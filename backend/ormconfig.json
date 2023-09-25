@@ -1,0 +1,19 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5439,
+  "username": "postgres",
+  "password": "mysecretpassword",
+  "database": "alisa",
+  "synchronize": true,
+  "logging": true,
+  "entities": ["src/entities/*.ts"],
+  "migrations": ["src/migrations/*.ts"],
+  "subscribers": ["src/subscribers/*.ts"],
+  "extra": {
+    "ssl": {
+      "rejectUnauthorized": false
+    }
+  },
+  "ssl":false
+}

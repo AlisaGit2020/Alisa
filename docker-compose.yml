@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres
+    container_name: alisa-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+    ports:
+      - "5439:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  #backend:
+    #image: node:20.6.1
+    #build:
+      #context: backend/src
+      #dockerfile: Dockerfile
+    #container_name: alisa-backend
+    #depends_on:
+      #- postgres
+    #ports:
+      #- "5000:5000"
+    #environment:
+      #DATABASE_URL: postgres://postgres:mysecretpassword@postgres:5432/alisa
+    #volumes:
+      #- ./src:/app
+      #- ./node_modules:/app/node_modules
+
+
+volumes:
+  postgres-data:
