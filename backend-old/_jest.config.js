@@ -1,4 +1,4 @@
-// jest.config.js
+// _jest.config.js
 export default {
     // ...
     "transform": {
