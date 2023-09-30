@@ -1,5 +1,5 @@
-/backend/node_modules/
-/backend/dist/
+/backend-old/node_modules/
+/backend-old/dist/
 /.idea/
 
 ```

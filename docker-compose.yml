@@ -11,19 +11,19 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
-  #backend:
-    #image: node:20.6.1
-    #build:
-      #context: backend/src
+      #backend-old:
+      #image: node:20.6.1
+      #build:
+      #context: backend-old/src
       #dockerfile: Dockerfile
-    #container_name: alisa-backend
-    #depends_on:
+      #container_name: alisa-backend-old
+      #depends_on:
       #- postgres
-    #ports:
+      #ports:
       #- "5000:5000"
-    #environment:
+      #environment:
       #DATABASE_URL: postgres://postgres:mysecretpassword@postgres:5432/alisa
-    #volumes:
+      #volumes:
       #- ./src:/app
       #- ./node_modules:/app/node_modules
 
