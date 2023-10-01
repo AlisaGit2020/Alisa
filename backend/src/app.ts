@@ -8,7 +8,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
-
+//Test
 app.get('/expenses', async (req: Request, res: Response) => {
     try {
         const expenseRepository = dataSource.getRepository(Expense);
