@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import { InvestmentCalculator } from './classes/investment-calculator.class';
-import { InvestmentCalculatorInputDto } from './dtos/investment-calculator-input.dto';
+import { InvestmentInputDto } from './dtos/investment-input.dto';
 import { InvestmentService } from './investment.service';
 import { Investment } from './entities/investment.entity';
 
@@ -14,25 +14,40 @@ export class InvestmentController {
   }
 
   @Get('/:id')
-  async findOne(id: number): Promise<Investment> {
-    return this.investmentService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<Investment> {
+    return this.investmentService.findOne(Number(id));
   }
 
   @Post('/calculate')
   async calculateInvestment(
-    @Body() investment: InvestmentCalculatorInputDto,
+    @Body() investment: InvestmentInputDto,
   ): Promise<InvestmentCalculator> {
-    return this.investmentService.calculateInvestment(investment);
+
+    return this.investmentService.calculate(investment);
   }
 
-  @Post('/calculate/save')
-  async saveCalculateInvestment(
-    @Body() investment: InvestmentCalculatorInputDto,
+  @Post('/')
+  async saveInvestmentCalculation(
+    @Body() investment: InvestmentInputDto,
+    id?: number,
   ): Promise<Investment> {
     const calculatedInvestment =
-      this.investmentService.calculateInvestment(investment);
-    return this.investmentService.saveCalculatedInvestment(
+      this.investmentService.calculate(investment);
+    return this.investmentService.saveCalculation(
       calculatedInvestment,
+        id
     );
   }
+
+  @Put ('/:id')
+  async updateInvestment(@Param('id') id:string, @Body() investment: InvestmentInputDto): Promise<Investment> {
+    return this.saveInvestmentCalculation(investment, Number(id))
+  }
+
+  @Delete('/:id')
+  async deleteInvestment(@Param('id') id:number): Promise<boolean> {
+    await this.investmentService.delete (id)
+    return true
+  }
+
 }

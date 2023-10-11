@@ -1,4 +1,4 @@
-export class InvestmentCalculatorInputDto {
+export class InvestmentInputDto {
   deptFreePrice: number;
   deptShare: number;
   transferTaxPercent: number = 2; //default 2%

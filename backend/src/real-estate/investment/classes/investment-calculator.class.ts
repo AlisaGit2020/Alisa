@@ -1,6 +1,6 @@
 //This class calculates an apartment key figures by given parameters
 import { pmt } from 'financial';
-import { InvestmentCalculatorInputDto } from '../dtos/investment-calculator-input.dto';
+import { InvestmentInputDto } from '../dtos/investment-input.dto';
 
 export class InvestmentCalculator {
   /**
@@ -133,7 +133,7 @@ export class InvestmentCalculator {
    */
   public readonly cashFlowAfterTaxPerMonth: number;
 
-  constructor(investment: InvestmentCalculatorInputDto) {
+  constructor(investment: InvestmentInputDto) {
     this.deptFreePrice = investment.deptFreePrice;
     this.deptShare = investment.deptShare;
     this.transferTaxPercent = investment.transferTaxPercent;

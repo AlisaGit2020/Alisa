@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InvestmentCalculator } from './classes/investment-calculator.class';
-import { InvestmentCalculatorInputDto } from './dtos/investment-calculator-input.dto';
+import { InvestmentInputDto } from './dtos/investment-input.dto';
 import { Investment } from './entities/investment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -12,8 +12,8 @@ export class InvestmentService {
     private investmentsRepository: Repository<Investment>,
   ) {}
 
-  calculateInvestment(
-    investment: InvestmentCalculatorInputDto,
+  calculate(
+    investment: InvestmentInputDto,
   ): InvestmentCalculator {
     return new InvestmentCalculator(investment);
   }
@@ -26,11 +26,22 @@ export class InvestmentService {
     return this.investmentsRepository.findOneBy({ id: id });
   }
 
-  async saveCalculatedInvestment(
+  async saveCalculation(
     investmentCalculation: InvestmentCalculator,
+    id?: number,
   ): Promise<Investment> {
     // save to database
-    const investmentEntity = new Investment();
+    let investmentEntity: Investment;
+
+    if (id) {
+       investmentEntity = await this.findOne(id);
+    }else {
+      investmentEntity = new Investment();
+    }
+    if (!investmentEntity) {
+      throw new Error('Investment not found');
+    }
+
     investmentEntity.deptFreePrice = investmentCalculation.deptFreePrice;
     investmentEntity.deptShare = investmentCalculation.deptShare;
     investmentEntity.transferTaxPercent =
@@ -71,4 +82,8 @@ export class InvestmentService {
     await this.investmentsRepository.save(investmentEntity);
     return investmentEntity;
   }
+
+    async delete(id: number): Promise<void> {
+      await this.investmentsRepository.delete(id);
+    }
 }
