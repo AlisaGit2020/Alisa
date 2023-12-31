@@ -2,5 +2,5 @@
 /backend-old/node_modules/
 /backend-old/dist/
 /.idea/
-
+/postgres-data/
 ```

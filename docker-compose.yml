@@ -1,32 +1,31 @@
 version: '3.8'
 services:
-  postgres:
+  database:
     image: postgres
+    restart: always
     container_name: alisa-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mysecretpassword
     ports:
-      - "5439:5432"
+      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
-      #backend-old:
-      #image: node:20.6.1
-      #build:
-      #context: backend-old/src
-      #dockerfile: Dockerfile
-      #container_name: alisa-backend-old
-      #depends_on:
-      #- postgres
-      #ports:
-      #- "5000:5000"
-      #environment:
-      #DATABASE_URL: postgres://postgres:mysecretpassword@postgres:5432/alisa
-      #volumes:
-      #- ./src:/app
-      #- ./node_modules:/app/node_modules
-
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: alisa-backend
+    ports:
+      - '3000:3000'
+    depends_on:
+      - database
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/package.json:/app/package.json
+      - ./backend/.env:/app/.env
+    
 
 volumes:
   postgres-data:
