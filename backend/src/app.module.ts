@@ -4,12 +4,12 @@ import { AppService } from './app.service';
 import { RealEstateModule } from './real-estate/real-estate.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';//d
+import { TestDatabaseModule } from './test.module';
 
-console.log('rgrae'+ process.env.DB_HOST);
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
+        TypeOrmModule.forRoot({
       type: 'postgres',      
       host: process.env.DB_HOST,
       port: Number(process.env.DB_PORT),
@@ -19,7 +19,7 @@ console.log('rgrae'+ process.env.DB_HOST);
       synchronize: true,
       autoLoadEntities: true,      
     }),    
-    RealEstateModule,
+    RealEstateModule,    
   ],
   controllers: [AppController],
   providers: [AppService],

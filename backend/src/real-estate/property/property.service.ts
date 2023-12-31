@@ -22,14 +22,12 @@ export class PropertyService {
   async add(
     input: PropertyInputDto,    
   ): Promise<Property> {
-    
-    
+        
     const propertyEntity = new Property();
 
     propertyEntity.name = input.name;    
 
-    await this.propertyRepository.save(propertyEntity);
-    return propertyEntity;
+    return await this.propertyRepository.save(propertyEntity);    
   }
 
   async update(
