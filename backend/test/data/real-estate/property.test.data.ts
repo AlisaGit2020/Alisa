@@ -4,7 +4,8 @@ import { TestData } from "../test-data";
 
 
 export const propertyTestData = {
-    tableName: 'property',
+    name: 'Property',
+    tables: ['property'],
     baseUrl: '/real-estate/property',
     baseUrlWithId: '/real-estate/property/1',
 

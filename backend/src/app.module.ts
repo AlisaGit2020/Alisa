@@ -5,23 +5,25 @@ import { RealEstateModule } from './real-estate/real-estate.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';//d
 import { TestDatabaseModule } from './test.module';
+import { AccountingModule } from './accounting/accounting.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
-      type: 'postgres',      
+      type: 'postgres',
       host: process.env.DB_HOST,
       port: Number(process.env.DB_PORT),
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,      
+      database: process.env.DB_DATABASE,
       synchronize: true,
-      autoLoadEntities: true,      
-    }),    
-    RealEstateModule,    
+      autoLoadEntities: true,
+    }),
+    RealEstateModule,
+    AccountingModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

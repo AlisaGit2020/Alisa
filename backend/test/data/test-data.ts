@@ -1,6 +1,7 @@
 
 export type TestData = {
-    tableName: string;
+    name: string;
+    tables: string[];
     baseUrl: string;
     baseUrlWithId: string;
     inputPost: any;
