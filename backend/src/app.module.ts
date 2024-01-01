@@ -9,7 +9,7 @@ import { TestDatabaseModule } from './test.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-        TypeOrmModule.forRoot({
+    TypeOrmModule.forRoot({
       type: 'postgres',      
       host: process.env.DB_HOST,
       port: Number(process.env.DB_PORT),
