@@ -1,23 +1,8 @@
 //TypeOrm entity for transaction table.
-import { Column, ColumnOptions, Entity, PrimaryGeneratedColumn, ValueTransformer } from 'typeorm';
+import { DecimalToNumberTransformer } from 'src/common/transformer/entity.data.transformer';
+import { columnOptionTwoDecimal } from 'src/common/typeorm.column.definitions';
+import { Column, ColumnOptions, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-class DecimalToNumberTransformer implements ValueTransformer {
-  to(value: number): number {
-    return value;
-  }
-
-  from(value: string): number {
-    return parseFloat(value);
-  }
-}
-
-const columnOptionTwoDecimal: ColumnOptions = {
-  type: 'decimal',
-  precision: 10,
-  scale: 2,
-  default: 0,
-  transformer: new DecimalToNumberTransformer()
-};
 
 @Entity()
 export class Transaction {

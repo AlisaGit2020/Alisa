@@ -1,13 +1,7 @@
 //TypeOrm entity for investment table. Fields are same as in investment-calculator.class.ts
 
+import { columnOptionTwoDecimal } from 'src/common/typeorm.column.definitions';
 import { Column, ColumnOptions, Entity, PrimaryGeneratedColumn } from 'typeorm';
-
-const columnOptionTwoDecimal: ColumnOptions = {
-  type: 'decimal',
-  precision: 10,
-  scale: 2,
-  default: 0,
-};
 
 @Entity()
 export class Investment {

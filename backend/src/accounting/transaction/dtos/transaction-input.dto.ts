@@ -1,7 +1,7 @@
 export class TransactionInputDto {
   description: string;
-  transactionDate: Date;
-  accountingDate: Date;
+  transactionDate: string;
+  accountingDate: string;
   amount: number;
   quantity: number;
   totalAmount: number;

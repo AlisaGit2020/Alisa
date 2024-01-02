@@ -13,8 +13,8 @@ export const expenseTestData = {
     inputPost: {
         transaction: {
             description: 'Siivousmaksu',
-            transactionDate: new Date('2023-01-31'),
-            accountingDate: new Date('2023-02-31'),
+            transactionDate: '2023-01-31',
+            accountingDate: '2023-02-28',
             amount: 9.91,
             quantity: 4,
             totalAmount: 39.64
@@ -23,9 +23,10 @@ export const expenseTestData = {
 
     inputPut: {
         transaction: {
+            id: 1,
             description: 'Yhtiövastike',
-            transactionDate: new Date('2023-02-31'),
-            accountingDate: new Date('2023-03-31'),
+            transactionDate: '2023-02-28',
+            accountingDate: '2023-03-31',
             amount: 188,
             quantity: 1,
             totalAmount: 188
@@ -36,7 +37,7 @@ export const expenseTestData = {
         transaction: {
             description: 'Siivousmaksu',
             transactionDate: '2023-01-31',
-            accountingDate: '2023-03-03',
+            accountingDate: '2023-02-28',
             amount: 9.91,
             quantity: 4,
             totalAmount: 39.64,
@@ -50,7 +51,7 @@ export const expenseTestData = {
         transaction: {
             id: 1,
             description: 'Yhtiövastike',
-            transactionDate: '2023-02-31',
+            transactionDate: '2023-02-28',
             accountingDate: '2023-03-31',
             amount: 188.00,
             quantity: 1.00,
