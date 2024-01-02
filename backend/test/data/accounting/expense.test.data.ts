@@ -1,16 +1,22 @@
 
 import { TestData } from "../test-data";
 import { ExpenseInputDto } from "src/accounting/expense/dtos/expense-input.dto";
+import { ExpenseTypeInputDto } from "src/accounting/expense/dtos/expense-type-input.dto";
 import { TransactionInputDto } from "src/accounting/transaction/dtos/transaction-input.dto";
 
 
 export const expenseTestData = {
     name: 'Expense',
-    tables: ['expense', 'transaction'],
+    tables: ['expense', 'expense_type', 'transaction'],
     baseUrl: '/accounting/expense',
     baseUrlWithId: '/accounting/expense/1',
 
     inputPost: {
+        expenseType: {
+            name: 'Lainan lyhennys',
+            description: 'Pankkilainanlyhennyksen lyhennyksen osuus',
+            isTaxDeductible: false,
+        } as ExpenseTypeInputDto,
         transaction: {
             description: 'Siivousmaksu',
             transactionDate: '2023-01-31',
@@ -22,6 +28,12 @@ export const expenseTestData = {
     } as ExpenseInputDto,
 
     inputPut: {
+        expenseType: {
+            id: 1,
+            name: 'Lainan korko',
+            description: 'Pankkilainanlyhennyksen koron osuus',
+            isTaxDeductible: true,
+        } as ExpenseTypeInputDto,
         transaction: {
             id: 1,
             description: 'Yhtiövastike',
@@ -34,6 +46,12 @@ export const expenseTestData = {
     } as ExpenseInputDto,
 
     expected: {
+        expenseType: {
+            id: 1,
+            name: 'Lainan lyhennys',
+            description: 'Pankkilainanlyhennyksen lyhennyksen osuus',
+            isTaxDeductible: false,
+        },
         transaction: {
             description: 'Siivousmaksu',
             transactionDate: '2023-01-31',
@@ -48,6 +66,12 @@ export const expenseTestData = {
 
     expectedPut: {
         id: 1,
+        expenseType: {
+            id: 1,
+            name: 'Lainan korko',
+            description: 'Pankkilainanlyhennyksen koron osuus',
+            isTaxDeductible: true,
+        },
         transaction: {
             id: 1,
             description: 'Yhtiövastike',
