@@ -7,7 +7,7 @@ import { TransactionInputDto } from "src/accounting/transaction/dtos/transaction
 
 export const expenseTestData = {
     name: 'Expense',
-    tables: ['expense', 'expense_type', 'transaction'],
+    tables: ['expense', 'expense_type', 'property', 'transaction'],
     baseUrl: '/accounting/expense',
     baseUrlWithId: '/accounting/expense/1',
 
@@ -17,6 +17,9 @@ export const expenseTestData = {
             description: 'Pankkilainanlyhennyksen lyhennyksen osuus',
             isTaxDeductible: false,
         } as ExpenseTypeInputDto,
+        property: {
+            name: 'Akun asunto'
+        },
         transaction: {
             description: 'Siivousmaksu',
             transactionDate: '2023-01-31',
@@ -34,6 +37,10 @@ export const expenseTestData = {
             description: 'Pankkilainanlyhennyksen koron osuus',
             isTaxDeductible: true,
         } as ExpenseTypeInputDto,
+        property: {
+            id: 1,
+            name: 'Hessun asunto'
+        },
         transaction: {
             id: 1,
             description: 'Yhtiövastike',
@@ -51,6 +58,10 @@ export const expenseTestData = {
             name: 'Lainan lyhennys',
             description: 'Pankkilainanlyhennyksen lyhennyksen osuus',
             isTaxDeductible: false,
+        },
+        property: {
+            id: 1,
+            name: 'Akun asunto'
         },
         transaction: {
             description: 'Siivousmaksu',
@@ -71,6 +82,10 @@ export const expenseTestData = {
             name: 'Lainan korko',
             description: 'Pankkilainanlyhennyksen koron osuus',
             isTaxDeductible: true,
+        },
+        property: {
+            id: 1,
+            name: 'Hessun asunto'
         },
         transaction: {
             id: 1,
