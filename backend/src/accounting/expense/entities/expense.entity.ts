@@ -1,4 +1,5 @@
-import { Transaction } from '../../transaction/entities/transaction.entity';
+
+import { Transaction } from 'src/accounting/transaction/entities/transaction.entity';
 import { Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 

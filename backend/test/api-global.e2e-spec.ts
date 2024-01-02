@@ -9,6 +9,7 @@ import { DataSource } from 'typeorm';
 import { propertyTestData } from './data/real-estate/property.test.data';
 import { TestData } from './data/test-data';
 import { expenseTestData } from './data/accounting/expense.test.data';
+import { expenseTypeTestData } from './data/accounting/expense-type.test.data';
 
 describe('Global controller end-to-end test (e2e)', () => {
   let app: INestApplication;
@@ -28,7 +29,8 @@ describe('Global controller end-to-end test (e2e)', () => {
 
   describe.each([
     [propertyTestData],
-    [expenseTestData]
+    [expenseTestData],
+    [expenseTypeTestData]
   ])('Api endpoints', (testData: TestData) => {
 
     describe(`${testData.name}`, () => {
