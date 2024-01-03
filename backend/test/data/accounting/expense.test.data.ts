@@ -3,6 +3,7 @@ import { TestData } from "../test-data";
 import { ExpenseInputDto } from "src/accounting/expense/dtos/expense-input.dto";
 import { ExpenseTypeInputDto } from "src/accounting/expense/dtos/expense-type-input.dto";
 import { TransactionInputDto } from "src/accounting/transaction/dtos/transaction-input.dto";
+import { expenseTypeTestData } from "./expense-type.test.data";
 
 
 export const expenseTestData = {
@@ -12,11 +13,7 @@ export const expenseTestData = {
     baseUrlWithId: '/accounting/expense/1',
 
     inputPost: {
-        expenseType: {
-            name: 'Lainan lyhennys',
-            description: 'Pankkilainanlyhennyksen lyhennyksen osuus',
-            isTaxDeductible: false,
-        } as ExpenseTypeInputDto,
+        expenseType: expenseTypeTestData.inputPost,
         property: {
             name: 'Akun asunto'
         },
@@ -31,12 +28,7 @@ export const expenseTestData = {
     } as ExpenseInputDto,
 
     inputPut: {
-        expenseType: {
-            id: 1,
-            name: 'Lainan korko',
-            description: 'Pankkilainanlyhennyksen koron osuus',
-            isTaxDeductible: true,
-        } as ExpenseTypeInputDto,
+        expenseType: expenseTypeTestData.inputPut,
         property: {
             id: 1,
             name: 'Hessun asunto'
@@ -53,12 +45,7 @@ export const expenseTestData = {
     } as ExpenseInputDto,
 
     expected: {
-        expenseType: {
-            id: 1,
-            name: 'Lainan lyhennys',
-            description: 'Pankkilainanlyhennyksen lyhennyksen osuus',
-            isTaxDeductible: false,
-        },
+        expenseType: expenseTypeTestData.expected,
         property: {
             id: 1,
             name: 'Akun asunto'
@@ -77,12 +64,7 @@ export const expenseTestData = {
 
     expectedPut: {
         id: 1,
-        expenseType: {
-            id: 1,
-            name: 'Lainan korko',
-            description: 'Pankkilainanlyhennyksen koron osuus',
-            isTaxDeductible: true,
-        },
+        expenseType: expenseTypeTestData.expectedPut,
         property: {
             id: 1,
             name: 'Hessun asunto'

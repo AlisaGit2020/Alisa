@@ -18,6 +18,7 @@ export const expenseTypeTestData = {
     } as ExpenseTypeInputDto,
 
     inputPut: {
+        id: 1,
         name: 'Lainan lyhennys',
         description: 'Pankkilaina lyhennyksen lainan lyhennys',
         isTaxDeductible: false
