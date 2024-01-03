@@ -13,9 +13,10 @@ import { expenseTypeTestData } from './data/accounting/expense-type.test.data';
 
 describe('Global controller end-to-end test (e2e)', () => {
   let app: INestApplication;
+  let server: any;
   let dataSource: DataSource;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule]
@@ -25,7 +26,13 @@ describe('Global controller end-to-end test (e2e)', () => {
     dataSource = app.get(DataSource);
 
     await app.init();
+    server = app.getHttpServer()
   });
+
+  afterAll(async () => {
+    await app.close()
+    server.close()
+  })
 
   describe.each([
     [propertyTestData],
@@ -41,7 +48,7 @@ describe('Global controller end-to-end test (e2e)', () => {
           dataSource.query(`TRUNCATE TABLE ${tableName} RESTART IDENTITY CASCADE;`);
         })
 
-        return request(app.getHttpServer())
+        return request(server)
           .post(testData.baseUrl)
           .send(testData.inputPost)
           .expect(201)
@@ -49,14 +56,14 @@ describe('Global controller end-to-end test (e2e)', () => {
       });
 
       it(`GET ${testData.baseUrl}, gets list of items (GET)`, () => {
-        return request(app.getHttpServer())
+        return request(server)
           .get(testData.baseUrl)
           .expect(200)
           .expect([testData.expected]);
       });
 
       it(`GET ${testData.baseUrlWithId}, get single item`, () => {
-        return request(app.getHttpServer())
+        return request(server)
           .get(testData.baseUrlWithId)
           .expect(200)
           .expect(testData.expected);
@@ -71,7 +78,7 @@ describe('Global controller end-to-end test (e2e)', () => {
           }
         }
 
-        return request(app.getHttpServer())
+        return request(server)
           .put(testData.baseUrlWithId)
           .send(copyObject)
           .expect(200)
@@ -80,7 +87,7 @@ describe('Global controller end-to-end test (e2e)', () => {
 
       it(`PUT ${testData.baseUrlWithId}, update an item`, () => {
 
-        return request(app.getHttpServer())
+        return request(server)
           .put(testData.baseUrlWithId)
           .send(testData.inputPut)
           .expect(200)
@@ -88,7 +95,7 @@ describe('Global controller end-to-end test (e2e)', () => {
       });
 
       it(`DELETE ${testData.baseUrlWithId}, delete an item`, () => {
-        return request(app.getHttpServer())
+        return request(server)
           .delete(testData.baseUrlWithId)
           .expect(200)
           .expect('true');
