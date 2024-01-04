@@ -25,6 +25,21 @@ services:
       - ./backend/src:/app/src
       - ./backend/package.json:/app/package.json
       - ./backend/.env:/app/.env
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: alisa-frontend
+    ports:
+      - '3001:8080'
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/.env:/app/.env      
     
 
 volumes:
