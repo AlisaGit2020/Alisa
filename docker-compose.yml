@@ -37,6 +37,7 @@ services:
       - backend
     volumes:
       - ./frontend/src:/app/src
+      - ./frontend/node_modules:/app/node_modules
       - ./frontend/package.json:/app/package.json
       - ./frontend/vite.config.ts:/app/vite.config.ts
       - ./frontend/.env:/app/.env      

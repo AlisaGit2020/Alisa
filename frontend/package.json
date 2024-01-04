@@ -10,8 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.15.3",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"    
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
@@ -25,7 +28,6 @@
     "typescript": "^5.2.2",
     "vite": "^5.0.8"
   },
-
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.6.1"
   }
