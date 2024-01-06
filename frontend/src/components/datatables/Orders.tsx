@@ -26,7 +26,7 @@ export default function Orders() {
     return (
       <React.Fragment>
         <Title>Recent Expenses</Title>
-        <Table size="small" style={{ width: 'max-content' }}>
+        <Table size="small">
           <TableHead>
             <TableRow>
               <TableCell>Date</TableCell>

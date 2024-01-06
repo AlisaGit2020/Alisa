@@ -1,9 +1,10 @@
 import axios from 'axios';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 import { useState } from 'react';
 import getApiUrl from '../../functions';
-import { Container } from '@mui/material';
+import { Container, Grid, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const ApartmentForm = () => {
@@ -32,19 +33,26 @@ const ApartmentForm = () => {
     };
 
     return (
-        <Container sx={{ mt: 4, mb: 4 }}>
-            <TextField
-                label="Apartment Name"
-                value={apartmentName}
-                onChange={handleNameChange}
-                autoComplete='off'
-            />
-            <br></br>
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
-                Tallenna
-            </Button>
+        <Grid container margin={4}>
+            <Grid item lg={6}>
+                <Stack spacing={2}>
+                    <TextField
+                        label="Apartment Name"
+                        value={apartmentName}
+                        onChange={handleNameChange}
+                        autoComplete='off'
+                    />
 
-        </Container>
+
+                </Stack>
+
+                <Divider></Divider>
+
+                <Button variant="contained" color="primary" onClick={handleSubmit}>
+                    Tallenna
+                </Button>
+            </Grid>
+        </Grid>
     );
 };
 

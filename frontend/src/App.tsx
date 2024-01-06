@@ -15,6 +15,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AppRoutes from './components/AppRoutes';
 import LeftMenu from './components/LeftMenu';
+import { Stack } from '@mui/material';
 
 function Copyright(props: any) {
   return (
@@ -90,7 +91,7 @@ export default function App() {
 
   return (
     <ThemeProvider theme={defaultTheme}>
-      <Box sx={{ display: 'flex' }}>
+      <Box sx={{ display: 'flex' }} maxWidth='100vw'>
         <CssBaseline />
         <AppBar position="absolute" open={open}>
           <Toolbar
@@ -144,6 +145,7 @@ export default function App() {
           <LeftMenu></LeftMenu>
 
         </Drawer>
+        <CssBaseline />
         <Box
           component="main"
           sx={{
@@ -153,6 +155,7 @@ export default function App() {
                 : theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
+            width: '100vw',
             overflow: 'auto'
           }}
         >
