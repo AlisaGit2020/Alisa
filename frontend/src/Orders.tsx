@@ -7,6 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from './Title';
 import { Expense } from '../../backend/src/accounting/expense/entities/expense.entity'
+import getApiUrl from './functions';
 
 // Generate Order Data
 function createData(
@@ -65,7 +66,7 @@ export default function Orders() {
   const [expenses, setData] = React.useState<Expense[]>([]);
 
   React.useEffect(() => {
-    fetch('http://localhost:3000/accounting/expense')
+    fetch(getApiUrl('accounting/expense'))
       .then((response) => response.json())
       .then(setData)
   }, [])
