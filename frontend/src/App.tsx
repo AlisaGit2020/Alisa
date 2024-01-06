@@ -15,7 +15,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AppRoutes from './components/AppRoutes';
 import LeftMenu from './components/LeftMenu';
-import { Stack } from '@mui/material';
+import { Container, Stack } from '@mui/material';
 
 function Copyright(props: any) {
   return (
@@ -160,7 +160,9 @@ export default function App() {
           }}
         >
           <Toolbar />
-          <AppRoutes></AppRoutes>
+          <Container maxWidth={false} sx={{ mt: 4, mb: 4 }}>
+            <AppRoutes></AppRoutes>
+          </Container>
 
         </Box>
       </Box>

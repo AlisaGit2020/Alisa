@@ -33,9 +33,9 @@ const ApartmentForm = () => {
     };
 
     return (
-        <Grid container margin={4}>
+        <Grid container>
             <Grid item lg={6}>
-                <Stack spacing={2}>
+                <Stack spacing={2} marginBottom={2}>
                     <TextField
                         label="Apartment Name"
                         value={apartmentName}
@@ -49,7 +49,7 @@ const ApartmentForm = () => {
                 <Divider></Divider>
 
                 <Button variant="contained" color="primary" onClick={handleSubmit}>
-                    Tallenna
+                    Save
                 </Button>
             </Grid>
         </Grid>
