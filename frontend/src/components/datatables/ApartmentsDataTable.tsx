@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Link from '@mui/material/Link';
+import DeleteIcon from '@mui/icons-material/Delete';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -8,44 +8,85 @@ import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
 import { Property } from '../../../../backend/src/real-estate/property/entities/property.entity'
 import getApiUrl from '../../functions';
-
-function preventDefault(event: React.MouseEvent) {
-  event.preventDefault();
-}
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper } from '@mui/material';
+import axios from 'axios';
 
 export default function ApartmentsDataTable() {
   const [expenses, setData] = React.useState<Property[]>([]);
+  const [open, setOpen] = React.useState(false);
+  const [apartmentIdToDelete, setApartmentIdToDelete] = React.useState(0);
+
 
   React.useEffect(() => {
-    fetch(getApiUrl('real-estate/property'))
-      .then((response) => response.json())
-      .then(setData)
+    fetchData()
   }, [])
+
+  const fetchData = async () => {
+    const response = await fetch(getApiUrl('real-estate/property'));
+    const data = await response.json();
+    setData(data);
+  };
+
+  const handleClickOpen = (apartmentId: number) => {
+    setApartmentIdToDelete(apartmentId);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setApartmentIdToDelete(0);
+    setOpen(false);
+  };
+
+  const handleDelete = async () => {
+    await axios.delete(getApiUrl(`real-estate/property/${apartmentIdToDelete}`));
+    fetchData();
+    handleClose();
+  };
+
 
   if (expenses.length > 0) {
     return (
-      <React.Fragment>
+      <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
         <Title>Apartments</Title>
         <Table size="small">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {expenses.map((row) => (
               <TableRow key={row.id}>
                 <TableCell>{row.name}</TableCell>
+                <TableCell align='right'>
+                  <IconButton onClick={() => handleClickOpen(row.id)}><DeleteIcon></DeleteIcon></IconButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </React.Fragment >
+
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>Confirm Deletion</DialogTitle>
+          <DialogContent>
+            <p>Are you sure you want to delete this apartment?</p>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleDelete} color="primary">
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Paper>
     );
   } else {
     return (
       <React.Fragment>
-        <Title>No recent expenses</Title>
+        <Title>No apartments</Title>
       </React.Fragment>
     )
   }

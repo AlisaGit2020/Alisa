@@ -12,9 +12,7 @@ export default function Apartments() {
 
             {/* Apartments */}
             <Grid item xs={6}>
-                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                    <ApartmentsDataTable />
-                </Paper>
+                <ApartmentsDataTable />
             </Grid>
         </Grid>
     )

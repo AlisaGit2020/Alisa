@@ -15,7 +15,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AppRoutes from './components/AppRoutes';
 import LeftMenu from './components/LeftMenu';
-import { Container, Stack } from '@mui/material';
+import { Container } from '@mui/material';
 
 function Copyright(props: any) {
   return (
