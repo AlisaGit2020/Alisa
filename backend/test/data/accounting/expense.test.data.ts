@@ -4,6 +4,8 @@ import { ExpenseInputDto } from "src/accounting/expense/dtos/expense-input.dto";
 import { ExpenseTypeInputDto } from "src/accounting/expense/dtos/expense-type-input.dto";
 import { TransactionInputDto } from "src/accounting/transaction/dtos/transaction-input.dto";
 import { expenseTypeTestData } from "./expense-type.test.data";
+import { FindManyOptions } from "typeorm/find-options/FindManyOptions";
+import { Expense } from "src/accounting/expense/entities/expense.entity";
 
 
 export const expenseTestData = {
@@ -78,5 +80,13 @@ export const expenseTestData = {
             quantity: 1.00,
             totalAmount: 188.00,
         }
-    }
+    },
+
+    searchOptions: {
+        where: {
+            transaction: { id: 1 }
+        }
+    } as FindManyOptions<Expense>
+
+
 } as TestData

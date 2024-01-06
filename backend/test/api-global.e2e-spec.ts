@@ -52,7 +52,7 @@ describe('Global controller end-to-end test (e2e)', () => {
           .post(testData.baseUrl)
           .send(testData.inputPost)
           .expect(201)
-          .expect(testData.expected);
+          .expect(testData.expected)
       });
 
       it(`GET ${testData.baseUrl}, gets list of items (GET)`, () => {
@@ -100,6 +100,30 @@ describe('Global controller end-to-end test (e2e)', () => {
           .expect(200)
           .expect('true');
       });
+
+      it(`POST ${testData.baseUrl}, add 10 same items`, async () => {
+
+        for (let i = 0; i < 10; i++) {
+          await request(server)
+            .post(testData.baseUrl)
+            .send(testData.inputPost)
+            .expect(201);
+        }
+
+        const response = await request(server).get(testData.baseUrl)
+        expect(response.status).toBe(200)
+        expect(response.body).toHaveLength(10)
+      });
+
+      if (testData.searchOptions) {
+        const searchUrl = `${testData.baseUrl}/search`;
+        it(`SEARCH ${searchUrl}, search items`, () => {
+          return request(server)
+            .post(searchUrl)
+            .send(testData.searchOptions)
+            .expect(200);
+        });
+      }
     })
   })
 

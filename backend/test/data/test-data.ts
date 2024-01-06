@@ -8,4 +8,5 @@ export type TestData = {
     inputPut: any;
     expected: any;
     expectedPut: any;
+    searchOptions: any;
 };

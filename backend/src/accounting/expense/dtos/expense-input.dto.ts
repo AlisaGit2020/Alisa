@@ -3,7 +3,7 @@ import { ExpenseTypeInputDto } from "./expense-type-input.dto";
 import { PropertyInputDto } from "src/real-estate/property/dtos/property-input.dto";
 
 export class ExpenseInputDto {
-  expenseType: ExpenseTypeInputDto;
-  property: PropertyInputDto;
+  expenseType: ExpenseTypeInputDto | number;
+  property: PropertyInputDto | number;
   transaction: TransactionInputDto;
 }

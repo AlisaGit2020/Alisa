@@ -1,6 +1,7 @@
 //TypeOrm entity for property table.
 
-import { Column, ColumnOptions, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Expense } from 'src/accounting/expense/entities/expense.entity';
+import { Column, ColumnOptions, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 const columnOptionTwoDecimal: ColumnOptions = {
   type: 'decimal',
@@ -13,8 +14,11 @@ const columnOptionTwoDecimal: ColumnOptions = {
 export class Property {
   @PrimaryGeneratedColumn()
   public id: number;
-    
+
   @Column()
   public name: string;
+
+  @OneToMany(() => Expense, (expense) => expense.property)
+  expenses: Expense[]
 
 }

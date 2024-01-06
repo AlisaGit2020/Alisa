@@ -1,0 +1,11 @@
+{
+  "moduleDirectories": ["node_modules", "backend"],
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "../",
+  "testEnvironment": "node",
+  "testRegex": ".service.spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "setupFiles": ["<rootDir>/test/jest.setup.ts"]
+}

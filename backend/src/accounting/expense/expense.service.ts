@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, FindOptionsWhere, Repository } from 'typeorm';
 import { Expense } from './entities/expense.entity';
 import { ExpenseInputDto } from './dtos/expense-input.dto';
 
@@ -13,6 +13,10 @@ export class ExpenseService {
 
     async findAll(): Promise<Expense[]> {
         return this.expenseRepository.find();
+    }
+
+    async search(options: FindManyOptions<Expense>): Promise<Expense[]> {
+        return this.expenseRepository.find(options);
     }
 
     async findOne(id: number): Promise<Expense> {
@@ -37,7 +41,9 @@ export class ExpenseService {
 
         const expenseEntity = await this.findOne(id);
 
+        const transactionId = expenseEntity.transaction.id
         this.mapData(expenseEntity, input)
+        expenseEntity.transaction.id = transactionId
 
         await this.expenseRepository.save(expenseEntity);
         return expenseEntity;
