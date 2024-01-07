@@ -1,7 +1,7 @@
 import { Grid, Paper } from '@mui/material'
-import Chart from '../Chart'
-import Deposits from '../Deposits'
-import Orders from './datatables/Orders'
+import Chart from '../../Chart'
+import Deposits from '../../Deposits'
+import Orders from '../datatables/Orders'
 
 export default function Dashboard() {
     return (

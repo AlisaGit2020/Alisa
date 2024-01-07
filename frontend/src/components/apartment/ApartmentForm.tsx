@@ -1,10 +1,11 @@
 import axios from 'axios';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import SaveIcon from '@mui/icons-material/Save';
 import { useState } from 'react';
 import getApiUrl from '../../functions';
-import { Grid, Stack } from '@mui/material';
+import { Box, Grid, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const ApartmentForm = () => {
@@ -35,19 +36,26 @@ const ApartmentForm = () => {
     return (
         <Grid container>
             <Grid item lg={6}>
+                <Box marginBottom={3}>
+                    <Button variant="contained" color="secondary"
+                        startIcon={<ArrowBackIosIcon></ArrowBackIosIcon>}
+                        onClick={() => navigate('/apartments')}>
+                        Back
+                    </Button>
+                </Box>
+
                 <Stack spacing={2} marginBottom={2}>
                     <TextField
                         label="Apartment Name"
                         value={apartmentName}
                         onChange={handleNameChange}
                         autoComplete='off'
+                        autoFocus={true}
                     />
-
                 </Stack>
 
-                <Divider></Divider>
-
-                <Button variant="contained" color="primary" onClick={handleSubmit}>
+                <Button variant="contained" color="primary"
+                    onClick={handleSubmit}>
                     Save
                 </Button>
             </Grid>

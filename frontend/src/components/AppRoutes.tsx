@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Dashboard from './Dashboard';
-import Apartments from './Apartments';
-import ApartmentForm from './forms/ApartmentForm';
+import Dashboard from './dashboard/Dashboard';
+import Apartments from './apartment/Apartments';
+import ApartmentForm from './apartment/ApartmentForm';
 
 export default function AppRoutes() {
     return (

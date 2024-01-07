@@ -1,5 +1,5 @@
 import { Button, Grid, Paper } from '@mui/material'
-import ApartmentsDataTable from './datatables/ApartmentsDataTable'
+import ApartmentsDataTable from './ApartmentDataTable'
 
 export default function Apartments() {
     return (
