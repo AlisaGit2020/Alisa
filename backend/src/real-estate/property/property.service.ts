@@ -9,7 +9,7 @@ export class PropertyService {
   constructor(
     @InjectRepository(Property)
     private propertyRepository: Repository<Property>,
-  ) {}
+  ) { }
 
   async findAll(): Promise<Property[]> {
     return this.propertyRepository.find();
@@ -20,32 +20,38 @@ export class PropertyService {
   }
 
   async add(
-    input: PropertyInputDto,    
+    input: PropertyInputDto,
   ): Promise<Property> {
-        
+
     const propertyEntity = new Property();
 
-    propertyEntity.name = input.name;    
+    this.mapData(propertyEntity, input);
 
-    return await this.propertyRepository.save(propertyEntity);    
+    return await this.propertyRepository.save(propertyEntity);
   }
 
   async update(
     id: number,
-    input: PropertyInputDto,    
-  ): Promise<Property> {    
-    
+    input: PropertyInputDto,
+  ): Promise<Property> {
+
     const propertyEntity = await this.findOne(id);
 
-    if (input.name !== undefined) {
-      propertyEntity.name = input.name;    
-    }
+    this.mapData(propertyEntity, input);
 
     await this.propertyRepository.save(propertyEntity);
     return propertyEntity;
   }
-  
+
   async delete(id: number): Promise<void> {
     await this.propertyRepository.delete(id);
+  }
+
+  private mapData(property: Property, input: PropertyInputDto) {
+    Object.entries(input).forEach(([key, value]) => {
+      if (value !== undefined) {
+        property[key] = value;
+      }
+    });
   }
 }

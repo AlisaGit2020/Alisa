@@ -6,6 +6,7 @@ import { TransactionInputDto } from "src/accounting/transaction/dtos/transaction
 import { expenseTypeTestData } from "./expense-type.test.data";
 import { FindManyOptions } from "typeorm/find-options/FindManyOptions";
 import { Expense } from "src/accounting/expense/entities/expense.entity";
+import { propertyTestData } from "../real-estate/property.test.data";
 
 
 export const expenseTestData = {
@@ -16,9 +17,7 @@ export const expenseTestData = {
 
     inputPost: {
         expenseType: expenseTypeTestData.inputPost,
-        property: {
-            name: 'Akun asunto'
-        },
+        property: propertyTestData.inputPost,
         transaction: {
             description: 'Siivousmaksu',
             transactionDate: '2023-01-31',
@@ -31,10 +30,7 @@ export const expenseTestData = {
 
     inputPut: {
         expenseType: expenseTypeTestData.inputPut,
-        property: {
-            id: 1,
-            name: 'Hessun asunto'
-        },
+        property: propertyTestData.inputPut,
         transaction: {
             id: 1,
             description: 'Yhtiövastike',
@@ -48,10 +44,7 @@ export const expenseTestData = {
 
     expected: {
         expenseType: expenseTypeTestData.expected,
-        property: {
-            id: 1,
-            name: 'Akun asunto'
-        },
+        property: propertyTestData.expected,
         transaction: {
             description: 'Siivousmaksu',
             transactionDate: '2023-01-31',
@@ -67,10 +60,7 @@ export const expenseTestData = {
     expectedPut: {
         id: 1,
         expenseType: expenseTypeTestData.expectedPut,
-        property: {
-            id: 1,
-            name: 'Hessun asunto'
-        },
+        property: propertyTestData.expectedPut,
         transaction: {
             id: 1,
             description: 'Yhtiövastike',

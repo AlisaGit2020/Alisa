@@ -1,7 +1,6 @@
 //TypeOrm entity for transaction table.
-import { DecimalToNumberTransformer } from 'src/common/transformer/entity.data.transformer';
 import { columnOptionTwoDecimal } from 'src/common/typeorm.column.definitions';
-import { Column, ColumnOptions, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 
 @Entity()

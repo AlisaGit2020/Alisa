@@ -10,20 +10,25 @@ export const propertyTestData = {
     baseUrlWithId: '/real-estate/property/1',
 
     inputPost: {
-        name: 'Akun asunto'
+        name: 'Akun asunto',
+        size: 36.5
     } as PropertyInputDto,
 
     inputPut: {
-        name: 'Hessun asunto'
+        id: 1,
+        name: 'Hessun asunto',
+        size: 59
     } as PropertyInputDto,
 
     expected: {
         id: 1,
-        name: 'Akun asunto'
+        name: 'Akun asunto',
+        size: 36.5
     } as Property,
 
     expectedPut: {
         id: 1,
-        name: 'Hessun asunto'
+        name: 'Hessun asunto',
+        size: 59
     }
 } as TestData

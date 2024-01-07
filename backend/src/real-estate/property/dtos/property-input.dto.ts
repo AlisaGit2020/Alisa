@@ -1,3 +1,4 @@
-export class PropertyInputDto {  
+export class PropertyInputDto {
   name: string;
+  size: number;
 }

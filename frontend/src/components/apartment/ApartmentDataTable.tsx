@@ -52,6 +52,7 @@ export default function ApartmentsDataTable() {
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
+              <TableCell>Size</TableCell>
               <TableCell></TableCell>
             </TableRow>
           </TableHead>
@@ -59,6 +60,7 @@ export default function ApartmentsDataTable() {
             {expenses.map((row) => (
               <TableRow key={row.id}>
                 <TableCell>{row.name}</TableCell>
+                <TableCell>31 m2</TableCell>
                 <TableCell align='right'>
                   <IconButton onClick={() => handleClickOpen(row.id)}><DeleteIcon></DeleteIcon></IconButton>
                 </TableCell>

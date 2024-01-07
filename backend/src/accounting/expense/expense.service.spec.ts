@@ -6,7 +6,6 @@ import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { AppModule } from 'src/app.module';
 import { ExpenseService } from './expense.service';
-import { randomInt } from 'crypto';
 import { PropertyService } from 'src/real-estate/property/property.service';
 import { ExpenseTypeService } from './expense-type.service';
 
@@ -47,7 +46,7 @@ describe('Expense service', () => {
 
   describe('update an expense', () => {
     it('update expense and add no new transaction', async () => {
-      await propertyService.add({ name: 'Yrjöntie 1' })
+      await propertyService.add({ name: 'Yrjöntie 1', size: 59.5 })
       await expenseTypeService.add({ name: 'Expense type1', description: '', isTaxDeductible: true });
 
       await service.add({
@@ -85,9 +84,9 @@ describe('Expense service', () => {
 
   describe('find expenses', () => {
     it('finds expenses by property', async () => {
-      await propertyService.add({ name: 'Yrjöntie 1' })
-      await propertyService.add({ name: 'Radiotie 6' })
-      await propertyService.add({ name: 'Aurora' })
+      await propertyService.add({ name: 'Yrjöntie 1', size: 59.5 })
+      await propertyService.add({ name: 'Radiotie 6', size: 29 })
+      await propertyService.add({ name: 'Aurora', size: 36.5 })
 
       await expenseTypeService.add({ name: 'Expense type1', description: '', isTaxDeductible: true });
 
