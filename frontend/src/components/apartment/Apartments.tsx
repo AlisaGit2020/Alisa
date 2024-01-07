@@ -1,4 +1,4 @@
-import { Button, Grid, Paper } from '@mui/material'
+import { Button, Grid } from '@mui/material'
 import ApartmentsDataTable from './ApartmentDataTable'
 
 export default function Apartments() {
@@ -11,7 +11,7 @@ export default function Apartments() {
             </Grid>
 
             {/* Apartments */}
-            <Grid item xs={6}>
+            <Grid item xs={12} lg={6}>
                 <ApartmentsDataTable />
             </Grid>
         </Grid>

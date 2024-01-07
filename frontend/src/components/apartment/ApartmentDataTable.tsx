@@ -1,5 +1,6 @@
 import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -10,12 +11,14 @@ import { Property } from '../../../../backend/src/real-estate/property/entities/
 import getApiUrl from '../../functions';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper } from '@mui/material';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function ApartmentsDataTable() {
   const [expenses, setData] = React.useState<Property[]>([]);
   const [open, setOpen] = React.useState(false);
   const [apartmentIdToDelete, setApartmentIdToDelete] = React.useState(0);
 
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     fetchData()
@@ -57,12 +60,13 @@ export default function ApartmentsDataTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {expenses.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>31 m2</TableCell>
+            {expenses.map((property) => (
+              <TableRow key={property.id}>
+                <TableCell>{property.name}</TableCell>
+                <TableCell>{property.size}</TableCell>
                 <TableCell align='right'>
-                  <IconButton onClick={() => handleClickOpen(row.id)}><DeleteIcon></DeleteIcon></IconButton>
+                  <IconButton onClick={() => navigate(`edit/${property.id}`)}><EditIcon></EditIcon></IconButton>
+                  <IconButton onClick={() => handleClickOpen(property.id)}><DeleteIcon></DeleteIcon></IconButton>
                 </TableCell>
               </TableRow>
             ))}

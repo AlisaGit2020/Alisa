@@ -8,6 +8,7 @@ export default function AppRoutes() {
         <BrowserRouter>
             <Routes>
                 <Route path='/' element={<Dashboard></Dashboard>}></Route>
+                <Route path='/apartments/edit/:id' element={<ApartmentForm></ApartmentForm>}></Route>
                 <Route path='/apartments/add' element={<ApartmentForm></ApartmentForm>}></Route>
                 <Route path='/apartments' element={<Apartments></Apartments>}></Route>
             </Routes>
