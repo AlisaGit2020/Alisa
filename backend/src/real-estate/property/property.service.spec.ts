@@ -37,7 +37,6 @@ describe('Expense service', () => {
     });
   })
 
-
   it('adds new property', async () => {
 
     await service.add({

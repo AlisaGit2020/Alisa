@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { RealEstateModule } from './real-estate/real-estate.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';//d
-import { TestDatabaseModule } from './test.module';
 import { AccountingModule } from './accounting/accounting.module';
 
 @Module({

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
@@ -16,7 +16,7 @@ const newProperty = {
 const ApartmentForm = () => {
     const [apartment, setApartment] = useState<PropertyInputDto>(newProperty);
     const { id } = useParams();
-
+    const [errorMessage, setErrorMessage] = useState<String[]>([])
     const navigate = useNavigate();
 
     React.useEffect(() => {
@@ -31,8 +31,6 @@ const ApartmentForm = () => {
                 return response.data
             } catch (error) {
                 return newProperty;
-                console.error('Error while fetching apartment', error);
-                throw error;
             }
         }
         return newProperty;
@@ -46,7 +44,9 @@ const ApartmentForm = () => {
     };
 
     const handleSubmit = async () => {
+        setErrorMessage([])
         try {
+            console.log(apartment)
             if (id) {
                 await axios.put(getApiUrl(`real-estate/property/${id}`), apartment);
             } else {
@@ -57,8 +57,14 @@ const ApartmentForm = () => {
 
             navigate('/apartments')
 
-        } catch (error) {
-            console.error('Error while saving', error);
+        } catch (error: any) {
+            if (error.response) {
+                setErrorMessage(error.response.data.message);
+            } else if (error.request) {
+                setErrorMessage(['Request error']);
+            } else {
+                setErrorMessage(['An error occurred']);
+            }
         }
     };
 
@@ -85,7 +91,7 @@ const ApartmentForm = () => {
                         label="Apartment size"
                         value={apartment.size}
                         autoComplete='off'
-                        onChange={(e) => handleChange('size', e.target.value)}
+                        onChange={(e) => handleChange('size', Number(e.target.value))}
                     />
                 </Stack>
 
@@ -93,6 +99,14 @@ const ApartmentForm = () => {
                     onClick={handleSubmit}>
                     Save
                 </Button>
+
+                {errorMessage.length > 0 && (
+                    <Box marginTop={3} sx={{ color: 'error.main', border: 1, borderColor: 'error.main', padding: 2, borderRadius: 4 }}>
+                        {errorMessage.map((message, index) => (
+                            <div key={index}>{message}</div>
+                        ))}
+                    </Box>
+                )}
             </Grid>
         </Grid>
     );

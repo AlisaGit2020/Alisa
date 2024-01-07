@@ -1,5 +1,6 @@
 //TypeOrm entity for property table.
 
+import { IsNumber, Max, Min } from 'class-validator';
 import { Expense } from 'src/accounting/expense/entities/expense.entity';
 import { columnOptionOneDecimal } from 'src/common/typeorm.column.definitions';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';

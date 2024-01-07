@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
+import { validate, validateOrReject } from 'class-validator';
 
 @Injectable()
 export class PropertyService {
