@@ -4,14 +4,14 @@ import Button from '@mui/material/Button';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { PropertyInputDto } from '../../../../backend/src/real-estate/property/dtos/property-input.dto'
 import { useState } from 'react';
-import getApiUrl from '../../functions';
+import getApiUrl, { getNumber } from '../../functions';
 import { Box, Grid, Stack } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import React from 'react';
 
 const newProperty = {
     name: '',
-    size: undefined
+    size: 0
 }
 const ApartmentForm = () => {
     const [apartment, setApartment] = useState<PropertyInputDto>(newProperty);
@@ -88,10 +88,11 @@ const ApartmentForm = () => {
                         onChange={(e) => handleChange('name', e.target.value)}
                     />
                     <TextField
+                        type='number'
                         label="Apartment size"
                         value={apartment.size}
                         autoComplete='off'
-                        onChange={(e) => handleChange('size', Number(e.target.value))}
+                        onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
                     />
                 </Stack>
 
