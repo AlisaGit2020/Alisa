@@ -8,15 +8,15 @@ import getApiUrl, { getNumber } from '../../functions';
 import { Box, Grid, Stack } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import React from 'react';
+import { ValidationError, validate } from 'class-validator';
 
-const newProperty = {
-    name: '',
-    size: 0
-}
+const newProperty = new PropertyInputDto();
+
 const ApartmentForm = () => {
     const [apartment, setApartment] = useState<PropertyInputDto>(newProperty);
     const { id } = useParams();
     const [errorMessage, setErrorMessage] = useState<String[]>([])
+    const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
     const navigate = useNavigate();
 
     React.useEffect(() => {
@@ -45,8 +45,14 @@ const ApartmentForm = () => {
 
     const handleSubmit = async () => {
         setErrorMessage([])
+        setValidationErrors([])
         try {
-            console.log(apartment)
+
+            const validationErrors = await validate(apartment);
+            if (validationErrors.length > 0) {
+                setValidationErrors(validationErrors);
+                return;
+            }
             if (id) {
                 await axios.put(getApiUrl(`real-estate/property/${id}`), apartment);
             } else {
@@ -101,10 +107,20 @@ const ApartmentForm = () => {
                     Save
                 </Button>
 
-                {errorMessage.length > 0 && (
+                {(errorMessage.length > 0 || validationErrors.length > 0) && (
                     <Box marginTop={3} sx={{ color: 'error.main', border: 1, borderColor: 'error.main', padding: 2, borderRadius: 4 }}>
                         {errorMessage.map((message, index) => (
                             <div key={index}>{message}</div>
+                        ))}
+                        {validationErrors.map((error: ValidationError, index) => (
+                            <div key={index}>
+                                {error.property}:
+                                <ul>
+                                    {error.constraints && typeof error.constraints === 'object' && Object.values(error.constraints).map((constraint, constraintIndex) => (
+                                        <li key={constraintIndex}>{constraint}</li>
+                                    ))}
+                                </ul>
+                            </div>
                         ))}
                     </Box>
                 )}
