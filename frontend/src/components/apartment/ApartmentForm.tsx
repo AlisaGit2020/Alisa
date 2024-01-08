@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
@@ -10,7 +10,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import React from 'react';
 import { ValidationError, validate } from 'class-validator';
 
-const newProperty = new PropertyInputDto();
+const newProperty = {
+    name: '',
+    size: 0,
+} as PropertyInputDto;
+
+const validateProperty: PropertyInputDto = new PropertyInputDto()
+validateProperty.name = '';
+validateProperty.size = 0;
 
 const ApartmentForm = () => {
     const [apartment, setApartment] = useState<PropertyInputDto>(newProperty);
@@ -27,7 +34,8 @@ const ApartmentForm = () => {
     const getApartment = async (apartmentId: number) => {
         if (apartmentId) {
             try {
-                const response = await axios.get(getApiUrl(`real-estate/property/${apartmentId}`));
+                const response = await axios.get<PropertyInputDto>(getApiUrl(`real-estate/property/${apartmentId}`));
+
                 return response.data
             } catch (error) {
                 return newProperty;
@@ -36,19 +44,24 @@ const ApartmentForm = () => {
         return newProperty;
     }
 
-    const handleChange = (fieldName: string, value: any) => {
+    function handleChange<T extends keyof PropertyInputDto, K extends PropertyInputDto[T]>(
+        name: T,
+        value: K
+    ) {
+        validateProperty[name] = value;
         setApartment((prevApartment) => ({
             ...prevApartment,
-            [fieldName]: value,
+            [name]: value,
         }));
-    };
+    }
 
     const handleSubmit = async () => {
         setErrorMessage([])
         setValidationErrors([])
         try {
 
-            const validationErrors = await validate(apartment);
+            console.log(validateProperty);
+            const validationErrors = await validate(validateProperty, { skipMissingProperties: true });
             if (validationErrors.length > 0) {
                 setValidationErrors(validationErrors);
                 return;
