@@ -51,7 +51,7 @@ export default function ApartmentsDataTable() {
     return (
       <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
         <Title>Apartments</Title>
-        <Table size="small">
+        <Table size="small" aria-label="simple table">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>

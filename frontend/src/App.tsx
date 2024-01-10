@@ -16,6 +16,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import AppRoutes from './components/AppRoutes';
 import LeftMenu from './components/LeftMenu';
 import { Container } from '@mui/material';
+import { useTranslation, Trans } from 'react-i18next';
 
 function Copyright(props: any) {
   return (
@@ -85,6 +86,8 @@ const defaultTheme = createTheme();
 
 export default function App() {
   const [open, setOpen] = React.useState(true);
+  const { t } = useTranslation();
+
   const toggleDrawer = () => {
     setOpen(!open);
   };
@@ -118,7 +121,7 @@ export default function App() {
               noWrap
               sx={{ flexGrow: 1 }}
             >
-              Dashboard
+              {t('header.title')}
             </Typography>
             <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
