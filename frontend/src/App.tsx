@@ -17,6 +17,7 @@ import AppRoutes from './components/AppRoutes';
 import LeftMenu from './components/LeftMenu';
 import { Container } from '@mui/material';
 import { useTranslation, Trans } from 'react-i18next';
+import i18n from './i18n';
 
 function Copyright(props: any) {
   return (
@@ -86,7 +87,12 @@ const defaultTheme = createTheme();
 
 export default function App() {
   const [open, setOpen] = React.useState(true);
-  const { t } = useTranslation();
+  const { t } = useTranslation('app');
+
+  React.useEffect(() => {
+    const language = navigator.language
+    i18n.changeLanguage(language)
+  }, [])
 
   const toggleDrawer = () => {
     setOpen(!open);

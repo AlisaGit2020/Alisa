@@ -6,9 +6,11 @@ import { Alert, Box, ButtonGroup, Grid, Link, List, ListItem } from '@mui/materi
 import { useNavigate, useParams } from 'react-router-dom';
 import React from 'react';
 import { ValidationError } from 'class-validator';
+import { TFunction } from 'i18next';
 
 
 interface InputProps {
+    t: TFunction
     apiUrl: string
     backUrl: string
     formComponents: any
@@ -18,6 +20,7 @@ interface InputProps {
 }
 
 const AlisaForm: React.FC<InputProps> = ({
+    t,
     apiUrl,
     backUrl,
     formComponents,
@@ -85,7 +88,7 @@ const AlisaForm: React.FC<InputProps> = ({
             <Grid item lg={6} xs={12}>
                 <Box marginBottom={3}>
                     <Link href={backUrl} color="primary">
-                        Back
+                        {t('back')}
                     </Link>
                 </Box>
 
@@ -94,11 +97,11 @@ const AlisaForm: React.FC<InputProps> = ({
                 <ButtonGroup>
                     <Button variant="contained" color="primary"
                         onClick={handleSubmit}>
-                        Save
+                        {t('save')}
                     </Button>
                     <Button variant="outlined"
                         onClick={() => navigate(backUrl)}>
-                        Cancel
+                        {t('cancel')}
                     </Button>
                 </ButtonGroup>
 

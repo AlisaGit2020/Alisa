@@ -4,9 +4,10 @@ import AlisaForm from '../AlisaForm';
 import { useState } from 'react';
 import { getNumber } from '../../functions';
 import { PropertyInputDto } from '../../../../backend/src/real-estate/property/dtos/property-input.dto'
+import { WithTranslation, withTranslation } from 'react-i18next';
 
 
-const ApartmentForm = () => {
+function ApartmentForm({ t }: WithTranslation) {
     const [data, setData] = useState({
         name: '',
         size: 0
@@ -25,7 +26,7 @@ const ApartmentForm = () => {
     const formComponents = (
         <Stack spacing={2} marginBottom={2}>
             <TextField
-                label="Apartment Name"
+                label={t('name')}
                 value={data.name}
                 autoComplete='off'
                 autoFocus={true}
@@ -33,7 +34,7 @@ const ApartmentForm = () => {
             />
             <TextField
                 type='number'
-                label="Apartment size"
+                label={t('size')}
                 value={data.size}
                 autoComplete='off'
                 onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
@@ -43,6 +44,7 @@ const ApartmentForm = () => {
     return (
 
         <AlisaForm
+            t={t}
             apiUrl='real-estate/property'
             backUrl='/apartments'
             formComponents={formComponents}
@@ -54,4 +56,4 @@ const ApartmentForm = () => {
     );
 };
 
-export default ApartmentForm;
+export default withTranslation(['common', 'apartment'])(ApartmentForm);

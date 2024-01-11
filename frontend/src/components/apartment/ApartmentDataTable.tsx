@@ -13,7 +13,11 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, 
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-export default function ApartmentsDataTable() {
+interface InputProps {
+  title: string
+}
+
+const ApartmentsDataTable: React.FC<InputProps> = ({ title }) => {
   const [expenses, setData] = React.useState<Property[]>([]);
   const [open, setOpen] = React.useState(false);
   const [apartmentIdToDelete, setApartmentIdToDelete] = React.useState(0);
@@ -50,7 +54,7 @@ export default function ApartmentsDataTable() {
   if (expenses.length > 0) {
     return (
       <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-        <Title>Apartments</Title>
+        <Title>{title}</Title>
         <Table size="small" aria-label="simple table">
           <TableHead>
             <TableRow>
@@ -97,3 +101,5 @@ export default function ApartmentsDataTable() {
     )
   }
 }
+
+export default ApartmentsDataTable
