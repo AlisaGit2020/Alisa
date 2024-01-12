@@ -2,7 +2,7 @@ import axios from 'axios';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
 import getApiUrl, { getValidationErrors } from '../../functions';
-import { Alert, Box, ButtonGroup, Grid, Link, List, ListItem } from '@mui/material';
+import { Alert, Box, ButtonGroup, Grid, Link, List, ListItem, Paper } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import React from 'react';
 import { ValidationError } from 'class-validator';
@@ -84,53 +84,55 @@ const AlisaForm: React.FC<InputProps> = ({
     };
 
     return (
-        <Grid container>
-            <Grid item lg={6} xs={12}>
-                <Box marginBottom={3}>
-                    <Link href={backUrl} color="primary">
-                        {t('back')}
-                    </Link>
-                </Box>
-
-                {formComponents}
-
-                <ButtonGroup>
-                    <Button variant="contained" color="primary"
-                        onClick={handleSubmit}>
-                        {t('save')}
-                    </Button>
-                    <Button variant="outlined"
-                        onClick={() => navigate(backUrl)}>
-                        {t('cancel')}
-                    </Button>
-                </ButtonGroup>
-
-                {(errorMessage.length > 0 || validationErrors.length > 0) && (
-
-                    <Box marginTop={3} sx={{ padding: 1 }}>
-                        {errorMessage.map((message, index) => (
-                            <Alert severity="error" key={index}>{message}</Alert>
-                        ))}
-                        {validationErrors.length > 0 && (
-                            <Alert severity="warning">
-                                <b>Please correct following data</b>
-                                <Box>
-                                    {validationErrors.map((error: ValidationError, index) => (
-                                        <Box key={index}>
-                                            {error.constraints &&
-                                                typeof error.constraints === 'object' &&
-                                                Object.values(error.constraints).map((constraint, constraintIndex) => (
-                                                    <div key={constraintIndex}>{constraint}</div>
-                                                ))}
-                                        </Box>
-                                    ))}
-                                </Box>
-                            </Alert>
-                        )}
+        <Paper sx={{ p: 2 }}>
+            <Grid container>
+                <Grid item lg={6} xs={12}>
+                    <Box marginBottom={3}>
+                        <Link href={backUrl} color="primary">
+                            {t('back')}
+                        </Link>
                     </Box>
-                )}
+
+                    {formComponents}
+
+                    <ButtonGroup>
+                        <Button variant="contained" color="primary"
+                            onClick={handleSubmit}>
+                            {t('save')}
+                        </Button>
+                        <Button variant="outlined"
+                            onClick={() => navigate(backUrl)}>
+                            {t('cancel')}
+                        </Button>
+                    </ButtonGroup>
+
+                    {(errorMessage.length > 0 || validationErrors.length > 0) && (
+
+                        <Box marginTop={3} sx={{ padding: 1 }}>
+                            {errorMessage.map((message, index) => (
+                                <Alert severity="error" key={index}>{message}</Alert>
+                            ))}
+                            {validationErrors.length > 0 && (
+                                <Alert severity="warning">
+                                    <b>Please correct following data</b>
+                                    <Box>
+                                        {validationErrors.map((error: ValidationError, index) => (
+                                            <Box key={index}>
+                                                {error.constraints &&
+                                                    typeof error.constraints === 'object' &&
+                                                    Object.values(error.constraints).map((constraint, constraintIndex) => (
+                                                        <div key={constraintIndex}>{constraint}</div>
+                                                    ))}
+                                            </Box>
+                                        ))}
+                                    </Box>
+                                </Alert>
+                            )}
+                        </Box>
+                    )}
+                </Grid>
             </Grid>
-        </Grid>
+        </Paper>
     );
 };
 

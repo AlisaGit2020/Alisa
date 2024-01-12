@@ -1,5 +1,4 @@
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import AppBar from './components/layout/AppBar';
 import AppContainer from './components/layout/AppContainer';
