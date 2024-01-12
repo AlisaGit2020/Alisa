@@ -5,8 +5,9 @@ import { AccountBalanceRounded, AttachMoney, Apartment } from '@mui/icons-materi
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import React from 'react';
 import List from '@mui/material/List';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
-export default function LeftMenu() {
+function LeftMenuItems({ t }: WithTranslation) {
   return (
     <List component="nav">
       <React.Fragment>
@@ -14,30 +15,34 @@ export default function LeftMenu() {
           <ListItemIcon>
             <DashboardIcon />
           </ListItemIcon>
-          <ListItemText primary="Dashboard" />
+          <ListItemText primary={t('dashboard')} />
         </ListItemButton>
 
         <ListItemButton component="a" href='/apartments'>
           <ListItemIcon>
             <Apartment />
           </ListItemIcon>
-          <ListItemText primary="Apartments" />
+          <ListItemText primary={t('apartments')} />
         </ListItemButton>
 
         <ListItemButton component="a">
           <ListItemIcon>
             <AccountBalanceRounded />
           </ListItemIcon>
-          <ListItemText primary="Transactions" />
+          <ListItemText primary={t('transactions')} />
         </ListItemButton>
 
         <ListItemButton component="a">
           <ListItemIcon>
             <AttachMoney />
           </ListItemIcon>
-          <ListItemText primary="Taxes" />
+          <ListItemText primary={t('taxes')} />
         </ListItemButton>
       </React.Fragment>
     </List>
   );
 }
+
+export default withTranslation('menu')(LeftMenuItems);
+
+

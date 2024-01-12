@@ -2,8 +2,9 @@ import i18n, { Resource } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
+
 const availableLanguages = ['en', 'fi'];
-const namespaces = ['apartment'];
+const namespaces = ['apartment', 'menu'];
 
 const loadNsTranslation = async (language: string, namespace: string): Promise<Record<string, string>> => {
     try {

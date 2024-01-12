@@ -14,7 +14,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AppRoutes from './components/AppRoutes';
-import LeftMenu from './components/LeftMenu';
+import LeftMenuItems from './components/leftmenu/LeftMenuItems';
 import { Container } from '@mui/material';
 import { useTranslation, Trans } from 'react-i18next';
 import i18n from './i18n';
@@ -83,16 +83,31 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
+function getInitialOpenState() {
+  // Yritä hakea tallennettu 'open' arvo localStoragesta
+  const storedOpen = localStorage.getItem('open');
+  // Palauta tallennettu arvo, jos se on määritetty, muuten palauta true
+  return storedOpen !== null ? JSON.parse(storedOpen) : true;
+}
+
+function setOpenState(open: boolean) {
+  // Tallenna 'open' arvo localStorageen
+  localStorage.setItem('open', JSON.stringify(open));
+}
+
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
 export default function App() {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(getInitialOpenState());
   const { t } = useTranslation('app');
 
   const toggleDrawer = () => {
-    setOpen(!open);
+    const newOpenState = !open;
+    setOpen(newOpenState);
+    setOpenState(newOpenState);
   };
+
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -147,7 +162,7 @@ export default function App() {
           </Toolbar>
           <Divider />
 
-          <LeftMenu></LeftMenu>
+          <LeftMenuItems></LeftMenuItems>
 
         </Drawer>
         <CssBaseline />

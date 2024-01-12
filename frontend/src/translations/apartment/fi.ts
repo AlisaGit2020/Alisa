@@ -1,8 +1,8 @@
-const fi = {
+const apartment = {
     addNewApartment: 'Lisää uusi asunto',
     apartments: 'Asunnot',
     name: 'Nimi',
     size: 'Pinta-ala',
 }
 
-export default fi
+export default apartment
