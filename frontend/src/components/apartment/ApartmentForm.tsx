@@ -56,4 +56,4 @@ function ApartmentForm({ t }: WithTranslation) {
     );
 };
 
-export default withTranslation(['common', 'apartment'])(ApartmentForm);
+export default withTranslation('apartment')(ApartmentForm);

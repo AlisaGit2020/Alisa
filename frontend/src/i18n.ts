@@ -50,8 +50,7 @@ const initializeI18n = async () => {
 const resources = await initializeI18n();
 
 i18n
-    // detect user language
-    // learn more: https://github.com/i18next/i18next-browser-languageDetector
+
     .use(LanguageDetector)
     // pass the i18n instance to react-i18next.
     .use(initReactI18next)
@@ -60,6 +59,7 @@ i18n
     .init({
         debug: false,
         fallbackLng: 'en',
+        fallbackNS: ['common'],
         interpolation: {
             escapeValue: false, // not needed for react as it escapes by default
         },

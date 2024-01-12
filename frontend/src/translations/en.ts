@@ -9,6 +9,7 @@ const en = {
     common: {
         back: 'Back',
         cancel: 'Cancel',
+        name: 'Name',
         save: 'Save'
     }
 }

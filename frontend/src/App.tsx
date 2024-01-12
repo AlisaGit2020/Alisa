@@ -18,6 +18,7 @@ import LeftMenu from './components/LeftMenu';
 import { Container } from '@mui/material';
 import { useTranslation, Trans } from 'react-i18next';
 import i18n from './i18n';
+import LanguageSelector from './components/LanguageSelector';
 
 function Copyright(props: any) {
   return (
@@ -89,11 +90,6 @@ export default function App() {
   const [open, setOpen] = React.useState(true);
   const { t } = useTranslation('app');
 
-  React.useEffect(() => {
-    const language = navigator.language
-    i18n.changeLanguage(language)
-  }, [])
-
   const toggleDrawer = () => {
     setOpen(!open);
   };
@@ -108,6 +104,7 @@ export default function App() {
               pr: '24px', // keep right padding when drawer closed
             }}
           >
+
             <IconButton
               edge="start"
               color="inherit"
@@ -120,6 +117,7 @@ export default function App() {
             >
               <MenuIcon />
             </IconButton>
+
             <Typography
               component="h1"
               variant="h6"
@@ -129,11 +127,9 @@ export default function App() {
             >
               {t('header.title')}
             </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+
+            <LanguageSelector></LanguageSelector>
+
           </Toolbar>
         </AppBar>
         <Drawer variant="permanent" open={open}>

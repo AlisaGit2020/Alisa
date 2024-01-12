@@ -12,7 +12,6 @@ function Apartments({ t }: WithTranslation) {
                 <Button variant="contained" href='apartments/add'>{t('addNewApartment')}</Button>
             </Grid>
 
-            {/* Apartments */}
             <Grid item xs={12} lg={6}>
                 <ApartmentsDataTable title={t('apartments')} />
             </Grid>
@@ -21,4 +20,4 @@ function Apartments({ t }: WithTranslation) {
     )
 }
 
-export default withTranslation(['common', 'apartment'])(Apartments)
+export default withTranslation('apartment')(Apartments)

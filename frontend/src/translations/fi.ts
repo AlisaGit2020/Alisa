@@ -3,6 +3,13 @@ const fi = {
         header: {
             title: 'Alisa'
         },
+    },
+
+    common: {
+        back: 'Takaisin',
+        cancel: 'Peruuta',
+        name: 'Nimi',
+        save: 'Tallenna'
     }
 }
 
