@@ -1,13 +1,11 @@
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { styled } from '@mui/material/styles';
-import { Box, CssBaseline, Divider, IconButton, Paper, Toolbar, Typography } from '@mui/material';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import { CssBaseline, IconButton, Toolbar, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
-import LeftMenuItems from './LeftMenuItems';
 import React from 'react';
 import LanguageSelector from './LanguageSelector';
+import LeftMenu from './LeftMenu';
 
 const drawerWidth: number = 240;
 
@@ -32,32 +30,6 @@ const _AppBar = styled(MuiAppBar, {
     }),
   }),
 }));
-
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    '& .MuiDrawer-paper': {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      width: drawerWidth,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      boxSizing: 'border-box',
-      ...(!open && {
-        overflowX: 'hidden',
-        transition: theme.transitions.create('width', {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
-        width: theme.spacing(7),
-        [theme.breakpoints.up('sm')]: {
-          width: theme.spacing(9),
-        },
-      }),
-    },
-  }),
-);
 
 function getInitialOpenState() {
   // Yritä hakea tallennettu 'open' arvo localStoragesta
@@ -117,24 +89,7 @@ function AppBar({ t }: WithTranslation) {
 
         </Toolbar>
       </_AppBar >
-      <Drawer variant="permanent" open={open}>
-        <Toolbar
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            px: [1],
-          }}
-        >
-          <IconButton onClick={toggleDrawer}>
-            <ChevronLeftIcon />
-          </IconButton>
-        </Toolbar>
-        <Divider />
-
-        <LeftMenuItems></LeftMenuItems>
-
-      </Drawer>
+      <LeftMenu open={open} onToggleDrawer={toggleDrawer}></LeftMenu>
     </>
   );
 }

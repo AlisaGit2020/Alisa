@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
-import getApiUrl, { getValidationErrors } from '../functions';
+import getApiUrl, { getValidationErrors } from '../../functions';
 import { Alert, Box, ButtonGroup, Grid, Link, List, ListItem } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import React from 'react';
