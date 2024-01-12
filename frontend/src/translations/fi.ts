@@ -1,8 +1,8 @@
 const fi = {
-    translation: {
-        header: {
-            title: 'Alisa'
-        },
+    appBar: {
+        title: 'Alisa',
+        slogan: 'Alisa, sijoittamisen supersankari kyykyttää numeroita!',
+        selectLanguage: 'Valitse kieli'
     },
 
     common: {

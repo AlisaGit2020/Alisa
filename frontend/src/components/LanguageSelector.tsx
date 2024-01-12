@@ -1,10 +1,10 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { MenuItem, Box, Button, Menu, Fade, IconButton } from '@mui/material';
+import { WithTranslation, useTranslation, withTranslation } from 'react-i18next';
+import { MenuItem, Box, Menu, Fade, IconButton, Tooltip } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
 
 
-function LanguageSelector() {
+function LanguageSelector({ t }: WithTranslation) {
     const { i18n } = useTranslation();
 
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -24,15 +24,18 @@ function LanguageSelector() {
 
     return (
         <Box>
-            <IconButton
-                color="inherit"
-                id="fade-button"
-                aria-controls={open ? 'fade-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? 'true' : undefined}
-                onClick={handleClick}
-            ><LanguageIcon></LanguageIcon>
-            </IconButton>
+            <Tooltip title={t('selectLanguage')}>
+                <IconButton
+                    color="inherit"
+                    id="fade-button"
+                    aria-controls={open ? 'fade-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    onClick={handleClick}
+                    aria-placeholder='grarg'
+                ><LanguageIcon></LanguageIcon>
+                </IconButton>
+            </Tooltip>
             <Menu
                 id="fade-menu"
                 MenuListProps={{
@@ -50,4 +53,4 @@ function LanguageSelector() {
     );
 };
 
-export default LanguageSelector;
+export default withTranslation('appBar')(LanguageSelector);

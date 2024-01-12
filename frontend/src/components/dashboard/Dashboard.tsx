@@ -1,12 +1,23 @@
-import { Grid, Paper } from '@mui/material'
+import { Grid, Paper, Typography } from '@mui/material'
 import Chart from '../../Chart'
 import Deposits from '../../Deposits'
 import Orders from '../datatables/Orders'
+import { WithTranslation, withTranslation } from 'react-i18next'
 
-export default function Dashboard() {
+function Dashboard({ t }: WithTranslation) {
     return (
 
+
         <Grid container spacing={3}>
+            <Grid item xs={12}>
+
+                <Paper elevation={5} sx={{ p: '10px' }}>
+                    <Typography sx={{ fontSize: 'medium' }}>
+                        {t('slogan')}
+                    </Typography>
+                </Paper>
+
+            </Grid>
             {/* Chart */}
             <Grid item xs={12} md={8} lg={9}>
                 <Paper
@@ -43,3 +54,4 @@ export default function Dashboard() {
     )
 }
 
+export default withTranslation('appBar')(Dashboard)

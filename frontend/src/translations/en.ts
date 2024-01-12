@@ -1,9 +1,8 @@
 const en = {
-    app: {
-        header: {
-            title: 'Alisa'
-        },
-
+    appBar: {
+        title: 'Alisa',
+        slogan: 'Alisa, the superhero of investment is shaking numbers!',
+        selectLanguage: 'Select language'
     },
 
     common: {
