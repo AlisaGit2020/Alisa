@@ -10,6 +10,7 @@ const fi = {
         cancel: 'Peruuta',
         confirm: 'Vahvista',
         confirmDelete: 'Poistetaanko tietue?',
+        description: 'Kuvaus',
         name: 'Nimi',
         save: 'Tallenna'
     }

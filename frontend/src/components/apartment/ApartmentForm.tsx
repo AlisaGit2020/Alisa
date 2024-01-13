@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { getNumber } from '../../functions';
 import { PropertyInputDto } from '../../../../backend/src/real-estate/property/dtos/property-input.dto'
 import { WithTranslation, withTranslation } from 'react-i18next';
+import apartmentContext from '../../alisa-contexts/apartment';
 
 
 function ApartmentForm({ t }: WithTranslation) {
@@ -45,8 +46,7 @@ function ApartmentForm({ t }: WithTranslation) {
 
         <AlisaForm
             t={t}
-            apiUrl='real-estate/property'
-            backUrl='/apartments'
+            alisaContext={apartmentContext}
             formComponents={formComponents}
             onSetData={setData}
             data={data}
@@ -56,4 +56,4 @@ function ApartmentForm({ t }: WithTranslation) {
     );
 };
 
-export default withTranslation('apartment')(ApartmentForm);
+export default withTranslation(apartmentContext.name)(ApartmentForm);

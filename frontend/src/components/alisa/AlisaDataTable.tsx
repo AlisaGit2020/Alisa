@@ -1,6 +1,8 @@
 
 import * as React from 'react';
+import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -9,7 +11,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
 import getApiUrl from '../../functions';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, Tooltip } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { TFunction } from 'i18next';
@@ -22,11 +24,11 @@ interface AlisaDataTableField<T> {
 interface AlisaDataTableInputProps<T> {
   t: TFunction
   title: string
-  apiUrl: string
+  alisaContext: AlisaContext
   fields: AlisaDataTableField<T>[]
 }
 
-function AlisaDataTable<T extends { id: number }>({ t, title, apiUrl, fields }: AlisaDataTableInputProps<T>) {
+function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fields }: AlisaDataTableInputProps<T>) {
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
   const [apartmentIdToDelete, setApartmentIdToDelete] = React.useState(0);
@@ -38,7 +40,7 @@ function AlisaDataTable<T extends { id: number }>({ t, title, apiUrl, fields }: 
   }, [])
 
   const fetchData = async () => {
-    const response = await fetch(getApiUrl(apiUrl));
+    const response = await fetch(getApiUrl(alisaContext.apiPath));
     const data: T[] = await response.json();
     setData(data);
   };
@@ -54,13 +56,17 @@ function AlisaDataTable<T extends { id: number }>({ t, title, apiUrl, fields }: 
   };
 
   const handleDelete = async () => {
-    await axios.delete(getApiUrl(`${apiUrl}/${apartmentIdToDelete}`));
+    await axios.delete(getApiUrl(`${alisaContext.apiPath}/${apartmentIdToDelete}`));
     fetchData();
     handleClose();
   };
 
   const getDataValue = (field: AlisaDataTableField<T>, dataItem: T): React.ReactNode => {
     const value = dataItem[field.name];
+
+    if (typeof (value) === 'boolean') {
+      return (<CheckIcon visibility={value ? 'visible' : 'hidden'}></CheckIcon>)
+    }
     if (field.format == 'number') {
       return t('format.number', { val: value })
     }
@@ -73,13 +79,20 @@ function AlisaDataTable<T extends { id: number }>({ t, title, apiUrl, fields }: 
     return (
       <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
         <Title>{title}</Title>
+
         <Table size="small" aria-label="simple table">
           <TableHead>
             <TableRow>
               {fields.map((field) => (
                 <TableCell key={field.name as string}>{t(field.name as string)}</TableCell>
               ))}
-              <TableCell></TableCell>
+              <TableCell align='right'>
+                <Tooltip title={t('add')}>
+                  <IconButton href={`${alisaContext.routePath}/add`}>
+                    <AddIcon></AddIcon>
+                  </IconButton>
+                </Tooltip>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

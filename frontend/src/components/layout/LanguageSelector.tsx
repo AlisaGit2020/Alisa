@@ -4,7 +4,6 @@ import { MenuItem, Box, Menu, Fade, IconButton, Tooltip } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
 import CheckIcon from '@mui/icons-material/Check';
 
-
 function LanguageSelector({ t }: WithTranslation) {
     const { i18n } = useTranslation();
 

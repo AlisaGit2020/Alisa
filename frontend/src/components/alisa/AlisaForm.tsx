@@ -11,8 +11,7 @@ import { TFunction } from 'i18next';
 
 interface InputProps {
     t: TFunction
-    apiUrl: string
-    backUrl: string
+    alisaContext: AlisaContext
     formComponents: any
     onSetData: (any)
     data: object,
@@ -21,8 +20,7 @@ interface InputProps {
 
 const AlisaForm: React.FC<InputProps> = ({
     t,
-    apiUrl,
-    backUrl,
+    alisaContext,
     formComponents,
     onSetData,
     data,
@@ -42,7 +40,7 @@ const AlisaForm: React.FC<InputProps> = ({
     const fetchData = async (apartmentId: number) => {
         if (apartmentId) {
             try {
-                const response = await axios.get(getApiUrl(`${apiUrl}/${apartmentId}`));
+                const response = await axios.get(getApiUrl(`${alisaContext.apiPath}/${apartmentId}`));
 
                 return response.data
             } catch (error: any) {
@@ -65,12 +63,12 @@ const AlisaForm: React.FC<InputProps> = ({
         try {
 
             if (id) {
-                await axios.put(getApiUrl(`${apiUrl}/${id}`), data);
+                await axios.put(getApiUrl(`${alisaContext.apiPath}/${id}`), data);
             } else {
-                await axios.post(getApiUrl(apiUrl), data);
+                await axios.post(getApiUrl(alisaContext.apiPath), data);
             }
 
-            navigate(backUrl)
+            navigate(alisaContext.routePath)
 
         } catch (error: any) {
             if (error.response) {
@@ -88,7 +86,7 @@ const AlisaForm: React.FC<InputProps> = ({
             <Grid container>
                 <Grid item lg={6} xs={12}>
                     <Box marginBottom={3}>
-                        <Link href={backUrl} color="primary">
+                        <Link href={alisaContext.routePath} color="primary">
                             {t('back')}
                         </Link>
                     </Box>
@@ -101,7 +99,7 @@ const AlisaForm: React.FC<InputProps> = ({
                             {t('save')}
                         </Button>
                         <Button variant="outlined"
-                            onClick={() => navigate(backUrl)}>
+                            onClick={() => navigate(alisaContext.routePath)}>
                             {t('cancel')}
                         </Button>
                     </ButtonGroup>

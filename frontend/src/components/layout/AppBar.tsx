@@ -1,7 +1,8 @@
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { styled } from '@mui/material/styles';
-import { CssBaseline, IconButton, Toolbar, Typography } from '@mui/material';
+import { CssBaseline, IconButton, Toolbar, Tooltip, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import SettingsIcon from '@mui/icons-material/Settings';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import React from 'react';
 import LanguageSelector from './LanguageSelector';
@@ -86,6 +87,13 @@ function AppBar({ t }: WithTranslation) {
           </Typography>
 
           <LanguageSelector></LanguageSelector>
+          <Tooltip title={t('settings')}>
+            <IconButton
+              color="inherit"
+              href='/settings'
+            ><SettingsIcon></SettingsIcon>
+            </IconButton>
+          </Tooltip>
 
         </Toolbar>
       </_AppBar >

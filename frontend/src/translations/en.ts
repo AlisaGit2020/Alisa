@@ -19,6 +19,7 @@ const en = {
         cancel: 'Cancel',
         confirm: 'Confirm',
         confirmDelete: 'Are you sure delete item?',
+        description: 'Description',
         name: 'Name',
         save: 'Save',
 
