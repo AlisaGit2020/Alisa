@@ -37,7 +37,6 @@ function LanguageSelector({ t }: WithTranslation) {
                     aria-haspopup="true"
                     aria-expanded={open ? 'true' : undefined}
                     onMouseOver={handleOpen}
-                    aria-placeholder='grarg'
                 ><LanguageIcon></LanguageIcon>
                 </IconButton>
             </Tooltip>
@@ -51,8 +50,8 @@ function LanguageSelector({ t }: WithTranslation) {
                 onClose={handleClose}
                 TransitionComponent={Fade}
             >
-                <MenuItem onClick={() => changeLanguage('en-FI')}>English <CheckIcon visibility={getVisibility('en-FI')}></CheckIcon></MenuItem>
-                <MenuItem onClick={() => changeLanguage('fi-FI')}>Suomi <CheckIcon visibility={getVisibility('fi-FI')}></CheckIcon></MenuItem>
+                <MenuItem onClick={() => changeLanguage('en')}>English <CheckIcon visibility={getVisibility('en')}></CheckIcon></MenuItem>
+                <MenuItem onClick={() => changeLanguage('fi')}>Suomi <CheckIcon visibility={getVisibility('fi')}></CheckIcon></MenuItem>
             </Menu>
         </Box>
     );

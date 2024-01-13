@@ -8,6 +8,8 @@ const fi = {
     common: {
         back: 'Takaisin',
         cancel: 'Peruuta',
+        confirm: 'Vahvista',
+        confirmDelete: 'Poistetaanko tietue?',
         name: 'Nimi',
         save: 'Tallenna'
     }
