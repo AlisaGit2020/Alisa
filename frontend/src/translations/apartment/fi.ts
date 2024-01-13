@@ -1,5 +1,5 @@
 const apartment = {
-    addNewApartment: 'Lisää uusi asunto',
+    add: 'Lisää uusi asunto',
     apartments: 'Asunnot',
     name: 'Nimi',
     size: 'Pinta-ala',

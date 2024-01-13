@@ -6,6 +6,12 @@ const en = {
     },
 
     common: {
+        format: {
+            currency: {
+                euro: '{{val, number(minimumFractionDigits:2)}} €',
+            },
+            date: '{{val, datetime}}',
+        },
         back: 'Back',
         cancel: 'Cancel',
         name: 'Name',

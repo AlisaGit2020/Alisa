@@ -1,5 +1,5 @@
 const apartment = {
-    addNewApartment: 'Add new apartment',
+    add: 'Add new apartment',
     apartments: 'Apartments',
 
     size: 'Size',
