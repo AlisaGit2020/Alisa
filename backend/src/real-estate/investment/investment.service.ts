@@ -3,25 +3,29 @@ import { InvestmentCalculator } from './classes/investment-calculator.class';
 import { InvestmentInputDto } from './dtos/investment-input.dto';
 import { Investment } from './entities/investment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 
 @Injectable()
 export class InvestmentService {
   constructor(
     @InjectRepository(Investment)
-    private investmentsRepository: Repository<Investment>,
+    private repository: Repository<Investment>,
   ) {}
 
   calculate(investment: InvestmentInputDto): InvestmentCalculator {
     return new InvestmentCalculator(investment);
   }
 
+  async search(options: FindManyOptions<Investment>): Promise<Investment[]> {
+    return this.repository.find(options);
+  }
+
   async findAll(): Promise<Investment[]> {
-    return this.investmentsRepository.find();
+    return this.repository.find();
   }
 
   async findOne(id: number): Promise<Investment> {
-    return this.investmentsRepository.findOneBy({ id: id });
+    return this.repository.findOneBy({ id: id });
   }
 
   async saveCalculation(
@@ -77,11 +81,11 @@ export class InvestmentService {
     investmentEntity.cashFlowAfterTaxPerMonth =
       investmentCalculation.cashFlowAfterTaxPerMonth;
 
-    await this.investmentsRepository.save(investmentEntity);
+    await this.repository.save(investmentEntity);
     return investmentEntity;
   }
 
   async delete(id: number): Promise<void> {
-    await this.investmentsRepository.delete(id);
+    await this.repository.delete(id);
   }
 }

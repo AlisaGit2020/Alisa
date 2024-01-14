@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
 
@@ -8,15 +8,19 @@ import { PropertyInputDto } from './dtos/property-input.dto';
 export class PropertyService {
   constructor(
     @InjectRepository(Property)
-    private propertyRepository: Repository<Property>,
+    private repository: Repository<Property>,
   ) {}
 
+  async search(options: FindManyOptions<Property>): Promise<Property[]> {
+    return this.repository.find(options);
+  }
+
   async findAll(): Promise<Property[]> {
-    return this.propertyRepository.find();
+    return this.repository.find();
   }
 
   async findOne(id: number): Promise<Property> {
-    return this.propertyRepository.findOneBy({ id: id });
+    return this.repository.findOneBy({ id: id });
   }
 
   async add(input: PropertyInputDto): Promise<Property> {
@@ -24,7 +28,7 @@ export class PropertyService {
 
     this.mapData(propertyEntity, input);
 
-    return await this.propertyRepository.save(propertyEntity);
+    return await this.repository.save(propertyEntity);
   }
 
   async update(id: number, input: PropertyInputDto): Promise<Property> {
@@ -32,12 +36,12 @@ export class PropertyService {
 
     this.mapData(propertyEntity, input);
 
-    await this.propertyRepository.save(propertyEntity);
+    await this.repository.save(propertyEntity);
     return propertyEntity;
   }
 
   async delete(id: number): Promise<void> {
-    await this.propertyRepository.delete(id);
+    await this.repository.delete(id);
   }
 
   private mapData(property: Property, input: PropertyInputDto) {

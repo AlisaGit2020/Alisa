@@ -1,5 +1,7 @@
+import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { TestData } from '../test-data';
 import { ExpenseTypeInputDto } from 'src/accounting/expense/dtos/expense-type-input.dto';
+import { ExpenseType } from 'src/accounting/expense/entities/expense-type.entity';
 
 export const expenseTypeTestData = {
   name: 'Expense type',
@@ -33,4 +35,10 @@ export const expenseTypeTestData = {
     description: 'Pankkilaina lyhennyksen lainan lyhennys',
     isTaxDeductible: false,
   },
+
+  searchOptions: {
+    where: {
+      name: 'Lainan korko',
+    },
+  } as FindManyOptions<ExpenseType>,
 } as TestData;

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { ExpenseType } from './entities/expense-type.entity';
 import { ExpenseTypeInputDto } from './dtos/expense-type-input.dto';
 
@@ -8,15 +8,19 @@ import { ExpenseTypeInputDto } from './dtos/expense-type-input.dto';
 export class ExpenseTypeService {
   constructor(
     @InjectRepository(ExpenseType)
-    private expenseTypeRepository: Repository<ExpenseType>,
+    private repository: Repository<ExpenseType>,
   ) {}
 
   async findAll(): Promise<ExpenseType[]> {
-    return this.expenseTypeRepository.find();
+    return this.repository.find();
+  }
+
+  async search(options: FindManyOptions<ExpenseType>): Promise<ExpenseType[]> {
+    return this.repository.find(options);
   }
 
   async findOne(id: number): Promise<ExpenseType> {
-    return this.expenseTypeRepository.findOneBy({ id: id });
+    return this.repository.findOneBy({ id: id });
   }
 
   async add(input: ExpenseTypeInputDto): Promise<ExpenseType> {
@@ -24,7 +28,7 @@ export class ExpenseTypeService {
 
     this.mapData(expenseTypeEntity, input);
 
-    return await this.expenseTypeRepository.save(expenseTypeEntity);
+    return await this.repository.save(expenseTypeEntity);
   }
 
   async update(id: number, input: ExpenseTypeInputDto): Promise<ExpenseType> {
@@ -32,12 +36,12 @@ export class ExpenseTypeService {
 
     this.mapData(expenseTypeTypeEntity, input);
 
-    await this.expenseTypeRepository.save(expenseTypeTypeEntity);
+    await this.repository.save(expenseTypeTypeEntity);
     return expenseTypeTypeEntity;
   }
 
   async delete(id: number): Promise<void> {
-    await this.expenseTypeRepository.delete(id);
+    await this.repository.delete(id);
   }
 
   private mapData(expenseType: ExpenseType, input: ExpenseTypeInputDto) {

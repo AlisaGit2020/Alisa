@@ -1,6 +1,7 @@
 import { PropertyInputDto } from 'src/real-estate/property/dtos/property-input.dto';
 import { Property } from 'src/real-estate/property/entities/property.entity';
 import { TestData } from '../test-data';
+import { FindManyOptions } from 'typeorm';
 
 export const propertyTestData = {
   name: 'Property',
@@ -30,4 +31,10 @@ export const propertyTestData = {
     name: 'Hessun asunto',
     size: 59,
   },
+
+  searchOptions: {
+    where: {
+      name: 'Hessun asunto',
+    },
+  } as FindManyOptions<Property>,
 } as TestData;

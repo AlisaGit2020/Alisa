@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   Put,
@@ -10,26 +11,35 @@ import {
 import { ExpenseTypeService } from './expense-type.service';
 import { ExpenseType } from './entities/expense-type.entity';
 import { ExpenseTypeInputDto } from './dtos/expense-type-input.dto';
+import { FindManyOptions } from 'typeorm';
 
 @Controller('accounting/expense/type')
 export class ExpenseTypeController {
-  constructor(private expenseTypeService: ExpenseTypeService) {}
+  constructor(private service: ExpenseTypeService) {}
+
+  @Post('/search')
+  @HttpCode(200)
+  async search(
+    @Body() options: FindManyOptions<ExpenseType>,
+  ): Promise<ExpenseType[]> {
+    return this.service.search(options);
+  }
 
   @Get('/')
   async findAll(): Promise<ExpenseType[]> {
-    return this.expenseTypeService.findAll();
+    return this.service.findAll();
   }
 
   @Get('/:id')
   async findOne(@Param('id') id: string): Promise<ExpenseType> {
-    return this.expenseTypeService.findOne(Number(id));
+    return this.service.findOne(Number(id));
   }
 
   @Post('/')
   async add(
     @Body() expenseTypeInput: ExpenseTypeInputDto,
   ): Promise<ExpenseType> {
-    return this.expenseTypeService.add(expenseTypeInput);
+    return this.service.add(expenseTypeInput);
   }
 
   @Put('/:id')
@@ -37,12 +47,12 @@ export class ExpenseTypeController {
     @Param('id') id: string,
     @Body() ExpenseType: ExpenseTypeInputDto,
   ): Promise<ExpenseType> {
-    return this.expenseTypeService.update(Number(id), ExpenseType);
+    return this.service.update(Number(id), ExpenseType);
   }
 
   @Delete('/:id')
   async delete(@Param('id') id: number): Promise<boolean> {
-    await this.expenseTypeService.delete(id);
+    await this.service.delete(id);
     return true;
   }
 }

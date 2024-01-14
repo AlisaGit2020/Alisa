@@ -15,27 +15,27 @@ import { FindManyOptions } from 'typeorm';
 
 @Controller('accounting/expense')
 export class ExpenseController {
-  constructor(private expenseService: ExpenseService) {}
+  constructor(private service: ExpenseService) {}
 
   @Post('/search')
   @HttpCode(200)
   async search(@Body() options: FindManyOptions<Expense>): Promise<Expense[]> {
-    return this.expenseService.search(options);
+    return this.service.search(options);
   }
 
   @Get('/')
   async findAll(): Promise<Expense[]> {
-    return this.expenseService.findAll();
+    return this.service.findAll();
   }
 
   @Get('/:id')
   async findOne(@Param('id') id: string): Promise<Expense> {
-    return this.expenseService.findOne(Number(id));
+    return this.service.findOne(Number(id));
   }
 
   @Post('/')
   async add(@Body() ExpenseInput: ExpenseInputDto): Promise<Expense> {
-    return this.expenseService.add(ExpenseInput);
+    return this.service.add(ExpenseInput);
   }
 
   @Put('/:id')
@@ -43,12 +43,12 @@ export class ExpenseController {
     @Param('id') id: string,
     @Body() Expense: ExpenseInputDto,
   ): Promise<Expense> {
-    return this.expenseService.update(Number(id), Expense);
+    return this.service.update(Number(id), Expense);
   }
 
   @Delete('/:id')
   async delete(@Param('id') id: number): Promise<boolean> {
-    await this.expenseService.delete(id);
+    await this.service.delete(id);
     return true;
   }
 }

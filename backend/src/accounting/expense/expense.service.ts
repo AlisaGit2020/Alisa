@@ -8,19 +8,19 @@ import { ExpenseInputDto } from './dtos/expense-input.dto';
 export class ExpenseService {
   constructor(
     @InjectRepository(Expense)
-    private expenseRepository: Repository<Expense>,
+    private repository: Repository<Expense>,
   ) {}
 
   async findAll(): Promise<Expense[]> {
-    return this.expenseRepository.find();
+    return this.repository.find();
   }
 
   async search(options: FindManyOptions<Expense>): Promise<Expense[]> {
-    return this.expenseRepository.find(options);
+    return this.repository.find(options);
   }
 
   async findOne(id: number): Promise<Expense> {
-    return this.expenseRepository.findOneBy({ id: id });
+    return this.repository.findOneBy({ id: id });
   }
 
   async add(input: ExpenseInputDto): Promise<Expense> {
@@ -28,7 +28,7 @@ export class ExpenseService {
 
     this.mapData(expenseEntity, input);
 
-    return await this.expenseRepository.save(expenseEntity);
+    return await this.repository.save(expenseEntity);
   }
 
   async update(id: number, input: ExpenseInputDto): Promise<Expense> {
@@ -38,12 +38,12 @@ export class ExpenseService {
     this.mapData(expenseEntity, input);
     expenseEntity.transaction.id = transactionId;
 
-    await this.expenseRepository.save(expenseEntity);
+    await this.repository.save(expenseEntity);
     return expenseEntity;
   }
 
   async delete(id: number): Promise<void> {
-    await this.expenseRepository.delete(id);
+    await this.repository.delete(id);
   }
 
   private mapData(expense: Expense, input: ExpenseInputDto) {

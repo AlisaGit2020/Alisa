@@ -8,15 +8,15 @@ import { Transaction } from './entities/transaction.entity';
 export class TransactionService {
   constructor(
     @InjectRepository(Transaction)
-    private transactionRepository: Repository<Transaction>,
+    private repository: Repository<Transaction>,
   ) {}
 
   async findAll(): Promise<Transaction[]> {
-    return this.transactionRepository.find();
+    return this.repository.find();
   }
 
   async findOne(id: number): Promise<Transaction> {
-    return this.transactionRepository.findOneBy({ id: id });
+    return this.repository.findOneBy({ id: id });
   }
 
   async add(input: TransactionInputDto): Promise<Transaction> {
@@ -24,7 +24,7 @@ export class TransactionService {
 
     this.mapData(transactionEntity, input);
 
-    return await this.transactionRepository.save(transactionEntity);
+    return await this.repository.save(transactionEntity);
   }
 
   async update(id: number, input: TransactionInputDto): Promise<Transaction> {
@@ -32,12 +32,12 @@ export class TransactionService {
 
     this.mapData(transactionEntity, input);
 
-    await this.transactionRepository.save(transactionEntity);
+    await this.repository.save(transactionEntity);
     return transactionEntity;
   }
 
   async delete(id: number): Promise<void> {
-    await this.transactionRepository.delete(id);
+    await this.repository.delete(id);
   }
 
   private mapData(transaction: Transaction, input: TransactionInputDto) {

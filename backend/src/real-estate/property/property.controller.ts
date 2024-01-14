@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   Put,
@@ -10,24 +11,33 @@ import {
 import { PropertyService } from './property.service';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
+import { FindManyOptions } from 'typeorm';
 
 @Controller('real-estate/property')
 export class PropertyController {
-  constructor(private propertyService: PropertyService) {}
+  constructor(private service: PropertyService) {}
+
+  @Post('/search')
+  @HttpCode(200)
+  async search(
+    @Body() options: FindManyOptions<Property>,
+  ): Promise<Property[]> {
+    return this.service.search(options);
+  }
 
   @Get('/')
   async findAll(): Promise<Property[]> {
-    return this.propertyService.findAll();
+    return this.service.findAll();
   }
 
   @Get('/:id')
   async findOne(@Param('id') id: string): Promise<Property> {
-    return this.propertyService.findOne(Number(id));
+    return this.service.findOne(Number(id));
   }
 
   @Post('/')
   async add(@Body() propertyInput: PropertyInputDto): Promise<Property> {
-    return this.propertyService.add(propertyInput);
+    return this.service.add(propertyInput);
   }
 
   @Put('/:id')
@@ -35,12 +45,12 @@ export class PropertyController {
     @Param('id') id: string,
     @Body() property: PropertyInputDto,
   ): Promise<Property> {
-    return this.propertyService.update(Number(id), property);
+    return this.service.update(Number(id), property);
   }
 
   @Delete('/:id')
   async delete(@Param('id') id: number): Promise<boolean> {
-    await this.propertyService.delete(id);
+    await this.service.delete(id);
     return true;
   }
 }
