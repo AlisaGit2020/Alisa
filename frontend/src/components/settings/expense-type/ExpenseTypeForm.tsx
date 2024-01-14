@@ -15,8 +15,8 @@ function ExpenseTypeForm({ t }: WithTranslation) {
     });
 
     const handleChange = (
-        name: string,
-        value: any
+        name: keyof ExpenseTypeInputDto,
+        value: ExpenseTypeInputDto[keyof ExpenseTypeInputDto]
     ) => {
         setData((prevData) => ({
             ...prevData,
@@ -49,7 +49,7 @@ function ExpenseTypeForm({ t }: WithTranslation) {
     )
     return (
 
-        <AlisaForm
+        <AlisaForm<ExpenseTypeInputDto>
             t={t}
             alisaContext={expenseTypeContext}
             formComponents={formComponents}

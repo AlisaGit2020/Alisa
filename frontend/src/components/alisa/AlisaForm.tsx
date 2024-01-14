@@ -9,23 +9,23 @@ import { ValidationError } from 'class-validator';
 import { TFunction } from 'i18next';
 
 
-interface InputProps {
+interface InputProps<T> {
     t: TFunction
     alisaContext: AlisaContext
     formComponents: JSX.Element
-    onSetData: any
+    onSetData: React.Dispatch<React.SetStateAction<T>>;
     data: object
     validateObject: object
 }
 
-const AlisaForm: React.FC<InputProps> = ({
+function AlisaForm<T extends object>({
     t,
     alisaContext,
     formComponents,
     onSetData,
     data,
     validateObject
-}) => {
+}:InputProps<T>) {
 
     const { id } = useParams();
     const [errorMessage, setErrorMessage] = useState<string[]>([])
@@ -140,6 +140,6 @@ const AlisaForm: React.FC<InputProps> = ({
             </Grid>
         </Paper>
     );
-};
+}
 
 export default AlisaForm;

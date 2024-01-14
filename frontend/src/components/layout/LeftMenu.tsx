@@ -34,7 +34,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 
 interface LeftMenuProps {
     open: boolean
-    onToggleDrawer: (any)
+    onToggleDrawer: () => void
 }
 
 function LeftMenu({ open, onToggleDrawer }: LeftMenuProps) {

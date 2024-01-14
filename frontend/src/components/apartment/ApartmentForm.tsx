@@ -9,14 +9,14 @@ import apartmentContext from '../../alisa-contexts/apartment';
 
 
 function ApartmentForm({ t }: WithTranslation) {
-    const [data, setData] = useState({
+    const [data, setData] = useState<PropertyInputDto>({
         name: '',
         size: 0
     });
 
     const handleChange = (
-        name: string,
-        value: any
+        name: keyof PropertyInputDto,
+        value: PropertyInputDto[keyof PropertyInputDto]
     ) => {
         setData((prevData) => ({
             ...prevData,
@@ -44,7 +44,7 @@ function ApartmentForm({ t }: WithTranslation) {
     )
     return (
 
-        <AlisaForm
+        <AlisaForm<PropertyInputDto>
             t={t}
             alisaContext={apartmentContext}
             formComponents={formComponents}
