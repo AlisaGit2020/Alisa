@@ -16,15 +16,12 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { TFunction } from 'i18next';
 import AlisaConfirmDialog from './AlisaConfirmDialog';
+import { TypeOrmOrderOption, TypeOrmRelationOption } from '../../types/types';
 
 interface AlisaDataTableField<T> {
   name: keyof T,
   format?: 'number' | 'currency'
 }
-
-type OrderOption = {
-  [key: string]: 'ASC' | 'DESC';
-};
 
 interface AlisaDataTableInputProps<T> {
   t: TFunction
@@ -32,8 +29,9 @@ interface AlisaDataTableInputProps<T> {
   alisaContext: AlisaContext
   fields: AlisaDataTableField<T>[]
   fetchOptions?: {
+    relations: TypeOrmRelationOption,
     where?: Partial<T>,
-    order?: OrderOption
+    order?: TypeOrmOrderOption
   }
 }
 

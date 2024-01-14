@@ -1,6 +1,7 @@
 //TypeOrm entity for transaction table.
+import { Expense } from 'src/accounting/expense/entities/expense.entity';
 import { columnOptionTwoDecimal } from 'src/common/typeorm.column.definitions';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Transaction {
@@ -24,4 +25,11 @@ export class Transaction {
 
   @Column(columnOptionTwoDecimal)
   public totalAmount: number;
+
+  @OneToOne(() => Expense, (expense) => expense.transaction, {
+    eager: false,
+    cascade: true,
+    nullable: true,
+  })
+  expense: Expense;
 }

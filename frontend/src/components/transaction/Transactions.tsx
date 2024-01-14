@@ -22,7 +22,14 @@ function Transactions({ t }: WithTranslation) {
                         { name: 'quantity' },
                         { name: 'totalAmount' },
                     ]}
-                    fetchOptions={{order: {transactionDate: 'ASC'}}}
+                    fetchOptions={{
+                        relations: {
+                            expense: true
+                        },
+                        order: {
+                            transactionDate: 'ASC'
+                        }
+                    }}
                     />
             </Grid>
         </Grid>
