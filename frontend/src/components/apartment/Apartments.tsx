@@ -25,4 +25,4 @@ function Apartments({ t }: WithTranslation) {
     )
 }
 
-export default function withTranslation(apartmentContext.name)(Apartments)
+export default withTranslation(apartmentContext.name)(Apartments)
