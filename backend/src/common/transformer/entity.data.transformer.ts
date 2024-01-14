@@ -1,11 +1,11 @@
-import { ValueTransformer } from "typeorm";
+import { ValueTransformer } from 'typeorm';
 
 export class DecimalToNumberTransformer implements ValueTransformer {
-    to(value: number): number {
-        return value;
-    }
+  to(value: number): number {
+    return value;
+  }
 
-    from(value: string): number {
-        return parseFloat(value);
-    }
+  from(value: string): number {
+    return parseFloat(value);
+  }
 }

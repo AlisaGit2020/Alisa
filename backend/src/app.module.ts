@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { RealEstateModule } from './real-estate/real-estate.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';//d
+import { ConfigModule } from '@nestjs/config'; //d
 import { AccountingModule } from './accounting/accounting.module';
 
 @Module({
@@ -20,9 +20,9 @@ import { AccountingModule } from './accounting/accounting.module';
       autoLoadEntities: true,
     }),
     RealEstateModule,
-    AccountingModule
+    AccountingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

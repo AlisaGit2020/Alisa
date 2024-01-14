@@ -12,6 +12,6 @@ import { ExpenseType } from './expense/entities/expense-type.entity';
 @Module({
   controllers: [ExpenseTypeController, ExpenseController],
   providers: [TransactionService, ExpenseService, ExpenseTypeService],
-  imports: [TypeOrmModule.forFeature([Transaction, Expense, ExpenseType])]
+  imports: [TypeOrmModule.forFeature([Transaction, Expense, ExpenseType])],
 })
-export class AccountingModule { }
+export class AccountingModule {}

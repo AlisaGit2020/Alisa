@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsNumberString, Max, Min } from "class-validator";
+import { IsNotEmpty, IsNumber, Max, Min } from 'class-validator';
 
 export class PropertyInputDto {
   @IsNotEmpty()

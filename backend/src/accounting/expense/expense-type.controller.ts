@@ -1,11 +1,19 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ExpenseTypeService } from './expense-type.service';
 import { ExpenseType } from './entities/expense-type.entity';
 import { ExpenseTypeInputDto } from './dtos/expense-type-input.dto';
 
 @Controller('accounting/expense/type')
 export class ExpenseTypeController {
-  constructor(private expenseTypeService: ExpenseTypeService) { }
+  constructor(private expenseTypeService: ExpenseTypeService) {}
 
   @Get('/')
   async findAll(): Promise<ExpenseType[]> {
@@ -25,14 +33,16 @@ export class ExpenseTypeController {
   }
 
   @Put('/:id')
-  async update(@Param('id') id: string, @Body() ExpenseType: ExpenseTypeInputDto): Promise<ExpenseType> {
+  async update(
+    @Param('id') id: string,
+    @Body() ExpenseType: ExpenseTypeInputDto,
+  ): Promise<ExpenseType> {
     return this.expenseTypeService.update(Number(id), ExpenseType);
   }
 
   @Delete('/:id')
   async delete(@Param('id') id: number): Promise<boolean> {
-    await this.expenseTypeService.delete(id)
-    return true
+    await this.expenseTypeService.delete(id);
+    return true;
   }
-
 }

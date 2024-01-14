@@ -6,52 +6,45 @@ import { Transaction } from './entities/transaction.entity';
 
 @Injectable()
 export class TransactionService {
-    constructor(
-        @InjectRepository(Transaction)
-        private transactionRepository: Repository<Transaction>,
-    ) { }
+  constructor(
+    @InjectRepository(Transaction)
+    private transactionRepository: Repository<Transaction>,
+  ) {}
 
-    async findAll(): Promise<Transaction[]> {
-        return this.transactionRepository.find();
-    }
+  async findAll(): Promise<Transaction[]> {
+    return this.transactionRepository.find();
+  }
 
-    async findOne(id: number): Promise<Transaction> {
-        return this.transactionRepository.findOneBy({ id: id });
-    }
+  async findOne(id: number): Promise<Transaction> {
+    return this.transactionRepository.findOneBy({ id: id });
+  }
 
-    async add(
-        input: TransactionInputDto,
-    ): Promise<Transaction> {
+  async add(input: TransactionInputDto): Promise<Transaction> {
+    const transactionEntity = new Transaction();
 
-        const transactionEntity = new Transaction();
+    this.mapData(transactionEntity, input);
 
-        this.mapData(transactionEntity, input)
+    return await this.transactionRepository.save(transactionEntity);
+  }
 
-        return await this.transactionRepository.save(transactionEntity);
-    }
+  async update(id: number, input: TransactionInputDto): Promise<Transaction> {
+    const transactionEntity = await this.findOne(id);
 
-    async update(
-        id: number,
-        input: TransactionInputDto,
-    ): Promise<Transaction> {
+    this.mapData(transactionEntity, input);
 
-        const transactionEntity = await this.findOne(id);
+    await this.transactionRepository.save(transactionEntity);
+    return transactionEntity;
+  }
 
-        this.mapData(transactionEntity, input)
+  async delete(id: number): Promise<void> {
+    await this.transactionRepository.delete(id);
+  }
 
-        await this.transactionRepository.save(transactionEntity);
-        return transactionEntity;
-    }
-
-    async delete(id: number): Promise<void> {
-        await this.transactionRepository.delete(id);
-    }
-
-    private mapData(transaction: Transaction, input: TransactionInputDto) {
-        Object.entries(input).forEach(([key, value]) => {
-            if (value !== undefined) {
-                transaction[key] = value;
-            }
-        });
-    }
+  private mapData(transaction: Transaction, input: TransactionInputDto) {
+    Object.entries(input).forEach(([key, value]) => {
+      if (value !== undefined) {
+        transaction[key] = value;
+      }
+    });
+  }
 }

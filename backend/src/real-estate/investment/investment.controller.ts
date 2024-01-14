@@ -1,4 +1,12 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { InvestmentCalculator } from './classes/investment-calculator.class';
 import { InvestmentInputDto } from './dtos/investment-input.dto';
 import { InvestmentService } from './investment.service';
@@ -22,7 +30,6 @@ export class InvestmentController {
   async calculateInvestment(
     @Body() investment: InvestmentInputDto,
   ): Promise<InvestmentCalculator> {
-
     return this.investmentService.calculate(investment);
   }
 
@@ -31,23 +38,21 @@ export class InvestmentController {
     @Body() investment: InvestmentInputDto,
     id?: number,
   ): Promise<Investment> {
-    const calculatedInvestment =
-      this.investmentService.calculate(investment);
-    return this.investmentService.saveCalculation(
-      calculatedInvestment,
-        id
-    );
+    const calculatedInvestment = this.investmentService.calculate(investment);
+    return this.investmentService.saveCalculation(calculatedInvestment, id);
   }
 
-  @Put ('/:id')
-  async updateInvestment(@Param('id') id:string, @Body() investment: InvestmentInputDto): Promise<Investment> {
-    return this.saveInvestmentCalculation(investment, Number(id))
+  @Put('/:id')
+  async updateInvestment(
+    @Param('id') id: string,
+    @Body() investment: InvestmentInputDto,
+  ): Promise<Investment> {
+    return this.saveInvestmentCalculation(investment, Number(id));
   }
 
   @Delete('/:id')
-  async deleteInvestment(@Param('id') id:number): Promise<boolean> {
-    await this.investmentService.delete (id)
-    return true
+  async deleteInvestment(@Param('id') id: number): Promise<boolean> {
+    await this.investmentService.delete(id);
+    return true;
   }
-
 }

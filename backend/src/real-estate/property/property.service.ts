@@ -1,16 +1,15 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
-import { validate, validateOrReject } from 'class-validator';
 
 @Injectable()
 export class PropertyService {
   constructor(
     @InjectRepository(Property)
     private propertyRepository: Repository<Property>,
-  ) { }
+  ) {}
 
   async findAll(): Promise<Property[]> {
     return this.propertyRepository.find();
@@ -20,10 +19,7 @@ export class PropertyService {
     return this.propertyRepository.findOneBy({ id: id });
   }
 
-  async add(
-    input: PropertyInputDto,
-  ): Promise<Property> {
-
+  async add(input: PropertyInputDto): Promise<Property> {
     const propertyEntity = new Property();
 
     this.mapData(propertyEntity, input);
@@ -31,11 +27,7 @@ export class PropertyService {
     return await this.propertyRepository.save(propertyEntity);
   }
 
-  async update(
-    id: number,
-    input: PropertyInputDto,
-  ): Promise<Property> {
-
+  async update(id: number, input: PropertyInputDto): Promise<Property> {
     const propertyEntity = await this.findOne(id);
 
     this.mapData(propertyEntity, input);

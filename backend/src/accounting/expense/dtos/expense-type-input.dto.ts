@@ -1,5 +1,4 @@
-import { IsNotEmpty } from "class-validator";
-import { TransactionInputDto } from "src/accounting/transaction/dtos/transaction-input.dto";
+import { IsNotEmpty } from 'class-validator';
 
 export class ExpenseTypeInputDto {
   @IsNotEmpty()

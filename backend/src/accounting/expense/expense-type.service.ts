@@ -6,52 +6,45 @@ import { ExpenseTypeInputDto } from './dtos/expense-type-input.dto';
 
 @Injectable()
 export class ExpenseTypeService {
-    constructor(
-        @InjectRepository(ExpenseType)
-        private expenseTypeRepository: Repository<ExpenseType>,
-    ) { }
+  constructor(
+    @InjectRepository(ExpenseType)
+    private expenseTypeRepository: Repository<ExpenseType>,
+  ) {}
 
-    async findAll(): Promise<ExpenseType[]> {
-        return this.expenseTypeRepository.find();
-    }
+  async findAll(): Promise<ExpenseType[]> {
+    return this.expenseTypeRepository.find();
+  }
 
-    async findOne(id: number): Promise<ExpenseType> {
-        return this.expenseTypeRepository.findOneBy({ id: id });
-    }
+  async findOne(id: number): Promise<ExpenseType> {
+    return this.expenseTypeRepository.findOneBy({ id: id });
+  }
 
-    async add(
-        input: ExpenseTypeInputDto,
-    ): Promise<ExpenseType> {
+  async add(input: ExpenseTypeInputDto): Promise<ExpenseType> {
+    const expenseTypeEntity = new ExpenseType();
 
-        const expenseTypeEntity = new ExpenseType();
+    this.mapData(expenseTypeEntity, input);
 
-        this.mapData(expenseTypeEntity, input)
+    return await this.expenseTypeRepository.save(expenseTypeEntity);
+  }
 
-        return await this.expenseTypeRepository.save(expenseTypeEntity);
-    }
+  async update(id: number, input: ExpenseTypeInputDto): Promise<ExpenseType> {
+    const expenseTypeTypeEntity = await this.findOne(id);
 
-    async update(
-        id: number,
-        input: ExpenseTypeInputDto,
-    ): Promise<ExpenseType> {
+    this.mapData(expenseTypeTypeEntity, input);
 
-        const expenseTypeTypeEntity = await this.findOne(id);
+    await this.expenseTypeRepository.save(expenseTypeTypeEntity);
+    return expenseTypeTypeEntity;
+  }
 
-        this.mapData(expenseTypeTypeEntity, input)
+  async delete(id: number): Promise<void> {
+    await this.expenseTypeRepository.delete(id);
+  }
 
-        await this.expenseTypeRepository.save(expenseTypeTypeEntity);
-        return expenseTypeTypeEntity;
-    }
-
-    async delete(id: number): Promise<void> {
-        await this.expenseTypeRepository.delete(id);
-    }
-
-    private mapData(expenseType: ExpenseType, input: ExpenseTypeInputDto) {
-        Object.entries(input).forEach(([key, value]) => {
-            if (value !== undefined) {
-                expenseType[key] = value;
-            }
-        });
-    }
+  private mapData(expenseType: ExpenseType, input: ExpenseTypeInputDto) {
+    Object.entries(input).forEach(([key, value]) => {
+      if (value !== undefined) {
+        expenseType[key] = value;
+      }
+    });
+  }
 }

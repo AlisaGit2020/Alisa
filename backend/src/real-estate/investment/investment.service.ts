@@ -12,9 +12,7 @@ export class InvestmentService {
     private investmentsRepository: Repository<Investment>,
   ) {}
 
-  calculate(
-    investment: InvestmentInputDto,
-  ): InvestmentCalculator {
+  calculate(investment: InvestmentInputDto): InvestmentCalculator {
     return new InvestmentCalculator(investment);
   }
 
@@ -34,8 +32,8 @@ export class InvestmentService {
     let investmentEntity: Investment;
 
     if (id) {
-       investmentEntity = await this.findOne(id);
-    }else {
+      investmentEntity = await this.findOne(id);
+    } else {
       investmentEntity = new Investment();
     }
     if (!investmentEntity) {
@@ -83,7 +81,7 @@ export class InvestmentService {
     return investmentEntity;
   }
 
-    async delete(id: number): Promise<void> {
-      await this.investmentsRepository.delete(id);
-    }
+  async delete(id: number): Promise<void> {
+    await this.investmentsRepository.delete(id);
+  }
 }

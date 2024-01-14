@@ -1,7 +1,5 @@
-
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Expense } from './expense.entity';
-
 
 @Entity()
 export class ExpenseType {
@@ -9,7 +7,7 @@ export class ExpenseType {
   public id: number;
 
   @OneToMany(() => Expense, (expense) => expense.expenseType)
-  expenses: Expense[]
+  expenses: Expense[];
 
   @Column()
   name: string;
@@ -19,5 +17,4 @@ export class ExpenseType {
 
   @Column()
   isTaxDeductible: boolean;
-
 }
