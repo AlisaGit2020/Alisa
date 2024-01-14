@@ -12,7 +12,8 @@ const fi = {
         confirmDelete: 'Poistetaanko tietue?',
         description: 'Kuvaus',
         name: 'Nimi',
-        save: 'Tallenna'
+        save: 'Tallenna',
+        settings: 'Asetukset'
     }
 }
 

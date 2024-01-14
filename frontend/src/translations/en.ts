@@ -22,7 +22,7 @@ const en = {
         description: 'Description',
         name: 'Name',
         save: 'Save',
-
+        settings: 'Settings'
     },
 
 }
