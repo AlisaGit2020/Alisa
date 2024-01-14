@@ -15,6 +15,7 @@ const en = {
             number: '{{val, number}}'
         },
 
+        amount: 'Amount',
         back: 'Back',
         cancel: 'Cancel',
         confirm: 'Confirm',
@@ -22,8 +23,10 @@ const en = {
         description: 'Description',
         name: 'Name',
         noRowsFound: 'No rows found',
+        quantity: 'Quantity',
         save: 'Save',
-        settings: 'Settings'
+        settings: 'Settings',
+        totalAmount: 'Total'
     },
 
 }

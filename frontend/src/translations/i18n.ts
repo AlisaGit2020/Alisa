@@ -8,7 +8,8 @@ const namespaces = [
     'apartment',
     'expense-type',
     'menu',
-    'settings'
+    'settings',
+    'transaction'
 ];
 
 const loadNsTranslation = async (language: string, namespace: string): Promise<Record<string, string>> => {

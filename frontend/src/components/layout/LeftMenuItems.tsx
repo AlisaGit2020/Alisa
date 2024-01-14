@@ -6,6 +6,8 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import React from 'react';
 import List from '@mui/material/List';
 import { WithTranslation, withTranslation } from 'react-i18next';
+import transactionContext from '../../alisa-contexts/transaction';
+import apartmentContext from '../../alisa-contexts/apartment';
 
 function LeftMenuItems({ t }: WithTranslation) {
   return (
@@ -18,14 +20,14 @@ function LeftMenuItems({ t }: WithTranslation) {
           <ListItemText primary={t('dashboard')} />
         </ListItemButton>
 
-        <ListItemButton component="a" href='/apartments'>
+        <ListItemButton component="a" href={apartmentContext.routePath}>
           <ListItemIcon>
             <Apartment />
           </ListItemIcon>
           <ListItemText primary={t('apartments')} />
         </ListItemButton>
 
-        <ListItemButton component="a">
+        <ListItemButton component="a" href={transactionContext.routePath}>
           <ListItemIcon>
             <AccountBalanceRounded />
           </ListItemIcon>

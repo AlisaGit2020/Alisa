@@ -6,6 +6,7 @@ const fi = {
     },
 
     common: {
+        amount: 'Määrä',
         back: 'Takaisin',
         cancel: 'Peruuta',
         confirm: 'Vahvista',
@@ -13,8 +14,10 @@ const fi = {
         description: 'Kuvaus',
         name: 'Nimi',
         noRowsFound: 'Rivejä ei löytynyt',
+        quantity: 'Määrä',
         save: 'Tallenna',
-        settings: 'Asetukset'
+        settings: 'Asetukset',
+        totalAmount: 'Yhteensä'
     }
 }
 
