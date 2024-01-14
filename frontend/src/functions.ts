@@ -24,9 +24,11 @@ export async function getValidationErrors<T>(validateObject: object, data: T): P
     return await validate(validateObject, { skipMissingProperties: true });
 }
 
-function copyMatchingKeyValues(Target: any, Source: any) {
+function copyMatchingKeyValues(Target: object, Source: any) {
     return Object.keys(Source).forEach(key => {
-        if (Source[key] !== undefined)
+        if (Source[key] !== undefined){            
             Target[key] = Source[key];
+        }
+            
     });
 }

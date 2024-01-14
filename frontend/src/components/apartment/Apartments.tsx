@@ -1,4 +1,4 @@
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AlisaDataTable from '../alisa/AlisaDataTable';
 import { Property } from '../../../../backend/src/real-estate/property/entities/property.entity';
@@ -25,4 +25,4 @@ function Apartments({ t }: WithTranslation) {
     )
 }
 
-export default withTranslation(apartmentContext.name)(Apartments)
+export default function withTranslation(apartmentContext.name)(Apartments)

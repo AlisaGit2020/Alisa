@@ -59,6 +59,6 @@ function ExpenseTypeForm({ t }: WithTranslation) {
         >
         </AlisaForm>
     );
-};
+}
 
 export default withTranslation(expenseTypeContext.name)(ExpenseTypeForm);

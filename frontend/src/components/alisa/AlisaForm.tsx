@@ -2,7 +2,7 @@ import axios from 'axios';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
 import getApiUrl, { getValidationErrors } from '../../functions';
-import { Alert, Box, ButtonGroup, Grid, Link, List, ListItem, Paper } from '@mui/material';
+import { Alert, Box, ButtonGroup, Grid, Link, Paper } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import React from 'react';
 import { ValidationError } from 'class-validator';
@@ -12,9 +12,9 @@ import { TFunction } from 'i18next';
 interface InputProps {
     t: TFunction
     alisaContext: AlisaContext
-    formComponents: any
-    onSetData: (any)
-    data: object,
+    formComponents: JSX.Element
+    onSetData: any
+    data: object
     validateObject: object
 }
 
@@ -28,7 +28,7 @@ const AlisaForm: React.FC<InputProps> = ({
 }) => {
 
     const { id } = useParams();
-    const [errorMessage, setErrorMessage] = useState<String[]>([])
+    const [errorMessage, setErrorMessage] = useState<string[]>([])
     const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
     const navigate = useNavigate();
 
@@ -42,9 +42,9 @@ const AlisaForm: React.FC<InputProps> = ({
             try {
                 const response = await axios.get(getApiUrl(`${alisaContext.apiPath}/${apartmentId}`));
 
-                return response.data
-            } catch (error: any) {
-                setErrorMessage([error.message]);
+                return response.data;
+            } catch (error) {
+                handleApiError(error);
             }
         }
         return data
@@ -70,7 +70,13 @@ const AlisaForm: React.FC<InputProps> = ({
 
             navigate(alisaContext.routePath)
 
-        } catch (error: any) {
+        } catch (error) {
+            handleApiError(error)
+        }
+    };
+
+    const handleApiError = (error:unknown) => {
+        if (axios.isAxiosError(error)){
             if (error.response) {
                 setErrorMessage([error.response.data.message]);
             } else if (error.request) {
@@ -78,8 +84,10 @@ const AlisaForm: React.FC<InputProps> = ({
             } else {
                 setErrorMessage(['An error occurred']);
             }
+        }else{
+            setErrorMessage([JSON.stringify(error)])
         }
-    };
+    }
 
     return (
         <Paper sx={{ p: 2 }}>

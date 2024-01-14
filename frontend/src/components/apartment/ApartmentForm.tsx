@@ -54,6 +54,6 @@ function ApartmentForm({ t }: WithTranslation) {
         >
         </AlisaForm>
     );
-};
+}
 
 export default withTranslation(apartmentContext.name)(ApartmentForm);

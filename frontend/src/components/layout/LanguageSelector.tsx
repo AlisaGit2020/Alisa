@@ -54,6 +54,6 @@ function LanguageSelector({ t }: WithTranslation) {
             </Menu>
         </Box>
     );
-};
+}
 
 export default withTranslation('appBar')(LanguageSelector);

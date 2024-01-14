@@ -1,8 +1,8 @@
-import { Button, Grid } from '@mui/material'
-import { WithTranslation, withTranslation } from 'react-i18next';
+import { Grid } from '@mui/material'
+import { withTranslation } from 'react-i18next';
 import ExpenseTypes from './expense-type/ExpenseTypes';
 
-function Settings({ t }: WithTranslation) {
+function Settings() {
 
     return (
 
