@@ -35,7 +35,7 @@ function LanguageSelector({ t }: WithTranslation) {
                     aria-controls={open ? 'fade-menu' : undefined}
                     aria-haspopup="true"
                     aria-expanded={open ? 'true' : undefined}
-                    onMouseOver={handleOpen}
+                    onClick={handleOpen}
                 ><LanguageIcon></LanguageIcon>
                 </IconButton>
             </Tooltip>
