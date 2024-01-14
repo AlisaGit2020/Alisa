@@ -10,6 +10,7 @@ import { propertyTestData } from './data/real-estate/property.test.data';
 import { TestData } from './data/test-data';
 import { expenseTestData } from './data/accounting/expense.test.data';
 import { expenseTypeTestData } from './data/accounting/expense-type.test.data';
+import { transactionTestData } from './data/accounting/transaction.test.data';
 
 describe('Global controller end-to-end test (e2e)', () => {
   let app: INestApplication;
@@ -33,10 +34,14 @@ describe('Global controller end-to-end test (e2e)', () => {
     server.close();
   });
 
-  describe.each([[propertyTestData], [expenseTestData], [expenseTypeTestData]])(
-    'Api endpoints',
-    (testData: TestData) => {
-      describe(`${testData.name}`, () => {
+  describe.each([
+    [propertyTestData],
+    [expenseTestData],
+    [expenseTypeTestData],
+    [transactionTestData],
+  ])('Api endpoints', (testData: TestData) => {
+    describe(`${testData.name}`, () => {
+      if (testData.inputPost) {
         it(`POST ${testData.baseUrl}, add a new item`, () => {
           testData.tables.map((tableName) => {
             dataSource.query(
@@ -108,17 +113,17 @@ describe('Global controller end-to-end test (e2e)', () => {
           expect(response.status).toBe(200);
           expect(response.body).toHaveLength(10);
         });
+      }
 
-        if (testData.searchOptions) {
-          const searchUrl = `${testData.baseUrl}/search`;
-          it(`SEARCH ${searchUrl}, search items`, () => {
-            return request(server)
-              .post(searchUrl)
-              .send(testData.searchOptions)
-              .expect(200);
-          });
-        }
-      });
-    },
-  );
+      if (testData.searchOptions) {
+        const searchUrl = `${testData.baseUrl}/search`;
+        it(`SEARCH ${searchUrl}, search items`, () => {
+          return request(server)
+            .post(searchUrl)
+            .send(testData.searchOptions)
+            .expect(200);
+        });
+      }
+    });
+  });
 });

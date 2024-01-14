@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { TransactionInputDto } from './dtos/transaction-input.dto';
 import { Transaction } from './entities/transaction.entity';
 
@@ -10,6 +10,10 @@ export class TransactionService {
     @InjectRepository(Transaction)
     private repository: Repository<Transaction>,
   ) {}
+
+  async search(options: FindManyOptions<Transaction>): Promise<Transaction[]> {
+    return this.repository.find(options);
+  }
 
   async findAll(): Promise<Transaction[]> {
     return this.repository.find();
