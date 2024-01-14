@@ -11,24 +11,33 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
 import getApiUrl from '../../functions';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, Tooltip } from '@mui/material';
+import { Box, IconButton, Paper, Tooltip } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { TFunction } from 'i18next';
+import AlisaConfirmDialog from './AlisaConfirmDialog';
 
 interface AlisaDataTableField<T> {
   name: keyof T,
   format?: 'number' | 'currency'
 }
 
+type OrderOption = {
+  [key: string]: 'ASC' | 'DESC';
+};
+
 interface AlisaDataTableInputProps<T> {
   t: TFunction
   title: string
   alisaContext: AlisaContext
   fields: AlisaDataTableField<T>[]
+  fetchOptions?: {
+    where?: Partial<T>,
+    order?: OrderOption
+  }
 }
 
-function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fields }: AlisaDataTableInputProps<T>) {
+function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fields, fetchOptions: searchOptions }: AlisaDataTableInputProps<T>) {
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
   const [apartmentIdToDelete, setApartmentIdToDelete] = React.useState(0);
@@ -40,8 +49,8 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
   }, [])
 
   const fetchData = async () => {
-    const response = await fetch(getApiUrl(alisaContext.apiPath));
-    const data: T[] = await response.json();
+    const response = await axios.post(`${getApiUrl(alisaContext.apiPath)}/search`, searchOptions);
+    const data: T[] = await response.data;
     setData(data);
   };
 
@@ -75,26 +84,27 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
   }
 
 
-  if (data.length > 0) {
-    return (
-      <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-        <Title>{title}</Title>
 
-        <Table size="small" aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              {fields.map((field) => (
-                <TableCell key={field.name as string}>{t(field.name as string)}</TableCell>
-              ))}
-              <TableCell align='right'>
-                <Tooltip title={t('add')}>
-                  <IconButton href={`${alisaContext.routePath}/add`}>
-                    <AddIcon></AddIcon>
-                  </IconButton>
-                </Tooltip>
-              </TableCell>
-            </TableRow>
-          </TableHead>
+  return (
+    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+      <Title>{title}</Title>
+
+      <Table size="small" aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            {fields.map((field) => (
+              <TableCell key={field.name as string}>{t(field.name as string)}</TableCell>
+            ))}
+            <TableCell align='right'>
+              <Tooltip title={t('add')}>
+                <IconButton href={`${alisaContext.routePath}/add`}>
+                  <AddIcon></AddIcon>
+                </IconButton>
+              </Tooltip>
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        {(data.length > 0) && (
           <TableBody>
 
             {data.map((item) => (
@@ -113,31 +123,24 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
             ))}
 
           </TableBody>
-        </Table>
+        )}
 
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>{t('confirm')}</DialogTitle>
-          <DialogContent>
-            <p>{t('confirmDelete')}</p>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleDelete} color="primary">
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Paper>
-    );
-  } else {
-    return (
-      <React.Fragment>
-        <Title>No apartments</Title>
-      </React.Fragment>
-    )
-  }
+      </Table>
+
+      {(data.length == 0) && (
+        <Box padding={2} fontSize={'medium'}>{t('noRowsFound')}</Box>
+      )}
+
+      <AlisaConfirmDialog 
+        t={t}
+        open={open}
+        onHandleClose={handleClose}
+        onHandleDelete={handleDelete}
+      ></AlisaConfirmDialog>
+
+    </Paper>
+  );
+
 }
 
 export default AlisaDataTable

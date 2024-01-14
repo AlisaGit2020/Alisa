@@ -12,6 +12,7 @@ const fi = {
         confirmDelete: 'Poistetaanko tietue?',
         description: 'Kuvaus',
         name: 'Nimi',
+        noRowsFound: 'Rivejä ei löytynyt',
         save: 'Tallenna',
         settings: 'Asetukset'
     }

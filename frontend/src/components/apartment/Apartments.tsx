@@ -18,7 +18,9 @@ function Apartments({ t }: WithTranslation) {
                     fields={[
                         { name: 'name' },
                         { name: 'size', format: 'number' },
-                    ]} />
+                    ]}
+                    fetchOptions={{order: {name: 'ASC'}}}
+                    />
             </Grid>
         </Grid>
 
