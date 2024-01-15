@@ -28,7 +28,7 @@ export class Transaction {
 
   @OneToOne(() => Expense, (expense) => expense.transaction, {
     eager: false,
-    cascade: true,
+    cascade: false,
     nullable: true,
   })
   expense: Expense;

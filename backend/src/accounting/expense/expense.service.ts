@@ -52,5 +52,9 @@ export class ExpenseService {
         expense[key] = value;
       }
     });
+
+    if (expense.transaction.totalAmount > 0) {
+      expense.transaction.totalAmount = expense.transaction.totalAmount * -1;
+    }
   }
 }

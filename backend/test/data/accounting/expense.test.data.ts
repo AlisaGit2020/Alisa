@@ -48,7 +48,7 @@ export const expenseTestData = {
       accountingDate: '2023-02-28',
       amount: 9.91,
       quantity: 4,
-      totalAmount: 39.64,
+      totalAmount: -39.64,
       id: 1,
     },
     id: 1,
@@ -65,7 +65,7 @@ export const expenseTestData = {
       accountingDate: '2023-03-31',
       amount: 188.0,
       quantity: 1.0,
-      totalAmount: 188.0,
+      totalAmount: -188.0,
     },
   },
 

@@ -30,7 +30,7 @@ export class Expense {
 
   @OneToOne(() => Transaction, {
     eager: true,
-    cascade: false,
+    cascade: true,
   })
   @JoinColumn({ name: 'transaction_id' })
   transaction: Transaction;

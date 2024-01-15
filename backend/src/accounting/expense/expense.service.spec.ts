@@ -8,6 +8,7 @@ import { AppModule } from 'src/app.module';
 import { ExpenseService } from './expense.service';
 import { PropertyService } from 'src/real-estate/property/property.service';
 import { ExpenseTypeService } from './expense-type.service';
+import { expenseTestData } from 'test/data/accounting/expense.test.data';
 
 describe('Expense service', () => {
   let app: INestApplication;
@@ -78,7 +79,7 @@ describe('Expense service', () => {
       const expense = await service.findOne(1);
       expect(expense.transaction.id).toBe(1);
       expect(expense.transaction.amount).toBe(99);
-      expect(expense.transaction.totalAmount).toBe(99);
+      expect(expense.transaction.totalAmount).toBe(-99);
     });
   });
 
@@ -116,6 +117,18 @@ describe('Expense service', () => {
       const expenses = await service.search({ where: { property: { id: 1 } } });
 
       expect(expenses.length).toBe(4);
+    });
+  });
+
+  describe('add new expense', () => {
+    it('sets transaction total amount as a negative number', async () => {
+      const expense = expenseTestData.inputPost;
+
+      await service.add(expense);
+
+      const savedExpence = await service.findOne(1);
+
+      expect(savedExpence.transaction.totalAmount).toBe(-39.64);
     });
   });
 });
