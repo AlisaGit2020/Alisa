@@ -14,7 +14,7 @@ const namespaces = [
 
 const loadNsTranslation = async (language: string, namespace: string): Promise<Record<string, string>> => {
     try {
-        const { default: translations } = await import(`./${namespace}/${language}.ts`);
+        const { default: translations } = await import(/* @vite-ignore */ `./${namespace}/${language}.ts`);
         return translations;
     } catch (error) {
         console.error(`Error while loading translation file (${language}, ${namespace}):`, error);
@@ -28,7 +28,7 @@ const loadResources = async () => {
     await Promise.all(
         availableLanguages.map(async (language) => {
             try {
-                const { default: translations } = await import(`./${language}.ts`);
+                const { default: translations } = await import(/* @vite-ignore */`./${language}.ts`);
                 resources[language] = translations
 
 
