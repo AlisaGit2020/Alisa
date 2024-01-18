@@ -1,7 +1,11 @@
 const transactions = {
-    transactions: 'Tilitapahtumat',
+    add: 'Uusi tilitapahtuma',
     amount: 'Yksikköhinta',
-    transactionDate: 'Tapahtumapäivä'
+    chooseTransactionType: 'Valitse tapahtumatyyyppi',
+    expense: 'Kulu',
+    income: 'Tulo',
+    transactionDate: 'Tapahtumapäivä',
+    transactions: 'Tilitapahtumat',    
 }
 
 export default transactions

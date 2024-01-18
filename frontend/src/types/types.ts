@@ -6,3 +6,9 @@ export type TypeOrmOrderOption = {
 export type TypeOrmRelationOption = {
     [key: string]: boolean
 };
+
+export type TypeOrmFetchOptions<T> = {
+    relations: TypeOrmRelationOption,
+    where?: Partial<T>,
+    order?: TypeOrmOrderOption
+};

@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { FindManyOptions } from 'typeorm';
 import { TransactionService } from './transaction.service';
 import { Transaction } from './entities/transaction.entity';
@@ -13,5 +13,10 @@ export class TransactionController {
     @Body() options: FindManyOptions<Transaction>,
   ): Promise<Transaction[]> {
     return this.service.search(options);
+  }
+
+  @Get('/:id')
+  async findOne(@Param('id') id: string): Promise<Transaction> {
+    return this.service.findOne(Number(id));
   }
 }

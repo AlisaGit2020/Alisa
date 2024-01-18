@@ -1,7 +1,12 @@
 const transactions = {
-    transactions: 'Transactions',
+    add: 'Add new transaction',
     amount: 'Unit price',
-    transactionDate: 'Transaction date'
+    chooseTransactionType: 'Choose transaction type',
+    expense: 'Expense',
+    income: 'Income',
+    transactionDate: 'Transaction date',
+    transactions: 'Transactions',    
+    
 }
 
 export default transactions

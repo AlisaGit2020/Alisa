@@ -16,6 +16,7 @@ interface InputProps<T> {
     onSetData: React.Dispatch<React.SetStateAction<T>>;
     data: object
     validateObject: object
+    id?: number
 }
 
 function AlisaForm<T extends object>({
@@ -24,23 +25,28 @@ function AlisaForm<T extends object>({
     formComponents,
     onSetData,
     data,
-    validateObject
+    validateObject,
+    id
 }:InputProps<T>) {
 
-    const { id } = useParams();
+    const { idFromParams } = useParams();
     const [errorMessage, setErrorMessage] = useState<string[]>([])
     const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
     const navigate = useNavigate();
 
+    if (!id) {
+        id = Number(idFromParams)
+    }
+    
     React.useEffect(() => {
         fetchData(Number(id))
             .then(onSetData)
     }, [])
 
-    const fetchData = async (apartmentId: number) => {
-        if (apartmentId) {
+    const fetchData = async (id: number) => {
+        if (id) {
             try {
-                const response = await axios.get(getApiUrl(`${alisaContext.apiPath}/${apartmentId}`));
+                const response = await axios.get(getApiUrl(`${alisaContext.apiPath}/${id}`));
 
                 return response.data;
             } catch (error) {
@@ -54,6 +60,7 @@ function AlisaForm<T extends object>({
         setErrorMessage([])
         setValidationErrors([])
 
+        console.log(validateObject);
         const validationErrors = await getValidationErrors(validateObject, data);
         if (validationErrors.length > 0) {
             setValidationErrors(validationErrors);

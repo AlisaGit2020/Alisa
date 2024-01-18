@@ -16,7 +16,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { TFunction } from 'i18next';
 import AlisaConfirmDialog from './AlisaConfirmDialog';
-import { TypeOrmOrderOption, TypeOrmRelationOption } from '../../types/types';
+import { TypeOrmFetchOptions } from '../../types/types';
 
 interface AlisaDataTableField<T> {
   name: keyof T,
@@ -28,11 +28,7 @@ interface AlisaDataTableInputProps<T> {
   title: string
   alisaContext: AlisaContext
   fields: AlisaDataTableField<T>[]
-  fetchOptions?: {
-    relations: TypeOrmRelationOption,
-    where?: Partial<T>,
-    order?: TypeOrmOrderOption
-  }
+  fetchOptions?: TypeOrmFetchOptions<T>
 }
 
 function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fields, fetchOptions: searchOptions }: AlisaDataTableInputProps<T>) {
