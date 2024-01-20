@@ -1,20 +1,21 @@
 import axios from 'axios';
 import { useState } from 'react';
-import getApiUrl from '../../functions';
-import { MenuItem, Select } from '@mui/material';
+import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React from 'react';
+import ApiClient from '../../lib/api-client';
 
 
-interface InputProps<T> {
-    //onHandleChange: React.Dispatch<SelectChangeEvent>;
+interface InputProps<T extends {id: number}> {    
     onHandleChange: (fieldName: keyof T, value: T[keyof T]) => void;
-    value: string;
+    fieldName: keyof T
+    value: T[keyof T];
     apiUrl: string
 
 }
 
-function AlisaSelect<T extends object>({
+function AlisaSelect<T extends {id: number}>({
     onHandleChange,
+    fieldName,
     value,
     apiUrl,
 
@@ -31,9 +32,9 @@ function AlisaSelect<T extends object>({
     const fetchData = async () => {
 
         try {
-            const response = await axios.get(getApiUrl(`${apiUrl}`));
-
-            return response.data;
+            const result = await ApiClient.search<T>(apiUrl);            
+                       
+            return result;
         } catch (error) {
             handleApiError(error);
         }
@@ -41,18 +42,24 @@ function AlisaSelect<T extends object>({
         return data
     }
 
+    const handleChange = (e: SelectChangeEvent<NonNullable<T[keyof T]>>) => {
+        const selectedValue = e.target.value as T[keyof T]        
+        onHandleChange(fieldName, selectedValue)
+    }
+
     const handleApiError = (error: unknown) => {
         if (axios.isAxiosError(error)) { /* empty */ }
     }
 
     return (
+
         (data.length > 0 && value) && (
             <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
                 value={value}
                 label="Age"
-                onChange={(e) => onHandleChange('property' as keyof T, e.target.value as T[keyof T])}
+                onChange={(e) => handleChange(e)}
             >
                 {data.map((item) => (
                     <MenuItem key={item.id as string} value={item.id}>{item.name}</MenuItem>

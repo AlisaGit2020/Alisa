@@ -10,13 +10,12 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
-import getApiUrl from '../../functions';
 import { Box, IconButton, Paper, Tooltip } from '@mui/material';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { TFunction } from 'i18next';
 import AlisaConfirmDialog from './AlisaConfirmDialog';
-import { TypeOrmFetchOptions } from '../../types/types';
+import { TypeOrmFetchOptions } from '../../lib/types';
+import ApiClient from '../../lib/api-client';
 
 interface AlisaDataTableField<T> {
   name: keyof T,
@@ -31,36 +30,35 @@ interface AlisaDataTableInputProps<T> {
   fetchOptions?: TypeOrmFetchOptions<T>
 }
 
-function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fields, fetchOptions: searchOptions }: AlisaDataTableInputProps<T>) {
+function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fields, fetchOptions }: AlisaDataTableInputProps<T>) {
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
-  const [apartmentIdToDelete, setApartmentIdToDelete] = React.useState(0);
-
+  const [idToDelete, setIdToDelete] = React.useState<number>(0);  
+  const [idDeleted, setIdDeleted] = React.useState<number>(0);  
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    fetchData()
-  }, [])
+    const fetchData = async () => {    
+      const data: T[] = await ApiClient.search<T>(alisaContext.apiPath, fetchOptions);
+      setData(data);
+    };
 
-  const fetchData = async () => {
-    const response = await axios.post(`${getApiUrl(alisaContext.apiPath)}/search`, searchOptions);
-    const data: T[] = await response.data;
-    setData(data);
-  };
+    fetchData()
+  }, [idDeleted])
 
   const handleClickOpen = (apartmentId: number) => {
-    setApartmentIdToDelete(apartmentId);
+    setIdToDelete(apartmentId);
     setOpen(true);
   };
 
   const handleClose = () => {
-    setApartmentIdToDelete(0);
+    setIdToDelete(0);
     setOpen(false);
   };
 
-  const handleDelete = async () => {
-    await axios.delete(getApiUrl(`${alisaContext.apiPath}/${apartmentIdToDelete}`));
-    fetchData();
+  const handleDelete = async () => {    
+    await ApiClient.delete(alisaContext.apiPath, idToDelete);
+    setIdDeleted(idToDelete);
     handleClose();
   };
 
@@ -76,8 +74,6 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
 
     return String(value);
   }
-
-
 
   return (
     <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>

@@ -7,7 +7,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
 import { Expense } from '../../../../backend/src/accounting/expense/entities/expense.entity'
-import getApiUrl from '../../functions';
+import ApiClient from '../../lib/api-client';
+import expenseContext from '../../alisa-contexts/expense';
 
 function preventDefault(event: React.MouseEvent) {
   event.preventDefault();
@@ -16,10 +17,9 @@ function preventDefault(event: React.MouseEvent) {
 export default function Orders() {
   const [expenses, setData] = React.useState<Expense[]>([]);
 
-  React.useEffect(() => {
-    fetch(getApiUrl('accounting/expense'))
-      .then((response) => response.json())
-      .then(setData)
+  React.useEffect(async () => {
+    const data = await ApiClient.search<Expense>(expenseContext.apiPath)
+    setData(data)
   }, [])
 
   if (expenses.length > 0) {

@@ -17,18 +17,18 @@ interface ExpenseFormProps extends WithTranslation {
 function ExpenseForm({ t, id }: ExpenseFormProps) {
     const transaction = new TransactionInputDto()
 
-    
+
     transaction.accountingDate = '2024-01-01'
     transaction.transactionDate = '2024-01-01'
-    transaction.description = '',            
-    transaction.amount = 0,
-    transaction.quantity = 0, 
-    transaction.totalAmount = 0
-        
+    transaction.description = '',
+        transaction.amount = 0,
+        transaction.quantity = 0,
+        transaction.totalAmount = 0
+
 
     const [data, setData] = useState<ExpenseInputDto>({
-        expenseType: new ExpenseTypeInputDto() ,
-        property: '5',
+        expenseType: new ExpenseTypeInputDto(),
+        property: {id: 0},
         transaction: transaction
     });
 
@@ -36,12 +36,12 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
         name: keyof ExpenseInputDto,
         value: ExpenseInputDto[keyof ExpenseInputDto]
     ) => {
-        console.log(value);
         setData((prevData) => ({
             ...prevData,
             [name]: value,
         }));
     }
+
 
     const handleTransactionChange = (
         name: keyof TransactionInputDto,
@@ -57,17 +57,16 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
     }
 
     const formComponents = (
-        
+
         <Stack spacing={2} marginBottom={2}>
             <AlisaSelect<ExpenseInputDto>
-                apiUrl={apartmentContext.apiPath}   
+                apiUrl={apartmentContext.apiPath}
+                fieldName='property'                
                 value={data.property.id}
-                
-                onHandleChange={handleChange} 
+                onHandleChange={handleChange}
             >
-
             </AlisaSelect>
- 
+
             <TextField
                 label={t('expenseType')}
                 value={data.expenseType.id}
@@ -77,21 +76,21 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
             />
             <TextField
                 type='number'
-                label={t('amount', {ns:'transaction'})}
+                label={t('amount', { ns: 'transaction' })}
                 value={data.transaction.amount}
                 autoComplete='off'
                 onChange={(e) => handleTransactionChange('amount', e.target.value)}
             />
             <TextField
                 type='number'
-                label={t('quantity', {ns:'transaction'})}
+                label={t('quantity', { ns: 'transaction' })}
                 value={data.transaction.quantity}
                 autoComplete='off'
                 onChange={(e) => handleTransactionChange('quantity', e.target.value)}
             />
             <TextField
                 type='number'
-                label={t('totalAmount', {ns:'transaction'})}
+                label={t('totalAmount', { ns: 'transaction' })}
                 value={data.transaction.totalAmount}
                 autoComplete='off'
                 onChange={(e) => handleTransactionChange('totalAmount', e.target.value)}
@@ -108,6 +107,7 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
             data={data}
             validateObject={new ExpenseInputDto()}
             id={id}
+            relations={{ property: true, expenseType: true, transaction: true }}
         >
         </AlisaForm>
     );

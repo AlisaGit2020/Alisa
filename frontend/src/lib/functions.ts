@@ -1,10 +1,5 @@
 import { ValidationError, validate } from "class-validator";
 
-export default function getApiUrl(path: string) {
-    const apiBasePath = import.meta.env.VITE_API_URL;
-    return `${apiBasePath}/${path}`;
-}
-
 export function getNumber(value: string, decimals: number) {
 
     if (!value) {

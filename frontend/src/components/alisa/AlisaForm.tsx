@@ -1,12 +1,14 @@
 import axios from 'axios';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
-import getApiUrl, { getValidationErrors } from '../../functions';
+import { getValidationErrors } from '../../lib/functions';
 import { Alert, Box, ButtonGroup, Grid, Link, Paper } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import React from 'react';
 import { ValidationError } from 'class-validator';
 import { TFunction } from 'i18next';
+import ApiClient from '../../lib/api-client';
+import { TypeOrmRelationOption } from '../../lib/types';
 
 
 interface InputProps<T> {
@@ -16,63 +18,59 @@ interface InputProps<T> {
     onSetData: React.Dispatch<React.SetStateAction<T>>;
     data: object
     validateObject: object
-    id?: number
+    id?: number,
+    relations?: TypeOrmRelationOption
 }
 
-function AlisaForm<T extends object>({
+function AlisaForm<T extends { id: number }>({
     t,
     alisaContext,
     formComponents,
     onSetData,
     data,
     validateObject,
-    id
-}:InputProps<T>) {
+    id,
+    relations
+}: InputProps<T>) {
 
-    const { idFromParams } = useParams();
+    const { idParam } = useParams();
     const [errorMessage, setErrorMessage] = useState<string[]>([])
     const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
     const navigate = useNavigate();
 
     if (!id) {
-        id = Number(idFromParams)
+        id = Number(idParam)
     }
-    
+
     React.useEffect(() => {
-        fetchData(Number(id))
-            .then(onSetData)
-    }, [])
-
-    const fetchData = async (id: number) => {
-        if (id) {
-            try {
-                const response = await axios.get(getApiUrl(`${alisaContext.apiPath}/${id}`));
-
-                return response.data;
-            } catch (error) {
-                handleApiError(error);
-            }
+        const fetchData = async (id: number) => {
+            const data = await ApiClient.get<T>(alisaContext.apiPath, id, relations);
+            console.log(data)
+            return data
         }
-        return data
-    }
+
+        if (id) {
+            fetchData(Number(id))
+                .then(onSetData)
+        }
+    }, [id])
 
     const handleSubmit = async () => {
         setErrorMessage([])
         setValidationErrors([])
 
-        console.log(validateObject);
         const validationErrors = await getValidationErrors(validateObject, data);
         if (validationErrors.length > 0) {
             setValidationErrors(validationErrors);
             return;
         }
-
+        
         try {
 
             if (id) {
-                await axios.put(getApiUrl(`${alisaContext.apiPath}/${id}`), data);
+                await ApiClient.put(alisaContext.apiPath, id, data);                
             } else {
-                await axios.post(getApiUrl(alisaContext.apiPath), data);
+                await ApiClient.post(alisaContext.apiPath, data);
             }
 
             navigate(alisaContext.routePath)
@@ -82,8 +80,8 @@ function AlisaForm<T extends object>({
         }
     };
 
-    const handleApiError = (error:unknown) => {
-        if (axios.isAxiosError(error)){
+    const handleApiError = (error: unknown) => {
+        if (axios.isAxiosError(error)) {
             if (error.response) {
                 setErrorMessage([error.response.data.message]);
             } else if (error.request) {
@@ -91,7 +89,7 @@ function AlisaForm<T extends object>({
             } else {
                 setErrorMessage(['An error occurred']);
             }
-        }else{
+        } else {
             setErrorMessage([JSON.stringify(error)])
         }
     }

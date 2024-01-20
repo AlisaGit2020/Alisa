@@ -16,7 +16,7 @@ export default function AppRoutes() {
             <Routes>
                 <Route path='/' element={<Dashboard></Dashboard>}></Route>
                 
-                <Route path={`${apartmentContext.routePath}/edit/:id`} element={<ApartmentForm></ApartmentForm>}></Route>
+                <Route path={`${apartmentContext.routePath}/edit/:idParam`} element={<ApartmentForm></ApartmentForm>}></Route>
                 <Route path={`${apartmentContext.routePath}/add`} element={<ApartmentForm></ApartmentForm>}></Route>
                 <Route path={`${apartmentContext.routePath}`} element={<Apartments></Apartments>}></Route>
                 
@@ -24,7 +24,7 @@ export default function AppRoutes() {
                 <Route path={`${transactionContext.routePath}/add/:type?`} element={<TransactionForm></TransactionForm>}></Route>                
                 <Route path={`${transactionContext.routePath}`} element={<Transactions></Transactions>}></Route>
 
-                <Route path={`${expenseTypeContext.routePath}/edit/:id`} element={<ExpenseTypeForm></ExpenseTypeForm>}></Route>
+                <Route path={`${expenseTypeContext.routePath}/edit/:idParam`} element={<ExpenseTypeForm></ExpenseTypeForm>}></Route>
                 <Route path={`${expenseTypeContext.routePath}/add`} element={<ExpenseTypeForm></ExpenseTypeForm>}></Route>
                 <Route path='/settings' element={<Settings></Settings>}></Route>
             </Routes>

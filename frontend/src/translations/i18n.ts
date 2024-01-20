@@ -6,6 +6,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 const availableLanguages = ['en', 'fi'];
 const namespaces = [
     'apartment',
+    'expense',
     'expense-type',
     'menu',
     'settings',
@@ -44,7 +45,7 @@ const loadResources = async () => {
             }
         })
     );
-    console.log(resources)
+    
     return resources;
 };
 

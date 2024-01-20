@@ -2,7 +2,7 @@ import TextField from '@mui/material/TextField';
 import { Stack } from '@mui/material';
 import AlisaForm from '../alisa/AlisaForm';
 import { useState } from 'react';
-import { getNumber } from '../../functions';
+import { getNumber } from '../../lib/functions';
 import { PropertyInputDto } from '../../../../backend/src/real-estate/property/dtos/property-input.dto'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import apartmentContext from '../../alisa-contexts/apartment';
