@@ -23,6 +23,11 @@ export class ExpenseController {
     return this.service.search(options);
   }
 
+  @Get('/default')
+  async getDefault(): Promise<ExpenseInputDto> {
+    return this.service.getDefault();
+  }
+
   @Get('/')
   async findAll(): Promise<Expense[]> {
     return this.service.findAll();

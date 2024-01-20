@@ -9,6 +9,7 @@ import { ExpenseTypeController } from './expense/expense-type.controller';
 import { ExpenseTypeService } from './expense/expense-type.service';
 import { ExpenseType } from './expense/entities/expense-type.entity';
 import { TransactionController } from './transaction/transaction.controller';
+import { Property } from 'src/real-estate/property/entities/property.entity';
 
 @Module({
   controllers: [
@@ -17,6 +18,8 @@ import { TransactionController } from './transaction/transaction.controller';
     TransactionController,
   ],
   providers: [ExpenseService, ExpenseTypeService, TransactionService],
-  imports: [TypeOrmModule.forFeature([Transaction, Expense, ExpenseType])],
+  imports: [
+    TypeOrmModule.forFeature([Transaction, Expense, ExpenseType, Property]),
+  ],
 })
 export class AccountingModule {}

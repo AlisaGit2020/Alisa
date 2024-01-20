@@ -3,12 +3,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Repository } from 'typeorm';
 import { Expense } from './entities/expense.entity';
 import { ExpenseInputDto } from './dtos/expense-input.dto';
+import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
+import { Property } from 'src/real-estate/property/entities/property.entity';
+import { ExpenseType } from './entities/expense-type.entity';
 
 @Injectable()
 export class ExpenseService {
   constructor(
     @InjectRepository(Expense)
     private repository: Repository<Expense>,
+
+    @InjectRepository(Property)
+    private propertyRepository: Repository<Property>,
+
+    @InjectRepository(ExpenseType)
+    private expenseTypeRepository: Repository<ExpenseType>,
   ) {}
 
   async findAll(): Promise<Expense[]> {
@@ -29,6 +38,26 @@ export class ExpenseService {
     this.mapData(expenseEntity, input);
 
     return await this.repository.save(expenseEntity);
+  }
+
+  async getDefault(): Promise<ExpenseInputDto> {
+    const properties = await this.propertyRepository.find({
+      take: 1,
+      order: { name: 'ASC' },
+    });
+
+    const expenseTypes = await this.expenseTypeRepository.find({
+      take: 1,
+      order: { name: 'ASC' },
+    });
+
+    const expense = new ExpenseInputDto();
+    expense.property = properties[0].id;
+    expense.expenseType = expenseTypes[0].id;
+    expense.transaction = new TransactionInputDto();
+    expense.transaction.accountingDate = new Date();
+    expense.transaction.transactionDate = new Date();
+    return expense;
   }
 
   async update(id: number, input: ExpenseInputDto): Promise<Expense> {
