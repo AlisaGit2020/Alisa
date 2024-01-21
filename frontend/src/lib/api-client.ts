@@ -37,6 +37,10 @@ class ApiClient {
         await axios.delete(`${path}/${id}`);
     }
 
+    public static async getDefault<T>(path: string): Promise<T> {        
+        return axios.get(ApiClient.getApiUrl(`${path}/default`))
+    }
+
     public static async search<T>(
         path: string,
         options?: TypeOrmFetchOptions<T>
