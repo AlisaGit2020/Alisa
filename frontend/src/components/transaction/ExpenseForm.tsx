@@ -62,6 +62,7 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
 
         <Stack spacing={2} marginBottom={2}>
             <AlisaSelect<ExpenseInputDto, Property>
+                label={t('apartment')}
                 apiUrl={apartmentContext.apiPath}
                 fetchOptions={{order: {name: 'ASC'}}}
                 fieldName='propertyId'
@@ -71,6 +72,7 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
             </AlisaSelect>
 
             <AlisaSelect<ExpenseInputDto, ExpenseType>
+                label={t('expenseType')}
                 apiUrl={expenseTypeContext.apiPath}
                 fetchOptions={{order: {name: 'ASC'}}}
                 fieldName='expenseTypeId'
@@ -123,7 +125,7 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
                 data={data}
                 validateObject={new ExpenseInputDto()}
                 id={id}
-                relations={{ property: true, expenseType: true, transaction: true }}
+                relations={{ property: false, expenseType: false, transaction: true }}
             >
             </AlisaForm>
         );

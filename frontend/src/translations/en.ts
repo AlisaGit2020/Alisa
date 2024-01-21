@@ -15,7 +15,8 @@ const en = {
             number: '{{val, number}}'
         },
 
-        amount: 'Amount',        
+        amount: 'Amount',
+        apartment: 'Apartment',        
         back: 'Back',
         cancel: 'Cancel',
         confirm: 'Confirm',

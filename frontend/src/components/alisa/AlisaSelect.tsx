@@ -1,21 +1,23 @@
 import axios from 'axios';
 import { useState } from 'react';
-import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
+import { MenuItem, Select, SelectChangeEvent, TextField } from '@mui/material';
 import React from 'react';
 import ApiClient from '../../lib/api-client';
 import { TypeOrmFetchOptions } from '../../lib/types';
 
 
 interface InputProps<T1, T2 extends{id: number, name: string}> {    
-    onHandleChange: (fieldName: keyof T1, value: T1[keyof T1]) => void;
+    onHandleChange: (fieldName: keyof T1, value: T1[keyof T1]) => void
+    label: string
     fieldName: keyof T1
-    value: T1[keyof T1];
+    value: T1[keyof T1]
     apiUrl: string
     fetchOptions?: TypeOrmFetchOptions<T2>
 }
 
 function AlisaSelect<T1, T2 extends{id: number, name: string}>({
     onHandleChange,
+    label,
     fieldName,
     value,
     apiUrl,
@@ -56,18 +58,17 @@ function AlisaSelect<T1, T2 extends{id: number, name: string}>({
     return (
 
         (data.length > 0 && value) && (
-            <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
+            <TextField                
+                select
                 value={value}
-                label="Age"
+                label={label}
                 onChange={(e) => handleChange(e)}
             >
                 {data.map((item) => (
                     <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
                 ))}
 
-            </Select>
+            </TextField>
         )
     );
 }

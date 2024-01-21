@@ -7,6 +7,7 @@ const fi = {
 
     common: {
         amount: 'Määrä',
+        apartment: 'Asunto', 
         back: 'Takaisin',
         cancel: 'Peruuta',
         confirm: 'Vahvista',
