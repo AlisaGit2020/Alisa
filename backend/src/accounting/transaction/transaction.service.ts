@@ -53,6 +53,8 @@ export class TransactionService {
     if (expenseId) {
       this.expenseRepository.delete(expenseId);
     }
+
+    this.repository.delete(id);
   }
 
   private mapData(transaction: Transaction, input: TransactionInputDto) {

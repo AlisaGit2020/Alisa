@@ -1,4 +1,12 @@
-import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { FindManyOptions } from 'typeorm';
 import { TransactionService } from './transaction.service';
 import { Transaction } from './entities/transaction.entity';
@@ -18,5 +26,11 @@ export class TransactionController {
   @Get('/:id')
   async findOne(@Param('id') id: string): Promise<Transaction> {
     return this.service.findOne(Number(id));
+  }
+
+  @Delete('/:id')
+  async delete(@Param('id') id: number): Promise<boolean> {
+    await this.service.delete(id);
+    return true;
   }
 }

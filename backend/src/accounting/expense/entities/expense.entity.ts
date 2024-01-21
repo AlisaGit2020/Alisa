@@ -31,7 +31,6 @@ export class Expense {
     eager: true,
     cascade: ['insert', 'update'],
   })
-
   @JoinColumn({ name: 'propertyId' })
   property: Property;
 
@@ -41,7 +40,7 @@ export class Expense {
   /*Transaction*/
   @OneToOne(() => Transaction, {
     eager: true,
-    cascade: true,
+    cascade: ['insert', 'update'],
   })
   @JoinColumn({ name: 'transaction_id' })
   transaction: Transaction;

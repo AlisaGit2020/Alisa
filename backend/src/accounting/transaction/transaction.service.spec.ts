@@ -51,6 +51,9 @@ describe('Expense service', () => {
 
       const expense = await expenseService.findOne(savedExpence.id);
       expect(expense).toBeNull();
+
+      const transaction = await service.findOne(transactionId);
+      expect(transaction).toBeNull();
     });
   });
 });
