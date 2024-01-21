@@ -34,7 +34,7 @@ class ApiClient {
     }
 
     public static async delete(path:string, id:number) {            
-        await axios.delete(`${path}/${id}`);
+        await axios.delete(ApiClient.getApiUrl(`${path}/${id}`));
     }
 
     public static async getDefault<T>(path: string): Promise<T> {        

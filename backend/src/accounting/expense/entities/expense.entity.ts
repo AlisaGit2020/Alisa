@@ -1,5 +1,6 @@
 import { Transaction } from 'src/accounting/transaction/entities/transaction.entity';
 import {
+  Column,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -8,26 +9,37 @@ import {
 } from 'typeorm';
 import { ExpenseType } from './expense-type.entity';
 import { Property } from 'src/real-estate/property/entities/property.entity';
+import { Expose, Transform } from 'class-transformer';
 
 @Entity()
 export class Expense {
   @PrimaryGeneratedColumn()
   public id: number;
 
+  /*Expense type*/
   @ManyToOne(() => ExpenseType, (expenseType) => expenseType.expenses, {
     eager: true,
     cascade: ['insert', 'update'],
   })
-  @JoinColumn({ name: 'expense_type_id' })
+  @JoinColumn({ name: 'expenseTypeId' })
   expenseType: ExpenseType;
 
+  @Column({ nullable: false })
+  expenseTypeId: number;
+
+  /*Property*/
   @ManyToOne(() => Property, (property) => property.expenses, {
     eager: true,
     cascade: ['insert', 'update'],
   })
-  @JoinColumn({ name: 'property_id' })
+
+  @JoinColumn({ name: 'propertyId' })
   property: Property;
 
+  @Column({ nullable: false })
+  propertyId: number;
+
+  /*Transaction*/
   @OneToOne(() => Transaction, {
     eager: true,
     cascade: true,

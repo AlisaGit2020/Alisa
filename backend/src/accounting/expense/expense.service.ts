@@ -6,6 +6,7 @@ import { ExpenseInputDto } from './dtos/expense-input.dto';
 import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
 import { Property } from 'src/real-estate/property/entities/property.entity';
 import { ExpenseType } from './entities/expense-type.entity';
+import { classToPlain, instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class ExpenseService {
@@ -29,7 +30,8 @@ export class ExpenseService {
   }
 
   async findOne(id: number): Promise<Expense> {
-    return this.repository.findOneBy({ id: id });
+    const expense = await this.repository.findOneBy({ id: id });        
+    return expense;
   }
 
   async add(input: ExpenseInputDto): Promise<Expense> {
@@ -52,8 +54,8 @@ export class ExpenseService {
     });
 
     const expense = new ExpenseInputDto();
-    expense.property = properties[0].id;
-    expense.expenseType = expenseTypes[0].id;
+    expense.propertyId = properties[0].id;
+    expense.expenseTypeId = expenseTypes[0].id;
     expense.transaction = new TransactionInputDto();
     expense.transaction.accountingDate = new Date();
     expense.transaction.transactionDate = new Date();

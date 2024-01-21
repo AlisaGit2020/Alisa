@@ -2,7 +2,7 @@ export class TransactionInputDto {
   description: string = '';
   transactionDate: Date;
   accountingDate: Date;
-  amount: number = 1;
-  quantity: number = 0;
+  amount: number = 0;
+  quantity: number = 1;
   totalAmount: number = 0;
 }

@@ -60,18 +60,18 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
         <Stack spacing={2} marginBottom={2}>
             <AlisaSelect<ExpenseInputDto>
                 apiUrl={apartmentContext.apiPath}
-                fieldName='property'
-                value={data.property.id}
+                fieldName='propertyId'
+                value={data.propertyId}
                 onHandleChange={handleChange}
             >
             </AlisaSelect>
 
             <TextField
                 label={t('expenseType')}
-                value={data.expenseType.id}
+                value={data.expenseTypeId}
                 autoComplete='off'
                 autoFocus={true}
-                onChange={(e) => handleChange('expenseType', e.target.value)}
+                onChange={(e) => handleChange('expenseTypeId', e.target.value)}
             />
             <TextField
                 type='number'
