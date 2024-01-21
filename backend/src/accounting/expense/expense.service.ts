@@ -6,7 +6,7 @@ import { ExpenseInputDto } from './dtos/expense-input.dto';
 import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
 import { Property } from 'src/real-estate/property/entities/property.entity';
 import { ExpenseType } from './entities/expense-type.entity';
-import { classToPlain, instanceToPlain } from 'class-transformer';
+import { Transaction } from '../transaction/entities/transaction.entity';
 
 @Injectable()
 export class ExpenseService {
@@ -19,6 +19,9 @@ export class ExpenseService {
 
     @InjectRepository(ExpenseType)
     private expenseTypeRepository: Repository<ExpenseType>,
+
+    @InjectRepository(Transaction)
+    private transactionRepository: Repository<Transaction>,
   ) {}
 
   async findAll(): Promise<Expense[]> {
@@ -30,7 +33,7 @@ export class ExpenseService {
   }
 
   async findOne(id: number): Promise<Expense> {
-    const expense = await this.repository.findOneBy({ id: id });        
+    const expense = await this.repository.findOneBy({ id: id });
     return expense;
   }
 
@@ -74,7 +77,9 @@ export class ExpenseService {
   }
 
   async delete(id: number): Promise<void> {
+    const expense = await this.findOne(id);
     await this.repository.delete(id);
+    await this.transactionRepository.delete(expense.transaction.id);
   }
 
   private mapData(expense: Expense, input: ExpenseInputDto) {

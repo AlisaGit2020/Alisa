@@ -10,6 +10,7 @@ import { PropertyService } from 'src/real-estate/property/property.service';
 import { ExpenseTypeService } from './expense-type.service';
 import { expenseTestData } from 'test/data/accounting/expense.test.data';
 import { startOfDay } from 'date-fns';
+import { TransactionService } from '../transaction/transaction.service';
 
 describe('Expense service', () => {
   let app: INestApplication;
@@ -17,6 +18,7 @@ describe('Expense service', () => {
   let service: ExpenseService;
   let propertyService: PropertyService;
   let expenseTypeService: ExpenseTypeService;
+  let transactionService: TransactionService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -30,6 +32,7 @@ describe('Expense service', () => {
     service = app.get<ExpenseService>(ExpenseService);
     propertyService = app.get<PropertyService>(PropertyService);
     expenseTypeService = app.get<ExpenseTypeService>(ExpenseTypeService);
+    transactionService = app.get<TransactionService>(TransactionService);
   });
 
   afterAll(async () => {
@@ -138,13 +141,16 @@ describe('Expense service', () => {
       const expense = expenseTestData.inputPost;
       await service.add(expense);
 
-      const savedExpence = await service.findOne(1);
+      let savedExpence = await service.findOne(1);
       const transactionId = savedExpence.transaction.id;
 
       await service.delete(savedExpence.id);
 
-      const transaction = await service.findOne(transactionId);
+      const transaction = await transactionService.findOne(transactionId);
       expect(transaction).toBeNull();
+
+      savedExpence = await service.findOne(1);
+      expect(savedExpence).toBeNull();
     });
   });
 });
