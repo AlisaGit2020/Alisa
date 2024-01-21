@@ -73,6 +73,12 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
                 autoFocus={true}
                 onChange={(e) => handleChange('expenseTypeId', e.target.value)}
             />
+            <TextField                
+                label={t('description', { ns: 'transaction' })}
+                value={data.transaction.description}
+                autoComplete='off'
+                onChange={(e) => handleTransactionChange('description', e.target.value)}
+            />
             <TextField
                 type='number'
                 label={t('amount', { ns: 'transaction' })}
