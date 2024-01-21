@@ -5,6 +5,7 @@ import { expenseTypeTestData } from './expense-type.test.data';
 import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { Expense } from 'src/accounting/expense/entities/expense.entity';
 import { propertyTestData } from '../real-estate/property.test.data';
+import { parseISO, startOfDay } from 'date-fns';
 
 export const expenseTestData = {
   name: 'Expense',
@@ -17,8 +18,8 @@ export const expenseTestData = {
     property: propertyTestData.inputPost,
     transaction: {
       description: 'Siivousmaksu',
-      transactionDate: '2023-01-31',
-      accountingDate: '2023-02-28',
+      transactionDate: startOfDay(new Date('2023-01-31')),
+      accountingDate: startOfDay(new Date('2023-02-28')),
       amount: 9.91,
       quantity: 4,
       totalAmount: 39.64,
@@ -31,8 +32,8 @@ export const expenseTestData = {
     transaction: {
       id: 1,
       description: 'Yhtiövastike',
-      transactionDate: '2023-02-28',
-      accountingDate: '2023-03-31',
+      transactionDate: startOfDay(new Date('2023-02-28')),
+      accountingDate: startOfDay(new Date('2023-03-31')),
       amount: 188,
       quantity: 1,
       totalAmount: 188,
@@ -41,11 +42,13 @@ export const expenseTestData = {
 
   expected: {
     expenseType: expenseTypeTestData.expected,
+    expenseTypeId: 1,
     property: propertyTestData.expected,
+    propertyId: 1,
     transaction: {
       description: 'Siivousmaksu',
-      transactionDate: '2023-01-31',
-      accountingDate: '2023-02-28',
+      transactionDate: startOfDay(new Date('2023-01-31')).toISOString(),
+      accountingDate: startOfDay(new Date('2023-02-28')).toISOString(),
       amount: 9.91,
       quantity: 4,
       totalAmount: -39.64,
@@ -57,12 +60,14 @@ export const expenseTestData = {
   expectedPut: {
     id: 1,
     expenseType: expenseTypeTestData.expectedPut,
+    expenseTypeId: 1,
     property: propertyTestData.expectedPut,
+    propertyId: 1,
     transaction: {
       id: 1,
       description: 'Yhtiövastike',
-      transactionDate: '2023-02-28',
-      accountingDate: '2023-03-31',
+      transactionDate: startOfDay(new Date('2023-02-28')).toISOString(),
+      accountingDate: startOfDay(new Date('2023-03-31')).toISOString(),
       amount: 188.0,
       quantity: 1.0,
       totalAmount: -188.0,

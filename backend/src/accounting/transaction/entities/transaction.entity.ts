@@ -11,10 +11,10 @@ export class Transaction {
   @Column()
   description: string;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'timestamp' })
   transactionDate: Date;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'timestamp' })
   accountingDate: Date;
 
   @Column(columnOptionTwoDecimal)
