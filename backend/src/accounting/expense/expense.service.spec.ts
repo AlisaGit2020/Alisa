@@ -9,6 +9,7 @@ import { ExpenseService } from './expense.service';
 import { PropertyService } from 'src/real-estate/property/property.service';
 import { ExpenseTypeService } from './expense-type.service';
 import { expenseTestData } from 'test/data/accounting/expense.test.data';
+import { startOfDay } from 'date-fns';
 
 describe('Expense service', () => {
   let app: INestApplication;
@@ -51,29 +52,29 @@ describe('Expense service', () => {
       });
 
       await service.add({
-        expenseType: 1,
+        expenseTypeId: 1,
         transaction: {
           amount: 10,
-          accountingDate: '2014-06-06',
-          transactionDate: '2016-06-07',
+          accountingDate: startOfDay(new Date('2014-06-06')),
+          transactionDate: startOfDay(new Date('2016-06-07')),
           description: '',
           quantity: 1,
           totalAmount: 10,
         },
-        property: 1,
+        propertyId: 1,
       });
 
       await service.update(1, {
-        expenseType: 1,
+        expenseTypeId: 1,
         transaction: {
           amount: 99,
-          accountingDate: '2014-06-06',
-          transactionDate: '2016-06-07',
+          accountingDate: startOfDay(new Date('2014-06-06')),
+          transactionDate: startOfDay(new Date('2016-06-07')),
           description: '',
           quantity: 1,
           totalAmount: 99,
         },
-        property: 1,
+        propertyId: 1,
       });
 
       const expense = await service.findOne(1);
@@ -100,16 +101,16 @@ describe('Expense service', () => {
       await Promise.all(
         propertyIdArray.map(async (propertyId) => {
           await service.add({
-            expenseType: 1,
+            expenseTypeId: 1,
             transaction: {
               amount: 10,
-              accountingDate: '2014-06-06',
-              transactionDate: '2016-06-07',
+              accountingDate: startOfDay(new Date('2014-06-06')),
+              transactionDate: startOfDay(new Date('2016-06-07')),
               description: '',
               quantity: 1,
               totalAmount: 10,
             },
-            property: propertyId,
+            propertyId: propertyId,
           });
         }),
       );
