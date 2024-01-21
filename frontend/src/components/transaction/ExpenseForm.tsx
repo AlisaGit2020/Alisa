@@ -9,28 +9,27 @@ import expenseContext from '../../alisa-contexts/expense';
 import { ExpenseTypeInputDto } from '../../../../backend/src/accounting/expense/dtos/expense-type-input.dto';
 import AlisaSelect from '../alisa/AlisaSelect';
 import apartmentContext from '../../alisa-contexts/apartment';
+import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
+import ApiClient from '../../lib/api-client';
+import React from 'react';
 
 interface ExpenseFormProps extends WithTranslation {
     id?: number
 }
 
 function ExpenseForm({ t, id }: ExpenseFormProps) {
-    const transaction = new TransactionInputDto()
 
+    const [data, setData] = useState<ExpenseInputDto>(undefined);
 
-    transaction.accountingDate = '2024-01-01'
-    transaction.transactionDate = '2024-01-01'
-    transaction.description = '',
-        transaction.amount = 0,
-        transaction.quantity = 0,
-        transaction.totalAmount = 0
+    React.useEffect(() => {
+       const fetchData = () => {
+         return ApiClient.getDefault<ExpenseInputDto>(expenseContext.apiPath)
+       }
 
-
-    const [data, setData] = useState<ExpenseInputDto>({
-        expenseType: new ExpenseTypeInputDto(),
-        property: {id: 0},
-        transaction: transaction
-    });
+       fetchData()
+       .then(setData)
+      
+    }, [])
 
     const handleChange = (
         name: keyof ExpenseInputDto,
@@ -56,12 +55,12 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
         }));
     }
 
-    const formComponents = (
+    const formComponents = () => (
 
         <Stack spacing={2} marginBottom={2}>
             <AlisaSelect<ExpenseInputDto>
                 apiUrl={apartmentContext.apiPath}
-                fieldName='property'                
+                fieldName='property'
                 value={data.property.id}
                 onHandleChange={handleChange}
             >
@@ -97,20 +96,25 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
             />
         </Stack>
     )
-    return (
+    
+    if (data == undefined) {
+        return (<AlisaLoadingProgress></AlisaLoadingProgress>)
+    } else {
+        return (
+            <AlisaForm<ExpenseInputDto>
+                t={t}
+                alisaContext={expenseContext}
+                formComponents={formComponents()}
+                onSetData={setData}
+                data={data}
+                validateObject={new ExpenseInputDto()}
+                id={id}
+                relations={{ property: true, expenseType: true, transaction: true }}
+            >
+            </AlisaForm>
+        );
+    }
 
-        <AlisaForm<ExpenseInputDto>
-            t={t}
-            alisaContext={expenseContext}
-            formComponents={formComponents}
-            onSetData={setData}
-            data={data}
-            validateObject={new ExpenseInputDto()}
-            id={id}
-            relations={{ property: true, expenseType: true, transaction: true }}
-        >
-        </AlisaForm>
-    );
 }
 
 export default withTranslation(expenseContext.name)(ExpenseForm);

@@ -16,14 +16,14 @@ function TransactionForm() {
     React.useEffect(() => {
 
         const fetchData = async (id: number) => {
-            
+
             if (id) {
                 try {
                     const transaction = await ApiClient.get<Transaction>(
                         transactionContext.apiPath,
                         id,
                         { expense: true }
-                    )            
+                    )
 
                     if (transaction.expense) {
                         setExpenseId(transaction.expense.id)
@@ -39,13 +39,15 @@ function TransactionForm() {
 
     }, [id])
 
-    return (
-        (type == 'expense' || expenseId) ? (
+    if (type == 'expense' || expenseId) {
+        return (
             <ExpenseForm id={expenseId} />
-        ) : (
+        )
+    } else {
+        return (
             <TransactionChooseType></TransactionChooseType>
         )
-    )
+    }
 
 }
 

@@ -38,7 +38,9 @@ class ApiClient {
     }
 
     public static async getDefault<T>(path: string): Promise<T> {        
-        return axios.get(ApiClient.getApiUrl(`${path}/default`))
+        const response = await axios.get(ApiClient.getApiUrl(`${path}/default`));
+        console.log(response.data);
+        return response.data;
     }
 
     public static async search<T>(
