@@ -12,7 +12,7 @@ export default function App() {
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: 'flex' }} maxWidth='100vw'>
         <AppBar></AppBar>
-        <AppContainer></AppContainer>
+        <AppContainer></AppContainer>        
       </Box>
     </ThemeProvider>
   );

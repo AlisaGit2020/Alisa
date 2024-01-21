@@ -132,4 +132,19 @@ describe('Expense service', () => {
       expect(savedExpence.transaction.totalAmount).toBe(-39.64);
     });
   });
+
+  describe('delete', () => {
+    it('deletes also transaction row', async () => {
+      const expense = expenseTestData.inputPost;
+      await service.add(expense);
+
+      const savedExpence = await service.findOne(1);
+      const transactionId = savedExpence.transaction.id;
+
+      await service.delete(savedExpence.id);
+
+      const transaction = await service.findOne(transactionId);
+      expect(transaction).toBeNull();
+    });
+  });
 });

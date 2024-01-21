@@ -5,7 +5,7 @@ import { expenseTypeTestData } from './expense-type.test.data';
 import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { Expense } from 'src/accounting/expense/entities/expense.entity';
 import { propertyTestData } from '../real-estate/property.test.data';
-import { parseISO, startOfDay } from 'date-fns';
+import { startOfDay } from 'date-fns';
 
 export const expenseTestData = {
   name: 'Expense',

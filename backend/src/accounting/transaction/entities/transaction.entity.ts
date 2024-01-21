@@ -29,8 +29,11 @@ export class Transaction {
   @OneToOne(() => Expense, (expense) => expense.transaction, {
     eager: false,
     cascade: false,
-    onDelete: 'CASCADE',
     nullable: true,
   })
   expense: Expense;
+
+  getExpenseId(): number | null {
+    return this.expense ? this.expense.id : null;
+  }
 }

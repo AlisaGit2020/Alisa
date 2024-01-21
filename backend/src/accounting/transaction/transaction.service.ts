@@ -3,12 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Repository } from 'typeorm';
 import { TransactionInputDto } from './dtos/transaction-input.dto';
 import { Transaction } from './entities/transaction.entity';
+import { Expense } from '../expense/entities/expense.entity';
 
 @Injectable()
 export class TransactionService {
   constructor(
     @InjectRepository(Transaction)
     private repository: Repository<Transaction>,
+
+    @InjectRepository(Expense)
+    private expenseRepository: Repository<Expense>,
   ) {}
 
   async search(options: FindManyOptions<Transaction>): Promise<Transaction[]> {
@@ -41,7 +45,14 @@ export class TransactionService {
   }
 
   async delete(id: number): Promise<void> {
-    await this.repository.delete(id);
+    const expenses = await this.expenseRepository.find({
+      where: { transaction: { id: id } },
+    });
+    const expenseId = expenses[0]?.id;
+
+    if (expenseId) {
+      this.expenseRepository.delete(expenseId);
+    }
   }
 
   private mapData(transaction: Transaction, input: TransactionInputDto) {

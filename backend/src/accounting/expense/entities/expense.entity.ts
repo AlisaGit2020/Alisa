@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 import { ExpenseType } from './expense-type.entity';
 import { Property } from 'src/real-estate/property/entities/property.entity';
-import { Expose, Transform } from 'class-transformer';
 
 @Entity()
 export class Expense {
