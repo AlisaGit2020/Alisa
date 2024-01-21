@@ -17,7 +17,7 @@ export class Expense {
 
   /*Expense type*/
   @ManyToOne(() => ExpenseType, (expenseType) => expenseType.expenses, {
-    eager: true,
+    eager: false,
     cascade: ['insert', 'update'],
   })
   @JoinColumn({ name: 'expenseTypeId' })
@@ -28,7 +28,7 @@ export class Expense {
 
   /*Property*/
   @ManyToOne(() => Property, (property) => property.expenses, {
-    eager: true,
+    eager: false,
     cascade: ['insert', 'update'],
   })
   @JoinColumn({ name: 'propertyId' })
@@ -39,7 +39,7 @@ export class Expense {
 
   /*Transaction*/
   @OneToOne(() => Transaction, {
-    eager: true,
+    eager: false,
     cascade: ['insert', 'update'],
   })
   @JoinColumn({ name: 'transaction_id' })

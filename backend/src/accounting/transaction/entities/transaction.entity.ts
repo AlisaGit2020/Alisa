@@ -32,8 +32,4 @@ export class Transaction {
     nullable: true,
   })
   expense: Expense;
-
-  getExpenseId(): number | null {
-    return this.expense ? this.expense.id : null;
-  }
 }
