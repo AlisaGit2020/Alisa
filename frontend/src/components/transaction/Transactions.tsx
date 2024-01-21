@@ -16,11 +16,11 @@ function Transactions({ t }: WithTranslation) {
                     t={t}
                     alisaContext={transactionContext}
                     fields={[
-                        { name: 'transactionDate' },
+                        { name: 'transactionDate', format: 'date' },
                         { name: 'description' },
-                        { name: 'amount' },
-                        { name: 'quantity' },
-                        { name: 'totalAmount' },
+                        { name: 'amount', format: 'currency' },
+                        { name: 'quantity', format: 'number' },
+                        { name: 'totalAmount', format: 'currency' },
                     ]}
                     fetchOptions={{
                         relations: {

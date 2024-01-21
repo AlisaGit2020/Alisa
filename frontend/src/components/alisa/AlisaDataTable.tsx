@@ -19,7 +19,7 @@ import ApiClient from '../../lib/api-client';
 
 interface AlisaDataTableField<T> {
   name: keyof T,
-  format?: 'number' | 'currency'
+  format?: 'number' | 'currency' | 'date'
 }
 
 interface AlisaDataTableInputProps<T> {
@@ -70,6 +70,14 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
     }
     if (field.format == 'number') {
       return t('format.number', { val: value })
+    }
+    if (field.format == 'currency') {
+      return t('format.currency.euro', { val: value })
+    }
+    if (field.format == 'date') {         
+      return t('format.date', { val: new Date(value as string), formatParams: {
+        val: { year: 'numeric', month: 'numeric', day: 'numeric' },
+      } })
     }
 
     return String(value);
