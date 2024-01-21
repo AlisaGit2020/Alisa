@@ -8,7 +8,7 @@ export type TypeOrmRelationOption = {
 };
 
 export type TypeOrmFetchOptions<T> = {
-    relations: TypeOrmRelationOption,
+    relations?: TypeOrmRelationOption,
     where?: Partial<T>,
     order?: TypeOrmOrderOption
 };

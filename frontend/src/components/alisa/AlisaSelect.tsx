@@ -3,25 +3,27 @@ import { useState } from 'react';
 import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React from 'react';
 import ApiClient from '../../lib/api-client';
+import { TypeOrmFetchOptions } from '../../lib/types';
 
 
-interface InputProps<T extends {id: number}> {    
-    onHandleChange: (fieldName: keyof T, value: T[keyof T]) => void;
-    fieldName: keyof T
-    value: T[keyof T];
+interface InputProps<T1, T2 extends{id: number, name: string}> {    
+    onHandleChange: (fieldName: keyof T1, value: T1[keyof T1]) => void;
+    fieldName: keyof T1
+    value: T1[keyof T1];
     apiUrl: string
-
+    fetchOptions?: TypeOrmFetchOptions<T2>
 }
 
-function AlisaSelect<T extends {id: number}>({
+function AlisaSelect<T1, T2 extends{id: number, name: string}>({
     onHandleChange,
     fieldName,
     value,
     apiUrl,
+    fetchOptions
 
-}: InputProps<T>) {
+}: InputProps<T1, T2>) {
 
-    const [data, setData] = useState<T[]>([])    
+    const [data, setData] = useState<T2[]>([])    
 
     React.useEffect(() => {
         fetchData()
@@ -32,7 +34,7 @@ function AlisaSelect<T extends {id: number}>({
     const fetchData = async () => {
 
         try {
-            const result = await ApiClient.search<T>(apiUrl);            
+            const result = await ApiClient.search<T2>(apiUrl, fetchOptions);            
                        
             return result;
         } catch (error) {
@@ -42,8 +44,8 @@ function AlisaSelect<T extends {id: number}>({
         return data
     }
 
-    const handleChange = (e: SelectChangeEvent<NonNullable<T[keyof T]>>) => {
-        const selectedValue = e.target.value as T[keyof T]        
+    const handleChange = (e: SelectChangeEvent<NonNullable<T1[keyof T1]>>) => {
+        const selectedValue = e.target.value as T1[keyof T1]        
         onHandleChange(fieldName, selectedValue)
     }
 
@@ -62,7 +64,7 @@ function AlisaSelect<T extends {id: number}>({
                 onChange={(e) => handleChange(e)}
             >
                 {data.map((item) => (
-                    <MenuItem key={item.id as string} value={item.id}>{item.name}</MenuItem>
+                    <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
                 ))}
 
             </Select>

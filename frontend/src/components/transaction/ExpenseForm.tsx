@@ -12,6 +12,7 @@ import apartmentContext from '../../alisa-contexts/apartment';
 import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
 import ApiClient from '../../lib/api-client';
 import React from 'react';
+import { Property } from '../../../../backend/src/real-estate/property/entities/property.entity';
 
 interface ExpenseFormProps extends WithTranslation {
     id?: number
@@ -58,8 +59,9 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
     const formComponents = () => (
 
         <Stack spacing={2} marginBottom={2}>
-            <AlisaSelect<ExpenseInputDto>
+            <AlisaSelect<ExpenseInputDto, Property>
                 apiUrl={apartmentContext.apiPath}
+                fetchOptions={{order: {name: 'ASC'}}}
                 fieldName='propertyId'
                 value={data.propertyId}
                 onHandleChange={handleChange}
