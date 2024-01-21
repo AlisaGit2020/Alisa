@@ -13,6 +13,8 @@ import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
 import ApiClient from '../../lib/api-client';
 import React from 'react';
 import { Property } from '../../../../backend/src/real-estate/property/entities/property.entity';
+import { ExpenseType } from '../../../../backend/src/accounting/expense/entities/expense-type.entity';
+import expenseTypeContext from '../../alisa-contexts/expense-type';
 
 interface ExpenseFormProps extends WithTranslation {
     id?: number
@@ -68,40 +70,44 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
             >
             </AlisaSelect>
 
-            <TextField
-                label={t('expenseType')}
+            <AlisaSelect<ExpenseInputDto, ExpenseType>
+                apiUrl={expenseTypeContext.apiPath}
+                fetchOptions={{order: {name: 'ASC'}}}
+                fieldName='expenseTypeId'
                 value={data.expenseTypeId}
-                autoComplete='off'
-                autoFocus={true}
-                onChange={(e) => handleChange('expenseTypeId', e.target.value)}
-            />
+                onHandleChange={handleChange}
+            >
+            </AlisaSelect>
+
             <TextField                
                 label={t('description', { ns: 'transaction' })}
                 value={data.transaction.description}
                 autoComplete='off'
                 onChange={(e) => handleTransactionChange('description', e.target.value)}
             />
-            <TextField
-                type='number'
-                label={t('amount', { ns: 'transaction' })}
-                value={data.transaction.amount}
-                autoComplete='off'
-                onChange={(e) => handleTransactionChange('amount', e.target.value)}
-            />
-            <TextField
-                type='number'
-                label={t('quantity', { ns: 'transaction' })}
-                value={data.transaction.quantity}
-                autoComplete='off'
-                onChange={(e) => handleTransactionChange('quantity', e.target.value)}
-            />
-            <TextField
-                type='number'
-                label={t('totalAmount', { ns: 'transaction' })}
-                value={data.transaction.totalAmount}
-                autoComplete='off'
-                onChange={(e) => handleTransactionChange('totalAmount', e.target.value)}
-            />
+            <Stack direction={'row'} spacing={2}>
+                <TextField
+                    type='number'
+                    label={t('amount', { ns: 'transaction' })}
+                    value={data.transaction.amount}
+                    autoComplete='off'
+                    onChange={(e) => handleTransactionChange('amount', e.target.value)}
+                />
+                <TextField
+                    type='number'
+                    label={t('quantity', { ns: 'transaction' })}
+                    value={data.transaction.quantity}
+                    autoComplete='off'
+                    onChange={(e) => handleTransactionChange('quantity', e.target.value)}
+                />
+                <TextField
+                    type='number'
+                    label={t('totalAmount', { ns: 'transaction' })}
+                    value={data.transaction.totalAmount}
+                    autoComplete='off'
+                    onChange={(e) => handleTransactionChange('totalAmount', e.target.value)}
+                />
+            </Stack>
         </Stack>
     )
     
