@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { Expense } from './entities/expense.entity';
 import { ExpenseInputDto } from './dtos/expense-input.dto';
 import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
@@ -32,8 +32,12 @@ export class ExpenseService {
     return this.repository.find(options);
   }
 
-  async findOne(id: number): Promise<Expense> {
-    const expense = await this.repository.findOneBy({ id: id });
+  async findOne(
+    id: number,
+    options: FindOneOptions<Expense> = {},
+  ): Promise<Expense> {
+    options.where = { id: id };
+    const expense = await this.repository.findOne(options);
     return expense;
   }
 
@@ -66,18 +70,12 @@ export class ExpenseService {
   }
 
   async update(id: number, input: ExpenseInputDto): Promise<Expense> {
-    const result = await this.search({
-      where: { id: id },
-      relations: {
-        transaction: true,
-      },
+    const expenseEntity = await this.findOne(id, {
+      relations: { transaction: true },
     });
 
-    const expenseEntity = result[0];
-
-    const transactionId = expenseEntity.transaction.id;
     this.mapData(expenseEntity, input);
-    expenseEntity.transaction.id = transactionId;
+    expenseEntity.transaction.id = expenseEntity.transactionId;
 
     await this.repository.save(expenseEntity);
     return expenseEntity;
@@ -86,7 +84,7 @@ export class ExpenseService {
   async delete(id: number): Promise<void> {
     const expense = await this.findOne(id);
     await this.repository.delete(id);
-    await this.transactionRepository.delete(expense.transaction.id);
+    await this.transactionRepository.delete(expense.transactionId);
   }
 
   private mapData(expense: Expense, input: ExpenseInputDto) {

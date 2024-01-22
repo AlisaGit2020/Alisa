@@ -54,6 +54,7 @@ export const expenseTestData = {
       totalAmount: -39.64,
       id: 1,
     },
+    transactionId: 1,
     id: 1,
   },
 
@@ -72,6 +73,7 @@ export const expenseTestData = {
       quantity: 1.0,
       totalAmount: -188.0,
     },
+    transactionId: 1,
   },
 
   searchOptions: {

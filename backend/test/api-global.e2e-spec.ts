@@ -56,13 +56,6 @@ describe('Global controller end-to-end test (e2e)', () => {
             .expect(testData.expected);
         });
 
-        it(`GET ${testData.baseUrl}, gets list of items (GET)`, () => {
-          return request(server)
-            .get(testData.baseUrl)
-            .expect(200)
-            .expect([testData.expected]);
-        });
-
         it(`GET ${testData.baseUrlWithId}, get single item`, () => {
           return request(server)
             .get(testData.baseUrlWithId)

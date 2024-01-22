@@ -42,6 +42,9 @@ export class Expense {
     eager: false,
     cascade: ['insert', 'update'],
   })
-  @JoinColumn({ name: 'transaction_id' })
+  @JoinColumn({ name: 'transactionId' })
   transaction: Transaction;
+
+  @Column({ nullable: false })
+  transactionId: number;
 }

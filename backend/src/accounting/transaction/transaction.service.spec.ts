@@ -44,7 +44,7 @@ describe('Expense service', () => {
       await expenseService.add(expenseInput);
 
       const savedExpence = await expenseService.findOne(1);
-      const transactionId = savedExpence.transaction.id;
+      const transactionId = savedExpence.transactionId;
 
       //Delete transaction.
       await service.delete(transactionId);

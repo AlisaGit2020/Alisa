@@ -45,13 +45,13 @@ export class TransactionService {
   }
 
   async delete(id: number): Promise<void> {
-    const expenses = await this.expenseRepository.find({
+    const expense = await this.expenseRepository.findOne({
       where: { transaction: { id: id } },
     });
-    const expenseId = expenses[0]?.id;
+    const expenseId = expense?.id;
 
     if (expenseId) {
-      this.expenseRepository.delete(expenseId);
+      await this.expenseRepository.delete(expenseId);
     }
 
     this.repository.delete(id);

@@ -80,7 +80,9 @@ describe('Expense service', () => {
         propertyId: 1,
       });
 
-      const expense = await service.findOne(1);
+      const expense = await service.findOne(1, {
+        relations: { transaction: true },
+      });
       expect(expense.transaction.id).toBe(1);
       expect(expense.transaction.amount).toBe(99);
       expect(expense.transaction.totalAmount).toBe(-99);
@@ -130,7 +132,9 @@ describe('Expense service', () => {
 
       await service.add(expense);
 
-      const savedExpence = await service.findOne(1);
+      const savedExpence = await service.findOne(1, {
+        relations: { transaction: true },
+      });
 
       expect(savedExpence.transaction.totalAmount).toBe(-39.64);
     });
@@ -142,7 +146,7 @@ describe('Expense service', () => {
       await service.add(expense);
 
       let savedExpence = await service.findOne(1);
-      const transactionId = savedExpence.transaction.id;
+      const transactionId = savedExpence.transactionId;
 
       await service.delete(savedExpence.id);
 
