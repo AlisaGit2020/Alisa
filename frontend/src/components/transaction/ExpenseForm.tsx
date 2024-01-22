@@ -15,6 +15,9 @@ import React from 'react';
 import { Property } from '../../../../backend/src/real-estate/property/entities/property.entity';
 import { ExpenseType } from '../../../../backend/src/accounting/expense/entities/expense-type.entity';
 import expenseTypeContext from '../../alisa-contexts/expense-type';
+import { DateField, DatePicker } from '@mui/x-date-pickers';
+import { max } from 'class-validator';
+import dayjs from 'dayjs';
 
 interface ExpenseFormProps extends WithTranslation {
     id?: number
@@ -25,13 +28,13 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
     const [data, setData] = useState<ExpenseInputDto>(undefined);
 
     React.useEffect(() => {
-       const fetchData = () => {
-         return ApiClient.getDefault<ExpenseInputDto>(expenseContext.apiPath)
-       }
+        const fetchData = () => {
+            return ApiClient.getDefault<ExpenseInputDto>(expenseContext.apiPath)
+        }
 
-       fetchData()
-       .then(setData)
-      
+        fetchData()
+            .then(setData)
+
     }, [])
 
     const handleChange = (
@@ -64,7 +67,7 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
             <AlisaSelect<ExpenseInputDto, Property>
                 label={t('apartment')}
                 apiUrl={apartmentContext.apiPath}
-                fetchOptions={{order: {name: 'ASC'}}}
+                fetchOptions={{ order: { name: 'ASC' } }}
                 fieldName='propertyId'
                 value={data.propertyId}
                 onHandleChange={handleChange}
@@ -74,21 +77,38 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
             <AlisaSelect<ExpenseInputDto, ExpenseType>
                 label={t('expenseType')}
                 apiUrl={expenseTypeContext.apiPath}
-                fetchOptions={{order: {name: 'ASC'}}}
+                fetchOptions={{ order: { name: 'ASC' } }}
                 fieldName='expenseTypeId'
                 value={data.expenseTypeId}
                 onHandleChange={handleChange}
             >
             </AlisaSelect>
 
-            <TextField                
+            <TextField
                 label={t('description', { ns: 'transaction' })}
                 value={data.transaction.description}
                 autoComplete='off'
                 onChange={(e) => handleTransactionChange('description', e.target.value)}
             />
             <Stack direction={'row'} spacing={2}>
+                <DatePicker
+                    sx={{ width: '100%' }}
+                    label={t('transactionDate', { ns: 'transaction' })}
+                    value={dayjs(data.transaction.transactionDate) }
+                    onChange={(newValue) => handleTransactionChange('transactionDate', newValue as unknown as TransactionInputDto[keyof TransactionInputDto])}
+                />
+                <DatePicker
+                    sx={{ width: '100%' }}
+                    label={t('accountingDate', { ns: 'transaction' })}
+                    value={dayjs(data.transaction.accountingDate) }
+                    onChange={(newValue) => handleTransactionChange('accountingDate', newValue as unknown as TransactionInputDto[keyof TransactionInputDto])}
+                />
+                
+            </Stack>
+
+            <Stack direction={'row'} spacing={2}>
                 <TextField
+                    sx={{ width: '100%' }}
                     type='number'
                     label={t('amount', { ns: 'transaction' })}
                     value={data.transaction.amount}
@@ -96,6 +116,7 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
                     onChange={(e) => handleTransactionChange('amount', e.target.value)}
                 />
                 <TextField
+                    sx={{ width: '100%' }}
                     type='number'
                     label={t('quantity', { ns: 'transaction' })}
                     value={data.transaction.quantity}
@@ -103,6 +124,7 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
                     onChange={(e) => handleTransactionChange('quantity', e.target.value)}
                 />
                 <TextField
+                    sx={{ width: '100%' }}
                     type='number'
                     label={t('totalAmount', { ns: 'transaction' })}
                     value={data.transaction.totalAmount}
@@ -112,7 +134,7 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
             </Stack>
         </Stack>
     )
-    
+
     if (data == undefined) {
         return (<AlisaLoadingProgress></AlisaLoadingProgress>)
     } else {

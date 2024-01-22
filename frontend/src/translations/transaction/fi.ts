@@ -1,4 +1,5 @@
 const transactions = {
+    accountingDate: 'Kirjanpito pvm',
     add: 'Uusi tilitapahtuma',
     amount: 'Yksikköhinta',
     chooseTransactionType: 'Valitse tapahtumatyyyppi',

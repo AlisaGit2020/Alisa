@@ -1,4 +1,5 @@
 const transactions = {
+    accountingDate: 'Accounting date',
     add: 'Add new transaction',
     amount: 'Unit price',
     chooseTransactionType: 'Choose transaction type',
