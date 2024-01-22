@@ -13,6 +13,7 @@ const fi = {
         confirm: 'Vahvista',
         confirmDelete: 'Poistetaanko tietue?',
         description: 'Kuvaus',
+        delete: 'Poista',
         name: 'Nimi',
         noRowsFound: 'Rivejä ei löytynyt',
         quantity: 'Määrä',

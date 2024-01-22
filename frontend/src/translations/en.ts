@@ -21,6 +21,7 @@ const en = {
         cancel: 'Cancel',
         confirm: 'Confirm',
         confirmDelete: 'Are you sure delete item?',
+        delete: 'Delete',
         description: 'Description',
         name: 'Name',
         noRowsFound: 'No rows found',
