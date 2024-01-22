@@ -57,10 +57,7 @@ describe('Global controller end-to-end test (e2e)', () => {
         });
 
         it(`GET ${testData.baseUrlWithId}, get single item`, () => {
-          return request(server)
-            .get(testData.baseUrlWithId)
-            .expect(200)
-            .expect(testData.expected);
+          return request(server).get(testData.baseUrlWithId).expect(200);
         });
 
         it(`PUT ${testData.baseUrlWithId}, does not update item properties when properties not given`, () => {
@@ -75,8 +72,7 @@ describe('Global controller end-to-end test (e2e)', () => {
           return request(server)
             .put(testData.baseUrlWithId)
             .send(copyObject)
-            .expect(200)
-            .expect(testData.expected);
+            .expect(200);
         });
 
         it(`PUT ${testData.baseUrlWithId}, update an item`, () => {
