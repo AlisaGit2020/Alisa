@@ -66,7 +66,14 @@ export class ExpenseService {
   }
 
   async update(id: number, input: ExpenseInputDto): Promise<Expense> {
-    const expenseEntity = await this.findOne(id);
+    const result = await this.search({
+      where: { id: id },
+      relations: {
+        transaction: true,
+      },
+    });
+
+    const expenseEntity = result[0];
 
     const transactionId = expenseEntity.transaction.id;
     this.mapData(expenseEntity, input);

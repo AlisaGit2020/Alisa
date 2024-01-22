@@ -3,7 +3,7 @@ import { IsNumber, IsObject } from 'class-validator';
 import { PropertyInputDto } from 'src/real-estate/property/dtos/property-input.dto';
 
 export class ExpenseInputDto {
-  id?: number;
+  id: number;
 
   expenseType?: ExpenseInputDto;
 
