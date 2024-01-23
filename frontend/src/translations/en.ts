@@ -23,6 +23,7 @@ const en = {
         confirmDelete: 'Are you sure delete item?',
         delete: 'Delete',
         description: 'Description',
+        edit: 'Edit',
         name: 'Name',
         noRowsFound: 'No rows found',
         quantity: 'Quantity',

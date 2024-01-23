@@ -14,6 +14,7 @@ const fi = {
         confirmDelete: 'Poistetaanko tietue?',
         description: 'Kuvaus',
         delete: 'Poista',
+        edit: 'Muokkaa',
         name: 'Nimi',
         noRowsFound: 'Rivejä ei löytynyt',
         quantity: 'Määrä',

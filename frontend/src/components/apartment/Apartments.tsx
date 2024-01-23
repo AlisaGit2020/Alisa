@@ -1,8 +1,8 @@
 import { Grid } from '@mui/material'
 import { WithTranslation, withTranslation } from 'react-i18next';
-import AlisaDataTable from '../alisa/AlisaDataTable';
 import { Property } from '../../../../backend/src/real-estate/property/entities/property.entity';
 import apartmentContext from '../../alisa-contexts/apartment';
+import AlisaCardList from '../alisa/AlisaCardList';
 
 function Apartments({ t }: WithTranslation) {
 
@@ -11,7 +11,7 @@ function Apartments({ t }: WithTranslation) {
         <Grid container>
 
             <Grid item xs={12} lg={6}>
-                <AlisaDataTable<Property>
+                <AlisaCardList<Property>
                     title={t('apartments')}
                     t={t}
                     alisaContext={apartmentContext}
