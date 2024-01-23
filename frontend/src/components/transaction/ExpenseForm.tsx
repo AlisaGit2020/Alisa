@@ -1,12 +1,11 @@
 import TextField from '@mui/material/TextField';
-import { Stack } from '@mui/material';
+import { InputAdornment, Stack } from '@mui/material';
 import AlisaForm from '../alisa/AlisaForm';
 import { useState } from 'react';
 import { ExpenseInputDto } from '../../../../backend/src/accounting/expense/dtos/expense-input.dto'
 import { TransactionInputDto } from '../../../../backend/src/accounting/transaction/dtos/transaction-input.dto'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import expenseContext from '../../alisa-contexts/expense';
-import { ExpenseTypeInputDto } from '../../../../backend/src/accounting/expense/dtos/expense-type-input.dto';
 import AlisaSelect from '../alisa/AlisaSelect';
 import apartmentContext from '../../alisa-contexts/apartment';
 import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
@@ -15,8 +14,7 @@ import React from 'react';
 import { Property } from '../../../../backend/src/real-estate/property/entities/property.entity';
 import { ExpenseType } from '../../../../backend/src/accounting/expense/entities/expense-type.entity';
 import expenseTypeContext from '../../alisa-contexts/expense-type';
-import { DateField, DatePicker } from '@mui/x-date-pickers';
-import { max } from 'class-validator';
+import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 
 interface ExpenseFormProps extends WithTranslation {
@@ -52,6 +50,8 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
         name: keyof TransactionInputDto,
         value: TransactionInputDto[keyof TransactionInputDto]
     ) => {
+
+        handleTransactionDataChange(name, value)
         setData((prevData) => ({
             ...prevData,
             transaction: {
@@ -59,6 +59,33 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
                 [name]: value,
             },
         }));
+    }
+
+    const handleTransactionDataChange = (
+        name: keyof TransactionInputDto,
+        newValue: TransactionInputDto[keyof TransactionInputDto]
+    ) => {
+        if (name === 'totalAmount') {
+            let amount = 0
+            if (data.transaction.quantity > 0) {
+                amount = Number(newValue) / data.transaction.quantity
+            } 
+            handleTransactionChange('amount', amount)
+            return;
+        }        
+        if (name === 'quantity') {
+            if (Number(newValue) == 0){
+                handleTransactionChange('quantity', 1)
+                return;
+            }
+            
+            const amount = data.transaction.totalAmount / Number(newValue)
+            handleTransactionChange('amount', amount)            
+        }
+
+        if (name === 'transactionDate') {
+            handleTransactionChange('accountingDate', newValue)
+        }
     }
 
     const formComponents = () => (
@@ -74,7 +101,7 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
             >
             </AlisaSelect>
 
-            <AlisaSelect<ExpenseInputDto, ExpenseType>
+            <AlisaSelect<ExpenseInputDto, ExpenseType>  
                 label={t('expenseType')}
                 apiUrl={expenseTypeContext.apiPath}
                 fetchOptions={{ order: { name: 'ASC' } }}
@@ -88,32 +115,38 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
                 label={t('description', { ns: 'transaction' })}
                 value={data.transaction.description}
                 autoComplete='off'
+                autoFocus={true}
                 onChange={(e) => handleTransactionChange('description', e.target.value)}
             />
+
             <Stack direction={'row'} spacing={2}>
                 <DatePicker
                     sx={{ width: '100%' }}
                     label={t('transactionDate', { ns: 'transaction' })}
-                    value={dayjs(data.transaction.transactionDate) }
+                    value={dayjs(data.transaction.transactionDate)}
                     onChange={(newValue) => handleTransactionChange('transactionDate', newValue as unknown as TransactionInputDto[keyof TransactionInputDto])}
                 />
                 <DatePicker
                     sx={{ width: '100%' }}
                     label={t('accountingDate', { ns: 'transaction' })}
-                    value={dayjs(data.transaction.accountingDate) }
+                    value={dayjs(data.transaction.accountingDate)}
                     onChange={(newValue) => handleTransactionChange('accountingDate', newValue as unknown as TransactionInputDto[keyof TransactionInputDto])}
                 />
-                
+
             </Stack>
 
             <Stack direction={'row'} spacing={2}>
                 <TextField
                     sx={{ width: '100%' }}
+                    disabled={true}
                     type='number'
                     label={t('amount', { ns: 'transaction' })}
                     value={data.transaction.amount}
                     autoComplete='off'
                     onChange={(e) => handleTransactionChange('amount', e.target.value)}
+                    InputProps={{
+                        endAdornment: <InputAdornment position="end">€</InputAdornment>,
+                      }}  
                 />
                 <TextField
                     sx={{ width: '100%' }}
@@ -129,7 +162,10 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
                     label={t('totalAmount', { ns: 'transaction' })}
                     value={data.transaction.totalAmount}
                     autoComplete='off'
-                    onChange={(e) => handleTransactionChange('totalAmount', e.target.value)}
+                    onChange={(e) => handleTransactionChange('totalAmount', e.target.value)}   
+                    InputProps={{
+                        endAdornment: <InputAdornment position="end">€</InputAdornment>,
+                      }}                         
                 />
             </Stack>
         </Stack>
