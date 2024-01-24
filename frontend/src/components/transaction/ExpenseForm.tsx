@@ -16,6 +16,9 @@ import { ExpenseType } from '../../../../backend/src/accounting/expense/entities
 import expenseTypeContext from '../../alisa-contexts/expense-type';
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
+import AlisaTextField from '../alisa/form/AlisaTextField';
+import AlisaNumberField from '../alisa/form/AlisaNumberField';
+import AlisaDatePicker from '../alisa/form/AlisaDatepicker';
 
 interface ExpenseFormProps extends WithTranslation {
     id?: number
@@ -111,61 +114,47 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
             >
             </AlisaSelect>
 
-            <TextField
+            <AlisaTextField
                 label={t('description', { ns: 'transaction' })}
                 value={data.transaction.description}
                 autoComplete='off'
-                autoFocus={true}
+                autoFocus={true}                
                 onChange={(e) => handleTransactionChange('description', e.target.value)}
             />
 
             <Stack direction={'row'} spacing={2}>
-                <DatePicker
-                    sx={{ width: '100%' }}
+                <AlisaDatePicker                                        
                     label={t('transactionDate', { ns: 'transaction' })}
-                    value={dayjs(data.transaction.transactionDate)}
+                    value={data.transaction.transactionDate}
                     onChange={(newValue) => handleTransactionChange('transactionDate', newValue as unknown as TransactionInputDto[keyof TransactionInputDto])}
                 />
-                <DatePicker
-                    sx={{ width: '100%' }}
+                <AlisaDatePicker                    
                     label={t('accountingDate', { ns: 'transaction' })}
-                    value={dayjs(data.transaction.accountingDate)}
+                    value={data.transaction.accountingDate}
                     onChange={(newValue) => handleTransactionChange('accountingDate', newValue as unknown as TransactionInputDto[keyof TransactionInputDto])}
                 />
 
             </Stack>
 
             <Stack direction={'row'} spacing={2}>
-                <TextField
-                    sx={{ width: '100%' }}
+                <AlisaNumberField                    
                     disabled={true}
-                    type='number'
                     label={t('amount', { ns: 'transaction' })}
-                    value={data.transaction.amount}
-                    autoComplete='off'
+                    value={data.transaction.amount}                    
                     onChange={(e) => handleTransactionChange('amount', e.target.value)}
-                    InputProps={{
-                        endAdornment: <InputAdornment position="end">€</InputAdornment>,
-                      }}  
+                    adornment='€'
                 />
-                <TextField
-                    sx={{ width: '100%' }}
-                    type='number'
+                <AlisaNumberField                                        
                     label={t('quantity', { ns: 'transaction' })}
-                    value={data.transaction.quantity}
-                    autoComplete='off'
+                    value={data.transaction.quantity}                    
                     onChange={(e) => handleTransactionChange('quantity', e.target.value)}
                 />
-                <TextField
-                    sx={{ width: '100%' }}
-                    type='number'
+                <AlisaNumberField                                        
                     label={t('totalAmount', { ns: 'transaction' })}
                     value={data.transaction.totalAmount}
                     autoComplete='off'
                     onChange={(e) => handleTransactionChange('totalAmount', e.target.value)}   
-                    InputProps={{
-                        endAdornment: <InputAdornment position="end">€</InputAdornment>,
-                      }}                         
+                    adornment='€'
                 />
             </Stack>
         </Stack>
