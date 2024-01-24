@@ -3,9 +3,7 @@ import dayjs from "dayjs"
 
 function AlisaDatePicker(props: {
     label: '',
-    value: '',
-    adornment?: string,
-    autoComplete?: string,
+    value: '',        
     autoFocus?: boolean,
     disabled?: boolean,
     fullWidth?: boolean,

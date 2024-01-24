@@ -8,5 +8,5 @@ export class PropertyInputDto {
   @IsNumber()
   @Min(1)
   @Max(1000)
-  size?: number;
+  size: number;
 }

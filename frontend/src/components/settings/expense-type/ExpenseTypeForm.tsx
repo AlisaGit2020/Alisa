@@ -6,6 +6,7 @@ import { WithTranslation, withTranslation } from 'react-i18next';
 import AlisaForm from '../../alisa/AlisaForm';
 import expenseTypeContext from '../../../alisa-contexts/expense-type';
 import { ExpenseTypeInputDto } from '../../../../../backend/src/accounting/expense/dtos/expense-type-input.dto';
+import AlisaTextField from '../../alisa/form/AlisaTextField';
 
 function ExpenseTypeForm({ t }: WithTranslation) {
     const [data, setData] = useState<ExpenseTypeInputDto>({
@@ -26,14 +27,14 @@ function ExpenseTypeForm({ t }: WithTranslation) {
 
     const formComponents = (
         <Stack spacing={2} marginBottom={2}>
-            <TextField
+            <AlisaTextField
                 label={t('name')}
                 value={data.name}
                 autoComplete='off'
                 autoFocus={true}
                 onChange={(e) => handleChange('name', e.target.value)}
             />
-            <TextField
+            <AlisaTextField
                 label={t('description')}
                 value={data.description}
                 autoComplete='off'

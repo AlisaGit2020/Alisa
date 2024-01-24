@@ -2,8 +2,8 @@ import { InputAdornment, TextField } from "@mui/material"
 import { ChangeEventHandler } from "react"
 
 function AlisaTextField(props: {
-    label: '',
-    value: '',
+    label: string,
+    value?: string,
     adornment?: string,
     autoComplete?: string,
     autoFocus?: boolean,

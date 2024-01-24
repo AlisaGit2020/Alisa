@@ -4,6 +4,7 @@ import { MenuItem, Select, SelectChangeEvent, TextField } from '@mui/material';
 import React from 'react';
 import ApiClient from '../../lib/api-client';
 import { TypeOrmFetchOptions } from '../../lib/types';
+import AlisaSelectField from './form/AlisaSelectField';
 
 
 interface InputProps<T1, T2 extends{id: number, name: string}> {    
@@ -58,17 +59,15 @@ function AlisaSelect<T1, T2 extends{id: number, name: string}>({
     return (
 
         (data.length > 0 && value) && (
-            <TextField                
+            <AlisaSelectField                
                 select
-                value={value}
+                value={value as string}
                 label={label}
-                onChange={(e) => handleChange(e)}
+                items={data}
+                onChange={handleChange}                
             >
-                {data.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
-                ))}
 
-            </TextField>
+            </AlisaSelectField>
         )
     );
 }
