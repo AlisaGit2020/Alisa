@@ -7,6 +7,8 @@ import AlisaForm from '../../alisa/AlisaForm';
 import expenseTypeContext from '../../../alisa-contexts/expense-type';
 import { ExpenseTypeInputDto } from '../../../../../backend/src/accounting/expense/dtos/expense-type-input.dto';
 import AlisaTextField from '../../alisa/form/AlisaTextField';
+import AlisaSwitch from '../../alisa/form/AlisaSwitch';
+import { Tune } from '@mui/icons-material';
 
 function ExpenseTypeForm({ t }: WithTranslation) {
     const [data, setData] = useState<ExpenseTypeInputDto>({
@@ -40,12 +42,11 @@ function ExpenseTypeForm({ t }: WithTranslation) {
                 autoComplete='off'
                 onChange={(e) => handleChange('description', e.target.value)}
             />
-            <FormControlLabel control={
-                <Switch
-                    checked={data.isTaxDeductible}
-                    onChange={(e) => handleChange('isTaxDeductible', e.target.checked)}
-                />
-            } label={t('isTaxDeductible')} />
+            <AlisaSwitch
+                value={data.isTaxDeductible}
+                onChange={(e) => handleChange('isTaxDeductible', e.target.checked)}
+                label={t('isTaxDeductible')}                
+            />
         </Stack>
     )
     return (
