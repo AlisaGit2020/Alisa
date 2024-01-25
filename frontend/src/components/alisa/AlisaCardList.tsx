@@ -1,19 +1,17 @@
 
 import * as React from 'react';
-import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
-import { Box, Button, Card, CardActions, CardContent, CardMedia, Grid, IconButton, Link, Paper, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Card, CardActions, CardContent, CardMedia, Grid, IconButton, Link, Paper, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { TFunction } from 'i18next';
-import AlisaConfirmDialog from './AlisaConfirmDialog';
+import AlisaConfirmDialog from './form/dialog/AlisaConfirmDialog';
 import { TypeOrmFetchOptions } from '../../lib/types';
 import ApiClient from '../../lib/api-client';
 
@@ -100,11 +98,11 @@ function AlisaCardList<T extends { id: number }>({ t, title, alisaContext, field
                     {item.name}
                   </Typography>
                   <CardMedia
-                  component="img"
-                  alt={item.name}
-                  height="140"
-                  image={`/assets/apartments/${item.name}.jpg`}
-                />
+                    component="img"
+                    alt={item.name}
+                    height="140"
+                    image={`/assets/apartments/${item.name}.jpg`}
+                  />
                   <Typography variant="body2" color="text.secondary">
                     <Table>
                       <TableBody>
@@ -136,10 +134,13 @@ function AlisaCardList<T extends { id: number }>({ t, title, alisaContext, field
       )}
 
       <AlisaConfirmDialog
-        t={t}
+        title={t('confirm')}
+        contentText={t('confirmDelete')}
+        buttonTextConfirm={t('delete')}
+        buttonTextCancel={t('cancel')}
         open={open}
-        onHandleClose={handleClose}
-        onHandleDelete={handleDelete}
+        onConfirm={handleDelete}
+        onClose={handleClose}
       ></AlisaConfirmDialog>
 
     </Paper>

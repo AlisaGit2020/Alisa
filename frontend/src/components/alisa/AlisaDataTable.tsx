@@ -13,7 +13,7 @@ import Title from '../../Title';
 import { Box, IconButton, Paper, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { TFunction } from 'i18next';
-import AlisaConfirmDialog from './AlisaConfirmDialog';
+import AlisaConfirmDialog from './form/dialog/AlisaConfirmDialog';
 import { TypeOrmFetchOptions } from '../../lib/types';
 import ApiClient from '../../lib/api-client';
 
@@ -33,12 +33,12 @@ interface AlisaDataTableInputProps<T> {
 function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fields, fetchOptions }: AlisaDataTableInputProps<T>) {
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
-  const [idToDelete, setIdToDelete] = React.useState<number>(0);  
-  const [idDeleted, setIdDeleted] = React.useState<number>(0);  
+  const [idToDelete, setIdToDelete] = React.useState<number>(0);
+  const [idDeleted, setIdDeleted] = React.useState<number>(0);
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    const fetchData = async () => {    
+    const fetchData = async () => {
       const data: T[] = await ApiClient.search<T>(alisaContext.apiPath, fetchOptions);
       setData(data);
     };
@@ -56,7 +56,7 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
     setOpen(false);
   };
 
-  const handleDelete = async () => {    
+  const handleDelete = async () => {
     await ApiClient.delete(alisaContext.apiPath, idToDelete);
     setIdDeleted(idToDelete);
     handleClose();
@@ -74,10 +74,12 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
     if (field.format == 'currency') {
       return t('format.currency.euro', { val: value })
     }
-    if (field.format == 'date') {         
-      return t('format.date', { val: new Date(value as string), formatParams: {
-        val: { year: 'numeric', month: 'numeric', day: 'numeric' },
-      } })
+    if (field.format == 'date') {
+      return t('format.date', {
+        val: new Date(value as string), formatParams: {
+          val: { year: 'numeric', month: 'numeric', day: 'numeric' },
+        }
+      })
     }
 
     return String(value);
@@ -129,11 +131,14 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
         <Box padding={2} fontSize={'medium'}>{t('noRowsFound')}</Box>
       )}
 
-      <AlisaConfirmDialog 
-        t={t}
+      <AlisaConfirmDialog
+        title={t('confirm')}
+        contentText={t('confirmDelete')}
+        buttonTextConfirm={t('delete')}
+        buttonTextCancel={t('cancel')}
         open={open}
-        onHandleClose={handleClose}
-        onHandleDelete={handleDelete}
+        onConfirm={handleDelete}
+        onClose={handleClose}
       ></AlisaConfirmDialog>
 
     </Paper>
