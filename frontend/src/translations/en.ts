@@ -29,7 +29,8 @@ const en = {
         quantity: 'Quantity',
         save: 'Save',
         settings: 'Settings',
-        totalAmount: 'Total'
+        totalAmount: 'Total',
+        validationErrorTitle: 'Please check following fields:',
     },
 
 }

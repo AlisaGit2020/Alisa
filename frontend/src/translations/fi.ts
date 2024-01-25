@@ -20,7 +20,8 @@ const fi = {
         quantity: 'Määrä',
         save: 'Tallenna',
         settings: 'Asetukset',
-        totalAmount: 'Yhteensä'
+        totalAmount: 'Yhteensä',
+        validationErrorTitle: 'Tarkasta nämä kentät:',
     }
 }
 

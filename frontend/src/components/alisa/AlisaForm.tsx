@@ -2,13 +2,14 @@ import axios from 'axios';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
 import { getValidationErrors } from '../../lib/functions';
-import { Alert, Box, ButtonGroup, Grid, Link, Paper } from '@mui/material';
+import { Box, ButtonGroup, Grid, Link, Paper } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import React from 'react';
 import { ValidationError } from 'class-validator';
 import { TFunction } from 'i18next';
 import ApiClient from '../../lib/api-client';
 import { TypeOrmRelationOption } from '../../lib/types';
+import AlisaAlert from './form/dialog/AlisaAlert';
 
 
 interface InputProps<T> {
@@ -34,8 +35,8 @@ function AlisaForm<T extends { id: number }>({
 }: InputProps<T>) {
 
     const { idParam } = useParams();
-    const [errorMessage, setErrorMessage] = useState<string[]>([])
-    const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
+    const [errorMessage, setErrorMessage] = useState<string[]>([])    
+    const [validationErrors, setValidationErrors] = useState<string[]>([])
     const navigate = useNavigate();
 
     if (!id) {
@@ -59,16 +60,24 @@ function AlisaForm<T extends { id: number }>({
         setErrorMessage([])
         setValidationErrors([])
 
-        const validationErrors = await getValidationErrors(validateObject, data);
-        if (validationErrors.length > 0) {
+        const valErrors = await getValidationErrors(validateObject, data);
+        if (valErrors.length > 0) {
+            valErrors.forEach((error: ValidationError) => {
+                if (error.constraints && typeof error.constraints === 'object') {
+                    Object.values(error.constraints).forEach((constraint: string) => {
+                        validationErrors.push(constraint);
+                    });
+                }
+            });
+            
             setValidationErrors(validationErrors);
             return;
         }
-        
+
         try {
 
             if (id) {
-                await ApiClient.put(alisaContext.apiPath, id, data);                
+                await ApiClient.put(alisaContext.apiPath, id, data);
             } else {
                 await ApiClient.post(alisaContext.apiPath, data);
             }
@@ -120,25 +129,12 @@ function AlisaForm<T extends { id: number }>({
                     {(errorMessage.length > 0 || validationErrors.length > 0) && (
 
                         <Box marginTop={3} sx={{ padding: 1 }}>
-                            {errorMessage.map((message, index) => (
-                                <Alert severity="error" key={index}>{message}</Alert>
-                            ))}
-                            {validationErrors.length > 0 && (
-                                <Alert severity="warning">
-                                    <b>Please correct following data</b>
-                                    <Box>
-                                        {validationErrors.map((error: ValidationError, index) => (
-                                            <Box key={index}>
-                                                {error.constraints &&
-                                                    typeof error.constraints === 'object' &&
-                                                    Object.values(error.constraints).map((constraint, constraintIndex) => (
-                                                        <div key={constraintIndex}>{constraint}</div>
-                                                    ))}
-                                            </Box>
-                                        ))}
-                                    </Box>
-                                </Alert>
-                            )}
+                            <AlisaAlert severity='error' content={errorMessage}></AlisaAlert>
+                            <AlisaAlert
+                                title={t('validationErrorTitle')}
+                                severity='warning'
+                                content={validationErrors}>
+                            </AlisaAlert>
                         </Box>
                     )}
                 </Grid>
