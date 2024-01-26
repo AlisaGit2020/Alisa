@@ -61,7 +61,7 @@ function AlisaSelect<T1, T2 extends{id: number, name: string}>({
         (data.length > 0 && value) && (
             <AlisaSelectField                
                 select
-                value={value as string}
+                value={value as number}
                 label={label}
                 items={data}
                 onChange={handleChange}                

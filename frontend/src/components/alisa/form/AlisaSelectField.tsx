@@ -5,9 +5,10 @@ type Item = {
     id: number
     name: string
 }
-function AlisaSelectField(props: {
+function AlisaSelectField(props: {    
     label: string,
-    value: string,
+    value: number,
+    id?:string,
     adornment?: string,
     autoComplete?: string,
     autoFocus?: boolean,
@@ -18,6 +19,7 @@ function AlisaSelectField(props: {
 }) {
     return (
         <TextField
+            id = {props.id}
             fullWidth={props.fullWidth !== undefined ? props.fullWidth : true}
             select
             label={props.label}

@@ -2,8 +2,8 @@ import { DatePicker, DateValidationError, PickerChangeHandlerContext } from "@mu
 import dayjs from "dayjs"
 
 function AlisaDatePicker(props: {
-    label: '',
-    value: '',        
+    label: string,
+    value: string,        
     autoFocus?: boolean,
     disabled?: boolean,
     fullWidth?: boolean,
