@@ -3,7 +3,7 @@ import { FormControlLabel, Stack, Switch } from '@mui/material';
 import { useState } from 'react';
 
 import { WithTranslation, withTranslation } from 'react-i18next';
-import AlisaForm from '../../alisa/AlisaForm';
+import AlisaDataForm from '../../alisa/AlisaDataForm';
 import expenseTypeContext from '../../../alisa-contexts/expense-type';
 import { ExpenseTypeInputDto } from '../../../../../backend/src/accounting/expense/dtos/expense-type-input.dto';
 import AlisaTextField from '../../alisa/form/AlisaTextField';
@@ -51,7 +51,7 @@ function ExpenseTypeForm({ t }: WithTranslation) {
     )
     return (
 
-        <AlisaForm<ExpenseTypeInputDto>
+        <AlisaDataForm<ExpenseTypeInputDto>
             t={t}
             alisaContext={expenseTypeContext}
             formComponents={formComponents}
@@ -59,7 +59,7 @@ function ExpenseTypeForm({ t }: WithTranslation) {
             data={data}
             validateObject={new ExpenseTypeInputDto()}
         >
-        </AlisaForm>
+        </AlisaDataForm>
     );
 }
 

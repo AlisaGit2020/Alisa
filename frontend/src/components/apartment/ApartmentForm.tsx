@@ -1,5 +1,5 @@
 import { Stack } from '@mui/material';
-import AlisaForm from '../alisa/AlisaForm';
+import AlisaDataForm from '../alisa/AlisaDataForm';
 import { useState } from 'react';
 import { getNumber } from '../../lib/functions';
 import { PropertyInputDto } from '../../../../backend/src/real-estate/property/dtos/property-input.dto'
@@ -45,7 +45,7 @@ function ApartmentForm({ t }: WithTranslation) {
     )
     return (
 
-        <AlisaForm<PropertyInputDto>
+        <AlisaDataForm<PropertyInputDto>
             t={t}
             alisaContext={apartmentContext}
             formComponents={formComponents}
@@ -53,7 +53,7 @@ function ApartmentForm({ t }: WithTranslation) {
             data={data}
             validateObject={new PropertyInputDto()}
         >
-        </AlisaForm>
+        </AlisaDataForm>
     );
 }
 

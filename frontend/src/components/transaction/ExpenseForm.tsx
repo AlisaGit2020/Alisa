@@ -1,6 +1,6 @@
 import TextField from '@mui/material/TextField';
 import { InputAdornment, Stack } from '@mui/material';
-import AlisaForm from '../alisa/AlisaForm';
+import AlisaDataForm from '../alisa/AlisaDataForm';
 import { useState } from 'react';
 import { ExpenseInputDto } from '../../../../backend/src/accounting/expense/dtos/expense-input.dto'
 import { TransactionInputDto } from '../../../../backend/src/accounting/transaction/dtos/transaction-input.dto'
@@ -164,7 +164,7 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
         return (<AlisaLoadingProgress></AlisaLoadingProgress>)
     } else {
         return (
-            <AlisaForm<ExpenseInputDto>
+            <AlisaDataForm<ExpenseInputDto>
                 t={t}
                 alisaContext={expenseContext}
                 formComponents={formComponents()}
@@ -174,7 +174,7 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
                 id={id}
                 relations={{ property: false, expenseType: false, transaction: true }}
             >
-            </AlisaForm>
+            </AlisaDataForm>
         );
     }
 

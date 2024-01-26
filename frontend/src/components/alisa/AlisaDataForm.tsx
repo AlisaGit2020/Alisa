@@ -1,15 +1,14 @@
 import axios from 'axios';
-import Button from '@mui/material/Button';
 import { useState } from 'react';
 import { getValidationErrors } from '../../lib/functions';
-import { Box, ButtonGroup, Grid, Link, Paper } from '@mui/material';
+import { Box, Grid, Link, Paper } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import React from 'react';
 import { ValidationError } from 'class-validator';
 import { TFunction } from 'i18next';
 import ApiClient from '../../lib/api-client';
 import { TypeOrmRelationOption } from '../../lib/types';
-import AlisaAlert from './dialog/AlisaAlert';
+import AlisaForm from './form/AlisaForm';
 
 
 interface InputProps<T> {
@@ -23,7 +22,7 @@ interface InputProps<T> {
     relations?: TypeOrmRelationOption
 }
 
-function AlisaForm<T extends { id: number }>({
+function AlisaDataForm<T extends { id: number }>({
     t,
     alisaContext,
     formComponents,
@@ -111,36 +110,22 @@ function AlisaForm<T extends { id: number }>({
                         <Link href={alisaContext.routePath} color="primary">
                             {t('back')}
                         </Link>
-                    </Box>
+                    </Box>                    
 
-                    {formComponents}
+                    <AlisaForm
+                        formComponents={formComponents} 
+                        submitButtonText={t('save')} 
+                        cancelButtonText={t('cancel')} 
+                        errorMessage={errorMessage} 
+                        validationMessage={validationErrors} 
+                        onSubmit={handleSubmit} 
+                        onCancel={() => navigate(alisaContext.routePath)}                        
+                    ></AlisaForm>
 
-                    <ButtonGroup>
-                        <Button variant="contained" color="primary"
-                            onClick={handleSubmit}>
-                            {t('save')}
-                        </Button>
-                        <Button variant="outlined"
-                            onClick={() => navigate(alisaContext.routePath)}>
-                            {t('cancel')}
-                        </Button>
-                    </ButtonGroup>
-
-                    {(errorMessage.length > 0 || validationErrors.length > 0) && (
-
-                        <Box marginTop={3} sx={{ padding: 1 }}>
-                            <AlisaAlert severity='error' content={errorMessage}></AlisaAlert>
-                            <AlisaAlert
-                                title={t('validationErrorTitle')}
-                                severity='warning'
-                                content={validationErrors}>
-                            </AlisaAlert>
-                        </Box>
-                    )}
                 </Grid>
             </Grid>
         </Paper>
     );
 }
 
-export default AlisaForm;
+export default AlisaDataForm;
