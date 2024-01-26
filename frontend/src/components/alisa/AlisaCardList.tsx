@@ -11,7 +11,7 @@ import Title from '../../Title';
 import { Box, Button, Card, CardActions, CardContent, CardMedia, Grid, IconButton, Link, Paper, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { TFunction } from 'i18next';
-import AlisaConfirmDialog from './form/dialog/AlisaConfirmDialog';
+import AlisaConfirmDialog from './dialog/AlisaConfirmDialog';
 import { TypeOrmFetchOptions } from '../../lib/types';
 import ApiClient from '../../lib/api-client';
 

@@ -9,7 +9,7 @@ import { ValidationError } from 'class-validator';
 import { TFunction } from 'i18next';
 import ApiClient from '../../lib/api-client';
 import { TypeOrmRelationOption } from '../../lib/types';
-import AlisaAlert from './form/dialog/AlisaAlert';
+import AlisaAlert from './dialog/AlisaAlert';
 
 
 interface InputProps<T> {
