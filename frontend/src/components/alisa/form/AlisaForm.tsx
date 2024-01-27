@@ -6,7 +6,7 @@ function AlisaForm(props: {
     formComponents: JSX.Element
     submitButtonText: string
     cancelButtonText: string
-    errorMessage: string | string[]
+    errorMessage?: string | string[]
     errorMessageTitle?: string
     validationMessage: string | string[]
     validationMessageTitle?: string
