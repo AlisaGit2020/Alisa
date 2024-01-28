@@ -3,10 +3,8 @@ import Dashboard from './dashboard/Dashboard';
 import Apartments from './apartment/Apartments';
 import ApartmentForm from './apartment/ApartmentForm';
 import Settings from './settings/Settings';
-import apartmentContext from '../alisa-contexts/apartment';
-import expenseTypeContext from '../alisa-contexts/expense-type';
+import{ apartmentContext, expenseTypeContext, transactionContext } from '../alisa-contexts/alisa-contexts';
 import ExpenseTypeForm from './settings/expense-type/ExpenseTypeForm';
-import transactionContext from '../alisa-contexts/transaction';
 import Transactions from './transaction/Transactions';
 import TransactionForm from './transaction/TransactionForm';
 

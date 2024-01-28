@@ -8,7 +8,8 @@ import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
 import { Expense } from '../../../../backend/src/accounting/expense/entities/expense.entity'
 import ApiClient from '../../lib/api-client';
-import expenseContext from '../../alisa-contexts/expense';
+import { expenseContext } from '../../alisa-contexts/alisa-contexts';
+
 
 function preventDefault(event: React.MouseEvent) {
   event.preventDefault();

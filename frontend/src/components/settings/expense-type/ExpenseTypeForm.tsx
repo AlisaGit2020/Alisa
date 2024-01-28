@@ -1,14 +1,11 @@
-import TextField from '@mui/material/TextField';
-import { FormControlLabel, Stack, Switch } from '@mui/material';
+import { Stack } from '@mui/material';
 import { useState } from 'react';
-
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AlisaDataForm from '../../alisa/AlisaDataForm';
-import expenseTypeContext from '../../../alisa-contexts/expense-type';
 import { ExpenseTypeInputDto } from '../../../../../backend/src/accounting/expense/dtos/expense-type-input.dto';
 import AlisaTextField from '../../alisa/form/AlisaTextField';
 import AlisaSwitch from '../../alisa/form/AlisaSwitch';
-import { Tune } from '@mui/icons-material';
+import { expenseTypeContext } from '../../../alisa-contexts/alisa-contexts';
 
 function ExpenseTypeForm({ t }: WithTranslation) {
     const [data, setData] = useState<ExpenseTypeInputDto>({

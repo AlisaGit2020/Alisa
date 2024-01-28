@@ -6,8 +6,8 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import React from 'react';
 import List from '@mui/material/List';
 import { WithTranslation, withTranslation } from 'react-i18next';
-import transactionContext from '../../alisa-contexts/transaction';
-import apartmentContext from '../../alisa-contexts/apartment';
+import { apartmentContext, transactionContext } from '../../alisa-contexts/alisa-contexts';
+
 
 function LeftMenuItems({ t }: WithTranslation) {
   return (

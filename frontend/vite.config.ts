@@ -8,5 +8,8 @@ export default defineConfig({
     host: true,
     strictPort: true,
     port: 8080
+  },
+  esbuild: {
+    target: 'esnext'
   }
 })

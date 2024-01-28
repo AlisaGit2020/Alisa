@@ -12,3 +12,7 @@ export type TypeOrmFetchOptions<T> = {
     where?: Partial<T>,
     order?: TypeOrmOrderOption
 };
+
+export type DTO<T> = T & {
+    id: number;
+};

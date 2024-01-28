@@ -1,8 +1,8 @@
 import { Grid } from '@mui/material'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { Property } from '../../../../backend/src/real-estate/property/entities/property.entity';
-import apartmentContext from '../../alisa-contexts/apartment';
 import AlisaCardList from '../alisa/AlisaCardList';
+import { apartmentContext } from '../../alisa-contexts/alisa-contexts';
 
 function Apartments({ t }: WithTranslation) {
 

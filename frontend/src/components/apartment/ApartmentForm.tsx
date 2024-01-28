@@ -1,19 +1,27 @@
 import { Stack } from '@mui/material';
-import AlisaDataForm from '../alisa/AlisaDataForm';
 import { useState } from 'react';
 import { getNumber } from '../../lib/functions';
 import { PropertyInputDto } from '../../../../backend/src/real-estate/property/dtos/property-input.dto'
 import { WithTranslation, withTranslation } from 'react-i18next';
-import apartmentContext from '../../alisa-contexts/apartment';
 import AlisaNumberField from '../alisa/form/AlisaNumberField';
 import AlisaTextField from '../alisa/form/AlisaTextField';
+import { apartmentContext } from '../../alisa-contexts/alisa-contexts';
+import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
+import { DTO } from '../../lib/types';
+import DataService from '../../lib/data-service';
+import { useNavigate, useParams } from 'react-router-dom';
 
 
 function ApartmentForm({ t }: WithTranslation) {
-    const [data, setData] = useState<PropertyInputDto>({
+    const [data, setData] = useState<DTO<PropertyInputDto>>({
+        id: 0,
         name: '',
         size: 0
     });
+    const {idParam} = useParams();    
+    const navigate = useNavigate();
+
+    const dataService = new DataService<DTO<PropertyInputDto>>(apartmentContext)
 
     const handleChange = (
         name: keyof PropertyInputDto,
@@ -22,7 +30,7 @@ function ApartmentForm({ t }: WithTranslation) {
         setData((prevData) => ({
             ...prevData,
             [name]: value,
-        }));
+        }));                
     }
 
     const formComponents = (
@@ -34,7 +42,7 @@ function ApartmentForm({ t }: WithTranslation) {
                 autoFocus={true}
                 onChange={(e) => handleChange('name', e.target.value)}
             />
-            <AlisaNumberField                
+            <AlisaNumberField
                 label={t('size')}
                 value={data.size}
                 autoComplete='off'
@@ -43,17 +51,21 @@ function ApartmentForm({ t }: WithTranslation) {
             />
         </Stack>
     )
+
     return (
 
-        <AlisaDataForm<PropertyInputDto>
-            t={t}
-            alisaContext={apartmentContext}
+        <AlisaFormHandler<DTO<PropertyInputDto>>
+            id={Number(idParam)}
+            dataService={dataService}
+            data={data}
             formComponents={formComponents}
             onSetData={setData}
-            data={data}
-            validateObject={new PropertyInputDto()}
+            cancelButtonText={t('cancel')}
+            submitButtonText={t('save')}
+            onCancel={() => navigate(apartmentContext.routePath)}
+            onAfterSubmit={() => navigate(apartmentContext.routePath)}
         >
-        </AlisaDataForm>
+        </AlisaFormHandler>
     );
 }
 

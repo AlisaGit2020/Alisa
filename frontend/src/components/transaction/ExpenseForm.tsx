@@ -1,23 +1,19 @@
-import TextField from '@mui/material/TextField';
-import { InputAdornment, Stack } from '@mui/material';
+
 import AlisaDataForm from '../alisa/AlisaDataForm';
 import { useState } from 'react';
 import { ExpenseInputDto } from '../../../../backend/src/accounting/expense/dtos/expense-input.dto'
 import { TransactionInputDto } from '../../../../backend/src/accounting/transaction/dtos/transaction-input.dto'
 import { WithTranslation, withTranslation } from 'react-i18next';
-import expenseContext from '../../alisa-contexts/expense';
 import AlisaSelect from '../alisa/AlisaSelect';
-import apartmentContext from '../../alisa-contexts/apartment';
 import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
 import ApiClient from '../../lib/api-client';
 import React from 'react';
 import { Property } from '../../../../backend/src/real-estate/property/entities/property.entity';
 import { ExpenseType } from '../../../../backend/src/accounting/expense/entities/expense-type.entity';
-import expenseTypeContext from '../../alisa-contexts/expense-type';
-import { DatePicker } from '@mui/x-date-pickers';
-import dayjs from 'dayjs';
 import AlisaTextField from '../alisa/form/AlisaTextField';
 import AlisaNumberField from '../alisa/form/AlisaNumberField';
+import { expenseContext, apartmentContext, expenseTypeContext } from '../../alisa-contexts/alisa-contexts';
+import { Stack } from '@mui/material';
 import AlisaDatePicker from '../alisa/form/AlisaDatepicker';
 
 interface ExpenseFormProps extends WithTranslation {
