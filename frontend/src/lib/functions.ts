@@ -19,16 +19,19 @@ export function getNumber(value: string, decimals: number): number {
 
 export async function getValidationErrors<T>(validateObject: object, data: T): Promise<ValidationError[]> {
     console.log(data);
-    copyMatchingKeyValues(validateObject, data)
+    copyMatchingKeyValues(validateObject, data as object)
 
     return await validate(validateObject, { skipMissingProperties: true });
 }
 
-export function copyMatchingKeyValues<T>(Target: T, Source: Partial<T>): void {
-    Object.keys(Source).forEach((key) => {
+export function copyMatchingKeyValues<T extends object>(
+    target: T,
+    source: Partial<T>
+): void {
+    Object.keys(source).forEach((key) => {
         const typedKey = key as keyof T;
-        if (Source[typedKey] !== undefined) {
-            Target[typedKey] = Source[typedKey] as T[keyof T];
+        if (source[typedKey] !== undefined) {
+            target[typedKey] = source[typedKey] as T[keyof T];
         }
     });
 }

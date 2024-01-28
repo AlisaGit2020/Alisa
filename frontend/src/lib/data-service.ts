@@ -76,11 +76,11 @@ class DataService<T extends { id: number }> {
         return strErrors
     }
 
-    private async getValidationErrors<T>(data: T): Promise<ValidationError[]> {
+    private async getValidationErrors<T extends object>(data: T): Promise<ValidationError[]> {
         if (this.dataValidateInstance === undefined) {
             return []
         }
-        copyMatchingKeyValues(this.dataValidateInstance, data)
+        copyMatchingKeyValues<T>(this.dataValidateInstance as T, data)
         return await validate(this.dataValidateInstance, { skipMissingProperties: true });
     }
 }
