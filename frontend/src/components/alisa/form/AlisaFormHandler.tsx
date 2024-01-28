@@ -1,26 +1,29 @@
 import React from "react"
 import AlisaForm from "./AlisaForm"
 import DataService from "../../../lib/data-service"
-import { error } from "console"
-
 
 function AlisaFormHandler<T extends { id: number }>(props: {
     formComponents: JSX.Element
     id?: number
     data?: T 
-    dataService: DataService<T>
-    submitButtonText: string
-    cancelButtonText: string
+    dataService: DataService<T>    
+    translation: {
+        submitButton: string,
+        cancelButton: string,
+        errorMessageTitle?: string,
+        validationMessageTitle?: string
+    }
     onCancel: () => void
     onAfterSubmit: () => void
     onSetData: React.Dispatch<React.SetStateAction<T>>;
 }) {
-    const [errorMessage] = React.useState<string>()
+    const [errorMessage, setErrorMessage] = React.useState<string>()
     const [validationMessage, setValidationMessage] = React.useState<string[]>([])
+    const [dataService] = React.useState<DataService<T>>(props.dataService)
 
     React.useEffect(() => {
         const fetchData = async (id: number) => {
-            const data = await props.dataService.read(id);            
+            const data = await dataService.read(id);            
             return data
         }
 
@@ -37,26 +40,26 @@ function AlisaFormHandler<T extends { id: number }>(props: {
             throw new Error('Cannot save when data is missing');
         }
 
-        try{
-            const result = await props.dataService.save(props.data, props.id)
-            
-            if (result.constructor.name === 'ValidationError') {
-                setValidationMessage([])
-                return;
-            }
-            
-            props.onAfterSubmit()
+        const validationErrors = await dataService.getStrValidationErrors(props.data)
+        if (validationErrors.length > 0) {
+            return setValidationMessage(validationErrors)
+        }
 
+        try{
+            await dataService.save(props.data, props.id)            
+            props.onAfterSubmit()
         } catch (error: unknown) {
-            //setErrorMessage(error)
+            setErrorMessage(JSON.stringify(error))
         }        
                 
     }
 
     return (
         <AlisaForm
-            submitButtonText={props.submitButtonText}
-            cancelButtonText={props.cancelButtonText}
+            submitButtonText={props.translation.submitButton}
+            cancelButtonText={props.translation.cancelButton}
+            errorMessageTitle={props.translation.errorMessageTitle}
+            validationMessageTitle={props.translation.validationMessageTitle}
             formComponents={props.formComponents}
             errorMessage={errorMessage}
             validationMessage={validationMessage}

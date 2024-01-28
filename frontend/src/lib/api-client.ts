@@ -1,7 +1,6 @@
 import axios from "axios";
 import { TypeOrmFetchOptions, TypeOrmRelationOption } from "./types";
 import Logger from "./logger";
-import { ValidationError } from "class-validator";
 import { VITE_API_URL } from "../constants";
 
 class ApiClient {
@@ -25,12 +24,12 @@ class ApiClient {
         return result[0];
     }
 
-    public static async post<T>(path: string, data: T): Promise<T | ValidationError> {
+    public static async post<T>(path: string, data: T): Promise<T> {
         Logger.info(data);
         return axios.post(ApiClient.getApiUrl(path), data)
     }
 
-    public static async put<T>(path: string, id: number, data: T): Promise<T | ValidationError> {
+    public static async put<T>(path: string, id: number, data: T): Promise<T> {
         Logger.info(data);
         return axios.put(ApiClient.getApiUrl(`${path}/${id}`), data)
     }

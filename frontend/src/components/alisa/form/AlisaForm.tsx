@@ -32,7 +32,7 @@ function AlisaForm(props: {
 
             {(props.errorMessage || props.validationMessage) && (
 
-                <Box marginTop={3} sx={{ padding: 3 }}>
+                <Box marginTop={3}>
                     <AlisaAlert
                         title={props.errorMessageTitle}
                         severity='error'

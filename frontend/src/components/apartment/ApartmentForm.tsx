@@ -18,34 +18,33 @@ function ApartmentForm({ t }: WithTranslation) {
         name: '',
         size: 0
     });
-    const {idParam} = useParams();    
+    const { idParam } = useParams();
     const navigate = useNavigate();
 
-    const dataService = new DataService<DTO<PropertyInputDto>>(apartmentContext)
+    const dataService = new DataService<DTO<PropertyInputDto>>(
+        apartmentContext,
+        undefined,
+        new PropertyInputDto()
+    )
 
     const handleChange = (
         name: keyof PropertyInputDto,
         value: PropertyInputDto[keyof PropertyInputDto]
-    ) => {
-        setData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));                
+    ) => {            
+        setData(dataService.updateNestedData(data, name, value));
     }
 
     const formComponents = (
         <Stack spacing={2} marginBottom={2}>
             <AlisaTextField
                 label={t('name')}
-                value={data.name}
-                autoComplete='off'
+                value={data.name}                
                 autoFocus={true}
                 onChange={(e) => handleChange('name', e.target.value)}
             />
             <AlisaNumberField
                 label={t('size')}
-                value={data.size}
-                autoComplete='off'
+                value={data.size}                
                 onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
                 adornment='m2'
             />
@@ -60,8 +59,12 @@ function ApartmentForm({ t }: WithTranslation) {
             data={data}
             formComponents={formComponents}
             onSetData={setData}
-            cancelButtonText={t('cancel')}
-            submitButtonText={t('save')}
+            translation={{
+                cancelButton: t('cancel'),
+                submitButton: t('save'),
+                validationMessageTitle: t('validationErrorTitle'),
+            }}
+
             onCancel={() => navigate(apartmentContext.routePath)}
             onAfterSubmit={() => navigate(apartmentContext.routePath)}
         >

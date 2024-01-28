@@ -1,15 +1,20 @@
 import { ValidationError, validate } from "class-validator";
 
-export function getNumber(value: string, decimals: number) {
+export function getNumber(value: string, decimals: number): number {
+    
+    if (value === '0') {
+        return 0;
+    }
 
     if (!value) {
-        return '';
+        return 0;
     }
 
     const floatNumber = parseFloat(value)
     if (floatNumber) {
         return parseFloat(floatNumber.toFixed(decimals));
     }
+    return 0
 }
 
 export async function getValidationErrors<T>(validateObject: object, data: T): Promise<ValidationError[]> {
@@ -19,7 +24,7 @@ export async function getValidationErrors<T>(validateObject: object, data: T): P
     return await validate(validateObject, { skipMissingProperties: true });
 }
 
-function copyMatchingKeyValues(Target: object, Source: any) {
+export function copyMatchingKeyValues(Target: object, Source: any) {
     return Object.keys(Source).forEach(key => {
         if (Source[key] !== undefined){            
             Target[key] = Source[key];

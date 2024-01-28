@@ -1,32 +1,68 @@
-import { ValidationError } from "class-validator";
+import { ValidationError, validate } from "class-validator";
 import ApiClient from "./api-client";
-import { DTO, TypeOrmRelationOption } from "./types";
+import { TypeOrmRelationOption } from "./types";
 import AlisaContext from "../alisa-contexts/alisa-contexts";
+import { copyMatchingKeyValues } from "./functions";
 
 class DataService<T extends { id: number }> {
     private apiPath: string;
-    private relations?: TypeOrmRelationOption;    
+    private relations?: TypeOrmRelationOption;
+    private dataValidateInstance?: object
 
-    constructor(context: AlisaContext, relations?: TypeOrmRelationOption) {
+    constructor(context: AlisaContext, relations?: TypeOrmRelationOption, validator?: object) {
         this.apiPath = context.apiPath;
         this.relations = relations;
+        this.dataValidateInstance = validator
     }
 
     public async read(id: number): Promise<T> {
         return ApiClient.get<T>(this.apiPath, id, this.relations)
     }
 
-    public async save( data: T, id?: number,): Promise<T | ValidationError> {
-        
+    public async save(data: T, id?: number,): Promise<T | ValidationError[]> {
+        const validationErrors = await this.getValidationErrors(data);
+        if (validationErrors.length > 0) {
+            return validationErrors
+        }
         if (id) {
             return ApiClient.put<T>(this.apiPath, id, data)
         } else {
-            return await ApiClient.post<T>(this.apiPath, data)
+            return ApiClient.post<T>(this.apiPath, data)
         }
-
     }
 
-    public static ValidationErrorsToStringArray(errors: ValidationError[]): string[] {
+    public updateNestedData(data: T, name: string, value: T[keyof T]): T {
+        const names = name.split('.');
+    
+        if (names.length === 1) {            
+            return { ...data, [name]: value } as T;
+        } else {
+            
+            const updatedData = { ...data };
+            let currentData = updatedData;
+    
+            for (let i = 0; i < names.length - 1; i++) {
+                const currentName = names[i] as keyof T;
+                if (currentName in currentData) {
+                    currentData[currentName] = { ...currentData[currentName] };
+                    currentData = currentData[currentName] as T;
+                } 
+            }
+    
+            const finalName = names[names.length - 1] as keyof T;
+            if (finalName in currentData) {
+                currentData[finalName] = value;
+            } 
+    
+            return updatedData as T;
+        }
+    }
+
+    public async getStrValidationErrors(data: T): Promise<string[]> {
+        return this.transformToStringArray(await this.getValidationErrors(data))
+    }
+
+    private transformToStringArray(errors: ValidationError[]): string[] {
         const strErrors: string[] = []
         if (errors.length > 0) {
             errors.forEach((error: ValidationError) => {
@@ -36,10 +72,16 @@ class DataService<T extends { id: number }> {
                     });
                 }
             });
-
-
         }
         return strErrors
+    }
+
+    private async getValidationErrors<T>(data: T): Promise<ValidationError[]> {
+        if (this.dataValidateInstance === undefined) {
+            return []
+        }
+        copyMatchingKeyValues(this.dataValidateInstance, data)
+        return await validate(this.dataValidateInstance, { skipMissingProperties: true });
     }
 }
 
