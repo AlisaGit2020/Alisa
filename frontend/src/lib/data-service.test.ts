@@ -34,4 +34,32 @@ describe('Data service', () => {
         });
     })
 
+    describe('Data', () => {
+
+        it('updates nested data correctly', async () => {
+            const dataService = new DataService<{
+                description: string, 
+                transaction: {                    
+                    totalAmount: number,
+                    isDefault: boolean
+                },
+            }>(context)
+            const data = {
+                description: 'First version',
+                transaction: {
+                    totalAmount: 9.9,
+                    isDefault: false
+                }
+            }
+
+            let updatedData = dataService.updateNestedData(data, 'transaction.totalAmount', 10)         
+            updatedData = dataService.updateNestedData(updatedData, 'transaction.isDefault', true)         
+            updatedData = dataService.updateNestedData(updatedData, 'description', 'Second version')         
+            expect (updatedData.transaction.totalAmount).toBe(10)
+            expect (updatedData.transaction.isDefault).toBe(true)
+            expect (updatedData.description).toBe('Second version')
+            
+        });
+    })
+
 });

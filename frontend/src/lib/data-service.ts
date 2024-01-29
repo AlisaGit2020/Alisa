@@ -31,7 +31,7 @@ class DataService<T extends object> {
         }
     }
 
-    public updateNestedData(data: T, name: string, value: T[keyof T]): T {
+    public updateNestedData(data: T, name: string, value: unknown): T {
         const names = name.split('.');
     
         if (names.length === 1) {            
@@ -51,7 +51,7 @@ class DataService<T extends object> {
     
             const finalName = names[names.length - 1] as keyof T;
             if (finalName in currentData) {
-                currentData[finalName] = value;
+                currentData[finalName] = value as T[keyof T];
             } 
     
             return updatedData as T;
