@@ -2,6 +2,8 @@
 import DataService from "./data-service";
 import AlisaContext from "../alisa-contexts/alisa-contexts";
 import { TestInputDto } from "../../test/mock/TestInputDto";
+import { TestNestedInputDto } from "../../test/mock/TestNestedInputDto";
+import "reflect-metadata";
 
 jest.mock('../../src/constants', () => ({
     VITE_API_URL: 'http://localhost',
@@ -10,27 +12,37 @@ jest.mock('../../src/constants', () => ({
 
 describe('Data service', () => {
     
-    let dataService: DataService<TestInputDto>;
+    let dataService: DataService<object>;
 
     const context: AlisaContext = {
         apiPath: 'test/data',
         name: 'Test context',
         routePath: 'path/test/data'
-    }
-    
-    beforeAll(() => {
-       dataService = new DataService<TestInputDto>(context, {}, new TestInputDto())     
-    })
+    }    
 
     describe('Validation', () => {
 
-        it('Transforms Validation array to string array', async () => {
-            
+        it('Transforms validation array to string array', async () => {
+            dataService = new DataService<TestInputDto>(context, {}, new TestInputDto())   
+
             const strErrors = await dataService.getStrValidationErrors({
                 name: ''                
             })         
             expect(strErrors).toHaveLength(1)    
             expect(strErrors[0]).toBe('name should not be empty')                    
+        });
+
+        it('validated child input dto', async () => {
+            dataService = new DataService<TestNestedInputDto>(context, {}, new TestNestedInputDto())   
+            
+            const strErrors = await dataService.getStrValidationErrors({
+                name: 'Some name',
+                child: {
+                    name: ''
+                }
+            })         
+            expect(strErrors).toHaveLength(1)    
+            expect(strErrors[0]).toBe('child name should not be empty')                    
         });
     })
 
@@ -56,8 +68,8 @@ describe('Data service', () => {
                         someField: 'some text'
                     }
                 }
-            }
-
+            }   
+            
             let updatedData = dataService.updateNestedData(data, 'transaction.totalAmount', 10)         
             updatedData = dataService.updateNestedData(updatedData, 'transaction.isDefault', true)         
             updatedData = dataService.updateNestedData(updatedData, 'description', 'Second version')         

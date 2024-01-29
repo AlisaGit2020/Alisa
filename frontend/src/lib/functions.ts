@@ -30,9 +30,24 @@ export function copyMatchingKeyValues<T extends object>(
 ): void {
     Object.keys(source).forEach((key) => {
         const typedKey = key as keyof T;
-        if (source[typedKey] !== undefined) {
-            target[typedKey] = source[typedKey] as T[keyof T];
+        const sourceValue = source[typedKey];
+
+        if (sourceValue !== undefined) {
+            if (typeof sourceValue === 'object' && sourceValue !== null) {
+                
+                if (typeof target[typedKey] === 'object' && target[typedKey] !== null) {
+                    copyMatchingKeyValues(target[typedKey] as object, sourceValue);
+                } else {
+                    target[typedKey] = {} as T[keyof T];
+                    copyMatchingKeyValues(target[typedKey] as object, sourceValue);
+                }
+            } else {
+                
+                target[typedKey] = sourceValue as T[keyof T];
+            }
         }
     });
 }
+
+
 

@@ -33,27 +33,27 @@ class DataService<T extends object> {
 
     public updateNestedData(data: T, name: string, value: unknown): T {
         const names = name.split('.');
-    
-        if (names.length === 1) {            
+
+        if (names.length === 1) {
             return { ...data, [name]: value } as T;
         } else {
-            
+
             const updatedData = { ...data };
             let currentData = updatedData;
-    
+
             for (let i = 0; i < names.length - 1; i++) {
                 const currentName = names[i] as keyof T;
                 if (currentName in currentData) {
                     currentData[currentName] = { ...currentData[currentName] };
                     currentData = currentData[currentName] as T;
-                } 
+                }
             }
-    
+
             const finalName = names[names.length - 1] as keyof T;
             if (finalName in currentData) {
                 currentData[finalName] = value as T[keyof T];
-            } 
-    
+            }
+
             return updatedData as T;
         }
     }
@@ -71,9 +71,15 @@ class DataService<T extends object> {
                         strErrors.push(constraint);
                     });
                 }
+                if (error.children && typeof error.children === 'object') {
+                    const childrenErrors = this.transformToStringArray(error.children);
+                    childrenErrors.forEach((childError: string) => {
+                        strErrors.push(error.property + ' ' + childError);
+                    });
+                }
             });
         }
-        return strErrors
+                return strErrors
     }
 
     private async getValidationErrors<T extends object>(data: T): Promise<ValidationError[]> {
@@ -81,7 +87,7 @@ class DataService<T extends object> {
             return []
         }
         copyMatchingKeyValues<T>(this.dataValidateInstance as T, data)
-        return await validate(this.dataValidateInstance, { skipMissingProperties: true });
+                return await validate(this.dataValidateInstance, { skipMissingProperties: true });
     }
 }
 
