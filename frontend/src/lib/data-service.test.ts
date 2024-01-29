@@ -41,23 +41,32 @@ describe('Data service', () => {
                 description: string, 
                 transaction: {                    
                     totalAmount: number,
-                    isDefault: boolean
+                    isDefault: boolean,
+                    thirdLevel: {
+                        someField: string
+                    }
                 },
             }>(context)
             const data = {
                 description: 'First version',
                 transaction: {
                     totalAmount: 9.9,
-                    isDefault: false
+                    isDefault: false,
+                    thirdLevel: {
+                        someField: 'some text'
+                    }
                 }
             }
 
             let updatedData = dataService.updateNestedData(data, 'transaction.totalAmount', 10)         
             updatedData = dataService.updateNestedData(updatedData, 'transaction.isDefault', true)         
             updatedData = dataService.updateNestedData(updatedData, 'description', 'Second version')         
+            updatedData = dataService.updateNestedData(updatedData, 'transaction.thirdLevel.someField', 'Another value')        
+
             expect (updatedData.transaction.totalAmount).toBe(10)
             expect (updatedData.transaction.isDefault).toBe(true)
             expect (updatedData.description).toBe('Second version')
+            expect (updatedData.transaction.thirdLevel.someField).toBe('Another value')
             
         });
     })
