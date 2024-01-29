@@ -2,7 +2,7 @@ import React from "react"
 import AlisaForm from "./AlisaForm"
 import DataService from "../../../lib/data-service"
 
-function AlisaFormHandler<T extends { id: number }>(props: {
+function AlisaFormHandler<T extends object>(props: {
     formComponents: JSX.Element
     id?: number
     data?: T 
@@ -41,7 +41,7 @@ function AlisaFormHandler<T extends { id: number }>(props: {
         }
 
         const validationErrors = await dataService.getStrValidationErrors(props.data)
-        if (validationErrors.length > 0) {
+        if (validationErrors !== undefined && validationErrors.length > 0) {
             return setValidationMessage(validationErrors)
         }
 

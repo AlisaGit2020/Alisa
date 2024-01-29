@@ -16,3 +16,5 @@ export type TypeOrmFetchOptions<T> = {
 export type DTO<T> = T & {
     id: number;
 };
+
+export type TObject<T> = T & object

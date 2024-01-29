@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils'; // Import act to handle async code
 import AlisaFormHandler from './AlisaFormHandler';
 import DataService from '../../../lib/data-service';
 import AlisaContext from '../../../alisa-contexts/alisa-contexts';
-import { DTO } from '../../../lib/types';
+import { TestInputDto } from '../../../../test/mock/TestInputDto';
 
 // Mock DataService for testing purposes
 jest.mock('../../../lib/data-service');
@@ -29,6 +29,7 @@ describe('AlisaFormHandler', () => {
 
     // Define a mock function for onSetData
     const mockSetData = jest.fn();
+    const mockAfterSubmit = jest.fn();
 
     const context: AlisaContext = {
         apiPath : 'test/data',
@@ -38,14 +39,18 @@ describe('AlisaFormHandler', () => {
 
     // Render AlisaFormHandler with necessary props
     const { getByText } = render(
-      <AlisaFormHandler
+      <AlisaFormHandler<TestInputDto>
         formComponents={<div data-test-id="formComponents" />}
         id={1}
-        dataService={new DataService<DTO<{name: string}>>(context)}
-        submitButtonText="Save"
-        cancelButtonText="Cancel"
+        dataService={new DataService<TestInputDto>(context, {}, new TestInputDto())}
+        translation={{
+          submitButton: 'Save',
+          cancelButton: 'Cancel'
+        }}                
+        data={{name: 'Test name'}}
         onCancel={() => {}}
         onSetData={mockSetData}
+        onAfterSubmit={mockAfterSubmit}
       />
     );
 
@@ -61,7 +66,9 @@ describe('AlisaFormHandler', () => {
 
     // Wait for save operation to complete
     await waitFor(() => {
-      expect(DataService.prototype.save).toHaveBeenCalledWith(1);
+      expect(DataService.prototype.save).toHaveBeenCalledWith(
+        {name: "Test name"}, 1
+      );
       // You may add more assertions based on the actual behavior of your code
     });
   });

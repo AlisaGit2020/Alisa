@@ -1,10 +1,10 @@
 import { ValidationError, validate } from "class-validator";
 import ApiClient from "./api-client";
-import { TypeOrmRelationOption } from "./types";
+import { DTO, TypeOrmRelationOption } from "./types";
 import AlisaContext from "../alisa-contexts/alisa-contexts";
 import { copyMatchingKeyValues } from "./functions";
 
-class DataService<T extends { id: number }> {
+class DataService<T extends object> {
     private apiPath: string;
     private relations?: TypeOrmRelationOption;
     private dataValidateInstance?: object
@@ -16,11 +16,11 @@ class DataService<T extends { id: number }> {
     }
 
     public async read(id: number): Promise<T> {
-        return ApiClient.get<T>(this.apiPath, id, this.relations)
+        return ApiClient.get<DTO<T>>(this.apiPath, id, this.relations)
     }
 
     public async save(data: T, id?: number,): Promise<T | ValidationError[]> {
-        const validationErrors = await this.getValidationErrors(data);
+        const validationErrors = await this.getValidationErrors(data as object);
         if (validationErrors.length > 0) {
             return validationErrors
         }
@@ -59,7 +59,7 @@ class DataService<T extends { id: number }> {
     }
 
     public async getStrValidationErrors(data: T): Promise<string[]> {
-        return this.transformToStringArray(await this.getValidationErrors(data))
+        return this.transformToStringArray(await this.getValidationErrors(data as object))
     }
 
     private transformToStringArray(errors: ValidationError[]): string[] {

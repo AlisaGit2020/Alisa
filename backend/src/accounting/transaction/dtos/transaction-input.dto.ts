@@ -4,9 +4,9 @@ export class TransactionInputDto {
   @IsNotEmpty()
   description: string = '';
 
-  transactionDate: Date;
+  transactionDate!: Date;
 
-  accountingDate: Date;
+  accountingDate!: Date;
 
   amount: number = 0;
 

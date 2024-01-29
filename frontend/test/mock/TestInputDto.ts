@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsNumber, Max, Min } from "class-validator";
+import { IsNotEmpty } from "class-validator";
 export class TestInputDto {
     @IsNotEmpty()
-    name: string;
+    name!: string;
 }
 
