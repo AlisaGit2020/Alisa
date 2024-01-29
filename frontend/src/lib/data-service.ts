@@ -79,7 +79,7 @@ class DataService<T extends object> {
                 }
             });
         }
-                return strErrors
+        return strErrors
     }
 
     private async getValidationErrors<T extends object>(data: T): Promise<ValidationError[]> {
@@ -87,7 +87,7 @@ class DataService<T extends object> {
             return []
         }
         copyMatchingKeyValues<T>(this.dataValidateInstance as T, data)
-                return await validate(this.dataValidateInstance, { skipMissingProperties: true });
+        return await validate(this.dataValidateInstance, { skipMissingProperties: true });
     }
 }
 
