@@ -17,8 +17,7 @@ export function getNumber(value: string, decimals: number): number {
     return 0
 }
 
-export async function getValidationErrors<T>(validateObject: object, data: T): Promise<ValidationError[]> {
-    console.log(data);
+export async function getValidationErrors<T>(validateObject: object, data: T): Promise<ValidationError[]> {    
     copyMatchingKeyValues(validateObject, data as object)
 
     return await validate(validateObject, { skipMissingProperties: true });

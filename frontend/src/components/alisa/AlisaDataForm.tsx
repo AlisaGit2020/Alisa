@@ -45,8 +45,7 @@ function AlisaDataForm<T extends { id: number }>({
 
     React.useEffect(() => {
         const fetchData = async (id: number) => {
-            const data = await ApiClient.get<T>(alisaContext.apiPath, id, relations);
-            console.log(data)
+            const data = await ApiClient.get<T>(alisaContext.apiPath, id, relations);            
             return data
         }
 
@@ -68,8 +67,7 @@ function AlisaDataForm<T extends { id: number }>({
                         validationErrors.push(constraint);
                     });
                 }
-            });
-            console.log(valErrors)
+            });            
             setValidationErrors(validationErrors);
             return;
         }

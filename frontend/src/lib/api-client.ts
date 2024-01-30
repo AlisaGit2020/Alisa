@@ -39,16 +39,14 @@ class ApiClient {
     }
 
     public static async getDefault<T>(path: string): Promise<T> {        
-        const response = await axios.get(ApiClient.getApiUrl(`${path}/default`));
-        console.log(response.data);
+        const response = await axios.get(ApiClient.getApiUrl(`${path}/default`));        
         return response.data;
     }
 
     public static async search<T>(
         path: string,
         options?: TypeOrmFetchOptions<T>
-    ): Promise<T[]> {
-        Logger.info(path);
+    ): Promise<T[]> {        
         const url = ApiClient.getApiUrl(`${path}/search`);
         try {
             return (await axios.post<T[]>(url, options)).data;
