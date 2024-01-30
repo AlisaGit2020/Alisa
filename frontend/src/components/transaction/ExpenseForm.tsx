@@ -11,7 +11,7 @@ import { Property } from '@alisa-backend/real-estate/property/entities/property.
 import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
 import AlisaTextField from '../alisa/form/AlisaTextField';
 import AlisaNumberField from '../alisa/form/AlisaNumberField';
-import { expenseContext, apartmentContext, expenseTypeContext } from '../../alisa-contexts/alisa-contexts';
+import { expenseContext, apartmentContext, expenseTypeContext } from '@alisa-contexts';
 import { Stack } from '@mui/material';
 import AlisaDatePicker from '../alisa/form/AlisaDatepicker';
 

@@ -1,12 +1,12 @@
 import { withTranslation } from 'react-i18next';
 import ExpenseForm from './ExpenseForm';
-import { Transaction } from '../../../../backend/src/accounting/transaction/entities/transaction.entity';
+import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import { useState } from 'react';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import TransactionChooseType from './TransactionChooseType';
 import ApiClient from '../../lib/api-client';
-import { transactionContext } from '../../alisa-contexts/alisa-contexts';
+import { transactionContext } from '@alisa-contexts';
 
 
 function TransactionForm() {

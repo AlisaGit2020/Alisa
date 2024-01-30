@@ -1,7 +1,8 @@
 import { WithTranslation, withTranslation } from "react-i18next"
-import { ExpenseType } from "../../../../../backend/src/accounting/expense/entities/expense-type.entity"
+
 import AlisaDataTable from "../../alisa/AlisaDataTable"
-import { expenseTypeContext } from "../../../alisa-contexts/alisa-contexts"
+import { expenseTypeContext } from "@alisa-contexts"
+import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity"
 
 function ExpenseTypes({ t }: WithTranslation) {
     return (

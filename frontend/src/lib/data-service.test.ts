@@ -1,6 +1,6 @@
 // data-service.test.js
 import DataService from "./data-service";
-import AlisaContext from "../alisa-contexts/alisa-contexts";
+import AlisaContext from "@alisa-contexts";
 import { TestInputDto } from "../../test/mock/TestInputDto";
 import { TestNestedInputDto } from "../../test/mock/TestNestedInputDto";
 import "reflect-metadata";

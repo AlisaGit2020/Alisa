@@ -2,7 +2,7 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils'; // Import act to handle async code
 import AlisaFormHandler from './AlisaFormHandler';
 import DataService from '../../../lib/data-service';
-import AlisaContext from '../../../alisa-contexts/alisa-contexts';
+import AlisaContext from '@alisa-contexts';
 import { TestInputDto } from '../../../../test/mock/TestInputDto';
 
 // Mock DataService for testing purposes

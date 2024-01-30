@@ -1,11 +1,11 @@
 import { Stack } from '@mui/material';
 import { useState } from 'react';
 import { getNumber } from '../../lib/functions';
-import { PropertyInputDto } from '../../../../backend/src/real-estate/property/dtos/property-input.dto'
+import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/property-input.dto'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AlisaNumberField from '../alisa/form/AlisaNumberField';
 import AlisaTextField from '../alisa/form/AlisaTextField';
-import { apartmentContext } from '../../alisa-contexts/alisa-contexts';
+import { apartmentContext } from '../../lib/alisa-contexts';
 import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
 import { DTO } from '../../lib/types';
 import DataService from '../../lib/data-service';

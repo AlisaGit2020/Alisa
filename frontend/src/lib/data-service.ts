@@ -1,7 +1,7 @@
 import { ValidationError, validate } from "class-validator";
 import ApiClient from "./api-client";
 import { DTO, TypeOrmRelationOption } from "./types";
-import AlisaContext from "../alisa-contexts/alisa-contexts";
+import AlisaContext from "@alisa-contexts";
 import { copyMatchingKeyValues } from "./functions";
 
 class DataService<T extends object> {

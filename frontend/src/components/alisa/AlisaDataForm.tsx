@@ -9,7 +9,7 @@ import { TFunction } from 'i18next';
 import ApiClient from '../../lib/api-client';
 import { TypeOrmRelationOption } from '../../lib/types';
 import AlisaForm from './form/AlisaForm';
-import AlisaContext from '../../alisa-contexts/alisa-contexts';
+import AlisaContext from '../../lib/alisa-contexts';
 
 
 interface InputProps<T> {
