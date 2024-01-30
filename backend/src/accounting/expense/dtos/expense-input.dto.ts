@@ -1,6 +1,6 @@
-import { TransactionInputDto } from 'src/accounting/transaction/dtos/transaction-input.dto';
+import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
 import { IsNumber, IsObject } from 'class-validator';
-import { PropertyInputDto } from 'src/real-estate/property/dtos/property-input.dto';
+import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/property-input.dto';
 
 export class ExpenseInputDto {
   expenseType?: ExpenseInputDto;
@@ -14,5 +14,5 @@ export class ExpenseInputDto {
   propertyId?: number;
 
   @IsObject()
-  transaction: TransactionInputDto;
+  transaction: TransactionInputDto = new TransactionInputDto();
 }
