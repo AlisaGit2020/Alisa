@@ -29,6 +29,7 @@
     "paths": {
       "@alisa-backend/*": ["../backend/src/*"],
       "@alisa-contexts": ["src/lib/alisa-contexts.ts"],
+      "@alisa-lib/*": ["src/lib/*"],
     }
   },
   "include": ["src"],  

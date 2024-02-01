@@ -19,6 +19,10 @@ class DataService<T extends object> {
         return ApiClient.get<DTO<T>>(this.apiPath, id, this.relations)
     }
 
+    public async getDefaults(): Promise<T> {
+        return ApiClient.getDefault<T>(this.apiPath)
+    }
+
     public async save(data: T, id?: number,): Promise<T | ValidationError[]> {
         const validationErrors = await this.getValidationErrors(data as object);
         if (validationErrors.length > 0) {
