@@ -3,7 +3,7 @@ import dayjs from "dayjs"
 
 function AlisaDatePicker(props: {
     label: string,
-    value: string,        
+    value: Date,        
     autoFocus?: boolean,
     disabled?: boolean,
     fullWidth?: boolean,

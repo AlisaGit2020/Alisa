@@ -7,6 +7,7 @@ import { useParams } from 'react-router-dom';
 import TransactionChooseType from './TransactionChooseType';
 import ApiClient from '../../lib/api-client';
 import { transactionContext } from '@alisa-contexts';
+import ExpenseForm2 from './ExpenseForm2';
 
 
 function TransactionForm() {
@@ -41,7 +42,7 @@ function TransactionForm() {
 
     if (type == 'expense' || expenseId) {
         return (
-            <ExpenseForm id={expenseId} />
+            <ExpenseForm2 id={expenseId} />
         )
     } else {
         return (
