@@ -6,7 +6,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import TransactionChooseType from './TransactionChooseType';
 import ApiClient from '../../lib/api-client';
-import { transactionContext } from '@alisa-contexts';
+import { transactionContext } from '@alisa-lib/alisa-contexts';
 
 
 function TransactionForm() {

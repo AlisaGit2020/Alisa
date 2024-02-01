@@ -19,8 +19,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {      
-      '@alisa-backend': path.resolve(__dirname, '../backend/src'),
-      '@alisa-contexts': path.resolve(__dirname, './src/lib/alisa-contexts.ts'),
+      '@alisa-backend': path.resolve(__dirname, '../backend/src'),      
       '@alisa-lib': path.resolve(__dirname, './src/lib'),
     },
   },

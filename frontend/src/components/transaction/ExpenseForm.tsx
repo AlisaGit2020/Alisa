@@ -3,23 +3,23 @@ import { useState } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AlisaNumberField from '../alisa/form/AlisaNumberField';
 import AlisaTextField from '../alisa/form/AlisaTextField';
-import { apartmentContext, expenseContext, expenseTypeContext, transactionContext } from '@alisa-contexts';
+import { apartmentContext, expenseContext, expenseTypeContext, transactionContext } from '@alisa-lib/alisa-contexts';
 import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
 import DataService from '@alisa-lib/data-service';
 import { useNavigate } from 'react-router-dom';
 import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-input.dto';
 import AlisaSelect from '../alisa/AlisaSelect';
 import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
-import AlisaDatePicker from '../alisa/form/AlisaDatepicker';
+import AlisaDatePicker from '../alisa/form/AlisaDatePicker';
 import React from 'react';
 import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
 import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 
-interface ExpenseForm2Props extends WithTranslation {
+interface ExpenseFormProps extends WithTranslation {
     id?: number
 }
 
-function ExpenseForm({ t, id }: ExpenseForm2Props) {
+function ExpenseForm({ t, id }: ExpenseFormProps) {
 
     const [data, setData] = useState<ExpenseInputDto>(new ExpenseInputDto());
     const navigate = useNavigate();
@@ -31,9 +31,8 @@ function ExpenseForm({ t, id }: ExpenseForm2Props) {
     )
 
     React.useEffect(() => {
-        if (id === undefined) {
-            const fetchData = () => {
-                console.log('fetch defaults data')
+        if (id && id === undefined) {
+            const fetchData = () => {                
                 return dataService.getDefaults()
             }
 
@@ -41,7 +40,7 @@ function ExpenseForm({ t, id }: ExpenseForm2Props) {
                 .then(setData)
         }
 
-    }, [id])
+    }, [])
 
     const handleChange = (
         name: string,

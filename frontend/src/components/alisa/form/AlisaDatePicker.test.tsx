@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import AlisaDatePicker from './AlisaDatepicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import AlisaDatePicker from './AlisaDatePicker';
 
 
 describe('AlisaDatePicker', () => {
@@ -11,7 +11,7 @@ describe('AlisaDatePicker', () => {
 
     const props = {
       label: 'Test Label',
-      value: '2022-01-26', // Provide a date string in the format YYYY-MM-DD
+      value: new Date('2024-01-01'), 
       autoFocus: true,
       disabled: false,
       fullWidth: false,
@@ -31,7 +31,7 @@ describe('AlisaDatePicker', () => {
     expect(datePicker).toBeEnabled();
 
     // Check if the date is displayed in the input
-    expect(datePicker).toHaveValue('01/26/2022');
+    expect(datePicker).toHaveValue('01/01/2024');
 
     // Check if the DatePicker has the correct width
     expect(datePicker).toHaveStyle('width: 100%;'); // Adjust this based on your styling
@@ -44,7 +44,7 @@ describe('AlisaDatePicker', () => {
 
     const props = {
       label: 'Test Label',
-      value: '2022-01-26',
+      value: new Date('2022-01-26'),
       onChange: mockOnChange,
     };
 

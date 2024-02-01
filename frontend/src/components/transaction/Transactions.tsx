@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AlisaDataTable from '../alisa/AlisaDataTable';
-import { transactionContext } from '@alisa-contexts';
+import { transactionContext } from '@alisa-lib/alisa-contexts';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 
 function Transactions({ t }: WithTranslation) {

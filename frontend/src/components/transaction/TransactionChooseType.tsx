@@ -3,7 +3,7 @@ import AlisaContent from "../alisa/AlisaContent";
 import PaymentIcon from '@mui/icons-material/Payment';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { WithTranslation, withTranslation } from "react-i18next";
-import { transactionContext } from "@alisa-contexts";
+import { transactionContext } from "@alisa-lib/alisa-contexts";
 
 function TransactionChooseType({t}: WithTranslation) {
     return (

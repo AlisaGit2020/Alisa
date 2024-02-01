@@ -5,7 +5,7 @@ import AlisaDataForm from '../../alisa/AlisaDataForm';
 import { ExpenseTypeInputDto } from '@alisa-backend/accounting/expense/dtos/expense-type-input.dto';
 import AlisaTextField from '../../alisa/form/AlisaTextField';
 import AlisaSwitch from '../../alisa/form/AlisaSwitch';
-import { expenseTypeContext } from '@alisa-contexts';
+import { expenseTypeContext } from '@alisa-lib/alisa-contexts';
 
 function ExpenseTypeForm({ t }: WithTranslation) {
     const [data, setData] = useState<ExpenseTypeInputDto>({

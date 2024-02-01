@@ -2,7 +2,7 @@ import { Grid } from '@mui/material'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 import AlisaCardList from '../alisa/AlisaCardList';
-import { apartmentContext } from '@alisa-contexts';
+import { apartmentContext } from '@alisa-lib/alisa-contexts';
 
 function Apartments({ t }: WithTranslation) {
 

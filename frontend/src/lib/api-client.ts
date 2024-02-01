@@ -24,13 +24,11 @@ class ApiClient {
         return result[0];
     }
 
-    public static async post<T>(path: string, data: T): Promise<T> {
-        Logger.info(data);
+    public static async post<T>(path: string, data: T): Promise<T> {        
         return axios.post(ApiClient.getApiUrl(path), data)
     }
 
-    public static async put<T>(path: string, id: number, data: T): Promise<T> {
-        Logger.info(data);
+    public static async put<T>(path: string, id: number, data: T): Promise<T> {        
         return axios.put(ApiClient.getApiUrl(`${path}/${id}`), data)
     }
 

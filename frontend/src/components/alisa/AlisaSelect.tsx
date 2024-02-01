@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { useState } from 'react';
-import { MenuItem, Select, SelectChangeEvent, TextField } from '@mui/material';
+import { ChangeEventHandler, useState } from 'react';
 import React from 'react';
 import ApiClient from '../../lib/api-client';
 import { TypeOrmFetchOptions } from '../../lib/types';
@@ -47,7 +46,7 @@ function AlisaSelect<T1, T2 extends{id: number, name: string}>({
         return data
     }
 
-    const handleChange = (e: SelectChangeEvent<NonNullable<T1[keyof T1]>>) => {
+    const handleChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> | undefined = (e) => {
         const selectedValue = e.target.value as T1[keyof T1]        
         onHandleChange(fieldName, selectedValue)
     }
@@ -59,8 +58,7 @@ function AlisaSelect<T1, T2 extends{id: number, name: string}>({
     return (
 
         (data.length > 0 && value) && (
-            <AlisaSelectField                
-                select
+            <AlisaSelectField                                
                 value={value as number}
                 label={label}
                 items={data}

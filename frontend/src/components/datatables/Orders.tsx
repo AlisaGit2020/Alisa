@@ -7,7 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
 import ApiClient from '../../lib/api-client';
-import { expenseContext } from '@alisa-contexts';
+import { expenseContext } from '@alisa-lib/alisa-contexts';
 import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 
 

@@ -27,8 +27,7 @@
 
     "baseUrl": ".",
     "paths": {
-      "@alisa-backend/*": ["../backend/src/*"],
-      "@alisa-contexts": ["src/lib/alisa-contexts.ts"],
+      "@alisa-backend/*": ["../backend/src/*"],      
       "@alisa-lib/*": ["src/lib/*"],
     }
   },
