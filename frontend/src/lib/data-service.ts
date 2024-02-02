@@ -34,7 +34,7 @@ class DataService<T extends object> {
             return ApiClient.post<T>(this.apiPath, data)
         }
     }
-
+    
     public updateNestedData(data: T, name: string, value: unknown): T {
         const names = name.split('.');
 

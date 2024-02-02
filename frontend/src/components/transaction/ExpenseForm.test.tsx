@@ -14,6 +14,41 @@ jest.mock('../../constants', () => ({
 jest.mock('../../lib/data-service');
 
 describe('ExpenseForm Component', () => {
+  beforeAll(() => {
+    const mockRead = jest.fn().mockResolvedValue(
+      {
+        id: 5,
+        transaction: {
+          accountingDate: new Date('2024-01-01'),
+          transactionDate: new Date('2024-01-01'),
+          description: 'Test transaction',
+          amount: 10,
+          quantity: 4,
+          totalAmount: 40,
+        },
+        propertyId: 5,
+        expenseTypeId: 1
+      } as ExpenseInputDto);
+
+    jest.spyOn(DataService.prototype, 'read').mockResolvedValue(mockRead);
+
+    const mockSearch = jest.fn().mockResolvedValue(
+      [
+        {
+          id: 1,
+          name: 'Item 1'
+        },
+        {
+          id: 5,
+          name: 'Item 5'
+        }
+      ]
+    );
+
+    // Mock the DataService constructor
+    jest.spyOn(DataService.prototype, 'search').mockResolvedValue(mockSearch);
+
+  })
   it('renders ExpenseForm correctly', async () => {
     const { container } = render(
       <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -31,25 +66,7 @@ describe('ExpenseForm Component', () => {
   });
 
   it('handles form submission correctly', async () => {
-    // Mock the useNavigate function    
 
-    const mockRead = jest.fn().mockResolvedValueOnce(
-      {
-        id: 5,
-        transaction: {
-          accountingDate :new Date('2024-01-01'),
-          transactionDate : new Date('2024-01-01'),
-          description : 'Test transaction',
-          amount : 10,
-          quantity : 4,
-          totalAmount :40,
-        },
-        propertyId : 5,
-        expenseTypeId : 1
-      } as ExpenseInputDto);
-
-    // Mock the DataService constructor
-    jest.spyOn(DataService.prototype, 'read').mockImplementationOnce(mockRead);
 
     // Render the component with mocked dependencies
     render(
@@ -59,7 +76,7 @@ describe('ExpenseForm Component', () => {
         </MemoryRouter>
       </LocalizationProvider>
     );
-    
+
   });
 
   // Add more test cases based on your component's functionality
