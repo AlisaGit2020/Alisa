@@ -1,11 +1,13 @@
 import { Stack } from '@mui/material';
 import { useState } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
-import AlisaDataForm from '../../alisa/AlisaDataForm';
 import { ExpenseTypeInputDto } from '@alisa-backend/accounting/expense/dtos/expense-type-input.dto';
 import AlisaTextField from '../../alisa/form/AlisaTextField';
 import AlisaSwitch from '../../alisa/form/AlisaSwitch';
 import { expenseTypeContext } from '@alisa-lib/alisa-contexts';
+import DataService from '@alisa-lib/data-service';
+import AlisaFormHandler from '../../alisa/form/AlisaFormHandler';
+import { useNavigate, useParams } from 'react-router-dom';
 
 function ExpenseTypeForm({ t }: WithTranslation) {
     const [data, setData] = useState<ExpenseTypeInputDto>({
@@ -13,15 +15,19 @@ function ExpenseTypeForm({ t }: WithTranslation) {
         description: '',
         isTaxDeductible: false
     });
+    const { idParam } = useParams();
+    const navigate = useNavigate();
+
+    const dataService = new DataService<ExpenseTypeInputDto>({
+        context: expenseTypeContext,
+        dataValidateInstance: new ExpenseTypeInputDto()
+    })
 
     const handleChange = (
         name: keyof ExpenseTypeInputDto,
         value: ExpenseTypeInputDto[keyof ExpenseTypeInputDto]
     ) => {
-        setData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
+        setData(dataService.updateNestedData(data, name, value));
     }
 
     const formComponents = (
@@ -42,21 +48,28 @@ function ExpenseTypeForm({ t }: WithTranslation) {
             <AlisaSwitch
                 value={data.isTaxDeductible}
                 onChange={(e) => handleChange('isTaxDeductible', e.target.checked)}
-                label={t('isTaxDeductible')}                
+                label={t('isTaxDeductible')}
             />
         </Stack>
     )
     return (
 
-        <AlisaDataForm<ExpenseTypeInputDto>
-            t={t}
-            alisaContext={expenseTypeContext}
+        <AlisaFormHandler<ExpenseTypeInputDto>
+            id={Number(idParam)}
+            dataService={dataService}
+            data={data}
             formComponents={formComponents}
             onSetData={setData}
-            data={data}
-            validateObject={new ExpenseTypeInputDto()}
+            translation={{
+                cancelButton: t('cancel'),
+                submitButton: t('save'),
+                validationMessageTitle: t('validationErrorTitle'),
+            }}
+
+            onCancel={() => navigate(expenseTypeContext.routePath)}
+            onAfterSubmit={() => navigate(expenseTypeContext.routePath)}
         >
-        </AlisaDataForm>
+        </AlisaFormHandler>
     );
 }
 
