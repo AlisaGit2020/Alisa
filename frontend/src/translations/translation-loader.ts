@@ -19,7 +19,6 @@ export const loadTranslations = async (availableLanguages: string[], namespaces:
                 const { default: translations } = await import(/* @vite-ignore */`./${language}.ts`);
                 resources[language] = translations
 
-
                 await Promise.all(
                     namespaces.map(async (namespace) => {
                         const nsTranslations = await loadNsTranslation(language, namespace);
