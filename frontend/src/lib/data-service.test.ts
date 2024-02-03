@@ -24,7 +24,7 @@ describe('Data service', () => {
     describe('Validation', () => {
 
         it('Transforms validation array to string array', async () => {
-            dataService = new DataService<TestInputDto>(context, {}, new TestInputDto())
+            dataService = new DataService<TestInputDto>({ context, dataValidateInstance: new TestInputDto() })
 
             const strErrors = await dataService.getStrValidationErrors({
                 name: ''
@@ -34,7 +34,7 @@ describe('Data service', () => {
         });
 
         it('validated child input dto', async () => {
-            dataService = new DataService<TestNestedInputDto>(context, {}, new TestNestedInputDto())
+            dataService = new DataService<TestNestedInputDto>({ context, dataValidateInstance: new TestNestedInputDto() })
 
             const strErrors = await dataService.getStrValidationErrors({
                 name: 'Some name',
@@ -59,7 +59,7 @@ describe('Data service', () => {
                         someField: string
                     }
                 },
-            }>(context)
+            }>({ context })
             const data = {
                 description: 'First version',
                 transaction: {
@@ -91,8 +91,8 @@ describe('Data service', () => {
             const responseData = { id: 1, name: 'Test Data' };
             apiClientMock.mockResolvedValueOnce(responseData);
 
-            const contextMock = { apiPath: '/test' } as AlisaContext;
-            const dataService = new DataService<{ transaction: { totalAmount: number } }>(contextMock, { transaction: true });
+            const context = { apiPath: '/test' } as AlisaContext;
+            const dataService = new DataService<{ transaction: { totalAmount: number } }>({ context, relations: { transaction: true } });
 
             // Kutsu read-funktiota
             const result = await dataService.read(1);
@@ -114,8 +114,8 @@ describe('Data service', () => {
             const apiClientPutMock = jest.spyOn(ApiClient, 'put');
             apiClientPutMock.mockResolvedValueOnce({ id: 1, name: 'Test Data' });
 
-            const contextMock = { apiPath: '/test' } as AlisaContext;
-            const dataService = new DataService(contextMock);
+            const context = { apiPath: '/test' } as AlisaContext;
+            const dataService = new DataService({ context });
 
             //Post
             const validData = { name: 'Test Data' };
@@ -131,15 +131,15 @@ describe('Data service', () => {
             expect(result).toEqual({ id: 1, name: 'Test Data' });
         });
 
-        it('should return validation errors when validation fails', async () => {            
+        it('should return validation errors when validation fails', async () => {
             const invalidData = { name: '' };
 
-            const contextMock = { apiPath: '/test' } as AlisaContext;
-            const dataService = new DataService<TestInputDto>(contextMock, {}, new TestInputDto());
-            
+            const context = { apiPath: '/test' } as AlisaContext;
+            const dataService = new DataService<TestInputDto>({ context, dataValidateInstance: new TestInputDto() });
+
             const result = await dataService.save(invalidData);
-        
-            if (Array.isArray(result)) {                
+
+            if (Array.isArray(result)) {
                 expect(result).toHaveLength(1);
                 expect(result[0].property).toBe('name');
                 expect(result[0].constraints).toHaveProperty('isNotEmpty');
@@ -148,5 +148,44 @@ describe('Data service', () => {
             }
         });
     });
+
+    describe('Search', () => {
+        it('should read data successfully', async () => {
+            const apiClientMock = jest.spyOn(ApiClient, 'search');
+            const responseData = [{ id: 1, name: 'Test Data' }];
+            apiClientMock.mockResolvedValueOnce(responseData);
+
+            const context = { apiPath: '/test' } as AlisaContext;
+            const fetchOptions = {
+                relations: {
+                    transaction: true
+                },
+                where: {
+                    id: 1
+                }
+            }
+
+            const dataService = new DataService<{
+                id: number,
+                name: number,
+                transaction: {
+                    totalAmount: number
+                }
+            }>({
+                context,
+                fetchOptions
+            });
+
+
+            // Kutsu read-funktiota
+            const result = await dataService.search();
+
+            // Tarkista, että ApiClient.get kutsuttiin oikein
+            expect(apiClientMock).toHaveBeenCalledWith('/test', fetchOptions);
+
+            // Tarkista, että paluuarvo vastaa odotuksia
+            expect(result).toEqual(responseData);
+        });
+    })
 
 });

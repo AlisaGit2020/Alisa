@@ -1,18 +1,25 @@
 import { ValidationError, validate } from "class-validator";
 import ApiClient from "./api-client";
-import { DTO, TypeOrmRelationOption } from "./types";
+import { DTO, TypeOrmFetchOptions, TypeOrmRelationOption } from "./types";
 import AlisaContext from "@alisa-lib/alisa-contexts";
 import { copyMatchingKeyValues } from "./functions";
 
 class DataService<T extends object> {
     private apiPath: string;
     private relations?: TypeOrmRelationOption;
-    private dataValidateInstance?: object
+    private fetchOptions?: TypeOrmFetchOptions<T>;
+    private dataValidateInstance?: object;
 
-    constructor(context: AlisaContext, relations?: TypeOrmRelationOption, validator?: object) {
-        this.apiPath = context.apiPath;
-        this.relations = relations;
-        this.dataValidateInstance = validator
+    constructor(options: {
+        context: AlisaContext,
+        relations?: TypeOrmRelationOption,
+        fetchOptions?: TypeOrmFetchOptions<T>,
+        dataValidateInstance?: object
+    }) {
+        this.apiPath = options.context.apiPath;
+        this.relations = options.relations;
+        this.fetchOptions = options.fetchOptions;
+        this.dataValidateInstance = options.dataValidateInstance
     }
 
     public async read(id: number): Promise<T> {
@@ -34,7 +41,11 @@ class DataService<T extends object> {
             return ApiClient.post<T>(this.apiPath, data)
         }
     }
-    
+
+    public async search(): Promise<T[]> {
+        return ApiClient.search(this.apiPath, this.fetchOptions)
+    }
+
     public updateNestedData(data: T, name: string, value: unknown): T {
         const names = name.split('.');
 

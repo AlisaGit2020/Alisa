@@ -21,16 +21,15 @@ function ApartmentForm({ t }: WithTranslation) {
     const { idParam } = useParams();
     const navigate = useNavigate();
 
-    const dataService = new DataService<DTO<PropertyInputDto>>(
-        apartmentContext,
-        undefined,
-        new PropertyInputDto()
-    )
+    const dataService = new DataService<DTO<PropertyInputDto>>({
+        context: apartmentContext,
+        dataValidateInstance: new PropertyInputDto()
+    })
 
     const handleChange = (
         name: keyof PropertyInputDto,
         value: PropertyInputDto[keyof PropertyInputDto]
-    ) => {            
+    ) => {
         setData(dataService.updateNestedData(data, name, value));
     }
 
@@ -38,13 +37,13 @@ function ApartmentForm({ t }: WithTranslation) {
         <Stack spacing={2} marginBottom={2}>
             <AlisaTextField
                 label={t('name')}
-                value={data.name}                
+                value={data.name}
                 autoFocus={true}
                 onChange={(e) => handleChange('name', e.target.value)}
             />
             <AlisaNumberField
                 label={t('size')}
-                value={data.size}                
+                value={data.size}
                 onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
                 adornment='m2'
             />

@@ -42,7 +42,10 @@ describe('AlisaFormHandler', () => {
       <AlisaFormHandler<TestInputDto>
         formComponents={<div data-test-id="formComponents" />}
         id={1}
-        dataService={new DataService<TestInputDto>(context, {}, new TestInputDto())}
+        dataService={new DataService<TestInputDto>({
+          context: context,           
+          dataValidateInstance: new TestInputDto()
+        })}
         translation={{
           submitButton: 'Save',
           cancelButton: 'Cancel'

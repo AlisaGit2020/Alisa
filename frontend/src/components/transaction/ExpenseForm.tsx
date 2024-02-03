@@ -24,15 +24,15 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
     const [data, setData] = useState<ExpenseInputDto>(new ExpenseInputDto());
     const navigate = useNavigate();
 
-    const dataService = new DataService<ExpenseInputDto>(
-        expenseContext,
-        {transaction: true},
-        new ExpenseInputDto()
-    )
+    const dataService = new DataService<ExpenseInputDto>({
+        context: expenseContext,
+        relations: { transaction: true },
+        dataValidateInstance: new ExpenseInputDto()
+    })
 
     React.useEffect(() => {
         if (id && id === undefined) {
-            const fetchData = () => {                
+            const fetchData = () => {
                 return dataService.getDefaults()
             }
 

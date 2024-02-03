@@ -13,6 +13,12 @@ jest.mock('../../constants', () => ({
 }));
 jest.mock('../../lib/data-service');
 
+/*
+TODO: 
+1) Refactor AlisaSelect
+2) Fix this test
+*/
+
 describe('ExpenseForm Component', () => {
   beforeAll(() => {
     const mockRead = jest.fn().mockResolvedValue(
