@@ -1,9 +1,8 @@
 import axios from 'axios';
 import { ChangeEventHandler, useState } from 'react';
 import React from 'react';
-import ApiClient from '../../lib/api-client';
-import { TypeOrmFetchOptions } from '../../lib/types';
 import AlisaSelectField from './form/AlisaSelectField';
+import DataService from '@alisa-lib/data-service';
 
 
 interface InputProps<T1, T2 extends{id: number, name: string}> {    
@@ -11,8 +10,7 @@ interface InputProps<T1, T2 extends{id: number, name: string}> {
     label: string
     fieldName: keyof T1
     value: T1[keyof T1]
-    apiUrl: string
-    fetchOptions?: TypeOrmFetchOptions<T2>
+    dataService: DataService<T2>
 }
 
 function AlisaSelect<T1, T2 extends{id: number, name: string}>({
@@ -20,31 +18,30 @@ function AlisaSelect<T1, T2 extends{id: number, name: string}>({
     label,
     fieldName,
     value,
-    apiUrl,
-    fetchOptions
+    dataService
 
 }: InputProps<T1, T2>) {
 
     const [data, setData] = useState<T2[]>([])    
 
     React.useEffect(() => {
+        const fetchData = async () => {
+
+            try {
+                const result = await dataService.search();            
+                           
+                return result;
+            } catch (error) {
+                handleApiError(error);
+            }
+    
+            return data
+        }
+
         fetchData()
             .then(setData)
     }, [])
 
-
-    const fetchData = async () => {
-
-        try {
-            const result = await ApiClient.search<T2>(apiUrl, fetchOptions);            
-                       
-            return result;
-        } catch (error) {
-            handleApiError(error);
-        }
-
-        return data
-    }
 
     const handleChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> | undefined = (e) => {
         const selectedValue = e.target.value as T1[keyof T1]        

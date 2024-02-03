@@ -1,15 +1,13 @@
-// data-service.test.js
+
+import { mockConstants } from "@alisa-mocks/mocks";
 import DataService from "./data-service";
 import AlisaContext from "@alisa-lib/alisa-contexts";
-import { TestInputDto } from "../../test/mock/TestInputDto";
-import { TestNestedInputDto } from "../../test/mock/TestNestedInputDto";
+import { TestInputDto } from "../../test/mocks/TestInputDto";
+import { TestNestedInputDto } from "../../test/mocks/TestNestedInputDto";
 import "reflect-metadata";
 import ApiClient from "./api-client";
 
-jest.mock('../../src/constants', () => ({
-    VITE_API_URL: 'http://localhost',
-}));
-
+jest.mock('../../src/constants', () => mockConstants);
 
 describe('Data service', () => {
 

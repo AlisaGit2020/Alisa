@@ -1,16 +1,13 @@
+import { mockConstants } from '@alisa-mocks/mocks';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils'; // Import act to handle async code
 import AlisaFormHandler from './AlisaFormHandler';
 import DataService from '../../../lib/data-service';
 import AlisaContext from '@alisa-lib/alisa-contexts';
-import { TestInputDto } from '../../../../test/mock/TestInputDto';
+import { TestInputDto } from '../../../../test/mocks/TestInputDto';
 
-// Mock DataService for testing purposes
+jest.mock('../../../constants', () => mockConstants);
 jest.mock('../../../lib/data-service');
-
-jest.mock('../../../constants', () => ({
-    VITE_API_URL: 'http://localhost',
-}));
 
 describe('AlisaFormHandler', () => {
   beforeEach(() => {

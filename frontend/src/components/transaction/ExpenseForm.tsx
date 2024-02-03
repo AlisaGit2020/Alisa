@@ -81,8 +81,10 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
             <Stack spacing={2} marginBottom={2}>
                 <AlisaSelect<ExpenseInputDto, Property>
                     label={t('apartment')}
-                    apiUrl={apartmentContext.apiPath}
-                    fetchOptions={{ order: { name: 'ASC' } }}
+                    dataService={new DataService<Property>({
+                        context: apartmentContext,
+                        fetchOptions: { order: { name: 'ASC' } } 
+                    })}                    
                     fieldName='propertyId'
                     value={data.propertyId}
                     onHandleChange={handleChange}
@@ -91,8 +93,10 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
 
                 <AlisaSelect<ExpenseInputDto, ExpenseType>
                     label={t('expenseType')}
-                    apiUrl={expenseTypeContext.apiPath}
-                    fetchOptions={{ order: { name: 'ASC' } }}
+                    dataService={new DataService<ExpenseType>({
+                        context: expenseTypeContext,
+                        fetchOptions: { order: { name: 'ASC' } } 
+                    })}                                        
                     fieldName='expenseTypeId'
                     value={data.expenseTypeId}
                     onHandleChange={handleChange}

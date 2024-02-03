@@ -21,6 +21,7 @@ export default defineConfig({
     alias: {      
       '@alisa-backend': path.resolve(__dirname, '../backend/src'),      
       '@alisa-lib': path.resolve(__dirname, './src/lib'),
+      '@alisa-mocks': path.resolve(__dirname, './test/mocks'),
     },
   },
   

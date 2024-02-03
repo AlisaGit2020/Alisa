@@ -3,7 +3,7 @@
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
+    "module": "esnext",
     "esModuleInterop": true,
     "skipLibCheck": true,
 
@@ -29,6 +29,7 @@
     "paths": {
       "@alisa-backend/*": ["../backend/src/*"],      
       "@alisa-lib/*": ["src/lib/*"],
+      "@alisa-mocks/*": ["test/mocks/*"],
     }
   },
   "include": ["src"],  

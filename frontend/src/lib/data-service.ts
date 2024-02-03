@@ -43,7 +43,7 @@ class DataService<T extends object> {
     }
 
     public async search(): Promise<T[]> {
-        return ApiClient.search(this.apiPath, this.fetchOptions)
+        return ApiClient.search<T>(this.apiPath, this.fetchOptions)
     }
 
     public updateNestedData(data: T, name: string, value: unknown): T {
