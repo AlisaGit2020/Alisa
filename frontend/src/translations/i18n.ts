@@ -35,6 +35,4 @@ const initializeI18n = async () => {
 };
 
 await initializeI18n()
-
-
 export default i18n;
