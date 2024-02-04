@@ -13,6 +13,10 @@ jest.mock('../../lib/data-service');
 jest.mock('react-i18next', () => mockReactI18next);
 
 describe('ExpenseForm Component', () => {
+
+  let getDefaultsMock: jest.SpyInstance<Promise<ExpenseInputDto>>;
+  let readMock: jest.SpyInstance<Promise<ExpenseInputDto>>;  
+
   beforeAll(() => {
     const mockRead = {
       id: 5,
@@ -28,8 +32,24 @@ describe('ExpenseForm Component', () => {
       expenseTypeId: 1
     } as ExpenseInputDto;
 
-    jest.spyOn(DataService.prototype, 'read').mockResolvedValue(mockRead);
+    readMock = jest.spyOn(DataService.prototype, 'read').mockResolvedValue(mockRead);
 
+    const mockDefaults = {
+      id: 5,
+      transaction: {
+        accountingDate: new Date('2024-01-01'),
+        transactionDate: new Date('2024-01-01'),
+        description: 'Test transaction',
+        amount: 10,
+        quantity: 4,
+        totalAmount: 40,
+      },
+      propertyId: 5,
+      expenseTypeId: 1
+    } as ExpenseInputDto;
+
+    getDefaultsMock = jest.spyOn(DataService.prototype, 'getDefaults').mockResolvedValue(mockDefaults);
+    
     const mockSearch = [
       {
         id: 1,
@@ -40,13 +60,18 @@ describe('ExpenseForm Component', () => {
         name: 'Item 5'
       }
     ];
-
-    // Mock the DataService constructor
+    
     jest.spyOn(DataService.prototype, 'search').mockResolvedValue(mockSearch);
 
   });
 
-  it('renders ExpenseForm correctly', async () => {
+  beforeEach(() => {
+    getDefaultsMock.mockClear();
+    readMock.mockClear();
+  })
+
+  it('renders ExpenseForm add', async () => {
+
     await act(async () => {
       const { container } = render(
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -59,11 +84,15 @@ describe('ExpenseForm Component', () => {
       // Assert that the component renders without crashing
       await waitFor(() => {
         expect(container).toBeInTheDocument();
+        
       });
     });
+
+    expect(getDefaultsMock).toHaveBeenCalledTimes(1);
+    expect(readMock).toHaveBeenCalledTimes(0);
   });
 
-  it('handles form submission correctly', async () => {
+  it('renders ExpenseForm edit', async () => {    
 
     await act(async () => {
       const {container} = render(
@@ -78,6 +107,10 @@ describe('ExpenseForm Component', () => {
         expect(container).toBeInTheDocument();
       });
     });
+
+    expect(getDefaultsMock).toHaveBeenCalledTimes(0);
+    expect(readMock).toHaveBeenCalledWith(5);
+    expect(readMock).toHaveBeenCalledTimes(1);
 
   });
 });

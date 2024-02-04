@@ -31,7 +31,8 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
     })
 
     React.useEffect(() => {        
-        if (id === undefined) {            
+        if (id === undefined) {      
+            console.log('fetch defaults')      
             const fetchData = () => {
                 return dataService.getDefaults()
             }
