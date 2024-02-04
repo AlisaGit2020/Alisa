@@ -30,8 +30,8 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
         dataValidateInstance: new ExpenseInputDto()
     })
 
-    React.useEffect(() => {
-        if (id && id === undefined) {
+    React.useEffect(() => {        
+        if (id === undefined) {            
             const fetchData = () => {
                 return dataService.getDefaults()
             }
