@@ -14,23 +14,20 @@ import { Box, IconButton, Paper, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { TFunction } from 'i18next';
 import AlisaConfirmDialog from './dialog/AlisaConfirmDialog';
-import { TypeOrmFetchOptions } from '../../lib/types';
-import ApiClient from '../../lib/api-client';
+import DataService from '@alisa-lib/data-service';
 
 interface AlisaDataTableField<T> {
   name: keyof T,
   format?: 'number' | 'currency' | 'date'
 }
 
-interface AlisaDataTableInputProps<T> {
-  t: TFunction
-  title: string
-  alisaContext: AlisaContext
-  fields: AlisaDataTableField<T>[]
-  fetchOptions?: TypeOrmFetchOptions<T>
-}
-
-function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fields, fetchOptions }: AlisaDataTableInputProps<T>) {
+function AlisaDataTable<T extends { id: number }>(props: {
+  t: TFunction,
+  title: string,
+  fields: AlisaDataTableField<T>[],
+  dataService: DataService<T>,
+  onNewRow: (event?:React.MouseEvent<HTMLButtonElement>) => void
+}) {
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState<number>(0);
@@ -39,7 +36,7 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const data: T[] = await ApiClient.search<T>(alisaContext.apiPath, fetchOptions);
+      const data: T[] = await props.dataService.search();
       setData(data);
     };
 
@@ -57,7 +54,7 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
   };
 
   const handleDelete = async () => {
-    await ApiClient.delete(alisaContext.apiPath, idToDelete);
+    await props.dataService.delete(idToDelete);
     setIdDeleted(idToDelete);
     handleClose();
   };
@@ -69,13 +66,13 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
       return (<CheckIcon visibility={value ? 'visible' : 'hidden'}></CheckIcon>)
     }
     if (field.format == 'number') {
-      return t('format.number', { val: value })
+      return props.t('format.number', { val: value })
     }
     if (field.format == 'currency') {
-      return t('format.currency.euro', { val: value })
+      return props.t('format.currency.euro', { val: value })
     }
     if (field.format == 'date') {
-      return t('format.date', {
+      return props.t('format.date', {
         val: new Date(value as string), formatParams: {
           val: { year: 'numeric', month: 'numeric', day: 'numeric' },
         }
@@ -87,17 +84,17 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
 
   return (
     <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-      <Title>{title}</Title>
+      <Title>{props.title}</Title>
 
       <Table size="small" aria-label="simple table">
         <TableHead>
           <TableRow>
-            {fields.map((field) => (
-              <TableCell key={field.name as string}>{t(field.name as string)}</TableCell>
+            {props.fields.map((field) => (
+              <TableCell key={field.name as string}>{props.t(field.name as string)}</TableCell>
             ))}
             <TableCell align='right'>
-              <Tooltip title={t('add')}>
-                <IconButton href={`${alisaContext.routePath}/add`}>
+              <Tooltip title={props.t('add')}>
+                <IconButton onClick={props.onNewRow}>
                   <AddIcon></AddIcon>
                 </IconButton>
               </Tooltip>
@@ -109,7 +106,7 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
 
             {data.map((item) => (
               <TableRow key={item.id}>
-                {fields.map((field) => (
+                {props.fields.map((field) => (
                   <TableCell key={field.name as string}>
                     {getDataValue(field, item)}
                   </TableCell>
@@ -128,14 +125,14 @@ function AlisaDataTable<T extends { id: number }>({ t, title, alisaContext, fiel
       </Table>
 
       {(data.length == 0) && (
-        <Box padding={2} fontSize={'medium'}>{t('noRowsFound')}</Box>
+        <Box padding={2} fontSize={'medium'}>{props.t('noRowsFound')}</Box>
       )}
 
       <AlisaConfirmDialog
-        title={t('confirm')}
-        contentText={t('confirmDelete')}
-        buttonTextConfirm={t('delete')}
-        buttonTextCancel={t('cancel')}
+        title={props.t('confirm')}
+        contentText={props.t('confirmDelete')}
+        buttonTextConfirm={props.t('delete')}
+        buttonTextCancel={props.t('cancel')}
         open={open}
         onConfirm={handleDelete}
         onClose={handleClose}

@@ -46,6 +46,10 @@ class DataService<T extends object> {
         return ApiClient.search<T>(this.apiPath, this.fetchOptions)
     }
 
+    public async delete(id: number): Promise<void>{
+        ApiClient.delete(this.apiPath, id)
+    }
+
     public updateNestedData(data: T, name: string, value: unknown): T {
         const names = name.split('.');
 

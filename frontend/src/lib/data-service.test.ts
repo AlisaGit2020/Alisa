@@ -147,6 +147,19 @@ describe('Data service', () => {
         });
     });
 
+    describe('Delete', () => {
+        it('deletes data successfully', async () => {        
+            const apiClientMock = jest.spyOn(ApiClient, 'delete');        
+
+            const context = { apiPath: '/test' } as AlisaContext;
+            const dataService = new DataService<{ transaction: { totalAmount: number } }>({ context, relations: { transaction: true } });
+            
+            await dataService.delete(1);
+            expect(apiClientMock).toHaveBeenCalledWith('/test', 1);
+            
+        });
+    })
+
     describe('Search', () => {
         it('should read data successfully', async () => {
             const apiClientMock = jest.spyOn(ApiClient, 'search');
