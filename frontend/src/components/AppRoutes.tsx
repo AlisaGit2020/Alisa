@@ -5,8 +5,8 @@ import ApartmentForm from './apartment/ApartmentForm';
 import Settings from './settings/Settings';
 import{ apartmentContext, expenseTypeContext, transactionContext } from '@alisa-lib/alisa-contexts';
 import ExpenseTypeForm from './settings/expense-type/ExpenseTypeForm';
-import Transactions from './transaction/Transactions';
 import TransactionForm from './transaction/TransactionForm';
+import TransactionMain from './transaction/TransactionMain';
 
 export default function AppRoutes() {
     return (
@@ -19,8 +19,8 @@ export default function AppRoutes() {
                 <Route path={`${apartmentContext.routePath}`} element={<Apartments></Apartments>}></Route>
                 
                 <Route path={`${transactionContext.routePath}/edit/:id`} element={<TransactionForm></TransactionForm>}></Route>                
-                <Route path={`${transactionContext.routePath}/add/:type?`} element={<TransactionForm></TransactionForm>}></Route>                
-                <Route path={`${transactionContext.routePath}`} element={<Transactions></Transactions>}></Route>
+                <Route path={`${transactionContext.routePath}/add/:type?/:propertyId?`} element={<TransactionForm></TransactionForm>}></Route>                
+                <Route path={`${transactionContext.routePath}/:propertyId?`} element={<TransactionMain></TransactionMain>}></Route>
 
                 <Route path={`${expenseTypeContext.routePath}/edit/:idParam`} element={<ExpenseTypeForm></ExpenseTypeForm>}></Route>
                 <Route path={`${expenseTypeContext.routePath}/add`} element={<ExpenseTypeForm></ExpenseTypeForm>}></Route>

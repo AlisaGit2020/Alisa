@@ -1,25 +1,26 @@
 import { InputAdornment, MenuItem, TextField } from "@mui/material"
 import { ChangeEventHandler } from "react"
 
-type Item = {
+export type AlisaSelectFieldItem = {
     id: number
     name: string
 }
-function AlisaSelectField(props: {    
+function AlisaSelectField(props: {
     label: string,
     value: number,
-    id?:string,
+    id?: string,
     adornment?: string,
     autoComplete?: string,
     autoFocus?: boolean,
     disabled?: boolean,
     fullWidth?: boolean,
-    items: Item[],
+    items: AlisaSelectFieldItem[],
     onChange?: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> | undefined
 }) {
+
     return (
         <TextField
-            id = {props.id}
+            id={props.id}
             fullWidth={props.fullWidth !== undefined ? props.fullWidth : true}
             select
             label={props.label}
@@ -34,7 +35,7 @@ function AlisaSelectField(props: {
                 ) : null,
             }}
         >
-            {props.items.map((item: Item) => (
+            {props.items.map((item: AlisaSelectFieldItem) => (
                 <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
             ))}
         </TextField>

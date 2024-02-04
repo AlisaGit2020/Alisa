@@ -11,7 +11,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
 import { Box, IconButton, Paper, Tooltip } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import { TFunction } from 'i18next';
 import AlisaConfirmDialog from './dialog/AlisaConfirmDialog';
 import DataService from '@alisa-lib/data-service';
@@ -26,13 +25,13 @@ function AlisaDataTable<T extends { id: number }>(props: {
   title: string,
   fields: AlisaDataTableField<T>[],
   dataService: DataService<T>,
-  onNewRow: (event?:React.MouseEvent<HTMLButtonElement>) => void
+  onNewRow: (event?: React.MouseEvent<HTMLButtonElement>) => void
+  onEdit: (id:number) => void
 }) {
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState<number>(0);
   const [idDeleted, setIdDeleted] = React.useState<number>(0);
-  const navigate = useNavigate();
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -41,7 +40,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
     };
 
     fetchData()
-  }, [idDeleted])
+  }, [idDeleted, props.dataService])
 
   const handleClickOpen = (apartmentId: number) => {
     setIdToDelete(apartmentId);
@@ -113,7 +112,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
                 ))}
 
                 <TableCell align='right'>
-                  <IconButton onClick={() => navigate(`edit/${item.id}`)}><EditIcon></EditIcon></IconButton>
+                  <IconButton onClick={() => props.onEdit(item.id)}><EditIcon></EditIcon></IconButton>
                   <IconButton onClick={() => handleClickOpen(item.id)}><DeleteIcon></DeleteIcon></IconButton>
                 </TableCell>
               </TableRow>

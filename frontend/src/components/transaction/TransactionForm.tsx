@@ -10,7 +10,7 @@ import { transactionContext } from '@alisa-lib/alisa-contexts';
 
 
 function TransactionForm() {
-    const { id, type } = useParams();
+    const { id, type, propertyId } = useParams();
     const [expenseId, setExpenseId] = useState<number>();
 
     React.useEffect(() => {
@@ -41,7 +41,7 @@ function TransactionForm() {
 
     if (type == 'expense' || expenseId) {
         return (
-            <ExpenseForm id={expenseId} />
+            <ExpenseForm id={expenseId} propertyId={Number(propertyId)} />
         )
     } else {
         return (

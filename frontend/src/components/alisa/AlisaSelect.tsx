@@ -5,7 +5,7 @@ import AlisaSelectField from './form/AlisaSelectField';
 import DataService from '@alisa-lib/data-service';
 
 
-interface InputProps<T1, T2 extends{id: number, name: string}> {    
+interface InputProps<T1, T2 extends { id: number, name: string }> {
     onHandleChange: (fieldName: keyof T1, value: T1[keyof T1]) => void
     label: string
     fieldName: keyof T1
@@ -13,7 +13,7 @@ interface InputProps<T1, T2 extends{id: number, name: string}> {
     dataService: DataService<T2>
 }
 
-function AlisaSelect<T1, T2 extends{id: number, name: string}>({
+function AlisaSelect<T1, T2 extends { id: number, name: string }>({
     onHandleChange,
     label,
     fieldName,
@@ -22,19 +22,19 @@ function AlisaSelect<T1, T2 extends{id: number, name: string}>({
 
 }: InputProps<T1, T2>) {
 
-    const [data, setData] = useState<T2[]>([])    
+    const [data, setData] = useState<T2[]>([])
 
     React.useEffect(() => {
         const fetchData = async () => {
 
             try {
-                const result = await dataService.search();            
-                           
+                const result = await dataService.search();
+
                 return result;
             } catch (error) {
                 handleApiError(error);
             }
-    
+
             return data
         }
 
@@ -44,7 +44,7 @@ function AlisaSelect<T1, T2 extends{id: number, name: string}>({
 
 
     const handleChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> | undefined = (e) => {
-        const selectedValue = e.target.value as T1[keyof T1]        
+        const selectedValue = e.target.value as T1[keyof T1]
         onHandleChange(fieldName, selectedValue)
     }
 
@@ -52,19 +52,26 @@ function AlisaSelect<T1, T2 extends{id: number, name: string}>({
         if (axios.isAxiosError(error)) { /* empty */ }
     }
 
-    return (
+    if (data.length > 0) {
+        const findItemById = (id: T1[keyof T1]) => data.find((item) => item.id === id);
+        
+        const items = data;
+        if (!findItemById(value)) {
+            items.unshift({ id: Number(value), name: '' } as T2)
+        }
 
-        (data.length > 0 && value) && (
-            <AlisaSelectField                                
-                value={value as number}
+        const alisaSelectField = (
+            <AlisaSelectField
+                value={Number(value)}
                 label={label}
-                items={data}
-                onChange={handleChange}                
+                items={items}
+                onChange={handleChange}
             >
-
             </AlisaSelectField>
         )
-    );
+
+        return alisaSelectField
+    }
 }
 
 export default AlisaSelect;

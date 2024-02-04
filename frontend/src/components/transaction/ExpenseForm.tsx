@@ -16,10 +16,11 @@ import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
 import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 
 interface ExpenseFormProps extends WithTranslation {
-    id?: number
+    id?: number,
+    propertyId?: number
 }
 
-function ExpenseForm({ t, id }: ExpenseFormProps) {
+function ExpenseForm({ t, id, propertyId }: ExpenseFormProps) {
 
     const [data, setData] = useState<ExpenseInputDto>(new ExpenseInputDto());
     const navigate = useNavigate();
@@ -31,10 +32,13 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
     })
 
     React.useEffect(() => {        
-        if (id === undefined) {      
-            console.log('fetch defaults')      
-            const fetchData = () => {
-                return dataService.getDefaults()
+        if (id === undefined) {                  
+            const fetchData = async () => {
+                const defaults = await dataService.getDefaults();
+                if (propertyId) {
+                    defaults.propertyId = propertyId
+                }
+                return defaults
             }
 
             fetchData()
@@ -169,8 +173,8 @@ function ExpenseForm({ t, id }: ExpenseFormProps) {
                     validationMessageTitle: t('validationErrorTitle'),
                 }}
 
-                onCancel={() => navigate(transactionContext.routePath)}
-                onAfterSubmit={() => navigate(transactionContext.routePath)}
+                onCancel={() => navigate(`${transactionContext.routePath}/${data.propertyId}`)}
+                onAfterSubmit={() => navigate(`${transactionContext.routePath}/${data.propertyId}`)}
             >
             </AlisaFormHandler>
         );
