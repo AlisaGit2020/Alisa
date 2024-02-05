@@ -4,7 +4,10 @@ const transactions = {
     amount: 'Yksikköhinta',
     chooseTransactionType: 'Valitse tapahtumatyyyppi',
     expense: 'Kulu',
+    expenseType: 'Kululaji',
     income: 'Tulo',
+    receiver: 'Saaja',
+    sender: 'Maksaja',
     transactionDate: 'Tapahtumapäivä',
     transactions: 'Tilitapahtumat',    
 }

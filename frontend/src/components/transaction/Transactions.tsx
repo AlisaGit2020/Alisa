@@ -56,9 +56,9 @@ function Transactions({ t, filter }: TransactionsProps) {
                 dataService={new DataService({ context: transactionContext, fetchOptions })}
                 fields={[
                     { name: 'transactionDate', format: 'date' },
-                    { name: 'description' },
-                    { name: 'amount', format: 'currency' },
-                    { name: 'quantity', format: 'number' },
+                    { name: 'sender' },
+                    { name: 'receiver' },
+                    { name: 'description' },                    
                     { name: 'totalAmount', format: 'currency' },
                 ]}
                 onNewRow={handleOpenAddMenu}

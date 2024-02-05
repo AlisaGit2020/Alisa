@@ -76,8 +76,8 @@ function ExpenseForm({ t, id, propertyId }: ExpenseFormProps) {
 
         if (name === 'expenseTypeId') {
             if (newData.transaction.description == '') {
-                const dataServiceExpenseType = new DataService<ExpenseType>({context: expenseTypeContext})
-                const expenseType = await dataServiceExpenseType.read(Number(value));                
+                const dataServiceExpenseType = new DataService<ExpenseType>({ context: expenseTypeContext })
+                const expenseType = await dataServiceExpenseType.read(Number(value));
                 newData = dataService.updateNestedData(newData, 'transaction.description', expenseType.name);
             }
         }
@@ -115,6 +115,24 @@ function ExpenseForm({ t, id, propertyId }: ExpenseFormProps) {
                     onHandleChange={handleChange}
                 >
                 </AlisaSelect>
+
+                <Stack direction={'row'} spacing={2}>
+                    <AlisaTextField
+                        label={t('sender', { ns: 'transaction' })}
+                        value={data.transaction.sender}
+                        autoComplete='off'
+                        autoFocus={true}
+                        onChange={(e) => handleChange('transaction.sender', e.target.value)}
+                    />
+
+                    <AlisaTextField
+                        label={t('receiver', { ns: 'transaction' })}
+                        value={data.transaction.receiver}
+                        autoComplete='off'
+                        autoFocus={true}
+                        onChange={(e) => handleChange('transaction.receiver', e.target.value)}
+                    />
+                </Stack>
 
                 <AlisaTextField
                     label={t('description', { ns: 'transaction' })}

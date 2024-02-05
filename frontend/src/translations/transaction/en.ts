@@ -4,10 +4,12 @@ const transactions = {
     amount: 'Unit price',
     chooseTransactionType: 'Choose transaction type',
     expense: 'Expense',
+    expenseType: 'Expense type',
     income: 'Income',
+    receiver: 'Receiver',
+    sender: 'Sender',
     transactionDate: 'Transaction date',
-    transactions: 'Transactions',    
-    
+    transactions: 'Transactions',        
 }
 
 export default transactions

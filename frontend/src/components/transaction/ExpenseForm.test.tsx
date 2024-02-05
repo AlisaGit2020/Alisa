@@ -21,6 +21,8 @@ describe('ExpenseForm Component', () => {
     const mockRead = {
       id: 5,
       transaction: {
+        sender: 'Yrjöntie',
+        receiver: 'Espoon kaupunki',
         accountingDate: new Date('2024-01-01'),
         transactionDate: new Date('2024-01-01'),
         description: 'Test transaction',
@@ -37,6 +39,8 @@ describe('ExpenseForm Component', () => {
     const mockDefaults = {
       id: 5,
       transaction: {
+        sender: 'Yrjöntie',
+        receiver: 'Espoon kaupunki',
         accountingDate: new Date('2024-01-01'),
         transactionDate: new Date('2024-01-01'),
         description: 'Test transaction',
