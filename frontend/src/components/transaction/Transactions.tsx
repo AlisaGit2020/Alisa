@@ -38,7 +38,7 @@ function Transactions({ t, filter }: TransactionsProps) {
             expense: true
         },
         order: {
-            transactionDate: 'ASC'
+            transactionDate: 'DESC'
         },
         where: {
             expense: {

@@ -31,8 +31,8 @@ function ExpenseForm({ t, id, propertyId }: ExpenseFormProps) {
         dataValidateInstance: new ExpenseInputDto()
     })
 
-    React.useEffect(() => {        
-        if (id === undefined) {                  
+    React.useEffect(() => {
+        if (id === undefined) {
             const fetchData = async () => {
                 const defaults = await dataService.getDefaults();
                 if (propertyId) {
@@ -47,7 +47,7 @@ function ExpenseForm({ t, id, propertyId }: ExpenseFormProps) {
 
     }, [])
 
-    const handleChange = (
+    const handleChange = async (
         name: string,
         value: unknown
     ) => {
@@ -74,6 +74,14 @@ function ExpenseForm({ t, id, propertyId }: ExpenseFormProps) {
             newData = dataService.updateNestedData(newData, 'transaction.accountingDate', value);
         }
 
+        if (name === 'expenseTypeId') {
+            if (newData.transaction.description == '') {
+                const dataServiceExpenseType = new DataService<ExpenseType>({context: expenseTypeContext})
+                const expenseType = await dataServiceExpenseType.read(Number(value));                
+                newData = dataService.updateNestedData(newData, 'transaction.description', expenseType.name);
+            }
+        }
+
         setData(newData);
     }
 
@@ -88,8 +96,8 @@ function ExpenseForm({ t, id, propertyId }: ExpenseFormProps) {
                     label={t('apartment')}
                     dataService={new DataService<Property>({
                         context: apartmentContext,
-                        fetchOptions: { order: { name: 'ASC' } } 
-                    })}                    
+                        fetchOptions: { order: { name: 'ASC' } }
+                    })}
                     fieldName='propertyId'
                     value={data.propertyId}
                     onHandleChange={handleChange}
@@ -100,8 +108,8 @@ function ExpenseForm({ t, id, propertyId }: ExpenseFormProps) {
                     label={t('expenseType')}
                     dataService={new DataService<ExpenseType>({
                         context: expenseTypeContext,
-                        fetchOptions: { order: { name: 'ASC' } } 
-                    })}                                        
+                        fetchOptions: { order: { name: 'ASC' } }
+                    })}
                     fieldName='expenseTypeId'
                     value={data.expenseTypeId}
                     onHandleChange={handleChange}
