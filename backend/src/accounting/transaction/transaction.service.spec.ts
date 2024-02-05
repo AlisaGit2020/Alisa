@@ -3,7 +3,7 @@ Data service teset
 */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { DataSource, Transaction } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { AppModule } from 'src/app.module';
 import { expenseTestData } from 'test/data/accounting/expense.test.data';
 import { TransactionService } from './transaction.service';

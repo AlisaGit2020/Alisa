@@ -17,6 +17,8 @@ export const expenseTestData = {
     expenseType: expenseTypeTestData.inputPost,
     property: propertyTestData.inputPost,
     transaction: {
+      sender: 'Aurora',
+      receiver: 'Bolag asuntoyhtiö Oy',
       description: 'Siivousmaksu',
       transactionDate: startOfDay(new Date('2023-01-31')),
       accountingDate: startOfDay(new Date('2023-02-28')),
@@ -31,6 +33,8 @@ export const expenseTestData = {
     property: propertyTestData.inputPut,
     transaction: {
       id: 1,
+      sender: 'Yrjöntie',
+      receiver: 'Espoon kaupunki',
       description: 'Yhtiövastike',
       transactionDate: startOfDay(new Date('2023-02-28')),
       accountingDate: startOfDay(new Date('2023-03-31')),
@@ -46,6 +50,8 @@ export const expenseTestData = {
     property: propertyTestData.expected,
     propertyId: 1,
     transaction: {
+      sender: 'Aurora',
+      receiver: 'Bolag asuntoyhtiö Oy',
       description: 'Siivousmaksu',
       transactionDate: startOfDay(new Date('2023-01-31')).toISOString(),
       accountingDate: startOfDay(new Date('2023-02-28')).toISOString(),
@@ -66,6 +72,8 @@ export const expenseTestData = {
     propertyId: 1,
     transaction: {
       id: 1,
+      sender: 'Yrjöntie',
+      receiver: 'Espoon kaupunki',
       description: 'Yhtiövastike',
       transactionDate: startOfDay(new Date('2023-02-28')).toISOString(),
       accountingDate: startOfDay(new Date('2023-03-31')).toISOString(),

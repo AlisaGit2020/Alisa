@@ -2,6 +2,12 @@ import { IsNotEmpty, Min } from 'class-validator';
 
 export class TransactionInputDto {
   @IsNotEmpty()
+  sender: string = '';
+
+  @IsNotEmpty()
+  receiver: string = '';
+
+  @IsNotEmpty()
   description: string = '';
 
   transactionDate!: Date;

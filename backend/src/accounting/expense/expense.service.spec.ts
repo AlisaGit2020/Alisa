@@ -11,6 +11,7 @@ import { ExpenseTypeService } from './expense-type.service';
 import { expenseTestData } from 'test/data/accounting/expense.test.data';
 import { startOfDay } from 'date-fns';
 import { TransactionService } from '../transaction/transaction.service';
+import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
 
 describe('Expense service', () => {
   let app: INestApplication;
@@ -57,6 +58,8 @@ describe('Expense service', () => {
       await service.add({
         expenseTypeId: 1,
         transaction: {
+          sender: 'Yrjöntie',
+          receiver: 'Espoon kaupunki',
           amount: 10,
           accountingDate: startOfDay(new Date('2014-06-06')),
           transactionDate: startOfDay(new Date('2016-06-07')),
@@ -70,6 +73,8 @@ describe('Expense service', () => {
       await service.update(1, {
         expenseTypeId: 1,
         transaction: {
+          sender: 'Yrjöntie',
+          receiver: 'Espoon kaupunki',
           amount: 99,
           accountingDate: startOfDay(new Date('2014-06-06')),
           transactionDate: startOfDay(new Date('2016-06-07')),
@@ -108,13 +113,15 @@ describe('Expense service', () => {
           await service.add({
             expenseTypeId: 1,
             transaction: {
+              sender: 'Yrjöntie',
+              receiver: 'Espoon kaupunki',
               amount: 10,
               accountingDate: startOfDay(new Date('2014-06-06')),
               transactionDate: startOfDay(new Date('2016-06-07')),
               description: '',
               quantity: 1,
               totalAmount: 10,
-            },
+            } as TransactionInputDto,
             propertyId: propertyId,
           });
         }),

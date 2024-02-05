@@ -9,6 +9,12 @@ export class Transaction {
   public id: number;
 
   @Column()
+  sender: string;
+
+  @Column()
+  receiver: string;
+
+  @Column()
   description: string;
 
   @Column({ type: 'timestamp' })
