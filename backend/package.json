@@ -29,6 +29,7 @@
     "@nestjs/typeorm": "^10.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "csv-parser": "^3.0.0",
     "date-fns": "^3.3.0",
     "financial": "^0.1.3",
     "google-auth-library": "^9.6.3",
@@ -46,7 +47,7 @@
     "@nestjs/testing": "^10.0.0",
     "@types/express": "^4.17.17",
     "@types/jest": "^29.5.2",
-    "@types/node": "^20.3.1",
+    "@types/node": "^20.11.16",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.18.1",
     "@typescript-eslint/parser": "^6.0.0",
@@ -86,6 +87,9 @@
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/dist/"
-    ]
+    ],
+    "moduleNameMapper": {        
+      "^@alisa-backend/(.*)": "<rootDir>../src/$1"    
+    }
   }
 }
