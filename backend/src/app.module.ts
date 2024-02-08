@@ -5,6 +5,7 @@ import { RealEstateModule } from './real-estate/real-estate.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config'; //d
 import { AccountingModule } from './accounting/accounting.module';
+import { GoogleModule } from './google/google.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AccountingModule } from './accounting/accounting.module';
     }),
     RealEstateModule,
     AccountingModule,
+    GoogleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
