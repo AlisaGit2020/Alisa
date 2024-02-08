@@ -3,16 +3,10 @@ import { google, gmail_v1 } from 'googleapis';
 import { GoogleService } from './google.service';
 import * as fs from 'fs/promises';
 import path from 'path';
-import { auth } from 'google-auth-library';
 
 @Injectable()
 export class GmailService {
   constructor(private readonly googleService: GoogleService) {}
-
-  async authenticate(code: string): Promise<string> {
-    const credentials = '';
-    auth = await this.googleService.authenticate(credentials, code);
-  }
 
   async listMessages(): Promise<gmail_v1.Schema$Message[]> {
     const code = '';
