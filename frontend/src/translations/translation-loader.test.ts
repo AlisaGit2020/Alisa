@@ -8,7 +8,7 @@ describe('loadTranslations', () => {
     const result = await loadTranslations(availableLanguages, namespaces);
     
     expect (result).toBeDefined()
-    console.log(result)
+    
     // Loop through each language
     for (const language of availableLanguages) {
         // Ensure the language key exists in the result
