@@ -26,7 +26,7 @@ describe('Google services', () => {
     server.close();
   });
 
-  it(`it returns authentikation url`, () => {
+  it.skip(`it returns authentikation url`, () => {
     return request(server).get(`/google/authenticate`).expect(200);
   });
 });

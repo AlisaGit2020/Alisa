@@ -17,6 +17,7 @@ export const expenseTestData = {
     expenseType: expenseTypeTestData.inputPost,
     property: propertyTestData.inputPost,
     transaction: {
+      externalId: '123',
       sender: 'Aurora',
       receiver: 'Bolag asuntoyhtiö Oy',
       description: 'Siivousmaksu',
@@ -33,6 +34,7 @@ export const expenseTestData = {
     property: propertyTestData.inputPut,
     transaction: {
       id: 1,
+      externalId: '124',
       sender: 'Yrjöntie',
       receiver: 'Espoon kaupunki',
       description: 'Yhtiövastike',
@@ -50,6 +52,7 @@ export const expenseTestData = {
     property: propertyTestData.expected,
     propertyId: 1,
     transaction: {
+      externalId: '123',
       sender: 'Aurora',
       receiver: 'Bolag asuntoyhtiö Oy',
       description: 'Siivousmaksu',
@@ -71,6 +74,7 @@ export const expenseTestData = {
     property: propertyTestData.expectedPut,
     propertyId: 1,
     transaction: {
+      externalId: '124',
       id: 1,
       sender: 'Yrjöntie',
       receiver: 'Espoon kaupunki',

@@ -1,6 +1,8 @@
 import { IsNotEmpty, Min } from 'class-validator';
 
 export class TransactionInputDto {
+  externalId?: string;
+
   @IsNotEmpty()
   sender: string = '';
 

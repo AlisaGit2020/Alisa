@@ -8,6 +8,9 @@ export class Transaction {
   @PrimaryGeneratedColumn()
   public id: number;
 
+  @Column({ nullable: true })
+  externalId?: string;
+
   @Column()
   sender: string;
 
