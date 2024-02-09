@@ -11,6 +11,8 @@ import { TestData } from './data/test-data';
 import { expenseTestData } from './data/accounting/expense.test.data';
 import { expenseTypeTestData } from './data/accounting/expense-type.test.data';
 import { transactionTestData } from './data/accounting/transaction.test.data';
+import { incomeTypeTestData } from './data/accounting/income-type.test.data';
+import { incomeTestData } from './data/accounting/income.test.data';
 
 describe('Global controller end-to-end test (e2e)', () => {
   let app: INestApplication;
@@ -38,6 +40,8 @@ describe('Global controller end-to-end test (e2e)', () => {
     [propertyTestData],
     [expenseTestData],
     [expenseTypeTestData],
+    [incomeTypeTestData],
+    [incomeTestData],
     [transactionTestData],
   ])('Api endpoints', (testData: TestData) => {
     describe(`${testData.name}`, () => {

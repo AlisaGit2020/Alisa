@@ -1,6 +1,7 @@
 //TypeOrm entity for property table.
 
-import { Expense } from 'src/accounting/expense/entities/expense.entity';
+import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
+import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 import { columnOptionOneDecimal } from 'src/common/typeorm.column.definitions';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -17,4 +18,7 @@ export class Property {
 
   @OneToMany(() => Expense, (expense) => expense.property)
   expenses: Expense[];
+
+  @OneToMany(() => Income, (income) => income.property)
+  incomes: Income[];
 }

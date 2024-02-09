@@ -10,16 +10,37 @@ import { ExpenseTypeService } from './expense/expense-type.service';
 import { ExpenseType } from './expense/entities/expense-type.entity';
 import { TransactionController } from './transaction/transaction.controller';
 import { Property } from 'src/real-estate/property/entities/property.entity';
+import { IncomeTypeController } from './income/income-type.controller';
+import { IncomeController } from './income/income.controller';
+import { IncomeService } from './income/income.service';
+import { IncomeTypeService } from './income/income-type.service';
+import { IncomeType } from './income/entities/income-type.entity';
+import { Income } from './income/entities/income.entity';
 
 @Module({
   controllers: [
     ExpenseTypeController,
     ExpenseController,
+    IncomeTypeController,
+    IncomeController,
     TransactionController,
   ],
-  providers: [ExpenseService, ExpenseTypeService, TransactionService],
+  providers: [
+    ExpenseService,
+    ExpenseTypeService,
+    IncomeService,
+    IncomeTypeService,
+    TransactionService,
+  ],
   imports: [
-    TypeOrmModule.forFeature([Transaction, Expense, ExpenseType, Property]),
+    TypeOrmModule.forFeature([
+      Transaction,
+      Expense,
+      ExpenseType,
+      Income,
+      IncomeType,
+      Property,
+    ]),
   ],
 })
 export class AccountingModule {}

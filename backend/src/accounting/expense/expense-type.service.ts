@@ -32,12 +32,12 @@ export class ExpenseTypeService {
   }
 
   async update(id: number, input: ExpenseTypeInputDto): Promise<ExpenseType> {
-    const expenseTypeTypeEntity = await this.findOne(id);
+    const expenseTypeEntity = await this.findOne(id);
 
-    this.mapData(expenseTypeTypeEntity, input);
+    this.mapData(expenseTypeEntity, input);
 
-    await this.repository.save(expenseTypeTypeEntity);
-    return expenseTypeTypeEntity;
+    await this.repository.save(expenseTypeEntity);
+    return expenseTypeEntity;
   }
 
   async delete(id: number): Promise<void> {

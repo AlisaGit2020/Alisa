@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Expense } from './expense.entity';
+import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 
 @Entity()
 export class ExpenseType {
