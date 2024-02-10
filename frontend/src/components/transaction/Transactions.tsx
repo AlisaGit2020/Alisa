@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material'
+import { Box } from '@mui/material'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AlisaDataTable from '../alisa/AlisaDataTable';
 import { transactionContext } from '@alisa-lib/alisa-contexts';
@@ -8,6 +8,7 @@ import { TypeOrmFetchOptions } from '@alisa-lib/types';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import TransactionAddMenu from './components/TransactionAddMenu';
+import TransactionImport from './components/TransactionImport';
 
 interface TransactionsProps extends WithTranslation {
     filter: {
@@ -17,6 +18,7 @@ interface TransactionsProps extends WithTranslation {
 
 function Transactions({ t, filter }: TransactionsProps) {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [importOpen, setImportOpen] = React.useState<boolean>(false);
     const navigate = useNavigate()
 
     const handleOpenAddMenu = (event?: React.MouseEvent<HTMLButtonElement>): void => {
@@ -33,6 +35,10 @@ function Transactions({ t, filter }: TransactionsProps) {
         navigate(`${transactionContext.routePath}/edit/${id}`)
     }
 
+    const handleOpenImport = () => {
+        setImportOpen(true);
+    }
+
     const fetchOptions = {
         relations: {
             expense: true
@@ -43,7 +49,7 @@ function Transactions({ t, filter }: TransactionsProps) {
         where: {
             expense: {
                 propertyId: filter.propertyId
-            }
+            },            
         }
     } as TypeOrmFetchOptions<Transaction>
 
@@ -70,7 +76,14 @@ function Transactions({ t, filter }: TransactionsProps) {
                 anchorEl={anchorEl}
                 onClose={handleCloseAddMenu}
                 onAddExpense={() => navigate(`${transactionContext.routePath}/add/expense/${filter.propertyId}`)}
+                onImport={handleOpenImport}
             ></TransactionAddMenu>
+
+            <TransactionImport
+                open={importOpen}
+                onClose={() => setImportOpen(false)}
+                t={t}
+            ></TransactionImport>
         </Box>
 
     )

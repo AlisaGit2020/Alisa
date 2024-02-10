@@ -1,12 +1,14 @@
 import { Divider, ListItemIcon, ListItemText, Menu, MenuItem, MenuList, Paper } from "@mui/material"
 import PaymentIcon from '@mui/icons-material/Payment';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import { TFunction, t } from "i18next"
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { TFunction} from "i18next"
 
 function TransactionAddMenu( props: {    
     t: TFunction
     onClose: () => void
     onAddExpense: () => void
+    onImport: () => void
     anchorEl: null | HTMLElement
 }) {
         
@@ -19,7 +21,7 @@ function TransactionAddMenu( props: {
         >
             <MenuList>
                 <MenuItem >
-                    <ListItemText>Lisää uusi tapahtuma</ListItemText>
+                    <ListItemText>{props.t('add')}</ListItemText>
                 </MenuItem>
                 <Divider></Divider>
                 <MenuItem onClick={props.onAddExpense}>
@@ -33,6 +35,12 @@ function TransactionAddMenu( props: {
                         <MonetizationOnIcon fontSize="small" />
                     </ListItemIcon>
                     <ListItemText>{props.t('income')}</ListItemText>
+                </MenuItem>
+                <MenuItem onClick={props.onImport}>
+                    <ListItemIcon>
+                        <CloudUploadIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>{props.t('import')}</ListItemText>
                 </MenuItem>
             </MenuList>
         </Menu>
