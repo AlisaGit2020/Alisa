@@ -122,6 +122,8 @@ describe('Op import service', () => {
 
     /*"2023-12-02";"2023-12-02";-17,50;"105";"TILISIIRTO";"KOIVISTO JUHA";"FI4056700820217592";"OKOYFIHH";"ref=";"Viesti: Suihkuverho";"20231202/593619/133287"
      */
+    expect(expenses[1].propertyId).toBe(1);
+    expect(expenses[1].expenseTypeId).toBe(1);
     expect(expenses[1].transaction.externalId).toBe('20231202/593619/133287');
     expect(expenses[1].transaction.description).toBe('Suihkuverho');
     expect(expenses[1].transaction.amount).toBe(17.5);
