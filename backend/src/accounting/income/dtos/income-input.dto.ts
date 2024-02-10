@@ -4,6 +4,8 @@ import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/prope
 import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
 
 export class IncomeInputDto {
+  id?: number;
+
   incomeType?: IncomeTypeInputDto;
 
   @IsNumber()

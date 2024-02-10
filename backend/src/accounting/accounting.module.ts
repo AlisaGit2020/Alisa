@@ -42,5 +42,6 @@ import { Income } from './income/entities/income.entity';
       Property,
     ]),
   ],
+  exports: [ExpenseService, IncomeService],
 })
 export class AccountingModule {}

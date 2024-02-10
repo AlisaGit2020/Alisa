@@ -49,6 +49,14 @@ export class IncomeService {
     return await this.repository.save(incomeEntity);
   }
 
+  async save(input: IncomeInputDto): Promise<Income> {
+    if (input.id > 0) {
+      return this.update(input.id, input);
+    } else {
+      return this.add(input);
+    }
+  }
+
   async getDefault(): Promise<IncomeInputDto> {
     const properties = await this.propertyRepository.find({
       take: 1,

@@ -88,8 +88,8 @@
       "/node_modules/",
       "/dist/"
     ],
-    "moduleNameMapper": {        
-      "^@alisa-backend/(.*)": "<rootDir>../src/$1"    
+    "moduleNameMapper": {
+      "^@alisa-backend/(.*)": "<rootDir>../src/$1"
     }
   }
 }

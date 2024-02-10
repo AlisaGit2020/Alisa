@@ -49,6 +49,14 @@ export class ExpenseService {
     return await this.repository.save(expenseEntity);
   }
 
+  async save(input: ExpenseInputDto): Promise<Expense> {
+    if (input.id > 0) {
+      return this.update(input.id, input);
+    } else {
+      return this.add(input);
+    }
+  }
+
   async getDefault(): Promise<ExpenseInputDto> {
     const properties = await this.propertyRepository.find({
       take: 1,
