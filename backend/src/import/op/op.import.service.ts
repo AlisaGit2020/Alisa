@@ -98,7 +98,7 @@ export class OpImportService {
   ): Promise<ExpenseInputDto> {
     const expense = new ExpenseInputDto();
     expense.id = await this.getExpenseId(opCsvRow);
-    expense.expenseTypeId = this.getExpenseTypeId(opCsvRow);
+    expense.expenseTypeId = this.getExpenseTypeId(options, opCsvRow);
     expense.propertyId = options.propertyId;
     expense.transaction = this.toTransaction(opCsvRow);
     return expense;
@@ -110,7 +110,7 @@ export class OpImportService {
   ): Promise<IncomeInputDto> {
     const income = new IncomeInputDto();
     income.id = await this.getIncomeId(opCsvRow);
-    income.incomeTypeId = this.getIncomeTypeId(opCsvRow);
+    income.incomeTypeId = this.getIncomeTypeId(options, opCsvRow);
     income.propertyId = options.propertyId;
     income.transaction = this.toTransaction(opCsvRow);
     return income;
@@ -148,12 +148,12 @@ export class OpImportService {
     return amount;
   }
 
-  private getExpenseTypeId(opCsvRow: CSVRow): number {
-    return 1;
+  private getExpenseTypeId(options: OpImportOptions, opCsvRow: CSVRow): number {
+    return options.expenseTypeId;
   }
 
-  private getIncomeTypeId(opCsvRow: CSVRow): number {
-    return 1;
+  private getIncomeTypeId(options: OpImportOptions, opCsvRow: CSVRow): number {
+    return options.incomeTypeId;
   }
 
   private isExpense(opCsvRow: CSVRow): boolean {
@@ -189,4 +189,6 @@ type CSVRow = {
 export type OpImportOptions = {
   csvFile: string;
   propertyId: number;
+  expenseTypeId: number;
+  incomeTypeId: number;
 };

@@ -28,6 +28,8 @@ describe('Op import service', () => {
   const opImportOptions: OpImportOptions = {
     csvFile: `${MOCKS_PATH}/import/op.transactions.csv`,
     propertyId: 1,
+    expenseTypeId: 1,
+    incomeTypeId: 1,
   };
 
   beforeAll(async () => {
@@ -103,7 +105,7 @@ describe('Op import service', () => {
     expect(incomes.length).toBe(13);
   });
 
-  it('parse description correctly', async () => {
+  it('sets data correctly', async () => {
     await service.importCsv(opImportOptions);
 
     const expenses = await expenseService.search({
@@ -114,9 +116,22 @@ describe('Op import service', () => {
       relations: { transaction: true },
     });
 
-    expect(expenses[1].transaction.description).toBe('Suihkuverho');
     expect(expenses[2].transaction.description).toBe('Marraskuu sähkölasku');
     expect(expenses[3].transaction.description).toBe('Rahoitusvastike');
     expect(incomes[0].transaction.description).toBe('Airbnb BOFAIE3X');
+
+    /*"2023-12-02";"2023-12-02";-17,50;"105";"TILISIIRTO";"KOIVISTO JUHA";"FI4056700820217592";"OKOYFIHH";"ref=";"Viesti: Suihkuverho";"20231202/593619/133287"
+     */
+    expect(expenses[1].transaction.externalId).toBe('20231202/593619/133287');
+    expect(expenses[1].transaction.description).toBe('Suihkuverho');
+    expect(expenses[1].transaction.amount).toBe(17.5);
+    expect(expenses[1].transaction.quantity).toBe(1);
+    expect(expenses[1].transaction.totalAmount).toBe(-17.5);
+    expect(expenses[1].transaction.transactionDate).toEqual(
+      new Date('2023-12-02'),
+    );
+    expect(expenses[1].transaction.accountingDate).toEqual(
+      new Date('2023-12-02'),
+    );
   });
 });

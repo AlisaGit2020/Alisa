@@ -36,10 +36,14 @@ export class OpImportController {
   async uploadFile(
     @UploadedFile() file,
     @Body('propertyId') propertyId: number,
+    @Body('expenseTypeId') expenseTypeId: number,
+    @Body('incomeTypeId') incomeTypeId: number,
   ) {
     await this.service.importCsv({
       csvFile: file.path,
       propertyId: propertyId,
+      expenseTypeId: expenseTypeId,
+      incomeTypeId: incomeTypeId,
     });
   }
 }
