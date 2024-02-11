@@ -8,7 +8,7 @@ interface AlisaContentProps {
 function AlisaContent({ headerText, content }: AlisaContentProps) {
     return (
         <Paper sx={{ p: 2 }}>
-            <Stack spacing={2}>
+            <Stack spacing={4}>
                 <Title>{headerText}</Title>
                 {content}
             </Stack>
