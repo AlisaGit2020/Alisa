@@ -1,4 +1,4 @@
-import { Box, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
 import { useState } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { apartmentContext, expenseContext, expenseTypeContext, transactionContext } from '@alisa-lib/alisa-contexts';
@@ -12,7 +12,6 @@ import React from 'react';
 import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
 import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 import TransactionFormFields from './components/TransactionFormFields';
-import Title from '../../Title';
 import AlisaContent from '../alisa/AlisaContent';
 
 interface ExpenseFormProps extends WithTranslation {
