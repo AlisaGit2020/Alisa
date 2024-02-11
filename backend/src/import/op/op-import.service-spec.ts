@@ -4,7 +4,7 @@ Data service test
 import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { AppModule } from 'src/app.module';
-import { OpImportOptions, OpImportService } from './op.import.service';
+import { OpImportService } from './op-import.service';
 import { MOCKS_PATH } from '@alisa-backend/constants';
 import { INestApplication } from '@nestjs/common';
 import { IncomeTypeService } from '@alisa-backend/accounting/income/income-type.service';
@@ -15,6 +15,7 @@ import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/prope
 import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
 import { ExpenseService } from '@alisa-backend/accounting/expense/expense.service';
 import { IncomeService } from '@alisa-backend/accounting/income/income.service';
+import { OpImportInput } from './dtos/op-import-input.dto';
 
 describe('Op import service', () => {
   let service: OpImportService;
@@ -25,8 +26,8 @@ describe('Op import service', () => {
   let propertyService: PropertyService;
   let app: INestApplication;
   let dataSource: DataSource;
-  const opImportOptions: OpImportOptions = {
-    csvFile: `${MOCKS_PATH}/import/op.transactions.csv`,
+  const opImportOptions: OpImportInput = {
+    file: `${MOCKS_PATH}/import/op.transactions.csv`,
     propertyId: 1,
     expenseTypeId: 1,
     incomeTypeId: 1,

@@ -41,6 +41,14 @@ class ApiClient {
         return response.data;
     }
 
+    public static async upload<T>(path: string, data: T): Promise<T> {        
+        return axios.post(ApiClient.getApiUrl(path), data, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+    }
+
     public static async search<T>(
         path: string,
         options?: TypeOrmFetchOptions<T>

@@ -6,6 +6,7 @@ import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/
 import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-input.dto';
 import { ExpenseService } from '@alisa-backend/accounting/expense/expense.service';
 import { IncomeService } from '@alisa-backend/accounting/income/income.service';
+import { OpImportInput } from './dtos/op-import-input.dto';
 
 @Injectable()
 export class OpImportService {
@@ -16,11 +17,11 @@ export class OpImportService {
     private incomeService: IncomeService,
   ) {}
 
-  async importCsv(options: OpImportOptions) {
+  async importCsv(options: OpImportInput) {
     const rows: CSVRow[] = [];
 
     await new Promise<void>((resolve, reject) => {
-      fs.createReadStream(options.csvFile, { encoding: 'utf-8' })
+      fs.createReadStream(options.file, { encoding: 'utf-8' })
         .pipe(csvParser({ separator: ';', headers: false }))
         .on('data', (data: string[]) => {
           if (data[10] !== 'Arkistointitunnus') {
@@ -52,7 +53,7 @@ export class OpImportService {
     await this.handleRows(rows, options);
   }
 
-  private async handleRows(rows: CSVRow[], options: OpImportOptions) {
+  private async handleRows(rows: CSVRow[], options: OpImportInput) {
     for (const opCsvRow of rows) {
       if (this.isExpense(opCsvRow)) {
         const expense = await this.toExpense(opCsvRow, options);
@@ -94,7 +95,7 @@ export class OpImportService {
 
   private async toExpense(
     opCsvRow: CSVRow,
-    options: OpImportOptions,
+    options: OpImportInput,
   ): Promise<ExpenseInputDto> {
     const expense = new ExpenseInputDto();
     expense.id = await this.getExpenseId(opCsvRow);
@@ -106,7 +107,7 @@ export class OpImportService {
 
   private async toIncome(
     opCsvRow: CSVRow,
-    options: OpImportOptions,
+    options: OpImportInput,
   ): Promise<IncomeInputDto> {
     const income = new IncomeInputDto();
     income.id = await this.getIncomeId(opCsvRow);
@@ -148,11 +149,11 @@ export class OpImportService {
     return amount;
   }
 
-  private getExpenseTypeId(options: OpImportOptions, opCsvRow: CSVRow): number {
+  private getExpenseTypeId(options: OpImportInput, opCsvRow: CSVRow): number {
     return options.expenseTypeId;
   }
 
-  private getIncomeTypeId(options: OpImportOptions, opCsvRow: CSVRow): number {
+  private getIncomeTypeId(options: OpImportInput, opCsvRow: CSVRow): number {
     return options.incomeTypeId;
   }
 
@@ -184,11 +185,4 @@ type CSVRow = {
   reference: string;
   message: string;
   archiveID: string;
-};
-
-export type OpImportOptions = {
-  csvFile: string;
-  propertyId: number;
-  expenseTypeId: number;
-  incomeTypeId: number;
 };

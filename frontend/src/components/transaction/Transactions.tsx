@@ -81,6 +81,7 @@ function Transactions({ t, filter }: TransactionsProps) {
 
             <TransactionImport
                 open={importOpen}
+                propertyId={Number(filter.propertyId)}
                 onClose={() => setImportOpen(false)}
                 t={t}
             ></TransactionImport>

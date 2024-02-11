@@ -37,8 +37,12 @@ class DataService<T extends object> {
         }
         if (id) {
             return ApiClient.put<T>(this.apiPath, id, data)
-        } else {
-            return ApiClient.post<T>(this.apiPath, data)
+        } else {    
+            if ('file' in data) {
+                return ApiClient.upload<T>(this.apiPath, data)
+            }else{
+                return ApiClient.post<T>(this.apiPath, data)
+            }
         }
     }
 
