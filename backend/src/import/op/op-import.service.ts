@@ -99,7 +99,7 @@ export class OpImportService {
   ): Promise<ExpenseInputDto> {
     const expense = new ExpenseInputDto();
     expense.id = await this.getExpenseId(opCsvRow);
-    expense.expenseTypeId = this.getExpenseTypeId(options, opCsvRow);
+    expense.expenseTypeId = this.getExpenseTypeId(options);
     expense.propertyId = options.propertyId;
     expense.transaction = this.toTransaction(opCsvRow);
     return expense;
@@ -111,7 +111,7 @@ export class OpImportService {
   ): Promise<IncomeInputDto> {
     const income = new IncomeInputDto();
     income.id = await this.getIncomeId(opCsvRow);
-    income.incomeTypeId = this.getIncomeTypeId(options, opCsvRow);
+    income.incomeTypeId = this.getIncomeTypeId(options);
     income.propertyId = options.propertyId;
     income.transaction = this.toTransaction(opCsvRow);
     return income;
@@ -149,11 +149,11 @@ export class OpImportService {
     return amount;
   }
 
-  private getExpenseTypeId(options: OpImportInput, opCsvRow: CSVRow): number {
+  private getExpenseTypeId(options: OpImportInput): number {
     return options.expenseTypeId;
   }
 
-  private getIncomeTypeId(options: OpImportInput, opCsvRow: CSVRow): number {
+  private getIncomeTypeId(options: OpImportInput): number {
     return options.incomeTypeId;
   }
 

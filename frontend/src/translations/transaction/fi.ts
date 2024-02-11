@@ -6,6 +6,7 @@ const transaction = {
     expense: 'Kulu',
     expenseType: 'Kululaji',
     income: 'Tulo',
+    incomeType: 'Tulolaji',
     import: 'Tuonti',
     importTitle: 'Tapahtumien tuonti',
     receiver: 'Saaja',

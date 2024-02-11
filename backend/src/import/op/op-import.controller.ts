@@ -9,6 +9,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
 import { OpImportService } from './op-import.service';
+import { validate } from 'class-validator';
+import { OpImportInput } from './dtos/op-import-input.dto';
+import { Code } from 'typeorm';
 
 @Controller('import/op')
 export class OpImportController {
@@ -38,12 +41,19 @@ export class OpImportController {
     @Body('expenseTypeId') expenseTypeId: number,
     @Body('incomeTypeId') incomeTypeId: number,
   ) {
-    const data = {
-      file: file.path,
-      propertyId: propertyId,
-      expenseTypeId: expenseTypeId,
-      incomeTypeId: incomeTypeId,
-    };
+    const data = new OpImportInput();
+
+    data.file = file.path;
+    data.expenseTypeId = Number(expenseTypeId);
+    data.propertyId = Number(propertyId);
+    data.incomeTypeId = Number(incomeTypeId);
+
+    const validationErrors = await validate(data);
+
+    if (validationErrors.length > 0) {
+      //Todo: return 400 Bad request
+      return validationErrors;
+    }
 
     await this.service.importCsv(data);
   }

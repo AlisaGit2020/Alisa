@@ -1,4 +1,4 @@
-import React from "react"
+import React, { ReactNode } from "react"
 import AlisaForm from "./AlisaForm"
 import DataService from "../../../lib/data-service"
 
@@ -13,6 +13,7 @@ function AlisaFormHandler<T extends object>(props: {
         errorMessageTitle?: string,
         validationMessageTitle?: string
     }
+    submitButtonIcon?: ReactNode
     onCancel: () => void
     onAfterSubmit: () => void
     onSetData: React.Dispatch<React.SetStateAction<T>>;
@@ -36,8 +37,11 @@ function AlisaFormHandler<T extends object>(props: {
 
     const handleSubmit = async () => {
 
+        resetErrorMessages()
+
         if (props.data === undefined) {
-            throw new Error('Cannot save when data is missing');
+            setErrorMessage('Cannot save when data is missing');
+            return
         }
 
         const validationErrors = await dataService.getStrValidationErrors(props.data)
@@ -54,8 +58,14 @@ function AlisaFormHandler<T extends object>(props: {
                 
     }
 
+    const resetErrorMessages = () => {
+        setValidationMessage([]);
+        setErrorMessage('')
+    }
+
     return (
         <AlisaForm
+            submitButtonIcon={props.submitButtonIcon}
             submitButtonText={props.translation.submitButton}
             cancelButtonText={props.translation.cancelButton}
             errorMessageTitle={props.translation.errorMessageTitle}

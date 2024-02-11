@@ -26,7 +26,7 @@ describe('Op import service', () => {
   let propertyService: PropertyService;
   let app: INestApplication;
   let dataSource: DataSource;
-  const opImportOptions: OpImportInput = {
+  const opImportInput: OpImportInput = {
     file: `${MOCKS_PATH}/import/op.transactions.csv`,
     propertyId: 1,
     expenseTypeId: 1,
@@ -73,20 +73,33 @@ describe('Op import service', () => {
     incomeInputDto.description = '';
     await incomeTypeService.add(incomeInputDto);
 
+    incomeInputDto.name = 'Test income type2';
+    incomeInputDto.description = '';
+    await incomeTypeService.add(incomeInputDto);
+
     const expenseType = new ExpenseTypeInputDto();
     expenseType.name = 'Test expense type';
     expenseType.description = '';
     expenseType.isTaxDeductible = true;
     await expenseTypeService.add(expenseType);
 
+    expenseType.name = 'Test expense type2';
+    expenseType.description = '';
+    expenseType.isTaxDeductible = false;
+    await expenseTypeService.add(expenseType);
+
     const property = new PropertyInputDto();
     property.name = 'Test property';
     property.size = 29;
     await propertyService.add(property);
+
+    property.name = 'Test property2';
+    property.size = 36;
+    await propertyService.add(property);
   });
 
   it('import CSV', async () => {
-    await service.importCsv(opImportOptions);
+    await service.importCsv(opImportInput);
 
     const expenses = await expenseService.findAll();
     const incomes = await incomeService.findAll();
@@ -96,8 +109,8 @@ describe('Op import service', () => {
   });
 
   it('does not add double', async () => {
-    await service.importCsv(opImportOptions);
-    await service.importCsv(opImportOptions);
+    await service.importCsv(opImportInput);
+    await service.importCsv(opImportInput);
 
     const expenses = await expenseService.findAll();
     const incomes = await incomeService.findAll();
@@ -107,7 +120,7 @@ describe('Op import service', () => {
   });
 
   it('sets data correctly', async () => {
-    await service.importCsv(opImportOptions);
+    await service.importCsv(opImportInput);
 
     const expenses = await expenseService.search({
       relations: { transaction: true },
@@ -136,5 +149,33 @@ describe('Op import service', () => {
     expect(expenses[1].transaction.accountingDate).toEqual(
       new Date('2023-12-02'),
     );
+  });
+
+  it('changes property, income type and expense type when they change', async () => {
+    await service.importCsv(opImportInput);
+
+    let expenses = await expenseService.findAll();
+    let incomes = await incomeService.findAll();
+    expect(expenses[0].propertyId).toBe(1);
+    expect(incomes[0].propertyId).toBe(1);
+
+    const input: OpImportInput = {
+      file: `${MOCKS_PATH}/import/op.transactions.csv`,
+      propertyId: 2, //Change to another property
+      expenseTypeId: 2,
+      incomeTypeId: 2,
+    };
+
+    await service.importCsv(input);
+
+    expenses = await expenseService.findAll();
+    incomes = await incomeService.findAll();
+
+    expect(expenses[0].propertyId).toBe(2);
+    expect(incomes[0].propertyId).toBe(2);
+    expect(expenses[0].expenseTypeId).toBe(2);
+    expect(incomes[0].incomeTypeId).toBe(2);
+    expect(expenses.length).toBe(7);
+    expect(incomes.length).toBe(13);
   });
 });

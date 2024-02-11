@@ -1,10 +1,12 @@
 import { Box, Button, ButtonGroup } from "@mui/material"
 
 import AlisaAlert from "../dialog/AlisaAlert"
+import { ReactNode } from "react"
 
 function AlisaForm(props: {
     formComponents: JSX.Element
     submitButtonText: string
+    submitButtonIcon?: ReactNode
     cancelButtonText: string
     errorMessage?: string | string[]
     errorMessageTitle?: string
@@ -20,7 +22,8 @@ function AlisaForm(props: {
             <Box marginTop={3} >
                 <ButtonGroup>
                     <Button variant="contained" color="primary"
-                        onClick={props.onSubmit}>
+                        onClick={props.onSubmit}
+                        startIcon={props.submitButtonIcon}>
                         {props.submitButtonText}
                     </Button>
                     <Button variant="outlined"

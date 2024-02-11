@@ -37,6 +37,7 @@ function Transactions({ t, filter }: TransactionsProps) {
 
     const handleOpenImport = () => {
         setImportOpen(true);
+        handleCloseAddMenu()
     }
 
     const fetchOptions = {

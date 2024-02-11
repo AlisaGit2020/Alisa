@@ -6,6 +6,7 @@ const transaction = {
     expense: 'Expense',
     expenseType: 'Expense type',
     income: 'Income',
+    incomeType: 'Income type',
     import: 'Import',
     importTitle: 'Import transactions',
     receiver: 'Receiver',
