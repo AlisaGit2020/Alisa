@@ -41,17 +41,25 @@ function Transactions({ t, filter }: TransactionsProps) {
     }
 
     const fetchOptions = {
+        select: {
+            id: true,
+            transactionDate: true,
+            sender: true,
+            receiver: true,
+            description: true,
+            totalAmount: true
+        },
         relations: {
-            expense: true
+            expense: true,
+            income: true
         },
         order: {
             transactionDate: 'DESC'
         },
-        where: {
-            expense: {
-                propertyId: filter.propertyId
-            },            
-        }
+        where: [
+            { expense: { propertyId: filter.propertyId } },
+            { income: { propertyId: filter.propertyId } }
+        ]
     } as TypeOrmFetchOptions<Transaction>
 
     return (
@@ -63,9 +71,9 @@ function Transactions({ t, filter }: TransactionsProps) {
                 dataService={new DataService({ context: transactionContext, fetchOptions })}
                 fields={[
                     { name: 'transactionDate', format: 'date' },
-                    { name: 'sender' },
-                    { name: 'receiver' },
-                    { name: 'description' },                    
+                    { name: 'sender', maxLength: 30 },
+                    { name: 'receiver', maxLength: 30 },
+                    { name: 'description', maxLength: 40 },
                     { name: 'totalAmount', format: 'currency' },
                 ]}
                 onNewRow={handleOpenAddMenu}

@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  HttpException,
+  HttpStatus,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -51,8 +53,7 @@ export class OpImportController {
     const validationErrors = await validate(data);
 
     if (validationErrors.length > 0) {
-      //Todo: return 400 Bad request
-      return validationErrors;
+      throw new HttpException(validationErrors, HttpStatus.BAD_REQUEST);
     }
 
     await this.service.importCsv(data);

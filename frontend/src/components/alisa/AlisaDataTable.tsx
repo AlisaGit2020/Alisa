@@ -10,13 +10,14 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
-import { Box, IconButton, Paper, Tooltip } from '@mui/material';
+import { Box, IconButton, Paper, Tooltip, Typography } from '@mui/material';
 import { TFunction } from 'i18next';
 import AlisaConfirmDialog from './dialog/AlisaConfirmDialog';
 import DataService from '@alisa-lib/data-service';
 
 interface AlisaDataTableField<T> {
   name: keyof T,
+  maxLength?: number
   format?: 'number' | 'currency' | 'date'
 }
 
@@ -59,7 +60,11 @@ function AlisaDataTable<T extends { id: number }>(props: {
   };
 
   const getDataValue = (field: AlisaDataTableField<T>, dataItem: T): React.ReactNode => {
-    const value = dataItem[field.name];
+    let value = dataItem[field.name];
+
+    if (field.maxLength && typeof (value) === 'string' && value.length > field.maxLength) {
+      value = value.substring(0, field.maxLength) + '...' as T[keyof T]
+    }
 
     if (typeof (value) === 'boolean') {
       return (<CheckIcon visibility={value ? 'visible' : 'hidden'}></CheckIcon>)
@@ -89,7 +94,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
         <TableHead>
           <TableRow>
             {props.fields.map((field) => (
-              <TableCell key={field.name as string}>{props.t(field.name as string)}</TableCell>
+              <TableCell key={field.name as string}><Typography fontWeight={'bold'}>{props.t(field.name as string)}</Typography></TableCell>
             ))}
             <TableCell align='right'>
               <Tooltip title={props.t('add')}>
