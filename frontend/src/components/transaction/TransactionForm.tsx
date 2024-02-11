@@ -4,7 +4,7 @@ import { Transaction } from '@alisa-backend/accounting/transaction/entities/tran
 import { useState } from 'react';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import TransactionChooseType from './TransactionChooseType';
+import TransactionChooseType from './components/TransactionChooseType';
 import ApiClient from '../../lib/api-client';
 import { transactionContext } from '@alisa-lib/alisa-contexts';
 

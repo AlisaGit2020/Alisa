@@ -33,7 +33,11 @@ function TransactionImport(props: {
         value: unknown
     ) => {
 
-        const newData = dataService.updateNestedData(data, name, value);
+        let newData = dataService.updateNestedData(data, name, value);
+        if (name === 'file' && value instanceof File ) {
+            console.log(value)
+            newData = dataService.updateNestedData(newData, 'fileName', value.name)
+        }
         setData(newData);
     }
 
@@ -51,7 +55,7 @@ function TransactionImport(props: {
             >
             </AlisaSelect>
             <AlisaSelect<OpImportInput, ExpenseType>
-                label={props.t('expenseType')}
+                label={props.t('defaultExpenseType')}
                 dataService={new DataService<ExpenseType>({
                     context: expenseTypeContext,
                     fetchOptions: { order: { name: 'ASC' } }
@@ -62,7 +66,7 @@ function TransactionImport(props: {
             >
             </AlisaSelect>
             <AlisaSelect<OpImportInput, IncomeType>
-                label={props.t('incomeType')}
+                label={props.t('defaultIncomeType')}
                 dataService={new DataService<IncomeType>({
                     context: incomeTypeContext,
                     fetchOptions: { order: { name: 'ASC' } }
@@ -72,7 +76,7 @@ function TransactionImport(props: {
                 onHandleChange={handleChange}
             >
             </AlisaSelect>
-            <TextField
+            <TextField                
                 type={'file'}
                 onChange={(e) => handleChange('file', e.target.files[0])}
             ></TextField>
@@ -88,14 +92,14 @@ function TransactionImport(props: {
 
             <DialogTitle>{props.t('importTitle')} <CloudUploadIcon></CloudUploadIcon></DialogTitle>
             <DialogContent dividers>
-                <AlisaFormHandler                    
+                <AlisaFormHandler
                     formComponents={formComponents}
                     translation={{
                         submitButton: props.t('import'),
                         cancelButton: props.t('cancel'),
                         errorMessageTitle: '',
-                        validationMessageTitle: ''
-                    }}                    
+                        validationMessageTitle: props.t('validationErrorTitle')
+                    }}
                     submitButtonIcon={<CloudUploadIcon></CloudUploadIcon>}
                     dataService={new DataService<OpImportInput>({
                         context: opImportContext,
@@ -103,8 +107,8 @@ function TransactionImport(props: {
                     })}
                     data={data}
                     onAfterSubmit={props.onClose}
-                    onCancel={props.onClose}       
-                    onSetData={setData}                                 
+                    onCancel={props.onClose}
+                    onSetData={setData}
                 ></AlisaFormHandler>
             </DialogContent>
         </Dialog>

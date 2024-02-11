@@ -3,6 +3,8 @@ const transaction = {
     add: 'Uusi tilitapahtuma',    
     amount: 'Yksikköhinta',
     chooseTransactionType: 'Valitse tapahtumatyyyppi',
+    defaultIncomeType: 'Oletustulolaji',
+    defaultExpenseType: 'Oletuskululaji',
     expense: 'Kulu',
     expenseType: 'Kululaji',
     income: 'Tulo',

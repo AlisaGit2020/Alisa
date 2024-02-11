@@ -3,6 +3,8 @@ const transaction = {
     add: 'Add new transaction',    
     amount: 'Unit price',
     chooseTransactionType: 'Choose transaction type',
+    defaultIncomeType: 'Default income type',
+    defaultExpenseType: 'Default expense type',
     expense: 'Expense',
     expenseType: 'Expense type',
     income: 'Income',

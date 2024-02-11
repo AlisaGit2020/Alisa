@@ -43,7 +43,7 @@ function AlisaFormHandler<T extends object>(props: {
             setErrorMessage('Cannot save when data is missing');
             return
         }
-
+        
         const validationErrors = await dataService.getStrValidationErrors(props.data)
         if (validationErrors !== undefined && validationErrors.length > 0) {
             return setValidationMessage(validationErrors)

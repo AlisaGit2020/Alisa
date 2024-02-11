@@ -1,5 +1,5 @@
 import { Stack, Box, Button } from "@mui/material";
-import AlisaContent from "../alisa/AlisaContent";
+import AlisaContent from "../../alisa/AlisaContent";
 import PaymentIcon from '@mui/icons-material/Payment';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { WithTranslation, withTranslation } from "react-i18next";

@@ -32,7 +32,7 @@ export class OpImportController {
           cb(null, dir);
         },
         filename: function (req, file, cb) {
-          cb(null, file.originalname + '-' + Date.now());
+          cb(null, Date.now() + '-' + file.originalname);
         },
       }),
     }),
@@ -43,6 +43,9 @@ export class OpImportController {
     @Body('expenseTypeId') expenseTypeId: number,
     @Body('incomeTypeId') incomeTypeId: number,
   ) {
+    if (file === undefined) {
+      throw new HttpException('file must not be empty', HttpStatus.BAD_REQUEST);
+    }
     const data = new OpImportInput();
 
     data.file = file.path;
