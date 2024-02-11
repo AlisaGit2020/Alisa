@@ -34,8 +34,7 @@ function TransactionImport(props: {
     ) => {
 
         let newData = dataService.updateNestedData(data, name, value);
-        if (name === 'file' && value instanceof File ) {
-            console.log(value)
+        if (name === 'file' && value instanceof File ) {            
             newData = dataService.updateNestedData(newData, 'fileName', value.name)
         }
         setData(newData);
