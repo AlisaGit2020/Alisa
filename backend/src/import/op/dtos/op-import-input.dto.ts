@@ -7,7 +7,7 @@ export class OpImportInput {
   @Matches(/(?:^$)|(?:^.+\.csv$)/, {
     message: 'Invalid file extension, use .csv-files.',
   })
-  fileName: string = '';
+  fileName?: string = '';
   @Min(1)
   propertyId: number = 0;
   @Min(1)

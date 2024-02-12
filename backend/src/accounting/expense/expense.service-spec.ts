@@ -41,9 +41,13 @@ describe('Expense service', () => {
   });
 
   beforeEach(async () => {
-    ['expense, expense_type', 'property', 'transaction'].map((tableName) => {
-      dataSource.query(`TRUNCATE TABLE ${tableName} RESTART IDENTITY CASCADE;`);
-    });
+    ['expense, expense_type', 'property', 'transaction'].map(
+      async (tableName) => {
+        await dataSource.query(
+          `TRUNCATE TABLE ${tableName} RESTART IDENTITY CASCADE;`,
+        );
+      },
+    );
   });
 
   describe('update an expense', () => {

@@ -4,6 +4,7 @@ import { FindManyOptions, Repository } from 'typeorm';
 import { TransactionInputDto } from './dtos/transaction-input.dto';
 import { Transaction } from './entities/transaction.entity';
 import { Expense } from '../expense/entities/expense.entity';
+import { Income } from '../income/entities/income.entity';
 
 @Injectable()
 export class TransactionService {
@@ -13,6 +14,9 @@ export class TransactionService {
 
     @InjectRepository(Expense)
     private expenseRepository: Repository<Expense>,
+
+    @InjectRepository(Income)
+    private incomeRepository: Repository<Income>,
   ) {}
 
   async search(options: FindManyOptions<Transaction>): Promise<Transaction[]> {
@@ -52,6 +56,15 @@ export class TransactionService {
 
     if (expenseId) {
       await this.expenseRepository.delete(expenseId);
+    }
+
+    const income = await this.incomeRepository.findOne({
+      where: { transaction: { id: id } },
+    });
+    const incomeId = income?.id;
+
+    if (incomeId) {
+      await this.incomeRepository.delete(incomeId);
     }
 
     this.repository.delete(id);
