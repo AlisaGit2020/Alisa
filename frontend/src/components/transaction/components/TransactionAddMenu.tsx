@@ -8,6 +8,7 @@ function TransactionAddMenu( props: {
     t: TFunction
     onClose: () => void
     onAddExpense: () => void
+    onAddIncome: () => void
     onImport: () => void
     anchorEl: null | HTMLElement
 }) {
@@ -30,7 +31,7 @@ function TransactionAddMenu( props: {
                     </ListItemIcon>
                     <ListItemText>{props.t('expense')}</ListItemText>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem onClick={props.onAddIncome}>
                     <ListItemIcon>
                         <MonetizationOnIcon fontSize="small" />
                     </ListItemIcon>

@@ -7,11 +7,13 @@ import { useParams } from 'react-router-dom';
 import TransactionChooseType from './components/TransactionChooseType';
 import ApiClient from '../../lib/api-client';
 import { transactionContext } from '@alisa-lib/alisa-contexts';
+import IncomeForm from './IncomeForm';
 
 
 function TransactionForm() {
     const { id, type, propertyId } = useParams();
     const [expenseId, setExpenseId] = useState<number>();
+    const [incomeId, setIncomeId] = useState<number>();
 
     React.useEffect(() => {
 
@@ -22,11 +24,15 @@ function TransactionForm() {
                     const transaction = await ApiClient.get<Transaction>(
                         transactionContext.apiPath,
                         id,
-                        { expense: true }
+                        { expense: true, income: true }
                     )
 
                     if (transaction.expense) {
                         setExpenseId(transaction.expense.id)
+                    }
+
+                    if (transaction.income) {
+                        setIncomeId(transaction.income.id)
                     }
 
                 } catch (error) {
@@ -39,14 +45,18 @@ function TransactionForm() {
 
     }, [id])
 
-    if (type == 'expense' || expenseId) {
+    if (type === 'expense' || expenseId) {
         return (
             <ExpenseForm id={expenseId} propertyId={Number(propertyId)} />
-        )
+        );
+    } else if (type === 'income' || incomeId) {
+        return (
+            <IncomeForm id={incomeId} propertyId={Number(propertyId)} />
+        );
     } else {
         return (
             <TransactionChooseType></TransactionChooseType>
-        )
+        );
     }
 
 }

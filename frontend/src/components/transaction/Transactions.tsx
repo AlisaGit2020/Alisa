@@ -85,6 +85,7 @@ function Transactions({ t, filter }: TransactionsProps) {
                 anchorEl={anchorEl}
                 onClose={handleCloseAddMenu}
                 onAddExpense={() => navigate(`${transactionContext.routePath}/add/expense/${filter.propertyId}`)}
+                onAddIncome={() => navigate(`${transactionContext.routePath}/add/income/${filter.propertyId}`)}
                 onImport={handleOpenImport}
             ></TransactionAddMenu>
 
