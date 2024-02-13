@@ -1,5 +1,6 @@
 import { Box, Container, Toolbar } from "@mui/material"
 import AppRoutes from "../AppRoutes"
+import Breadcrumbs from "./Breadcrumbs"
 
 function AppContainer() {
     return (
@@ -16,8 +17,8 @@ function AppContainer() {
                 overflow: 'auto'
             }}
         >
-            <Toolbar />
-            <Container maxWidth={false} sx={{ mt: 4, mb: 4 }}>
+            <Toolbar />            
+            <Container maxWidth={false} sx={{ mt: 3, mb: 4 }}>
                 <AppRoutes></AppRoutes>
             </Container>
 

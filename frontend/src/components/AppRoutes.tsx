@@ -7,10 +7,12 @@ import{ propertyContext, expenseTypeContext, transactionContext } from '@alisa-l
 import ExpenseTypeForm from './settings/expense-type/ExpenseTypeForm';
 import TransactionForm from './transaction/TransactionForm';
 import TransactionMain from './transaction/TransactionMain';
+import Breadcrumbs from './layout/Breadcrumbs';
 
 export default function AppRoutes() {
     return (
         <BrowserRouter>
+            <Breadcrumbs></Breadcrumbs>
             <Routes>
                 <Route path='/' element={<Dashboard></Dashboard>}></Route>
                 

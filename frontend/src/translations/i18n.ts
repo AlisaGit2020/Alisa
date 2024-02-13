@@ -10,6 +10,7 @@ const namespaces = [
     'expense',
     'expense-type',
     'menu',
+    'route',
     'settings',
     'transaction'
 ];
