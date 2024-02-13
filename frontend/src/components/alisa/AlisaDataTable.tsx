@@ -10,7 +10,7 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
-import { Box, IconButton, Paper, Tooltip, Typography } from '@mui/material';
+import { Box, IconButton, Paper, TableContainer, Tooltip, Typography } from '@mui/material';
 import { TFunction } from 'i18next';
 import AlisaConfirmDialog from './dialog/AlisaConfirmDialog';
 import DataService from '@alisa-lib/data-service';
@@ -90,45 +90,47 @@ function AlisaDataTable<T extends { id: number }>(props: {
     <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
       <Title>{props.title}</Title>
 
-      <Table size="small" aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            {props.fields.map((field) => (
-              <TableCell key={field.name as string} align={ field.format === 'currency' ? 'right' : 'left' }>
-                <Typography fontWeight={'bold'}>{props.t(field.name as string)}</Typography>
-              </TableCell>
-            ))}
-            <TableCell align='right'>
-              <Tooltip title={props.t('add')}>
-                <IconButton onClick={props.onNewRow}>
-                  <AddIcon></AddIcon>
-                </IconButton>
-              </Tooltip>
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        {(data.length > 0) && (
-          <TableBody>
-
-            {data.map((item) => (
-              <TableRow key={item.id}>
-                {props.fields.map((field) => (
-                  <TableCell key={field.name as string} align={ field.format === 'currency' ? 'right' : 'left' }>
-                    {getDataValue(field, item)}
-                  </TableCell>
-                ))}
-
-                <TableCell align='right'>
-                  <IconButton onClick={() => props.onEdit(item.id)}><EditIcon></EditIcon></IconButton>
-                  <IconButton onClick={() => handleClickOpen(item.id)}><DeleteIcon></DeleteIcon></IconButton>
+      <TableContainer sx={{ maxHeight: 960 }}>
+        <Table stickyHeader size="small" aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              {props.fields.map((field) => (
+                <TableCell key={field.name as string} align={field.format === 'currency' ? 'right' : 'left'}>
+                  <Typography fontWeight={'bold'}>{props.t(field.name as string)}</Typography>
                 </TableCell>
-              </TableRow>
-            ))}
+              ))}
+              <TableCell align='right'>
+                <Tooltip title={props.t('add')}>
+                  <IconButton onClick={props.onNewRow}>
+                    <AddIcon></AddIcon>
+                  </IconButton>
+                </Tooltip>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          {(data.length > 0) && (
+            <TableBody>
 
-          </TableBody>
-        )}
+              {data.map((item) => (
+                <TableRow key={item.id}>
+                  {props.fields.map((field) => (
+                    <TableCell key={field.name as string} align={field.format === 'currency' ? 'right' : 'left'}>
+                      {getDataValue(field, item)}
+                    </TableCell>
+                  ))}
 
-      </Table>
+                  <TableCell align='right'>
+                    <IconButton onClick={() => props.onEdit(item.id)}><EditIcon></EditIcon></IconButton>
+                    <IconButton onClick={() => handleClickOpen(item.id)}><DeleteIcon></DeleteIcon></IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+
+            </TableBody>
+          )}
+
+        </Table>
+      </TableContainer>
 
       {(data.length == 0) && (
         <Box padding={2} fontSize={'medium'}>{props.t('noRowsFound')}</Box>

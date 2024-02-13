@@ -8,7 +8,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
-import { Box, Button, Card, CardActions, CardContent, CardMedia, Grid, IconButton, Link, Paper, Typography } from '@mui/material';
+import { Box, Button, Card, CardActions, CardContent, CardMedia, Grid, Link, Paper, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { TFunction } from 'i18next';
 import AlisaConfirmDialog from './dialog/AlisaConfirmDialog';
@@ -29,7 +29,8 @@ interface AlisaCardListInputProps<T> {
   fetchOptions?: TypeOrmFetchOptions<T>
 }
 
-function AlisaCardList<T extends { id: number }>({ t, title, alisaContext, fields, fetchOptions }: AlisaCardListInputProps<T>) {
+
+function AlisaCardList<T extends { id: number }>({ t, title, alisaContext, fetchOptions }: AlisaCardListInputProps<T>) {
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState<number>(0);
@@ -91,20 +92,20 @@ function AlisaCardList<T extends { id: number }>({ t, title, alisaContext, field
       {(data.length > 0) && (
         <Grid container spacing={2} marginTop={2}>
           {data.map((item) => (
-            <Grid item md={4}>
+            <Grid key={item.name} item md={4}>
               <Card >
 
                 <CardContent>
                   <Typography gutterBottom variant="h5" component="div">
                     {item.name}
                   </Typography>
-                  <CardMedia
+                  <CardMedia                  
                     component="img"
                     alt={item.name}
-                    height="140"
+                    height="140"                    
                     image={`/assets/properties/${item.name}.jpg`}
                   />
-                  <Typography variant="body2" color="text.secondary">
+                  
                     <Table>
                       <TableBody>
                         <TableRow>
@@ -114,14 +115,14 @@ function AlisaCardList<T extends { id: number }>({ t, title, alisaContext, field
                       </TableBody>
                     </Table>
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec condimentum nisl.
-                  </Typography>
+                  
                 </CardContent>
                 <CardActions>
-                  <Button size="small" onClick={() => navigate(`edit/${item.id}`)}><IconButton >
-                    <EditIcon></EditIcon></IconButton>{t('edit')}
+                  <Button size="small" onClick={() => navigate(`edit/${item.id}`)} startIcon={<EditIcon></EditIcon>}>
+                    {t('edit')}
                   </Button>
-                  <Button size="small" onClick={() => handleClickOpen(item.id)}><IconButton >
-                    <DeleteIcon></DeleteIcon></IconButton>{t('delete')}
+                  <Button size="small" onClick={() => handleClickOpen(item.id)} startIcon={<DeleteIcon></DeleteIcon>}>
+                    {t('delete')}
                   </Button>
                 </CardActions>
               </Card>

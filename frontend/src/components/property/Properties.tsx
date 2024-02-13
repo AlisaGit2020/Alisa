@@ -10,7 +10,7 @@ function Properties({ t }: WithTranslation) {
 
         <Grid container>
 
-            <Grid item xs={12} lg={6}>
+            <Grid item xs={12} lg={12}>
                 <AlisaCardList<Property>
                     title={t('properties')}
                     t={t}
