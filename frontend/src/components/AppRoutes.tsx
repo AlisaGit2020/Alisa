@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './dashboard/Dashboard';
-import Apartments from './apartment/Apartments';
-import ApartmentForm from './apartment/ApartmentForm';
+import Properties from './property/Properties';
+import PropertyForm from './property/PropertyForm';
 import Settings from './settings/Settings';
-import{ apartmentContext, expenseTypeContext, transactionContext } from '@alisa-lib/alisa-contexts';
+import{ propertyContext, expenseTypeContext, transactionContext } from '@alisa-lib/alisa-contexts';
 import ExpenseTypeForm from './settings/expense-type/ExpenseTypeForm';
 import TransactionForm from './transaction/TransactionForm';
 import TransactionMain from './transaction/TransactionMain';
@@ -14,9 +14,9 @@ export default function AppRoutes() {
             <Routes>
                 <Route path='/' element={<Dashboard></Dashboard>}></Route>
                 
-                <Route path={`${apartmentContext.routePath}/edit/:idParam`} element={<ApartmentForm></ApartmentForm>}></Route>
-                <Route path={`${apartmentContext.routePath}/add`} element={<ApartmentForm></ApartmentForm>}></Route>
-                <Route path={`${apartmentContext.routePath}`} element={<Apartments></Apartments>}></Route>
+                <Route path={`${propertyContext.routePath}/edit/:idParam`} element={<PropertyForm></PropertyForm>}></Route>
+                <Route path={`${propertyContext.routePath}/add`} element={<PropertyForm></PropertyForm>}></Route>
+                <Route path={`${propertyContext.routePath}`} element={<Properties></Properties>}></Route>
                 
                 <Route path={`${transactionContext.routePath}/edit/:id`} element={<TransactionForm></TransactionForm>}></Route>                
                 <Route path={`${transactionContext.routePath}/add/:type?/:propertyId?`} element={<TransactionForm></TransactionForm>}></Route>                

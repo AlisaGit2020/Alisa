@@ -16,7 +16,7 @@ const en = {
         },
 
         amount: 'Amount',
-        apartment: 'Apartment',        
+        property: 'property',        
         back: 'Back',
         cancel: 'Cancel',
         confirm: 'Confirm',

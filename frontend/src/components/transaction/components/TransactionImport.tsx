@@ -7,7 +7,7 @@ import AlisaSelect from "../../alisa/AlisaSelect";
 import { OpImportInput } from "@alisa-backend/import/op/dtos/op-import-input.dto";
 import DataService from "@alisa-lib/data-service";
 import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity";
-import { apartmentContext, expenseTypeContext, incomeTypeContext, opImportContext } from "@alisa-lib/alisa-contexts";
+import { propertyContext, expenseTypeContext, incomeTypeContext, opImportContext } from "@alisa-lib/alisa-contexts";
 import { IncomeType } from "@alisa-backend/accounting/income/entities/income-type.entity";
 import { Property } from "@alisa-backend/real-estate/property/entities/property.entity";
 import AlisaFormHandler from "../../alisa/form/AlisaFormHandler";
@@ -43,9 +43,9 @@ function TransactionImport(props: {
     const formComponents = (
         <Stack spacing={2} marginBottom={2}>
             <AlisaSelect<OpImportInput, Property>
-                label={props.t('apartment')}
+                label={props.t('property')}
                 dataService={new DataService<Property>({
-                    context: apartmentContext,
+                    context: propertyContext,
                     fetchOptions: { order: { name: 'ASC' } }
                 })}
                 fieldName='propertyId'

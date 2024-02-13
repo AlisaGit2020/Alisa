@@ -14,6 +14,7 @@ import { TFunction } from 'i18next';
 import AlisaConfirmDialog from './dialog/AlisaConfirmDialog';
 import { TypeOrmFetchOptions } from '../../lib/types';
 import ApiClient from '../../lib/api-client';
+import AlisaContext from '@alisa-lib/alisa-contexts';
 
 interface AlisCardListField<T> {
   name: keyof T,
@@ -86,7 +87,7 @@ function AlisaCardList<T extends { id: number }>({ t, title, alisaContext, field
   return (
     <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
       <Title>{title}</Title>
-      <Link href={'/apartments/add'}>{t('add')}</Link>
+      <Link href={'/properties/add'}>{t('add')}</Link>
       {(data.length > 0) && (
         <Grid container spacing={2} marginTop={2}>
           {data.map((item) => (
@@ -101,7 +102,7 @@ function AlisaCardList<T extends { id: number }>({ t, title, alisaContext, field
                     component="img"
                     alt={item.name}
                     height="140"
-                    image={`/assets/apartments/${item.name}.jpg`}
+                    image={`/assets/properties/${item.name}.jpg`}
                   />
                   <Typography variant="body2" color="text.secondary">
                     <Table>

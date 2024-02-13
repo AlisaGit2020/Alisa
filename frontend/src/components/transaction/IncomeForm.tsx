@@ -1,7 +1,7 @@
 import { Stack } from '@mui/material';
 import { useState } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
-import { apartmentContext, incomeContext, incomeTypeContext, transactionContext } from '@alisa-lib/alisa-contexts';
+import { propertyContext, incomeContext, incomeTypeContext, transactionContext } from '@alisa-lib/alisa-contexts';
 import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
 import DataService from '@alisa-lib/data-service';
 import { useNavigate } from 'react-router-dom';
@@ -92,9 +92,9 @@ function IncomeForm({ t, id, propertyId }: IncomeFormProps) {
 
             <Stack spacing={2} marginBottom={2}>
                 <AlisaSelect<IncomeInputDto, Property>
-                    label={t('apartment')}
+                    label={t('property')}
                     dataService={new DataService<Property>({
-                        context: apartmentContext,
+                        context: propertyContext,
                         fetchOptions: { order: { name: 'ASC' } }
                     })}
                     fieldName='propertyId'

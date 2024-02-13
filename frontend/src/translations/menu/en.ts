@@ -1,6 +1,6 @@
 const menu = {
     dashboard: 'Dashboard',
-    apartments: 'Apartments',
+    properties: 'properties',
     transactions: 'Transactions',
     taxes: 'Taxes',
 }

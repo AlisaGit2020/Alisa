@@ -1,4 +1,4 @@
-import { apartmentContext, transactionContext } from "@alisa-lib/alisa-contexts"
+import { propertyContext, transactionContext } from "@alisa-lib/alisa-contexts"
 import Transactions from "./Transactions"
 import { WithTranslation, withTranslation } from "react-i18next"
 import { Paper } from "@mui/material"
@@ -27,14 +27,14 @@ function TransactionMain({ t }: WithTranslation) {
             <Paper sx={{ p: 2, marginBottom: 3, display: 'flex', flexDirection: 'column' }}>
                 <AlisaSelect<{ property: number }, Property>
                     dataService={new DataService({
-                        context: apartmentContext,
+                        context: propertyContext,
                         fetchOptions: {
                             order: {
                                 name: 'ASC'
                             }
                         }
                     })}
-                    label={t('apartment')}
+                    label={t('property')}
                     onHandleChange={handleChange}
                     fieldName={'property'}
                     value={property}

@@ -3,7 +3,7 @@ import { loadTranslations } from './translation-loader';
 describe('loadTranslations', () => {
   it('loads translations for available languages and namespaces', async () => {
     const availableLanguages = ['en', 'fi'];
-    const namespaces = ['apartment', 'expense', 'expense-type', 'menu', 'settings', 'transaction'];
+    const namespaces = ['property', 'expense', 'expense-type', 'menu', 'settings', 'transaction'];
 
     const result = await loadTranslations(availableLanguages, namespaces);
     

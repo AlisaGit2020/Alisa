@@ -2,9 +2,9 @@ import { Grid } from '@mui/material'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 import AlisaCardList from '../alisa/AlisaCardList';
-import { apartmentContext } from '@alisa-lib/alisa-contexts';
+import { propertyContext } from '@alisa-lib/alisa-contexts';
 
-function Apartments({ t }: WithTranslation) {
+function Properties({ t }: WithTranslation) {
 
     return (
 
@@ -12,9 +12,9 @@ function Apartments({ t }: WithTranslation) {
 
             <Grid item xs={12} lg={6}>
                 <AlisaCardList<Property>
-                    title={t('apartments')}
+                    title={t('properties')}
                     t={t}
-                    alisaContext={apartmentContext}
+                    alisaContext={propertyContext}
                     fields={[
                         { name: 'name' },
                         { name: 'size', format: 'number' },
@@ -27,4 +27,4 @@ function Apartments({ t }: WithTranslation) {
     )
 }
 
-export default withTranslation(apartmentContext.name)(Apartments)
+export default withTranslation(propertyContext.name)(Properties)

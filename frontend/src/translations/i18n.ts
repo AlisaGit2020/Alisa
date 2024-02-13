@@ -6,7 +6,7 @@ import { loadTranslations } from './translation-loader';
 
 const availableLanguages = ['en', 'fi'];
 const namespaces = [
-    'apartment',
+    'property',
     'expense',
     'expense-type',
     'menu',

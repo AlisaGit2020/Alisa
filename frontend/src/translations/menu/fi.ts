@@ -1,6 +1,6 @@
 const menu = {
     dashboard: 'Etusivu',
-    apartments: 'Asunnot',
+    properties: 'Asunnot',
     transactions: 'Tilitapahtumat',
     taxes: 'Verot',
 }

@@ -1,9 +1,9 @@
-const apartment = {
+const property = {
     add: 'Lisää uusi asunto',
-    apartments: 'Asunnot',
+    properties: 'Asunnot',
     confirmDelete: 'Poistetaanko asunto?',
     name: 'Nimi',
     size: 'Pinta-ala',
 }
 
-export default apartment
+export default property

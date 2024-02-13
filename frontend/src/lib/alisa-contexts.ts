@@ -6,10 +6,10 @@ type AlisaContext = {
 
 export default AlisaContext
 
-export const apartmentContext: AlisaContext = {
-    name: 'apartment',
+export const propertyContext: AlisaContext = {
+    name: 'property',
     apiPath: 'real-estate/property',
-    routePath: '/apartments',
+    routePath: '/properties',
 }
 
 export const expenseTypeContext: AlisaContext = {

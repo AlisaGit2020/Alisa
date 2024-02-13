@@ -1,4 +1,4 @@
-//This class calculates an apartment key figures by given parameters
+//This class calculates an property key figures by given parameters
 import { pmt } from 'financial';
 import { InvestmentInputDto } from '../dtos/investment-input.dto';
 
@@ -34,7 +34,7 @@ export class InvestmentCalculator {
   public readonly rentPerMonth: number;
 
   /**
-   * Apartment size in square meters
+   * property size in square meters
    */
   public readonly apartmentSize: number;
 

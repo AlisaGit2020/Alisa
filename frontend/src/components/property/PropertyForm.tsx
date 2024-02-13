@@ -5,14 +5,14 @@ import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/prope
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AlisaNumberField from '../alisa/form/AlisaNumberField';
 import AlisaTextField from '../alisa/form/AlisaTextField';
-import { apartmentContext } from '../../lib/alisa-contexts';
+import { propertyContext } from '../../lib/alisa-contexts';
 import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
 import { DTO } from '../../lib/types';
 import DataService from '../../lib/data-service';
 import { useNavigate, useParams } from 'react-router-dom';
 
 
-function ApartmentForm({ t }: WithTranslation) {
+function PropertyForm({ t }: WithTranslation) {
     const [data, setData] = useState<DTO<PropertyInputDto>>({
         id: 0,
         name: '',
@@ -22,7 +22,7 @@ function ApartmentForm({ t }: WithTranslation) {
     const navigate = useNavigate();
 
     const dataService = new DataService<DTO<PropertyInputDto>>({
-        context: apartmentContext,
+        context: propertyContext,
         dataValidateInstance: new PropertyInputDto()
     })
 
@@ -64,11 +64,11 @@ function ApartmentForm({ t }: WithTranslation) {
                 validationMessageTitle: t('validationErrorTitle'),
             }}
 
-            onCancel={() => navigate(apartmentContext.routePath)}
-            onAfterSubmit={() => navigate(apartmentContext.routePath)}
+            onCancel={() => navigate(propertyContext.routePath)}
+            onAfterSubmit={() => navigate(propertyContext.routePath)}
         >
         </AlisaFormHandler>
     );
 }
 
-export default withTranslation(apartmentContext.name)(ApartmentForm);
+export default withTranslation(propertyContext.name)(PropertyForm);
