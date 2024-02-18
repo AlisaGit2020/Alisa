@@ -1,47 +1,48 @@
-import { propertyContext, transactionContext } from "@alisa-lib/alisa-contexts"
+import { transactionContext } from "@alisa-lib/alisa-contexts"
 import Transactions from "./Transactions"
 import { WithTranslation, withTranslation } from "react-i18next"
 import { Paper } from "@mui/material"
-import AlisaSelect from "../alisa/AlisaSelect"
-import DataService from "@alisa-lib/data-service"
-import { Property } from "@alisa-backend/real-estate/property/entities/property.entity"
 import { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
+import TransactionListFilter, { TransactionFilter } from "./components/TransactionListFilter"
+import DataService from "@alisa-lib/data-service"
 
 function TransactionMain({ t }: WithTranslation) {
     let { propertyId } = useParams();
     propertyId = propertyId ?? '0';
+    
+    const dataService = new DataService<TransactionFilter>({
+        context: transactionContext
+    })
+    const date = new Date()
 
-    const [property, setProperty] = useState<number>(Number(propertyId))
+    const [filter, setFilter] = useState<TransactionFilter>({
+        propertyId: Number(propertyId),
+        year: date.getFullYear(),
+        month: date.getMonth() + 1
+    } as TransactionFilter)
+
     const navigate = useNavigate()
 
     const handleChange = (fieldName: string, selectedValue: number) => {
-        if (fieldName === 'property') {
+        if (fieldName === 'propertyId') {
             navigate(`${transactionContext.routePath}/${selectedValue}`)
-            setProperty(selectedValue)
+                        
         }
+        const newFilter = dataService.updateNestedData(filter, fieldName, selectedValue)
+        setFilter(newFilter)
     }
 
     return (
         <>
             <Paper sx={{ p: 2, marginBottom: 3, display: 'flex', flexDirection: 'column' }}>
-                <AlisaSelect<{ property: number }, Property>
-                    dataService={new DataService({
-                        context: propertyContext,
-                        fetchOptions: {
-                            order: {
-                                name: 'ASC'
-                            }
-                        }
-                    })}
-                    label={t('property')}
-                    onHandleChange={handleChange}
-                    fieldName={'property'}
-                    value={property}
-                ></AlisaSelect>
+                <TransactionListFilter
+                    filter={filter}
+                    onChange={handleChange}
+                ></TransactionListFilter>
             </Paper>
             <Transactions
-                filter={{ propertyId: property }}
+                filter={filter}
             ></Transactions>
         </>
     )

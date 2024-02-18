@@ -15,6 +15,19 @@ const en = {
             number: '{{val, number}}'
         },
 
+        january: 'January',
+        february: 'February',
+        march: 'March',
+        april: 'April',
+        may: 'May',
+        june: 'June',
+        july: 'July',
+        august: 'August',
+        september: 'September',
+        october: 'October',
+        november: 'November',
+        december: 'December',
+
         amount: 'Amount',
         property: 'property',        
         back: 'Back',
@@ -24,6 +37,7 @@ const en = {
         delete: 'Delete',
         description: 'Description',
         edit: 'Edit',
+        month: 'Month',
         name: 'Name',
         noRowsFound: 'No rows found',
         quantity: 'Quantity',
@@ -31,6 +45,7 @@ const en = {
         settings: 'Settings',
         totalAmount: 'Total',
         validationErrorTitle: 'Please check following fields:',
+        year: 'Year'
     },
 
 }

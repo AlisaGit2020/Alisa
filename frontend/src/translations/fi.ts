@@ -6,6 +6,19 @@ const fi = {
     },
 
     common: {
+        january: 'Tammikuu',
+        february: 'Helmikuu',
+        march: 'Maaliskuu',
+        april: 'Huhtikuu',
+        may: 'Toukokuu',
+        june: 'Kesäkuu',
+        july: 'Heinäkuu',
+        august: 'Elokuu',
+        september: 'Syyskuu',
+        october: 'Lokakuu',
+        november: 'Marraskuu',
+        december: 'Joulukuu',
+
         amount: 'Määrä',
         property: 'Asunto', 
         back: 'Takaisin',
@@ -15,6 +28,7 @@ const fi = {
         description: 'Kuvaus',
         delete: 'Poista',
         edit: 'Muokkaa',
+        month: 'Kuukausi',
         name: 'Nimi',
         noRowsFound: 'Rivejä ei löytynyt',
         quantity: 'Määrä',
@@ -22,6 +36,7 @@ const fi = {
         settings: 'Asetukset',
         totalAmount: 'Yhteensä',
         validationErrorTitle: 'Tarkasta nämä kentät:',
+        year: 'Vuosi',
     }
 }
 

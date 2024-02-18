@@ -1,6 +1,5 @@
 import { Box, Container, Toolbar } from "@mui/material"
 import AppRoutes from "../AppRoutes"
-import Breadcrumbs from "./Breadcrumbs"
 
 function AppContainer() {
     return (

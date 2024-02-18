@@ -9,11 +9,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import TransactionAddMenu from './components/TransactionAddMenu';
 import TransactionImport from './components/TransactionImport';
+import { TransactionFilter } from './components/TransactionListFilter';
 
 interface TransactionsProps extends WithTranslation {
-    filter: {
-        propertyId?: number
-    }
+    filter: TransactionFilter
 }
 
 function Transactions({ t, filter }: TransactionsProps) {
@@ -40,6 +39,16 @@ function Transactions({ t, filter }: TransactionsProps) {
         handleCloseAddMenu()
     }
 
+    const transactionDateFilter = (): object => {
+        const startDate = new Date(filter.year, filter.month - 1, 1); 
+        const endDate = new Date(filter.year, filter.month, 0, 23, 59, 59); 
+        return {
+            transactionDate: {
+                $between: [startDate, endDate]
+            } 
+        }
+    }
+
     const fetchOptions = {
         select: {
             id: true,
@@ -56,10 +65,12 @@ function Transactions({ t, filter }: TransactionsProps) {
         order: {
             transactionDate: 'DESC'
         },
+        
         where: [
-            { expense: { propertyId: filter.propertyId } },
-            { income: { propertyId: filter.propertyId } }
-        ]
+            { expense: { propertyId: filter.propertyId }, ...transactionDateFilter() },
+            { income: { propertyId: filter.propertyId }, ...transactionDateFilter() }            
+        ],
+        
     } as TypeOrmFetchOptions<Transaction>
 
     return (

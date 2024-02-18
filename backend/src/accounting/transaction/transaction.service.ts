@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Repository } from 'typeorm';
+import { Between, FindManyOptions, Repository } from 'typeorm';
 import { TransactionInputDto } from './dtos/transaction-input.dto';
 import { Transaction } from './entities/transaction.entity';
 import { Expense } from '../expense/entities/expense.entity';
 import { Income } from '../income/entities/income.entity';
+import { BetweenDates } from '@alisa-backend/common/types';
+import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
 
 @Injectable()
 export class TransactionService {
@@ -20,6 +22,10 @@ export class TransactionService {
   ) {}
 
   async search(options: FindManyOptions<Transaction>): Promise<Transaction[]> {
+    if (options.where !== undefined) {
+      options.where = typeormWhereTransformer(options.where);
+    }
+
     return this.repository.find(options);
   }
 
