@@ -7,11 +7,9 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import {
-  TransactionFindManyOptions,
-  TransactionService,
-} from './transaction.service';
+import { TransactionService } from './transaction.service';
 import { Transaction } from './entities/transaction.entity';
+import { FindManyOptions } from 'typeorm';
 
 @Controller('accounting/transaction')
 export class TransactionController {
@@ -20,7 +18,7 @@ export class TransactionController {
   @Post('/search')
   @HttpCode(200)
   async search(
-    @Body() options: TransactionFindManyOptions,
+    @Body() options: FindManyOptions<Transaction>,
   ): Promise<Transaction[]> {
     return this.service.search(options);
   }

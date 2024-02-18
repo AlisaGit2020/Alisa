@@ -132,8 +132,8 @@ export class OpImportService {
 
     transaction.externalId = opCsvRow.archiveID;
     transaction.description = this.getMessagePart(opCsvRow.message);
-    transaction.transactionDate = new Date(opCsvRow.valueDate);
-    transaction.accountingDate = new Date(opCsvRow.valueDate);
+    transaction.transactionDate = new Date(opCsvRow.datePosted);
+    transaction.accountingDate = new Date(opCsvRow.datePosted);
     transaction.amount = this.getAmount(opCsvRow);
     transaction.quantity = 1;
     transaction.totalAmount = transaction.amount;
