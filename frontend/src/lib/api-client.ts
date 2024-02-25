@@ -61,6 +61,18 @@ class ApiClient {
         }
     }
 
+    public static async statistics<T>(
+        path: string,
+        options?: TypeOrmFetchOptions<T>
+    ): Promise<T> {        
+        const url = ApiClient.getApiUrl(`${path}/search/statistics`);
+        try {
+            return (await axios.post<T>(url, options)).data;
+        } catch (error) {
+            ApiClient.handleError(`Error in search path ${url}`);
+        }
+    }
+
     private static getApiUrl(path: string) {        
         const apiBasePath = VITE_API_URL;        
         return `${apiBasePath}/${path}`;

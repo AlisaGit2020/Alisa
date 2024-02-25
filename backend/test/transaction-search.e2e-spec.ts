@@ -121,22 +121,32 @@ describe('Transaction search', () => {
     },
   );
 
-  it(`fetch statistics correctly with filter`, async () => {
-    const response = await request(server)
-      .post(`/accounting/transaction/search/statistics`)
-      .send({
-        where: {
-          transactionDate: {
-            $between: [new Date('2023-12-01'), new Date('2023-12-22')],
-          },
+  it.each([[['expense', 'income'], { expense: true, income: true }]])(
+    `fetch statistics correctly with filter`,
+    async (relations) => {
+      const transactionDateFilter = {
+        transactionDate: {
+          $between: [new Date('2023-12-01'), new Date('2023-12-22')],
         },
-      })
-      .expect(200);
-    expect(response.body.rowCount).toBe(16);
-    expect(response.body.totalExpenses).toBe(1649.22);
-    expect(response.body.totalIncomes).toBe(1078.4);
-    expect(response.body.total).toBe(-570.82);
-  });
+      };
+
+      const response = await request(server)
+        .post(`/accounting/transaction/search/statistics`)
+        .send({
+          relations: relations,
+          where: [
+            { expense: { propertyId: 1 }, ...transactionDateFilter },
+            { income: { propertyId: 1 }, ...transactionDateFilter },
+          ],
+        })
+        .expect(200);
+
+      expect(response.body.rowCount).toBe(16);
+      expect(response.body.totalExpenses).toBe(1649.22);
+      expect(response.body.totalIncomes).toBe(1078.4);
+      expect(response.body.total).toBe(-570.82);
+    },
+  );
 
   it(`fetch statistics correctly without filter`, async () => {
     const response = await request(server)

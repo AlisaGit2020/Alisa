@@ -1,6 +1,6 @@
 export class TransactionStatisticsDto {
-  rowCount: number;
-  totalExpenses: number;
-  totalIncomes: number;
-  total: number;
+  rowCount: number = 0;
+  totalExpenses: number = 0;
+  totalIncomes: number = 0;
+  total: number = 0;
 }

@@ -199,4 +199,37 @@ describe('Data service', () => {
         });
     })
 
+    describe('Statistics', () => {
+        it('should read data successfully', async () => {
+            const apiClientMock = jest.spyOn(ApiClient, 'statistics');
+            const responseData = [{ rowCount: 11, total: 206 }];
+            apiClientMock.mockResolvedValueOnce(responseData);
+
+            const context = { apiPath: '/test' } as AlisaContext;
+            const fetchOptions = {
+                where: {
+                    id: 1
+                }
+            }
+
+            const dataService = new DataService<{
+                id: number,
+                total: number,                
+            }>({
+                context,
+                fetchOptions
+            });
+
+
+            // Kutsu read-funktiota
+            const result = await dataService.statistics();
+
+            // Tarkista, että ApiClient.get kutsuttiin oikein
+            expect(apiClientMock).toHaveBeenCalledWith('/test', fetchOptions);
+
+            // Tarkista, että paluuarvo vastaa odotuksia
+            expect(result).toEqual(responseData);
+        });
+    })
+
 });

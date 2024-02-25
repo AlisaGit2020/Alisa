@@ -12,7 +12,11 @@ const transaction = {
     import: 'Tuonti',
     importTitle: 'Tapahtumien tuonti',
     receiver: 'Saaja',
+    rowCount: 'Tapahtumia',
     sender: 'Maksaja',
+    totalExpenses: 'Kulut',
+    totalIncomes: 'Tulot',
+    total: 'Tulos',
     transactionDate: 'Tapahtumapäivä',
     transactions: 'Tilitapahtumat',    
 }

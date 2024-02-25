@@ -81,6 +81,24 @@ export class TransactionService {
   ): Promise<TransactionStatisticsDto> {
     const queryBuilder = this.repository.createQueryBuilder('transaction');
 
+    if (options.relations !== undefined) {
+      let relations = [];
+      if (Array.isArray(options.relations)) {
+        relations = options.relations;
+      } else {
+        relations = Object.entries(options.relations)
+          .filter(([key, value]) => value === true)
+          .map(([key]) => key);
+      }
+
+      for (const relation of relations) {
+        queryBuilder.leftJoinAndSelect(
+          `transaction.${relation}`,
+          relation as string,
+        );
+      }
+    }
+
     if (options.where !== undefined) {
       options.where = typeormWhereTransformer(options.where);
       queryBuilder.where(options.where);

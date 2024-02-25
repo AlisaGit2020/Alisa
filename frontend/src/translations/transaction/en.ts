@@ -12,7 +12,11 @@ const transaction = {
     import: 'Import',
     importTitle: 'Import transactions',
     receiver: 'Receiver',
+    rowCount: 'Transactions',
     sender: 'Sender',
+    totalExpenses: 'Expenses',
+    totalIncomes: 'Incomes',
+    total: 'Total',
     transactionDate: 'Transaction date',
     transactions: 'Transactions',        
 }

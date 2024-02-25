@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import TransactionAddMenu from './components/TransactionAddMenu';
 import TransactionImport from './components/TransactionImport';
 import { TransactionFilter } from './components/TransactionListFilter';
+import TransactionListStatistics from './components/TransactionListStatistics';
 
 interface TransactionsProps extends WithTranslation {
     filter: TransactionFilter
@@ -57,7 +58,7 @@ function Transactions({ t, filter }: TransactionsProps) {
             receiver: true,
             description: true,
             totalAmount: true
-        },
+        },        
         relations: {
             expense: true,
             income: true
@@ -76,6 +77,10 @@ function Transactions({ t, filter }: TransactionsProps) {
     return (
 
         <Box>
+            <TransactionListStatistics
+                relations={fetchOptions.relations}
+                where={fetchOptions.where}
+            ></TransactionListStatistics>
             <AlisaDataTable<Transaction>
                 title={t('transactions')}
                 t={t}
