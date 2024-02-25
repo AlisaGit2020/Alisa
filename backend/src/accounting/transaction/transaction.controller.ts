@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { Transaction } from './entities/transaction.entity';
+import { TransactionStatisticsDto } from './dtos/transaction-statistics.dto';
 import { FindManyOptions } from 'typeorm';
 
 @Controller('accounting/transaction')
@@ -21,6 +22,14 @@ export class TransactionController {
     @Body() options: FindManyOptions<Transaction>,
   ): Promise<Transaction[]> {
     return this.service.search(options);
+  }
+
+  @Post('/search/statistics')
+  @HttpCode(200)
+  async statistics(
+    @Body() options: FindManyOptions<Transaction>,
+  ): Promise<TransactionStatisticsDto> {
+    return this.service.statistics(options);
   }
 
   @Get('/:id')

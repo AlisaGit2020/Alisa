@@ -120,4 +120,31 @@ describe('Transaction search', () => {
       expect(response.body.length).toBe(expectedCount);
     },
   );
+
+  it(`fetch statistics correctly with filter`, async () => {
+    const response = await request(server)
+      .post(`/accounting/transaction/search/statistics`)
+      .send({
+        where: {
+          transactionDate: {
+            $between: [new Date('2023-12-01'), new Date('2023-12-22')],
+          },
+        },
+      })
+      .expect(200);
+    expect(response.body.rowCount).toBe(16);
+    expect(response.body.totalExpenses).toBe(1649.22);
+    expect(response.body.totalIncomes).toBe(1078.4);
+    expect(response.body.total).toBe(-570.82);
+  });
+
+  it(`fetch statistics correctly without filter`, async () => {
+    const response = await request(server)
+      .post(`/accounting/transaction/search/statistics`)
+      .expect(200);
+    expect(response.body.rowCount).toBe(20);
+    expect(response.body.totalExpenses).toBe(1689.22);
+    expect(response.body.totalIncomes).toBe(1357.67);
+    expect(response.body.total).toBe(-331.55);
+  });
 });

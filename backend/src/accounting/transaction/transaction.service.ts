@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, FindManyOptions, Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { TransactionInputDto } from './dtos/transaction-input.dto';
 import { Transaction } from './entities/transaction.entity';
 import { Expense } from '../expense/entities/expense.entity';
 import { Income } from '../income/entities/income.entity';
-import { BetweenDates } from '@alisa-backend/common/types';
 import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
+import { TransactionStatisticsDto } from './dtos/transaction-statistics.dto';
 
 @Injectable()
 export class TransactionService {
@@ -74,6 +74,37 @@ export class TransactionService {
     }
 
     this.repository.delete(id);
+  }
+
+  async statistics(
+    options: FindManyOptions<Transaction>,
+  ): Promise<TransactionStatisticsDto> {
+    const queryBuilder = this.repository.createQueryBuilder('transaction');
+
+    if (options.where !== undefined) {
+      options.where = typeormWhereTransformer(options.where);
+      queryBuilder.where(options.where);
+    }
+
+    const result = await queryBuilder
+      .select('COUNT(transaction.id)', 'rowCount')
+      .addSelect(
+        'SUM(CASE WHEN transaction.totalAmount < 0 THEN transaction.amount ELSE 0 END)',
+        'totalExpenses',
+      )
+      .addSelect(
+        'SUM(CASE WHEN transaction.totalAmount > 0 THEN transaction.amount ELSE 0 END)',
+        'totalIncomes',
+      )
+      .addSelect('SUM(transaction.totalAmount)', 'total')
+      .getRawOne();
+
+    return {
+      rowCount: Number(result.rowCount),
+      totalExpenses: Number(result.totalExpenses),
+      totalIncomes: Number(result.totalIncomes),
+      total: Number(result.total),
+    };
   }
 
   private mapData(transaction: Transaction, input: TransactionInputDto) {
