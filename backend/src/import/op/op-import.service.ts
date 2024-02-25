@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as csvParser from 'csv-parser';
+import * as crypto from 'crypto';
 import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
 import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
 import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-input.dto';
@@ -76,7 +77,7 @@ export class OpImportService {
   private async getExpenseId(opCsvRow: CSVRow): Promise<number | undefined> {
     const expenses = await this.expenseService.search({
       where: {
-        transaction: { externalId: opCsvRow.archiveID },
+        transaction: { externalId: this.getExternalId(opCsvRow) },
       },
     });
 
@@ -86,7 +87,7 @@ export class OpImportService {
   private async getIncomeId(opCsvRow: CSVRow): Promise<number | undefined> {
     const incomes = await this.incomeService.search({
       where: {
-        transaction: { externalId: opCsvRow.archiveID },
+        transaction: { externalId: this.getExternalId(opCsvRow) },
       },
     });
 
@@ -130,7 +131,7 @@ export class OpImportService {
       transaction.receiver = 'Juha Koivisto';
     }
 
-    transaction.externalId = opCsvRow.archiveID;
+    transaction.externalId = this.getExternalId(opCsvRow);
     transaction.description = this.getMessagePart(opCsvRow.message);
     transaction.transactionDate = new Date(opCsvRow.datePosted);
     transaction.accountingDate = new Date(opCsvRow.datePosted);
@@ -147,6 +148,12 @@ export class OpImportService {
       return amount * -1;
     }
     return amount;
+  }
+
+  private getExternalId(opCsvRow: CSVRow): string {
+    const concatenatedString = Object.values(opCsvRow).join('');
+
+    return crypto.createHash('sha256').update(concatenatedString).digest('hex');
   }
 
   private getExpenseTypeId(options: OpImportInput): number {

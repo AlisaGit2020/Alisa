@@ -138,7 +138,9 @@ describe('Op import service', () => {
      */
     expect(expenses[1].propertyId).toBe(1);
     expect(expenses[1].expenseTypeId).toBe(1);
-    expect(expenses[1].transaction.externalId).toBe('20231202/593619/133287');
+    expect(expenses[1].transaction.externalId).toBe(
+      'df0fe65687b70c62e4d30a6731707f9f394fe01e9d388195829aa716892a1adc',
+    );
     expect(expenses[1].transaction.description).toBe('Suihkuverho');
     expect(expenses[1].transaction.amount).toBe(17.5);
     expect(expenses[1].transaction.quantity).toBe(1);
