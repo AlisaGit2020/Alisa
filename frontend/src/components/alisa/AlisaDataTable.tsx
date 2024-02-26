@@ -26,8 +26,9 @@ function AlisaDataTable<T extends { id: number }>(props: {
   title: string,
   fields: AlisaDataTableField<T>[],
   dataService: DataService<T>,
-  onNewRow: (event?: React.MouseEvent<HTMLButtonElement>) => void
-  onEdit: (id: number) => void
+  onNewRow: (event?: React.MouseEvent<HTMLButtonElement>) => void,
+  onEdit: (id: number) => void,
+  onOpen: (id: number) => void
 }) {
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -43,12 +44,12 @@ function AlisaDataTable<T extends { id: number }>(props: {
     fetchData()
   }, [idDeleted, props.dataService])
 
-  const handleClickOpen = (apartmentId: number) => {
+  const handleDeleteOpen = (apartmentId: number) => {
     setIdToDelete(apartmentId);
     setOpen(true);
   };
 
-  const handleClose = () => {
+  const handleDeleteClose = () => {
     setIdToDelete(0);
     setOpen(false);
   };
@@ -56,7 +57,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
   const handleDelete = async () => {
     await props.dataService.delete(idToDelete);
     setIdDeleted(idToDelete);
-    handleClose();
+    handleDeleteClose();
   };
 
   const getDataValue = (field: AlisaDataTableField<T>, dataItem: T): React.ReactNode => {
@@ -112,7 +113,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
             <TableBody>
 
               {data.map((item) => (
-                <TableRow key={item.id}>
+                <TableRow key={item.id} onClick={() => props.onOpen(item.id)}>
                   {props.fields.map((field) => (
                     <TableCell key={field.name as string} align={field.format === 'currency' ? 'right' : 'left'}>
                       {getDataValue(field, item)}
@@ -121,7 +122,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
 
                   <TableCell align='right'>
                     <IconButton onClick={() => props.onEdit(item.id)}><EditIcon></EditIcon></IconButton>
-                    <IconButton onClick={() => handleClickOpen(item.id)}><DeleteIcon></DeleteIcon></IconButton>
+                    <IconButton onClick={() => handleDeleteOpen(item.id)}><DeleteIcon></DeleteIcon></IconButton>
                   </TableCell>
                 </TableRow>
               ))}
@@ -143,7 +144,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
         buttonTextCancel={props.t('cancel')}
         open={open}
         onConfirm={handleDelete}
-        onClose={handleClose}
+        onClose={handleDeleteClose}
       ></AlisaConfirmDialog>
 
     </Paper>

@@ -1,7 +1,7 @@
 //TypeOrm entity for transaction table.
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
-import { Expense } from 'src/accounting/expense/entities/expense.entity';
-import { columnOptionTwoDecimal } from 'src/common/typeorm.column.definitions';
+import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
+import { columnOptionTwoDecimal } from '@alisa-backend/common/typeorm.column.definitions';
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -41,12 +41,12 @@ export class Transaction {
     cascade: false,
     nullable: true,
   })
-  expense: Expense;
+  expense?: Expense;
 
   @OneToOne(() => Income, (income) => income.transaction, {
     eager: false,
     cascade: false,
     nullable: true,
   })
-  income: Income;
+  income?: Income;
 }

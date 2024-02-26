@@ -5,6 +5,7 @@ const transaction = {
     chooseTransactionType: 'Choose transaction type',
     defaultIncomeType: 'Default income type',
     defaultExpenseType: 'Default expense type',
+    detailsTitle: 'Transaction details',
     expense: 'Expense',
     expenseType: 'Expense type',
     income: 'Income',

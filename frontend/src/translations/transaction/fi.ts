@@ -5,6 +5,7 @@ const transaction = {
     chooseTransactionType: 'Valitse tapahtumatyyyppi',
     defaultIncomeType: 'Oletustulolaji',
     defaultExpenseType: 'Oletuskululaji',
+    detailsTitle: 'Tapahtuman tiedot',
     expense: 'Kulu',
     expenseType: 'Kululaji',
     income: 'Tulo',

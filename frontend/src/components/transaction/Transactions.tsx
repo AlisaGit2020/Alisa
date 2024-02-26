@@ -11,24 +11,26 @@ import TransactionAddMenu from './components/TransactionAddMenu';
 import TransactionImport from './components/TransactionImport';
 import { TransactionFilter } from './components/TransactionListFilter';
 import TransactionListStatistics from './components/TransactionListStatistics';
+import TransactionDetails from './components/TransactionDetails';
 
 interface TransactionsProps extends WithTranslation {
     filter: TransactionFilter
 }
 
 function Transactions({ t, filter }: TransactionsProps) {
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [anchorElAdd, setAnchorElAdd] = React.useState<null | HTMLElement>(null);    
+    const [detailId, setDetailId] = React.useState<number>(0);
     const [importOpen, setImportOpen] = React.useState<boolean>(false);
     const navigate = useNavigate()
 
     const handleOpenAddMenu = (event?: React.MouseEvent<HTMLButtonElement>): void => {
         if (event !== undefined) {
-            setAnchorEl(event.currentTarget);
+            setAnchorElAdd(event.currentTarget);
         }
     };
 
     const handleCloseAddMenu = () => {
-        setAnchorEl(null);
+        setAnchorElAdd(null);
     };
 
     const handleEdit = (id: number) => {
@@ -38,6 +40,10 @@ function Transactions({ t, filter }: TransactionsProps) {
     const handleOpenImport = () => {
         setImportOpen(true);
         handleCloseAddMenu()
+    }
+
+    const handleOpenDetails = (id: number) => {
+        setDetailId(id)
     }
 
     const transactionDateFilter = (): object => {
@@ -94,11 +100,17 @@ function Transactions({ t, filter }: TransactionsProps) {
                 ]}
                 onNewRow={handleOpenAddMenu}
                 onEdit={handleEdit}
+                onOpen={handleOpenDetails}
             />
 
+            <TransactionDetails              
+              id={detailId}
+              onClose={() => setDetailId(0)}  
+            ></TransactionDetails>
+            
             <TransactionAddMenu
                 t={t}
-                anchorEl={anchorEl}
+                anchorEl={anchorElAdd}
                 onClose={handleCloseAddMenu}
                 onAddExpense={() => navigate(`${transactionContext.routePath}/add/expense/${filter.propertyId}`)}
                 onAddIncome={() => navigate(`${transactionContext.routePath}/add/income/${filter.propertyId}`)}

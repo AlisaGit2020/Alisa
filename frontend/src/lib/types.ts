@@ -4,7 +4,7 @@ export type TypeOrmOrderOption = {
 
   
 export type TypeOrmRelationOption = {
-    [key: string]: boolean
+    [key: string]: boolean | TypeOrmRelationOption
 };
 
 export type TypeOrmFetchOptions<T> = {

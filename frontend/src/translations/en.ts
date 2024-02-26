@@ -37,6 +37,8 @@ const en = {
         delete: 'Delete',
         description: 'Description',
         edit: 'Edit',
+        externalId: 'External id',
+        id: 'Id',
         month: 'Month',
         name: 'Name',
         noRowsFound: 'No rows found',

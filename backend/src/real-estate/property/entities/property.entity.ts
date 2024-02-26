@@ -2,7 +2,7 @@
 
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
-import { columnOptionOneDecimal } from 'src/common/typeorm.column.definitions';
+import { columnOptionOneDecimal } from '@alisa-backend/common/typeorm.column.definitions';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()

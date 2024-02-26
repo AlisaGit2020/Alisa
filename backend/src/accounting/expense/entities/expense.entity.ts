@@ -1,4 +1,4 @@
-import { Transaction } from 'src/accounting/transaction/entities/transaction.entity';
+import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import {
   Column,
   Entity,
@@ -7,8 +7,8 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ExpenseType } from './expense-type.entity';
-import { Property } from 'src/real-estate/property/entities/property.entity';
+import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
+import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 
 @Entity()
 export class Expense {

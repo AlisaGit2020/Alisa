@@ -17,12 +17,12 @@ class DataService<T extends object> {
         dataValidateInstance?: object
     }) {
         this.apiPath = options.context.apiPath;
-        this.relations = options.relations;
+        this.relations = options.relations;        
         this.fetchOptions = options.fetchOptions;
         this.dataValidateInstance = options.dataValidateInstance
     }
 
-    public async read(id: number): Promise<T> {
+    public async read(id: number): Promise<T> {        
         return ApiClient.get<DTO<T>>(this.apiPath, id, this.relations)
     }
 

@@ -28,6 +28,8 @@ const fi = {
         description: 'Kuvaus',
         delete: 'Poista',
         edit: 'Muokkaa',
+        externalId: 'Ulkoinen tunniste',
+        id: 'Tunniste',
         month: 'Kuukausi',
         name: 'Nimi',
         noRowsFound: 'Rivejä ei löytynyt',
