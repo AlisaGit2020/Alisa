@@ -33,9 +33,16 @@ function TransactionListStatistics({ t, where, relations }: TransactionListStati
         fetchData()
     }, [relations, where])
 
-    const infoBox = (headerText: string, contentText: string, backgroundColor: string) => {
+    const infoBox = (headerText: string, contentText: string, backgroundColor: string, fontColor: string) => {
         return (
-            <Paper sx={{ width: '100%', padding: 2, display: 'flex', justifyContent: 'space-between', backgroundColor: backgroundColor }}>
+            <Paper sx={{ 
+                width: '100%', 
+                padding: 2, 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                bgcolor: backgroundColor,
+                color:fontColor 
+                }}>
                 <Box>{headerText}</Box>
                 <Box sx={{ fontSize: '30px' }} >{contentText}</Box>
             </Paper>
@@ -45,10 +52,10 @@ function TransactionListStatistics({ t, where, relations }: TransactionListStati
 
     return (
         <Stack direction={'row'} spacing={2} marginBottom={2}>
-            {infoBox(t('rowCount'), data.rowCount.toString(), 'lightblue')}
-            {infoBox(t('totalIncomes'), t('format.currency.euro', { val: data.totalIncomes }), 'lightgray')}
-            {infoBox(t('totalExpenses'), t('format.currency.euro', { val: data.totalExpenses }), 'pink')}
-            {infoBox(t('total'), t('format.currency.euro', { val: data.total }), 'white')}
+            {infoBox(t('rowCount'), data.rowCount.toString(), 'info.main', 'white')}
+            {infoBox(t('totalIncomes'), t('format.currency.euro', { val: data.totalIncomes }), 'success.main', 'white')}
+            {infoBox(t('totalExpenses'), t('format.currency.euro', { val: data.totalExpenses }), 'error.main', 'white')}
+            {infoBox(t('total'), t('format.currency.euro', { val: data.total }), 'white', 'black')}
         </Stack>
     )
 }

@@ -113,9 +113,13 @@ function AlisaDataTable<T extends { id: number }>(props: {
             <TableBody>
 
               {data.map((item) => (
-                <TableRow key={item.id} onClick={() => props.onOpen(item.id)}>
+                <TableRow key={item.id}>
                   {props.fields.map((field) => (
-                    <TableCell key={field.name as string} align={field.format === 'currency' ? 'right' : 'left'}>
+                    <TableCell 
+                    key={field.name as string} 
+                    align={field.format === 'currency' ? 'right' : 'left'}
+                    onClick={() => props.onOpen(item.id)}
+                    >
                       {getDataValue(field, item)}
                     </TableCell>
                   ))}
