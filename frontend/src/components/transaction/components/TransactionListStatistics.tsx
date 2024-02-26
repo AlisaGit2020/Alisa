@@ -30,13 +30,12 @@ function TransactionListStatistics({ t, where, relations }: TransactionListFilte
             }
         })
         const fetchData = async () => {
-            const data: TransactionStatisticsDto = await dataService.statistics();
-            console.log(data)
-            setData(data);
+            const newData: TransactionStatisticsDto = await dataService.statistics<TransactionStatisticsDto>();                        
+            setData(newData);
         };
 
         fetchData()
-    }, [where])
+    }, [relations, where])
 
     const infoBox = (headerText: string, contentText: string, backgroundColor: string) => {
         return (

@@ -208,13 +208,15 @@ describe('Data service', () => {
             const context = { apiPath: '/test' } as AlisaContext;
             const fetchOptions = {
                 where: {
-                    id: 1
+                    dateCreated: new Date('2024-01-01'),                    
                 }
             }
 
             const dataService = new DataService<{
                 id: number,
-                total: number,                
+                name: number,                
+                description: number,   
+                dateCreated: Date             
             }>({
                 context,
                 fetchOptions

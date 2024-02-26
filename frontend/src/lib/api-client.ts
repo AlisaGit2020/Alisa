@@ -61,13 +61,13 @@ class ApiClient {
         }
     }
 
-    public static async statistics<T>(
+    public static async statistics<T, K>(
         path: string,
         options?: TypeOrmFetchOptions<T>
-    ): Promise<T> {        
+    ): Promise<K> {        
         const url = ApiClient.getApiUrl(`${path}/search/statistics`);
         try {
-            return (await axios.post<T>(url, options)).data;
+            return (await axios.post<K>(url, options)).data;
         } catch (error) {
             ApiClient.handleError(`Error in search path ${url}`);
         }

@@ -50,8 +50,8 @@ class DataService<T extends object> {
         return ApiClient.search<T>(this.apiPath, this.fetchOptions)
     }
 
-    public async statistics(): Promise<T> {
-        return ApiClient.statistics<T>(this.apiPath, this.fetchOptions)
+    public async statistics<K>(): Promise<K> {
+        return ApiClient.statistics<T, K>(this.apiPath, this.fetchOptions)
     }
 
     public async delete(id: number): Promise<void>{
