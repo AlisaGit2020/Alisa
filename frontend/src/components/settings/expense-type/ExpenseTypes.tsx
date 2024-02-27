@@ -21,6 +21,8 @@ function ExpenseTypes({ t }: WithTranslation) {
                 { name: 'isTaxDeductible' },
             ]}
             onNewRow={() => navigate(`${expenseTypeContext.routePath}/add`)} 
+            onEdit={()=> {}}
+            onOpen={()=> {}}
             />
 
     )

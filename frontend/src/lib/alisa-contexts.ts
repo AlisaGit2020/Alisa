@@ -42,6 +42,12 @@ export const opImportContext: AlisaContext = {
     routePath: '/transactions/import/op',
 }
 
+export const settingsContext: AlisaContext = {
+    name: 'settings',
+    apiPath: '',
+    routePath: '/settings',
+}
+
 export const transactionContext: AlisaContext = {
     name: 'transaction',
     apiPath: 'accounting/transaction',

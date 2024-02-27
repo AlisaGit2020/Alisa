@@ -26,7 +26,8 @@ export default function AppRoutes() {
 
                 <Route path={`${expenseTypeContext.routePath}/edit/:idParam`} element={<ExpenseTypeForm></ExpenseTypeForm>}></Route>
                 <Route path={`${expenseTypeContext.routePath}/add`} element={<ExpenseTypeForm></ExpenseTypeForm>}></Route>
-                <Route path='/settings' element={<Settings></Settings>}></Route>
+                
+                <Route path='/settings/:page?' element={<Settings></Settings>}></Route>
             </Routes>
         </BrowserRouter>
     )
