@@ -27,7 +27,7 @@ export const expenseContext: AlisaContext = {
 export const incomeTypeContext: AlisaContext = {
     name: 'income-type',
     apiPath: 'accounting/income/type',
-    routePath: '/settings',
+    routePath: '/settings/income-types',
 }
 
 export const incomeContext: AlisaContext = {

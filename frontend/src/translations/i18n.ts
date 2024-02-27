@@ -9,6 +9,7 @@ const namespaces = [
     'property',
     'expense',
     'expense-type',
+    'income-type',
     'menu',
     'route',
     'settings',

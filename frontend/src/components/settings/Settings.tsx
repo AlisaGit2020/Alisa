@@ -5,9 +5,11 @@ import SettingsMenu from './components/SettingsMenu';
 import { ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ExpenseTypeForm from './expense-type/ExpenseTypeForm';
+import IncomeTypes from './income-type/IncomeTypes';
+import IncomeTypeForm from './income-type/IncomeTypeForm';
 
 function Settings() {
-    const { page, action } = useParams();
+    const { page = 'expense-types', action = ''} = useParams();
     const navigate = useNavigate();
 
     const handleMenuClick = (selectedItem: SettingsPage) => {
@@ -16,8 +18,7 @@ function Settings() {
 
 
     const getContent = (iPage: SettingsPage, iAction: Action, content: ReactNode) => {
-        const selAction: string = action ?? "";
-        if (page === iPage && selAction === iAction) {
+        if (page === iPage && action === iAction) {
             return (
                 <Box>{content}</Box>
             )
@@ -35,6 +36,10 @@ function Settings() {
                 {getContent(SettingsPage.ExpenseTypes, Action.List, <ExpenseTypes></ExpenseTypes>)}
                 {getContent(SettingsPage.ExpenseTypes, Action.Add, <ExpenseTypeForm></ExpenseTypeForm>)}
                 {getContent(SettingsPage.ExpenseTypes, Action.Edit, <ExpenseTypeForm></ExpenseTypeForm>)}
+
+                {getContent(SettingsPage.IncomeTypes, Action.List, <IncomeTypes></IncomeTypes>)}
+                {getContent(SettingsPage.IncomeTypes, Action.Add, <IncomeTypeForm></IncomeTypeForm>)}
+                {getContent(SettingsPage.IncomeTypes, Action.Edit, <IncomeTypeForm></IncomeTypeForm>)}
             </Grid>
         </Grid>
 
