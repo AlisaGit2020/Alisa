@@ -9,8 +9,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Title from '../../Title';
-import { Box, IconButton, Paper, TableContainer, Tooltip, Typography } from '@mui/material';
+import { Box, IconButton, TableContainer, Tooltip, Typography } from '@mui/material';
 import { TFunction } from 'i18next';
 import AlisaConfirmDialog from './dialog/AlisaConfirmDialog';
 import DataService from '@alisa-lib/data-service';
@@ -23,7 +22,6 @@ interface AlisaDataTableField<T> {
 
 function AlisaDataTable<T extends { id: number }>(props: {
   t: TFunction,
-  title: string,
   fields: AlisaDataTableField<T>[],
   dataService: DataService<T>,
   onNewRow: (event?: React.MouseEvent<HTMLButtonElement>) => void,
@@ -88,9 +86,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
   }
 
   return (
-    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-      <Title>{props.title}</Title>
-
+    <>
       <TableContainer sx={{ maxHeight: 960 }}>
         <Table stickyHeader size="small" aria-label="simple table">
           <TableHead>
@@ -115,10 +111,10 @@ function AlisaDataTable<T extends { id: number }>(props: {
               {data.map((item) => (
                 <TableRow key={item.id}>
                   {props.fields.map((field) => (
-                    <TableCell 
-                    key={field.name as string} 
-                    align={field.format === 'currency' ? 'right' : 'left'}
-                    onClick={() => props.onOpen(item.id)}
+                    <TableCell
+                      key={field.name as string}
+                      align={field.format === 'currency' ? 'right' : 'left'}
+                      onClick={() => props.onOpen(item.id)}
                     >
                       {getDataValue(field, item)}
                     </TableCell>
@@ -150,8 +146,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
         onConfirm={handleDelete}
         onClose={handleDeleteClose}
       ></AlisaConfirmDialog>
-
-    </Paper>
+    </>
   );
 
 }

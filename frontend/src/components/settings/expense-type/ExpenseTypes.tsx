@@ -5,26 +5,29 @@ import { expenseTypeContext } from "@alisa-lib/alisa-contexts"
 import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity"
 import DataService from "@alisa-lib/data-service"
 import { useNavigate } from "react-router-dom"
+import AlisaContent from "../../alisa/AlisaContent"
 
 function ExpenseTypes({ t }: WithTranslation) {
     const navigate = useNavigate()
 
+    const handleEdit = (id: number) => {
+        navigate(`${expenseTypeContext.routePath}/edit/${id}`)
+    }
     return (
-
-        <AlisaDataTable<ExpenseType>
-            title={t('expenseTypes')}
-            t={t}
-            dataService={new DataService({context: expenseTypeContext})}                    
-            fields={[
-                { name: 'name' },
-                { name: 'description' },
-                { name: 'isTaxDeductible' },
-            ]}
-            onNewRow={() => navigate(`${expenseTypeContext.routePath}/add`)} 
-            onEdit={()=> {}}
-            onOpen={()=> {}}
+        <AlisaContent headerText={t('expenseTypes')}>
+            <AlisaDataTable<ExpenseType>
+                t={t}
+                dataService={new DataService({ context: expenseTypeContext })}
+                fields={[
+                    { name: 'name' },
+                    { name: 'description' },
+                    { name: 'isTaxDeductible' },
+                ]}
+                onNewRow={() => navigate(`${expenseTypeContext.routePath}/add`)}
+                onEdit={handleEdit}
+                onOpen={() => { }}
             />
-
+        </AlisaContent>
     )
 }
 

@@ -1,16 +1,17 @@
+import { ReactNode } from 'react';
 import Title from '../../Title';
 import { Paper, Stack } from "@mui/material"
 
 interface AlisaContentProps {
     headerText: string
-    content: JSX.Element
+    children: ReactNode
 }
-function AlisaContent({ headerText, content }: AlisaContentProps) {
+function AlisaContent( props: AlisaContentProps ) {
     return (
         <Paper sx={{ p: 2 }}>
             <Stack spacing={4}>
-                <Title>{headerText}</Title>
-                {content}
+                <Title>{props.headerText}</Title>
+                {props.children}
             </Stack>
 
         </Paper>

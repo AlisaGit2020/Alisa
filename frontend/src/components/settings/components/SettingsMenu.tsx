@@ -4,11 +4,8 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import PaymentIcon from '@mui/icons-material/Payment';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import SettingsMenuItem from "./SettingsMenuItem";
+import { SettingsPage } from "../Settings";
 
-export enum SettingsPage {
-    ExpenseTypes = 'expense-types',
-    IncomeTypes = 'income-types'
-}
 interface SettingsMenuProps extends WithTranslation {
     onClick: (selectedItem: SettingsPage) => void
     selectedItem?: SettingsPage

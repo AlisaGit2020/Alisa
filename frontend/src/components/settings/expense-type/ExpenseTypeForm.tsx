@@ -8,6 +8,7 @@ import { expenseTypeContext } from '@alisa-lib/alisa-contexts';
 import DataService from '@alisa-lib/data-service';
 import AlisaFormHandler from '../../alisa/form/AlisaFormHandler';
 import { useNavigate, useParams } from 'react-router-dom';
+import AlisaContent from '../../alisa/AlisaContent';
 
 function ExpenseTypeForm({ t }: WithTranslation) {
     const [data, setData] = useState<ExpenseTypeInputDto>({
@@ -53,23 +54,24 @@ function ExpenseTypeForm({ t }: WithTranslation) {
         </Stack>
     )
     return (
+        <AlisaContent headerText={t(idParam ? 'edit': 'add')}>
+            <AlisaFormHandler<ExpenseTypeInputDto>
+                id={Number(idParam)}
+                dataService={dataService}
+                data={data}
+                formComponents={formComponents}
+                onSetData={setData}
+                translation={{
+                    cancelButton: t('cancel'),
+                    submitButton: t('save'),
+                    validationMessageTitle: t('validationErrorTitle'),
+                }}
 
-        <AlisaFormHandler<ExpenseTypeInputDto>
-            id={Number(idParam)}
-            dataService={dataService}
-            data={data}
-            formComponents={formComponents}
-            onSetData={setData}
-            translation={{
-                cancelButton: t('cancel'),
-                submitButton: t('save'),
-                validationMessageTitle: t('validationErrorTitle'),
-            }}
-
-            onCancel={() => navigate(expenseTypeContext.routePath)}
-            onAfterSubmit={() => navigate(expenseTypeContext.routePath)}
-        >
-        </AlisaFormHandler>
+                onCancel={() => navigate(expenseTypeContext.routePath)}
+                onAfterSubmit={() => navigate(expenseTypeContext.routePath)}
+            >
+            </AlisaFormHandler>
+        </AlisaContent>
     );
 }
 

@@ -15,7 +15,7 @@ export const propertyContext: AlisaContext = {
 export const expenseTypeContext: AlisaContext = {
     name: 'expense-type',
     apiPath: 'accounting/expense/type',
-    routePath: '/settings',
+    routePath: '/settings/expense-types',
 }
 
 export const expenseContext: AlisaContext = {

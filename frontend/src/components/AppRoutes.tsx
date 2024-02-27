@@ -23,11 +23,8 @@ export default function AppRoutes() {
                 <Route path={`${transactionContext.routePath}/edit/:id`} element={<TransactionForm></TransactionForm>}></Route>                
                 <Route path={`${transactionContext.routePath}/add/:type?/:propertyId?`} element={<TransactionForm></TransactionForm>}></Route>                
                 <Route path={`${transactionContext.routePath}/:propertyId?`} element={<TransactionMain></TransactionMain>}></Route>
-
-                <Route path={`${expenseTypeContext.routePath}/edit/:idParam`} element={<ExpenseTypeForm></ExpenseTypeForm>}></Route>
-                <Route path={`${expenseTypeContext.routePath}/add`} element={<ExpenseTypeForm></ExpenseTypeForm>}></Route>
                 
-                <Route path='/settings/:page?' element={<Settings></Settings>}></Route>
+                <Route path='/settings/:page?/:action?/:idParam?' element={<Settings></Settings>}></Route>
             </Routes>
         </BrowserRouter>
     )
