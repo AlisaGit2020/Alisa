@@ -3,7 +3,7 @@ Data service teset
 */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { Between, DataSource, FindOperator } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { AppModule } from 'src/app.module';
 import { expenseTestData } from 'test/data/accounting/expense.test.data';
 import { incomeTestData } from 'test/data/accounting/income.test.data';
@@ -84,6 +84,23 @@ describe('Transaction service', () => {
 
       const transaction = await service.findOne(transactionId);
       expect(transaction).toBeNull();
+    });
+  });
+
+  describe('statistics', () => {
+    it('calculate statistics correctly', async () => {
+      const expenseInput = expenseTestData.inputPost;
+      await expenseService.add(expenseInput);
+
+      const incomeInput = incomeTestData.inputPost;
+      incomeInput.transaction.id = 2;
+      await incomeService.add(incomeInput);
+      const statistics = await service.statistics({});
+
+      expect(statistics.totalExpenses).toBe(-39.64);
+      expect(statistics.totalIncomes).toBe(39.64);
+      expect(statistics.total).toBe(0);
+      expect(statistics.rowCount).toBe(2);
     });
   });
 });

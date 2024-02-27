@@ -107,11 +107,11 @@ export class TransactionService {
     const result = await queryBuilder
       .select('COUNT(transaction.id)', 'rowCount')
       .addSelect(
-        'SUM(CASE WHEN transaction.totalAmount < 0 THEN transaction.amount ELSE 0 END)',
+        'SUM(CASE WHEN transaction.totalAmount < 0 THEN transaction.totalAmount ELSE 0 END)',
         'totalExpenses',
       )
       .addSelect(
-        'SUM(CASE WHEN transaction.totalAmount > 0 THEN transaction.amount ELSE 0 END)',
+        'SUM(CASE WHEN transaction.totalAmount > 0 THEN transaction.totalAmount ELSE 0 END)',
         'totalIncomes',
       )
       .addSelect('SUM(transaction.totalAmount)', 'total')
