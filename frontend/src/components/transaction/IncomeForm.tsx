@@ -129,27 +129,23 @@ function IncomeForm({ t, id, propertyId }: IncomeFormProps) {
     } else {
 
         return (
-            <AlisaContent
-                headerText={t('income')}
-                content={
-                    <AlisaFormHandler<IncomeInputDto>
-                        id={id}
-                        dataService={dataService}
-                        data={data}
-                        formComponents={formComponents()}
-                        onSetData={setData}
-                        translation={{
-                            cancelButton: t('cancel'),
-                            submitButton: t('save'),
-                            validationMessageTitle: t('validationErrorTitle'),
-                        }}
+            <AlisaContent headerText={t('income')}>
+                <AlisaFormHandler<IncomeInputDto>
+                    id={id}
+                    dataService={dataService}
+                    data={data}
+                    formComponents={formComponents()}
+                    onSetData={setData}
+                    translation={{
+                        cancelButton: t('cancel'),
+                        submitButton: t('save'),
+                        validationMessageTitle: t('validationErrorTitle'),
+                    }}
 
-                        onCancel={() => navigate(`${transactionContext.routePath}/${data.propertyId}`)}
-                        onAfterSubmit={() => navigate(`${transactionContext.routePath}/${data.propertyId}`)}
-                    >
-                    </AlisaFormHandler>
-                }
-            >
+                    onCancel={() => navigate(`${transactionContext.routePath}/${data.propertyId}`)}
+                    onAfterSubmit={() => navigate(`${transactionContext.routePath}/${data.propertyId}`)}
+                >
+                </AlisaFormHandler>
             </AlisaContent>
 
         );

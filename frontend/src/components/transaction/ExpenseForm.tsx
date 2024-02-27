@@ -129,10 +129,8 @@ function ExpenseForm({ t, id, propertyId }: ExpenseFormProps) {
     } else {
 
         return (
-            <AlisaContent
-                headerText={t('expense')}
-                content={
-                    <AlisaFormHandler<ExpenseInputDto>
+            <AlisaContent headerText={t('expense')}>
+                <AlisaFormHandler<ExpenseInputDto>
                         id={id}
                         dataService={dataService}
                         data={data}
@@ -148,8 +146,6 @@ function ExpenseForm({ t, id, propertyId }: ExpenseFormProps) {
                         onAfterSubmit={() => navigate(`${transactionContext.routePath}/${data.propertyId}`)}
                     >
                     </AlisaFormHandler>
-                }
-            >
             </AlisaContent>
 
         );

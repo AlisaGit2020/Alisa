@@ -88,7 +88,6 @@ function Transactions({ t, filter }: TransactionsProps) {
                 where={fetchOptions.where}
             ></TransactionListStatistics>
             <AlisaDataTable<Transaction>
-                title={t('transactions')}
                 t={t}
                 dataService={new DataService({ context: transactionContext, fetchOptions })}
                 fields={[
