@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Ownership } from '../../ownership/entities/ownership.entity';
+import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
 
 @Entity()
 export class User {
@@ -15,6 +15,6 @@ export class User {
   @Column()
   email: string;
 
-  @OneToMany(() => Ownership, (ownership) => ownership.owner)
+  @OneToMany(() => Ownership, (ownership) => ownership.user)
   ownerships: Ownership[];
 }

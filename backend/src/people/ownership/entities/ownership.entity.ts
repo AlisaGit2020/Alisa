@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+import { User } from '@alisa-backend/people/user/entities/user.entity';
 import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 
 @Entity()
@@ -16,12 +16,12 @@ export class Ownership {
   @Column()
   share: number;
 
-  @ManyToOne(() => User, (owner) => owner.ownerships, {
+  @ManyToOne(() => User, (user) => user.ownerships, {
     eager: false,
     cascade: ['insert', 'update'],
   })
   @JoinColumn({ name: 'userId' })
-  owner: User;
+  user: User;
 
   @ManyToOne(() => Property, (property) => property.ownerships, {
     eager: false,

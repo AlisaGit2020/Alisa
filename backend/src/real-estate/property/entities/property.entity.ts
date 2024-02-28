@@ -23,6 +23,8 @@ export class Property {
   @OneToMany(() => Income, (income) => income.property)
   incomes: Income[];
 
-  @OneToMany(() => Ownership, (ownership) => ownership.owner)
-  ownerships: Ownership[];
+  @OneToMany(() => Ownership, (ownership) => ownership.user, {
+    nullable: true,
+  })
+  ownerships?: Ownership[];
 }

@@ -7,6 +7,8 @@ import { ConfigModule } from '@nestjs/config'; //d
 import { AccountingModule } from './accounting/accounting.module';
 import { GoogleModule } from './google/google.module';
 import { ImportModule } from './import/import.module';
+import { AuthModule } from './people/auth/auth.module';
+import { PeopleModule } from './people/people.module';
 
 @Module({
   imports: [
@@ -22,8 +24,10 @@ import { ImportModule } from './import/import.module';
       autoLoadEntities: true,
     }),
     AccountingModule,
+    AuthModule,
     GoogleModule,
     ImportModule,
+    PeopleModule,
     RealEstateModule,
   ],
   controllers: [AppController],

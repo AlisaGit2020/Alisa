@@ -6,10 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PropertyController } from './property/property.controller';
 import { PropertyService } from './property/property.service';
 import { Property } from './property/entities/property.entity';
+import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
 
 @Module({
   controllers: [InvestmentController, PropertyController],
   providers: [InvestmentService, PropertyService],
-  imports: [TypeOrmModule.forFeature([Investment, Property])],
+  imports: [TypeOrmModule.forFeature([Investment, Property, Ownership])],
 })
 export class RealEstateModule {}
