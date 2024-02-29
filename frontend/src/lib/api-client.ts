@@ -5,6 +5,11 @@ import { VITE_API_URL } from "../constants";
 
 class ApiClient {
 
+    public static async authGoogle(
+    ): Promise<string> {        
+        return ApiClient.getApiUrl('auth/google')        
+    }
+
     public static async get<T extends { id: number }>(
         path: string,
         id: number,
@@ -24,24 +29,24 @@ class ApiClient {
         return result[0];
     }
 
-    public static async post<T>(path: string, data: T): Promise<T> {        
+    public static async post<T>(path: string, data: T): Promise<T> {
         return axios.post(ApiClient.getApiUrl(path), data)
     }
 
-    public static async put<T>(path: string, id: number, data: T): Promise<T> {        
+    public static async put<T>(path: string, id: number, data: T): Promise<T> {
         return axios.put(ApiClient.getApiUrl(`${path}/${id}`), data)
     }
 
-    public static async delete(path:string, id:number) {            
+    public static async delete(path: string, id: number) {
         await axios.delete(ApiClient.getApiUrl(`${path}/${id}`));
     }
 
-    public static async getDefault<T>(path: string): Promise<T> {        
-        const response = await axios.get(ApiClient.getApiUrl(`${path}/default`));        
+    public static async getDefault<T>(path: string): Promise<T> {
+        const response = await axios.get(ApiClient.getApiUrl(`${path}/default`));
         return response.data;
     }
 
-    public static async upload<T>(path: string, data: T): Promise<T> {        
+    public static async upload<T>(path: string, data: T): Promise<T> {
         return axios.post(ApiClient.getApiUrl(path), data, {
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -52,7 +57,7 @@ class ApiClient {
     public static async search<T>(
         path: string,
         options?: TypeOrmFetchOptions<T>
-    ): Promise<T[]> {        
+    ): Promise<T[]> {
         const url = ApiClient.getApiUrl(`${path}/search`);
         try {
             return (await axios.post<T[]>(url, options)).data;
@@ -64,7 +69,7 @@ class ApiClient {
     public static async statistics<T, K>(
         path: string,
         options?: TypeOrmFetchOptions<T>
-    ): Promise<K> {        
+    ): Promise<K> {
         const url = ApiClient.getApiUrl(`${path}/search/statistics`);
         try {
             return (await axios.post<K>(url, options)).data;
@@ -73,8 +78,8 @@ class ApiClient {
         }
     }
 
-    private static getApiUrl(path: string) {        
-        const apiBasePath = VITE_API_URL;        
+    private static getApiUrl(path: string) {
+        const apiBasePath = VITE_API_URL;
         return `${apiBasePath}/${path}`;
     }
 

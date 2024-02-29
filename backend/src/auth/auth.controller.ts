@@ -17,7 +17,11 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res) {
     const payload = await this.authService.login(req.user);
-    res.json(payload);
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(303);
+    res.redirect(
+      `${process.env.ALLOWED_ORIGIN}/login?access_token=${payload.access_token}`,
+    );
   }
 
   @UseGuards(JwtAuthGuard)

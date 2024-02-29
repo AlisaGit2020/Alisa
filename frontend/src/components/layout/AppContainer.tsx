@@ -1,7 +1,17 @@
 import { Box, Container, Toolbar } from "@mui/material"
 import AppRoutes from "../AppRoutes"
+import AuthProvider from "react-auth-kit/AuthProvider"
+import createStore from "react-auth-kit/createStore"
 
 function AppContainer() {
+
+    const store = createStore({
+        authName: '_auth',
+        authType: 'cookie',
+        cookieDomain: window.location.hostname,
+        cookieSecure: window.location.protocol === 'http:',
+    });
+
     return (
         <Box
             component="main"
@@ -16,9 +26,11 @@ function AppContainer() {
                 overflow: 'auto'
             }}
         >
-            <Toolbar />            
+            <Toolbar />
             <Container maxWidth={false} sx={{ mt: 3, mb: 4 }}>
-                <AppRoutes></AppRoutes>
+                <AuthProvider store={store}>
+                    <AppRoutes></AppRoutes>
+                </AuthProvider>
             </Container>
 
         </Box>

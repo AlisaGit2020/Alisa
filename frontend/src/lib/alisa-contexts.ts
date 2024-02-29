@@ -36,6 +36,12 @@ export const incomeContext: AlisaContext = {
     routePath: '/transactions',
 }
 
+export const loginContext: AlisaContext = {
+    name: 'login',
+    apiPath: 'auth',
+    routePath: '/login',
+}
+
 export const opImportContext: AlisaContext = {
     name: 'op-import',
     apiPath: 'import/op',
