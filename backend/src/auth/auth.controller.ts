@@ -3,6 +3,7 @@ import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt.auth.guard';
+import { User } from '../people/user/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -20,9 +21,10 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('/test')
-  async findAll(): Promise<number[]> {
-    return [1, 2, 3, 4];
+  @Get('/user')
+  async findAll(@Req() req): Promise<User> {
+    const user = req.user;
+    return this.authService.getUserInfo(user.email);
   }
 
   @Get('logout')
