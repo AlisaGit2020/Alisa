@@ -44,17 +44,16 @@ function TransactionListStatistics({ t, where, relations }: TransactionListStati
                 color:fontColor 
                 }}>
                 <Box>{headerText}</Box>
-                <Box sx={{ fontSize: '30px' }} >{contentText}</Box>
+                <Box sx={{ fontSize: '20px' }} >{contentText}</Box>
             </Paper>
         )
     }
 
 
     return (
-        <Stack direction={'row'} spacing={2} marginBottom={2}>
-            {infoBox(t('rowCount'), data.rowCount.toString(), 'info.main', 'white')}
-            {infoBox(t('totalIncomes'), t('format.currency.euro', { val: data.totalIncomes }), 'success.main', 'white')}
-            {infoBox(t('totalExpenses'), t('format.currency.euro', { val: data.totalExpenses }), 'error.main', 'white')}
+        <Stack direction={'row'} spacing={2} marginBottom={2}>            
+            {infoBox(t('totalIncomes'), t('format.currency.euro', { val: data.totalIncomes }), 'success.light', 'white')}
+            {infoBox(t('totalExpenses'), t('format.currency.euro', { val: data.totalExpenses }), 'error.light', 'white')}
             {infoBox(t('total'), t('format.currency.euro', { val: data.total }), 'white', 'black')}
         </Stack>
     )
