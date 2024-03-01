@@ -36,7 +36,7 @@ function TransactionListFilter({ t, onChange, filter }: TransactionListFilterPro
 
 
     return (
-        <Stack direction={'row'} spacing={2}>
+        <Stack spacing={2} marginTop={10} width={400} padding={3}>
             <AlisaSelect<TransactionFilter, Property>
                 dataService={new DataService({
                     context: propertyContext,
