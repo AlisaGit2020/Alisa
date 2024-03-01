@@ -3,7 +3,7 @@ import { TypeOrmFetchOptions, TypeOrmRelationOption } from "./types";
 import Logger from "./logger";
 import { VITE_API_URL } from "../constants";
 import { User } from "@alisa-backend/people/user/entities/user.entity";
-import { getCookie } from 'typescript-cookie'
+import Cookies from 'js-cookie'
 
 class ApiClient {
     private static async authOptions() {
@@ -18,7 +18,7 @@ class ApiClient {
     private static async getTokenAttempt() {
         return new Promise((resolve) => {
             setTimeout(() => {
-                const token = getCookie('_auth');                
+                const token = Cookies.get('_auth');                
                 if (token) {
                     resolve(token);
                 }
@@ -123,3 +123,4 @@ class ApiClient {
 }
 
 export default ApiClient
+
