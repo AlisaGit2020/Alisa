@@ -4,7 +4,7 @@ import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.en
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  public id: number;
+  public id?: number;
 
   @Column()
   firstName: string;
@@ -16,7 +16,7 @@ export class User {
   email: string;
 
   @Column({ nullable: true })
-  locale?: string;
+  language?: string;
 
   @Column({ nullable: true })
   photo?: string;

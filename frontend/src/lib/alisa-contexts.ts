@@ -59,3 +59,9 @@ export const transactionContext: AlisaContext = {
     apiPath: 'accounting/transaction',
     routePath: '/transactions',
 }
+
+export const userContext: AlisaContext = {
+    name: 'user',
+    apiPath: 'auth',
+    routePath: '/',
+}

@@ -6,23 +6,34 @@ import { User } from "@alisa-backend/people/user/entities/user.entity";
 import { getCookie } from 'typescript-cookie'
 
 class ApiClient {
-    private static authOptions = {
-        withCredentials: true,
-        headers: {
-            'Authorization': `Bearer ${ApiClient.getToken()}`,
+    private static async authOptions() {
+        return {
+            withCredentials: true,
+            headers: {
+                'Authorization': `Bearer ${await ApiClient.getToken()}`,
+            }
         }
     }
 
+    private static async getTokenAttempt() {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const token = getCookie('_auth');                
+                if (token) {
+                    resolve(token);
+                }
+            }, 5)
+        });
+    }
+
     public static getToken() {
-        const token = getCookie('_auth');
-        if (token){
-            return token
-        }        
+        const token = ApiClient.getTokenAttempt()
+        return token
     }
 
     public static async authGoogle(
-    ): Promise<string> {        
-        return ApiClient.getApiUrl('auth/google')        
+    ): Promise<string> {
+        return ApiClient.getApiUrl('auth/google')
     }
 
     public static async get<T extends { id: number }>(
@@ -61,12 +72,12 @@ class ApiClient {
         return response.data;
     }
 
-    public static async me(): Promise<User> {        
-        const response = await axios.get(ApiClient.getApiUrl(`auth/user`), ApiClient.authOptions)
+    public static async me(): Promise<User> {
+        const response = await axios.get(ApiClient.getApiUrl(`auth/user`), await ApiClient.authOptions())
         return response.data
     }
 
-    public static async upload<T>(path: string, data: T): Promise<T> {        
+    public static async upload<T>(path: string, data: T): Promise<T> {
         return axios.post(ApiClient.getApiUrl(path), data, {
             headers: {
                 'Content-Type': 'multipart/form-data'

@@ -6,30 +6,26 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { User } from '@alisa-backend/people/user/entities/user.entity';
 import ApiClient from '@alisa-lib/api-client';
+import { emptyUser } from '@alisa-lib/initial-data';
+import UserDetails from '../user/UserDetails';
 
 function UserMenu({ t }: WithTranslation) {
     const signOut = useSignOut()
 
-    const [data, setData] = React.useState<User>({})
+    const [data, setData] = React.useState<User>(emptyUser);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [openUserDetails, setOpenUserDetails] = React.useState<boolean>(false)
     const open = Boolean(anchorEl);
 
-    let token = ApiClient.getToken()
-
-    React.useEffect(() => {            
-
-        if (token) {
-            const fetchData = async () => {
-                const data = await ApiClient.me();
-                return data
-            }
-
-            fetchData()
-                .then(setData)
-        }else{
-            token = 'some value';
+    React.useEffect(() => {
+        const fetchData = async () => {
+            const data = await ApiClient.me();
+            return data
         }
-    }, [token])
+        fetchData()
+            .then(setData)
+
+    }, [])
 
     const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -39,6 +35,7 @@ function UserMenu({ t }: WithTranslation) {
     };
 
     const openUserProfile = () => {
+        setOpenUserDetails(true)
         handleClose()
     };
 
@@ -90,6 +87,11 @@ function UserMenu({ t }: WithTranslation) {
                     {t('signOut')}
                 </MenuItem>
             </Menu>
+
+            <UserDetails
+                onClose={() => setOpenUserDetails(false)}
+                open={openUserDetails}
+            ></UserDetails>
         </Box>
     );
 }

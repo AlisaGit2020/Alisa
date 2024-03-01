@@ -21,6 +21,9 @@ const fi = {
         november: 'Marraskuu',
         december: 'Joulukuu',
 
+        fi: 'Suomi',
+        en: 'Englanti',
+
         amount: 'Määrä',
         property: 'Asunto', 
         back: 'Takaisin',

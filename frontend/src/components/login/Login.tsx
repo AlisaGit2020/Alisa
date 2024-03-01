@@ -8,7 +8,7 @@ import React from 'react';
 import useSignIn from 'react-auth-kit/hooks/useSignIn';
 import { Button, Card, CardActionArea, CardActions, CardContent, Stack } from '@mui/material';
 import Title from '../../Title';
-import { WithTranslation, withTranslation } from 'react-i18next';
+import { WithTranslation, useTranslation, withTranslation } from 'react-i18next';
 import { loginContext } from '@alisa-lib/alisa-contexts';
 
 
@@ -16,18 +16,21 @@ function Login({t}: WithTranslation) {
     const [searchParams] = useSearchParams();
     const signIn = useSignIn();
     const navigate = useNavigate()
+    const { i18n } = useTranslation();
 
     React.useEffect(() => {
 
-        const doLogin = () => {
+        const doLogin = async () => {
             const accessToken = searchParams.get('access_token')
-            if (accessToken) {
+            if (accessToken) {                
                 if (signIn({
                     auth: {
                         token: accessToken,
                         type: 'Bearer'
                     }
                 })) {
+                    const user = await ApiClient.me()
+                    i18n.changeLanguage(user.language)
                     navigate('/')
                 } else {
                     //Throw error

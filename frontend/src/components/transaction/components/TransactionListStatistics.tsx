@@ -26,8 +26,7 @@ function TransactionListStatistics({ t, where, relations }: TransactionListStati
             }
         })
         const fetchData = async () => {
-            const newData: TransactionStatisticsDto = await dataService.statistics<TransactionStatisticsDto>();
-            console.log(newData)
+            const newData: TransactionStatisticsDto = await dataService.statistics<TransactionStatisticsDto>();            
             setData(newData);
         };
 

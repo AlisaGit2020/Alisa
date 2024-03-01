@@ -14,7 +14,8 @@ const namespaces = [
     'menu',
     'route',
     'settings',
-    'transaction'
+    'transaction',
+    'user'
 ];
 
 const initializeI18n = async () => {

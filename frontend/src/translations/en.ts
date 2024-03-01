@@ -17,6 +17,9 @@ const en = {
             number: '{{val, number}}'
         },
 
+        fi: 'Finnish',
+        en: 'English',
+
         january: 'January',
         february: 'February',
         march: 'March',
