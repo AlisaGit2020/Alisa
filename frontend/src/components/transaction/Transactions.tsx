@@ -18,7 +18,7 @@ interface TransactionsProps extends WithTranslation {
 }
 
 function Transactions({ t, filter }: TransactionsProps) {
-    const [anchorElAdd, setAnchorElAdd] = React.useState<null | HTMLElement>(null);    
+    const [anchorElAdd, setAnchorElAdd] = React.useState<null | HTMLElement>(null);
     const [detailId, setDetailId] = React.useState<number>(0);
     const [importOpen, setImportOpen] = React.useState<boolean>(false);
     const navigate = useNavigate()
@@ -47,12 +47,12 @@ function Transactions({ t, filter }: TransactionsProps) {
     }
 
     const transactionDateFilter = (): object => {
-        const startDate = new Date(filter.year, filter.month - 1, 1); 
-        const endDate = new Date(filter.year, filter.month, 0, 23, 59, 59); 
+        const startDate = new Date(filter.year, filter.month - 1, 1);
+        const endDate = new Date(filter.year, filter.month, 0, 23, 59, 59);
         return {
             transactionDate: {
                 $between: [startDate, endDate]
-            } 
+            }
         }
     }
 
@@ -64,7 +64,7 @@ function Transactions({ t, filter }: TransactionsProps) {
             receiver: true,
             description: true,
             totalAmount: true
-        },        
+        },
         relations: {
             expense: true,
             income: true
@@ -72,12 +72,12 @@ function Transactions({ t, filter }: TransactionsProps) {
         order: {
             transactionDate: 'DESC'
         },
-        
+
         where: [
             { expense: { propertyId: filter.propertyId }, ...transactionDateFilter() },
-            { income: { propertyId: filter.propertyId }, ...transactionDateFilter() }            
+            { income: { propertyId: filter.propertyId }, ...transactionDateFilter() }
         ],
-        
+
     } as TypeOrmFetchOptions<Transaction>
 
     return (
@@ -87,26 +87,28 @@ function Transactions({ t, filter }: TransactionsProps) {
                 relations={fetchOptions.relations}
                 where={fetchOptions.where}
             ></TransactionListStatistics>
-            <AlisaDataTable<Transaction>
-                t={t}
-                dataService={new DataService({ context: transactionContext, fetchOptions })}
-                fields={[
-                    { name: 'transactionDate', format: 'date' },
-                    { name: 'sender', maxLength: 30 },
-                    { name: 'receiver', maxLength: 30 },
-                    { name: 'description', maxLength: 40 },
-                    { name: 'totalAmount', format: 'currency' },
-                ]}
-                onNewRow={handleOpenAddMenu}
-                onEdit={handleEdit}
-                onOpen={handleOpenDetails}
-            />
+            <Box marginTop={3}>
+                <AlisaDataTable<Transaction>
+                    t={t}
+                    dataService={new DataService({ context: transactionContext, fetchOptions })}
+                    fields={[
+                        { name: 'transactionDate', format: 'date' },
+                        { name: 'sender', maxLength: 30 },
+                        { name: 'receiver', maxLength: 30 },
+                        { name: 'description', maxLength: 40 },
+                        { name: 'totalAmount', format: 'currency' },
+                    ]}
+                    onNewRow={handleOpenAddMenu}
+                    onEdit={handleEdit}
+                    onOpen={handleOpenDetails}
+                />
+            </Box>
 
-            <TransactionDetails              
-              id={detailId}
-              onClose={() => setDetailId(0)}  
+            <TransactionDetails
+                id={detailId}
+                onClose={() => setDetailId(0)}
             ></TransactionDetails>
-            
+
             <TransactionAddMenu
                 t={t}
                 anchorEl={anchorElAdd}

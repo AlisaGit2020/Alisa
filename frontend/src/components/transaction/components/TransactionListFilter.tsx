@@ -5,6 +5,7 @@ import DataService from "@alisa-lib/data-service";
 import { Property } from "@alisa-backend/real-estate/property/entities/property.entity";
 import { Stack } from "@mui/material";
 import AlisaSelectField from "../../../components/alisa/form/AlisaSelectField";
+import { TFunction } from "i18next";
 
 interface TransactionListFilterProps extends WithTranslation {
     onChange: (fieldName: string, selectedValue: number) => void
@@ -32,22 +33,7 @@ function TransactionListFilter({ t, onChange, filter }: TransactionListFilterPro
         return yearList;
     };
 
-    const getMonthList = () => {
-        return [
-            { id: 1, name: t('january') },
-            { id: 2, name: t('february') },
-            { id: 3, name: t('march') },
-            { id: 4, name: t('april') },
-            { id: 5, name: t('may') },
-            { id: 6, name: t('june') },
-            { id: 7, name: t('july') },
-            { id: 8, name: t('august') },
-            { id: 9, name: t('september') },
-            { id: 10, name: t('october') },
-            { id: 11, name: t('november') },
-            { id: 12, name: t('december') },
-        ]
-    };
+
 
     return (
         <Stack direction={'row'} spacing={2}>
@@ -75,10 +61,27 @@ function TransactionListFilter({ t, onChange, filter }: TransactionListFilterPro
                 label={t('month')}
                 value={filter.month}
                 onChange={(e) => onChange('month', Number(e.target.value))}
-                items={ getMonthList()}
+                items={ getMonthList(t)}
             ></AlisaSelectField>
         </Stack>
     )
 }
 
 export default withTranslation(transactionContext.name)(TransactionListFilter);
+
+export const getMonthList = (t: TFunction) => {
+    return [
+        { id: 1, name: t('january') },
+        { id: 2, name: t('february') },
+        { id: 3, name: t('march') },
+        { id: 4, name: t('april') },
+        { id: 5, name: t('may') },
+        { id: 6, name: t('june') },
+        { id: 7, name: t('july') },
+        { id: 8, name: t('august') },
+        { id: 9, name: t('september') },
+        { id: 10, name: t('october') },
+        { id: 11, name: t('november') },
+        { id: 12, name: t('december') },
+    ]
+};
