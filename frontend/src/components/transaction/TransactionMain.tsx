@@ -8,6 +8,7 @@ import TransactionListFilter, { TransactionFilter, getMonthList } from "./compon
 import DataService from "@alisa-lib/data-service"
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import AlisaContent from "../alisa/AlisaContent"
+import CheckIcon from '@mui/icons-material/Check';
 
 function TransactionMain({ t }: WithTranslation) {
     let { propertyId } = useParams();
@@ -60,10 +61,15 @@ function TransactionMain({ t }: WithTranslation) {
                 ></TransactionListFilter>
                 <Box sx={{
                     alignItems: 'center',
-                    display: 'flex',                    
+                    display: 'flex',
                     flexDirection: 'column',
-                    }}>
-                <Button sx={{width:50}} variant={'contained'} onClick={() => setFilterOpen(false)}>{t('ok')}</Button>
+                }}>
+                    <Button
+                        startIcon={<CheckIcon></CheckIcon>}
+                        sx={{ width: 75 }}
+                        variant={'contained'}
+                        onClick={() => setFilterOpen(false)}
+                    >{t('ok')}</Button>
                 </Box>
             </Drawer>
             <Transactions

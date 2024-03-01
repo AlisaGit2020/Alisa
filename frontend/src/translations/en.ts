@@ -34,7 +34,7 @@ const en = {
         december: 'December',
 
         amount: 'Amount',
-        property: 'property',        
+        property: 'Property',        
         back: 'Back',
         cancel: 'Cancel',
         confirm: 'Confirm',
