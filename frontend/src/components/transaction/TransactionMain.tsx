@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import TransactionListFilter, { TransactionFilter, getMonthList } from "./components/TransactionListFilter"
 import DataService from "@alisa-lib/data-service"
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
+import AlisaContent from "../alisa/AlisaContent"
 
 function TransactionMain({ t }: WithTranslation) {
     let { propertyId } = useParams();
@@ -51,7 +52,7 @@ function TransactionMain({ t }: WithTranslation) {
     }
 
     return (
-        <>
+        <AlisaContent headerText={t('transactions')}>
             <Box marginBottom={2}>
                 <Button
                     variant="outlined"
@@ -69,7 +70,7 @@ function TransactionMain({ t }: WithTranslation) {
             <Transactions
                 filter={filter}
             ></Transactions>
-        </>
+        </AlisaContent>
     )
 
 }

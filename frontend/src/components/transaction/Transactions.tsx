@@ -1,4 +1,4 @@
-import { Box } from '@mui/material'
+import { Box, Paper } from '@mui/material'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AlisaDataTable from '../alisa/AlisaDataTable';
 import { transactionContext } from '@alisa-lib/alisa-contexts';
@@ -87,7 +87,7 @@ function Transactions({ t, filter }: TransactionsProps) {
                 relations={fetchOptions.relations}
                 where={fetchOptions.where}
             ></TransactionListStatistics>
-            <Box marginTop={3}>
+            <Paper sx={{marginTop:3}}>
                 <AlisaDataTable<Transaction>
                     t={t}
                     dataService={new DataService({ context: transactionContext, fetchOptions })}
@@ -102,7 +102,7 @@ function Transactions({ t, filter }: TransactionsProps) {
                     onEdit={handleEdit}
                     onOpen={handleOpenDetails}
                 />
-            </Box>
+            </Paper>
 
             <TransactionDetails
                 id={detailId}

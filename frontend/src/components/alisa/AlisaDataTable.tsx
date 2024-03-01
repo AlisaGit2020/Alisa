@@ -1,5 +1,6 @@
 
 import * as React from 'react';
+import { styled } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
@@ -13,6 +14,16 @@ import { Box, IconButton, TableContainer, Tooltip, Typography } from '@mui/mater
 import { TFunction } from 'i18next';
 import AlisaConfirmDialog from './dialog/AlisaConfirmDialog';
 import DataService from '@alisa-lib/data-service';
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+}));
 
 interface AlisaDataTableField<T> {
   name: keyof T,
@@ -109,7 +120,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
             <TableBody>
 
               {data.map((item) => (
-                <TableRow key={item.id}>
+                <StyledTableRow key={item.id}>
                   {props.fields.map((field) => (
                     <TableCell
                       key={field.name as string}
@@ -124,7 +135,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
                     <IconButton onClick={() => props.onEdit(item.id)}><EditIcon></EditIcon></IconButton>
                     <IconButton onClick={() => handleDeleteOpen(item.id)}><DeleteIcon></DeleteIcon></IconButton>
                   </TableCell>
-                </TableRow>
+                </StyledTableRow>
               ))}
 
             </TableBody>
