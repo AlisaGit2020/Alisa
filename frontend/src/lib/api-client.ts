@@ -2,8 +2,23 @@ import axios from "axios";
 import { TypeOrmFetchOptions, TypeOrmRelationOption } from "./types";
 import Logger from "./logger";
 import { VITE_API_URL } from "../constants";
+import { User } from "@alisa-backend/people/user/entities/user.entity";
+import { getCookie } from 'typescript-cookie'
 
 class ApiClient {
+    private static authOptions = {
+        withCredentials: true,
+        headers: {
+            'Authorization': `Bearer ${ApiClient.getToken()}`,
+        }
+    }
+
+    public static getToken() {
+        const token = getCookie('_auth');
+        if (token){
+            return token
+        }        
+    }
 
     public static async authGoogle(
     ): Promise<string> {        
@@ -46,7 +61,12 @@ class ApiClient {
         return response.data;
     }
 
-    public static async upload<T>(path: string, data: T): Promise<T> {
+    public static async me(): Promise<User> {        
+        const response = await axios.get(ApiClient.getApiUrl(`auth/user`), ApiClient.authOptions)
+        return response.data
+    }
+
+    public static async upload<T>(path: string, data: T): Promise<T> {        
         return axios.post(ApiClient.getApiUrl(path), data, {
             headers: {
                 'Content-Type': 'multipart/form-data'

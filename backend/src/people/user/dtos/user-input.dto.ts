@@ -11,4 +11,8 @@ export class UserInputDto {
 
   @IsEmail()
   email: string;
+
+  locale?: string;
+
+  photo?: string;
 }

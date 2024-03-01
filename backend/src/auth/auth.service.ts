@@ -14,7 +14,9 @@ export class AuthService {
   async login(user: UserInputDto) {
     const userEntity = await this.getUserByEmail(user.email);
 
-    if (!userEntity) {
+    if (userEntity) {
+      this.userService.update(userEntity.id, user);
+    } else {
       this.userService.add(user);
     }
     const accessToken = this.jwtService.sign(user);

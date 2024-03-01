@@ -12,8 +12,14 @@ export class User {
   @Column()
   lastName: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
+
+  @Column({ nullable: true })
+  locale?: string;
+
+  @Column({ nullable: true })
+  photo?: string;
 
   @OneToMany(() => Ownership, (ownership) => ownership.user)
   ownerships: Ownership[];
