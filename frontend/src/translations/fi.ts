@@ -1,8 +1,10 @@
 const fi = {
     appBar: {
+        profile: 'Käyttäjätiedot',
         title: 'Alisa',
         slogan: 'Alisa, sijoittamisen supersankari kyykyttää numeroita!',
-        selectLanguage: 'Valitse kieli'
+        selectLanguage: 'Valitse kieli',
+        signOut: 'Kirjaudu ulos'
     },
 
     common: {

@@ -7,6 +7,7 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import React from 'react';
 import LanguageSelector from './LanguageSelector';
 import LeftMenu from './LeftMenu';
+import UserMenu from './UserMenu';
 
 const drawerWidth: number = 240;
 
@@ -94,6 +95,7 @@ function AppBar({ t }: WithTranslation) {
             ><SettingsIcon></SettingsIcon>
             </IconButton>
           </Tooltip>
+          <UserMenu></UserMenu>
 
         </Toolbar>
       </_AppBar >

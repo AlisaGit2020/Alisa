@@ -1,8 +1,10 @@
 const en = {
     appBar: {
+        profile: 'Profile',
         title: 'Alisa',
         slogan: 'Alisa, the superhero of investment is shaking numbers!',
-        selectLanguage: 'Select language'
+        selectLanguage: 'Select language',
+        signOut: 'Sign out'
     },
 
     common: {
