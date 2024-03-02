@@ -6,12 +6,17 @@ import { Transaction } from '@alisa-backend/accounting/transaction/entities/tran
 import DataService from '@alisa-lib/data-service';
 import { TypeOrmFetchOptions } from '@alisa-lib/types';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import TransactionAddMenu from './components/TransactionAddMenu';
 import TransactionImport from './components/TransactionImport';
 import { TransactionFilter } from './components/TransactionListFilter';
 import TransactionListStatistics from './components/TransactionListStatistics';
 import TransactionDetails from './components/TransactionDetails';
+import TransactionForm from './TransactionForm';
+
+export enum TransactionType  {
+    Income,
+    Expense
+}
 
 interface TransactionsProps extends WithTranslation {
     filter: TransactionFilter
@@ -20,8 +25,9 @@ interface TransactionsProps extends WithTranslation {
 function Transactions({ t, filter }: TransactionsProps) {
     const [anchorElAdd, setAnchorElAdd] = React.useState<null | HTMLElement>(null);
     const [detailId, setDetailId] = React.useState<number>(0);
+    const [editId, setEditId] = React.useState<number>(0);
+    const [addType, setAddType] = React.useState<TransactionType | undefined>(undefined);
     const [importOpen, setImportOpen] = React.useState<boolean>(false);
-    const navigate = useNavigate()
 
     const handleOpenAddMenu = (event?: React.MouseEvent<HTMLButtonElement>): void => {
         if (event !== undefined) {
@@ -34,7 +40,12 @@ function Transactions({ t, filter }: TransactionsProps) {
     };
 
     const handleEdit = (id: number) => {
-        navigate(`${transactionContext.routePath}/edit/${id}`)
+        setEditId(id)
+    }
+
+    const handleAdd = (type: TransactionType) => {
+        setAddType(type)
+        handleCloseAddMenu()
     }
 
     const handleOpenImport = () => {
@@ -87,7 +98,7 @@ function Transactions({ t, filter }: TransactionsProps) {
                 relations={fetchOptions.relations}
                 where={fetchOptions.where}
             ></TransactionListStatistics>
-            <Paper sx={{marginTop:3}}>
+            <Paper sx={{ marginTop: 3 }}>
                 <AlisaDataTable<Transaction>
                     t={t}
                     dataService={new DataService({ context: transactionContext, fetchOptions })}
@@ -104,26 +115,52 @@ function Transactions({ t, filter }: TransactionsProps) {
                 />
             </Paper>
 
-            <TransactionDetails
-                id={detailId}
-                onClose={() => setDetailId(0)}
-            ></TransactionDetails>
+            {(detailId > 0) && (
+                <TransactionDetails
+                    id={detailId}
+                    onClose={() => setDetailId(0)}
+                ></TransactionDetails>
+            )}
+
+            {(editId > 0) && (
+                <TransactionForm
+                    open={true}
+                    id={editId}
+                    propertyId={filter.propertyId}
+                    onClose={() => setEditId(0)}
+                    onAfterSubmit={() => setEditId(0)}
+                    onCancel={() => setEditId(0)}
+                ></TransactionForm>
+            )}
+
+            {(addType !==  undefined) && (
+                <TransactionForm
+                    open={true}        
+                    type={addType}            
+                    propertyId={filter.propertyId}
+                    onClose={() => setAddType(undefined)}
+                    onAfterSubmit={() => setAddType(undefined)}
+                    onCancel={() => setAddType(undefined)}
+                ></TransactionForm>
+            )}
 
             <TransactionAddMenu
                 t={t}
                 anchorEl={anchorElAdd}
                 onClose={handleCloseAddMenu}
-                onAddExpense={() => navigate(`${transactionContext.routePath}/add/expense/${filter.propertyId}`)}
-                onAddIncome={() => navigate(`${transactionContext.routePath}/add/income/${filter.propertyId}`)}
+                onAddExpense={() => handleAdd(TransactionType.Expense)}
+                onAddIncome={() => handleAdd(TransactionType.Income)}
                 onImport={handleOpenImport}
             ></TransactionAddMenu>
 
-            <TransactionImport
-                open={importOpen}
-                propertyId={Number(filter.propertyId)}
-                onClose={() => setImportOpen(false)}
-                t={t}
-            ></TransactionImport>
+            {(importOpen) && (
+                <TransactionImport
+                    open={importOpen}
+                    propertyId={filter.propertyId}
+                    onClose={() => setImportOpen(false)}
+                    t={t}
+                ></TransactionImport>
+            )}
         </Box>
 
     )

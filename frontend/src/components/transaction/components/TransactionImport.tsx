@@ -1,8 +1,7 @@
 import { Dialog, DialogContent, DialogTitle, Stack, TextField } from "@mui/material"
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { TFunction } from "i18next"
-import { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useState } from 'react';
 import AlisaSelect from "../../alisa/AlisaSelect";
 import { OpImportInput } from "@alisa-backend/import/op/dtos/op-import-input.dto";
 import DataService from "@alisa-lib/data-service";
@@ -21,8 +20,9 @@ function TransactionImport(props: {
 }) {
     const initialData = new OpImportInput()
     initialData.propertyId = props.propertyId;
+    
     const [data, setData] = useState<OpImportInput>(initialData)
-
+    console.log(data)
     const dataService = new DataService<OpImportInput>({
         context: opImportContext,
         dataValidateInstance: new OpImportInput()

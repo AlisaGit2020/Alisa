@@ -1,7 +1,7 @@
 import { act, render, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
-import {mockConstants, mockReactI18next} from '@alisa-mocks/mocks'
+import { mockConstants, mockReactI18next } from '@alisa-mocks/mocks'
 import IncomeForm from './IncomeForm';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -15,7 +15,7 @@ jest.mock('react-i18next', () => mockReactI18next);
 describe('IncomeForm Component', () => {
 
   let getDefaultsMock: jest.SpyInstance<Promise<IncomeInputDto>>;
-  let readMock: jest.SpyInstance<Promise<IncomeInputDto>>;  
+  let readMock: jest.SpyInstance<Promise<IncomeInputDto>>;
 
   beforeAll(() => {
     const mockRead = {
@@ -53,7 +53,7 @@ describe('IncomeForm Component', () => {
     } as IncomeInputDto;
 
     getDefaultsMock = jest.spyOn(DataService.prototype, 'getDefaults').mockResolvedValue(mockDefaults);
-    
+
     const mockSearch = [
       {
         id: 1,
@@ -64,7 +64,7 @@ describe('IncomeForm Component', () => {
         name: 'Item 5'
       }
     ];
-    
+
     jest.spyOn(DataService.prototype, 'search').mockResolvedValue(mockSearch);
 
   });
@@ -80,7 +80,10 @@ describe('IncomeForm Component', () => {
       const { container } = render(
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <MemoryRouter>
-            <IncomeForm />
+            <IncomeForm
+              onAfterSubmit={() => { }}
+              onCancel={() => { }}
+            />
           </MemoryRouter>
         </LocalizationProvider>
       );
@@ -88,7 +91,7 @@ describe('IncomeForm Component', () => {
       // Assert that the component renders without crashing
       await waitFor(() => {
         expect(container).toBeInTheDocument();
-        
+
       });
     });
 
@@ -96,13 +99,17 @@ describe('IncomeForm Component', () => {
     expect(readMock).toHaveBeenCalledTimes(0);
   });
 
-  it('renders IncomeForm edit', async () => {    
+  it('renders IncomeForm edit', async () => {
 
     await act(async () => {
-      const {container} = render(
+      const { container } = render(
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <MemoryRouter>
-            <IncomeForm id={5} />
+            <IncomeForm
+              id={5}
+              onAfterSubmit={() => { }}
+              onCancel={() => { }}
+            />
           </MemoryRouter>
         </LocalizationProvider>
       );

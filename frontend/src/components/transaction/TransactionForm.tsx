@@ -3,21 +3,30 @@ import ExpenseForm from './ExpenseForm';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import { useState } from 'react';
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import TransactionChooseType from './components/TransactionChooseType';
 import ApiClient from '../../lib/api-client';
 import { transactionContext } from '@alisa-lib/alisa-contexts';
 import IncomeForm from './IncomeForm';
+import { Dialog, DialogContent } from '@mui/material';
+import { TransactionType } from './Transactions';
 
 
-function TransactionForm() {
-    const { id, type, propertyId } = useParams();
+function TransactionForm(props: {
+    open: boolean,
+    id?: number,
+    type?: TransactionType,
+    propertyId: number,
+    onClose: () => void,
+    onAfterSubmit: () => void,
+    onCancel: () => void
+}) {
+    //const { id, type, propertyId } = useParams();
     const [expenseId, setExpenseId] = useState<number>();
     const [incomeId, setIncomeId] = useState<number>();
 
     React.useEffect(() => {
 
-        const fetchData = async (id: number) => {
+        const fetchData = async (id: number | undefined) => {
 
             if (id) {
                 try {
@@ -41,23 +50,48 @@ function TransactionForm() {
             }
         }
 
-        fetchData(Number(id))
+        fetchData(props.id)
 
-    }, [id])
+    }, [props.id])
 
-    if (type === 'expense' || expenseId) {
-        return (
-            <ExpenseForm id={expenseId} propertyId={Number(propertyId)} />
-        );
-    } else if (type === 'income' || incomeId) {
-        return (
-            <IncomeForm id={incomeId} propertyId={Number(propertyId)} />
-        );
-    } else {
-        return (
-            <TransactionChooseType></TransactionChooseType>
-        );
+    const getContent = () => {
+        if (props.type === TransactionType.Expense || expenseId) {
+            return (
+                <ExpenseForm
+                    id={expenseId}
+                    propertyId={props.propertyId}
+                    onAfterSubmit={props.onAfterSubmit}
+                    onCancel={props.onCancel}
+                />
+            );
+        } else if (props.type === TransactionType.Income || incomeId) {
+            return (
+                <IncomeForm
+                    id={incomeId}
+                    propertyId={props.propertyId}
+                    onAfterSubmit={props.onAfterSubmit}
+                    onCancel={props.onCancel}
+                />
+            );
+        } else {
+            return (
+                <TransactionChooseType></TransactionChooseType>
+            );
+        }
     }
+
+    return (
+        <Dialog
+            open={props.open}
+            onClose={props.onClose}
+            fullWidth={true}
+            maxWidth={'lg'}>
+
+            <DialogContent dividers>
+                {getContent()}
+            </DialogContent>
+        </Dialog>
+    )
 
 }
 

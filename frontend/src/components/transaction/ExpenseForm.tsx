@@ -4,7 +4,6 @@ import { WithTranslation, withTranslation } from 'react-i18next';
 import { propertyContext, expenseContext, expenseTypeContext, transactionContext } from '@alisa-lib/alisa-contexts';
 import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
 import DataService from '@alisa-lib/data-service';
-import { useNavigate } from 'react-router-dom';
 import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-input.dto';
 import AlisaSelect from '../alisa/AlisaSelect';
 import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
@@ -16,13 +15,14 @@ import AlisaContent from '../alisa/AlisaContent';
 
 interface ExpenseFormProps extends WithTranslation {
     id?: number,
-    propertyId?: number
+    propertyId?: number,
+    onAfterSubmit: () => void,
+    onCancel: () => void
 }
 
-function ExpenseForm({ t, id, propertyId }: ExpenseFormProps) {
+function ExpenseForm({ t, id, propertyId, onAfterSubmit, onCancel }: ExpenseFormProps) {
 
-    const [data, setData] = useState<ExpenseInputDto>(new ExpenseInputDto());
-    const navigate = useNavigate();
+    const [data, setData] = useState<ExpenseInputDto>(new ExpenseInputDto());    
 
     const dataService = new DataService<ExpenseInputDto>({
         context: expenseContext,
@@ -142,8 +142,8 @@ function ExpenseForm({ t, id, propertyId }: ExpenseFormProps) {
                             validationMessageTitle: t('validationErrorTitle'),
                         }}
 
-                        onCancel={() => navigate(`${transactionContext.routePath}/${data.propertyId}`)}
-                        onAfterSubmit={() => navigate(`${transactionContext.routePath}/${data.propertyId}`)}
+                        onCancel={onCancel}
+                        onAfterSubmit={onAfterSubmit}
                     >
                     </AlisaFormHandler>
             </AlisaContent>

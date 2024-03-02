@@ -4,7 +4,6 @@ import { WithTranslation, withTranslation } from 'react-i18next';
 import { propertyContext, incomeContext, incomeTypeContext, transactionContext } from '@alisa-lib/alisa-contexts';
 import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
 import DataService from '@alisa-lib/data-service';
-import { useNavigate } from 'react-router-dom';
 import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
 import AlisaSelect from '../alisa/AlisaSelect';
 import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
@@ -16,13 +15,14 @@ import AlisaContent from '../alisa/AlisaContent';
 
 interface IncomeFormProps extends WithTranslation {
     id?: number,
-    propertyId?: number
+    propertyId?: number,
+    onAfterSubmit: () => void,
+    onCancel: () => void
 }
 
-function IncomeForm({ t, id, propertyId }: IncomeFormProps) {
+function IncomeForm({ t, id, propertyId, onAfterSubmit, onCancel }: IncomeFormProps) {
 
     const [data, setData] = useState<IncomeInputDto>(new IncomeInputDto());
-    const navigate = useNavigate();
 
     const dataService = new DataService<IncomeInputDto>({
         context: incomeContext,
@@ -142,8 +142,8 @@ function IncomeForm({ t, id, propertyId }: IncomeFormProps) {
                         validationMessageTitle: t('validationErrorTitle'),
                     }}
 
-                    onCancel={() => navigate(`${transactionContext.routePath}/${data.propertyId}`)}
-                    onAfterSubmit={() => navigate(`${transactionContext.routePath}/${data.propertyId}`)}
+                    onCancel={onCancel}
+                    onAfterSubmit={onAfterSubmit}
                 >
                 </AlisaFormHandler>
             </AlisaContent>

@@ -1,7 +1,7 @@
 import { act, render, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
-import {mockConstants, mockReactI18next} from '@alisa-mocks/mocks'
+import { mockConstants, mockReactI18next } from '@alisa-mocks/mocks'
 import ExpenseForm from './ExpenseForm';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -15,7 +15,7 @@ jest.mock('react-i18next', () => mockReactI18next);
 describe('ExpenseForm Component', () => {
 
   let getDefaultsMock: jest.SpyInstance<Promise<ExpenseInputDto>>;
-  let readMock: jest.SpyInstance<Promise<ExpenseInputDto>>;  
+  let readMock: jest.SpyInstance<Promise<ExpenseInputDto>>;
 
   beforeAll(() => {
     const mockRead = {
@@ -53,7 +53,7 @@ describe('ExpenseForm Component', () => {
     } as ExpenseInputDto;
 
     getDefaultsMock = jest.spyOn(DataService.prototype, 'getDefaults').mockResolvedValue(mockDefaults);
-    
+
     const mockSearch = [
       {
         id: 1,
@@ -64,7 +64,7 @@ describe('ExpenseForm Component', () => {
         name: 'Item 5'
       }
     ];
-    
+
     jest.spyOn(DataService.prototype, 'search').mockResolvedValue(mockSearch);
 
   });
@@ -80,7 +80,10 @@ describe('ExpenseForm Component', () => {
       const { container } = render(
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <MemoryRouter>
-            <ExpenseForm />
+            <ExpenseForm
+              onAfterSubmit={() => { }}
+              onCancel={() => { }}
+            />
           </MemoryRouter>
         </LocalizationProvider>
       );
@@ -88,7 +91,7 @@ describe('ExpenseForm Component', () => {
       // Assert that the component renders without crashing
       await waitFor(() => {
         expect(container).toBeInTheDocument();
-        
+
       });
     });
 
@@ -96,13 +99,17 @@ describe('ExpenseForm Component', () => {
     expect(readMock).toHaveBeenCalledTimes(0);
   });
 
-  it('renders ExpenseForm edit', async () => {    
+  it('renders ExpenseForm edit', async () => {
 
     await act(async () => {
-      const {container} = render(
+      const { container } = render(
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <MemoryRouter>
-            <ExpenseForm id={5} />
+            <ExpenseForm
+              id={5}
+              onAfterSubmit={() => { }}
+              onCancel={() => { }}
+            />
           </MemoryRouter>
         </LocalizationProvider>
       );
