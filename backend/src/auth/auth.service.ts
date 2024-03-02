@@ -13,11 +13,10 @@ export class AuthService {
 
   async login(user: UserInputDto) {
     const userEntity = await this.getUserByEmail(user.email);
-
     if (userEntity) {
-      this.userService.update(userEntity.id, user);
+      await this.userService.update(userEntity.id, user);
     } else {
-      this.userService.add(user);
+      await this.userService.add(user);
     }
     const accessToken = this.jwtService.sign(user);
 
@@ -31,9 +30,10 @@ export class AuthService {
     return this.getUserByEmail(email);
   }
 
-  private async getUserByEmail(email: string): Promise<User> {
-    return this.userService.findOne(undefined, {
+  private async getUserByEmail(email: string): Promise<User | undefined> {
+    const users = await this.userService.search({
       where: { email: email },
     });
+    return users.length === 1 ? users[0] : undefined;
   }
 }

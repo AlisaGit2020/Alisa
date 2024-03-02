@@ -12,7 +12,7 @@ export class UserInputDto {
   @IsEmail()
   email: string;
 
-  locale?: string;
+  language?: string;
 
   photo?: string;
 }

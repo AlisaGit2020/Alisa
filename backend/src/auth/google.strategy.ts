@@ -28,7 +28,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       firstName: profile.name.givenName,
       lastName: profile.name.familyName,
       email: profile.emails[0].value,
-      locale: profile._json.locale,
+      language: profile._json.locale,
       photo: profile._json.picture,
     };
 

@@ -73,7 +73,7 @@ export class TransactionService {
       await this.incomeRepository.delete(incomeId);
     }
 
-    this.repository.delete(id);
+    await this.repository.delete(id);
   }
 
   async statistics(
@@ -107,7 +107,7 @@ export class TransactionService {
     const result = await queryBuilder
       .select('COUNT(transaction.id)', 'rowCount')
       .addSelect(
-        'SUM(CASE WHEN transaction.totalAmount < 0 THEN transaction.totalAmount ELSE 0 END)',
+        'SUM(CASE WHEN transaction.totalAmount < 0 THEN (transaction.totalAmount * -1) ELSE 0 END)',
         'totalExpenses',
       )
       .addSelect(

@@ -97,7 +97,7 @@ describe('Transaction service', () => {
       await incomeService.add(incomeInput);
       const statistics = await service.statistics({});
 
-      expect(statistics.totalExpenses).toBe(-39.64);
+      expect(statistics.totalExpenses).toBe(39.64);
       expect(statistics.totalIncomes).toBe(39.64);
       expect(statistics.total).toBe(0);
       expect(statistics.rowCount).toBe(2);
