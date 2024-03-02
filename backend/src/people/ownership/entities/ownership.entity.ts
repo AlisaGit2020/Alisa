@@ -23,10 +23,15 @@ export class Ownership {
   @JoinColumn({ name: 'userId' })
   user: User;
 
+  @Column({ nullable: false })
+  userId: number;
+
   @ManyToOne(() => Property, (property) => property.ownerships, {
     eager: false,
-    cascade: ['insert', 'update'],
   })
   @JoinColumn({ name: 'propertyId' })
   property: Property;
+
+  @Column({ nullable: false })
+  propertyId: number;
 }

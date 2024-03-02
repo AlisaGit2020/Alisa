@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Repository } from 'typeorm';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
+import { OwnershipService } from '@alisa-backend/people/ownership/ownership.service';
 
 @Injectable()
 export class PropertyService {
   constructor(
+    private ownershipService: OwnershipService,
     @InjectRepository(Property)
     private repository: Repository<Property>,
   ) {}
@@ -27,8 +29,7 @@ export class PropertyService {
     const propertyEntity = new Property();
 
     this.mapData(propertyEntity, input);
-
-    return await this.repository.save(propertyEntity);
+    return this.repository.save(propertyEntity);
   }
 
   async update(id: number, input: PropertyInputDto): Promise<Property> {

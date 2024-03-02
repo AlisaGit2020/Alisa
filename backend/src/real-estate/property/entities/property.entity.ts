@@ -23,8 +23,8 @@ export class Property {
   @OneToMany(() => Income, (income) => income.property)
   incomes: Income[];
 
-  @OneToMany(() => Ownership, (ownership) => ownership.user, {
-    nullable: true,
+  @OneToMany(() => Ownership, (ownership) => ownership.property, {
+    cascade: ['insert', 'update', 'remove'],
   })
-  ownerships?: Ownership[];
+  ownerships: Ownership[];
 }
