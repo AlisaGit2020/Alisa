@@ -103,7 +103,7 @@ class ApiClient {
     ): Promise<K> {
         const url = ApiClient.getApiUrl(`${path}/search/statistics`);
         try {
-            return (await axios.post<K>(url, options)).data;
+            return (await axios.post<K>(url, options, await ApiClient.authOptions())).data;
         } catch (error) {
             ApiClient.handleError(`Error in search path ${url}`);
         }
