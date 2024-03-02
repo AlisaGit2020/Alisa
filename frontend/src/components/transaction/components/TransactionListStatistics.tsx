@@ -11,10 +11,11 @@ import { TypeOrmRelationOption } from "@alisa-lib/types";
 interface TransactionListStatisticsProps extends WithTranslation {
     relations?: TypeOrmRelationOption
     where?: Partial<Transaction>
+    deletedId: number
 }
 
 
-function TransactionListStatistics({ t, where, relations }: TransactionListStatisticsProps) {
+function TransactionListStatistics({ t, where, relations, deletedId }: TransactionListStatisticsProps) {
     const [data, setData] = React.useState<TransactionStatisticsDto>(new TransactionStatisticsDto())
 
     React.useEffect(() => {
@@ -31,7 +32,7 @@ function TransactionListStatistics({ t, where, relations }: TransactionListStati
         };
 
         fetchData()
-    }, [relations, where])
+    }, [relations, where, deletedId])
 
     const infoBox = (headerText: string, contentText: string, backgroundColor: string, fontColor: string) => {
         return (

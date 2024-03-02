@@ -26,6 +26,7 @@ function Transactions({ t, filter }: TransactionsProps) {
     const [anchorElAdd, setAnchorElAdd] = React.useState<null | HTMLElement>(null);
     const [detailId, setDetailId] = React.useState<number>(0);
     const [editId, setEditId] = React.useState<number>(0);
+    const [deletedId, setDeletedId] = React.useState<number>(0)
     const [addType, setAddType] = React.useState<TransactionType | undefined>(undefined);
     const [importOpen, setImportOpen] = React.useState<boolean>(false);
 
@@ -46,6 +47,10 @@ function Transactions({ t, filter }: TransactionsProps) {
     const handleAdd = (type: TransactionType) => {
         setAddType(type)
         handleCloseAddMenu()
+    }
+
+    const handleDelete = (id: number) => {
+        setTimeout(() =>  setDeletedId(id), 200)
     }
 
     const handleOpenImport = () => {
@@ -97,6 +102,7 @@ function Transactions({ t, filter }: TransactionsProps) {
             <TransactionListStatistics
                 relations={fetchOptions.relations}
                 where={fetchOptions.where}
+                deletedId={deletedId}
             ></TransactionListStatistics>
             <Paper sx={{ marginTop: 3 }}>
                 <AlisaDataTable<Transaction>
@@ -112,6 +118,7 @@ function Transactions({ t, filter }: TransactionsProps) {
                     onNewRow={handleOpenAddMenu}
                     onEdit={handleEdit}
                     onOpen={handleOpenDetails}
+                    onDelete={handleDelete}
                 />
             </Paper>
 

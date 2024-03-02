@@ -26,6 +26,7 @@ function ExpenseTypes({ t }: WithTranslation) {
                 onNewRow={() => navigate(`${expenseTypeContext.routePath}/add`)}
                 onEdit={handleEdit}
                 onOpen={() => { }}
+                onDelete={() => {}}
             />
         </AlisaContent>
     )

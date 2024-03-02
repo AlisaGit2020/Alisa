@@ -25,6 +25,7 @@ function IncomeTypes({ t }: WithTranslation) {
                 onNewRow={() => navigate(`${incomeTypeContext.routePath}/add`)}
                 onEdit={handleEdit}
                 onOpen={() => { }}
+                onDelete={() => {}}
             />
         </AlisaContent>
     )

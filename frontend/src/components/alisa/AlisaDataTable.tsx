@@ -37,7 +37,8 @@ function AlisaDataTable<T extends { id: number }>(props: {
   dataService: DataService<T>,
   onNewRow: (event?: React.MouseEvent<HTMLButtonElement>) => void,
   onEdit: (id: number) => void,
-  onOpen: (id: number) => void
+  onOpen: (id: number) => void,
+  onDelete: (id: number) => void,
 }) {
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -65,8 +66,9 @@ function AlisaDataTable<T extends { id: number }>(props: {
 
   const handleDelete = async () => {
     await props.dataService.delete(idToDelete);
-    setIdDeleted(idToDelete);
+    setTimeout(() => setIdDeleted(idToDelete), 200);
     handleDeleteClose();
+    props.onDelete(idToDelete)
   };
 
   const getDataValue = (field: AlisaDataTableField<T>, dataItem: T): React.ReactNode => {
