@@ -32,9 +32,7 @@ function TransactionListFilter({ t, onChange, filter }: TransactionListFilterPro
 
         return yearList;
     };
-
-
-
+    
     return (
         <Stack spacing={2} marginTop={10} width={400} padding={3}>
             <AlisaSelect<TransactionFilter, Property>

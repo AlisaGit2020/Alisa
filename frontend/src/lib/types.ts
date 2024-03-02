@@ -11,6 +11,7 @@ export type TypeOrmFetchOptions<T> = {
     relations?: TypeOrmRelationOption,
     where?: Partial<T>,
     order?: TypeOrmOrderOption
+    limit?: number
 };
 
 export type DTO<T> = T & {

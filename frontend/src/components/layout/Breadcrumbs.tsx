@@ -10,9 +10,9 @@ function AlisaBreadcrumbs({ t }: WithTranslation) {
     const crumbs = location.pathname.split('/')
         .filter(crumb => crumb !== '' && crumb !== '0')
         .map((crumb, index) => {
-            currentLink = `${currentLink}/${crumb}`
+            currentLink = `${currentLink}/${crumb}`            
             return (
-                <Link key={index} href={currentLink}>{t(crumb) + ' / '}  </Link>
+                <Link key={index} href={currentLink}>{t(decodeURIComponent(crumb)) + ' / '}  </Link>
             )
         })
     return (

@@ -1,42 +1,74 @@
-import { transactionContext } from "@alisa-lib/alisa-contexts"
+import { propertyContext, transactionContext } from "@alisa-lib/alisa-contexts"
 import Transactions from "./Transactions"
 import { WithTranslation, withTranslation } from "react-i18next"
-import { Box, Button, Drawer, Paper } from "@mui/material"
-import { useState } from "react"
+import { Box, Button, Drawer } from "@mui/material"
+import React, { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import TransactionListFilter, { TransactionFilter, getMonthList } from "./components/TransactionListFilter"
 import DataService from "@alisa-lib/data-service"
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import AlisaContent from "../alisa/AlisaContent"
 import CheckIcon from '@mui/icons-material/Check';
+import { getFirstProperty, getPropertyIdByName, getPropertyNameById } from "./utils/TransactionMainFunctions"
 
 function TransactionMain({ t }: WithTranslation) {
-    let { propertyId } = useParams();
-    propertyId = propertyId ?? '0';
-
+    const { propertyName } = useParams();    
+    const [propertyName2, setPropertyName2] = useState<string | undefined>(propertyName)
+    const navigate = useNavigate()
+    
     const dataService = new DataService<TransactionFilter>({
         context: transactionContext
     })
+    
     const date = new Date()
 
     const [filter, setFilter] = useState<TransactionFilter>({
-        propertyId: Number(propertyId),
+        propertyId: 0,
         year: date.getFullYear(),
         month: date.getMonth() + 1
     } as TransactionFilter)
 
     const [filterOpen, setFilterOpen] = useState<boolean>(false)
 
-    const navigate = useNavigate()
+    React.useEffect(() => {        
+        const getFirstPropertyAndNavigate = async ()=> {
+        if (!propertyName) {
+            const name = await getFirstProperty(propertyName);
+            setPropertyName2(name)
+            navigate(`${transactionContext.routePath}/${name}`)
+        }                
+        }
+        getFirstPropertyAndNavigate()
+    }, [propertyName, navigate])
+
+    React.useEffect(() => {        
+        if (!propertyName2) {
+            return
+        }
+        const fetchPropertyId = async () => {            
+            return await getPropertyIdByName(propertyName2 as string)
+        }        
+
+        fetchPropertyId().then((id: number) => {                                  
+            handleChange('propertyId', id)            
+        })
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [propertyName2])
+
+    const handlePropertyIdChange = async (propertyId: number) => {
+        const name = await getPropertyNameById(propertyId)
+        navigate(`${transactionContext.routePath}/${name}`)
+        setPropertyName2(name)
+    }
 
     const handleChange = (fieldName: string, selectedValue: number) => {
-        if (fieldName === 'propertyId') {
-            navigate(`${transactionContext.routePath}/${selectedValue}`)
+        if (fieldName === 'propertyId') {             
+            handlePropertyIdChange(selectedValue)
         }
         const newFilter = dataService.updateNestedData(filter, fieldName, selectedValue)
         setFilter(newFilter)
     }
-
 
     const getMonthText = (month: number): string => {
         const monthList = getMonthList(t)
@@ -50,7 +82,7 @@ function TransactionMain({ t }: WithTranslation) {
                     variant="outlined"
                     onClick={() => setFilterOpen(true)}
                     startIcon={<FilterAltOutlinedIcon></FilterAltOutlinedIcon>}
-                >{filter.propertyId}, {getMonthText(filter.month)} {filter.year}
+                >{propertyName2}, {getMonthText(filter.month)} {filter.year}
                 </Button>
             </Box>
 
