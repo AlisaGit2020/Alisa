@@ -29,9 +29,9 @@ describe('AlisaFormHandler', () => {
     const mockAfterSubmit = jest.fn();
 
     const context: AlisaContext = {
-        apiPath : 'test/data',
-        name: 'Test context',
-        routePath: '/test/data'    
+      apiPath: 'test/data',
+      name: 'Test context',
+      routePath: '/test/data'
     }
 
     // Render AlisaFormHandler with necessary props
@@ -40,15 +40,15 @@ describe('AlisaFormHandler', () => {
         formComponents={<div data-test-id="formComponents" />}
         id={1}
         dataService={new DataService<TestInputDto>({
-          context: context,           
+          context: context,
           dataValidateInstance: new TestInputDto()
         })}
         translation={{
           submitButton: 'Save',
           cancelButton: 'Cancel'
-        }}                
-        data={{name: 'Test name'}}
-        onCancel={() => {}}
+        }}
+        data={{ name: 'Test name' }}
+        onCancel={() => { }}
         onSetData={mockSetData}
         onAfterSubmit={mockAfterSubmit}
       />
@@ -56,18 +56,23 @@ describe('AlisaFormHandler', () => {
 
     // Wait for the useEffect to fetch data
     await waitFor(() => {
-      expect(DataService.prototype.read).toHaveBeenCalledWith(1);      
+      expect(DataService.prototype.read).toHaveBeenCalledWith(1);
     });
 
-    // Trigger save button click
-    act(() => {
+    // Wait for the formComponents element to be rendered
+    await waitFor(() => {
+      
+    });
+
+    // Trigger save button click after the formComponents element is rendered
+    await act(async () => {
       fireEvent.click(getByText('Save'));
     });
 
     // Wait for save operation to complete
     await waitFor(() => {
       expect(DataService.prototype.save).toHaveBeenCalledWith(
-        {name: "Test name"}, 1
+        { name: "Test name" }, 1
       );
       // You may add more assertions based on the actual behavior of your code
     });

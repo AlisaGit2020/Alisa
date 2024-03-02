@@ -31,8 +31,7 @@ function TransactionFormFields({ t, data, onHandleChange }: ExpenseFormProps) {
                 <AlisaTextField
                     label={t('receiver', { ns: 'transaction' })}
                     value={data.receiver}
-                    autoComplete='off'
-                    autoFocus={true}
+                    autoComplete='off'                    
                     onChange={(e) => handleChange('receiver', e.target.value)}
                 />
             </Stack>
@@ -40,8 +39,7 @@ function TransactionFormFields({ t, data, onHandleChange }: ExpenseFormProps) {
             <AlisaTextField
                 label={t('description', { ns: 'transaction' })}
                 value={data.description}
-                autoComplete='off'
-                autoFocus={true}
+                autoComplete='off'                
                 onChange={(e) => handleChange('description', e.target.value)}
             />
 

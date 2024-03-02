@@ -1,12 +1,13 @@
 import React, { ReactNode } from "react"
 import AlisaForm from "./AlisaForm"
 import DataService from "../../../lib/data-service"
+import AlisaLoadingProgress from "../AlisaLoadingProgress"
 
 function AlisaFormHandler<T extends object>(props: {
     formComponents: JSX.Element
     id?: number
-    data?: T 
-    dataService: DataService<T>    
+    data?: T
+    dataService: DataService<T>
     translation: {
         submitButton: string,
         cancelButton: string,
@@ -21,18 +22,24 @@ function AlisaFormHandler<T extends object>(props: {
     const [errorMessage, setErrorMessage] = React.useState<string>()
     const [validationMessage, setValidationMessage] = React.useState<string[]>([])
     const [dataService] = React.useState<DataService<T>>(props.dataService)
+    const [ready, setReady] = React.useState<boolean>(false)
 
     React.useEffect(() => {
         const fetchData = async (id: number) => {
-            const data = await dataService.read(id);            
+            const data = await dataService.read(id);
             return data
         }
 
         if (props.id) {
-            fetchData((props.id))
-                .then(props.onSetData)
-        }    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+            fetchData(props.id)
+                .then((data: T) => {
+                    props.onSetData(data)
+                    setReady(true)
+                })
+        } else {
+            setReady(true)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const handleSubmit = async () => {
@@ -43,19 +50,19 @@ function AlisaFormHandler<T extends object>(props: {
             setErrorMessage('Cannot save when data is missing');
             return
         }
-        
+
         const validationErrors = await dataService.getStrValidationErrors(props.data)
         if (validationErrors !== undefined && validationErrors.length > 0) {
             return setValidationMessage(validationErrors)
         }
 
-        try{
-            await dataService.save(props.data, props.id)            
+        try {
+            await dataService.save(props.data, props.id)
             props.onAfterSubmit()
         } catch (error: unknown) {
             setErrorMessage(JSON.stringify(error))
-        }        
-                
+        }
+
     }
 
     const resetErrorMessages = () => {
@@ -63,20 +70,24 @@ function AlisaFormHandler<T extends object>(props: {
         setErrorMessage('')
     }
 
-    return (
-        <AlisaForm
-            submitButtonIcon={props.submitButtonIcon}
-            submitButtonText={props.translation.submitButton}
-            cancelButtonText={props.translation.cancelButton}
-            errorMessageTitle={props.translation.errorMessageTitle}
-            validationMessageTitle={props.translation.validationMessageTitle}
-            formComponents={props.formComponents}
-            errorMessage={errorMessage}
-            validationMessage={validationMessage}
-            onSubmit={handleSubmit}
-            onCancel={props.onCancel}
-        ></AlisaForm>
-    )
+    if (ready) {
+        return (
+            <AlisaForm
+                submitButtonIcon={props.submitButtonIcon}
+                submitButtonText={props.translation.submitButton}
+                cancelButtonText={props.translation.cancelButton}
+                errorMessageTitle={props.translation.errorMessageTitle}
+                validationMessageTitle={props.translation.validationMessageTitle}
+                formComponents={props.formComponents}
+                errorMessage={errorMessage}
+                validationMessage={validationMessage}
+                onSubmit={handleSubmit}
+                onCancel={props.onCancel}
+            ></AlisaForm>
+        )
+    } else {
+        return (<AlisaLoadingProgress></AlisaLoadingProgress>)
+    }
 }
 
 export default AlisaFormHandler

@@ -9,6 +9,7 @@ import { transactionContext } from '@alisa-lib/alisa-contexts';
 import IncomeForm from './IncomeForm';
 import { Dialog, DialogContent } from '@mui/material';
 import { TransactionType } from './Transactions';
+import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
 
 
 function TransactionForm(props: {
@@ -23,6 +24,7 @@ function TransactionForm(props: {
     //const { id, type, propertyId } = useParams();
     const [expenseId, setExpenseId] = useState<number>();
     const [incomeId, setIncomeId] = useState<number>();
+    const [ready, setReady] = useState<boolean>(false);
 
     React.useEffect(() => {
 
@@ -43,11 +45,12 @@ function TransactionForm(props: {
                     if (transaction.income) {
                         setIncomeId(transaction.income.id)
                     }
-
+                    
                 } catch (error) {
                     //handleApiError(error);
                 }
             }
+            setReady(true)
         }
 
         fetchData(props.id)
@@ -55,6 +58,9 @@ function TransactionForm(props: {
     }, [props.id])
 
     const getContent = () => {
+        if (!ready) {
+            return <AlisaLoadingProgress></AlisaLoadingProgress>
+        }
         if (props.type === TransactionType.Expense || expenseId) {
             return (
                 <ExpenseForm
@@ -92,7 +98,6 @@ function TransactionForm(props: {
             </DialogContent>
         </Dialog>
     )
-
 }
 
 export default withTranslation(transactionContext.name)(TransactionForm);

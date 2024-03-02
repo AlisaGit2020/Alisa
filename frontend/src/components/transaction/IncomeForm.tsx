@@ -1,7 +1,7 @@
 import { Stack } from '@mui/material';
 import { useState } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
-import { propertyContext, incomeContext, incomeTypeContext, transactionContext } from '@alisa-lib/alisa-contexts';
+import { incomeContext, incomeTypeContext, transactionContext } from '@alisa-lib/alisa-contexts';
 import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
 import DataService from '@alisa-lib/data-service';
 import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
@@ -9,7 +9,6 @@ import AlisaSelect from '../alisa/AlisaSelect';
 import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
 import React from 'react';
 import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
-import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 import TransactionFormFields from './components/TransactionFormFields';
 import AlisaContent from '../alisa/AlisaContent';
 
@@ -23,6 +22,7 @@ interface IncomeFormProps extends WithTranslation {
 function IncomeForm({ t, id, propertyId, onAfterSubmit, onCancel }: IncomeFormProps) {
 
     const [data, setData] = useState<IncomeInputDto>(new IncomeInputDto());
+    const [ready, setReady] = useState<boolean>(false)
 
     const dataService = new DataService<IncomeInputDto>({
         context: incomeContext,
@@ -41,7 +41,12 @@ function IncomeForm({ t, id, propertyId, onAfterSubmit, onCancel }: IncomeFormPr
             }
 
             fetchData()
-                .then(setData)
+                .then((data) => {
+                    setData(data)
+                    setReady(true)
+                })
+        } else {
+            setReady(true)
         }
 
     }, [])
@@ -85,23 +90,10 @@ function IncomeForm({ t, id, propertyId, onAfterSubmit, onCancel }: IncomeFormPr
     }
 
     const formComponents = () => {
-        if (data === undefined) {
-            return (<></>);
-        }
+
         return (
 
             <Stack spacing={2} marginBottom={2}>
-                <AlisaSelect<IncomeInputDto, Property>
-                    label={t('property')}
-                    dataService={new DataService<Property>({
-                        context: propertyContext,
-                        fetchOptions: { order: { name: 'ASC' } }
-                    })}
-                    fieldName='propertyId'
-                    value={data.propertyId}
-                    onHandleChange={handleChange}
-                >
-                </AlisaSelect>
 
                 <AlisaSelect<IncomeInputDto, IncomeType>
                     label={t('incomeType')}
@@ -124,10 +116,7 @@ function IncomeForm({ t, id, propertyId, onAfterSubmit, onCancel }: IncomeFormPr
         )
     }
 
-    if (data === undefined) {
-        return (<AlisaLoadingProgress></AlisaLoadingProgress>)
-    } else {
-
+    if (ready) {
         return (
             <AlisaContent headerText={t('income')}>
                 <AlisaFormHandler<IncomeInputDto>
@@ -147,8 +136,9 @@ function IncomeForm({ t, id, propertyId, onAfterSubmit, onCancel }: IncomeFormPr
                 >
                 </AlisaFormHandler>
             </AlisaContent>
-
         );
+    } else {
+        return (<AlisaLoadingProgress></AlisaLoadingProgress>)
     }
 }
 
