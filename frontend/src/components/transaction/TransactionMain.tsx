@@ -1,4 +1,4 @@
-import { propertyContext, transactionContext } from "@alisa-lib/alisa-contexts"
+import { transactionContext } from "@alisa-lib/alisa-contexts"
 import Transactions from "./Transactions"
 import { WithTranslation, withTranslation } from "react-i18next"
 import { Box, Button, Drawer } from "@mui/material"
