@@ -13,11 +13,15 @@ import { expenseTypeTestData } from './data/accounting/expense-type.test.data';
 import { transactionTestData } from './data/accounting/transaction.test.data';
 import { incomeTypeTestData } from './data/accounting/income-type.test.data';
 import { incomeTestData } from './data/accounting/income.test.data';
+import { AuthService } from '@alisa-backend/auth/auth.service';
+import { getUserAccessToken } from './helper-functions';
 
 describe('Global controller end-to-end test (e2e)', () => {
   let app: INestApplication;
   let server: any;
   let dataSource: DataSource;
+  let authService: AuthService;
+  let token: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -29,6 +33,9 @@ describe('Global controller end-to-end test (e2e)', () => {
 
     await app.init();
     server = app.getHttpServer();
+
+    authService = app.get<AuthService>(AuthService);
+    token = await getUserAccessToken(authService);
   });
 
   afterAll(async () => {
@@ -45,6 +52,10 @@ describe('Global controller end-to-end test (e2e)', () => {
     [transactionTestData],
   ])('Api endpoints', (testData: TestData) => {
     describe(`${testData.name}`, () => {
+      it(`GET ${testData.baseUrlWithId}, fails when not authorized`, () => {
+        return request(server).get(testData.baseUrlWithId).expect(401);
+      });
+
       if (testData.inputPost) {
         it(`POST ${testData.baseUrl}, add a new item`, () => {
           testData.tables.map((tableName) => {
@@ -55,13 +66,17 @@ describe('Global controller end-to-end test (e2e)', () => {
 
           return request(server)
             .post(testData.baseUrl)
+            .set('Authorization', `Bearer ${token}`)
             .send(testData.inputPost)
             .expect(201)
             .expect(testData.expected);
         });
 
         it(`GET ${testData.baseUrlWithId}, get single item`, () => {
-          return request(server).get(testData.baseUrlWithId).expect(200);
+          return request(server)
+            .get(testData.baseUrlWithId)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200);
         });
 
         it(`PUT ${testData.baseUrlWithId}, does not update item properties when properties not given`, () => {
@@ -75,6 +90,7 @@ describe('Global controller end-to-end test (e2e)', () => {
 
           return request(server)
             .put(testData.baseUrlWithId)
+            .set('Authorization', `Bearer ${token}`)
             .send(copyObject)
             .expect(200);
         });
@@ -82,6 +98,7 @@ describe('Global controller end-to-end test (e2e)', () => {
         it(`PUT ${testData.baseUrlWithId}, update an item`, () => {
           return request(server)
             .put(testData.baseUrlWithId)
+            .set('Authorization', `Bearer ${token}`)
             .send(testData.inputPut)
             .expect(200)
             .expect(testData.expectedPut);
@@ -90,6 +107,7 @@ describe('Global controller end-to-end test (e2e)', () => {
         it(`DELETE ${testData.baseUrlWithId}, delete an item`, () => {
           return request(server)
             .delete(testData.baseUrlWithId)
+            .set('Authorization', `Bearer ${token}`)
             .expect(200)
             .expect('true');
         });
@@ -98,11 +116,14 @@ describe('Global controller end-to-end test (e2e)', () => {
           for (let i = 0; i < 10; i++) {
             await request(server)
               .post(testData.baseUrl)
+              .set('Authorization', `Bearer ${token}`)
               .send(testData.inputPost)
               .expect(201);
           }
 
-          const response = await request(server).get(testData.baseUrl);
+          const response = await request(server)
+            .get(testData.baseUrl)
+            .set('Authorization', `Bearer ${token}`);
           expect(response.status).toBe(200);
           expect(response.body).toHaveLength(10);
         });
@@ -113,6 +134,7 @@ describe('Global controller end-to-end test (e2e)', () => {
         it(`SEARCH ${searchUrl}, search items`, () => {
           return request(server)
             .post(searchUrl)
+            .set('Authorization', `Bearer ${token}`)
             .send(testData.searchOptions)
             .expect(200);
         });

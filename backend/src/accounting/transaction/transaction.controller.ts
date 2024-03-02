@@ -6,12 +6,15 @@ import {
   HttpCode,
   Param,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { Transaction } from './entities/transaction.entity';
 import { TransactionStatisticsDto } from './dtos/transaction-statistics.dto';
 import { FindManyOptions } from 'typeorm';
+import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('accounting/transaction')
 export class TransactionController {
   constructor(private service: TransactionService) {}

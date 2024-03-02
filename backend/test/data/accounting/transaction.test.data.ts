@@ -6,6 +6,7 @@ export const transactionTestData = {
   name: 'Transaction',
   tables: ['transaction'],
   baseUrl: '/accounting/transaction',
+  baseUrlWithId: '/accounting/transaction/1',
   searchOptions: {
     where: {
       description: 'Some description',

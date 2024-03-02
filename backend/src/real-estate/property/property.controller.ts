@@ -7,12 +7,15 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
 import { FindManyOptions } from 'typeorm';
+import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('real-estate/property')
 export class PropertyController {
   constructor(private service: PropertyService) {}

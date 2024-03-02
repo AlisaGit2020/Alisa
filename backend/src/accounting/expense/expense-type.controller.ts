@@ -7,12 +7,15 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ExpenseTypeService } from './expense-type.service';
 import { ExpenseType } from './entities/expense-type.entity';
 import { ExpenseTypeInputDto } from './dtos/expense-type-input.dto';
 import { FindManyOptions } from 'typeorm';
+import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('accounting/expense/type')
 export class ExpenseTypeController {
   constructor(private service: ExpenseTypeService) {}

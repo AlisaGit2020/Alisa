@@ -7,12 +7,15 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { IncomeTypeService } from './income-type.service';
 import { IncomeType } from './entities/income-type.entity';
 import { IncomeTypeInputDto } from './dtos/income-type-input.dto';
 import { FindManyOptions } from 'typeorm';
+import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('accounting/income/type')
 export class IncomeTypeController {
   constructor(private service: IncomeTypeService) {}

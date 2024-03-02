@@ -15,10 +15,13 @@ import { IncomeTypeService } from '@alisa-backend/accounting/income/income-type.
 import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
 import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
 import { DataSource } from 'typeorm';
+import { AuthService } from '@alisa-backend/auth/auth.service';
+import { getUserAccessToken } from './helper-functions';
 
 describe('Transaction search', () => {
   let app: INestApplication;
   let server: any;
+  let token: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -44,6 +47,9 @@ describe('Transaction search', () => {
     await dataSource.query(
       'TRUNCATE TABLE transaction RESTART IDENTITY CASCADE;',
     );
+
+    const authService = app.get(AuthService);
+    token = await getUserAccessToken(authService);
 
     const opImportService = app.get(OpImportService);
     const incomeTypeService = app.get(IncomeTypeService);
@@ -80,9 +86,14 @@ describe('Transaction search', () => {
     server.close();
   });
 
+  it(`fails when not authorized`, async () => {
+    await request(server).post(`/accounting/transaction/search`).expect(401);
+  });
+
   it(`returns all transactions`, async () => {
     const response = await request(server)
       .post(`/accounting/transaction/search`)
+      .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
     expect(response.body.length).toBe(20);
@@ -91,6 +102,7 @@ describe('Transaction search', () => {
   it(`filters transaction date correctly`, async () => {
     const response = await request(server)
       .post(`/accounting/transaction/search`)
+      .set('Authorization', `Bearer ${token}`)
       .send({
         where: {
           transactionDate: {
@@ -110,6 +122,7 @@ describe('Transaction search', () => {
     async (propertyId: number, expectedCount: number) => {
       const response = await request(server)
         .post(`/accounting/transaction/search`)
+        .set('Authorization', `Bearer ${token}`)
         .send({
           where: [
             { income: { propertyId: propertyId } },
@@ -132,6 +145,7 @@ describe('Transaction search', () => {
 
       const response = await request(server)
         .post(`/accounting/transaction/search/statistics`)
+        .set('Authorization', `Bearer ${token}`)
         .send({
           relations: relations,
           where: [
@@ -151,6 +165,7 @@ describe('Transaction search', () => {
   it(`fetch statistics correctly without filter`, async () => {
     const response = await request(server)
       .post(`/accounting/transaction/search/statistics`)
+      .set('Authorization', `Bearer ${token}`)
       .expect(200);
     expect(response.body.rowCount).toBe(20);
     expect(response.body.totalExpenses).toBe(1689.22);

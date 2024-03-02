@@ -56,19 +56,19 @@ class ApiClient {
     }
 
     public static async post<T>(path: string, data: T): Promise<T> {
-        return axios.post(ApiClient.getApiUrl(path), data)
+        return axios.post(ApiClient.getApiUrl(path), data, await ApiClient.authOptions())
     }
 
     public static async put<T>(path: string, id: number, data: T): Promise<T> {
-        return axios.put(ApiClient.getApiUrl(`${path}/${id}`), data)
+        return axios.put(ApiClient.getApiUrl(`${path}/${id}`), data, await ApiClient.authOptions())
     }
 
     public static async delete(path: string, id: number) {
-        await axios.delete(ApiClient.getApiUrl(`${path}/${id}`));
+        await axios.delete(ApiClient.getApiUrl(`${path}/${id}`), await ApiClient.authOptions());
     }
 
     public static async getDefault<T>(path: string): Promise<T> {
-        const response = await axios.get(ApiClient.getApiUrl(`${path}/default`));
+        const response = await axios.get(ApiClient.getApiUrl(`${path}/default`), await ApiClient.authOptions());
         return response.data;
     }
 
@@ -91,7 +91,7 @@ class ApiClient {
     ): Promise<T[]> {
         const url = ApiClient.getApiUrl(`${path}/search`);
         try {
-            return (await axios.post<T[]>(url, options)).data;
+            return (await axios.post<T[]>(url, options, await ApiClient.authOptions())).data;
         } catch (error) {
             ApiClient.handleError(`Error in search path ${url}`);
         }
