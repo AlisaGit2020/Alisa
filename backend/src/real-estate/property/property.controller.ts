@@ -25,15 +25,10 @@ export class PropertyController {
   @Post('/search')
   @HttpCode(200)
   async search(
-    @Body() options: FindManyOptions<Property>,
     @User() user,
+    @Body() options: FindManyOptions<Property>,
   ): Promise<Property[]> {
     return this.service.search(user, options);
-  }
-
-  @Get('/')
-  async findAll(): Promise<Property[]> {
-    return this.service.findAll();
   }
 
   @Get('/:id')

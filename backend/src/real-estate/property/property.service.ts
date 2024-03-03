@@ -25,10 +25,6 @@ export class PropertyService {
     return this.repository.find(options);
   }
 
-  async findAll(): Promise<Property[]> {
-    return this.repository.find();
-  }
-
   async findOne(user: JWTUser, id: number): Promise<Property> {
     this.validateId(user, id);
     return this.repository.findOneBy({ id: id });
