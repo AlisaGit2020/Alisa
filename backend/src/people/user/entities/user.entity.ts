@@ -21,6 +21,8 @@ export class User {
   @Column({ nullable: true })
   photo?: string;
 
-  @OneToMany(() => Ownership, (ownership) => ownership.user)
-  ownerships: Ownership[];
+  @OneToMany(() => Ownership, (ownership) => ownership.user, {
+    nullable: true,
+  })
+  ownerships?: Ownership[];
 }

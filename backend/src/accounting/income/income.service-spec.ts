@@ -12,6 +12,7 @@ import { incomeTestData } from 'test/data/accounting/income.test.data';
 import { startOfDay } from 'date-fns';
 import { TransactionService } from '../transaction/transaction.service';
 import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
+import { jwtUser2 } from 'test/data/mocks/user.mock';
 
 describe('Income service', () => {
   let app: INestApplication;
@@ -48,7 +49,7 @@ describe('Income service', () => {
 
   describe('update an income', () => {
     it('update income and add no new transaction', async () => {
-      await propertyService.add({ name: 'Yrjöntie 1', size: 59.5 });
+      await propertyService.add(jwtUser2, { name: 'Yrjöntie 1', size: 59.5 });
       await incomeTypeService.add({
         name: 'Income type1',
         description: '',
@@ -95,9 +96,9 @@ describe('Income service', () => {
 
   describe('find incomes', () => {
     it('finds incomes by property', async () => {
-      await propertyService.add({ name: 'Yrjöntie 1', size: 59.5 });
-      await propertyService.add({ name: 'Radiotie 6', size: 29 });
-      await propertyService.add({ name: 'Aurora', size: 36.5 });
+      await propertyService.add(jwtUser2, { name: 'Yrjöntie 1', size: 59.5 });
+      await propertyService.add(jwtUser2, { name: 'Radiotie 6', size: 29 });
+      await propertyService.add(jwtUser2, { name: 'Aurora', size: 36.5 });
 
       await incomeTypeService.add({
         name: 'Income type1',

@@ -16,11 +16,13 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res) {
-    const payload = await this.authService.login(req.user);
+    const accessToken = await this.authService.login(req.user);
+
     res.setHeader('Cache-Control', 'no-store');
     res.status(303);
+
     res.redirect(
-      `${process.env.ALLOWED_ORIGIN}/login?access_token=${payload.access_token}`,
+      `${process.env.ALLOWED_ORIGIN}/login?access_token=${accessToken}`,
     );
   }
 

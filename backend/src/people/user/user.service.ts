@@ -30,7 +30,7 @@ export class UserService {
 
     this.mapData(userEntity, input);
 
-    return await this.repository.save(userEntity);
+    return this.repository.save(userEntity);
   }
 
   async save(input: UserInputDto): Promise<User> {

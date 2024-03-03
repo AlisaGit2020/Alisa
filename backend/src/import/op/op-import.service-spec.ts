@@ -16,6 +16,7 @@ import { PropertyService } from '@alisa-backend/real-estate/property/property.se
 import { ExpenseService } from '@alisa-backend/accounting/expense/expense.service';
 import { IncomeService } from '@alisa-backend/accounting/income/income.service';
 import { OpImportInput } from './dtos/op-import-input.dto';
+import { jwtUser2 } from 'test/data/mocks/user.mock';
 
 describe('Op import service', () => {
   let service: OpImportService;
@@ -91,11 +92,11 @@ describe('Op import service', () => {
     const property = new PropertyInputDto();
     property.name = 'Test property';
     property.size = 29;
-    await propertyService.add(property);
+    await propertyService.add(jwtUser2, property);
 
     property.name = 'Test property2';
     property.size = 36;
-    await propertyService.add(property);
+    await propertyService.add(jwtUser2, property);
   });
 
   it('import CSV', async () => {

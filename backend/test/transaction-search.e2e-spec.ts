@@ -17,6 +17,7 @@ import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-ty
 import { DataSource } from 'typeorm';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { getUserAccessToken } from './helper-functions';
+import { jwtUser2 } from './data/mocks/user.mock';
 
 describe('Transaction search', () => {
   let app: INestApplication;
@@ -70,7 +71,7 @@ describe('Transaction search', () => {
     const property = new PropertyInputDto();
     property.name = 'Test property';
     property.size = 29;
-    await propertyService.add(property);
+    await propertyService.add(jwtUser2, property);
 
     const input: OpImportInput = {
       expenseTypeId: 1,

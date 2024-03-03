@@ -12,6 +12,7 @@ import { expenseTestData } from 'test/data/accounting/expense.test.data';
 import { startOfDay } from 'date-fns';
 import { TransactionService } from '../transaction/transaction.service';
 import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
+import { jwtUser2 } from 'test/data/mocks/user.mock';
 
 describe('Expense service', () => {
   let app: INestApplication;
@@ -52,7 +53,7 @@ describe('Expense service', () => {
 
   describe('update an expense', () => {
     it('update expense and add no new transaction', async () => {
-      await propertyService.add({ name: 'Yrjöntie 1', size: 59.5 });
+      await propertyService.add(jwtUser2, { name: 'Yrjöntie 1', size: 59.5 });
       await expenseTypeService.add({
         name: 'Expense type1',
         description: '',
@@ -100,9 +101,9 @@ describe('Expense service', () => {
 
   describe('find expenses', () => {
     it('finds expenses by property', async () => {
-      await propertyService.add({ name: 'Yrjöntie 1', size: 59.5 });
-      await propertyService.add({ name: 'Radiotie 6', size: 29 });
-      await propertyService.add({ name: 'Aurora', size: 36.5 });
+      await propertyService.add(jwtUser2, { name: 'Yrjöntie 1', size: 59.5 });
+      await propertyService.add(jwtUser2, { name: 'Radiotie 6', size: 29 });
+      await propertyService.add(jwtUser2, { name: 'Aurora', size: 36.5 });
 
       await expenseTypeService.add({
         name: 'Expense type1',
