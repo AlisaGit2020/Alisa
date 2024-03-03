@@ -25,7 +25,7 @@ export class AuthService {
     const users = await this.userService.search({
       where: { id: userEntity.id },
       relations: {
-        ownerships: false,
+        ownerships: true,
       },
     });
 

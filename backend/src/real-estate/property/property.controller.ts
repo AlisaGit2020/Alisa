@@ -28,6 +28,7 @@ export class PropertyController {
     @Body() options: FindManyOptions<Property>,
     @User() user,
   ): Promise<Property[]> {
+    console.log(user);
     return this.service.search(user, options);
   }
 
