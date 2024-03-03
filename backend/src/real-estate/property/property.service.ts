@@ -28,7 +28,8 @@ export class PropertyService {
     return this.repository.find();
   }
 
-  async findOne(id: number): Promise<Property> {
+  async findOne(user: JWTUser, id: number): Promise<Property> {
+    this.validateId(user, id);
     return this.repository.findOneBy({ id: id });
   }
 
@@ -46,7 +47,7 @@ export class PropertyService {
   ): Promise<Property> {
     this.validateId(user, id);
 
-    const propertyEntity = await this.findOne(id);
+    const propertyEntity = await this.findOne(user, id);
 
     this.mapData(user, propertyEntity, input);
 

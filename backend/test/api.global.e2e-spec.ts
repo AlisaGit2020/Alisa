@@ -44,7 +44,6 @@ describe('Global controller end-to-end test (e2e)', () => {
   });
 
   describe.each([
-    //[propertyTestData],
     [expenseTestData],
     [expenseTypeTestData],
     [incomeTypeTestData],

@@ -12,6 +12,7 @@ import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownershi
 import { jwtUser1, jwtUser2, jwtUser3 } from 'test/data/mocks/user.mock';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { addProperty } from 'test/helper-functions';
 
 describe('Property service', () => {
   let app: INestApplication;
@@ -54,23 +55,11 @@ describe('Property service', () => {
     jwtUser2.id = user2.id;
     jwtUser3.id = user3.id;
 
-    await addProperty('Yrjöntie 1', 59.1, jwtUser2);
-    await addProperty('Annankatu 4', 34, jwtUser2);
-    await addProperty('Bourbon street 4', 159, jwtUser3);
-    await addProperty('Laamanninkuja 6', 51, jwtUser3);
+    await addProperty(service, 'Yrjöntie 1', 59.1, jwtUser2);
+    await addProperty(service, 'Annankatu 4', 34, jwtUser2);
+    await addProperty(service, 'Bourbon street 4', 159, jwtUser3);
+    await addProperty(service, 'Laamanninkuja 6', 51, jwtUser3);
   });
-
-  const addProperty = async (name: string, size: number, user: JWTUser) => {
-    const inputProperty = new PropertyInputDto();
-    inputProperty.name = name;
-    inputProperty.size = size;
-
-    const ownership = new OwnershipInputDto();
-    ownership.share = 100;
-    inputProperty.ownerships.push(ownership);
-
-    await service.add(user, inputProperty);
-  };
 
   it('saved property and ownership correctly', async () => {
     const properties = await service.search(jwtUser2, {

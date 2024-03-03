@@ -28,7 +28,6 @@ export class PropertyController {
     @Body() options: FindManyOptions<Property>,
     @User() user,
   ): Promise<Property[]> {
-    console.log(user);
     return this.service.search(user, options);
   }
 
@@ -38,8 +37,11 @@ export class PropertyController {
   }
 
   @Get('/:id')
-  async findOne(@Param('id') id: string): Promise<Property> {
-    return this.service.findOne(Number(id));
+  async findOne(
+    @User() user: JWTUser,
+    @Param('id') id: string,
+  ): Promise<Property> {
+    return this.service.findOne(user, Number(id));
   }
 
   @Post('/')
