@@ -125,4 +125,22 @@ describe('Property controller', () => {
         .expect(200);
     });
   });
+
+  describe('Delete', () => {
+    it(`fails when not authorized`, async () => {
+      await request(server).delete(`/real-estate/property/1`).expect(401);
+    });
+    it(`fails when not own property`, async () => {
+      await request(server)
+        .delete(`/real-estate/property/3`)
+        .set('Authorization', getBearerToken(token))
+        .expect(401);
+    });
+    it(`success when own property`, async () => {
+      await request(server)
+        .delete(`/real-estate/property/1`)
+        .set('Authorization', getBearerToken(token))
+        .expect(200);
+    });
+  });
 });

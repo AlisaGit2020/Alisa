@@ -66,7 +66,7 @@ export class PropertyController {
     @User() user: JWTUser,
     @Param('id') id: number,
   ): Promise<boolean> {
-    await this.service.delete(user, id);
+    await this.service.delete(user, Number(id));
     return true;
   }
 }

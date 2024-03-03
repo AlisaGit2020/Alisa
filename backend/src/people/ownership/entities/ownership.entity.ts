@@ -28,6 +28,7 @@ export class Ownership {
 
   @ManyToOne(() => Property, (property) => property.ownerships, {
     eager: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'propertyId' })
   property: Property;
