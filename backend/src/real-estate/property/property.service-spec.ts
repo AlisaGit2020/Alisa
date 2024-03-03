@@ -13,6 +13,7 @@ import { jwtUser1, jwtUser2, jwtUser3 } from 'test/data/mocks/user.mock';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { User } from '@alisa-backend/people/user/entities/user.entity';
 import { addProperty } from 'test/helper-functions';
+import { propertyTestData } from 'test/data/real-estate/property.test.data';
 
 describe('Property service', () => {
   let app: INestApplication;
@@ -61,26 +62,6 @@ describe('Property service', () => {
     await addProperty(service, 'Laamanninkuja 6', 51, jwtUser3);
   });
 
-  it('saved property and ownership correctly', async () => {
-    const properties = await service.search(jwtUser2, {
-      where: {
-        id: 1,
-      },
-      relations: { ownerships: true },
-    });
-
-    const property = properties[0];
-
-    expect(property.id).toBe(1);
-    expect(property.name).toBe('Yrjöntie 1');
-    expect(property.size).toBe(59.1);
-    expect(property.ownerships[0].id).toBe(1);
-    expect(property.ownerships[0].propertyId).toBe(1);
-    expect(property.ownerships[0].userId).toBe(user2.id);
-    expect(property.ownerships[0].share).toBe(100);
-    expect(properties.length).toBe(1);
-  });
-
   describe('Update', () => {
     it.each([[jwtUser1], [jwtUser3]])(
       'throws in update when not own property',
@@ -102,7 +83,7 @@ describe('Property service', () => {
         name: 'Aurora',
         size: 36.5,
       });
-      const property = await service.findOne(1);
+      const property = await service.findOne(jwtUser2, 1);
       expect(property.id).toBe(1);
       expect(property.name).toBe('Aurora');
       expect(property.size).toBe(36.5);
@@ -147,5 +128,47 @@ describe('Property service', () => {
         }
       },
     );
+  });
+
+  describe('Add', () => {
+    it('saved property and ownership correctly', async () => {
+      const properties = await service.search(jwtUser2, {
+        where: {
+          id: 2,
+        },
+        relations: { ownerships: true },
+      });
+
+      const property = properties[0];
+
+      expect(property.id).toBe(2);
+      expect(property.name).toBe('Annankatu 4');
+      expect(property.size).toBe(34);
+      expect(property.ownerships[0].id).toBe(2);
+      expect(property.ownerships[0].propertyId).toBe(2);
+      expect(property.ownerships[0].userId).toBe(user2.id);
+      expect(property.ownerships[0].share).toBe(100);
+      expect(properties.length).toBe(1);
+    });
+
+    it('adds a ownership to user even not set with property', async () => {
+      const propertyInput = propertyTestData.inputPost;
+      propertyInput.ownerships = undefined;
+      const insertedProperty = await service.add(jwtUser1, propertyInput);
+      jwtUser1.ownershipInProperties = [insertedProperty.id];
+
+      const properties = await service.search(jwtUser1, {
+        where: {
+          id: insertedProperty.id,
+        },
+        relations: { ownerships: true },
+      });
+
+      const property = properties[0];
+
+      expect(property.ownerships[0].propertyId).toBe(insertedProperty.id);
+      expect(property.ownerships[0].userId).toBe(jwtUser1.id);
+      expect(property.ownerships[0].share).toBe(100);
+    });
   });
 });

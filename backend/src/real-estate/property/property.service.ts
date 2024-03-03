@@ -5,6 +5,7 @@ import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { OwnershipService } from '@alisa-backend/people/ownership/ownership.service';
+import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownership-input.dto';
 
 @Injectable()
 export class PropertyService {
@@ -36,6 +37,11 @@ export class PropertyService {
   async add(user: JWTUser, input: PropertyInputDto): Promise<Property> {
     const propertyEntity = new Property();
 
+    if (input.ownerships === undefined) {
+      const ownership = new OwnershipInputDto();
+      ownership.share = 100;
+      input.ownerships = [ownership];
+    }
     this.mapData(user, propertyEntity, input);
     return this.repository.save(propertyEntity);
   }
