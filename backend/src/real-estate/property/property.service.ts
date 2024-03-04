@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, In, Repository } from 'typeorm';
+import { FindManyOptions, FindOptionsWhere, In, Repository } from 'typeorm';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
@@ -19,14 +19,14 @@ export class PropertyService {
     user: JWTUser,
     options: FindManyOptions<Property>,
   ): Promise<Property[]> {
-    this.validate(user, options);
+    await this.validate(user, options);
     options = this.handleOptions(user, options);
 
     return this.repository.find(options);
   }
 
   async findOne(user: JWTUser, id: number): Promise<Property> {
-    this.validateId(user, id);
+    await this.validateId(user, id);
     return this.repository.findOneBy({ id: id });
   }
 
@@ -47,7 +47,7 @@ export class PropertyService {
     id: number,
     input: PropertyInputDto,
   ): Promise<Property> {
-    this.validateId(user, id);
+    await this.validateId(user, id);
 
     const propertyEntity = await this.findOne(user, id);
 
@@ -58,7 +58,7 @@ export class PropertyService {
   }
 
   async delete(user: JWTUser, id: number): Promise<void> {
-    this.validateId(user, id);
+    await this.validateId(user, id);
     await this.repository.delete(id);
   }
 
@@ -75,34 +75,50 @@ export class PropertyService {
     });
   }
 
-  private validate(user: JWTUser, options: FindManyOptions): void {
+  private async validate(
+    user: JWTUser,
+    options: FindManyOptions,
+  ): Promise<void> {
     const propertyIdInQuery = this.getPropertyIdFromQuery(options);
     if (propertyIdInQuery === undefined) {
       return;
     }
-    this.validateId(user, propertyIdInQuery);
+    await this.validateId(user, propertyIdInQuery);
   }
 
-  private validateId(user: JWTUser, id: number): void {
-    if (!user.ownershipInProperties.includes(id)) {
+  private async validateId(user: JWTUser, id: number): Promise<void> {
+    const hasOwnership = await this.repository.exist({
+      where: {
+        id: id,
+        ownerships: {
+          userId: In([user.id]),
+        },
+      },
+    });
+
+    if (!hasOwnership) {
       throw new UnauthorizedException();
     }
   }
 
   private handleOptions(
     user: JWTUser,
-    options: FindManyOptions,
+    options: FindManyOptions<Property>,
   ): FindManyOptions {
     const propertyIdInQuery = this.getPropertyIdFromQuery(options);
 
     if (propertyIdInQuery !== undefined) {
       return options;
     }
-    if (options.where === undefined) {
-      options.where = {};
-    }
+    options.loadRelationIds = true;
 
-    options.where['id'] = In(user.ownershipInProperties);
+    if (options.where === undefined) {
+      options.where = {} as FindOptionsWhere<Property>;
+    }
+    if (options.where['ownerships'] === undefined) {
+      options.where['ownerships'] = [];
+    }
+    options.where['ownerships']['userId'] = In([user.id]);
     return options;
   }
 

@@ -56,12 +56,13 @@ describe('Property controller', () => {
     jwtUser2.id = user2.id;
     jwtUser3.id = user3.id;
 
+    //Create token before creating properties, so it tests also the ownership checks doesn't need relogin
+    token = await getUserAccessToken2(authService, jwtUser2);
+
     await addProperty(propertyService, 'Yrjöntie 1', 59.1, jwtUser2);
     await addProperty(propertyService, 'Annankatu 4', 34, jwtUser2);
     await addProperty(propertyService, 'Bourbon street 4', 159, jwtUser3);
     await addProperty(propertyService, 'Laamanninkuja 6', 51, jwtUser3);
-
-    token = await getUserAccessToken2(authService, jwtUser2);
   });
 
   afterAll(async () => {

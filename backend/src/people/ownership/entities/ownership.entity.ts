@@ -16,6 +16,7 @@ export class Ownership {
   @Column()
   share: number;
 
+  //User
   @ManyToOne(() => User, (user) => user.ownerships, {
     eager: false,
     cascade: ['insert', 'update'],
@@ -26,6 +27,7 @@ export class Ownership {
   @Column({ nullable: false })
   userId: number;
 
+  //Property
   @ManyToOne(() => Property, (property) => property.ownerships, {
     eager: false,
     onDelete: 'CASCADE',
