@@ -80,7 +80,9 @@ describe('User service', () => {
 
     it('updates user when relogin', async () => {
       await service.login(testUser);
+      await new Promise((resolve) => setTimeout(resolve, 100));
       await service.login(updatedUser);
+
       const savedUser = await userService.findOne(1);
       expect(savedUser).toMatchObject(updatedUser);
     });

@@ -41,6 +41,7 @@ export class Expense {
   @OneToOne(() => Transaction, {
     eager: false,
     cascade: ['insert', 'update'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'transactionId' })
   transaction: Transaction;

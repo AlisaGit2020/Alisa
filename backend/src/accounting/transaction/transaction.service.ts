@@ -55,24 +55,6 @@ export class TransactionService {
   }
 
   async delete(id: number): Promise<void> {
-    const expense = await this.expenseRepository.findOne({
-      where: { transaction: { id: id } },
-    });
-    const expenseId = expense?.id;
-
-    if (expenseId) {
-      await this.expenseRepository.delete(expenseId);
-    }
-
-    const income = await this.incomeRepository.findOne({
-      where: { transaction: { id: id } },
-    });
-    const incomeId = income?.id;
-
-    if (incomeId) {
-      await this.incomeRepository.delete(incomeId);
-    }
-
     await this.repository.delete(id);
   }
 
