@@ -13,6 +13,8 @@ import { Transaction } from './entities/transaction.entity';
 import { TransactionStatisticsDto } from './dtos/transaction-statistics.dto';
 import { FindManyOptions } from 'typeorm';
 import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
+import { JWTUser } from '@alisa-backend/auth/types';
+import { User } from '@alisa-backend/common/decorators/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('accounting/transaction')
@@ -22,9 +24,10 @@ export class TransactionController {
   @Post('/search')
   @HttpCode(200)
   async search(
+    @User() user: JWTUser,
     @Body() options: FindManyOptions<Transaction>,
   ): Promise<Transaction[]> {
-    return this.service.search(options);
+    return this.service.search(user, options);
   }
 
   @Post('/search/statistics')

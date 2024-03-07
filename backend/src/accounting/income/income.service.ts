@@ -101,5 +101,8 @@ export class IncomeService {
         income[key] = value;
       }
     });
+
+    income.transaction.propertyId = income.propertyId;
+    income.transaction.property = income.property;
   }
 }

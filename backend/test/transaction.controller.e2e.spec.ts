@@ -8,21 +8,28 @@ import { AppModule } from '../src/app.module';
 import { OpImportService } from '@alisa-backend/import/op/op-import.service';
 import { MOCKS_PATH } from '@alisa-backend/constants';
 import { OpImportInput } from '@alisa-backend/import/op/dtos/op-import-input.dto';
-import { ExpenseTypeInputDto } from '@alisa-backend/accounting/expense/dtos/expense-type-input.dto';
-import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
-import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/property-input.dto';
 import { IncomeTypeService } from '@alisa-backend/accounting/income/income-type.service';
 import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
 import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
 import { DataSource } from 'typeorm';
 import { AuthService } from '@alisa-backend/auth/auth.service';
-import { getBearerToken, getUserAccessToken } from './helper-functions';
-import { jwtUser2 } from './data/mocks/user.mock';
+import {
+  addProperty, emptyTables,
+  getBearerToken,
+  getUserAccessToken2,
+} from './helper-functions';
+import { jwtUser1, jwtUser2, jwtUser3 } from './data/mocks/user.mock';
+import { expenseTypeTestData } from './data/accounting/expense-type.test.data';
+import { incomeTypeTestData } from './data/accounting/income-type.test.data';
+import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { UserService } from '@alisa-backend/people/user/user.service';
 
 describe('Transaction search', () => {
   let app: INestApplication;
   let server: any;
   let token: string;
+  let user2: User;
+  let user3: User;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -34,44 +41,30 @@ describe('Transaction search', () => {
     await app.init();
     server = app.getHttpServer();
 
-    const dataSource = app.get(DataSource);
-
-    await dataSource.query('TRUNCATE TABLE income RESTART IDENTITY CASCADE;');
-    await dataSource.query('TRUNCATE TABLE expense RESTART IDENTITY CASCADE;');
-    await dataSource.query(
-      'TRUNCATE TABLE income_type RESTART IDENTITY CASCADE;',
-    );
-    await dataSource.query(
-      'TRUNCATE TABLE expense_type RESTART IDENTITY CASCADE;',
-    );
-    await dataSource.query('TRUNCATE TABLE property RESTART IDENTITY CASCADE;');
-    await dataSource.query(
-      'TRUNCATE TABLE transaction RESTART IDENTITY CASCADE;',
-    );
-
-    const authService = app.get(AuthService);
-    token = await getUserAccessToken(authService);
-
+    const userService = app.get(UserService);
     const opImportService = app.get(OpImportService);
     const incomeTypeService = app.get(IncomeTypeService);
     const expenseTypeService = app.get(ExpenseTypeService);
     const propertyService = app.get(PropertyService);
 
-    const incomeInputDto = new IncomeTypeInputDto();
-    incomeInputDto.name = 'Test income type';
-    incomeInputDto.description = '';
-    await incomeTypeService.add(incomeInputDto);
+    const dataSource = app.get(DataSource);
 
-    const expenseType = new ExpenseTypeInputDto();
-    expenseType.name = 'Test expense type';
-    expenseType.description = '';
-    expenseType.isTaxDeductible = true;
-    await expenseTypeService.add(expenseType);
+    await emptyTables(dataSource)
 
-    const property = new PropertyInputDto();
-    property.name = 'Test property';
-    property.size = 29;
-    await propertyService.add(jwtUser2, property);
+    await userService.add(jwtUser1);
+    user2 = await userService.add(jwtUser2);
+    user3 = await userService.add(jwtUser3);
+
+    jwtUser2.id = user2.id;
+    jwtUser3.id = user3.id;
+
+    const authService = app.get(AuthService);
+    token = await getUserAccessToken2(authService, jwtUser2);
+
+    await incomeTypeService.add(incomeTypeTestData.inputPost);
+    await expenseTypeService.add(expenseTypeTestData.inputPost);
+
+    await addProperty(propertyService, 'Test property', 29, jwtUser2);
 
     const input: OpImportInput = {
       expenseTypeId: 1,
