@@ -102,6 +102,9 @@ export class ExpenseService {
       }
     });
 
+    expense.transaction.propertyId = expense.propertyId;
+    expense.transaction.property = expense.property
+
     if (expense.transaction.totalAmount > 0) {
       expense.transaction.totalAmount = expense.transaction.totalAmount * -1;
     }

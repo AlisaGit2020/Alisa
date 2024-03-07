@@ -2,7 +2,8 @@
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 import { columnOptionTwoDecimal } from '@alisa-backend/common/typeorm.column.definitions';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
+import {Property} from "@alisa-backend/real-estate/property/entities/property.entity";
 
 @Entity()
 export class Transaction {
@@ -36,6 +37,17 @@ export class Transaction {
   @Column(columnOptionTwoDecimal)
   public totalAmount: number;
 
+  /*Property*/
+  @ManyToOne(() => Property, (property) => property.transactions, {
+    eager: false,
+    cascade: false,
+  })
+  @JoinColumn({ name: 'propertyId' })
+  property: Property;
+  @Column({ nullable: false })
+  propertyId: number;
+
+  /*Expense*/
   @OneToOne(() => Expense, (expense) => expense.transaction, {
     eager: false,
     cascade: false,
@@ -43,6 +55,7 @@ export class Transaction {
   })
   expense?: Expense;
 
+  /*Income*/
   @OneToOne(() => Income, (income) => income.transaction, {
     eager: false,
     cascade: false,

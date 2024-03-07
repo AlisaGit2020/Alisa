@@ -12,7 +12,7 @@ import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownershi
 import { jwtUser1, jwtUser2, jwtUser3 } from 'test/data/mocks/user.mock';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { User } from '@alisa-backend/people/user/entities/user.entity';
-import { addProperty } from 'test/helper-functions';
+import {addProperty, emptyTables, sleep} from 'test/helper-functions';
 import { propertyTestData } from 'test/data/real-estate/property.test.data';
 
 describe('Property service', () => {
@@ -41,13 +41,7 @@ describe('Property service', () => {
   });
 
   beforeAll(async () => {
-    ['expense', 'income', 'ownership', 'property', 'user'].map(
-      async (tableName) => {
-        await dataSource.query(
-          `TRUNCATE TABLE "${tableName}" RESTART IDENTITY CASCADE;`,
-        );
-      },
-    );
+    await emptyTables(dataSource)
 
     await userService.add(jwtUser1);
     user2 = await userService.add(jwtUser2);
@@ -60,6 +54,8 @@ describe('Property service', () => {
     await addProperty(service, 'Annankatu 4', 34, jwtUser2);
     await addProperty(service, 'Bourbon street 4', 159, jwtUser3);
     await addProperty(service, 'Laamanninkuja 6', 51, jwtUser3);
+
+    await sleep(50)
   });
 
   describe('Update', () => {

@@ -5,6 +5,7 @@ import { Expense } from '@alisa-backend/accounting/expense/entities/expense.enti
 import { columnOptionOneDecimal } from '@alisa-backend/common/typeorm.column.definitions';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
+import {Transaction} from "@alisa-backend/accounting/transaction/entities/transaction.entity";
 
 @Entity()
 export class Property {
@@ -17,10 +18,19 @@ export class Property {
   @Column(columnOptionOneDecimal)
   public size: number;
 
-  @OneToMany(() => Expense, (expense) => expense.property)
+  @OneToMany(() => Transaction, (transaction) => transaction.property, {
+    eager: false,
+  })
+  transactions: Transaction[];
+
+  @OneToMany(() => Expense, (expense) => expense.property, {
+    eager: false,
+  })
   expenses: Expense[];
 
-  @OneToMany(() => Income, (income) => income.property)
+  @OneToMany(() => Income, (income) => income.property, {
+    eager: false,
+  })
   incomes: Income[];
 
   @OneToMany(() => Ownership, (ownership) => ownership.property, {

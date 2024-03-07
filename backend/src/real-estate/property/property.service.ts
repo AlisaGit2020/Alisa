@@ -110,7 +110,6 @@ export class PropertyService {
     if (propertyIdInQuery !== undefined) {
       return options;
     }
-    options.loadRelationIds = true;
 
     if (options.where === undefined) {
       options.where = {} as FindOptionsWhere<Property>;
