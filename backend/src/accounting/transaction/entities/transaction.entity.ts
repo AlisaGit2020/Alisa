@@ -31,12 +31,6 @@ export class Transaction {
   @Column(columnOptionTwoDecimal)
   public amount: number;
 
-  @Column(columnOptionTwoDecimal)
-  public quantity: number;
-
-  @Column(columnOptionTwoDecimal)
-  public totalAmount: number;
-
   /*Property*/
   @ManyToOne(() => Property, (property) => property.transactions, {
     eager: false,
@@ -48,18 +42,18 @@ export class Transaction {
   propertyId: number;
 
   /*Expense*/
-  @OneToOne(() => Expense, (expense) => expense.transaction, {
+  @OneToMany(() => Expense, (expense) => expense.transaction, {
     eager: false,
-    cascade: false,
+    cascade: ["insert", "update", "remove"],
     nullable: true,
   })
-  expense?: Expense;
+  expenses?: Expense[];
 
   /*Income*/
-  @OneToOne(() => Income, (income) => income.transaction, {
+  @OneToMany(() => Income, (income) => income.transaction, {
     eager: false,
-    cascade: false,
+    cascade: ["insert", "update", "remove"],
     nullable: true,
   })
-  income?: Income;
+  incomes?: Income[];
 }

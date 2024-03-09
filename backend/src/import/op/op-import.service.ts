@@ -136,8 +136,6 @@ export class OpImportService {
     transaction.transactionDate = new Date(opCsvRow.datePosted);
     transaction.accountingDate = new Date(opCsvRow.datePosted);
     transaction.amount = this.getAmount(opCsvRow);
-    transaction.quantity = 1;
-    transaction.totalAmount = transaction.amount;
 
     return transaction;
   }

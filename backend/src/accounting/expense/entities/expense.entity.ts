@@ -9,11 +9,24 @@ import {
 } from 'typeorm';
 import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
 import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
+import {columnOptionTwoDecimal} from "@alisa-backend/common/typeorm.column.definitions";
 
 @Entity()
 export class Expense {
   @PrimaryGeneratedColumn()
   public id: number;
+
+  @Column({length: 255})
+  public description: string;
+
+  @Column(columnOptionTwoDecimal)
+  public amount: number;
+
+  @Column(columnOptionTwoDecimal)
+  public quantity: number;
+
+  @Column(columnOptionTwoDecimal)
+  public totalAmount: number;
 
   /*Expense type*/
   @ManyToOne(() => ExpenseType, (expenseType) => expenseType.expenses, {
@@ -38,9 +51,9 @@ export class Expense {
   propertyId: number;
 
   /*Transaction*/
-  @OneToOne(() => Transaction, {
+  @ManyToOne(() => Transaction, (transaction) => transaction.expenses, {
     eager: false,
-    cascade: ['insert', 'update'],
+    cascade: ["insert", "update"],
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'transactionId' })

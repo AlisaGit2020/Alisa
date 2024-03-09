@@ -13,6 +13,7 @@ import { startOfDay } from 'date-fns';
 import { TransactionService } from '../transaction/transaction.service';
 import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
 import { jwtUser2 } from 'test/data/mocks/user.mock';
+import {sleep} from "../../../test/helper-functions";
 
 describe('Income service', () => {
   let app: INestApplication;
@@ -49,56 +50,32 @@ describe('Income service', () => {
 
   describe('update an income', () => {
     it('update income and add no new transaction', async () => {
-      await propertyService.add(jwtUser2, { name: 'Yrjöntie 1', size: 59.5 });
+      const property = await propertyService.add(jwtUser2, { name: 'Yrjöntie 1', size: 59.5 });
       await incomeTypeService.add({
         name: 'Income type1',
         description: '',
       });
+      await sleep(10);
 
-      await service.add({
-        incomeTypeId: 1,
-        transaction: {
-          sender: 'Yrjöntie',
-          receiver: 'Espoon kaupunki',
-          amount: 10,
-          accountingDate: startOfDay(new Date('2014-06-06')),
-          transactionDate: startOfDay(new Date('2016-06-07')),
-          description: '',
-          quantity: 1,
-          totalAmount: 10,
-        },
-        propertyId: 1,
-      });
+      incomeTestData.inputPost.property = property;
+      incomeTestData.inputPost.propertyId = undefined;
+      await service.add(incomeTestData.inputPost);
 
-      await service.update(1, {
-        incomeTypeId: 1,
-        transaction: {
-          sender: 'Yrjöntie',
-          receiver: 'Espoon kaupunki',
-          amount: 99,
-          accountingDate: startOfDay(new Date('2014-06-06')),
-          transactionDate: startOfDay(new Date('2016-06-07')),
-          description: '',
-          quantity: 1,
-          totalAmount: 99,
-        },
-        propertyId: 1,
-      });
+      await service.update(1, incomeTestData.inputPut);
 
       const income = await service.findOne(1, {
         relations: { transaction: true },
       });
       expect(income.transaction.id).toBe(1);
-      expect(income.transaction.amount).toBe(99);
-      expect(income.transaction.totalAmount).toBe(99);
+      expect(income.transaction.amount).toBe(188);
     });
   });
 
   describe('find incomes', () => {
     it('finds incomes by property', async () => {
-      await propertyService.add(jwtUser2, { name: 'Yrjöntie 1', size: 59.5 });
-      await propertyService.add(jwtUser2, { name: 'Radiotie 6', size: 29 });
-      await propertyService.add(jwtUser2, { name: 'Aurora', size: 36.5 });
+      const property1 =await propertyService.add(jwtUser2, { name: 'Yrjöntie 1', size: 59.5 });
+      const property2 = await propertyService.add(jwtUser2, { name: 'Radiotie 6', size: 29 });
+      const property3 = await propertyService.add(jwtUser2, { name: 'Aurora', size: 36.5 });
 
       await incomeTypeService.add({
         name: 'Income type1',
@@ -108,22 +85,26 @@ describe('Income service', () => {
       const propertyIdArray = [1, 1, 1, 1, 2, 2, 3];
 
       await Promise.all(
-        propertyIdArray.map(async (propertyId) => {
-          await service.add({
-            incomeTypeId: 1,
-            transaction: {
-              sender: 'Yrjöntie',
-              receiver: 'Espoon kaupunki',
-              amount: 10,
-              accountingDate: startOfDay(new Date('2014-06-06')),
-              transactionDate: startOfDay(new Date('2016-06-07')),
+          propertyIdArray.map(async (propertyId) => {
+            await service.add({
+              incomeTypeId: 1,
               description: '',
-              quantity: 1,
+              amount: 10,
+              quantity:1,
               totalAmount: 10,
-            } as TransactionInputDto,
-            propertyId: propertyId,
-          });
-        }),
+              transaction: {
+                sender: 'Yrjöntie',
+                receiver: 'Espoon kaupunki',
+                amount: 10,
+                accountingDate: startOfDay(new Date('2014-06-06')),
+                transactionDate: startOfDay(new Date('2016-06-07')),
+                description: '',
+                quantity: 1,
+                totalAmount: 10,
+              } as TransactionInputDto,
+              propertyId: propertyId,
+            });
+          }),
       );
 
       const incomes = await service.search({ where: { property: { id: 1 } } });
@@ -137,16 +118,16 @@ describe('Income service', () => {
       const income = incomeTestData.inputPost;
       await service.add(income);
 
-      let savedExpence = await service.findOne(1);
-      const transactionId = savedExpence.transactionId;
+      let savedIncome = await service.findOne(1);
+      const transactionId = savedIncome.transactionId;
 
-      await service.delete(savedExpence.id);
+      await service.delete(savedIncome.id);
 
       const transaction = await transactionService.findOne(transactionId);
       expect(transaction).toBeNull();
 
-      savedExpence = await service.findOne(1);
-      expect(savedExpence).toBeNull();
+      savedIncome = await service.findOne(1);
+      expect(savedIncome).toBeNull();
     });
   });
 });

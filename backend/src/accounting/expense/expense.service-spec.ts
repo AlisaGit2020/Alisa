@@ -62,6 +62,9 @@ describe('Expense service', () => {
 
       await service.add({
         expenseTypeId: 1,
+        amount: 10,
+        quantity: 1,
+        totalAmount: 10,
         transaction: {
           sender: 'Yrjöntie',
           receiver: 'Espoon kaupunki',
@@ -69,14 +72,15 @@ describe('Expense service', () => {
           accountingDate: startOfDay(new Date('2014-06-06')),
           transactionDate: startOfDay(new Date('2016-06-07')),
           description: '',
-          quantity: 1,
-          totalAmount: 10,
         },
         propertyId: 1,
       });
 
       await service.update(1, {
         expenseTypeId: 1,
+        amount: 99,
+        quantity: 1,
+        totalAmount: 99,
         transaction: {
           sender: 'Yrjöntie',
           receiver: 'Espoon kaupunki',
@@ -84,8 +88,6 @@ describe('Expense service', () => {
           accountingDate: startOfDay(new Date('2014-06-06')),
           transactionDate: startOfDay(new Date('2016-06-07')),
           description: '',
-          quantity: 1,
-          totalAmount: 99,
         },
         propertyId: 1,
       });
@@ -94,8 +96,7 @@ describe('Expense service', () => {
         relations: { transaction: true },
       });
       expect(expense.transaction.id).toBe(1);
-      expect(expense.transaction.amount).toBe(99);
-      expect(expense.transaction.totalAmount).toBe(-99);
+      expect(expense.transaction.amount).toBe(-99);
     });
   });
 
@@ -117,6 +118,9 @@ describe('Expense service', () => {
         propertyIdArray.map(async (propertyId) => {
           await service.add({
             expenseTypeId: 1,
+            amount: 10,
+            quantity: 1,
+            totalAmount: 10,
             transaction: {
               sender: 'Yrjöntie',
               receiver: 'Espoon kaupunki',
@@ -124,8 +128,6 @@ describe('Expense service', () => {
               accountingDate: startOfDay(new Date('2014-06-06')),
               transactionDate: startOfDay(new Date('2016-06-07')),
               description: '',
-              quantity: 1,
-              totalAmount: 10,
             } as TransactionInputDto,
             propertyId: propertyId,
           });
@@ -144,11 +146,11 @@ describe('Expense service', () => {
 
       await service.add(expense);
 
-      const savedExpence = await service.findOne(1, {
+      const savedExpense = await service.findOne(1, {
         relations: { transaction: true },
       });
 
-      expect(savedExpence.transaction.totalAmount).toBe(-39.64);
+      expect(savedExpense.transaction.amount).toBe(-39.64);
     });
   });
 
