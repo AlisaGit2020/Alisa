@@ -62,6 +62,7 @@ describe('Expense service', () => {
 
       await service.add({
         expenseTypeId: 1,
+        description: 'Siivousmaksu',
         amount: 10,
         quantity: 1,
         totalAmount: 10,
@@ -78,6 +79,7 @@ describe('Expense service', () => {
 
       await service.update(1, {
         expenseTypeId: 1,
+        description: 'Siivousmaksu',
         amount: 99,
         quantity: 1,
         totalAmount: 99,
@@ -118,6 +120,7 @@ describe('Expense service', () => {
         propertyIdArray.map(async (propertyId) => {
           await service.add({
             expenseTypeId: 1,
+            description: 'Siivousmaksu',
             amount: 10,
             quantity: 1,
             totalAmount: 10,

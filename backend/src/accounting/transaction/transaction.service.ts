@@ -1,13 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOptionsWhere, In, Repository } from 'typeorm';
 import { TransactionInputDto } from './dtos/transaction-input.dto';
 import { Transaction } from './entities/transaction.entity';
-import { Expense } from '../expense/entities/expense.entity';
-import { Income } from '../income/entities/income.entity';
 import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
 import { TransactionStatisticsDto } from './dtos/transaction-statistics.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
+import { UserService } from '@alisa-backend/people/user/user.service';
 
 @Injectable()
 export class TransactionService {
@@ -15,11 +14,7 @@ export class TransactionService {
     @InjectRepository(Transaction)
     private repository: Repository<Transaction>,
 
-    @InjectRepository(Expense)
-    private expenseRepository: Repository<Expense>,
-
-    @InjectRepository(Income)
-    private incomeRepository: Repository<Income>,
+    private userService: UserService,
   ) {}
 
   async search(
@@ -55,11 +50,11 @@ export class TransactionService {
         where.property = {
           ...ownershipFilter,
         };
-      }else{
+      } else {
         where.property = {
-          ...where.property as object,
-          ...ownershipFilter
-        }
+          ...(where.property as object),
+          ...ownershipFilter,
+        };
       }
     }
 
@@ -70,7 +65,15 @@ export class TransactionService {
     return this.repository.findOneBy({ id: id });
   }
 
-  async add(input: TransactionInputDto): Promise<Transaction> {
+  async add(user: JWTUser, input: TransactionInputDto): Promise<Transaction> {
+    const hasOwnership = await this.userService.hasOwnership(
+      user.id,
+      input.propertyId,
+    );
+    if (!hasOwnership) {
+      throw new UnauthorizedException();
+    }
+
     const transactionEntity = new Transaction();
 
     this.mapData(transactionEntity, input);
@@ -78,45 +81,35 @@ export class TransactionService {
     return await this.repository.save(transactionEntity);
   }
 
-  async update(id: number, input: TransactionInputDto): Promise<Transaction> {
-    const transactionEntity = await this.findOne(id);
+  async update(
+    user: JWTUser,
+    id: number,
+    input: TransactionInputDto,
+  ): Promise<Transaction> {
+    await this.validateId(user, id);
 
+    const transactionEntity = await this.findOne(id);
     this.mapData(transactionEntity, input);
 
     await this.repository.save(transactionEntity);
     return transactionEntity;
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(user: JWTUser, id: number): Promise<void> {
+    await this.validateId(user, id);
     await this.repository.delete(id);
   }
 
   async statistics(
+    user: JWTUser,
     options: FindManyOptions<Transaction>,
   ): Promise<TransactionStatisticsDto> {
     const queryBuilder = this.repository.createQueryBuilder('transaction');
 
-    if (options.relations !== undefined) {
-      let relations = [];
-      if (Array.isArray(options.relations)) {
-        relations = options.relations;
-      } else {
-        relations = Object.entries(options.relations)
-          .filter(([key, value]) => value === true)
-          .map(([key]) => key);
-      }
-
-      for (const relation of relations) {
-        queryBuilder.leftJoinAndSelect(
-          `transaction.${relation}`,
-          relation as string,
-        );
-      }
-    }
-
-    if (options.where !== undefined) {
+    if (options.where === undefined) {
+      options.where = {};
+    } else {
       options.where = typeormWhereTransformer(options.where);
-      queryBuilder.where(options.where);
     }
 
     const result = await queryBuilder
@@ -130,6 +123,10 @@ export class TransactionService {
         'totalIncomes',
       )
       .addSelect('SUM(transaction.amount)', 'total')
+      .leftJoin('transaction.property', 'property')
+      .leftJoin('property.ownerships', 'ownership')
+      .where(options.where)
+      .andWhere('ownership.userId = :userId', { userId: user.id })
       .getRawOne();
 
     return {
@@ -146,36 +143,33 @@ export class TransactionService {
         transaction[key] = value;
       }
     });
-  }
 
-  private processProperty(user: JWTUser, property: any, where: any): void {
-    if (typeof property === 'object') {
-      // If property is an object, recursively process its properties
-      for (const key in property) {
-        if (property.hasOwnProperty(key)) {
-          this.processProperty(user, property[key], where);
-        }
+    if (input.expenses !== undefined) {
+      for (const expense of input.expenses) {
+        expense.propertyId = transaction.propertyId;
       }
-    } else {
-      // If property is a string, check if it is "Property" and add the filter
-      if (property === 'Property') {
-        if (!where.property) {
-          where.property = {};
-        }
-        where.property.ownership = In([user.id]);
+    }
+    if (input.incomes !== undefined) {
+      for (const income of input.incomes) {
+        income.propertyId = transaction.propertyId;
       }
     }
   }
 
-  private processTransactionProperties(
-    user: JWTUser,
-    properties: any,
-    where: any,
-  ): void {
-    for (const key in properties) {
-      if (properties.hasOwnProperty(key)) {
-        this.processProperty(user, properties[key], where);
-      }
+  private async validateId(user: JWTUser, id: number): Promise<void> {
+    const hasOwnership = await this.repository.exist({
+      where: {
+        id: id,
+        property: {
+          ownerships: {
+            userId: In([user.id]),
+          },
+        },
+      },
+    });
+
+    if (!hasOwnership) {
+      throw new UnauthorizedException();
     }
   }
 }

@@ -21,8 +21,7 @@ export class UserService {
 
   async findOne(id: number, options: FindOneOptions<User> = {}): Promise<User> {
     options.where = { id: id };
-    const user = await this.repository.findOne(options);
-    return user;
+    return await this.repository.findOne(options);
   }
 
   async add(input: UserInputDto): Promise<User> {
@@ -52,6 +51,13 @@ export class UserService {
 
   async delete(id: number): Promise<void> {
     await this.repository.delete(id);
+  }
+
+  async hasOwnership(userId: number, propertyId: number): Promise<boolean> {
+    const user = await this.findOne(userId, { relations: ['ownerships'] });
+    return user.ownerships.some(
+      (ownership) => ownership.propertyId === propertyId,
+    );
   }
 
   private mapData(user: User, input: UserInputDto) {

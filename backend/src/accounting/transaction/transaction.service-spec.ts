@@ -2,30 +2,33 @@
 Data service test
 */
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { INestApplication, UnauthorizedException } from '@nestjs/common';
+
 import { AppModule } from 'src/app.module';
-import { expenseTestData } from 'test/data/accounting/expense.test.data';
-import { incomeTestData } from 'test/data/accounting/income.test.data';
 import { TransactionService } from './transaction.service';
 import { ExpenseService } from '../expense/expense.service';
-import { IncomeService } from '../income/income.service';
-import { UserService } from '@alisa-backend/people/user/user.service';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
-import { jwtUser1, jwtUser2, jwtUser3 } from 'test/data/mocks/user.mock';
-import { addProperty, emptyTables, sleep } from 'test/helper-functions';
-import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
+
+import {
+  addTransaction,
+  addTransactionsToTestUsers,
+  getTestUsers,
+  prepareDatabase,
+  sleep,
+  TestUsersSetup,
+} from 'test/helper-functions';
+import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+import {
+  getTransactionExpense1,
+  getTransactionIncome1,
+  getTransactionIncome2,
+} from '../../../test/data/mocks/transaction.mock';
+import { FindOptionsWhere } from 'typeorm';
 
 describe('Transaction service', () => {
   let app: INestApplication;
-  let dataSource: DataSource;
   let service: TransactionService;
+  let testUsers: TestUsersSetup;
   let expenseService: ExpenseService;
-  let incomeService: IncomeService;
-  let userService: UserService;
-  let propertyService: PropertyService;
-  let user2: User;
-  let user3: User;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -35,12 +38,12 @@ describe('Transaction service', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    dataSource = app.get(DataSource);
     service = app.get<TransactionService>(TransactionService);
     expenseService = app.get<ExpenseService>(ExpenseService);
-    incomeService = app.get<IncomeService>(IncomeService);
-    userService = app.get<UserService>(UserService);
-    propertyService = app.get<PropertyService>(PropertyService);
+
+    await prepareDatabase(app);
+    testUsers = await getTestUsers(app);
+    await addTransactionsToTestUsers(app, testUsers);
   });
 
   afterAll(async () => {
@@ -48,105 +51,189 @@ describe('Transaction service', () => {
   });
 
   describe('Basic functions', () => {
-    beforeEach(async () => {
-      await emptyTables(dataSource);
+    describe('add', () => {
+      it('does not allow add a transaction for another user property', async () => {
+        const input = getTransactionIncome1(1);
+        await expect(
+          service.add(testUsers.userWithoutProperties.jwtUser, input),
+        ).rejects.toThrow(UnauthorizedException);
+      });
+    });
+
+    describe('update', () => {
+      it('updates own transaction', async () => {
+        const transaction = await addTransaction(
+          app,
+          testUsers.user1WithProperties.jwtUser,
+          getTransactionIncome1(1),
+        );
+
+        const input = {
+          receiver: 'Escobar',
+          sender: 'Batman',
+          accountingDate: new Date('2023-03-29'),
+          transactionDate: new Date('2023-03-29'),
+          amount: 1000,
+          description: 'New description',
+        };
+
+        const editedTransaction = await service.update(
+          testUsers.user1WithProperties.jwtUser,
+          transaction.id,
+          input,
+        );
+
+        expect(editedTransaction).toMatchObject(input);
+
+        //Reject when not an owner.
+        await expect(
+          service.update(
+            testUsers.userWithoutProperties.jwtUser,
+            transaction.id,
+            input,
+          ),
+        ).rejects.toThrow(UnauthorizedException);
+
+        await service.delete(
+          testUsers.user1WithProperties.jwtUser,
+          transaction.id,
+        );
+      });
     });
 
     describe('delete', () => {
       it('deletes also expense row', async () => {
-        const expenseInput = expenseTestData.inputPost;
-        const savedExpense = await expenseService.add(expenseInput);
+        let transaction = await addTransaction(
+          app,
+          testUsers.user1WithProperties.jwtUser,
+          getTransactionExpense1(1),
+        );
 
-        const transactionId = savedExpense.transactionId;
+        await sleep(20);
+        const transactions = await service.search(
+          testUsers.user1WithProperties.jwtUser,
+          {
+            relations: ['expenses'],
+            where: {
+              id: transaction.id,
+            },
+          },
+        );
 
         //Delete transaction.
-        await service.delete(transactionId);
+        await service.delete(
+          testUsers.user1WithProperties.jwtUser,
+          transaction.id,
+        );
         await sleep(50);
 
-        const expense = await expenseService.findOne(savedExpense.id);
+        const expense = await expenseService.findOne(
+          transactions[0].expenses[0].id,
+        );
         expect(expense).toBeNull();
 
-        const transaction = await service.findOne(transactionId);
+        transaction = await service.findOne(transaction.id);
         expect(transaction).toBeNull();
       });
 
       it('deletes also income row', async () => {
-        const incomeInput = incomeTestData.inputPost;
-        const savedIncome = await incomeService.add(incomeInput);
-        await sleep(20);
+        let transaction = await addTransaction(
+          app,
+          testUsers.user1WithProperties.jwtUser,
+          getTransactionIncome2(1),
+        );
 
-        const transactionId = savedIncome.transactionId;
+        await sleep(20);
+        const transactions = await service.search(
+          testUsers.user1WithProperties.jwtUser,
+          {
+            relations: ['incomes'],
+            where: {
+              id: transaction.id,
+            },
+          },
+        );
 
         //Delete transaction.
-        await service.delete(transactionId);
+        await service.delete(
+          testUsers.user1WithProperties.jwtUser,
+          transaction.id,
+        );
         await sleep(50);
 
-        const income = await incomeService.findOne(savedIncome.id);
+        const income = await expenseService.findOne(
+          transactions[0].incomes[0].id,
+        );
         expect(income).toBeNull();
 
-        const transaction = await service.findOne(transactionId);
+        transaction = await service.findOne(transaction.id);
         expect(transaction).toBeNull();
+      });
+
+      it('does not allow delete other user transaction', async () => {
+        const transaction = await addTransaction(
+          app,
+          testUsers.user1WithProperties.jwtUser,
+          getTransactionIncome1(1),
+        );
+        await expect(
+          service.delete(
+            testUsers.userWithoutProperties.jwtUser,
+            transaction.id,
+          ),
+        ).rejects.toThrow(UnauthorizedException);
+
+        await service.delete(
+          testUsers.user1WithProperties.jwtUser,
+          transaction.id,
+        );
       });
     });
 
     describe('statistics', () => {
       it('calculate statistics correctly', async () => {
-        const expenseInput = expenseTestData.inputPost;
-        await expenseService.add(expenseInput);
+        const statistics = await service.statistics(
+          testUsers.user1WithProperties.jwtUser,
+          { where: { propertyId: 1 } },
+        );
 
-        const incomeInput = incomeTestData.inputPost;
-        incomeInput.transaction.id = 2;
-        await incomeService.add(incomeInput);
-        await sleep(20);
-        const statistics = await service.statistics({});
-
-        expect(statistics.totalExpenses).toBe(39.64);
-        expect(statistics.totalIncomes).toBe(39.64);
-        expect(statistics.total).toBe(0);
-        expect(statistics.rowCount).toBe(2);
+        expect(statistics.totalExpenses).toBe(227.64);
+        expect(statistics.totalIncomes).toBe(1339);
+        expect(statistics.total).toBe(1111.36);
+        expect(statistics.rowCount).toBe(4);
       });
     });
   });
 
   describe('Authorize and authentication stuff', () => {
-    beforeAll(async () => {
-      await emptyTables(dataSource);
-
-      await userService.add(jwtUser1);
-      user2 = await userService.add(jwtUser2);
-      user3 = await userService.add(jwtUser3);
-
-      jwtUser2.id = user2.id;
-      jwtUser3.id = user3.id;
-
-      const property = await addProperty(
-        propertyService,
-        'Test property',
-        29,
-        jwtUser2,
-      );
-      await sleep(50);
-
-      const expenseInput = expenseTestData.inputPost;
-      expenseInput.property = property;
-      await expenseService.add(expenseInput);
-
-      const incomeInput = incomeTestData.inputPost;
-      incomeInput.property = property;
-      await incomeService.add(incomeInput);
-    });
-
-    it.each([[jwtUser1], [jwtUser3]])(
+    it.each([['userWithoutProperties']])(
       `does not return other's transactions`,
-      async (jwtUser) => {
-        const transactions = await service.search(jwtUser, {});
+      async (user) => {
+        const transactions = await service.search(testUsers[user].jwtUser, {});
         expect(transactions.length).toBe(0);
       },
     );
 
     it(`returns own transactions`, async () => {
-      const transactions = await service.search(jwtUser2, {});
-      expect(transactions.length).toBe(2);
+      const transactions = await service.search(
+        testUsers.user1WithProperties.jwtUser,
+        {},
+      );
+      expect(transactions.length).toBe(8);
     });
+
+    it.each([
+      [{ id: 1 }, 1],
+      [{ propertyId: 1 }, 4],
+    ])(
+      `returns own filtered transactions`,
+      async (where: FindOptionsWhere<Transaction>, expectedLength: number) => {
+        const transactions = await service.search(
+          testUsers.user1WithProperties.jwtUser,
+          { where: where },
+        );
+        expect(transactions.length).toBe(expectedLength);
+      },
+    );
   });
 });

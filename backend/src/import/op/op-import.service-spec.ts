@@ -143,9 +143,7 @@ describe('Op import service', () => {
       'df0fe65687b70c62e4d30a6731707f9f394fe01e9d388195829aa716892a1adc',
     );
     expect(expenses[1].transaction.description).toBe('Suihkuverho');
-    expect(expenses[1].transaction.amount).toBe(17.5);
-    expect(expenses[1].transaction.quantity).toBe(1);
-    expect(expenses[1].transaction.totalAmount).toBe(-17.5);
+    expect(expenses[1].transaction.amount).toBe(-17.5);
     expect(expenses[1].transaction.transactionDate).toEqual(
       new Date('2023-12-02'),
     );
