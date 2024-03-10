@@ -8,6 +8,7 @@ import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-
 import { ExpenseService } from '@alisa-backend/accounting/expense/expense.service';
 import { IncomeService } from '@alisa-backend/accounting/income/income.service';
 import { OpImportInput } from './dtos/op-import-input.dto';
+import { JWTUser } from '@alisa-backend/auth/types';
 
 @Injectable()
 export class OpImportService {
@@ -18,7 +19,7 @@ export class OpImportService {
     private incomeService: IncomeService,
   ) {}
 
-  async importCsv(options: OpImportInput) {
+  async importCsv(user: JWTUser, options: OpImportInput) {
     const rows: CSVRow[] = [];
 
     await new Promise<void>((resolve, reject) => {
@@ -51,10 +52,14 @@ export class OpImportService {
         });
     });
 
-    await this.handleRows(rows, options);
+    await this.handleRows(user, rows, options);
   }
 
-  private async handleRows(rows: CSVRow[], options: OpImportInput) {
+  private async handleRows(
+    user: JWTUser,
+    rows: CSVRow[],
+    options: OpImportInput,
+  ) {
     for (const opCsvRow of rows) {
       if (this.isExpense(opCsvRow)) {
         const expense = await this.toExpense(opCsvRow, options);
@@ -64,9 +69,9 @@ export class OpImportService {
           this.handleError(error);
         }
       } else {
-        const income = await this.toIncome(opCsvRow, options);
+        const income = await this.toIncome(user, opCsvRow, options);
         try {
-          await this.incomeService.save(income);
+          await this.incomeService.save(user, income);
         } catch (error: unknown) {
           this.handleError(error);
         }
@@ -84,8 +89,11 @@ export class OpImportService {
     return expenses[0]?.id ?? undefined;
   }
 
-  private async getIncomeId(opCsvRow: CSVRow): Promise<number | undefined> {
-    const incomes = await this.incomeService.search({
+  private async getIncomeId(
+    user: JWTUser,
+    opCsvRow: CSVRow,
+  ): Promise<number | undefined> {
+    const incomes = await this.incomeService.search(user, {
       where: {
         transaction: { externalId: this.getExternalId(opCsvRow) },
       },
@@ -107,11 +115,12 @@ export class OpImportService {
   }
 
   private async toIncome(
+    user: JWTUser,
     opCsvRow: CSVRow,
     options: OpImportInput,
   ): Promise<IncomeInputDto> {
     const income = new IncomeInputDto();
-    income.id = await this.getIncomeId(opCsvRow);
+    income.id = await this.getIncomeId(user, opCsvRow);
     income.incomeTypeId = this.getIncomeTypeId(options);
     income.propertyId = options.propertyId;
     income.transaction = this.toTransaction(opCsvRow);

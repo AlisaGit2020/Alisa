@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { Income } from './entities/income.entity';
@@ -7,41 +11,56 @@ import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
 import { Property } from 'src/real-estate/property/entities/property.entity';
 import { IncomeType } from './entities/income-type.entity';
 import { Transaction } from '../transaction/entities/transaction.entity';
+import { JWTUser } from '@alisa-backend/auth/types';
+import { AuthService } from '@alisa-backend/auth/auth.service';
 
 @Injectable()
 export class IncomeService {
   constructor(
     @InjectRepository(Income)
     private repository: Repository<Income>,
-
     @InjectRepository(Property)
     private propertyRepository: Repository<Property>,
-
     @InjectRepository(IncomeType)
     private incomeTypeRepository: Repository<IncomeType>,
-
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
+    private authService: AuthService,
   ) {}
 
   async findAll(): Promise<Income[]> {
     return this.repository.find();
   }
 
-  async search(options: FindManyOptions<Income>): Promise<Income[]> {
+  async search(
+    user: JWTUser,
+    options: FindManyOptions<Income>,
+  ): Promise<Income[]> {
+    options.where = this.authService.addOwnershipFilter(user, options.where);
+
     return this.repository.find(options);
   }
 
   async findOne(
+    user: JWTUser,
     id: number,
     options: FindOneOptions<Income> = {},
   ): Promise<Income> {
     options.where = { id: id };
     const income = await this.repository.findOne(options);
+    if (!income) {
+      return null;
+    }
+    if (!(await this.authService.hasOwnership(user, income.propertyId))) {
+      throw new UnauthorizedException();
+    }
     return income;
   }
 
-  async add(input: IncomeInputDto): Promise<Income> {
+  async add(user: JWTUser, input: IncomeInputDto): Promise<Income> {
+    if (!(await this.authService.hasOwnership(user, input.propertyId))) {
+      throw new UnauthorizedException();
+    }
     const incomeEntity = new Income();
 
     this.mapData(incomeEntity, input);
@@ -49,11 +68,11 @@ export class IncomeService {
     return await this.repository.save(incomeEntity);
   }
 
-  async save(input: IncomeInputDto): Promise<Income> {
+  async save(user: JWTUser, input: IncomeInputDto): Promise<Income> {
     if (input.id > 0) {
-      return this.update(input.id, input);
+      return this.update(user, input.id, input);
     } else {
-      return this.add(input);
+      return this.add(user, input);
     }
   }
 
@@ -77,10 +96,12 @@ export class IncomeService {
     return income;
   }
 
-  async update(id: number, input: IncomeInputDto): Promise<Income> {
-    const incomeEntity = await this.findOne(id, {
-      relations: { transaction: true },
-    });
+  async update(
+    user: JWTUser,
+    id: number,
+    input: IncomeInputDto,
+  ): Promise<Income> {
+    const incomeEntity = await this.getEntityOrThrow(user, id);
 
     this.mapData(incomeEntity, input);
     incomeEntity.transaction.id = incomeEntity.transactionId;
@@ -89,10 +110,9 @@ export class IncomeService {
     return incomeEntity;
   }
 
-  async delete(id: number): Promise<void> {
-    const income = await this.findOne(id);
+  async delete(user: JWTUser, id: number): Promise<void> {
+    await this.getEntityOrThrow(user, id);
     await this.repository.delete(id);
-    await this.transactionRepository.delete(income.transactionId);
   }
 
   private mapData(income: Income, input: IncomeInputDto) {
@@ -104,5 +124,18 @@ export class IncomeService {
 
     income.transaction.propertyId = income.propertyId;
     income.transaction.property = income.property;
+  }
+
+  private async getEntityOrThrow(user: JWTUser, id: number): Promise<Income> {
+    const incomeEntity = await this.findOne(user, id, {
+      loadRelationIds: true,
+    });
+    if (!incomeEntity) {
+      throw new NotFoundException();
+    }
+    if (!(await this.authService.hasOwnership(user, incomeEntity.propertyId))) {
+      throw new UnauthorizedException();
+    }
+    return incomeEntity;
   }
 }
