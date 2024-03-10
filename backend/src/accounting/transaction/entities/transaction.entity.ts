@@ -2,8 +2,15 @@
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 import { columnOptionTwoDecimal } from '@alisa-backend/common/typeorm.column.definitions';
-import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
-import {Property} from "@alisa-backend/real-estate/property/entities/property.entity";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 
 @Entity()
 export class Transaction {
@@ -31,6 +38,9 @@ export class Transaction {
   @Column(columnOptionTwoDecimal)
   public amount: number;
 
+  @Column(columnOptionTwoDecimal)
+  public balance: number;
+
   /*Property*/
   @ManyToOne(() => Property, (property) => property.transactions, {
     eager: false,
@@ -44,7 +54,7 @@ export class Transaction {
   /*Expense*/
   @OneToMany(() => Expense, (expense) => expense.transaction, {
     eager: false,
-    cascade: ["insert", "update", "remove"],
+    cascade: ['insert', 'update', 'remove'],
     nullable: true,
   })
   expenses?: Expense[];
@@ -52,7 +62,7 @@ export class Transaction {
   /*Income*/
   @OneToMany(() => Income, (income) => income.transaction, {
     eager: false,
-    cascade: ["insert", "update", "remove"],
+    cascade: ['insert', 'update', 'remove'],
     nullable: true,
   })
   incomes?: Income[];

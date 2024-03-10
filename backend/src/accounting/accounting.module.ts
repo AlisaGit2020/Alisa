@@ -17,6 +17,7 @@ import { IncomeTypeService } from './income/income-type.service';
 import { IncomeType } from './income/entities/income-type.entity';
 import { Income } from './income/entities/income.entity';
 import { AuthModule } from '@alisa-backend/auth/auth.module';
+import { RealEstateModule } from '@alisa-backend/real-estate/real-estate.module';
 
 @Module({
   controllers: [
@@ -35,6 +36,7 @@ import { AuthModule } from '@alisa-backend/auth/auth.module';
   ],
   imports: [
     AuthModule,
+    RealEstateModule,
     TypeOrmModule.forFeature([
       Transaction,
       Expense,
