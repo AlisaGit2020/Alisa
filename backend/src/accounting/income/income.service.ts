@@ -28,10 +28,6 @@ export class IncomeService {
     private authService: AuthService,
   ) {}
 
-  async findAll(): Promise<Income[]> {
-    return this.repository.find();
-  }
-
   async search(
     user: JWTUser,
     options: FindManyOptions<Income>,
@@ -127,9 +123,7 @@ export class IncomeService {
   }
 
   private async getEntityOrThrow(user: JWTUser, id: number): Promise<Income> {
-    const incomeEntity = await this.findOne(user, id, {
-      loadRelationIds: true,
-    });
+    const incomeEntity = await this.findOne(user, id);
     if (!incomeEntity) {
       throw new NotFoundException();
     }

@@ -8,13 +8,16 @@ import { PropertyService } from './property/property.service';
 import { Property } from './property/entities/property.entity';
 import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
 import { PeopleModule } from '@alisa-backend/people/people.module';
+import { AuthModule } from '@alisa-backend/auth/auth.module';
 
 @Module({
   controllers: [InvestmentController, PropertyController],
   providers: [InvestmentService, PropertyService],
   imports: [
     TypeOrmModule.forFeature([Investment, Property, Ownership]),
+    AuthModule,
     PeopleModule,
   ],
+  exports: [PropertyService],
 })
 export class RealEstateModule {}

@@ -112,28 +112,28 @@ export const getTestUsers = async (
 
   const property1 = await addProperty(
     propertyService,
-    `User's 1 first property `,
+    `User's 1 first property`,
     29,
     testUsers.user1WithProperties.jwtUser,
   );
 
   const property2 = await addProperty(
     propertyService,
-    `User's 1 second property `,
+    `User's 1 second property`,
     59,
     testUsers.user1WithProperties.jwtUser,
   );
 
   const property3 = await addProperty(
     propertyService,
-    `User's 2 first property `,
+    `User's 2 first property`,
     180,
     testUsers.user2WithProperties.jwtUser,
   );
 
   const property4 = await addProperty(
     propertyService,
-    `User's 2 second property `,
+    `User's 2 second property`,
     63,
     testUsers.user2WithProperties.jwtUser,
   );
@@ -149,11 +149,9 @@ export const getTestUsers = async (
   return testUsers;
 };
 
-export const addTransactionsToTestUsers = async (
+export const addIncomeAndExpenseTypes = async (
   app: INestApplication,
-  testUsers: TestUsersSetup,
-) => {
-  const transactionService = app.get<TransactionService>(TransactionService);
+): Promise<void> => {
   const incomeTypeService = app.get<IncomeTypeService>(IncomeTypeService);
   const expenseTypeService = app.get<ExpenseTypeService>(ExpenseTypeService);
 
@@ -164,6 +162,15 @@ export const addTransactionsToTestUsers = async (
   for (const incomeType of [incomeType1, incomeType2, expenseType3]) {
     await incomeTypeService.add(incomeType);
   }
+};
+
+export const addTransactionsToTestUsers = async (
+  app: INestApplication,
+  testUsers: TestUsersSetup,
+) => {
+  const transactionService = app.get<TransactionService>(TransactionService);
+
+  await addIncomeAndExpenseTypes(app);
 
   const addTransaction = async (
     jwtUser: JWTUser,

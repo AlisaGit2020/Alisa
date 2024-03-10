@@ -165,6 +165,7 @@ describe('Transaction service', () => {
       await sleep(50);
 
       const expense = await expenseService.findOne(
+        testUsers.user1WithProperties.jwtUser,
         transactions[0].expenses[0].id,
       );
       expect(expense).toBeNull();
@@ -202,6 +203,7 @@ describe('Transaction service', () => {
       await sleep(50);
 
       const income = await expenseService.findOne(
+        testUsers.user1WithProperties.jwtUser,
         transactions[0].incomes[0].id,
       );
       expect(income).toBeNull();

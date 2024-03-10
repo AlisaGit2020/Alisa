@@ -1,18 +1,22 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOptionsWhere, In, Repository } from 'typeorm';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
-import { OwnershipService } from '@alisa-backend/people/ownership/ownership.service';
 import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownership-input.dto';
+import { AuthService } from '@alisa-backend/auth/auth.service';
 
 @Injectable()
 export class PropertyService {
   constructor(
     @InjectRepository(Property)
     private repository: Repository<Property>,
-    private ownershipService: OwnershipService,
+    private authService: AuthService,
   ) {}
 
   async search(
@@ -26,8 +30,15 @@ export class PropertyService {
   }
 
   async findOne(user: JWTUser, id: number): Promise<Property> {
-    await this.validateId(user, id);
-    return this.repository.findOneBy({ id: id });
+    const property = await this.repository.findOneBy({ id: id });
+    if (!property) {
+      return null;
+    }
+
+    if (!(await this.authService.hasOwnership(user, id))) {
+      throw new UnauthorizedException();
+    }
+    return property;
   }
 
   async add(user: JWTUser, input: PropertyInputDto): Promise<Property> {
@@ -47,9 +58,7 @@ export class PropertyService {
     id: number,
     input: PropertyInputDto,
   ): Promise<Property> {
-    await this.validateId(user, id);
-
-    const propertyEntity = await this.findOne(user, id);
+    const propertyEntity = await this.getEntityOrThrow(user, id);
 
     this.mapData(user, propertyEntity, input);
 
@@ -58,7 +67,7 @@ export class PropertyService {
   }
 
   async delete(user: JWTUser, id: number): Promise<void> {
-    await this.validateId(user, id);
+    await this.getEntityOrThrow(user, id);
     await this.repository.delete(id);
   }
 
@@ -83,22 +92,18 @@ export class PropertyService {
     if (propertyIdInQuery === undefined) {
       return;
     }
-    await this.validateId(user, propertyIdInQuery);
+    await this.getEntityOrThrow(user, propertyIdInQuery);
   }
 
-  private async validateId(user: JWTUser, id: number): Promise<void> {
-    const hasOwnership = await this.repository.exist({
-      where: {
-        id: id,
-        ownerships: {
-          userId: In([user.id]),
-        },
-      },
-    });
-
-    if (!hasOwnership) {
+  private async getEntityOrThrow(user: JWTUser, id: number): Promise<Property> {
+    const entity = await this.findOne(user, id);
+    if (!entity) {
+      throw new NotFoundException();
+    }
+    if (!(await this.authService.hasOwnership(user, id))) {
       throw new UnauthorizedException();
     }
+    return entity;
   }
 
   private handleOptions(

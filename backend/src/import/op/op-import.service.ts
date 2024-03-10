@@ -1,4 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as fs from 'fs';
 import * as csvParser from 'csv-parser';
 import * as crypto from 'crypto';
@@ -9,17 +13,21 @@ import { ExpenseService } from '@alisa-backend/accounting/expense/expense.servic
 import { IncomeService } from '@alisa-backend/accounting/income/income.service';
 import { OpImportInput } from './dtos/op-import-input.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
+import { AuthService } from '@alisa-backend/auth/auth.service';
+import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
 
 @Injectable()
 export class OpImportService {
   constructor(
-    @Inject(ExpenseService)
     private expenseService: ExpenseService,
-    @Inject(IncomeService)
     private incomeService: IncomeService,
+    private propertyService: PropertyService,
+    private authService: AuthService,
   ) {}
 
   async importCsv(user: JWTUser, options: OpImportInput) {
+    await this.validate(user, options);
+
     const rows: CSVRow[] = [];
 
     await new Promise<void>((resolve, reject) => {
@@ -53,6 +61,21 @@ export class OpImportService {
     });
 
     await this.handleRows(user, rows, options);
+  }
+
+  private async validate(user: JWTUser, options: OpImportInput) {
+    const property = await this.propertyService.findOne(
+      user,
+      options.propertyId,
+    );
+
+    if (!property) {
+      throw new NotFoundException('Property not found');
+    }
+
+    if (!(await this.authService.hasOwnership(user, options.propertyId))) {
+      throw new UnauthorizedException();
+    }
   }
 
   private async handleRows(
@@ -112,6 +135,10 @@ export class OpImportService {
   ): Promise<ExpenseInputDto> {
     const expense = new ExpenseInputDto();
     expense.id = await this.getExpenseId(user, opCsvRow);
+    expense.description = this.getMessagePart(opCsvRow.message);
+    expense.amount = this.getAmount(opCsvRow);
+    expense.quantity = 1;
+    expense.totalAmount = expense.amount * expense.quantity * -1; //positive amount
     expense.expenseTypeId = this.getExpenseTypeId(options);
     expense.propertyId = options.propertyId;
     expense.transaction = this.toTransaction(opCsvRow);
@@ -125,6 +152,10 @@ export class OpImportService {
   ): Promise<IncomeInputDto> {
     const income = new IncomeInputDto();
     income.id = await this.getIncomeId(user, opCsvRow);
+    income.description = this.getMessagePart(opCsvRow.message);
+    income.amount = this.getAmount(opCsvRow);
+    income.quantity = 1;
+    income.totalAmount = income.amount * income.quantity;
     income.incomeTypeId = this.getIncomeTypeId(options);
     income.propertyId = options.propertyId;
     income.transaction = this.toTransaction(opCsvRow);
@@ -154,11 +185,7 @@ export class OpImportService {
   }
 
   private getAmount(opCsvRow: CSVRow): number {
-    const amount = Number(opCsvRow.amount.replace(',', '.'));
-    if (this.isExpense(opCsvRow)) {
-      return amount * -1;
-    }
-    return amount;
+    return Number(opCsvRow.amount.replace(',', '.'));
   }
 
   private getExternalId(opCsvRow: CSVRow): string {
