@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { Expense } from './entities/expense.entity';
@@ -7,41 +11,56 @@ import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
 import { Property } from 'src/real-estate/property/entities/property.entity';
 import { ExpenseType } from './entities/expense-type.entity';
 import { Transaction } from '../transaction/entities/transaction.entity';
+import { JWTUser } from '@alisa-backend/auth/types';
+import { AuthService } from '@alisa-backend/auth/auth.service';
 
 @Injectable()
 export class ExpenseService {
   constructor(
     @InjectRepository(Expense)
     private repository: Repository<Expense>,
-
     @InjectRepository(Property)
     private propertyRepository: Repository<Property>,
-
     @InjectRepository(ExpenseType)
     private expenseTypeRepository: Repository<ExpenseType>,
-
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
+    private authService: AuthService,
   ) {}
 
   async findAll(): Promise<Expense[]> {
     return this.repository.find();
   }
 
-  async search(options: FindManyOptions<Expense>): Promise<Expense[]> {
+  async search(
+    user: JWTUser,
+    options: FindManyOptions<Expense>,
+  ): Promise<Expense[]> {
+    options.where = this.authService.addOwnershipFilter(user, options.where);
+
     return this.repository.find(options);
   }
 
   async findOne(
+    user: JWTUser,
     id: number,
     options: FindOneOptions<Expense> = {},
   ): Promise<Expense> {
     options.where = { id: id };
     const expense = await this.repository.findOne(options);
+    if (!expense) {
+      return null;
+    }
+    if (!(await this.authService.hasOwnership(user, expense.propertyId))) {
+      throw new UnauthorizedException();
+    }
     return expense;
   }
 
-  async add(input: ExpenseInputDto): Promise<Expense> {
+  async add(user: JWTUser, input: ExpenseInputDto): Promise<Expense> {
+    if (!(await this.authService.hasOwnership(user, input.propertyId))) {
+      throw new UnauthorizedException();
+    }
     const expenseEntity = new Expense();
 
     this.mapData(expenseEntity, input);
@@ -49,11 +68,11 @@ export class ExpenseService {
     return await this.repository.save(expenseEntity);
   }
 
-  async save(input: ExpenseInputDto): Promise<Expense> {
+  async save(user: JWTUser, input: ExpenseInputDto): Promise<Expense> {
     if (input.id > 0) {
-      return this.update(input.id, input);
+      return this.update(user, input.id, input);
     } else {
-      return this.add(input);
+      return this.add(user, input);
     }
   }
 
@@ -77,10 +96,12 @@ export class ExpenseService {
     return expense;
   }
 
-  async update(id: number, input: ExpenseInputDto): Promise<Expense> {
-    const expenseEntity = await this.findOne(id, {
-      relations: { transaction: true },
-    });
+  async update(
+    user: JWTUser,
+    id: number,
+    input: ExpenseInputDto,
+  ): Promise<Expense> {
+    const expenseEntity = await this.getEntityOrThrow(user, id);
 
     this.mapData(expenseEntity, input);
     expenseEntity.transaction.id = expenseEntity.transactionId;
@@ -89,10 +110,9 @@ export class ExpenseService {
     return expenseEntity;
   }
 
-  async delete(id: number): Promise<void> {
-    const expense = await this.findOne(id);
+  async delete(user: JWTUser, id: number): Promise<void> {
+    await this.getEntityOrThrow(user, id);
     await this.repository.delete(id);
-    await this.transactionRepository.delete(expense.transactionId);
   }
 
   private mapData(expense: Expense, input: ExpenseInputDto) {
@@ -103,10 +123,21 @@ export class ExpenseService {
     });
 
     expense.transaction.propertyId = expense.propertyId;
-    expense.transaction.property = expense.property
+    expense.transaction.property = expense.property;
+  }
 
-    if (expense.transaction.amount > 0) {
-      expense.transaction.amount = expense.transaction.amount * -1;
+  private async getEntityOrThrow(user: JWTUser, id: number): Promise<Expense> {
+    const expenseEntity = await this.findOne(user, id, {
+      loadRelationIds: true,
+    });
+    if (!expenseEntity) {
+      throw new NotFoundException();
     }
+    if (
+      !(await this.authService.hasOwnership(user, expenseEntity.propertyId))
+    ) {
+      throw new UnauthorizedException();
+    }
+    return expenseEntity;
   }
 }

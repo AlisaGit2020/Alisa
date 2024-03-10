@@ -62,9 +62,9 @@ export class OpImportService {
   ) {
     for (const opCsvRow of rows) {
       if (this.isExpense(opCsvRow)) {
-        const expense = await this.toExpense(opCsvRow, options);
+        const expense = await this.toExpense(user, opCsvRow, options);
         try {
-          await this.expenseService.save(expense);
+          await this.expenseService.save(user, expense);
         } catch (error: unknown) {
           this.handleError(error);
         }
@@ -79,8 +79,11 @@ export class OpImportService {
     }
   }
 
-  private async getExpenseId(opCsvRow: CSVRow): Promise<number | undefined> {
-    const expenses = await this.expenseService.search({
+  private async getExpenseId(
+    user: JWTUser,
+    opCsvRow: CSVRow,
+  ): Promise<number | undefined> {
+    const expenses = await this.expenseService.search(user, {
       where: {
         transaction: { externalId: this.getExternalId(opCsvRow) },
       },
@@ -103,11 +106,12 @@ export class OpImportService {
   }
 
   private async toExpense(
+    user: JWTUser,
     opCsvRow: CSVRow,
     options: OpImportInput,
   ): Promise<ExpenseInputDto> {
     const expense = new ExpenseInputDto();
-    expense.id = await this.getExpenseId(opCsvRow);
+    expense.id = await this.getExpenseId(user, opCsvRow);
     expense.expenseTypeId = this.getExpenseTypeId(options);
     expense.propertyId = options.propertyId;
     expense.transaction = this.toTransaction(opCsvRow);

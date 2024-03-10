@@ -14,6 +14,8 @@ import { Expense } from './entities/expense.entity';
 import { ExpenseInputDto } from './dtos/expense-input.dto';
 import { FindManyOptions } from 'typeorm';
 import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
+import { User } from '@alisa-backend/common/decorators/user.decorator';
+import { JWTUser } from '@alisa-backend/auth/types';
 
 @UseGuards(JwtAuthGuard)
 @Controller('accounting/expense')
@@ -22,8 +24,11 @@ export class ExpenseController {
 
   @Post('/search')
   @HttpCode(200)
-  async search(@Body() options: FindManyOptions<Expense>): Promise<Expense[]> {
-    return this.service.search(options);
+  async search(
+    @User() user: JWTUser,
+    @Body() options: FindManyOptions<Expense>,
+  ): Promise<Expense[]> {
+    return this.service.search(user, options);
   }
 
   @Get('/default')
@@ -31,32 +36,37 @@ export class ExpenseController {
     return this.service.getDefault();
   }
 
-  @Get('/')
-  async findAll(): Promise<Expense[]> {
-    return this.service.findAll();
-  }
-
   @Get('/:id')
-  async findOne(@Param('id') id: string): Promise<Expense> {
-    return this.service.findOne(Number(id));
+  async findOne(
+    @User() user: JWTUser,
+    @Param('id') id: string,
+  ): Promise<Expense> {
+    return this.service.findOne(user, Number(id));
   }
 
   @Post('/')
-  async add(@Body() ExpenseInput: ExpenseInputDto): Promise<Expense> {
-    return this.service.add(ExpenseInput);
+  async add(
+    @User() user: JWTUser,
+    @Body() input: ExpenseInputDto,
+  ): Promise<Expense> {
+    return this.service.add(user, input);
   }
 
   @Put('/:id')
   async update(
+    @User() user: JWTUser,
     @Param('id') id: string,
-    @Body() Expense: ExpenseInputDto,
+    @Body() input: ExpenseInputDto,
   ): Promise<Expense> {
-    return this.service.update(Number(id), Expense);
+    return this.service.update(user, Number(id), input);
   }
 
   @Delete('/:id')
-  async delete(@Param('id') id: number): Promise<boolean> {
-    await this.service.delete(id);
+  async delete(
+    @User() user: JWTUser,
+    @Param('id') id: number,
+  ): Promise<boolean> {
+    await this.service.delete(user, id);
     return true;
   }
 }
