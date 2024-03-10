@@ -4,6 +4,8 @@ import { UserInputDto } from '../people/user/dtos/user-input.dto';
 import { UserService } from '../people/user/user.service';
 import { User } from '../people/user/entities/user.entity';
 import { JWTUser } from './types';
+import { FindOptionsWhere } from 'typeorm';
+import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 
 @Injectable()
 export class AuthService {
@@ -46,6 +48,48 @@ export class AuthService {
 
   async getUserInfo(email: string): Promise<User> {
     return this.getUserByEmail(email);
+  }
+
+  async hasOwnership(
+    user: JWTUser,
+    propertyId: number | undefined,
+  ): Promise<boolean> {
+    if (propertyId === undefined) {
+      return false;
+    }
+    return this.userService.hasOwnership(user.id, propertyId);
+  }
+  addOwnershipFilter(
+    user: JWTUser,
+    where: FindOptionsWhere<Transaction> | FindOptionsWhere<Transaction>[],
+  ): FindOptionsWhere<Transaction> | FindOptionsWhere<Transaction>[] {
+    if (Array.isArray(where)) {
+      for (const index in where) {
+        where[index] = this.addOwnershipFilter(
+          user,
+          where[index],
+        ) as FindOptionsWhere<Transaction>;
+      }
+    } else {
+      if (where === undefined) {
+        where = {} as FindOptionsWhere<Transaction>;
+      }
+
+      const ownershipFilter = { ownerships: [{ userId: user.id }] };
+
+      if (where.property === undefined) {
+        where.property = {
+          ...ownershipFilter,
+        };
+      } else {
+        where.property = {
+          ...(where.property as object),
+          ...ownershipFilter,
+        };
+      }
+    }
+
+    return where;
   }
 
   private async getUserByEmail(email: string): Promise<User | undefined> {

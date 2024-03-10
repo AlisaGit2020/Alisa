@@ -1,9 +1,8 @@
-import { IsNotEmpty, Min } from 'class-validator';
-import {ExpenseInputDto} from "@alisa-backend/accounting/expense/dtos/expense-input.dto";
-import {IncomeInputDto} from "@alisa-backend/accounting/income/dtos/income-input.dto";
+import { IsNotEmpty } from 'class-validator';
+import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-input.dto';
+import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
 
 export class TransactionInputDto {
-
   externalId?: string;
 
   @IsNotEmpty()
@@ -21,7 +20,7 @@ export class TransactionInputDto {
 
   amount: number = 0;
 
-  propertyId?:number;
+  propertyId?: number;
 
   expenses?: ExpenseInputDto[];
   incomes?: IncomeInputDto[];

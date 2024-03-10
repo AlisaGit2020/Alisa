@@ -42,8 +42,11 @@ export class TransactionController {
   }
 
   @Get('/:id')
-  async findOne(@Param('id') id: string): Promise<Transaction> {
-    return this.service.findOne(Number(id));
+  async findOne(
+    @User() user: JWTUser,
+    @Param('id') id: string,
+  ): Promise<Transaction> {
+    return this.service.findOne(user, Number(id));
   }
 
   @Put('/:id')

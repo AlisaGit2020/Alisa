@@ -2,7 +2,11 @@
 Data service test
 */
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, UnauthorizedException } from '@nestjs/common';
+import {
+  INestApplication,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import { AppModule } from 'src/app.module';
 import { TransactionService } from './transaction.service';
@@ -50,162 +54,189 @@ describe('Transaction service', () => {
     await app.close();
   });
 
-  describe('Basic functions', () => {
-    describe('add', () => {
-      it('does not allow add a transaction for another user property', async () => {
-        const input = getTransactionIncome1(1);
-        await expect(
-          service.add(testUsers.userWithoutProperties.jwtUser, input),
-        ).rejects.toThrow(UnauthorizedException);
-      });
-    });
-
-    describe('update', () => {
-      it('updates own transaction', async () => {
-        const transaction = await addTransaction(
-          app,
-          testUsers.user1WithProperties.jwtUser,
-          getTransactionIncome1(1),
-        );
-
-        const input = {
-          receiver: 'Escobar',
-          sender: 'Batman',
-          accountingDate: new Date('2023-03-29'),
-          transactionDate: new Date('2023-03-29'),
-          amount: 1000,
-          description: 'New description',
-        };
-
-        const editedTransaction = await service.update(
-          testUsers.user1WithProperties.jwtUser,
-          transaction.id,
-          input,
-        );
-
-        expect(editedTransaction).toMatchObject(input);
-
-        //Reject when not an owner.
-        await expect(
-          service.update(
-            testUsers.userWithoutProperties.jwtUser,
-            transaction.id,
-            input,
-          ),
-        ).rejects.toThrow(UnauthorizedException);
-
-        await service.delete(
-          testUsers.user1WithProperties.jwtUser,
-          transaction.id,
-        );
-      });
-    });
-
-    describe('delete', () => {
-      it('deletes also expense row', async () => {
-        let transaction = await addTransaction(
-          app,
-          testUsers.user1WithProperties.jwtUser,
-          getTransactionExpense1(1),
-        );
-
-        await sleep(20);
-        const transactions = await service.search(
-          testUsers.user1WithProperties.jwtUser,
-          {
-            relations: ['expenses'],
-            where: {
-              id: transaction.id,
-            },
-          },
-        );
-
-        //Delete transaction.
-        await service.delete(
-          testUsers.user1WithProperties.jwtUser,
-          transaction.id,
-        );
-        await sleep(50);
-
-        const expense = await expenseService.findOne(
-          transactions[0].expenses[0].id,
-        );
-        expect(expense).toBeNull();
-
-        transaction = await service.findOne(transaction.id);
-        expect(transaction).toBeNull();
-      });
-
-      it('deletes also income row', async () => {
-        let transaction = await addTransaction(
-          app,
-          testUsers.user1WithProperties.jwtUser,
-          getTransactionIncome2(1),
-        );
-
-        await sleep(20);
-        const transactions = await service.search(
-          testUsers.user1WithProperties.jwtUser,
-          {
-            relations: ['incomes'],
-            where: {
-              id: transaction.id,
-            },
-          },
-        );
-
-        //Delete transaction.
-        await service.delete(
-          testUsers.user1WithProperties.jwtUser,
-          transaction.id,
-        );
-        await sleep(50);
-
-        const income = await expenseService.findOne(
-          transactions[0].incomes[0].id,
-        );
-        expect(income).toBeNull();
-
-        transaction = await service.findOne(transaction.id);
-        expect(transaction).toBeNull();
-      });
-
-      it('does not allow delete other user transaction', async () => {
-        const transaction = await addTransaction(
-          app,
-          testUsers.user1WithProperties.jwtUser,
-          getTransactionIncome1(1),
-        );
-        await expect(
-          service.delete(
-            testUsers.userWithoutProperties.jwtUser,
-            transaction.id,
-          ),
-        ).rejects.toThrow(UnauthorizedException);
-
-        await service.delete(
-          testUsers.user1WithProperties.jwtUser,
-          transaction.id,
-        );
-      });
-    });
-
-    describe('statistics', () => {
-      it('calculate statistics correctly', async () => {
-        const statistics = await service.statistics(
-          testUsers.user1WithProperties.jwtUser,
-          { where: { propertyId: 1 } },
-        );
-
-        expect(statistics.totalExpenses).toBe(227.64);
-        expect(statistics.totalIncomes).toBe(1339);
-        expect(statistics.total).toBe(1111.36);
-        expect(statistics.rowCount).toBe(4);
-      });
+  describe('Create', () => {
+    it('does not allow add a transaction for another user property', async () => {
+      const input = getTransactionIncome1(1);
+      await expect(
+        service.add(testUsers.userWithoutProperties.jwtUser, input),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
-  describe('Authorize and authentication stuff', () => {
+  describe('Read', () => {
+    it('returns own transaction', async () => {
+      const transactions = await service.findOne(
+        testUsers.user1WithProperties.jwtUser,
+        1,
+      );
+      expect(transactions).not.toBeNull();
+    });
+
+    it('returns null when transaction does not exist', async () => {
+      const transactions = await service.findOne(
+        testUsers.user1WithProperties.jwtUser,
+        999,
+      );
+      expect(transactions).toBeNull();
+    });
+
+    it('throws UnauthorizedException when trying to read other user transaction', async () => {
+      await expect(
+        service.findOne(testUsers.userWithoutProperties.jwtUser, 1),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('Update', () => {
+    it('updates when own transaction and throws when not', async () => {
+      const transaction = await addTransaction(
+        app,
+        testUsers.user1WithProperties.jwtUser,
+        getTransactionIncome1(1),
+      );
+
+      const input = {
+        receiver: 'Escobar',
+        sender: 'Batman',
+        accountingDate: new Date('2023-03-29'),
+        transactionDate: new Date('2023-03-29'),
+        amount: 1000,
+        description: 'New description',
+      };
+
+      const editedTransaction = await service.update(
+        testUsers.user1WithProperties.jwtUser,
+        transaction.id,
+        input,
+      );
+
+      expect(editedTransaction).toMatchObject(input);
+
+      //Reject when not an owner.
+      await expect(
+        service.update(
+          testUsers.userWithoutProperties.jwtUser,
+          transaction.id,
+          input,
+        ),
+      ).rejects.toThrow(UnauthorizedException);
+
+      await service.delete(
+        testUsers.user1WithProperties.jwtUser,
+        transaction.id,
+      );
+    });
+
+    it('throws not found when transaction does not exist', async () => {
+      await expect(
+        service.update(
+          testUsers.user1WithProperties.jwtUser,
+          999,
+          getTransactionIncome2(1),
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('Delete', () => {
+    it('deletes also expense row', async () => {
+      let transaction = await addTransaction(
+        app,
+        testUsers.user1WithProperties.jwtUser,
+        getTransactionExpense1(1),
+      );
+
+      await sleep(20);
+      const transactions = await service.search(
+        testUsers.user1WithProperties.jwtUser,
+        {
+          relations: ['expenses'],
+          where: {
+            id: transaction.id,
+          },
+        },
+      );
+
+      //Delete transaction.
+      await service.delete(
+        testUsers.user1WithProperties.jwtUser,
+        transaction.id,
+      );
+      await sleep(50);
+
+      const expense = await expenseService.findOne(
+        transactions[0].expenses[0].id,
+      );
+      expect(expense).toBeNull();
+
+      transaction = await service.findOne(
+        testUsers.user1WithProperties.jwtUser,
+        transaction.id,
+      );
+      expect(transaction).toBeNull();
+    });
+
+    it('deletes also income row', async () => {
+      let transaction = await addTransaction(
+        app,
+        testUsers.user1WithProperties.jwtUser,
+        getTransactionIncome2(1),
+      );
+
+      await sleep(20);
+      const transactions = await service.search(
+        testUsers.user1WithProperties.jwtUser,
+        {
+          relations: ['incomes'],
+          where: {
+            id: transaction.id,
+          },
+        },
+      );
+
+      //Delete transaction.
+      await service.delete(
+        testUsers.user1WithProperties.jwtUser,
+        transaction.id,
+      );
+      await sleep(50);
+
+      const income = await expenseService.findOne(
+        transactions[0].incomes[0].id,
+      );
+      expect(income).toBeNull();
+
+      transaction = await service.findOne(
+        testUsers.user1WithProperties.jwtUser,
+        transaction.id,
+      );
+      expect(transaction).toBeNull();
+    });
+
+    it('throws not found when transaction does not exist', async () => {
+      await expect(
+        service.delete(testUsers.user1WithProperties.jwtUser, 999),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws when not own transaction', async () => {
+      const transaction = await addTransaction(
+        app,
+        testUsers.user1WithProperties.jwtUser,
+        getTransactionIncome1(1),
+      );
+      await expect(
+        service.delete(testUsers.userWithoutProperties.jwtUser, transaction.id),
+      ).rejects.toThrow(UnauthorizedException);
+
+      await service.delete(
+        testUsers.user1WithProperties.jwtUser,
+        transaction.id,
+      );
+    });
+  });
+
+  describe('Search', () => {
     it.each([['userWithoutProperties']])(
       `does not return other's transactions`,
       async (user) => {
@@ -235,5 +266,31 @@ describe('Transaction service', () => {
         expect(transactions.length).toBe(expectedLength);
       },
     );
+  });
+
+  describe('Statistics', () => {
+    it('calculate statistics correctly', async () => {
+      const statistics = await service.statistics(
+        testUsers.user1WithProperties.jwtUser,
+        { where: { propertyId: 1 } },
+      );
+
+      expect(statistics.totalExpenses).toBe(227.64);
+      expect(statistics.totalIncomes).toBe(1339);
+      expect(statistics.total).toBe(1111.36);
+      expect(statistics.rowCount).toBe(4);
+    });
+
+    it('does not calculate other user statistics', async () => {
+      const statistics = await service.statistics(
+        testUsers.userWithoutProperties.jwtUser,
+        { where: { propertyId: 1 } },
+      );
+
+      expect(statistics.totalExpenses).toBe(0);
+      expect(statistics.totalIncomes).toBe(0);
+      expect(statistics.total).toBe(0);
+      expect(statistics.rowCount).toBe(0);
+    });
   });
 });

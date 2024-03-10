@@ -14,6 +14,8 @@ import { OpImportService } from './op-import.service';
 import { validate } from 'class-validator';
 import { OpImportInput } from './dtos/op-import-input.dto';
 import { Code } from 'typeorm';
+import { JWTUser } from '@alisa-backend/auth/types';
+import { User } from '@alisa-backend/common/decorators/user.decorator';
 
 @Controller('import/op')
 export class OpImportController {
@@ -38,6 +40,7 @@ export class OpImportController {
     }),
   )
   async uploadFile(
+    @User() user: JWTUser,
     @UploadedFile() file,
     @Body('propertyId') propertyId: number,
     @Body('expenseTypeId') expenseTypeId: number,
@@ -59,6 +62,6 @@ export class OpImportController {
       throw new HttpException(validationErrors, HttpStatus.BAD_REQUEST);
     }
 
-    await this.service.importCsv(data);
+    await this.service.importCsv(user, data);
   }
 }
