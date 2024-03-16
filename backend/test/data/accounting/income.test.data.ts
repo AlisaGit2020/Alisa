@@ -1,10 +1,8 @@
 import { TestData } from '../test-data';
 import { IncomeInputDto } from 'src/accounting/income/dtos/income-input.dto';
 import { TransactionInputDto } from 'src/accounting/transaction/dtos/transaction-input.dto';
-import { incomeTypeTestData } from './income-type.test.data';
 import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { Income } from 'src/accounting/income/entities/income.entity';
-import { propertyTestData } from '../real-estate/property.test.data';
 import { startOfDay } from 'date-fns';
 
 export const incomeTestData = {
@@ -14,8 +12,8 @@ export const incomeTestData = {
   baseUrlWithId: '/accounting/income/1',
 
   inputPost: {
-    incomeType: incomeTypeTestData.inputPost,
-    property: propertyTestData.inputPost,
+    incomeTypeId: 1,
+    propertyId: 1,
     description: 'Siivous',
     amount: 39.64,
     quantity: 1,
@@ -32,8 +30,6 @@ export const incomeTestData = {
   } as IncomeInputDto,
 
   inputPut: {
-    incomeType: incomeTypeTestData.inputPut,
-    property: propertyTestData.inputPut,
     description: 'Yhtiövastike',
     amount: 94,
     quantity: 2,
@@ -51,9 +47,7 @@ export const incomeTestData = {
   } as IncomeInputDto,
 
   expected: {
-    incomeType: incomeTypeTestData.expected,
     incomeTypeId: 1,
-    property: propertyTestData.expected,
     propertyId: 1,
     description: 'Siivous',
     amount: 39.64,
@@ -75,9 +69,7 @@ export const incomeTestData = {
 
   expectedPut: {
     id: 1,
-    incomeType: incomeTypeTestData.expectedPut,
     incomeTypeId: 1,
-    property: propertyTestData.expectedPut,
     propertyId: 1,
     description: 'Yhtiövastike',
     amount: 94,
@@ -92,6 +84,7 @@ export const incomeTestData = {
       transactionDate: startOfDay(new Date('2023-02-28')).toISOString(),
       accountingDate: startOfDay(new Date('2023-03-31')).toISOString(),
       amount: 188.0,
+      propertyId: 1,
     },
     transactionId: 1,
   },

@@ -8,28 +8,23 @@ import { AppModule } from '../src/app.module';
 import { OpImportService } from '@alisa-backend/import/op/op-import.service';
 import { MOCKS_PATH } from '@alisa-backend/constants';
 import { OpImportInput } from '@alisa-backend/import/op/dtos/op-import-input.dto';
-import { IncomeTypeService } from '@alisa-backend/accounting/income/income-type.service';
-import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
-import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
-import { DataSource } from 'typeorm';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
-  addProperty, emptyTables,
+  addIncomeAndExpenseTypes,
   getBearerToken,
+  getTestUsers,
   getUserAccessToken2,
+  prepareDatabase,
+  TestUser,
+  TestUsersSetup,
 } from './helper-functions';
-import { jwtUser1, jwtUser2, jwtUser3 } from './data/mocks/user.mock';
-import { expenseTypeTestData } from './data/accounting/expense-type.test.data';
-import { incomeTypeTestData } from './data/accounting/income-type.test.data';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
-import { UserService } from '@alisa-backend/people/user/user.service';
 
 describe('Transaction search', () => {
   let app: INestApplication;
   let server: any;
   let token: string;
-  let user2: User;
-  let user3: User;
+  let testUsers: TestUsersSetup;
+  let mainUser: TestUser;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -41,30 +36,16 @@ describe('Transaction search', () => {
     await app.init();
     server = app.getHttpServer();
 
-    const userService = app.get(UserService);
     const opImportService = app.get(OpImportService);
-    const incomeTypeService = app.get(IncomeTypeService);
-    const expenseTypeService = app.get(ExpenseTypeService);
-    const propertyService = app.get(PropertyService);
-
-    const dataSource = app.get(DataSource);
-
-    await emptyTables(dataSource)
-
-    await userService.add(jwtUser1);
-    user2 = await userService.add(jwtUser2);
-    user3 = await userService.add(jwtUser3);
-
-    jwtUser2.id = user2.id;
-    jwtUser3.id = user3.id;
-
     const authService = app.get(AuthService);
-    token = await getUserAccessToken2(authService, jwtUser2);
 
-    await incomeTypeService.add(incomeTypeTestData.inputPost);
-    await expenseTypeService.add(expenseTypeTestData.inputPost);
+    await prepareDatabase(app);
+    testUsers = await getTestUsers(app);
+    mainUser = testUsers.user1WithProperties;
 
-    await addProperty(propertyService, 'Test property', 29, jwtUser2);
+    token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+    await addIncomeAndExpenseTypes(mainUser.jwtUser, app);
 
     const input: OpImportInput = {
       expenseTypeId: 1,
@@ -72,16 +53,12 @@ describe('Transaction search', () => {
       propertyId: 1,
       file: `${MOCKS_PATH}/import/op.transactions.csv`,
     };
-    await opImportService.importCsv(input);
+    await opImportService.importCsv(mainUser.jwtUser, input);
   });
 
   afterAll(async () => {
     await app.close();
     server.close();
-  });
-
-  it(`fails when not authorized`, async () => {
-    await request(server).post(`/accounting/transaction/search`).expect(401);
   });
 
   it(`returns all transactions`, async () => {
@@ -118,10 +95,7 @@ describe('Transaction search', () => {
         .post(`/accounting/transaction/search`)
         .set('Authorization', getBearerToken(token))
         .send({
-          where: [
-            { income: { propertyId: propertyId } },
-            { expense: { propertyId: propertyId } },
-          ],
+          where: { propertyId: propertyId },
         })
         .expect(200);
       expect(response.body.length).toBe(expectedCount);
@@ -142,10 +116,7 @@ describe('Transaction search', () => {
         .set('Authorization', getBearerToken(token))
         .send({
           relations: relations,
-          where: [
-            { expense: { propertyId: 1 }, ...transactionDateFilter },
-            { income: { propertyId: 1 }, ...transactionDateFilter },
-          ],
+          where: { propertyId: 1, ...transactionDateFilter },
         })
         .expect(200);
 

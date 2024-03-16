@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -41,7 +42,11 @@ export class ExpenseController {
     @User() user: JWTUser,
     @Param('id') id: string,
   ): Promise<Expense> {
-    return this.service.findOne(user, Number(id));
+    const expense = await this.service.findOne(user, Number(id));
+    if (!expense) {
+      throw new NotFoundException();
+    }
+    return expense;
   }
 
   @Post('/')

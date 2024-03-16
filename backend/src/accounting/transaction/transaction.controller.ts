@@ -41,6 +41,15 @@ export class TransactionController {
     return this.service.statistics(user, options);
   }
 
+  @Post('/')
+  async add(
+    @User() user: JWTUser,
+    @Body() input: TransactionInputDto,
+  ): Promise<boolean> {
+    await this.service.add(user, input);
+    return true;
+  }
+
   @Get('/:id')
   async findOne(
     @User() user: JWTUser,

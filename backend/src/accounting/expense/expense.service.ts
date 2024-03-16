@@ -58,7 +58,7 @@ export class ExpenseService {
     }
     const expenseEntity = new Expense();
 
-    this.mapData(expenseEntity, input);
+    this.mapData(user, expenseEntity, input);
 
     return await this.repository.save(expenseEntity);
   }
@@ -97,7 +97,7 @@ export class ExpenseService {
   ): Promise<Expense> {
     const expenseEntity = await this.getEntityOrThrow(user, id);
 
-    this.mapData(expenseEntity, input);
+    this.mapData(user, expenseEntity, input);
     if (expenseEntity.transaction !== undefined) {
       expenseEntity.transaction.id = expenseEntity.transactionId;
     }
@@ -111,7 +111,7 @@ export class ExpenseService {
     await this.repository.delete(id);
   }
 
-  private mapData(expense: Expense, input: ExpenseInputDto) {
+  private mapData(user, expense: Expense, input: ExpenseInputDto) {
     Object.entries(input).forEach(([key, value]) => {
       if (value !== undefined) {
         expense[key] = value;
@@ -121,6 +121,9 @@ export class ExpenseService {
     if (expense.transaction !== undefined) {
       expense.transaction.propertyId = expense.propertyId;
       expense.transaction.property = expense.property;
+    }
+    if (expense.expenseType !== undefined) {
+      expense.expenseType.userId = user.id;
     }
   }
 

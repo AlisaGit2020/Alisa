@@ -1,7 +1,6 @@
 import { TestData } from '../test-data';
 import { ExpenseInputDto } from 'src/accounting/expense/dtos/expense-input.dto';
 import { TransactionInputDto } from 'src/accounting/transaction/dtos/transaction-input.dto';
-import { expenseTypeTestData } from './expense-type.test.data';
 import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { Expense } from 'src/accounting/expense/entities/expense.entity';
 import { propertyTestData } from '../real-estate/property.test.data';
@@ -14,8 +13,8 @@ export const expenseTestData = {
   baseUrlWithId: '/accounting/expense/1',
 
   inputPost: {
-    expenseType: expenseTypeTestData.inputPost,
-    property: propertyTestData.inputPost,
+    expenseTypeId: 1,
+    propertyId: 1,
     description: 'Siivousmaksu',
     amount: 39.64,
     quantity: 1,
@@ -32,8 +31,6 @@ export const expenseTestData = {
   } as ExpenseInputDto,
 
   inputPut: {
-    expenseType: expenseTypeTestData.inputPut,
-    property: propertyTestData.inputPut,
     description: 'Yhtiövastike',
     amount: 94,
     quantity: 2,
@@ -46,12 +43,11 @@ export const expenseTestData = {
       description: 'Yhtiövastike',
       transactionDate: startOfDay(new Date('2023-02-28')),
       accountingDate: startOfDay(new Date('2023-03-31')),
-      amount: 188,
+      amount: -188,
     } as TransactionInputDto,
   } as ExpenseInputDto,
 
   expected: {
-    expenseType: expenseTypeTestData.expected,
     expenseTypeId: 1,
     property: propertyTestData.expected,
     propertyId: 1,
@@ -75,9 +71,7 @@ export const expenseTestData = {
 
   expectedPut: {
     id: 1,
-    expenseType: expenseTypeTestData.expectedPut,
     expenseTypeId: 1,
-    property: propertyTestData.expectedPut,
     propertyId: 1,
     description: 'Yhtiövastike',
     amount: 94,
@@ -92,6 +86,7 @@ export const expenseTestData = {
       transactionDate: startOfDay(new Date('2023-02-28')).toISOString(),
       accountingDate: startOfDay(new Date('2023-03-31')).toISOString(),
       amount: -188.0,
+      propertyId: 1,
     },
     transactionId: 1,
   },

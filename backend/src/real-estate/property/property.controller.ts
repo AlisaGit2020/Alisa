@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -36,7 +37,11 @@ export class PropertyController {
     @User() user: JWTUser,
     @Param('id') id: string,
   ): Promise<Property> {
-    return this.service.findOne(user, Number(id));
+    const property = await this.service.findOne(user, Number(id));
+    if (!property) {
+      throw new NotFoundException('Property not found');
+    }
+    return property;
   }
 
   @Post('/')

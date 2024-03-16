@@ -27,6 +27,7 @@ export const expenseTypeTestData = {
     name: 'Lainan korko',
     description: 'Pankkilaina lyhennyksen koron osuus',
     isTaxDeductible: true,
+    userId: 2,
   },
 
   expectedPut: {
@@ -34,6 +35,7 @@ export const expenseTypeTestData = {
     name: 'Lainan lyhennys',
     description: 'Pankkilaina lyhennyksen lainan lyhennys',
     isTaxDeductible: false,
+    userId: 2,
   },
 
   searchOptions: {

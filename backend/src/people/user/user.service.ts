@@ -55,6 +55,12 @@ export class UserService {
 
   async hasOwnership(userId: number, propertyId: number): Promise<boolean> {
     const user = await this.findOne(userId, { relations: ['ownerships'] });
+    if (!user) {
+      return false;
+    }
+    if (!user.ownerships) {
+      return false;
+    }
     return user.ownerships.some(
       (ownership) => ownership.propertyId === propertyId,
     );

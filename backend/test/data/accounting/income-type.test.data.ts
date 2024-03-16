@@ -30,6 +30,7 @@ export const incomeTypeTestData = {
     id: 1,
     name: 'Lainan lyhennys',
     description: 'Pankkilaina lyhennyksen lainan lyhennys',
+    userId: 2,
   },
 
   searchOptions: {
