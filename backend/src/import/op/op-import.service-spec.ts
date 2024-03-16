@@ -23,12 +23,14 @@ import {
   TestUsersSetup,
 } from '../../../test/helper-functions';
 import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
+import { BalanceService } from '@alisa-backend/accounting/transaction/balance.service';
 
 describe('OpImport service', () => {
   let service: OpImportService;
   let expenseService: ExpenseService;
   let incomeService: IncomeService;
   let transactionService: TransactionService;
+  let balanceService: BalanceService;
   let app: INestApplication;
   let testUsers: TestUsersSetup;
   let mainUser: TestUser;
@@ -52,6 +54,7 @@ describe('OpImport service', () => {
     incomeService = app.get<IncomeService>(IncomeService);
     expenseService = app.get<ExpenseService>(ExpenseService);
     transactionService = app.get<TransactionService>(TransactionService);
+    balanceService = app.get<BalanceService>(BalanceService);
 
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
@@ -71,7 +74,7 @@ describe('OpImport service', () => {
     balance = -331.55,
   ) => {
     return expect(
-      await transactionService.getBalance(mainUser.jwtUser, propertyId),
+      await balanceService.getBalance(mainUser.jwtUser, propertyId),
     ).toBe(balance);
   };
 

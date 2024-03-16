@@ -4,14 +4,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, LessThan, MoreThan, Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { TransactionInputDto } from './dtos/transaction-input.dto';
 import { Transaction } from './entities/transaction.entity';
 import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
 import { TransactionStatisticsDto } from './dtos/transaction-statistics.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
-import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
+import { BalanceService } from '@alisa-backend/accounting/transaction/balance.service';
 
 @Injectable()
 export class TransactionService {
@@ -20,7 +20,7 @@ export class TransactionService {
     private repository: Repository<Transaction>,
 
     private authService: AuthService,
-    private propertyService: PropertyService,
+    private balanceService: BalanceService,
   ) {}
 
   async search(
@@ -59,7 +59,7 @@ export class TransactionService {
 
     const transactionEntity = new Transaction();
     this.mapData(transactionEntity, input);
-    await this.calculateBalanceAddCase(user, transactionEntity);
+    await this.balanceService.handleTransactionAdd(user, transactionEntity);
     return await this.repository.save(transactionEntity);
   }
 
@@ -71,11 +71,11 @@ export class TransactionService {
     await this.getEntityOrThrow(user, id);
 
     const transactionEntity = await this.findOne(user, id);
-    await this.calculateBalanceUpdateCase(user, transactionEntity, input);
+    await this.balanceService.handleTransactionUpdate(transactionEntity, input);
     this.mapData(transactionEntity, input);
 
     await this.repository.save(transactionEntity);
-    await this.recalculateBalancesAfter(transactionEntity);
+    await this.balanceService.recalculateBalancesAfter(transactionEntity);
 
     return transactionEntity;
   }
@@ -91,7 +91,7 @@ export class TransactionService {
   async delete(user: JWTUser, id: number): Promise<void> {
     const transaction = await this.getEntityOrThrow(user, id);
     await this.repository.delete(id);
-    await this.recalculateBalancesAfterDelete(transaction);
+    await this.balanceService.recalculateBalancesAfterDelete(transaction);
   }
 
   async statistics(
@@ -129,113 +129,6 @@ export class TransactionService {
       totalIncomes: Number(result.totalIncomes),
       total: Number(result.total),
     };
-  }
-
-  async getBalance(user: JWTUser, propertyId: number): Promise<number> {
-    const property = await this.propertyService.findOne(user, propertyId);
-    if (!property) {
-      throw new NotFoundException();
-    }
-
-    if (!(await this.authService.hasOwnership(user, propertyId))) {
-      throw new UnauthorizedException();
-    }
-
-    const transactions = await this.search(user, {
-      where: { propertyId },
-      order: { id: 'DESC' },
-      take: 1,
-    });
-
-    if (transactions.length === 0) {
-      return 0;
-    }
-
-    return transactions[0].balance;
-  }
-
-  async calculateBalanceAddCase(
-    user: JWTUser,
-    transaction: Transaction,
-  ): Promise<void> {
-    const balance = await this.getBalance(user, transaction.propertyId);
-    transaction.balance = balance + transaction.amount;
-  }
-
-  async calculateBalanceUpdateCase(
-    user: JWTUser,
-    transaction: Transaction,
-    input: TransactionInputDto,
-  ): Promise<void> {
-    if (input.amount === transaction.amount) {
-      return;
-    }
-    //Get all transaction ids before the current transaction
-    const previousIds = await this.repository.find({
-      where: {
-        propertyId: transaction.propertyId,
-        id: LessThan(transaction.id),
-      },
-      order: { id: 'DESC' },
-      select: ['id'],
-      take: 1,
-    });
-    const previousId = previousIds[0]?.id ?? 0;
-
-    if (previousId === 0) {
-      transaction.balance = input.amount;
-      return;
-    }
-    //Get previous row balance
-    const previousBalance = await this.repository.findOne({
-      where: { id: previousId },
-      select: ['balance'],
-    });
-    //Calculate the new balance, previous balance new amount
-    transaction.balance = previousBalance.balance + input.amount;
-  }
-
-  private async recalculateBalancesAfter(transaction: Transaction) {
-    const transactions = await this.repository.find({
-      where: {
-        propertyId: transaction.propertyId,
-        id: MoreThan(transaction.id),
-      },
-      order: { id: 'ASC' },
-    });
-
-    if (transactions.length === 0) {
-      return;
-    }
-
-    let balance = transaction.balance;
-
-    for (const t of transactions) {
-      balance = t.amount + balance;
-      t.balance = balance;
-      await this.repository.save(t);
-    }
-  }
-
-  private async recalculateBalancesAfterDelete(transaction: Transaction) {
-    const transactions = await this.repository.find({
-      where: {
-        propertyId: transaction.propertyId,
-        id: MoreThan(transaction.id),
-      },
-      order: { id: 'ASC' },
-      take: 1,
-    });
-    const nextTransaction = transactions[0];
-
-    if (!nextTransaction) {
-      return;
-    }
-    //Fix next transaction balance
-    nextTransaction.balance = nextTransaction.balance - transaction.amount;
-    await this.repository.save(nextTransaction);
-
-    await this.recalculateBalancesAfter(nextTransaction);
   }
 
   private mapData(transaction: Transaction, input: TransactionInputDto) {
