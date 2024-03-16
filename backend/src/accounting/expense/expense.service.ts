@@ -71,7 +71,6 @@ export class ExpenseService {
       return this.add(user, input);
     }
   }
-
   async getDefault(): Promise<ExpenseInputDto> {
     const properties = await this.propertyRepository.find({
       take: 1,
@@ -100,7 +99,9 @@ export class ExpenseService {
     const expenseEntity = await this.getEntityOrThrow(user, id);
 
     this.mapData(expenseEntity, input);
-    expenseEntity.transaction.id = expenseEntity.transactionId;
+    if (expenseEntity.transaction !== undefined) {
+      expenseEntity.transaction.id = expenseEntity.transactionId;
+    }
 
     await this.repository.save(expenseEntity);
     return expenseEntity;
@@ -118,8 +119,10 @@ export class ExpenseService {
       }
     });
 
-    expense.transaction.propertyId = expense.propertyId;
-    expense.transaction.property = expense.property;
+    if (expense.transaction !== undefined) {
+      expense.transaction.propertyId = expense.propertyId;
+      expense.transaction.property = expense.property;
+    }
   }
 
   private async getEntityOrThrow(user: JWTUser, id: number): Promise<Expense> {

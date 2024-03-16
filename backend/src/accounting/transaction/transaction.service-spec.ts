@@ -383,6 +383,9 @@ describe('Transaction service', () => {
         },
       );
 
+      //Todo: Implement this test.
+      it.skip('gets balance correctly when the property change', async () => {});
+
       it.each([
         [1, 862.36],
         [2, 21.36],

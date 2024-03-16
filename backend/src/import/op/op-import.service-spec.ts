@@ -66,12 +66,22 @@ describe('OpImport service', () => {
     await app.close();
   });
 
+  const checkBalance = async (
+    propertyId = opImportInput.propertyId,
+    balance = -331.55,
+  ) => {
+    return expect(
+      await transactionService.getBalance(mainUser.jwtUser, propertyId),
+    ).toBe(balance);
+  };
+
   it('import CSV', async () => {
     const expenses = await expenseService.search(mainUser.jwtUser, {});
     const incomes = await incomeService.search(mainUser.jwtUser, {});
 
     expect(expenses.length).toBe(7);
     expect(incomes.length).toBe(13);
+    await checkBalance();
   });
 
   it('does not add double', async () => {
@@ -82,6 +92,7 @@ describe('OpImport service', () => {
 
     expect(expenses.length).toBe(7);
     expect(incomes.length).toBe(13);
+    await checkBalance();
   });
 
   it('saves expense transaction correctly', async () => {
@@ -147,7 +158,7 @@ describe('OpImport service', () => {
     expect(income.totalAmount).toBe(59.69);
   });
 
-  it('changes property, income type and expense type when they change', async () => {
+  it('changes income and expense type when they change', async () => {
     let expenses = await expenseService.search(mainUser.jwtUser, {});
     let incomes = await incomeService.search(mainUser.jwtUser, {});
     expect(expenses[0].propertyId).toBe(1);
@@ -155,7 +166,7 @@ describe('OpImport service', () => {
 
     const input: OpImportInput = {
       file: `${MOCKS_PATH}/import/op.transactions.csv`,
-      propertyId: 2, //Change to another property
+      propertyId: opImportInput.propertyId,
       expenseTypeId: 2,
       incomeTypeId: 2,
     };
@@ -165,12 +176,13 @@ describe('OpImport service', () => {
     expenses = await expenseService.search(mainUser.jwtUser, {});
     incomes = await incomeService.search(mainUser.jwtUser, {});
 
-    expect(expenses[0].propertyId).toBe(2);
-    expect(incomes[0].propertyId).toBe(2);
+    expect(expenses[0].propertyId).toBe(1);
+    expect(incomes[0].propertyId).toBe(1);
     expect(expenses[0].expenseTypeId).toBe(2);
     expect(incomes[0].incomeTypeId).toBe(2);
     expect(expenses.length).toBe(7);
     expect(incomes.length).toBe(13);
+    await checkBalance();
   });
 
   it('throws not found when property not exist', async () => {

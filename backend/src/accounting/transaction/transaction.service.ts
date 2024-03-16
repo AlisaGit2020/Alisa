@@ -80,6 +80,14 @@ export class TransactionService {
     return transactionEntity;
   }
 
+  async save(user: JWTUser, input: TransactionInputDto): Promise<Transaction> {
+    if (input.id > 0) {
+      return this.update(user, input.id, input);
+    } else {
+      return this.add(user, input);
+    }
+  }
+
   async delete(user: JWTUser, id: number): Promise<void> {
     const transaction = await this.getEntityOrThrow(user, id);
     await this.repository.delete(id);
@@ -159,6 +167,9 @@ export class TransactionService {
     transaction: Transaction,
     input: TransactionInputDto,
   ): Promise<void> {
+    if (input.amount === transaction.amount) {
+      return;
+    }
     //Get all transaction ids before the current transaction
     const previousIds = await this.repository.find({
       where: {

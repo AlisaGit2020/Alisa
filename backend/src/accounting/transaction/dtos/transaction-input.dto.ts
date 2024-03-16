@@ -3,6 +3,8 @@ import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-
 import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
 
 export class TransactionInputDto {
+  id?: number;
+
   externalId?: string;
 
   @IsNotEmpty()

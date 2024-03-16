@@ -100,7 +100,9 @@ export class IncomeService {
     const incomeEntity = await this.getEntityOrThrow(user, id);
 
     this.mapData(incomeEntity, input);
-    incomeEntity.transaction.id = incomeEntity.transactionId;
+    if (incomeEntity.transaction !== undefined) {
+      incomeEntity.transaction.id = incomeEntity.transactionId;
+    }
 
     await this.repository.save(incomeEntity);
     return incomeEntity;
@@ -118,8 +120,10 @@ export class IncomeService {
       }
     });
 
-    income.transaction.propertyId = income.propertyId;
-    income.transaction.property = income.property;
+    if (income.transaction !== undefined) {
+      income.transaction.propertyId = income.propertyId;
+      income.transaction.property = income.property;
+    }
   }
 
   private async getEntityOrThrow(user: JWTUser, id: number): Promise<Income> {

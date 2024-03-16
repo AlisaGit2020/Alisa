@@ -15,12 +15,14 @@ import { OpImportInput } from './dtos/op-import-input.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
+import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
 
 @Injectable()
 export class OpImportService {
   constructor(
     private expenseService: ExpenseService,
     private incomeService: IncomeService,
+    private transactionService: TransactionService,
     private propertyService: PropertyService,
     private authService: AuthService,
   ) {}
@@ -84,22 +86,47 @@ export class OpImportService {
     options: OpImportInput,
   ) {
     for (const opCsvRow of rows) {
-      if (this.isExpense(opCsvRow)) {
-        const expense = await this.toExpense(user, opCsvRow, options);
-        try {
-          await this.expenseService.save(user, expense);
-        } catch (error: unknown) {
-          this.handleError(error);
+      const transaction = await this.toTransaction(user, opCsvRow, options);
+      try {
+        const savedTransaction = await this.transactionService.save(
+          user,
+          transaction,
+        );
+
+        if (this.isExpense(opCsvRow)) {
+          const expense = await this.toExpense(user, opCsvRow, options);
+          expense.transactionId = savedTransaction.id;
+          try {
+            await this.expenseService.save(user, expense);
+          } catch (error: unknown) {
+            this.handleError(error);
+          }
+        } else {
+          const income = await this.toIncome(user, opCsvRow, options);
+          income.transactionId = savedTransaction.id;
+          try {
+            await this.incomeService.save(user, income);
+          } catch (error: unknown) {
+            this.handleError(error);
+          }
         }
-      } else {
-        const income = await this.toIncome(user, opCsvRow, options);
-        try {
-          await this.incomeService.save(user, income);
-        } catch (error: unknown) {
-          this.handleError(error);
-        }
+      } catch (error: unknown) {
+        this.handleError(error);
       }
     }
+  }
+
+  private async getTransactionId(
+    user: JWTUser,
+    opCsvRow: CSVRow,
+  ): Promise<number | undefined> {
+    const transactions = await this.transactionService.search(user, {
+      where: {
+        externalId: this.getExternalId(opCsvRow),
+      },
+    });
+
+    return transactions[0]?.id ?? undefined;
   }
 
   private async getExpenseId(
@@ -141,7 +168,7 @@ export class OpImportService {
     expense.totalAmount = expense.amount * expense.quantity * -1; //positive amount
     expense.expenseTypeId = this.getExpenseTypeId(options);
     expense.propertyId = options.propertyId;
-    expense.transaction = this.toTransaction(opCsvRow);
+    expense.transaction = undefined;
     return expense;
   }
 
@@ -158,12 +185,17 @@ export class OpImportService {
     income.totalAmount = income.amount * income.quantity;
     income.incomeTypeId = this.getIncomeTypeId(options);
     income.propertyId = options.propertyId;
-    income.transaction = this.toTransaction(opCsvRow);
+    income.transaction = undefined;
     return income;
   }
 
-  private toTransaction(opCsvRow: CSVRow): TransactionInputDto {
+  private async toTransaction(
+    user: JWTUser,
+    opCsvRow: CSVRow,
+    options: OpImportInput,
+  ): Promise<TransactionInputDto> {
     const transaction = new TransactionInputDto();
+    transaction.id = await this.getTransactionId(user, opCsvRow);
 
     if (this.isExpense(opCsvRow)) {
       //Expense
@@ -175,6 +207,7 @@ export class OpImportService {
       transaction.receiver = 'Juha Koivisto';
     }
 
+    transaction.propertyId = options.propertyId;
     transaction.externalId = this.getExternalId(opCsvRow);
     transaction.description = this.getMessagePart(opCsvRow.message);
     transaction.transactionDate = new Date(opCsvRow.datePosted);

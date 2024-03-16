@@ -46,6 +46,6 @@ import { RealEstateModule } from '@alisa-backend/real-estate/real-estate.module'
       Property,
     ]),
   ],
-  exports: [ExpenseService, IncomeService],
+  exports: [ExpenseService, IncomeService, TransactionService],
 })
 export class AccountingModule {}
