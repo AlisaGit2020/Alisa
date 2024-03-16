@@ -4,19 +4,18 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
 import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
-import {columnOptionTwoDecimal} from "@alisa-backend/common/typeorm.column.definitions";
+import { columnOptionTwoDecimal } from '@alisa-backend/common/typeorm.column.definitions';
 
 @Entity()
 export class Expense {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @Column({length: 255})
+  @Column({ length: 255 })
   public description: string;
 
   @Column(columnOptionTwoDecimal)
@@ -53,7 +52,7 @@ export class Expense {
   /*Transaction*/
   @ManyToOne(() => Transaction, (transaction) => transaction.expenses, {
     eager: false,
-    cascade: ["insert", "update"],
+    cascade: ['insert', 'update'],
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'transactionId' })

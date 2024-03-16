@@ -150,13 +150,14 @@ export const getTestUsers = async (
 };
 
 export const addIncomeAndExpenseTypes = async (
+  user: JWTUser,
   app: INestApplication,
 ): Promise<void> => {
   const incomeTypeService = app.get<IncomeTypeService>(IncomeTypeService);
   const expenseTypeService = app.get<ExpenseTypeService>(ExpenseTypeService);
 
   for (const expenseType of [expenseType1, expenseType2, expenseType3]) {
-    await expenseTypeService.add(expenseType);
+    await expenseTypeService.add(user, expenseType);
   }
 
   for (const incomeType of [incomeType1, incomeType2, expenseType3]) {
@@ -170,7 +171,7 @@ export const addTransactionsToTestUsers = async (
 ) => {
   const transactionService = app.get<TransactionService>(TransactionService);
 
-  await addIncomeAndExpenseTypes(app);
+  await addIncomeAndExpenseTypes(testUsers.user1WithProperties.jwtUser, app);
 
   const addTransaction = async (
     jwtUser: JWTUser,
@@ -231,6 +232,7 @@ export const addProperty = async (
 };
 
 export const addExpenseType = async (
+  user: JWTUser,
   service: ExpenseTypeService,
   name: string,
   description: string = '',
@@ -241,7 +243,7 @@ export const addExpenseType = async (
   expenseType.description = description;
   expenseType.isTaxDeductible = isTaxDeductible;
 
-  await service.add(expenseType);
+  await service.add(user, expenseType);
 };
 
 export const addIncomeType = async (

@@ -33,7 +33,6 @@ export class ExpenseService {
     options: FindManyOptions<Expense>,
   ): Promise<Expense[]> {
     options.where = this.authService.addOwnershipFilter(user, options.where);
-
     return this.repository.find(options);
   }
 

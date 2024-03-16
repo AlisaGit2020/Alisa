@@ -59,7 +59,7 @@ describe('OpImport service', () => {
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
     mainUser = testUsers.user1WithProperties;
-    await addIncomeAndExpenseTypes(app);
+    await addIncomeAndExpenseTypes(mainUser.jwtUser, app);
 
     //Do the import
     await service.importCsv(mainUser.jwtUser, opImportInput);

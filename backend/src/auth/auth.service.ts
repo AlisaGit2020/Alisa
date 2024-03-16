@@ -6,6 +6,7 @@ import { User } from '../people/user/entities/user.entity';
 import { JWTUser } from './types';
 import { FindOptionsWhere } from 'typeorm';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+import { FindOptionsWhereWithUserId } from '@alisa-backend/common/types';
 
 @Injectable()
 export class AuthService {
@@ -87,6 +88,28 @@ export class AuthService {
           ...ownershipFilter,
         };
       }
+    }
+
+    return where;
+  }
+
+  addUserFilter<T>(
+    user: JWTUser,
+    where: FindOptionsWhereWithUserId<T> | FindOptionsWhereWithUserId<T>[],
+  ): FindOptionsWhereWithUserId<T> | FindOptionsWhereWithUserId<T>[] {
+    if (Array.isArray(where)) {
+      for (const index in where) {
+        where[index] = this.addUserFilter(
+          user,
+          where[index],
+        ) as FindOptionsWhereWithUserId<T>;
+      }
+    } else {
+      if (where === undefined) {
+        where = {} as FindOptionsWhereWithUserId<T>;
+      }
+
+      where.userId = user.id;
     }
 
     return where;

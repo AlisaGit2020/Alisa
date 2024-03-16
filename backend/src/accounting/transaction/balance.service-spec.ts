@@ -49,8 +49,8 @@ describe('Balance service', () => {
 
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
-    await addIncomeAndExpenseTypes(app);
     mainUser = testUsers.user1WithProperties;
+    await addIncomeAndExpenseTypes(mainUser.jwtUser, app);
   });
 
   afterAll(async () => {
