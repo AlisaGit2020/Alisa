@@ -1,103 +1,114 @@
-import { withTranslation } from 'react-i18next';
-import ExpenseForm from './ExpenseForm';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { useState } from 'react';
-import React from 'react';
-import TransactionChooseType from './components/TransactionChooseType';
-import ApiClient from '../../lib/api-client';
-import { transactionContext } from '@alisa-lib/alisa-contexts';
-import IncomeForm from './IncomeForm';
-import { Dialog, DialogContent } from '@mui/material';
-import { TransactionType } from './Transactions';
-import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
+import { Dialog, DialogContent, Stack } from "@mui/material";
+import { useState } from "react";
+import { WithTranslation, withTranslation } from "react-i18next";
+import { transactionContext } from "@alisa-lib/alisa-contexts";
+import AlisaFormHandler from "../alisa/form/AlisaFormHandler";
+import DataService from "@alisa-lib/data-service";
+import { TransactionInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-input.dto";
 
+import React from "react";
+import AlisaLoadingProgress from "../alisa/AlisaLoadingProgress";
+import TransactionFormFields from "./components/TransactionFormFields";
+import AlisaContent from "../alisa/AlisaContent";
+import { TransactionType } from "./Transactions.tsx";
 
-function TransactionForm(props: {
-    open: boolean,
-    id?: number,
-    type?: TransactionType,
-    propertyId: number,
-    onClose: () => void,
-    onAfterSubmit: () => void,
-    onCancel: () => void
-}) {
-    //const { id, type, propertyId } = useParams();
-    const [expenseId, setExpenseId] = useState<number>();
-    const [incomeId, setIncomeId] = useState<number>();
-    const [ready, setReady] = useState<boolean>(false);
+interface TransactionFormProps extends WithTranslation {
+  id?: number;
+  open: boolean;
+  propertyId?: number;
+  type?: TransactionType;
+  onAfterSubmit: () => void;
+  onCancel: () => void;
+  onClose: () => void;
+}
 
-    React.useEffect(() => {
+function TransactionForm({
+  t,
+  open,
+  id,
+  propertyId,
+  type,
+  onAfterSubmit,
+  onCancel,
+  onClose,
+}: TransactionFormProps) {
+  const [data, setData] = useState<TransactionInputDto>(
+    new TransactionInputDto(),
+  );
+  const [ready, setReady] = useState<boolean>(false);
 
-        const fetchData = async (id: number | undefined) => {
+  const dataService = new DataService<TransactionInputDto>({
+    context: transactionContext,
+    relations: { expenses: true, incomes: true },
+    dataValidateInstance: new TransactionInputDto(),
+  });
 
-            if (id) {
-                try {
-                    const transaction = await ApiClient.get<Transaction>(
-                        transactionContext.apiPath,
-                        id,
-                        { expense: true, income: true }
-                    )
-
-                    if (transaction.expense) {
-                        setExpenseId(transaction.expense.id)
-                    }
-
-                    if (transaction.income) {
-                        setIncomeId(transaction.income.id)
-                    }
-                    
-                } catch (error) {
-                    //handleApiError(error);
-                }
-            }
-            setReady(true)
+  React.useEffect(() => {
+    if (id === undefined) {
+      const fetchData = async () => {
+        const defaults = await dataService.getDefaults();
+        if (propertyId) {
+          defaults.propertyId = propertyId;
         }
+        return defaults;
+      };
 
-        fetchData(props.id)
+      fetchData().then((data) => {
+        setData(data);
+        setReady(true);
+      });
+    } else {
+      setReady(true);
+    }
+  }, []);
 
-    }, [props.id])
+  const handleChange = async (name: string, value: unknown) => {
+    let newData = dataService.updateNestedData(data, name, value);
 
-    const getContent = () => {
-        if (!ready) {
-            return <AlisaLoadingProgress></AlisaLoadingProgress>
-        }
-        if (props.type === TransactionType.Expense || expenseId) {
-            return (
-                <ExpenseForm
-                    id={expenseId}
-                    propertyId={props.propertyId}
-                    onAfterSubmit={props.onAfterSubmit}
-                    onCancel={props.onCancel}
-                />
-            );
-        } else if (props.type === TransactionType.Income || incomeId) {
-            return (
-                <IncomeForm
-                    id={incomeId}
-                    propertyId={props.propertyId}
-                    onAfterSubmit={props.onAfterSubmit}
-                    onCancel={props.onCancel}
-                />
-            );
-        } else {
-            return (
-                <TransactionChooseType></TransactionChooseType>
-            );
-        }
+    if (name === "transactionDate") {
+      newData = dataService.updateNestedData(newData, "accountingDate", value);
     }
 
-    return (
-        <Dialog
-            open={props.open}
-            onClose={props.onClose}
-            fullWidth={true}
-            maxWidth={'lg'}>
+    setData(newData);
+  };
 
-            <DialogContent dividers>
-                {getContent()}
-            </DialogContent>
-        </Dialog>
-    )
+  const formComponents = () => {
+    return (
+      <Stack spacing={2} marginBottom={2}>
+        <TransactionFormFields
+          data={data}
+          onHandleChange={handleChange}
+        ></TransactionFormFields>
+      </Stack>
+    );
+  };
+
+  if (ready) {
+    return (
+      <Dialog open={open} onClose={onClose} fullWidth={true} maxWidth={"lg"}>
+        <DialogContent dividers>
+          <AlisaContent headerText={t("transaction")}>
+            <AlisaFormHandler<TransactionInputDto>
+              id={id}
+              dataService={dataService}
+              data={data}
+              formComponents={formComponents()}
+              onSetData={setData}
+              translation={{
+                cancelButton: t("cancel"),
+                submitButton: t("save"),
+                validationMessageTitle: t("validationErrorTitle"),
+              }}
+              onCancel={onCancel}
+              onAfterSubmit={onAfterSubmit}
+            ></AlisaFormHandler>
+          </AlisaContent>
+        </DialogContent>
+      </Dialog>
+    );
+  } else {
+    return <AlisaLoadingProgress></AlisaLoadingProgress>;
+  }
 }
 
 export default withTranslation(transactionContext.name)(TransactionForm);
