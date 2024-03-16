@@ -153,15 +153,29 @@ export const addIncomeAndExpenseTypes = async (
   user: JWTUser,
   app: INestApplication,
 ): Promise<void> => {
-  const incomeTypeService = app.get<IncomeTypeService>(IncomeTypeService);
+  await addExpenseTypes(user, app);
+  await addIncomeTypes(user, app);
+};
+
+export const addExpenseTypes = async (
+  user: JWTUser,
+  app: INestApplication,
+): Promise<void> => {
   const expenseTypeService = app.get<ExpenseTypeService>(ExpenseTypeService);
 
   for (const expenseType of [expenseType1, expenseType2, expenseType3]) {
     await expenseTypeService.add(user, expenseType);
   }
+};
+
+export const addIncomeTypes = async (
+  user: JWTUser,
+  app: INestApplication,
+): Promise<void> => {
+  const incomeTypeService = app.get<IncomeTypeService>(IncomeTypeService);
 
   for (const incomeType of [incomeType1, incomeType2, expenseType3]) {
-    await incomeTypeService.add(incomeType);
+    await incomeTypeService.add(user, incomeType);
   }
 };
 
@@ -247,6 +261,7 @@ export const addExpenseType = async (
 };
 
 export const addIncomeType = async (
+  user: JWTUser,
   service: IncomeTypeService,
   name: string,
   description: string = '',
@@ -255,7 +270,7 @@ export const addIncomeType = async (
   incomeType.name = name;
   incomeType.description = description;
 
-  await service.add(incomeType);
+  await service.add(user, incomeType);
 };
 
 export const sleep = async (milliseconds: number): Promise<void> => {

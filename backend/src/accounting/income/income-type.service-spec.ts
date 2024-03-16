@@ -10,19 +10,19 @@ import {
 import { AppModule } from 'src/app.module';
 
 import {
-  addExpenseTypes,
+  addIncomeTypes,
   emptyTables,
   getTestUsers,
   prepareDatabase,
   TestUser,
   TestUsersSetup,
 } from '../../../test/helper-functions';
-import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
+import { IncomeTypeService } from '@alisa-backend/accounting/income/income-type.service';
 import { DataSource } from 'typeorm';
 
-describe('Expense type service', () => {
+describe('Income type service', () => {
   let app: INestApplication;
-  let service: ExpenseTypeService;
+  let service: IncomeTypeService;
   let testUsers: TestUsersSetup;
   let mainUser: TestUser;
 
@@ -34,12 +34,12 @@ describe('Expense type service', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    service = app.get<ExpenseTypeService>(ExpenseTypeService);
+    service = app.get<IncomeTypeService>(IncomeTypeService);
 
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
     mainUser = testUsers.user1WithProperties;
-    //await addExpenseTypes(mainUser.jwtUser, app);
+    //await addIncomeTypes(mainUser.jwtUser, app);
   });
 
   afterAll(async () => {
@@ -48,21 +48,21 @@ describe('Expense type service', () => {
 
   describe('Create', () => {
     afterAll(async () => {
-      await emptyTables(app.get(DataSource), ['expense_type']);
+      await emptyTables(app.get(DataSource), ['income_type']);
     });
-    it('creates a new expense type to a user', async () => {
+    it('creates a new income type to a user', async () => {
       const input = {
-        name: 'Test expense type',
+        name: 'Test income type',
         description: 'Test description',
         isTaxDeductible: false,
       };
-      const newExpenseType = await service.add(mainUser.jwtUser, input);
+      const newIncomeType = await service.add(mainUser.jwtUser, input);
 
-      expect(newExpenseType).toMatchObject(input);
+      expect(newIncomeType).toMatchObject(input);
     });
     it('throws when saving with the existing name', async () => {
       const input = {
-        name: 'Test expense type',
+        name: 'Test income type',
         description: 'Test description',
         isTaxDeductible: false,
       };
@@ -70,7 +70,7 @@ describe('Expense type service', () => {
     });
     it('does not throw when saving with the existing name to another user', async () => {
       const input = {
-        name: 'Test expense type',
+        name: 'Test income type',
         description: 'Test description',
         isTaxDeductible: false,
       };
@@ -82,21 +82,21 @@ describe('Expense type service', () => {
 
   describe('Read', () => {
     afterAll(async () => {
-      await emptyTables(app.get(DataSource), ['expense_type']);
+      await emptyTables(app.get(DataSource), ['income_type']);
     });
 
-    it(`reads user's expense type `, async () => {
-      await addExpenseTypes(mainUser.jwtUser, app);
-      const expenseTypes = await service.findOne(mainUser.jwtUser, 1);
-      expect(expenseTypes).toBeDefined();
+    it(`reads user's income type `, async () => {
+      await addIncomeTypes(mainUser.jwtUser, app);
+      const incomeTypes = await service.findOne(mainUser.jwtUser, 1);
+      expect(incomeTypes).toBeDefined();
     });
 
-    it('returns null, when expense type does not exist', async () => {
-      const expenseType = await service.findOne(mainUser.jwtUser, 999);
-      expect(expenseType).toBeNull();
+    it('returns null, when income type does not exist', async () => {
+      const incomeType = await service.findOne(mainUser.jwtUser, 999);
+      expect(incomeType).toBeNull();
     });
 
-    it(`throws when reading another user's expense type`, async () => {
+    it(`throws when reading another user's income type`, async () => {
       await expect(
         service.findOne(testUsers.userWithoutProperties.jwtUser, 1),
       ).rejects.toThrowError(UnauthorizedException);
@@ -104,34 +104,30 @@ describe('Expense type service', () => {
   });
 
   describe('Update', () => {
-    let expenseTypeId: number;
+    let incomeTypeId: number;
     beforeAll(async () => {
-      await addExpenseTypes(mainUser.jwtUser, app);
-      expenseTypeId = 1;
+      await addIncomeTypes(mainUser.jwtUser, app);
+      incomeTypeId = 1;
     });
 
     afterAll(async () => {
-      await emptyTables(app.get(DataSource), ['expense_type']);
+      await emptyTables(app.get(DataSource), ['income_type']);
     });
 
-    it('updates expense type', async () => {
+    it('updates income type', async () => {
       const input = {
-        name: 'Updated expense type',
+        name: 'Updated income type',
         description: 'Updated description',
-        isTaxDeductible: true,
       };
-      await service.update(mainUser.jwtUser, expenseTypeId, input);
+      await service.update(mainUser.jwtUser, incomeTypeId, input);
 
-      const expenseType = await service.findOne(
-        mainUser.jwtUser,
-        expenseTypeId,
-      );
-      expect(expenseType).toMatchObject(input);
+      const incomeType = await service.findOne(mainUser.jwtUser, incomeTypeId);
+      expect(incomeType).toMatchObject(input);
     });
 
-    it('throws not found when updating non-existing expense type', async () => {
+    it('throws not found when updating non-existing income type', async () => {
       const input = {
-        name: 'Updated expense type',
+        name: 'Updated income type',
         description: 'Updated description',
         isTaxDeductible: true,
       };
@@ -140,16 +136,16 @@ describe('Expense type service', () => {
       ).rejects.toThrowError(NotFoundException);
     });
 
-    it('throws when updating another user expense type', async () => {
+    it('throws when updating another user income type', async () => {
       const input = {
-        name: 'Updated expense type',
+        name: 'Updated income type',
         description: 'Updated description',
         isTaxDeductible: true,
       };
       await expect(
         service.update(
           testUsers.userWithoutProperties.jwtUser,
-          expenseTypeId,
+          incomeTypeId,
           input,
         ),
       ).rejects.toThrowError(UnauthorizedException);
@@ -157,60 +153,57 @@ describe('Expense type service', () => {
   });
 
   describe('Delete', () => {
-    let expenseTypeId: number;
+    let incomeTypeId: number;
     beforeAll(async () => {
-      await addExpenseTypes(mainUser.jwtUser, app);
-      expenseTypeId = 1;
+      await addIncomeTypes(mainUser.jwtUser, app);
+      incomeTypeId = 1;
     });
 
     afterAll(async () => {
-      await emptyTables(app.get(DataSource), ['expense_type']);
+      await emptyTables(app.get(DataSource), ['income_type']);
     });
 
-    it('throws not found when deleting non-existing expense type', async () => {
+    it('throws not found when deleting non-existing income type', async () => {
       await expect(service.delete(mainUser.jwtUser, 999)).rejects.toThrowError(
         NotFoundException,
       );
     });
 
-    it('throws when deleting another user expense type', async () => {
+    it('throws when deleting another user income type', async () => {
       await expect(
-        service.delete(testUsers.userWithoutProperties.jwtUser, expenseTypeId),
+        service.delete(testUsers.userWithoutProperties.jwtUser, incomeTypeId),
       ).rejects.toThrowError(UnauthorizedException);
     });
 
-    it('deletes user expense type', async () => {
-      await service.delete(mainUser.jwtUser, expenseTypeId);
+    it('deletes user income type', async () => {
+      await service.delete(mainUser.jwtUser, incomeTypeId);
 
-      const expenseType = await service.findOne(
-        mainUser.jwtUser,
-        expenseTypeId,
-      );
-      expect(expenseType).toBeNull();
+      const incomeType = await service.findOne(mainUser.jwtUser, incomeTypeId);
+      expect(incomeType).toBeNull();
     });
   });
 
   describe('Search', () => {
     beforeAll(async () => {
-      await addExpenseTypes(mainUser.jwtUser, app);
+      await addIncomeTypes(mainUser.jwtUser, app);
     });
     afterAll(async () => {
-      await emptyTables(app.get(DataSource), ['expense_type']);
+      await emptyTables(app.get(DataSource), ['income_type']);
     });
 
-    it(`searches user's expense types`, async () => {
-      const expenseTypes = await service.search(mainUser.jwtUser, {
-        where: { name: 'Siivous' },
+    it(`searches user's income types`, async () => {
+      const incomeTypes = await service.search(mainUser.jwtUser, {
+        where: { name: 'Airbnb' },
       });
-      expect(expenseTypes.length).toBe(1);
+      expect(incomeTypes.length).toBe(1);
     });
 
-    it('returns empty result when user has no expense types', async () => {
-      const expenseTypes = await service.search(
+    it('returns empty result when user has no income types', async () => {
+      const incomeTypes = await service.search(
         testUsers.userWithoutProperties.jwtUser,
         {},
       );
-      expect(expenseTypes.length).toBe(0);
+      expect(incomeTypes.length).toBe(0);
     });
   });
 });
