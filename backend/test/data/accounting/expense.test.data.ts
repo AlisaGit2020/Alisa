@@ -11,6 +11,7 @@ export const expenseTestData = {
   tables: ['expense', 'expense_type', 'property', 'transaction'],
   baseUrl: '/accounting/expense',
   baseUrlWithId: '/accounting/expense/1',
+  hasDefault: true,
 
   inputPost: {
     expenseTypeId: 1,

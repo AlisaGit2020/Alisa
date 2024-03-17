@@ -71,22 +71,14 @@ export class ExpenseService {
     }
   }
   async getDefault(): Promise<ExpenseInputDto> {
-    const properties = await this.propertyRepository.find({
-      take: 1,
-      order: { name: 'ASC' },
-    });
-
     const expenseTypes = await this.expenseTypeRepository.find({
       take: 1,
       order: { name: 'ASC' },
     });
 
     const expense = new ExpenseInputDto();
-    expense.propertyId = properties[0].id;
     expense.expenseTypeId = expenseTypes[0].id;
-    expense.transaction = new TransactionInputDto();
-    expense.transaction.accountingDate = new Date();
-    expense.transaction.transactionDate = new Date();
+
     return expense;
   }
 

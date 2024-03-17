@@ -73,22 +73,13 @@ export class IncomeService {
   }
 
   async getDefault(): Promise<IncomeInputDto> {
-    const properties = await this.propertyRepository.find({
-      take: 1,
-      order: { name: 'ASC' },
-    });
-
     const incomeTypes = await this.incomeTypeRepository.find({
       take: 1,
       order: { name: 'ASC' },
     });
 
     const income = new IncomeInputDto();
-    income.propertyId = properties[0].id;
     income.incomeTypeId = incomeTypes[0].id;
-    income.transaction = new TransactionInputDto();
-    income.transaction.accountingDate = new Date();
-    income.transaction.transactionDate = new Date();
     return income;
   }
 

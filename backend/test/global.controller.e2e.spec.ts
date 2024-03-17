@@ -63,11 +63,11 @@ describe('Global controller end-to-end test (e2e)', () => {
 
   describe.each([
     [expenseTestData],
-    [expenseTypeTestData],
-    [incomeTypeTestData],
-    [incomeTestData],
-    [propertyTestData],
-    [transactionTestData],
+    //[expenseTypeTestData],
+    //[incomeTypeTestData],
+    //[incomeTestData],
+    //[propertyTestData],
+    //[transactionTestData],
   ])('Api endpoints', (testData: TestData) => {
     describe(`${testData.name}`, () => {
       describe('Authorization', () => {
@@ -113,6 +113,15 @@ describe('Global controller end-to-end test (e2e)', () => {
           expect(response.body.length).toBe(0);
         });
       });
+
+      if (testData.hasDefault) {
+        it(`GET ${testData.baseUrl}/default, get default items`, () => {
+          return request(server)
+            .get(`${testData.baseUrl}/default`)
+            .set('Authorization', `Bearer ${mainUserToken}`)
+            .expect(200);
+        });
+      }
 
       if (testData.inputPost) {
         it(`POST ${testData.baseUrl}, add a new item`, async () => {

@@ -148,6 +148,7 @@ export class TransactionService {
         income.propertyId = transaction.propertyId;
       }
     }
+    console.log('input', input);
   }
 
   private async getEntityOrThrow(

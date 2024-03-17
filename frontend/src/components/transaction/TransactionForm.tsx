@@ -1,16 +1,16 @@
 import { Dialog, DialogContent, Stack } from "@mui/material";
-import { useState } from "react";
+import React, { useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
 import AlisaFormHandler from "../alisa/form/AlisaFormHandler";
 import DataService from "@alisa-lib/data-service";
 import { TransactionInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-input.dto";
-
-import React from "react";
 import AlisaLoadingProgress from "../alisa/AlisaLoadingProgress";
 import TransactionFormFields from "./components/TransactionFormFields";
 import AlisaContent from "../alisa/AlisaContent";
 import { TransactionType } from "./Transactions.tsx";
+import ExpensesFormFields from "./components/ExpensesFormFields.tsx";
+import { ExpenseInputDto } from "@alisa-backend/accounting/expense/dtos/expense-input.dto.ts";
 
 interface TransactionFormProps extends WithTranslation {
   id?: number;
@@ -46,7 +46,7 @@ function TransactionForm({
   React.useEffect(() => {
     if (id === undefined) {
       const fetchData = async () => {
-        const defaults = await dataService.getDefaults();
+        const defaults = new TransactionInputDto();
         if (propertyId) {
           defaults.propertyId = propertyId;
         }
@@ -68,8 +68,23 @@ function TransactionForm({
     if (name === "transactionDate") {
       newData = dataService.updateNestedData(newData, "accountingDate", value);
     }
-
     setData(newData);
+  };
+
+  const handleExpenseChange = async (expenses: ExpenseInputDto[]) => {
+    await handleChange("expenses", expenses);
+  };
+
+  const getType = (): TransactionType | undefined => {
+    if (type !== undefined) {
+      return type;
+    }
+    if (data.expenses && data.expenses.length > 0) {
+      return TransactionType.Expense;
+    }
+    if (data.incomes && data.incomes.length > 0) {
+      return TransactionType.Income;
+    }
   };
 
   const formComponents = () => {
@@ -79,8 +94,23 @@ function TransactionForm({
           data={data}
           onHandleChange={handleChange}
         ></TransactionFormFields>
+        {getDetailComponents()}
       </Stack>
     );
+  };
+
+  const getDetailComponents = () => {
+    if (getType() === TransactionType.Expense) {
+      return (
+        <ExpensesFormFields
+          transaction={data}
+          onHandleChange={handleExpenseChange}
+        ></ExpensesFormFields>
+      );
+    }
+    if (getType() === TransactionType.Income) {
+      return "IncomeDetails";
+    }
   };
 
   if (ready) {

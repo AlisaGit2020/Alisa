@@ -16,9 +16,11 @@ export class TransactionInputDto {
   @IsNotEmpty()
   description: string = '';
 
-  transactionDate!: Date;
+  @IsNotEmpty()
+  transactionDate: Date = new Date();
 
-  accountingDate!: Date;
+  @IsNotEmpty()
+  accountingDate: Date = new Date();
 
   amount: number = 0;
 
