@@ -9,58 +9,59 @@ import AlisaTextField from "../../alisa/form/AlisaTextField";
 interface ExpenseFormProps extends WithTranslation {
   data: TransactionInputDto;
   onHandleChange: (name: string, value: unknown) => void;
+  onDescriptionChange: (value: string) => void;
+  onAmountChange: (value: number) => void;
 }
 
-function TransactionFormFields({ t, data, onHandleChange }: ExpenseFormProps) {
+function TransactionFormFields(props: ExpenseFormProps) {
   const handleChange = (name: keyof TransactionInputDto, value: unknown) => {
-    onHandleChange(name, value);
+    props.onHandleChange(name, value);
   };
 
   return (
     <>
       <Stack direction={"row"} spacing={2}>
         <AlisaTextField
-          label={t("sender")}
-          value={data.sender}
+          label={props.t("sender")}
+          value={props.data.sender}
           autoComplete="off"
           autoFocus={true}
           onChange={(e) => handleChange("sender", e.target.value)}
         />
 
         <AlisaTextField
-          label={t("receiver")}
-          value={data.receiver}
+          label={props.t("receiver")}
+          value={props.data.receiver}
           autoComplete="off"
           onChange={(e) => handleChange("receiver", e.target.value)}
         />
       </Stack>
 
       <AlisaTextField
-        label={t("description")}
-        value={data.description}
+        label={props.t("description")}
+        value={props.data.description}
         autoComplete="off"
         onChange={(e) => handleChange("description", e.target.value)}
+        onBlur={() => props.onDescriptionChange(props.data.description)}
       />
 
       <Stack direction={"row"} spacing={2}>
+        <AlisaNumberField
+          label={props.t("totalAmount")}
+          value={props.data.amount}
+          onChange={(e) => handleChange("amount", e.target.value)}
+          onBlur={() => props.onAmountChange(props.data.amount)}
+          adornment="€"
+        />
         <AlisaDatePicker
-          label={t("transactionDate")}
-          value={data.transactionDate}
+          label={props.t("transactionDate")}
+          value={props.data.transactionDate}
           onChange={(newValue) => handleChange("transactionDate", newValue)}
         />
         <AlisaDatePicker
-          label={t("accountingDate")}
-          value={data.accountingDate}
+          label={props.t("accountingDate")}
+          value={props.data.accountingDate}
           onChange={(newValue) => handleChange("accountingDate", newValue)}
-        />
-      </Stack>
-
-      <Stack direction={"row"} spacing={2}>
-        <AlisaNumberField
-          label={t("totalAmount")}
-          value={data.amount}
-          onChange={(e) => handleChange("amount", e.target.value)}
-          adornment="€"
         />
       </Stack>
     </>

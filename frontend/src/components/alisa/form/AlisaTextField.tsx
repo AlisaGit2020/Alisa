@@ -12,6 +12,7 @@ function AlisaTextField(props: {
   onChange?:
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
     | undefined;
+  onBlur?: () => void;
 }) {
   return (
     <TextField
@@ -25,6 +26,7 @@ function AlisaTextField(props: {
       }
       disabled={props.disabled !== undefined ? props.disabled : false}
       onChange={props.onChange}
+      onBlur={props.onBlur}
       InputProps={{
         endAdornment: props.adornment ? (
           <InputAdornment position="end">{props.adornment}</InputAdornment>

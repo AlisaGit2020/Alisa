@@ -37,6 +37,9 @@ function TransactionForm({
   );
   const [ready, setReady] = useState<boolean>(false);
 
+  const [description, setDescription] = useState<string>("");
+  const [amount, setAmount] = useState<number>(0);
+
   const dataService = new DataService<TransactionInputDto>({
     context: transactionContext,
     relations: { expenses: true, incomes: true },
@@ -60,7 +63,7 @@ function TransactionForm({
     } else {
       setReady(true);
     }
-  }, []);
+  }, [id, propertyId]);
 
   const handleChange = async (name: string, value: unknown) => {
     let newData = dataService.updateNestedData(data, name, value);
@@ -73,6 +76,14 @@ function TransactionForm({
 
   const handleExpenseChange = async (expenses: ExpenseInputDto[]) => {
     await handleChange("expenses", expenses);
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    setDescription(value);
+  };
+
+  const handleAmountChange = (value: number) => {
+    setAmount(value);
   };
 
   const getType = (): TransactionType | undefined => {
@@ -93,6 +104,8 @@ function TransactionForm({
         <TransactionFormFields
           data={data}
           onHandleChange={handleChange}
+          onDescriptionChange={(value) => handleDescriptionChange(value)}
+          onAmountChange={(value) => handleAmountChange(value)}
         ></TransactionFormFields>
         {getDetailComponents()}
       </Stack>
@@ -105,6 +118,8 @@ function TransactionForm({
         <ExpensesFormFields
           transaction={data}
           onHandleChange={handleExpenseChange}
+          changedDescription={description}
+          changedAmount={amount}
         ></ExpensesFormFields>
       );
     }
