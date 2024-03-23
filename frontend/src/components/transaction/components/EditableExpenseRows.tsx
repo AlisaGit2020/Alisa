@@ -4,27 +4,25 @@ import {
   expenseTypeContext,
   transactionContext,
 } from "@alisa-lib/alisa-contexts.ts";
-import { Grid, IconButton, Stack } from "@mui/material";
-import AlisaNumberField from "../../alisa/form/AlisaNumberField.tsx";
+import { IconButton } from "@mui/material";
 import { ExpenseInputDto } from "@alisa-backend/accounting/expense/dtos/expense-input.dto.ts";
 import React from "react";
 import DataService from "@alisa-lib/data-service.ts";
-import DeleteIcon from "@mui/icons-material/Delete";
 import AlisaSelect from "../../alisa/AlisaSelect.tsx";
 import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity.ts";
-import AlisaTextField from "../../alisa/form/AlisaTextField.tsx";
 import Title from "../../../Title.tsx";
 import Box from "@mui/material/Box";
 import { TransactionInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-input.dto.ts";
 import AddIcon from "@mui/icons-material/Add";
+import RowDataFields from "./RowDataFields.tsx";
 
-interface ExpenseFormFieldsProps extends WithTranslation {
+interface EditableExpenseRowsProps extends WithTranslation {
   transaction: TransactionInputDto;
   onHandleChange: (expenses: ExpenseInputDto[]) => void;
   changedDescription: string;
   changedAmount: number;
 }
-function ExpensesFormFields(props: ExpenseFormFieldsProps) {
+function EditableExpenseRows(props: EditableExpenseRowsProps) {
   const [data, setData] = React.useState<ExpenseInputDto[]>(
     props.transaction?.expenses || [],
   );
@@ -70,6 +68,12 @@ function ExpensesFormFields(props: ExpenseFormFieldsProps) {
 
   const addExpense = async () => {
     const defaults = await dataService.getDefaults();
+    //calculate all expenses total
+    const expensesTotalAmount = data
+      .map((expense) => expense.totalAmount)
+      .reduce((a, b) => Number(a) + Number(b), 0);
+
+    defaults.totalAmount = props.transaction.amount - expensesTotalAmount;
     data.push(defaults);
     setData([...data]);
     props.onHandleChange(data);
@@ -112,70 +116,30 @@ function ExpensesFormFields(props: ExpenseFormFieldsProps) {
     ) => {
       handleChange(index, name, expenseTypeId);
     };
+
     return (
-      <Grid container spacing={0} rowSpacing={0}>
-        <Grid container spacing={1} height={80}>
-          <Grid item xs={2}>
-            <AlisaSelect<ExpenseInputDto, ExpenseType>
-              label={props.t("expenseType")}
-              dataService={
-                new DataService<ExpenseType>({
-                  context: expenseTypeContext,
-                  fetchOptions: { order: { name: "ASC" } },
-                })
-              }
-              fieldName="expenseTypeId"
-              value={expense.expenseTypeId}
-              onHandleChange={handleExpenseTypeChange}
-            ></AlisaSelect>
-          </Grid>
-          <Grid item xs={4}>
-            <AlisaTextField
-              label={props.t("description")}
-              value={expense.description}
-              autoComplete="off"
-              onChange={(e) =>
-                handleChange(index, "description", e.target.value)
-              }
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <Stack direction={"row"} spacing={1}>
-              <AlisaNumberField
-                disabled={true}
-                label={props.t("amount")}
-                value={expense.amount}
-                onChange={(e) => handleChange(index, "amount", e.target.value)}
-                adornment="€"
-              />
-              <AlisaNumberField
-                label={props.t("quantity")}
-                value={expense.quantity}
-                onChange={(e) =>
-                  handleChange(index, "quantity", e.target.value)
-                }
-                onBlur={() => calculateAmount(index)}
-              />
-              <AlisaNumberField
-                label={props.t("totalAmount")}
-                value={expense.totalAmount}
-                autoComplete="off"
-                onChange={(e) =>
-                  handleChange(index, "totalAmount", e.target.value)
-                }
-                onBlur={() => calculateAmount(index)}
-                adornment="€"
-              />
-              <IconButton
-                onClick={() => removeExpense(index)}
-                title={props.t("delete")}
-              >
-                <DeleteIcon color={"secondary"}></DeleteIcon>
-              </IconButton>
-            </Stack>
-          </Grid>
-        </Grid>
-      </Grid>
+      <RowDataFields<ExpenseInputDto>
+        typeSelect={
+          <AlisaSelect<ExpenseInputDto, ExpenseType>
+            label={props.t("expenseType")}
+            dataService={
+              new DataService<ExpenseType>({
+                context: expenseTypeContext,
+                fetchOptions: { order: { name: "ASC" } },
+              })
+            }
+            fieldName="expenseTypeId"
+            value={expense.expenseTypeId}
+            onHandleChange={handleExpenseTypeChange}
+          ></AlisaSelect>
+        }
+        data={expense}
+        index={index}
+        onHandleChange={handleChange}
+        onCalculateAmount={calculateAmount}
+        onRemoveRow={removeExpense}
+        t={props.t}
+      ></RowDataFields>
     );
   };
 
@@ -207,4 +171,4 @@ function ExpensesFormFields(props: ExpenseFormFieldsProps) {
   );
 }
 
-export default withTranslation(transactionContext.name)(ExpensesFormFields);
+export default withTranslation(transactionContext.name)(EditableExpenseRows);

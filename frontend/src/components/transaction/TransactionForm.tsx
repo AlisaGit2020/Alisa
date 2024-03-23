@@ -9,7 +9,7 @@ import AlisaLoadingProgress from "../alisa/AlisaLoadingProgress";
 import TransactionFormFields from "./components/TransactionFormFields";
 import AlisaContent from "../alisa/AlisaContent";
 import { TransactionType } from "./Transactions.tsx";
-import ExpensesFormFields from "./components/ExpensesFormFields.tsx";
+import ExpensesFormFields from "./components/EditableExpenseRows.tsx";
 import { ExpenseInputDto } from "@alisa-backend/accounting/expense/dtos/expense-input.dto.ts";
 
 interface TransactionFormProps extends WithTranslation {

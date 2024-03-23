@@ -7,10 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { Expense } from './entities/expense.entity';
 import { ExpenseInputDto } from './dtos/expense-input.dto';
-import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
-import { Property } from 'src/real-estate/property/entities/property.entity';
 import { ExpenseType } from './entities/expense-type.entity';
-import { Transaction } from '../transaction/entities/transaction.entity';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 
@@ -19,12 +16,8 @@ export class ExpenseService {
   constructor(
     @InjectRepository(Expense)
     private repository: Repository<Expense>,
-    @InjectRepository(Property)
-    private propertyRepository: Repository<Property>,
     @InjectRepository(ExpenseType)
     private expenseTypeRepository: Repository<ExpenseType>,
-    @InjectRepository(Transaction)
-    private transactionRepository: Repository<Transaction>,
     private authService: AuthService,
   ) {}
 
@@ -78,6 +71,7 @@ export class ExpenseService {
 
     const expense = new ExpenseInputDto();
     expense.expenseTypeId = expenseTypes[0].id;
+    expense.description = expenseTypes[0].name;
 
     return expense;
   }
