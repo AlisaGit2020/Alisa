@@ -135,6 +135,53 @@ describe('Transaction service', () => {
       );
     });
 
+    it('deletes expense row when the row is not in the input', async () => {
+      const transaction = await addTransaction(
+        app,
+        testUsers.user1WithProperties.jwtUser,
+        {
+          sender: 'Batman',
+          receiver: 'Escobar',
+          accountingDate: new Date('2023-03-29'),
+          transactionDate: new Date('2023-03-29'),
+          amount: 1000,
+          description: 'Transaction',
+          propertyId: 1,
+          expenses: [
+            {
+              description: 'Expense1',
+              amount: 100,
+              quantity: 1,
+              expenseTypeId: 1,
+              totalAmount: 100,
+            },
+            {
+              description: 'Expense2',
+              amount: 100,
+              quantity: 1,
+              expenseTypeId: 1,
+              totalAmount: 100,
+            },
+          ],
+        },
+      );
+      //Remove last expense
+      transaction.expenses = transaction.expenses.slice(0, 1);
+      const editedTransaction = await service.update(
+        testUsers.user1WithProperties.jwtUser,
+        transaction.id,
+        transaction,
+      );
+
+      expect(editedTransaction.expenses.length).toBe(1);
+
+      //Clean up
+      await service.delete(
+        testUsers.user1WithProperties.jwtUser,
+        transaction.id,
+      );
+    });
+
     it('throws not found when transaction does not exist', async () => {
       await expect(
         service.update(

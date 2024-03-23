@@ -54,7 +54,7 @@ export class Transaction {
   /*Expense*/
   @OneToMany(() => Expense, (expense) => expense.transaction, {
     eager: false,
-    cascade: ['insert', 'update', 'remove'],
+    cascade: true,
     nullable: true,
   })
   expenses?: Expense[];
