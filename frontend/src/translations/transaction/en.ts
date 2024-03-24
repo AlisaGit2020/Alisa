@@ -2,6 +2,7 @@ const transaction = {
   accountingDate: "Accounting date",
   add: "Add new transaction",
   amount: "Unit price",
+  balance: "Balance",
   chooseTransactionType: "Choose transaction type",
   defaultIncomeType: "Default income type",
   defaultExpenseType: "Default expense type",

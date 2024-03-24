@@ -107,6 +107,17 @@ export class TransactionService {
       options.where = typeormWhereTransformer(options.where);
     }
 
+    const lastTransaction = await this.repository
+      .createQueryBuilder('transaction')
+      .select('transaction.balance', 'balance')
+      .leftJoin('transaction.property', 'property')
+      .leftJoin('property.ownerships', 'ownership')
+      .where(options.where)
+      .andWhere('ownership.userId = :userId', { userId: user.id })
+      .orderBy('transaction.id', 'DESC')
+      .limit(1)
+      .getRawOne();
+
     const result = await queryBuilder
       .select('COUNT(transaction.id)', 'rowCount')
       .addSelect(
@@ -118,14 +129,23 @@ export class TransactionService {
         'totalIncomes',
       )
       .addSelect('SUM(transaction.amount)', 'total')
+
+      .addSelect('MAX(transaction.balance)', 'balance')
       .leftJoin('transaction.property', 'property')
       .leftJoin('property.ownerships', 'ownership')
       .where(options.where)
       .andWhere('ownership.userId = :userId', { userId: user.id })
       .getRawOne();
 
+    if (lastTransaction === undefined) {
+      result.balance = 0;
+    } else {
+      result.balance = lastTransaction.balance;
+    }
+
     return {
       rowCount: Number(result.rowCount),
+      balance: Number(result.balance),
       totalExpenses: Number(result.totalExpenses),
       totalIncomes: Number(result.totalIncomes),
       total: Number(result.total),

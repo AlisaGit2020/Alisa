@@ -2,6 +2,7 @@ const transaction = {
   accountingDate: "Kirjanpito pvm",
   add: "Uusi tilitapahtuma",
   amount: "Yksikköhinta",
+  balance: "Saldo",
   chooseTransactionType: "Valitse tapahtumatyyyppi",
   defaultIncomeType: "Oletustulolaji",
   defaultExpenseType: "Oletuskululaji",

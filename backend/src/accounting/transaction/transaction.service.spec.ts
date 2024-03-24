@@ -148,7 +148,7 @@ describe('Transaction service', () => {
       );
     });
 
-    it.only('saves transaction amount as negative when it is an expense', async () => {
+    it('saves transaction amount as negative when it is an expense', async () => {
       const input = getTransactionExpense1(1);
       input.amount = 100;
       const transaction = await service.add(mainUser.jwtUser, input);
@@ -364,8 +364,9 @@ describe('Transaction service', () => {
         { where: { propertyId: 1 } },
       );
 
-      expect(statistics.totalExpenses).toBe(227.64);
+      expect(statistics.balance).toBe(1111.36);
       expect(statistics.totalIncomes).toBe(1339);
+      expect(statistics.totalExpenses).toBe(227.64);
       expect(statistics.total).toBe(1111.36);
       expect(statistics.rowCount).toBe(4);
     });
@@ -376,6 +377,7 @@ describe('Transaction service', () => {
         { where: { propertyId: 1 } },
       );
 
+      expect(statistics.balance).toBe(0);
       expect(statistics.totalExpenses).toBe(0);
       expect(statistics.totalIncomes).toBe(0);
       expect(statistics.total).toBe(0);
