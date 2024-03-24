@@ -18,7 +18,7 @@ interface RowDataFieldsProps<T> {
 
 function RowDataFields<T extends TransactionRow>(props: RowDataFieldsProps<T>) {
   return (
-    <Grid container spacing={0} rowSpacing={0} key={Math.random()}>
+    <Grid container spacing={0} rowSpacing={0}>
       <Grid container spacing={1} height={80}>
         <Grid item xs={2}>
           {props.typeSelect}
