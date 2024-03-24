@@ -4,7 +4,6 @@ import {
   HttpException,
   HttpStatus,
   Post,
-  UnauthorizedException,
   UploadedFile,
   UseGuards,
   UseInterceptors,
