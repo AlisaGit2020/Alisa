@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import React from "react";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
-import expense from "src/translations/expense/en";
 
 interface TransactionDetailsProps extends WithTranslation {
   id: number;
@@ -28,23 +27,25 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
     transactionDate: new Date("2000-01-01"),
     accountingDate: new Date("2000-01-01"),
     amount: 0,
-    quantity: 0,
-    totalAmount: 0,
-    expense: undefined,
-    income: undefined,
-  });
+    expenses: undefined,
+    incomes: undefined,
+    balance: 0,
+    externalId: "",
+    propertyId: 0,
+  } as unknown as Transaction);
 
   React.useEffect(() => {
     if (id) {
       const dataService = new DataService<Transaction>({
         context: transactionContext,
         relations: {
-          expense: { expenseType: true },
-          income: { incomeType: true },
+          expenses: { expenseType: true },
+          incomes: { incomeType: true },
         },
       });
       const fetchData = async () => {
         const newData: Transaction = await dataService.read(id);
+        console.log(newData);
         setData(newData);
       };
 
@@ -84,19 +85,19 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
               <TableCell>{t("externalId")}:</TableCell>
               <TableCell>{data.externalId}</TableCell>
             </TableRow>
-            {data.expense && (
+            {data.expenses && data.expenses.length > 0 && (
               <>
                 <TableRow>
                   <TableCell>{t("expenseType")}:</TableCell>
-                  <TableCell>{data.expense.expenseType.name}</TableCell>
+                  <TableCell>{data.expenses[0].expenseType.name}</TableCell>
                 </TableRow>
               </>
             )}
-            {data.income && (
+            {data.incomes && data.incomes.length > 0 && (
               <>
                 <TableRow>
                   <TableCell>{t("incomeType")}:</TableCell>
-                  <TableCell>{data.income.incomeType.name}</TableCell>
+                  <TableCell>{data.incomes[0].incomeType.name}</TableCell>
                 </TableRow>
               </>
             )}
@@ -120,22 +121,13 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
               <TableCell>{t("accountingDate")}:</TableCell>
               <TableCell>{getFormatDate(data.accountingDate)}</TableCell>
             </TableRow>
-            {data.quantity > 1 && (
-              <>
-                <TableRow>
-                  <TableCell>{t("amount")}:</TableCell>
-                  <TableCell>{getCurrency(data.amount)}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>{t("amount")}:</TableCell>
-                  <TableCell>{data.quantity}</TableCell>
-                </TableRow>
-              </>
-            )}
-
             <TableRow>
               <TableCell>{t("totalAmount")}:</TableCell>
-              <TableCell>{getCurrency(data.totalAmount)}</TableCell>
+              <TableCell>{getCurrency(data.amount)}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>{t("balance")}:</TableCell>
+              <TableCell>{getCurrency(data.balance)}</TableCell>
             </TableRow>
           </TableBody>
         </Table>

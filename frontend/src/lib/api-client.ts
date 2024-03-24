@@ -97,7 +97,6 @@ class ApiClient {
     const options = await ApiClient.getOptions({
       "Content-Type": "multipart/form-data",
     });
-    console.log("authOptions", options);
     return axios.post(ApiClient.getApiUrl(path), data, options);
   }
 
