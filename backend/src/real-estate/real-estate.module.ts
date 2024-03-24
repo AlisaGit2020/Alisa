@@ -9,12 +9,18 @@ import { Property } from './property/entities/property.entity';
 import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
 import { PeopleModule } from '@alisa-backend/people/people.module';
 import { AuthModule } from '@alisa-backend/auth/auth.module';
+import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
 
 @Module({
   controllers: [InvestmentController, PropertyController],
   providers: [InvestmentService, PropertyService],
   imports: [
-    TypeOrmModule.forFeature([Investment, Property, Ownership]),
+    TypeOrmModule.forFeature([
+      Investment,
+      Property,
+      PropertyStatistics,
+      Ownership,
+    ]),
     AuthModule,
     PeopleModule,
   ],

@@ -3,9 +3,16 @@
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 import { columnOptionOneDecimal } from '@alisa-backend/common/typeorm.column.definitions';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
-import {Transaction} from "@alisa-backend/accounting/transaction/entities/transaction.entity";
+import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
 
 @Entity()
 export class Property {
@@ -37,4 +44,9 @@ export class Property {
     cascade: ['insert', 'update', 'remove'],
   })
   ownerships: Ownership[];
+
+  @OneToOne(() => PropertyStatistics, (statistics) => statistics.property, {
+    eager: false,
+  })
+  statistics: PropertyStatistics;
 }

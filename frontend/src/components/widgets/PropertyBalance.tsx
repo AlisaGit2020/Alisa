@@ -18,7 +18,9 @@ import {
 import { WithTranslation, withTranslation } from "react-i18next";
 import {
   Avatar,
+  Badge,
   Box,
+  Chip,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
@@ -64,6 +66,7 @@ function PropertyBalance(props: PropertyBalanceProps) {
       }
       setProperties(properties);
       setPropertyId(properties[0].id);
+      setPropertyName(properties[0].name);
     };
     fetchData().then(() => {});
   }, []);
@@ -153,7 +156,16 @@ function PropertyBalance(props: PropertyBalanceProps) {
     <React.Fragment>
       <Stack direction={"row"}>
         <Title>
-          {props.t("balance")} - {propertyName}
+          <Stack direction={"row"} spacing={1}>
+            <Box>{props.t("balance")}</Box>
+            <Chip variant={"outlined"} label={propertyName}></Chip>
+            <Chip
+              variant={"outlined"}
+              label={props.t("format.currency.euro", {
+                val: data[data.length - 1]?.balance,
+              })}
+            ></Chip>
+          </Stack>
         </Title>
         <Box sx={{ textAlign: "right", flexGrow: 1, height: 20 }}>
           <ToggleButtonGroup
@@ -163,8 +175,8 @@ function PropertyBalance(props: PropertyBalanceProps) {
             onChange={handlePropertyChange}
           >
             {properties.map((item) => (
-              <Tooltip title={item.name}>
-                <ToggleButton value={item.id} key={item.id}>
+              <Tooltip title={item.name} key={item.id}>
+                <ToggleButton value={item.id}>
                   <Avatar
                     aria-label={item.name}
                     sx={{ width: 32, height: 32 }}

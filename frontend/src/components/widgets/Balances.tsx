@@ -14,6 +14,8 @@ import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
+import TableHead from "@mui/material/TableHead";
+import TableBody from "@mui/material/TableBody";
 
 interface PropertyBalanceProps extends WithTranslation {}
 
@@ -39,31 +41,34 @@ function Balances(props: PropertyBalanceProps) {
     <React.Fragment>
       <Title>{props.t("balance")}</Title>
       <Table size={"small"}>
-        {properties.map((item) => (
-          <TableRow key={item.id}>
-            <TableCell>
-              <Avatar
-                src={`/assets/properties/${item.name}.jpg`}
-                sx={{ width: 32, height: 32 }}
-              ></Avatar>
-            </TableCell>
-            <TableCell>{item.name}</TableCell>
+        <TableHead></TableHead>
+        <TableBody>
+          {properties.map((item) => (
+            <TableRow key={item.id}>
+              <TableCell>
+                <Avatar
+                  src={`/assets/properties/${item.name}.jpg`}
+                  sx={{ width: 32, height: 32 }}
+                ></Avatar>
+              </TableCell>
+              <TableCell>{item.name}</TableCell>
+              <TableCell sx={{ textAlign: "right" }}>
+                <Link href={`${transactionContext.routePath}/${item.name}`}>
+                  {props.t("format.currency.euro", { val: 3646.32 })}
+                </Link>
+              </TableCell>
+            </TableRow>
+          ))}
+          <TableRow sx={{ "&:last-child": { borderBottom: "none" } }}>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
             <TableCell sx={{ textAlign: "right" }}>
-              <Link href={`${transactionContext.routePath}/${item.name}`}>
+              <Typography variant="body1">
                 {props.t("format.currency.euro", { val: 3646.32 })}
-              </Link>
+              </Typography>
             </TableCell>
           </TableRow>
-        ))}
-        <TableRow sx={{ "&:last-child": { borderBottom: "none" } }}>
-          <TableCell></TableCell>
-          <TableCell></TableCell>
-          <TableCell sx={{ textAlign: "right" }}>
-            <Typography variant="body1">
-              {props.t("format.currency.euro", { val: 3646.32 })}
-            </Typography>
-          </TableCell>
-        </TableRow>
+        </TableBody>
       </Table>
     </React.Fragment>
   );
