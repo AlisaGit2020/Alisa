@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -54,7 +55,11 @@ export class TransactionController {
     @User() user: JWTUser,
     @Param('id') id: string,
   ): Promise<Transaction> {
-    return this.service.findOne(user, Number(id));
+    const transaction = await this.service.findOne(user, Number(id));
+    if (!transaction) {
+      throw new NotFoundException();
+    }
+    return transaction;
   }
 
   @Put('/:id')

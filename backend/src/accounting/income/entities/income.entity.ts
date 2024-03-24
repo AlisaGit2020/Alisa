@@ -54,6 +54,7 @@ export class Income {
   @ManyToOne(() => Transaction, (transaction) => transaction.incomes, {
     eager: false,
     cascade: ['insert', 'update'],
+    orphanedRowAction: 'delete',
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'transactionId' })

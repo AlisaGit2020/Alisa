@@ -141,11 +141,13 @@ export class TransactionService {
 
     if (input.expenses !== undefined) {
       for (const expense of input.expenses) {
+        expense.transactionId = transaction.id;
         expense.propertyId = transaction.propertyId;
       }
     }
     if (input.incomes !== undefined) {
       for (const income of input.incomes) {
+        income.transactionId = transaction.id;
         income.propertyId = transaction.propertyId;
       }
     }
