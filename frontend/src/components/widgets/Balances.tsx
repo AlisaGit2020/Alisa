@@ -13,6 +13,7 @@ import Table from "@mui/material/Table";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
+import Link from "@mui/material/Link";
 
 interface PropertyBalanceProps extends WithTranslation {}
 
@@ -48,7 +49,9 @@ function Balances(props: PropertyBalanceProps) {
             </TableCell>
             <TableCell>{item.name}</TableCell>
             <TableCell sx={{ textAlign: "right" }}>
-              {props.t("format.currency.euro", { val: 3646.32 })}
+              <Link href={`${transactionContext.routePath}/${item.name}`}>
+                {props.t("format.currency.euro", { val: 3646.32 })}
+              </Link>
             </TableCell>
           </TableRow>
         ))}
@@ -56,7 +59,7 @@ function Balances(props: PropertyBalanceProps) {
           <TableCell></TableCell>
           <TableCell></TableCell>
           <TableCell sx={{ textAlign: "right" }}>
-            <Typography variant="h6">
+            <Typography variant="body1">
               {props.t("format.currency.euro", { val: 3646.32 })}
             </Typography>
           </TableCell>
