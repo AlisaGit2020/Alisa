@@ -4,7 +4,9 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  UnauthorizedException,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -15,7 +17,9 @@ import { validate } from 'class-validator';
 import { OpImportInput } from './dtos/op-import-input.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { User } from '@alisa-backend/common/decorators/user.decorator';
+import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('import/op')
 export class OpImportController {
   constructor(private service: OpImportService) {}

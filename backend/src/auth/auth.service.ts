@@ -58,6 +58,7 @@ export class AuthService {
     if (propertyId === undefined) {
       return false;
     }
+
     return this.userService.hasOwnership(user.id, propertyId);
   }
   addOwnershipFilter(

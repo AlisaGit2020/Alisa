@@ -6,11 +6,12 @@ import { User } from "@alisa-backend/people/user/entities/user.entity";
 import Cookies from "js-cookie";
 
 class ApiClient {
-  private static async authOptions() {
+  private static async getOptions(headers?: Record<string, string>) {
     return {
       withCredentials: true,
       headers: {
         Authorization: `Bearer ${await ApiClient.getToken()}`,
+        ...headers,
       },
     };
   }
@@ -57,7 +58,7 @@ class ApiClient {
     return axios.post(
       ApiClient.getApiUrl(path),
       data,
-      await ApiClient.authOptions(),
+      await ApiClient.getOptions(),
     );
   }
 
@@ -65,21 +66,21 @@ class ApiClient {
     return axios.put(
       ApiClient.getApiUrl(`${path}/${id}`),
       data,
-      await ApiClient.authOptions(),
+      await ApiClient.getOptions(),
     );
   }
 
   public static async delete(path: string, id: number) {
     await axios.delete(
       ApiClient.getApiUrl(`${path}/${id}`),
-      await ApiClient.authOptions(),
+      await ApiClient.getOptions(),
     );
   }
 
   public static async getDefault<T>(path: string): Promise<T> {
     const response = await axios.get(
       ApiClient.getApiUrl(`${path}/default`),
-      await ApiClient.authOptions(),
+      await ApiClient.getOptions(),
     );
     return response.data;
   }
@@ -87,17 +88,17 @@ class ApiClient {
   public static async me(): Promise<User> {
     const response = await axios.get(
       ApiClient.getApiUrl(`auth/user`),
-      await ApiClient.authOptions(),
+      await ApiClient.getOptions(),
     );
     return response.data;
   }
 
   public static async upload<T>(path: string, data: T): Promise<T> {
-    return axios.post(ApiClient.getApiUrl(path), data, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    const options = await ApiClient.getOptions({
+      "Content-Type": "multipart/form-data",
     });
+    console.log("authOptions", options);
+    return axios.post(ApiClient.getApiUrl(path), data, options);
   }
 
   public static async search<T>(
@@ -106,9 +107,8 @@ class ApiClient {
   ): Promise<T[]> {
     const url = ApiClient.getApiUrl(`${path}/search`);
     try {
-      return (
-        await axios.post<T[]>(url, options, await ApiClient.authOptions())
-      ).data;
+      return (await axios.post<T[]>(url, options, await ApiClient.getOptions()))
+        .data;
     } catch (error) {
       ApiClient.handleError(`Error in search path ${url}`);
     }
@@ -120,7 +120,7 @@ class ApiClient {
   ): Promise<K> {
     const url = ApiClient.getApiUrl(`${path}/search/statistics`);
     try {
-      return (await axios.post<K>(url, options, await ApiClient.authOptions()))
+      return (await axios.post<K>(url, options, await ApiClient.getOptions()))
         .data;
     } catch (error) {
       ApiClient.handleError(`Error in search path ${url}`);
@@ -128,8 +128,7 @@ class ApiClient {
   }
 
   private static getApiUrl(path: string) {
-    const apiBasePath = VITE_API_URL;
-    return `${apiBasePath}/${path}`;
+    return `${VITE_API_URL}/${path}`;
   }
 
   private static handleError(message: string): never {
