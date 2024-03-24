@@ -18,6 +18,7 @@ import {
   getTestUsers,
   prepareDatabase,
   sleep,
+  TestUser,
   TestUsersSetup,
 } from 'test/helper-functions';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
@@ -32,6 +33,7 @@ describe('Transaction service', () => {
   let app: INestApplication;
   let service: TransactionService;
   let testUsers: TestUsersSetup;
+  let mainUser: TestUser;
   let expenseService: ExpenseService;
 
   beforeAll(async () => {
@@ -47,6 +49,7 @@ describe('Transaction service', () => {
 
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
+    mainUser = testUsers.user1WithProperties;
     await addTransactionsToTestUsers(app, testUsers);
   });
 
@@ -68,6 +71,16 @@ describe('Transaction service', () => {
       await expect(
         service.add(testUsers.userWithoutProperties.jwtUser, input),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('saves transaction amount as negative when it is an expense', async () => {
+      const input = getTransactionExpense1(1);
+      input.amount = 100;
+      const transaction = await service.add(mainUser.jwtUser, input);
+      expect(transaction.amount).toBe(-100);
+
+      //Clean up
+      await service.delete(mainUser.jwtUser, transaction.id);
     });
   });
 
@@ -133,6 +146,25 @@ describe('Transaction service', () => {
         testUsers.user1WithProperties.jwtUser,
         transaction.id,
       );
+    });
+
+    it.only('saves transaction amount as negative when it is an expense', async () => {
+      const input = getTransactionExpense1(1);
+      input.amount = 100;
+      const transaction = await service.add(mainUser.jwtUser, input);
+
+      //Update transaction
+      transaction.amount = 1000;
+      const editedTransaction = await service.update(
+        mainUser.jwtUser,
+        transaction.id,
+        transaction,
+      );
+
+      expect(editedTransaction.amount).toBe(-1000);
+
+      //Clean up
+      await service.delete(mainUser.jwtUser, transaction.id);
     });
 
     it('deletes expense row when the row is not in the input', async () => {

@@ -143,6 +143,9 @@ export class TransactionService {
       for (const expense of input.expenses) {
         expense.transactionId = transaction.id;
         expense.propertyId = transaction.propertyId;
+        if (transaction.amount > 0) {
+          transaction.amount = -transaction.amount;
+        }
       }
     }
     if (input.incomes !== undefined) {
