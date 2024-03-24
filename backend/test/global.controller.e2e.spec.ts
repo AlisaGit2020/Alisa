@@ -62,12 +62,12 @@ describe('Global controller end-to-end test (e2e)', () => {
   });
 
   describe.each([
-    [expenseTestData],
+    //[expenseTestData],
     //[expenseTypeTestData],
     //[incomeTypeTestData],
     //[incomeTestData],
     //[propertyTestData],
-    //[transactionTestData],
+    [transactionTestData],
   ])('Api endpoints', (testData: TestData) => {
     describe(`${testData.name}`, () => {
       describe('Authorization', () => {
@@ -124,7 +124,7 @@ describe('Global controller end-to-end test (e2e)', () => {
       }
 
       if (testData.inputPost) {
-        it(`POST ${testData.baseUrl}, add a new item`, async () => {
+        it.only(`POST ${testData.baseUrl}, add a new item`, async () => {
           const response = await request(server)
             .post(testData.baseUrl)
             .set('Authorization', `Bearer ${mainUserToken}`)

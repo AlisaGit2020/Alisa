@@ -59,6 +59,7 @@ export class TransactionService {
 
     const transactionEntity = new Transaction();
     this.mapData(transactionEntity, input);
+
     await this.balanceService.handleTransactionAdd(user, transactionEntity);
     return await this.repository.save(transactionEntity);
   }
@@ -148,7 +149,6 @@ export class TransactionService {
         income.propertyId = transaction.propertyId;
       }
     }
-    console.log('input', input);
   }
 
   private async getEntityOrThrow(

@@ -9,8 +9,9 @@ import AlisaLoadingProgress from "../alisa/AlisaLoadingProgress";
 import TransactionFormFields from "./components/TransactionFormFields";
 import AlisaContent from "../alisa/AlisaContent";
 import { TransactionType } from "./Transactions.tsx";
-import ExpensesFormFields from "./components/EditableExpenseRows.tsx";
+import EditableRows from "./components/EditableRows.tsx";
 import { ExpenseInputDto } from "@alisa-backend/accounting/expense/dtos/expense-input.dto.ts";
+import { IncomeInputDto } from "@alisa-backend/accounting/income/dtos/income-input.dto.ts";
 
 interface TransactionFormProps extends WithTranslation {
   id?: number;
@@ -74,8 +75,14 @@ function TransactionForm({
     setData(newData);
   };
 
-  const handleExpenseChange = async (expenses: ExpenseInputDto[]) => {
-    await handleChange("expenses", expenses);
+  const handleRowChange = async (
+    rows: ExpenseInputDto[] | IncomeInputDto[],
+  ) => {
+    if (getType() === TransactionType.Expense) {
+      await handleChange("expenses", rows);
+    } else {
+      await handleChange("incomes", rows);
+    }
   };
 
   const handleDescriptionChange = (value: string) => {
@@ -115,16 +122,25 @@ function TransactionForm({
   const getDetailComponents = () => {
     if (getType() === TransactionType.Expense) {
       return (
-        <ExpensesFormFields
+        <EditableRows
+          type={TransactionType.Expense}
           transaction={data}
-          onHandleChange={handleExpenseChange}
+          onHandleChange={handleRowChange}
           changedDescription={description}
           changedAmount={amount}
-        ></ExpensesFormFields>
+        ></EditableRows>
       );
     }
     if (getType() === TransactionType.Income) {
-      return "IncomeDetails";
+      return (
+        <EditableRows
+          type={TransactionType.Income}
+          transaction={data}
+          onHandleChange={handleRowChange}
+          changedDescription={description}
+          changedAmount={amount}
+        ></EditableRows>
+      );
     }
   };
 

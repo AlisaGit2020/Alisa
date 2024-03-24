@@ -49,7 +49,7 @@ export class BalanceService {
     transaction: Transaction,
   ): Promise<void> {
     const balance = await this.getBalance(user, transaction.propertyId);
-    transaction.balance = balance + transaction.amount;
+    transaction.balance = Number(balance) + Number(transaction.amount);
   }
 
   async handleTransactionUpdate(

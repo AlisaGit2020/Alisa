@@ -28,7 +28,7 @@ export class IncomeInputDto {
   propertyId?: number;
 
   @IsObject()
-  transaction: TransactionInputDto = new TransactionInputDto();
+  transaction?: TransactionInputDto;
 
   transactionId?: number;
 }
