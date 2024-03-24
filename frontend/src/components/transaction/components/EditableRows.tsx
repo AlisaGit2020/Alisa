@@ -2,6 +2,8 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import {
   expenseContext,
   expenseTypeContext,
+  incomeContext,
+  incomeTypeContext,
   transactionContext,
 } from "@alisa-lib/alisa-contexts.ts";
 import { IconButton } from "@mui/material";
@@ -15,23 +17,32 @@ import Box from "@mui/material/Box";
 import { TransactionInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-input.dto.ts";
 import AddIcon from "@mui/icons-material/Add";
 import RowDataFields from "./RowDataFields.tsx";
+import { TransactionRow } from "@alisa-lib/types.ts";
+import { TransactionType } from "../Transactions.tsx";
+import { IncomeInputDto } from "@alisa-backend/accounting/income/dtos/income-input.dto.ts";
+import { IncomeType } from "@alisa-backend/accounting/income/entities/income-type.entity.ts";
 
-interface EditableExpenseRowsProps extends WithTranslation {
+interface EditableRowsProps extends WithTranslation {
   transaction: TransactionInputDto;
-  onHandleChange: (expenses: ExpenseInputDto[]) => void;
+  type: TransactionType;
+  onHandleChange: (rows: ExpenseInputDto[] | IncomeInputDto[]) => void;
   changedDescription: string;
   changedAmount: number;
 }
-function EditableExpenseRows(props: EditableExpenseRowsProps) {
-  const [data, setData] = React.useState<ExpenseInputDto[]>(
-    props.transaction?.expenses || [],
-  );
+function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
+  let initialData;
+  if (props.type === TransactionType.Expense) {
+    initialData = props.transaction.expenses || [];
+  } else {
+    initialData = props.transaction.incomes || [];
+  }
+  const [data, setData] = React.useState<T[]>((initialData as T[]) || []);
 
   const hasRunInit = React.useRef(false);
 
-  const dataService = new DataService<ExpenseInputDto>({
-    context: expenseContext,
-    dataValidateInstance: new ExpenseInputDto(),
+  const dataService = new DataService<T>({
+    context:
+      props.type === TransactionType.Expense ? expenseContext : incomeContext,
   });
 
   React.useEffect(() => {
@@ -88,15 +99,15 @@ function EditableExpenseRows(props: EditableExpenseRowsProps) {
     props.onHandleChange(data);
   };
 
-  const handleChange = (
-    index: number,
-    name: keyof ExpenseInputDto,
-    value: ExpenseInputDto[keyof ExpenseInputDto],
-  ) => {
+  const handleChange = (index: number, name: keyof T, value: T[keyof T]) => {
     if (data === undefined) {
       return;
     }
-    data[index] = dataService.updateNestedData(data[index], name, value);
+    data[index] = dataService.updateNestedData(
+      data[index],
+      name as string,
+      value,
+    );
     setData([...data]);
     props.onHandleChange(data);
   };
@@ -104,22 +115,29 @@ function EditableExpenseRows(props: EditableExpenseRowsProps) {
   const calculateAmount = (index: number) => {
     const expense = data[index];
     if (expense.quantity && expense.totalAmount) {
-      const amount = expense.totalAmount / expense.quantity;
-      handleChange(index, "amount", amount);
+      const amount = Number(expense.totalAmount / expense.quantity);
+      handleChange(index, "amount", amount as T[keyof T]);
     }
   };
 
-  const getRowContent = (expense: ExpenseInputDto, index: number) => {
+  const getRowContent = (row: T, index: number) => {
     const handleExpenseTypeChange = (
-      name: keyof ExpenseInputDto,
-      expenseTypeId: ExpenseInputDto[keyof ExpenseInputDto],
+      fieldName: keyof ExpenseInputDto,
+      value: ExpenseInputDto[keyof ExpenseInputDto],
     ) => {
-      handleChange(index, name, expenseTypeId);
+      handleChange(index, fieldName as keyof T, value as T[keyof T]);
     };
 
-    return (
-      <RowDataFields<ExpenseInputDto>
-        typeSelect={
+    const handleIncomeTypeChange = (
+      fieldName: keyof IncomeInputDto,
+      value: IncomeInputDto[keyof IncomeInputDto],
+    ) => {
+      handleChange(index, fieldName as keyof T, value as T[keyof T]);
+    };
+
+    const getTypeSelect = (row: T) => {
+      if (props.type === TransactionType.Expense) {
+        return (
           <AlisaSelect<ExpenseInputDto, ExpenseType>
             label={props.t("expenseType")}
             dataService={
@@ -129,11 +147,35 @@ function EditableExpenseRows(props: EditableExpenseRowsProps) {
               })
             }
             fieldName="expenseTypeId"
-            value={expense.expenseTypeId}
+            value={row.expenseTypeId}
             onHandleChange={handleExpenseTypeChange}
           ></AlisaSelect>
-        }
-        data={expense}
+        );
+      }
+
+      if (props.type === TransactionType.Income) {
+        return (
+          <AlisaSelect<IncomeInputDto, IncomeType>
+            label={props.t("incomeType")}
+            dataService={
+              new DataService<IncomeType>({
+                context: incomeTypeContext,
+                fetchOptions: { order: { name: "ASC" } },
+              })
+            }
+            fieldName="incomeTypeId"
+            value={row.incomeTypeId}
+            onHandleChange={handleIncomeTypeChange}
+          ></AlisaSelect>
+        );
+      }
+    };
+
+    return (
+      <RowDataFields<T>
+        key={index}
+        typeSelect={getTypeSelect(row)}
+        data={row}
         index={index}
         onHandleChange={handleChange}
         onCalculateAmount={calculateAmount}
@@ -144,12 +186,10 @@ function EditableExpenseRows(props: EditableExpenseRowsProps) {
   };
 
   const getRows = () => {
-    return props.transaction?.expenses?.map(
-      (item: ExpenseInputDto, index: number) => getRowContent(item, index),
-    );
+    return data?.map((item: T, index: number) => getRowContent(item, index));
   };
 
-  if (props.transaction?.expenses?.length === 0) {
+  if (data?.length === 0) {
     return null;
   }
 
@@ -171,4 +211,4 @@ function EditableExpenseRows(props: EditableExpenseRowsProps) {
   );
 }
 
-export default withTranslation(transactionContext.name)(EditableExpenseRows);
+export default withTranslation(transactionContext.name)(EditableRows);

@@ -12,4 +12,67 @@ export const transactionTestData = {
       description: 'Some description',
     },
   } as FindManyOptions<Expense>,
+
+  /*
+  inputPost: {
+    propertyId: 1,
+    externalId: '126',
+    sender: 'Joku Ihminen',
+    receiver: 'Juha Koivisto',
+    description: 'Vuokrasuoritus maaliskuu 2023',
+    transactionDate: '2023-03-01T00:00:00.000Z',
+    accountingDate: '2023-03-01T00:00:00.000Z',
+    amount: 1090,
+    incomes: [
+      {
+        incomeTypeId: 2,
+        description: 'Vuokrasuoritus maaliskuu 2023',
+        amount: 1090,
+        quantity: 1,
+        totalAmount: 1090,
+      },
+    ],
+  },
+   */
+
+  inputPost: {
+    sender: 'tposhrk',
+    receiver: 'opkhtposk',
+    description: 'kohpstrok',
+    transactionDate: '2024-03-24T07:44:45.762Z',
+    accountingDate: '2024-03-24T07:44:45.762Z',
+    amount: '665',
+    propertyId: 1,
+    incomes: [
+      {
+        description: 'Airbnb tulo',
+        amount: 665,
+        quantity: 1,
+        totalAmount: '665',
+        incomeTypeId: 2,
+        propertyId: 1,
+      },
+    ],
+    balance: '29510950665',
+  },
+
+  inputPut: {
+    propertyId: 1,
+    externalId: '126',
+    sender: 'Joku toinen ihminen',
+    receiver: 'Juha Koivisto',
+    description: 'Vuokrasuoritus maaliskuu 2023',
+    transactionDate: '2023-03-01T00:00:00.000Z',
+    accountingDate: '2023-03-01T00:00:00.000Z',
+    amount: 1090,
+    incomes: [
+      {
+        incomeTypeId: 2,
+        description: 'Vuokrasuoritus maaliskuu 2023',
+        amount: 1090,
+        quantity: 1,
+        totalAmount: 1090,
+      },
+    ],
+  },
 } as TestData;

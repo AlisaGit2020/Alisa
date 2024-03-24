@@ -45,9 +45,8 @@ export class TransactionController {
   async add(
     @User() user: JWTUser,
     @Body() input: TransactionInputDto,
-  ): Promise<boolean> {
-    await this.service.add(user, input);
-    return true;
+  ): Promise<Transaction> {
+    return this.service.add(user, input);
   }
 
   @Get('/:id')

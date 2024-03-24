@@ -4,6 +4,7 @@ import AlisaNumberField from "../../alisa/form/AlisaNumberField.tsx";
 import DeleteIcon from "@mui/icons-material/Delete";
 import React from "react";
 import { TFunction } from "i18next";
+import { TransactionRow } from "@alisa-lib/types.ts";
 
 interface RowDataFieldsProps<T> {
   t: TFunction;
@@ -15,16 +16,9 @@ interface RowDataFieldsProps<T> {
   onRemoveRow: (index: number) => void;
 }
 
-function RowDataFields<
-  T extends {
-    description: string;
-    amount: number;
-    quantity: number;
-    totalAmount: number;
-  },
->(props: RowDataFieldsProps<T>) {
+function RowDataFields<T extends TransactionRow>(props: RowDataFieldsProps<T>) {
   return (
-    <Grid container spacing={0} rowSpacing={0}>
+    <Grid container spacing={0} rowSpacing={0} key={Math.random()}>
       <Grid container spacing={1} height={80}>
         <Grid item xs={2}>
           {props.typeSelect}

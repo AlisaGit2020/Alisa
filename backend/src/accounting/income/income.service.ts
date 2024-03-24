@@ -80,6 +80,8 @@ export class IncomeService {
 
     const income = new IncomeInputDto();
     income.incomeTypeId = incomeTypes[0].id;
+    income.description = incomeTypes[0].name;
+
     return income;
   }
 
