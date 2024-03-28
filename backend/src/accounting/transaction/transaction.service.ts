@@ -79,8 +79,14 @@ export class TransactionService {
   ): Promise<Transaction> {
     await this.getEntityOrThrow(user, id);
 
-    const transactionEntity = await this.findOne(user, id);
-    await this.balanceService.handleTransactionUpdate(transactionEntity, input);
+    input['balance'] = undefined; // Prevent balance update
+
+    let transactionEntity = await this.findOne(user, id);
+    transactionEntity = await this.balanceService.handleTransactionUpdate(
+      transactionEntity,
+      input,
+    );
+
     this.mapData(transactionEntity, input);
 
     await this.repository.save(transactionEntity);

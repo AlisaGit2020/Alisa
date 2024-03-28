@@ -61,8 +61,8 @@ export class BalanceService {
   async handleTransactionUpdate(
     transaction: Transaction,
     input: TransactionInputDto,
-  ): Promise<void> {
-    if (input.amount === transaction.amount) {
+  ): Promise<Transaction> {
+    if (Number(input.amount) === transaction.amount) {
       return;
     }
     //Get all transaction ids before the current transaction
@@ -78,7 +78,7 @@ export class BalanceService {
     const previousId = previousIds[0]?.id ?? 0;
 
     if (previousId === 0) {
-      transaction.balance = input.amount;
+      transaction.balance = Number(input.amount);
       return;
     }
     //Get previous row balance
@@ -87,7 +87,8 @@ export class BalanceService {
       select: ['balance'],
     });
     //Calculate the new balance, previous balance new amount
-    transaction.balance = previousBalance.balance + input.amount;
+    transaction.balance = previousBalance.balance + Number(input.amount);
+    return transaction;
   }
 
   async recalculateBalancesAfter(transaction: Transaction) {

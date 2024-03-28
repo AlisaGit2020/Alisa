@@ -77,7 +77,6 @@ function PropertyBalance(props: PropertyBalanceProps) {
       }
       const fetchOptions = {
         select: ["transactionDate", "balance"],
-        relations: { property: true },
         where: {
           transactionDate: { $between: [startDate, endDate] },
           propertyId: propertyId,
