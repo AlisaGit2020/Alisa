@@ -10,6 +10,7 @@ import { PropertyInputDto } from './dtos/property-input.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownership-input.dto';
 import { AuthService } from '@alisa-backend/auth/auth.service';
+import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
 
 @Injectable()
 export class PropertyService {
