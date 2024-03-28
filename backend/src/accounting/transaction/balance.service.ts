@@ -1,6 +1,4 @@
 import {
-  forwardRef,
-  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -12,8 +10,8 @@ import { Transaction } from './entities/transaction.entity';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Events } from '@alisa-backend/common/Events';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { Events, TransactionCreatedEvent } from '@alisa-backend/common/events';
 
 @Injectable()
 export class BalanceService {
@@ -37,6 +35,10 @@ export class BalanceService {
       throw new UnauthorizedException();
     }
 
+    return this._getBalance(propertyId);
+  }
+
+  private async _getBalance(propertyId: number): Promise<number> {
     const transactions = await this.repository.find({
       where: { propertyId },
       order: { id: 'DESC' },
@@ -50,45 +52,30 @@ export class BalanceService {
     return transactions[0].balance;
   }
 
-  async handleTransactionAdd(
-    user: JWTUser,
-    transaction: Transaction,
+  @OnEvent(Events.Transaction.Created)
+  async handleTransactionCreated(
+    event: TransactionCreatedEvent,
   ): Promise<void> {
-    const balance = await this.getBalance(user, transaction.propertyId);
-    transaction.balance = Number(balance) + Number(transaction.amount);
+    const previousBalance = await this.getPreviousBalance(event.transaction);
+    event.transaction.balance = previousBalance + event.transaction.amount;
+    await this.repository.save(event.transaction);
+
+    this.eventEmitter.emit(Events.Balance.Changed, {
+      propertyId: event.transaction.propertyId,
+      newBalance: event.transaction.balance,
+    });
   }
 
   async handleTransactionUpdate(
     transaction: Transaction,
     input: TransactionInputDto,
-  ): Promise<Transaction> {
+  ): Promise<void> {
     if (Number(input.amount) === transaction.amount) {
       return;
     }
-    //Get all transaction ids before the current transaction
-    const previousIds = await this.repository.find({
-      where: {
-        propertyId: transaction.propertyId,
-        id: LessThan(transaction.id),
-      },
-      order: { id: 'DESC' },
-      select: ['id'],
-      take: 1,
-    });
-    const previousId = previousIds[0]?.id ?? 0;
-
-    if (previousId === 0) {
-      transaction.balance = Number(input.amount);
-      return;
-    }
-    //Get previous row balance
-    const previousBalance = await this.repository.findOne({
-      where: { id: previousId },
-      select: ['balance'],
-    });
+    const previousBalance = await this.getPreviousBalance(transaction);
     //Calculate the new balance, previous balance new amount
-    transaction.balance = previousBalance.balance + Number(input.amount);
-    return transaction;
+    transaction.balance = previousBalance + Number(input.amount);
   }
 
   async recalculateBalancesAfter(transaction: Transaction) {
@@ -137,5 +124,29 @@ export class BalanceService {
     await this.repository.save(nextTransaction);
 
     await this.recalculateBalancesAfter(nextTransaction);
+  }
+
+  private async getPreviousBalance(transaction: Transaction): Promise<number> {
+    const previousIds = await this.repository.find({
+      where: {
+        propertyId: transaction.propertyId,
+        id: LessThan(transaction.id),
+      },
+      order: { id: 'DESC' },
+      select: ['id'],
+      take: 1,
+    });
+    const previousId = previousIds[0]?.id ?? 0;
+
+    if (previousId === 0) {
+      return 0;
+    }
+
+    const previousBalance = await this.repository.findOne({
+      where: { id: previousId },
+      select: ['balance'],
+    });
+
+    return previousBalance.balance;
   }
 }

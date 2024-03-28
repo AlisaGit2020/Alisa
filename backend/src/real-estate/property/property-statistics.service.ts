@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
 import { OnEvent } from '@nestjs/event-emitter';
-import { Events, BalanceChangedEvent } from '@alisa-backend/common/Events';
+import { Events, BalanceChangedEvent } from '@alisa-backend/common/events';
 
 @Injectable()
 export class PropertyStatisticsService {

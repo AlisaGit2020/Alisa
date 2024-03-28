@@ -17,6 +17,7 @@ import {
   emptyTables,
   getTestUsers,
   prepareDatabase,
+  sleep,
   TestUser,
   TestUsersSetup,
 } from 'test/helper-functions';
@@ -90,7 +91,7 @@ describe('Balance service', () => {
 
     it('gets balance correctly when add transactions to empty table', async () => {
       await addTransactions();
-
+      await sleep(50);
       const balance = await service.getBalance(mainUser.jwtUser, 1);
       expect(balance).toBe(1111.36);
     });
@@ -125,7 +126,9 @@ describe('Balance service', () => {
       'gets balance correctly when delete a transaction',
       async (transactionId: number, expectedBalance) => {
         await addTransactions();
+        await sleep(50);
         await transactionService.delete(mainUser.jwtUser, transactionId);
+        await sleep(50);
         const balance = await service.getBalance(mainUser.jwtUser, 1);
         expect(balance).toBe(expectedBalance);
       },

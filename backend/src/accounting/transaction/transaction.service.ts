@@ -13,7 +13,7 @@ import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { BalanceService } from '@alisa-backend/accounting/transaction/balance.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Events, BalanceChangedEvent } from '@alisa-backend/common/Events';
+import { Events, TransactionCreatedEvent } from '@alisa-backend/common/events';
 
 @Injectable()
 export class TransactionService {
@@ -63,12 +63,13 @@ export class TransactionService {
     const transactionEntity = new Transaction();
     this.mapData(transactionEntity, input);
 
-    await this.balanceService.handleTransactionAdd(user, transactionEntity);
     const transaction = await this.repository.save(transactionEntity);
+
     this.eventEmitter.emit(
-      Events.Balance.Changed,
-      new BalanceChangedEvent(transaction.propertyId, transaction.balance),
+      Events.Transaction.Created,
+      new TransactionCreatedEvent(transaction),
     );
+
     return transaction;
   }
 
@@ -79,13 +80,8 @@ export class TransactionService {
   ): Promise<Transaction> {
     await this.getEntityOrThrow(user, id);
 
-    input['balance'] = undefined; // Prevent balance update
-
-    let transactionEntity = await this.findOne(user, id);
-    transactionEntity = await this.balanceService.handleTransactionUpdate(
-      transactionEntity,
-      input,
-    );
+    const transactionEntity = await this.findOne(user, id);
+    await this.balanceService.handleTransactionUpdate(transactionEntity, input);
 
     this.mapData(transactionEntity, input);
 

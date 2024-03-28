@@ -63,6 +63,7 @@ describe('Transaction service', () => {
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
     await addTransactionsToTestUsers(app, testUsers);
+    await sleep(50);
   });
 
   describe('Create', () => {
@@ -359,6 +360,7 @@ describe('Transaction service', () => {
 
   describe('Statistics', () => {
     it('calculate statistics correctly', async () => {
+      await sleep(50);
       const statistics = await service.statistics(
         testUsers.user1WithProperties.jwtUser,
         { where: { propertyId: 1 } },

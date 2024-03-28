@@ -8,6 +8,7 @@ import { AppModule } from 'src/app.module';
 import { UserInputDto } from '@alisa-backend/people/user/dtos/user-input.dto';
 import { UserService } from '@alisa-backend/people/user/user.service';
 import { AuthService } from './auth.service';
+import { sleep } from '../../test/helper-functions';
 
 describe('User service', () => {
   let app: INestApplication;
@@ -71,9 +72,11 @@ describe('User service', () => {
       expect(savedUser).toMatchObject(testUser);
     });
 
-    it('does not create a new row when relogin', async () => {
+    it('does not create a new row when re-login', async () => {
       await service.login(testUser);
+      await sleep(50);
       await service.login(testUser);
+      await sleep(50);
       const users = await userService.findAll();
       expect(users.length).toBe(1);
     });
