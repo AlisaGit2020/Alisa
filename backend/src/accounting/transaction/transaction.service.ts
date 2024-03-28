@@ -11,9 +11,12 @@ import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeo
 import { TransactionStatisticsDto } from './dtos/transaction-statistics.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
-import { BalanceService } from '@alisa-backend/accounting/transaction/balance.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Events, TransactionCreatedEvent } from '@alisa-backend/common/events';
+import {
+  Events,
+  TransactionCreatedEvent,
+  TransactionUpdatedEvent,
+} from '@alisa-backend/common/events';
 
 @Injectable()
 export class TransactionService {
@@ -22,7 +25,6 @@ export class TransactionService {
     private repository: Repository<Transaction>,
 
     private authService: AuthService,
-    private balanceService: BalanceService,
     private eventEmitter: EventEmitter2,
   ) {}
 
@@ -80,15 +82,19 @@ export class TransactionService {
   ): Promise<Transaction> {
     await this.getEntityOrThrow(user, id);
 
-    const transactionEntity = await this.findOne(user, id);
-    await this.balanceService.handleTransactionUpdate(transactionEntity, input);
+    const oldTransaction = await this.findOne(user, id);
+    const transaction = await this.findOne(user, id);
 
-    this.mapData(transactionEntity, input);
+    this.mapData(transaction, input);
 
-    await this.repository.save(transactionEntity);
-    await this.balanceService.recalculateBalancesAfter(transactionEntity);
+    const updatedTransaction = await this.repository.save(transaction);
 
-    return transactionEntity;
+    this.eventEmitter.emit(
+      Events.Transaction.Updated,
+      new TransactionUpdatedEvent(oldTransaction, updatedTransaction),
+    );
+
+    return updatedTransaction;
   }
 
   async save(user: JWTUser, input: TransactionInputDto): Promise<Transaction> {
@@ -102,7 +108,7 @@ export class TransactionService {
   async delete(user: JWTUser, id: number): Promise<void> {
     const transaction = await this.getEntityOrThrow(user, id);
     await this.repository.delete(id);
-    await this.balanceService.recalculateBalancesAfterDelete(transaction);
+    this.eventEmitter.emit(Events.Transaction.Deleted, transaction);
   }
 
   async statistics(
