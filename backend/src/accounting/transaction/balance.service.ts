@@ -12,6 +12,8 @@ import { Transaction } from './entities/transaction.entity';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Events } from '@alisa-backend/common/Events';
 
 @Injectable()
 export class BalanceService {
@@ -21,6 +23,8 @@ export class BalanceService {
 
     private authService: AuthService,
     private propertyService: PropertyService,
+
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async getBalance(user: JWTUser, propertyId: number): Promise<number> {
@@ -106,6 +110,11 @@ export class BalanceService {
       t.balance = balance;
       await this.repository.save(t);
     }
+
+    this.eventEmitter.emit(Events.Balance.Changed, {
+      propertyId: transaction.propertyId,
+      newBalance: balance,
+    });
   }
 
   async recalculateBalancesAfterDelete(transaction: Transaction) {

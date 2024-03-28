@@ -1,33 +1,37 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOptionsWhere, In, Repository } from 'typeorm';
-import { Property } from './entities/property.entity';
-import { PropertyInputDto } from './dtos/property-input.dto';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownership-input.dto';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { Repository } from 'typeorm';
 import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
-import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
-import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { BalanceService } from '@alisa-backend/accounting/transaction/balance.service';
+import { OnEvent } from '@nestjs/event-emitter';
+import { Events, BalanceChangedEvent } from '@alisa-backend/common/Events';
 
 @Injectable()
 export class PropertyStatisticsService {
   constructor(
     @InjectRepository(PropertyStatistics)
     private repository: Repository<PropertyStatistics>,
-    private balanceService: BalanceService,
   ) {}
 
-  async calculateStatistics(user: JWTUser, propertyId: number): Promise<void> {
-    const balance = await this.balanceService.getBalance(user, propertyId);
+  @OnEvent(Events.Balance.Changed)
+  async calculateStatistics(event: BalanceChangedEvent): Promise<void> {
     const statistics = new PropertyStatistics();
-    statistics.balance = balance;
-    statistics.propertyId = propertyId;
-    await this.repository.save(statistics);
+    statistics.balance = event.newBalance;
+    statistics.propertyId = event.propertyId;
+    await this.save(statistics);
+  }
+
+  private async save(
+    statistics: PropertyStatistics,
+  ): Promise<PropertyStatistics> {
+    const existingStatistics = await this.repository.findOne({
+      where: { propertyId: statistics.propertyId },
+    });
+
+    if (existingStatistics) {
+      existingStatistics.balance = statistics.balance;
+      return await this.repository.save(existingStatistics);
+    }
+
+    return await this.repository.save(statistics);
   }
 }

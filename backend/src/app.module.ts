@@ -9,10 +9,12 @@ import { GoogleModule } from './google/google.module';
 import { ImportModule } from './import/import.module';
 import { AuthModule } from './auth/auth.module';
 import { PeopleModule } from './people/people.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    EventEmitterModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,

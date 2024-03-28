@@ -11,14 +11,18 @@ import {
   TestUser,
   TestUsersSetup,
 } from 'test/helper-functions';
-import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
 import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
+import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
+import {
+  getTransactionExpense1,
+  getTransactionIncome1,
+} from '../../../test/data/mocks/transaction.mock';
 
 describe('Property statistics service', () => {
   let app: INestApplication;
 
-  let service: PropertyStatisticsService;
   let propertyService: PropertyService;
+  let transactionService: TransactionService;
   let testUsers: TestUsersSetup;
   let mainTestUser: TestUser;
 
@@ -30,8 +34,8 @@ describe('Property statistics service', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    service = app.get<PropertyStatisticsService>(PropertyStatisticsService);
     propertyService = app.get<PropertyService>(PropertyService);
+    transactionService = app.get<TransactionService>(TransactionService);
 
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
@@ -45,14 +49,37 @@ describe('Property statistics service', () => {
 
   describe('Calculate statistics', () => {
     it('it calculates statistics correctly', async () => {
-      await service.calculateStatistics(mainTestUser.jwtUser, 1);
-
       const properties = await propertyService.search(mainTestUser.jwtUser, {
         relations: { statistics: true },
         where: { id: 1 },
       });
       const property = properties[0];
       expect(property.statistics.balance).toBe(1111.36);
+    });
+
+    it('it updates statistics when transaction amount updates', async () => {
+      const input = getTransactionExpense1(1);
+      input.amount = -100;
+
+      await transactionService.update(mainTestUser.jwtUser, 1, input);
+
+      const properties = await propertyService.search(mainTestUser.jwtUser, {
+        relations: { statistics: true },
+        where: { id: 1 },
+      });
+      const property = properties[0];
+      expect(property.statistics.balance).toBe(1051);
+    });
+
+    it('it updates statistics when transaction is deleted', async () => {
+      await transactionService.delete(mainTestUser.jwtUser, 1);
+
+      const properties = await propertyService.search(mainTestUser.jwtUser, {
+        relations: { statistics: true },
+        where: { id: 1 },
+      });
+      const property = properties[0];
+      expect(property.statistics.balance).toBe(1151);
     });
   });
 });

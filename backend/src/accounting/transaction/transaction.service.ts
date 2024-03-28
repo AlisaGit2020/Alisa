@@ -12,6 +12,8 @@ import { TransactionStatisticsDto } from './dtos/transaction-statistics.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { BalanceService } from '@alisa-backend/accounting/transaction/balance.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Events, BalanceChangedEvent } from '@alisa-backend/common/Events';
 
 @Injectable()
 export class TransactionService {
@@ -21,6 +23,7 @@ export class TransactionService {
 
     private authService: AuthService,
     private balanceService: BalanceService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async search(
@@ -61,7 +64,12 @@ export class TransactionService {
     this.mapData(transactionEntity, input);
 
     await this.balanceService.handleTransactionAdd(user, transactionEntity);
-    return await this.repository.save(transactionEntity);
+    const transaction = await this.repository.save(transactionEntity);
+    this.eventEmitter.emit(
+      Events.Balance.Changed,
+      new BalanceChangedEvent(transaction.propertyId, transaction.balance),
+    );
+    return transaction;
   }
 
   async update(

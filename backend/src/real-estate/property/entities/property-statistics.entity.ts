@@ -13,7 +13,7 @@ export class PropertyStatistics {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @OneToOne(() => Property, (property) => property.statistics)
+  @OneToOne(() => Property, (property) => property.statistics, {})
   @JoinColumn({ name: 'propertyId' })
   property: Property;
   @Column({ nullable: false })
