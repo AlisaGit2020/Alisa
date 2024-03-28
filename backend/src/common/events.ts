@@ -29,10 +29,10 @@ export class TransactionCreatedEvent {
 
 export class TransactionUpdatedEvent {
   public oldTransaction: Transaction;
-  public newTransaction: Transaction;
-  constructor(oldTransaction: Transaction, newtransaction: Transaction) {
+  public updatedTransaction: Transaction;
+  constructor(oldTransaction: Transaction, updatedTransaction: Transaction) {
     this.oldTransaction = oldTransaction;
-    this.newTransaction = newtransaction;
+    this.updatedTransaction = updatedTransaction;
   }
 }
 

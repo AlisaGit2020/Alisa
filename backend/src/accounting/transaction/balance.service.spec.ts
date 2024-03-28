@@ -104,6 +104,7 @@ describe('Balance service', () => {
       'gets balance correctly when edit a transaction',
       async (transactionId: number, newAmount: number) => {
         await addTransactions();
+
         await transactionService.update(mainUser.jwtUser, transactionId, {
           accountingDate: undefined,
           description: '',
@@ -112,6 +113,7 @@ describe('Balance service', () => {
           transactionDate: undefined,
           amount: newAmount, //100 less than original.
         });
+        await sleep(50);
         const balance = await service.getBalance(mainUser.jwtUser, 1);
         expect(balance).toBe(1011.36);
       },

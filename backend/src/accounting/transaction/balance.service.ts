@@ -5,13 +5,16 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, MoreThan, Repository } from 'typeorm';
-import { TransactionInputDto } from './dtos/transaction-input.dto';
 import { Transaction } from './entities/transaction.entity';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { Events, TransactionCreatedEvent } from '@alisa-backend/common/events';
+import {
+  Events,
+  TransactionCreatedEvent,
+  TransactionUpdatedEvent,
+} from '@alisa-backend/common/events';
 
 @Injectable()
 export class BalanceService {
@@ -66,19 +69,31 @@ export class BalanceService {
     });
   }
 
-  async handleTransactionUpdate(
-    transaction: Transaction,
-    input: TransactionInputDto,
-  ): Promise<void> {
-    if (Number(input.amount) === transaction.amount) {
+  @OnEvent(Events.Transaction.Updated)
+  async handleTransactionUpdate(event: TransactionUpdatedEvent): Promise<void> {
+    if (event.oldTransaction.amount === event.updatedTransaction.amount) {
       return;
     }
-    const previousBalance = await this.getPreviousBalance(transaction);
-    //Calculate the new balance, previous balance new amount
-    transaction.balance = previousBalance + Number(input.amount);
+    const previousBalance = await this.getPreviousBalance(
+      event.updatedTransaction,
+    );
+    //Calculate the new balance, previous balance + new amount
+    event.updatedTransaction.balance =
+      previousBalance + Number(event.updatedTransaction.amount);
+
+    await this.repository.save(event.updatedTransaction);
+
+    const newBalance = await this.recalculateBalancesAfter(
+      event.updatedTransaction,
+    );
+
+    this.eventEmitter.emit(Events.Balance.Changed, {
+      propertyId: event.updatedTransaction.propertyId,
+      newBalance: newBalance,
+    });
   }
 
-  async recalculateBalancesAfter(transaction: Transaction) {
+  async recalculateBalancesAfter(transaction: Transaction): Promise<number> {
     const transactions = await this.repository.find({
       where: {
         propertyId: transaction.propertyId,
@@ -88,7 +103,7 @@ export class BalanceService {
     });
 
     if (transactions.length === 0) {
-      return;
+      return transaction.balance; //Must be the last transaction
     }
 
     let balance = transaction.balance;
@@ -99,13 +114,11 @@ export class BalanceService {
       await this.repository.save(t);
     }
 
-    this.eventEmitter.emit(Events.Balance.Changed, {
-      propertyId: transaction.propertyId,
-      newBalance: balance,
-    });
+    return balance;
   }
 
-  async recalculateBalancesAfterDelete(transaction: Transaction) {
+  @OnEvent(Events.Transaction.Deleted)
+  async handleTransactionDelete(transaction: Transaction) {
     const transactions = await this.repository.find({
       where: {
         propertyId: transaction.propertyId,
@@ -117,13 +130,22 @@ export class BalanceService {
     const nextTransaction = transactions[0];
 
     if (!nextTransaction) {
+      this.eventEmitter.emit(Events.Balance.Changed, {
+        propertyId: transaction.propertyId,
+        newBalance: await this.getPreviousBalance(transaction),
+      });
       return;
     }
     //Fix next transaction balance
     nextTransaction.balance = nextTransaction.balance - transaction.amount;
     await this.repository.save(nextTransaction);
 
-    await this.recalculateBalancesAfter(nextTransaction);
+    const newBalance = await this.recalculateBalancesAfter(nextTransaction);
+
+    this.eventEmitter.emit(Events.Balance.Changed, {
+      propertyId: transaction.propertyId,
+      newBalance: newBalance,
+    });
   }
 
   private async getPreviousBalance(transaction: Transaction): Promise<number> {

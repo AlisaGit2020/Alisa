@@ -8,15 +8,13 @@ import {
   addTransactionsToTestUsers,
   getTestUsers,
   prepareDatabase,
+  sleep,
   TestUser,
   TestUsersSetup,
 } from 'test/helper-functions';
 import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
 import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import {
-  getTransactionExpense1,
-  getTransactionIncome1,
-} from '../../../test/data/mocks/transaction.mock';
+import { getTransactionExpense1 } from '../../../test/data/mocks/transaction.mock';
 
 describe('Property statistics service', () => {
   let app: INestApplication;
@@ -41,6 +39,7 @@ describe('Property statistics service', () => {
     testUsers = await getTestUsers(app);
     mainTestUser = testUsers.user1WithProperties;
     await addTransactionsToTestUsers(app, testUsers);
+    await sleep(50);
   });
 
   afterAll(async () => {
@@ -62,7 +61,7 @@ describe('Property statistics service', () => {
       input.amount = -100;
 
       await transactionService.update(mainTestUser.jwtUser, 1, input);
-
+      await sleep(50);
       const properties = await propertyService.search(mainTestUser.jwtUser, {
         relations: { statistics: true },
         where: { id: 1 },
@@ -73,7 +72,7 @@ describe('Property statistics service', () => {
 
     it('it updates statistics when transaction is deleted', async () => {
       await transactionService.delete(mainTestUser.jwtUser, 1);
-
+      await sleep(50);
       const properties = await propertyService.search(mainTestUser.jwtUser, {
         relations: { statistics: true },
         where: { id: 1 },
