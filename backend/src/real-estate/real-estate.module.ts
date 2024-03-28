@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { InvestmentController } from './investment/investment.controller';
 import { InvestmentService } from './investment/investment.service';
 import { Investment } from './investment/entities/investment.entity';
@@ -10,10 +10,12 @@ import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.en
 import { PeopleModule } from '@alisa-backend/people/people.module';
 import { AuthModule } from '@alisa-backend/auth/auth.module';
 import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
+import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
+import { AccountingModule } from '@alisa-backend/accounting/accounting.module';
 
 @Module({
   controllers: [InvestmentController, PropertyController],
-  providers: [InvestmentService, PropertyService],
+  providers: [InvestmentService, PropertyService, PropertyStatisticsService],
   imports: [
     TypeOrmModule.forFeature([
       Investment,
@@ -21,6 +23,7 @@ import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities
       PropertyStatistics,
       Ownership,
     ]),
+    forwardRef(() => AccountingModule),
     AuthModule,
     PeopleModule,
   ],

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TransactionService } from './transaction/transaction.service';
 import { Expense } from './expense/entities/expense.entity';
@@ -37,8 +37,9 @@ import { BalanceService } from '@alisa-backend/accounting/transaction/balance.se
     TransactionService,
   ],
   imports: [
+    forwardRef(() => RealEstateModule),
     AuthModule,
-    RealEstateModule,
+
     TypeOrmModule.forFeature([
       Transaction,
       Expense,
@@ -48,6 +49,6 @@ import { BalanceService } from '@alisa-backend/accounting/transaction/balance.se
       Property,
     ]),
   ],
-  exports: [ExpenseService, IncomeService, TransactionService],
+  exports: [BalanceService, ExpenseService, IncomeService, TransactionService],
 })
 export class AccountingModule {}

@@ -18,7 +18,6 @@ import {
 import { WithTranslation, withTranslation } from "react-i18next";
 import {
   Avatar,
-  Badge,
   Box,
   Chip,
   Stack,
@@ -139,7 +138,7 @@ function PropertyBalance(props: PropertyBalanceProps) {
   }, [propertyId]);
 
   const handlePropertyChange = (
-    event: React.MouseEvent<HTMLElement>,
+    _event: React.MouseEvent<HTMLElement>,
     propertyId: number,
   ) => {
     if (!propertyId) {
