@@ -34,7 +34,7 @@ const iconMap = {
 
 const getIcon = (iconName: keyof typeof iconMap, props: IconProps) => {
   const IconComponent = iconMap[iconName];
-  return IconComponent ? <IconComponent {...props} /> : null;
+  return IconComponent ? <IconComponent {...props} /> : undefined;
 };
 
 export {

@@ -5,7 +5,7 @@ import { Chip, Paper, Stack } from "@mui/material";
 interface AlisaContentProps {
   headerText: string;
   chipText?: string;
-  icon?: ReactElement;
+  icon?: ReactElement | undefined;
   children: ReactNode;
 }
 function AlisaContent(props: AlisaContentProps) {
