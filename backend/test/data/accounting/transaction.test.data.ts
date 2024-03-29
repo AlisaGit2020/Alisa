@@ -1,6 +1,7 @@
 import { TestData } from '../test-data';
 import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { Expense } from 'src/accounting/expense/entities/expense.entity';
+import { TransactionType } from '@alisa-backend/common/types';
 
 export const transactionTestData = {
   name: 'Transaction',
@@ -13,29 +14,8 @@ export const transactionTestData = {
     },
   } as FindManyOptions<Expense>,
 
-  /*
   inputPost: {
-    propertyId: 1,
-    externalId: '126',
-    sender: 'Joku Ihminen',
-    receiver: 'Juha Koivisto',
-    description: 'Vuokrasuoritus maaliskuu 2023',
-    transactionDate: '2023-03-01T00:00:00.000Z',
-    accountingDate: '2023-03-01T00:00:00.000Z',
-    amount: 1090,
-    incomes: [
-      {
-        incomeTypeId: 2,
-        description: 'Vuokrasuoritus maaliskuu 2023',
-        amount: 1090,
-        quantity: 1,
-        totalAmount: 1090,
-      },
-    ],
-  },
-   */
-
-  inputPost: {
+    type: TransactionType.INCOME,
     sender: 'tposhrk',
     receiver: 'opkhtposk',
     description: 'kohpstrok',
@@ -53,7 +33,6 @@ export const transactionTestData = {
         propertyId: 1,
       },
     ],
-    balance: '29510950665',
   },
 
   inputPut: {

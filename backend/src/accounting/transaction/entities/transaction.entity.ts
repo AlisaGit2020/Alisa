@@ -11,6 +11,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
+import { TransactionType } from '@alisa-backend/common/types';
 
 @Entity()
 export class Transaction {
@@ -19,6 +20,10 @@ export class Transaction {
 
   @Column({ nullable: true })
   externalId?: string;
+
+  //Small int fot transaction type
+  @Column({ type: 'smallint', default: TransactionType.INCOME })
+  type: TransactionType;
 
   @Column()
   sender: string;

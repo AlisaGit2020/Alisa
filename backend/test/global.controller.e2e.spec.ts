@@ -18,6 +18,7 @@ import {
   getTestUsers,
   getUserAccessToken2,
   prepareDatabase,
+  sleep,
   TestUser,
   TestUsersSetup,
 } from './helper-functions';
@@ -54,6 +55,7 @@ describe('Global controller end-to-end test (e2e)', () => {
     );
 
     await addTransactionsToTestUsers(app, testUsers);
+    await sleep(50);
   });
 
   afterAll(async () => {

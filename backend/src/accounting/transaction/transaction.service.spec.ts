@@ -3,6 +3,7 @@ Data service test
 */
 import { Test, TestingModule } from '@nestjs/testing';
 import {
+  BadRequestException,
   INestApplication,
   NotFoundException,
   UnauthorizedException,
@@ -28,6 +29,7 @@ import {
   getTransactionIncome2,
 } from '../../../test/data/mocks/transaction.mock';
 import { FindOptionsWhere } from 'typeorm';
+import { TransactionType } from '@alisa-backend/common/types';
 
 describe('Transaction service', () => {
   let app: INestApplication;
@@ -83,6 +85,23 @@ describe('Transaction service', () => {
       //Clean up
       await service.delete(mainUser.jwtUser, transaction.id);
     });
+
+    it.each([
+      [TransactionType.EXPENSE, getTransactionIncome1(1)],
+      [TransactionType.INCOME, getTransactionExpense1(1)],
+      [TransactionType.DEPOSIT, getTransactionIncome1(1)],
+      [TransactionType.DEPOSIT, getTransactionExpense1(1)],
+      [TransactionType.WITHDRAW, getTransactionIncome1(1)],
+      [TransactionType.WITHDRAW, getTransactionExpense1(1)],
+    ])(
+      'throws when adding invalid data to %s transaction type',
+      async (type, input) => {
+        input.type = type;
+        await expect(service.add(mainUser.jwtUser, input)).rejects.toThrow(
+          BadRequestException,
+        );
+      },
+    );
   });
 
   describe('Read', () => {
@@ -118,6 +137,7 @@ describe('Transaction service', () => {
       );
 
       const input = {
+        type: TransactionType.INCOME,
         receiver: 'Escobar',
         sender: 'Batman',
         accountingDate: new Date('2023-03-29'),
@@ -173,6 +193,7 @@ describe('Transaction service', () => {
         app,
         testUsers.user1WithProperties.jwtUser,
         {
+          type: TransactionType.EXPENSE,
           sender: 'Batman',
           receiver: 'Escobar',
           accountingDate: new Date('2023-03-29'),

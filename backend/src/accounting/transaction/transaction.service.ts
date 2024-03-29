@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -17,6 +18,7 @@ import {
   TransactionCreatedEvent,
   TransactionUpdatedEvent,
 } from '@alisa-backend/common/events';
+import { TransactionType } from '@alisa-backend/common/types';
 
 @Injectable()
 export class TransactionService {
@@ -61,6 +63,8 @@ export class TransactionService {
     if (!hasOwnership) {
       throw new UnauthorizedException();
     }
+
+    await this.validatePostInputOrThrow(input);
 
     const transactionEntity = new Transaction();
     this.mapData(transactionEntity, input);
@@ -204,5 +208,33 @@ export class TransactionService {
       throw new UnauthorizedException();
     }
     return entity;
+  }
+
+  private async validatePostInputOrThrow(input: TransactionInputDto) {
+    if (input.type === TransactionType.EXPENSE && input.incomes) {
+      throw new BadRequestException('Incomes are not allowed for expenses');
+    }
+
+    if (input.type === TransactionType.INCOME && input.expenses) {
+      throw new BadRequestException('Expenses are not allowed for incomes');
+    }
+
+    if (
+      input.type === TransactionType.DEPOSIT &&
+      (input.expenses || input.incomes)
+    ) {
+      throw new BadRequestException(
+        'Expenses or incomes are not allowed for deposits',
+      );
+    }
+
+    if (
+      input.type === TransactionType.WITHDRAW &&
+      (input.expenses || input.incomes)
+    ) {
+      throw new BadRequestException(
+        'Expenses or incomes are not allowed for withdraws',
+      );
+    }
   }
 }

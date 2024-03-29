@@ -3,11 +3,13 @@ import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-
 import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
 import { ExpenseTypeInputDto } from '@alisa-backend/accounting/expense/dtos/expense-type-input.dto';
 import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
+import { TransactionType } from '@alisa-backend/common/types';
 
 export const getTransactionExpense1 = (
   propertyId: number,
 ): TransactionInputDto => {
   return {
+    type: TransactionType.EXPENSE,
     propertyId: propertyId,
     externalId: '123',
     sender: 'Aurora',
@@ -32,6 +34,7 @@ export const getTransactionExpense2 = (
   propertyId: number,
 ): TransactionInputDto => {
   return {
+    type: TransactionType.EXPENSE,
     propertyId: propertyId,
     externalId: '124',
     sender: 'Yrjöntie',
@@ -63,6 +66,7 @@ export const getTransactionIncome1 = (
   propertyId: number,
 ): TransactionInputDto => {
   return {
+    type: TransactionType.INCOME,
     propertyId: propertyId,
     externalId: '125',
     sender: 'Airbnb',
@@ -94,6 +98,7 @@ export const getTransactionIncome2 = (
   propertyId: number,
 ): TransactionInputDto => {
   return {
+    type: TransactionType.INCOME,
     propertyId: propertyId,
     externalId: '126',
     sender: 'Joku Ihminen',
@@ -112,6 +117,30 @@ export const getTransactionIncome2 = (
       } as IncomeInputDto,
     ],
   };
+};
+
+export const getTransactionDeposit1 = {
+  type: TransactionType.DEPOSIT,
+  propertyId: 1,
+  externalId: '127',
+  sender: 'Juha Koivisto',
+  receiver: 'Juha Koivisto',
+  description: 'Talletus',
+  transactionDate: new Date('2023-03-01'),
+  accountingDate: new Date('2023-03-01'),
+  amount: 1000,
+};
+
+export const getTransactionWithdrawal1 = {
+  type: TransactionType.WITHDRAW,
+  propertyId: 1,
+  externalId: '128',
+  sender: 'Juha Koivisto',
+  receiver: 'Juha Koivisto',
+  description: 'Nosto',
+  transactionDate: new Date('2023-03-01'),
+  accountingDate: new Date('2023-03-01'),
+  amount: -100,
 };
 
 export const expenseType1: ExpenseTypeInputDto = {
