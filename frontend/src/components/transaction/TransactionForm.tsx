@@ -8,10 +8,15 @@ import { TransactionInputDto } from "@alisa-backend/accounting/transaction/dtos/
 import AlisaLoadingProgress from "../alisa/AlisaLoadingProgress";
 import TransactionFormFields from "./components/TransactionFormFields";
 import AlisaContent from "../alisa/AlisaContent";
-import { TransactionType } from "./Transactions.tsx";
 import EditableRows from "./components/EditableRows.tsx";
 import { ExpenseInputDto } from "@alisa-backend/accounting/expense/dtos/expense-input.dto.ts";
 import { IncomeInputDto } from "@alisa-backend/accounting/income/dtos/income-input.dto.ts";
+import {
+  TransactionType,
+  TransactionTypeName,
+  transactionTypeNames,
+} from "@alisa-backend/common/types.ts";
+import { getIcon } from "../alisa/AlisaIcons.tsx";
 
 interface TransactionFormProps extends WithTranslation {
   id?: number;
@@ -51,6 +56,7 @@ function TransactionForm({
     if (id === undefined) {
       const fetchData = async () => {
         const defaults = new TransactionInputDto();
+        defaults.type = type;
         if (propertyId) {
           defaults.propertyId = propertyId;
         }
@@ -78,7 +84,7 @@ function TransactionForm({
   const handleRowChange = async (
     rows: ExpenseInputDto[] | IncomeInputDto[],
   ) => {
-    if (getType() === TransactionType.Expense) {
+    if (getType() === TransactionType.EXPENSE) {
       await handleChange("expenses", rows);
     } else {
       await handleChange("incomes", rows);
@@ -97,12 +103,20 @@ function TransactionForm({
     if (type !== undefined) {
       return type;
     }
-    if (data.expenses && data.expenses.length > 0) {
-      return TransactionType.Expense;
+
+    return data.type;
+  };
+
+  const getTypeName = (): TransactionTypeName => {
+    const type = getType();
+    if (type === undefined) {
+      return TransactionTypeName.DEPOSIT;
     }
-    if (data.incomes && data.incomes.length > 0) {
-      return TransactionType.Income;
+    const typeName = transactionTypeNames.get(type);
+    if (typeName === undefined) {
+      return TransactionTypeName.DEPOSIT;
     }
+    return typeName;
   };
 
   const formComponents = () => {
@@ -120,10 +134,10 @@ function TransactionForm({
   };
 
   const getDetailComponents = () => {
-    if (getType() === TransactionType.Expense) {
+    if (getType() === TransactionType.EXPENSE) {
       return (
         <EditableRows
-          type={TransactionType.Expense}
+          type={TransactionType.EXPENSE}
           transaction={data}
           onHandleChange={handleRowChange}
           changedDescription={description}
@@ -131,10 +145,10 @@ function TransactionForm({
         ></EditableRows>
       );
     }
-    if (getType() === TransactionType.Income) {
+    if (getType() === TransactionType.INCOME) {
       return (
         <EditableRows
-          type={TransactionType.Income}
+          type={TransactionType.INCOME}
           transaction={data}
           onHandleChange={handleRowChange}
           changedDescription={description}
@@ -148,7 +162,11 @@ function TransactionForm({
     return (
       <Dialog open={open} onClose={onClose} fullWidth={true} maxWidth={"lg"}>
         <DialogContent dividers>
-          <AlisaContent headerText={t("transaction")}>
+          <AlisaContent
+            headerText={`${t("transaction")}`}
+            chipText={t(getTypeName())}
+            icon={getIcon(getTypeName(), { size: "medium" })}
+          >
             <AlisaFormHandler<TransactionInputDto>
               id={id}
               dataService={dataService}

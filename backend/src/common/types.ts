@@ -7,6 +7,23 @@ export enum TransactionType {
   WITHDRAW = 4,
 }
 
+export enum TransactionTypeName {
+  INCOME = 'income',
+  EXPENSE = 'expense',
+  DEPOSIT = 'deposit',
+  WITHDRAW = 'withdraw',
+}
+
+export const transactionTypeNames = new Map<
+  TransactionType,
+  TransactionTypeName
+>([
+  [TransactionType.INCOME, TransactionTypeName.INCOME],
+  [TransactionType.EXPENSE, TransactionTypeName.EXPENSE],
+  [TransactionType.DEPOSIT, TransactionTypeName.DEPOSIT],
+  [TransactionType.WITHDRAW, TransactionTypeName.WITHDRAW],
+]);
+
 export type BetweenDates = {
   $between: [string, string];
 };

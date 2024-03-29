@@ -6,6 +6,7 @@ const transaction = {
   chooseTransactionType: "Valitse tapahtumatyyyppi",
   defaultIncomeType: "Oletustulolaji",
   defaultExpenseType: "Oletuskululaji",
+  deposit: "Talletus",
   detailsTitle: "Tapahtuman tiedot",
   expense: "Kulu",
   expenseType: "Kululaji",
@@ -22,6 +23,7 @@ const transaction = {
   transaction: "Tilitapahtuma",
   transactionDate: "Tapahtumapäivä",
   transactions: "Tilitapahtumat",
+  withdraw: "Nosto",
 };
 
 export default transaction;

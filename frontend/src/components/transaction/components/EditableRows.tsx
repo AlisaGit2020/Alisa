@@ -18,9 +18,9 @@ import { TransactionInputDto } from "@alisa-backend/accounting/transaction/dtos/
 import AddIcon from "@mui/icons-material/Add";
 import RowDataFields from "./RowDataFields.tsx";
 import { TransactionRow } from "@alisa-lib/types.ts";
-import { TransactionType } from "../Transactions.tsx";
 import { IncomeInputDto } from "@alisa-backend/accounting/income/dtos/income-input.dto.ts";
 import { IncomeType } from "@alisa-backend/accounting/income/entities/income-type.entity.ts";
+import { TransactionType } from "@alisa-backend/common/types.ts";
 
 interface EditableRowsProps extends WithTranslation {
   transaction: TransactionInputDto;
@@ -31,7 +31,7 @@ interface EditableRowsProps extends WithTranslation {
 }
 function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
   let initialData;
-  if (props.type === TransactionType.Expense) {
+  if (props.type === TransactionType.EXPENSE) {
     initialData = props.transaction.expenses || [];
   } else {
     initialData = props.transaction.incomes || [];
@@ -42,7 +42,7 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
 
   const dataService = new DataService<T>({
     context:
-      props.type === TransactionType.Expense ? expenseContext : incomeContext,
+      props.type === TransactionType.EXPENSE ? expenseContext : incomeContext,
   });
 
   React.useEffect(() => {
@@ -136,7 +136,7 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
     };
 
     const getTypeSelect = (row: T) => {
-      if (props.type === TransactionType.Expense) {
+      if (props.type === TransactionType.EXPENSE) {
         return (
           <AlisaSelect<ExpenseInputDto, ExpenseType>
             label={props.t("expenseType")}
@@ -153,7 +153,7 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
         );
       }
 
-      if (props.type === TransactionType.Income) {
+      if (props.type === TransactionType.INCOME) {
         return (
           <AlisaSelect<IncomeInputDto, IncomeType>
             label={props.t("incomeType")}

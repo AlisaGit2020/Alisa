@@ -12,11 +12,7 @@ import { TransactionFilter } from "./components/TransactionListFilter";
 import TransactionListStatistics from "./components/TransactionListStatistics";
 import TransactionDetails from "./components/TransactionDetails";
 import TransactionForm from "./TransactionForm.tsx";
-
-export enum TransactionType {
-  Income,
-  Expense,
-}
+import { TransactionType } from "@alisa-backend/common/types.ts";
 
 interface TransactionsProps extends WithTranslation {
   filter: TransactionFilter;
@@ -161,8 +157,7 @@ function Transactions({ t, filter }: TransactionsProps) {
         t={t}
         anchorEl={anchorElAdd}
         onClose={handleCloseAddMenu}
-        onAddExpense={() => handleAdd(TransactionType.Expense)}
-        onAddIncome={() => handleAdd(TransactionType.Income)}
+        onAddTransaction={handleAdd}
         onImport={handleOpenImport}
       ></TransactionAddMenu>
 

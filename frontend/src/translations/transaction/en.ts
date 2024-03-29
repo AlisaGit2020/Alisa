@@ -6,6 +6,7 @@ const transaction = {
   chooseTransactionType: "Choose transaction type",
   defaultIncomeType: "Default income type",
   defaultExpenseType: "Default expense type",
+  deposit: "Deposit",
   detailsTitle: "Transaction details",
   expense: "Expense",
   expenseType: "Expense type",
@@ -22,6 +23,7 @@ const transaction = {
   transaction: "Transaction",
   transactionDate: "Transaction date",
   transactions: "Transactions",
+  withdraw: "Withdraw",
 };
 
 export default transaction;
