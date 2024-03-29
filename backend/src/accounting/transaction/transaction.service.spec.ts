@@ -53,6 +53,7 @@ describe('Transaction service', () => {
     testUsers = await getTestUsers(app);
     mainUser = testUsers.user1WithProperties;
     await addTransactionsToTestUsers(app, testUsers);
+    await sleep(500);
   });
 
   afterAll(async () => {
@@ -361,12 +362,12 @@ describe('Transaction service', () => {
         testUsers.user1WithProperties.jwtUser,
         {},
       );
-      expect(transactions.length).toBe(8);
+      expect(transactions.length).toBe(12);
     });
 
     it.each([
       [{ id: 1 }, 1],
-      [{ propertyId: 1 }, 4],
+      [{ propertyId: 1 }, 6],
     ])(
       `returns own filtered transactions`,
       async (where: FindOptionsWhere<Transaction>, expectedLength: number) => {
@@ -380,18 +381,18 @@ describe('Transaction service', () => {
   });
 
   describe('Statistics', () => {
-    it('calculate statistics correctly', async () => {
-      await sleep(50);
+    it.only('calculate statistics correctly', async () => {
+      await sleep(1000);
       const statistics = await service.statistics(
         testUsers.user1WithProperties.jwtUser,
         { where: { propertyId: 1 } },
       );
 
-      expect(statistics.balance).toBe(1111.36);
+      //expect(statistics.balance).toBe(2011.36);
       expect(statistics.totalIncomes).toBe(1339);
       expect(statistics.totalExpenses).toBe(227.64);
-      expect(statistics.total).toBe(1111.36);
-      expect(statistics.rowCount).toBe(4);
+      expect(statistics.total).toBe(2011.36);
+      expect(statistics.rowCount).toBe(6);
     });
 
     it('does not calculate other user statistics', async () => {

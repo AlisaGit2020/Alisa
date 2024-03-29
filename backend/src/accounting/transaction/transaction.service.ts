@@ -127,6 +127,24 @@ export class TransactionService {
       options.where = typeormWhereTransformer(options.where);
     }
 
+    const result = await queryBuilder
+      .select('COUNT(transaction.id)', 'rowCount')
+      .addSelect(
+        `SUM(CASE WHEN transaction.type = ${TransactionType.EXPENSE} THEN (transaction.amount * -1) ELSE 0 END)`,
+        'totalExpenses',
+      )
+      .addSelect(
+        `SUM(CASE WHEN transaction.type = ${TransactionType.INCOME} THEN transaction.amount ELSE 0 END)`,
+        'totalIncomes',
+      )
+      .addSelect('SUM(transaction.amount)', 'total')
+
+      .leftJoin('transaction.property', 'property')
+      .leftJoin('property.ownerships', 'ownership')
+      .where(options.where)
+      .andWhere('ownership.userId = :userId', { userId: user.id })
+      .getRawOne();
+
     const lastTransaction = await this.repository
       .createQueryBuilder('transaction')
       .select('transaction.balance', 'balance')
@@ -136,25 +154,6 @@ export class TransactionService {
       .andWhere('ownership.userId = :userId', { userId: user.id })
       .orderBy('transaction.id', 'DESC')
       .limit(1)
-      .getRawOne();
-
-    const result = await queryBuilder
-      .select('COUNT(transaction.id)', 'rowCount')
-      .addSelect(
-        'SUM(CASE WHEN transaction.amount < 0 THEN (transaction.amount * -1) ELSE 0 END)',
-        'totalExpenses',
-      )
-      .addSelect(
-        'SUM(CASE WHEN transaction.amount > 0 THEN transaction.amount ELSE 0 END)',
-        'totalIncomes',
-      )
-      .addSelect('SUM(transaction.amount)', 'total')
-
-      .addSelect('MAX(transaction.balance)', 'balance')
-      .leftJoin('transaction.property', 'property')
-      .leftJoin('property.ownerships', 'ownership')
-      .where(options.where)
-      .andWhere('ownership.userId = :userId', { userId: user.id })
       .getRawOne();
 
     if (lastTransaction === undefined) {
@@ -179,13 +178,19 @@ export class TransactionService {
       }
     });
 
+    if (
+      input.type === TransactionType.EXPENSE ||
+      input.type === TransactionType.WITHDRAW
+    ) {
+      if (transaction.amount > 0) {
+        transaction.amount = -transaction.amount;
+      }
+    }
+
     if (input.expenses !== undefined) {
       for (const expense of input.expenses) {
         expense.transactionId = transaction.id;
         expense.propertyId = transaction.propertyId;
-        if (transaction.amount > 0) {
-          transaction.amount = -transaction.amount;
-        }
       }
     }
     if (input.incomes !== undefined) {

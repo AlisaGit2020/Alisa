@@ -17,19 +17,24 @@ import { FindManyOptions } from 'typeorm';
 import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
 import { User } from '@alisa-backend/common/decorators/user.decorator';
 import { JWTUser } from '@alisa-backend/auth/types';
+import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
+import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
 
 @UseGuards(JwtAuthGuard)
 @Controller('real-estate/property')
 export class PropertyController {
-  constructor(private service: PropertyService) {}
+  constructor(
+    private service: PropertyService,
+    private propertyStatisticsService: PropertyStatisticsService,
+  ) {}
 
   @Post('/search')
   @HttpCode(200)
   async search(
-    @User() user,
+    @User() jwtUser: JWTUser,
     @Body() options: FindManyOptions<Property>,
   ): Promise<Property[]> {
-    return this.service.search(user, options);
+    return this.service.search(jwtUser, options);
   }
 
   @Get('/:id')
@@ -42,6 +47,17 @@ export class PropertyController {
       throw new NotFoundException('Property not found');
     }
     return property;
+  }
+
+  @Post('/:id/statistics/search')
+  @HttpCode(200)
+  async statistics(
+    @User() jwtUser: JWTUser,
+    @Param('id') id: string,
+    @Body() options: FindManyOptions<PropertyStatistics>,
+  ): Promise<PropertyStatistics[]> {
+    options.where = { propertyId: Number(id), ...options.where };
+    return this.propertyStatisticsService.search(jwtUser, options);
   }
 
   @Post('/')

@@ -24,6 +24,14 @@ export const transactionTypeNames = new Map<
   [TransactionType.WITHDRAW, TransactionTypeName.WITHDRAW],
 ]);
 
+export enum StatisticKey {
+  BALANCE = 'balance',
+  INCOME = 'income',
+  EXPENSE = 'expense',
+  DEPOSIT = 'deposit',
+  WITHDRAW = 'withdraw',
+}
+
 export type BetweenDates = {
   $between: [string, string];
 };

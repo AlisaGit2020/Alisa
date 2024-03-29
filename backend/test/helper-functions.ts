@@ -25,6 +25,8 @@ import {
   getTransactionExpense2,
   getTransactionIncome1,
   getTransactionIncome2,
+  getTransactionDeposit1,
+  getTransactionWithdrawal1,
 } from './data/mocks/transaction.mock';
 
 export const getUserAccessToken = async (
@@ -199,22 +201,13 @@ export const addTransactionsToTestUsers = async (
     testUsers.user2WithProperties,
   ]) {
     for (const index of [0, 1]) {
-      await addTransaction(
-        user.jwtUser,
-        getTransactionExpense1(user.properties[index].id),
-      );
-      await addTransaction(
-        user.jwtUser,
-        getTransactionExpense2(user.properties[index].id),
-      );
-      await addTransaction(
-        user.jwtUser,
-        getTransactionIncome1(user.properties[index].id),
-      );
-      await addTransaction(
-        user.jwtUser,
-        getTransactionIncome2(user.properties[index].id),
-      );
+      const propertyId = user.properties[index].id;
+      await addTransaction(user.jwtUser, getTransactionExpense1(propertyId));
+      await addTransaction(user.jwtUser, getTransactionExpense2(propertyId));
+      await addTransaction(user.jwtUser, getTransactionIncome1(propertyId));
+      await addTransaction(user.jwtUser, getTransactionIncome2(propertyId));
+      await addTransaction(user.jwtUser, getTransactionDeposit1(propertyId));
+      await addTransaction(user.jwtUser, getTransactionWithdrawal1(propertyId));
     }
   }
 };
