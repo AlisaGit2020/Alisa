@@ -16,6 +16,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   Events,
   TransactionCreatedEvent,
+  TransactionDeletedEvent,
   TransactionUpdatedEvent,
 } from '@alisa-backend/common/events';
 import { TransactionType } from '@alisa-backend/common/types';
@@ -112,7 +113,10 @@ export class TransactionService {
   async delete(user: JWTUser, id: number): Promise<void> {
     const transaction = await this.getEntityOrThrow(user, id);
     await this.repository.delete(id);
-    this.eventEmitter.emit(Events.Transaction.Deleted, transaction);
+    this.eventEmitter.emit(
+      Events.Transaction.Deleted,
+      new TransactionDeletedEvent(transaction),
+    );
   }
 
   async statistics(

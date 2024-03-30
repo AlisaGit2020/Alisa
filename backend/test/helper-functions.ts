@@ -61,6 +61,7 @@ export const emptyTables = async (
     'ownership',
     'user',
     'property',
+    'property_statistics',
   ],
 ) => {
   const sqlStatements: string[] = [];
