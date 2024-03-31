@@ -29,7 +29,27 @@ export class OpImportService {
 
   async importCsv(user: JWTUser, options: OpImportInput) {
     await this.validate(user, options);
+    const rows: CSVRow[] = await this.readCsv(options);
+    if (options.getList) {
+      return this.csvRowsToTransactions(user, rows, options);
+    }
+    await this.saveRows(user, rows, options);
+  }
 
+  private async csvRowsToTransactions(
+    user: JWTUser,
+    rows: CSVRow[],
+    options: OpImportInput,
+  ) {
+    const transactions: TransactionInputDto[] = [];
+    for (const opCsvRow of rows) {
+      const transaction = await this.toTransaction(user, opCsvRow, options);
+      transactions.push(transaction);
+    }
+    return transactions;
+  }
+
+  private async readCsv(options: OpImportInput): Promise<CSVRow[]> {
     const rows: CSVRow[] = [];
 
     await new Promise<void>((resolve, reject) => {
@@ -62,7 +82,7 @@ export class OpImportService {
         });
     });
 
-    await this.handleRows(user, rows, options);
+    return rows;
   }
 
   private async validate(user: JWTUser, options: OpImportInput) {
@@ -80,7 +100,7 @@ export class OpImportService {
     }
   }
 
-  private async handleRows(
+  private async saveRows(
     user: JWTUser,
     rows: CSVRow[],
     options: OpImportInput,
