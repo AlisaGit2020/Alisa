@@ -9,7 +9,11 @@ import {
   TransactionDeletedEvent,
   TransactionUpdatedEvent,
 } from '@alisa-backend/common/events';
-import { StatisticKey, TransactionType } from '@alisa-backend/common/types';
+import {
+  StatisticKey,
+  TransactionStatus,
+  TransactionType,
+} from '@alisa-backend/common/types';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { PropertyStatisticsFilterDto } from '@alisa-backend/real-estate/property/dtos/property-statistics-filter.dto';
@@ -94,6 +98,15 @@ export class PropertyStatisticsService {
   async handleTransactionUpdated(
     event: TransactionUpdatedEvent,
   ): Promise<void> {
+    if (
+      event.oldTransaction.status === TransactionStatus.PENDING &&
+      event.updatedTransaction.status === TransactionStatus.COMPLETED
+    ) {
+      return await this.handleTransactionCreated(
+        new TransactionCreatedEvent(event.updatedTransaction),
+      );
+    }
+
     for (const key of this.statisticTypes) {
       await this.handleTransactionUpdatedAllTime(key, event);
       await this.handleTransactionUpdatedYearly(key, event);
@@ -390,6 +403,10 @@ export class PropertyStatisticsService {
   }
 
   private weInterestedIn(key: string, transaction: Transaction): boolean {
+    if (transaction.status !== TransactionStatus.COMPLETED) {
+      return false;
+    }
+
     if (key === StatisticKey.BALANCE) {
       return true;
     }

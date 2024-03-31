@@ -1,14 +1,16 @@
 import { IsNotEmpty } from 'class-validator';
 import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-input.dto';
 import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
-import { TransactionType } from '@alisa-backend/common/types';
+import {
+  TransactionStatus,
+  TransactionType,
+} from '@alisa-backend/common/types';
 
 export class TransactionInputDto {
   id?: number;
-
   externalId?: string;
-
-  type?: TransactionType = TransactionType.INCOME;
+  status?: TransactionStatus = TransactionStatus.PENDING;
+  type?: TransactionType = TransactionType.UNKNOWN;
 
   @IsNotEmpty()
   sender: string = '';

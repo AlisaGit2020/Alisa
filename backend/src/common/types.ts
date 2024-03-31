@@ -1,6 +1,11 @@
 import { FindOptionsWhere } from 'typeorm';
 
+export enum TransactionStatus {
+  PENDING = 1,
+  COMPLETED = 2,
+}
 export enum TransactionType {
+  UNKNOWN = 0,
   INCOME = 1,
   EXPENSE = 2,
   DEPOSIT = 3,
@@ -8,6 +13,7 @@ export enum TransactionType {
 }
 
 export enum TransactionTypeName {
+  UNKNOWN = 'unknown',
   INCOME = 'income',
   EXPENSE = 'expense',
   DEPOSIT = 'deposit',
@@ -18,6 +24,7 @@ export const transactionTypeNames = new Map<
   TransactionType,
   TransactionTypeName
 >([
+  [TransactionType.UNKNOWN, TransactionTypeName.UNKNOWN],
   [TransactionType.INCOME, TransactionTypeName.INCOME],
   [TransactionType.EXPENSE, TransactionTypeName.EXPENSE],
   [TransactionType.DEPOSIT, TransactionTypeName.DEPOSIT],

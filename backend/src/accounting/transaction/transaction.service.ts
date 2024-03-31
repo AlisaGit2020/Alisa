@@ -19,7 +19,10 @@ import {
   TransactionDeletedEvent,
   TransactionUpdatedEvent,
 } from '@alisa-backend/common/events';
-import { TransactionType } from '@alisa-backend/common/types';
+import {
+  TransactionStatus,
+  TransactionType,
+} from '@alisa-backend/common/types';
 
 @Injectable()
 export class TransactionService {
@@ -130,6 +133,8 @@ export class TransactionService {
     } else {
       options.where = typeormWhereTransformer(options.where);
     }
+
+    options.where.status = TransactionStatus.COMPLETED;
 
     const result = await queryBuilder
       .select('COUNT(transaction.id)', 'rowCount')

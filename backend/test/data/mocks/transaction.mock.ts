@@ -3,12 +3,16 @@ import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-
 import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
 import { ExpenseTypeInputDto } from '@alisa-backend/accounting/expense/dtos/expense-type-input.dto';
 import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
-import { TransactionType } from '@alisa-backend/common/types';
+import {
+  TransactionStatus,
+  TransactionType,
+} from '@alisa-backend/common/types';
 
 export const getTransactionExpense1 = (
   propertyId: number,
 ): TransactionInputDto => {
   return {
+    status: TransactionStatus.COMPLETED,
     type: TransactionType.EXPENSE,
     propertyId: propertyId,
     externalId: '123',
@@ -34,6 +38,7 @@ export const getTransactionExpense2 = (
   propertyId: number,
 ): TransactionInputDto => {
   return {
+    status: TransactionStatus.COMPLETED,
     type: TransactionType.EXPENSE,
     propertyId: propertyId,
     externalId: '124',
@@ -66,6 +71,7 @@ export const getTransactionIncome1 = (
   propertyId: number,
 ): TransactionInputDto => {
   return {
+    status: TransactionStatus.COMPLETED,
     type: TransactionType.INCOME,
     propertyId: propertyId,
     externalId: '125',
@@ -98,6 +104,7 @@ export const getTransactionIncome2 = (
   propertyId: number,
 ): TransactionInputDto => {
   return {
+    status: TransactionStatus.COMPLETED,
     type: TransactionType.INCOME,
     propertyId: propertyId,
     externalId: '126',
@@ -123,6 +130,7 @@ export const getTransactionDeposit1 = (
   propertyId: number,
 ): TransactionInputDto => {
   return {
+    status: TransactionStatus.COMPLETED,
     type: TransactionType.DEPOSIT,
     propertyId: propertyId,
     externalId: '127',
@@ -137,6 +145,7 @@ export const getTransactionDeposit1 = (
 
 export const getTransactionWithdrawal1 = (propertyId: number) => {
   return {
+    status: TransactionStatus.COMPLETED,
     type: TransactionType.WITHDRAW,
     propertyId: propertyId,
     externalId: '128',
