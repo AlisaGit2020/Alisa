@@ -149,6 +149,7 @@ function Transactions({ t, filter }: TransactionsProps) {
       {addType !== undefined && (
         <TransactionForm
           open={true}
+          status={TransactionStatus.ACCEPTED}
           type={addType}
           propertyId={filter.propertyId}
           onClose={() => setAddType(undefined)}

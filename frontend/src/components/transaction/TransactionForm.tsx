@@ -12,6 +12,7 @@ import EditableRows from "./components/EditableRows.tsx";
 import { ExpenseInputDto } from "@alisa-backend/accounting/expense/dtos/expense-input.dto.ts";
 import { IncomeInputDto } from "@alisa-backend/accounting/income/dtos/income-input.dto.ts";
 import {
+  TransactionStatus,
   TransactionType,
   TransactionTypeName,
   transactionTypeNames,
@@ -22,6 +23,7 @@ interface TransactionFormProps extends WithTranslation {
   id?: number;
   open: boolean;
   propertyId?: number;
+  status?: TransactionStatus;
   type?: TransactionType;
   onAfterSubmit: () => void;
   onCancel: () => void;
@@ -33,6 +35,7 @@ function TransactionForm({
   open,
   id,
   propertyId,
+  status,
   type,
   onAfterSubmit,
   onCancel,
@@ -56,6 +59,7 @@ function TransactionForm({
     if (id === undefined) {
       const fetchData = async () => {
         const defaults = new TransactionInputDto();
+        defaults.status = status;
         defaults.type = type;
         if (propertyId) {
           defaults.propertyId = propertyId;

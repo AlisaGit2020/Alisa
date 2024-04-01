@@ -2,6 +2,7 @@ import React, { ReactNode } from "react";
 import AlisaForm from "./AlisaForm";
 import DataService from "../../../lib/data-service";
 import AlisaLoadingProgress from "../AlisaLoadingProgress";
+import { AxiosError } from "axios";
 
 function AlisaFormHandler<T extends object>(props: {
   formComponents: JSX.Element;
@@ -49,7 +50,7 @@ function AlisaFormHandler<T extends object>(props: {
       setErrorMessage("Cannot save when data is missing");
       return;
     }
-    console.log("props.data", props.data);
+
     const validationErrors = await dataService.getStrValidationErrors(
       props.data,
     );
@@ -61,6 +62,13 @@ function AlisaFormHandler<T extends object>(props: {
       await dataService.save(props.data, props.id);
       props.onAfterSubmit();
     } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 400) {
+          setValidationMessage(error.response.data.message);
+          return;
+        }
+      }
+
       setErrorMessage(JSON.stringify(error));
     }
   };

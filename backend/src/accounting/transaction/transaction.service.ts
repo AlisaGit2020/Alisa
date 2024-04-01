@@ -297,11 +297,11 @@ export class TransactionService {
   }
 
   private async commonValidation(input: TransactionInputDto): Promise<void> {
-    if (input.type === TransactionType.EXPENSE && input.incomes) {
+    if (input.type === TransactionType.EXPENSE && input?.incomes?.length > 0) {
       throw new BadRequestException('Incomes are not allowed for expenses');
     }
 
-    if (input.type === TransactionType.INCOME && input.expenses) {
+    if (input.type === TransactionType.INCOME && input?.expenses?.length > 0) {
       throw new BadRequestException('Expenses are not allowed for incomes');
     }
 
