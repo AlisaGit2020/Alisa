@@ -1,13 +1,20 @@
-import { WithTranslation, withTranslation } from 'react-i18next';
-import { styled } from '@mui/material/styles';
-import { CssBaseline, IconButton, Toolbar, Typography } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
-import React from 'react';
-import LanguageSelector from './LanguageSelector';
-import LeftMenu from './LeftMenu';
-import UserMenu from './UserMenu';
-import SettingsMenu from './SettingsMenu';
+import { WithTranslation, withTranslation } from "react-i18next";
+import { styled } from "@mui/material/styles";
+import {
+  Box,
+  CssBaseline,
+  IconButton,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
+import React from "react";
+import LanguageSelector from "./LanguageSelector";
+import LeftMenu from "./LeftMenu";
+import UserMenu from "./UserMenu";
+import SettingsMenu from "./SettingsMenu";
+import TopMenuItems from "./TopMenuItems.tsx";
 
 const drawerWidth: number = 240;
 
@@ -16,17 +23,17 @@ interface AppBarProps extends MuiAppBarProps {
 }
 
 const _AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
+  shouldForwardProp: (prop) => prop !== "open",
 })<AppBarProps>(({ theme, open }) => ({
   zIndex: theme.zIndex.drawer + 1,
-  transition: theme.transitions.create(['width', 'margin'], {
+  transition: theme.transitions.create(["width", "margin"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
   ...(open && {
     marginLeft: drawerWidth,
     width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
+    transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
@@ -35,14 +42,14 @@ const _AppBar = styled(MuiAppBar, {
 
 function getInitialOpenState() {
   // Yritä hakea tallennettu 'open' arvo localStoragesta
-  const storedOpen = localStorage.getItem('open');
+  const storedOpen = localStorage.getItem("open");
   // Palauta tallennettu arvo, jos se on määritetty, muuten palauta true
   return storedOpen !== null ? JSON.parse(storedOpen) : true;
 }
 
 function setOpenState(open: boolean) {
   // Tallenna 'open' arvo localStorageen
-  localStorage.setItem('open', JSON.stringify(open));
+  localStorage.setItem("open", JSON.stringify(open));
 }
 
 function AppBar({ t }: WithTranslation) {
@@ -60,18 +67,17 @@ function AppBar({ t }: WithTranslation) {
       <_AppBar position="absolute" open={open}>
         <Toolbar
           sx={{
-            pr: '24px', // keep right padding when drawer closed
+            pr: "24px", // keep right padding when drawer closed
           }}
         >
-
           <IconButton
             edge="start"
             color="inherit"
             aria-label="open drawer"
             onClick={toggleDrawer}
             sx={{
-              marginRight: '36px',
-              ...(open && { display: 'none' }),
+              marginRight: "36px",
+              ...(open && { display: "none" }),
             }}
           >
             <MenuIcon />
@@ -82,22 +88,21 @@ function AppBar({ t }: WithTranslation) {
             variant="h6"
             color="inherit"
             noWrap
-            sx={{ flexGrow: 1 }}
+            sx={{ flexGrow: 0 }}
           >
-            {t('title')}
+            {t("title")}
           </Typography>
-
+          <Box display="flex" justifyContent="center" flexGrow={1}>
+            <TopMenuItems></TopMenuItems>
+          </Box>
           <LanguageSelector></LanguageSelector>
           <SettingsMenu></SettingsMenu>
           <UserMenu></UserMenu>
-
         </Toolbar>
-      </_AppBar >
+      </_AppBar>
       <LeftMenu open={open} onToggleDrawer={toggleDrawer}></LeftMenu>
     </>
   );
 }
 
-export default withTranslation('appBar')(AppBar);
-
-
+export default withTranslation("appBar")(AppBar);

@@ -1,4 +1,5 @@
 const transaction = {
+  accepted: "Accepted",
   accountingDate: "Accounting date",
   add: "Add new transaction",
   amount: "Unit price",
@@ -14,6 +15,7 @@ const transaction = {
   incomeType: "Income type",
   import: "Import",
   importTitle: "Import transactions",
+  pending: "Pending",
   receiver: "Receiver",
   rowCount: "Transactions",
   sender: "Sender",

@@ -12,7 +12,10 @@ import { TransactionFilter } from "./components/TransactionListFilter";
 import TransactionListStatistics from "./components/TransactionListStatistics";
 import TransactionDetails from "./components/TransactionDetails";
 import TransactionForm from "./TransactionForm.tsx";
-import { TransactionType } from "@alisa-backend/common/types.ts";
+import {
+  TransactionStatus,
+  TransactionType,
+} from "@alisa-backend/common/types.ts";
 
 interface TransactionsProps extends WithTranslation {
   filter: TransactionFilter;
@@ -92,6 +95,7 @@ function Transactions({ t, filter }: TransactionsProps) {
     },
 
     where: {
+      status: TransactionStatus.COMPLETED,
       propertyId: filter.propertyId,
       ...transactionDateFilter(),
     },
