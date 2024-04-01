@@ -1,4 +1,5 @@
 const transaction = {
+  accepted: "Hyväksytty",
   accountingDate: "Kirjanpito pvm",
   add: "Uusi tilitapahtuma",
   amount: "Yksikköhinta",
@@ -14,6 +15,7 @@ const transaction = {
   incomeType: "Tulolaji",
   import: "Tuonti",
   importTitle: "Tapahtumien tuonti",
+  pending: "Odottaa",
   receiver: "Saaja",
   rowCount: "Tapahtumia",
   sender: "Maksaja",

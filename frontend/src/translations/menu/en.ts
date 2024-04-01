@@ -1,8 +1,8 @@
 const menu = {
-    dashboard: 'Dashboard',
-    properties: 'properties',
-    transactions: 'Transactions',
-    taxes: 'Taxes',
-}
+  dashboard: "Dashboard",
+  properties: "Properties",
+  transactions: "Transactions",
+  taxes: "Taxes",
+};
 
-export default menu
+export default menu;

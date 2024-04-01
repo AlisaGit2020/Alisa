@@ -6,8 +6,10 @@ import PropertyForm from "./property/PropertyForm";
 import Settings from "./settings/Settings";
 import { propertyContext, transactionContext } from "@alisa-lib/alisa-contexts";
 import TransactionMain from "./transaction/TransactionMain";
-import Breadcrumbs from "./layout/Breadcrumbs";
+
 import SignIn from "./login/Login";
+import Breadcrumbs from "./layout/Breadcrumbs.tsx";
+import TransactionsPending from "./transaction/TransactionsPending.tsx";
 
 export default function AppRoutes() {
   return (
@@ -33,6 +35,11 @@ export default function AppRoutes() {
           <Route
             path={`${transactionContext.routePath}/:propertyName?`}
             element={<TransactionMain></TransactionMain>}
+          ></Route>
+
+          <Route
+            path={`${transactionContext.routePath}/pending/`}
+            element={<TransactionsPending></TransactionsPending>}
           ></Route>
 
           <Route
