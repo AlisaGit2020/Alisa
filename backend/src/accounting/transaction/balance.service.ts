@@ -10,11 +10,7 @@ import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import {
-  Events,
-  TransactionCreatedEvent,
-  TransactionUpdatedEvent,
-} from '@alisa-backend/common/events';
+import { Events, TransactionAcceptedEvent } from '@alisa-backend/common/events';
 
 @Injectable()
 export class BalanceService {
@@ -55,10 +51,8 @@ export class BalanceService {
     return transactions[0].balance;
   }
 
-  @OnEvent(Events.Transaction.Created)
-  async handleTransactionCreated(
-    event: TransactionCreatedEvent,
-  ): Promise<void> {
+  @OnEvent(Events.Transaction.Accepted)
+  async transactionAccepted(event: TransactionAcceptedEvent): Promise<void> {
     const previousBalance = await this.getPreviousBalance(event.transaction);
     event.transaction.balance = previousBalance + event.transaction.amount;
     await this.repository.save(event.transaction);
@@ -66,30 +60,6 @@ export class BalanceService {
     this.eventEmitter.emit(Events.Balance.Changed, {
       propertyId: event.transaction.propertyId,
       newBalance: event.transaction.balance,
-    });
-  }
-
-  @OnEvent(Events.Transaction.Updated)
-  async handleTransactionUpdate(event: TransactionUpdatedEvent): Promise<void> {
-    if (event.oldTransaction.amount === event.updatedTransaction.amount) {
-      return;
-    }
-    const previousBalance = await this.getPreviousBalance(
-      event.updatedTransaction,
-    );
-    //Calculate the new balance, previous balance + new amount
-    event.updatedTransaction.balance =
-      previousBalance + Number(event.updatedTransaction.amount);
-
-    await this.repository.save(event.updatedTransaction);
-
-    const newBalance = await this.recalculateBalancesAfter(
-      event.updatedTransaction,
-    );
-
-    this.eventEmitter.emit(Events.Balance.Changed, {
-      propertyId: event.updatedTransaction.propertyId,
-      newBalance: newBalance,
     });
   }
 

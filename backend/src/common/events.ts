@@ -7,6 +7,7 @@ export const Events = {
   Transaction: {
     Created: 'transaction.created',
     Updated: 'transaction.updated',
+    Accepted: 'transaction.accepted',
     Deleted: 'transaction.deleted',
   },
 };
@@ -21,6 +22,13 @@ export class BalanceChangedEvent {
 }
 
 export class TransactionCreatedEvent {
+  public transaction: Transaction;
+  constructor(transaction: Transaction) {
+    this.transaction = transaction;
+  }
+}
+
+export class TransactionAcceptedEvent {
   public transaction: Transaction;
   constructor(transaction: Transaction) {
     this.transaction = transaction;

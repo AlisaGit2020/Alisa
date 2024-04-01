@@ -7,7 +7,6 @@ import {
   Events,
   TransactionCreatedEvent,
   TransactionDeletedEvent,
-  TransactionUpdatedEvent,
 } from '@alisa-backend/common/events';
 import {
   StatisticKey,
@@ -71,6 +70,10 @@ export class PropertyStatisticsService {
       return statistics;
     }
 
+    if (!filter.key) {
+      return [];
+    }
+
     return [
       {
         propertyId: filter.propertyId,
@@ -82,35 +85,15 @@ export class PropertyStatisticsService {
     ];
   }
 
-  @OnEvent(Events.Transaction.Created)
+  @OnEvent(Events.Transaction.Accepted)
   async handleTransactionCreated(
     event: TransactionCreatedEvent,
   ): Promise<void> {
     const eCase = this.EventCases.CREATED;
     for (const key of this.statisticTypes) {
-      await this.handleTransactionEventAllTime(eCase, key, event.transaction);
-      await this.handleTransactionEventYearly(eCase, key, event.transaction);
-      await this.handleTransactionEventMonthly(eCase, key, event.transaction);
-    }
-  }
-
-  @OnEvent(Events.Transaction.Updated)
-  async handleTransactionUpdated(
-    event: TransactionUpdatedEvent,
-  ): Promise<void> {
-    if (
-      event.oldTransaction.status === TransactionStatus.PENDING &&
-      event.updatedTransaction.status === TransactionStatus.COMPLETED
-    ) {
-      return await this.handleTransactionCreated(
-        new TransactionCreatedEvent(event.updatedTransaction),
-      );
-    }
-
-    for (const key of this.statisticTypes) {
-      await this.handleTransactionUpdatedAllTime(key, event);
-      await this.handleTransactionUpdatedYearly(key, event);
-      await this.handleTransactionUpdatedMonthly(key, event);
+      await this.transactionAcceptedAllTime(eCase, key, event.transaction);
+      await this.transactionAcceptedYearly(eCase, key, event.transaction);
+      await this.transactionAcceptedMonthly(eCase, key, event.transaction);
     }
   }
 
@@ -120,13 +103,13 @@ export class PropertyStatisticsService {
   ): Promise<void> {
     const eCase = this.EventCases.DELETED;
     for (const key of this.statisticTypes) {
-      await this.handleTransactionEventAllTime(eCase, key, event.transaction);
-      await this.handleTransactionEventYearly(eCase, key, event.transaction);
-      await this.handleTransactionEventMonthly(eCase, key, event.transaction);
+      await this.transactionAcceptedAllTime(eCase, key, event.transaction);
+      await this.transactionAcceptedYearly(eCase, key, event.transaction);
+      await this.transactionAcceptedMonthly(eCase, key, event.transaction);
     }
   }
 
-  private async handleTransactionEventAllTime(
+  private async transactionAcceptedAllTime(
     eventCase: string,
     key: StatisticKey,
     transaction: Transaction,
@@ -162,7 +145,7 @@ export class PropertyStatisticsService {
     await this.repository.save(statistics);
   }
 
-  private async handleTransactionEventYearly(
+  private async transactionAcceptedYearly(
     eventCase: string,
     key: StatisticKey,
     transaction: Transaction,
@@ -199,7 +182,7 @@ export class PropertyStatisticsService {
     await this.repository.save(statistics);
   }
 
-  private async handleTransactionEventMonthly(
+  private async transactionAcceptedMonthly(
     eventCase: string,
     key: StatisticKey,
     transaction: Transaction,
@@ -231,113 +214,6 @@ export class PropertyStatisticsService {
       statistics.year = year;
       statistics.month = month;
       value = this.getEventNewValue(eventCase, key, transaction);
-    }
-
-    statistics.value = this.getFormattedValue(value, key);
-
-    await this.repository.save(statistics);
-  }
-
-  private async handleTransactionUpdatedAllTime(
-    key: StatisticKey,
-    event: TransactionUpdatedEvent,
-  ): Promise<void> {
-    if (!this.weInterestedIn(key, event.updatedTransaction)) {
-      return;
-    }
-    let statistics: PropertyStatistics;
-
-    statistics = await this.repository.findOne({
-      where: {
-        propertyId: event.updatedTransaction.propertyId,
-        key,
-        year: IsNull(),
-        month: IsNull(),
-      },
-    });
-
-    let value: number;
-    if (statistics) {
-      value = this.getUpdatedNewValue(key, event, statistics);
-    } else {
-      statistics = new PropertyStatistics();
-      statistics.propertyId = event.updatedTransaction.propertyId;
-      statistics.key = key;
-      value = this.getUpdatedNewValue(key, event);
-    }
-
-    statistics.value = this.getFormattedValue(value, key);
-
-    await this.repository.save(statistics);
-  }
-
-  private async handleTransactionUpdatedYearly(
-    key: StatisticKey,
-    event: TransactionUpdatedEvent,
-  ): Promise<void> {
-    if (!this.weInterestedIn(key, event.updatedTransaction)) {
-      return;
-    }
-    let statistics: PropertyStatistics;
-
-    const year = this.getYear(key, event.updatedTransaction);
-
-    statistics = await this.repository.findOne({
-      where: {
-        propertyId: event.updatedTransaction.propertyId,
-        key,
-        year: year,
-        month: IsNull(),
-      },
-    });
-
-    let value: number;
-    if (statistics) {
-      value = this.getUpdatedNewValue(key, event, statistics);
-    } else {
-      statistics = new PropertyStatistics();
-      statistics.propertyId = event.updatedTransaction.propertyId;
-      statistics.key = key;
-      statistics.year = year;
-      value = this.getUpdatedNewValue(key, event);
-    }
-
-    statistics.value = this.getFormattedValue(value, key);
-
-    await this.repository.save(statistics);
-  }
-
-  private async handleTransactionUpdatedMonthly(
-    key: StatisticKey,
-    event: TransactionUpdatedEvent,
-  ): Promise<void> {
-    if (!this.weInterestedIn(key, event.updatedTransaction)) {
-      return;
-    }
-    let statistics: PropertyStatistics;
-
-    const year = this.getYear(key, event.updatedTransaction);
-    const month = this.getMonth(key, event.updatedTransaction);
-
-    statistics = await this.repository.findOne({
-      where: {
-        propertyId: event.updatedTransaction.propertyId,
-        key,
-        year: year,
-        month: month,
-      },
-    });
-
-    let value: number;
-    if (statistics) {
-      value = this.getUpdatedNewValue(key, event, statistics);
-    } else {
-      statistics = new PropertyStatistics();
-      statistics.propertyId = event.updatedTransaction.propertyId;
-      statistics.key = key;
-      statistics.year = year;
-      statistics.month = month;
-      value = this.getUpdatedNewValue(key, event);
     }
 
     statistics.value = this.getFormattedValue(value, key);
@@ -377,33 +253,13 @@ export class PropertyStatisticsService {
     return amount;
   }
 
-  private getUpdatedNewValue(
-    key: StatisticKey,
-    event: TransactionUpdatedEvent,
-    statistics?: PropertyStatistics,
-  ): number {
-    let oldAmount = event.oldTransaction.amount;
-    let newAmount = event.updatedTransaction.amount;
-
-    if (key === StatisticKey.EXPENSE || key === StatisticKey.WITHDRAW) {
-      oldAmount = -event.oldTransaction.amount;
-      newAmount = -event.updatedTransaction.amount;
-    }
-    const diff = newAmount - oldAmount;
-
-    if (statistics) {
-      return diff + parseFloat(statistics.value);
-    }
-    return diff;
-  }
-
   private getFormattedValue(value: number, key: string): string {
     // set value with correct amount of decimals
     return value.toFixed(this.decimals.get(key));
   }
 
   private weInterestedIn(key: string, transaction: Transaction): boolean {
-    if (transaction.status !== TransactionStatus.COMPLETED) {
+    if (transaction.status !== TransactionStatus.ACCEPTED) {
       return false;
     }
 

@@ -17,7 +17,7 @@ import {
   Events,
   TransactionCreatedEvent,
   TransactionDeletedEvent,
-  TransactionUpdatedEvent,
+  TransactionAcceptedEvent,
 } from '@alisa-backend/common/events';
 import {
   TransactionStatus,
@@ -80,6 +80,13 @@ export class TransactionService {
       new TransactionCreatedEvent(transaction),
     );
 
+    if (transaction.status === TransactionStatus.ACCEPTED) {
+      this.eventEmitter.emit(
+        Events.Transaction.Accepted,
+        new TransactionAcceptedEvent(transaction),
+      );
+    }
+
     return transaction;
   }
 
@@ -96,11 +103,15 @@ export class TransactionService {
     this.mapData(transaction, input);
 
     const updatedTransaction = await this.repository.save(transaction);
-
-    this.eventEmitter.emit(
-      Events.Transaction.Updated,
-      new TransactionUpdatedEvent(oldTransaction, updatedTransaction),
-    );
+    if (
+      oldTransaction.status === TransactionStatus.PENDING &&
+      updatedTransaction.status === TransactionStatus.ACCEPTED
+    ) {
+      this.eventEmitter.emit(
+        Events.Transaction.Accepted,
+        new TransactionAcceptedEvent(updatedTransaction),
+      );
+    }
 
     return updatedTransaction;
   }
@@ -134,7 +145,7 @@ export class TransactionService {
       options.where = typeormWhereTransformer(options.where);
     }
 
-    options.where.status = TransactionStatus.COMPLETED;
+    options.where.status = TransactionStatus.ACCEPTED;
 
     const result = await queryBuilder
       .select('COUNT(transaction.id)', 'rowCount')

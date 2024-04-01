@@ -95,7 +95,7 @@ function Transactions({ t, filter }: TransactionsProps) {
     },
 
     where: {
-      status: TransactionStatus.COMPLETED,
+      status: TransactionStatus.ACCEPTED,
       propertyId: filter.propertyId,
       ...transactionDateFilter(),
     },

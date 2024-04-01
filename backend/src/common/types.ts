@@ -2,7 +2,7 @@ import { FindOptionsWhere } from 'typeorm';
 
 export enum TransactionStatus {
   PENDING = 1,
-  COMPLETED = 2,
+  ACCEPTED = 2,
 }
 export enum TransactionType {
   UNKNOWN = 0,

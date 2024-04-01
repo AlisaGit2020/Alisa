@@ -10,9 +10,10 @@ import {
 
 export const getTransactionExpense1 = (
   propertyId: number,
+  status: TransactionStatus = TransactionStatus.ACCEPTED,
 ): TransactionInputDto => {
   return {
-    status: TransactionStatus.COMPLETED,
+    status: status,
     type: TransactionType.EXPENSE,
     propertyId: propertyId,
     externalId: '123',
@@ -36,9 +37,10 @@ export const getTransactionExpense1 = (
 
 export const getTransactionExpense2 = (
   propertyId: number,
+  status: TransactionStatus = TransactionStatus.ACCEPTED,
 ): TransactionInputDto => {
   return {
-    status: TransactionStatus.COMPLETED,
+    status: status,
     type: TransactionType.EXPENSE,
     propertyId: propertyId,
     externalId: '124',
@@ -69,9 +71,10 @@ export const getTransactionExpense2 = (
 
 export const getTransactionIncome1 = (
   propertyId: number,
+  status: TransactionStatus = TransactionStatus.ACCEPTED,
 ): TransactionInputDto => {
   return {
-    status: TransactionStatus.COMPLETED,
+    status: status,
     type: TransactionType.INCOME,
     propertyId: propertyId,
     externalId: '125',
@@ -102,9 +105,10 @@ export const getTransactionIncome1 = (
 
 export const getTransactionIncome2 = (
   propertyId: number,
+  status: TransactionStatus = TransactionStatus.ACCEPTED,
 ): TransactionInputDto => {
   return {
-    status: TransactionStatus.COMPLETED,
+    status: status,
     type: TransactionType.INCOME,
     propertyId: propertyId,
     externalId: '126',
@@ -128,9 +132,10 @@ export const getTransactionIncome2 = (
 
 export const getTransactionDeposit1 = (
   propertyId: number,
+  status: TransactionStatus = TransactionStatus.ACCEPTED,
 ): TransactionInputDto => {
   return {
-    status: TransactionStatus.COMPLETED,
+    status: status,
     type: TransactionType.DEPOSIT,
     propertyId: propertyId,
     externalId: '127',
@@ -143,9 +148,12 @@ export const getTransactionDeposit1 = (
   };
 };
 
-export const getTransactionWithdrawal1 = (propertyId: number) => {
+export const getTransactionWithdrawal1 = (
+  propertyId: number,
+  status: TransactionStatus = TransactionStatus.ACCEPTED,
+) => {
   return {
-    status: TransactionStatus.COMPLETED,
+    status: status,
     type: TransactionType.WITHDRAW,
     propertyId: propertyId,
     externalId: '128',
