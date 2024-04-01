@@ -3,7 +3,7 @@ import Title from "../../Title";
 import { Chip, Paper, Stack } from "@mui/material";
 
 interface AlisaContentProps {
-  headerText: string;
+  headerText?: string;
   chipText?: string;
   icon?: ReactElement | undefined;
   children: ReactNode;
