@@ -10,7 +10,12 @@ import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { Events, TransactionAcceptedEvent } from '@alisa-backend/common/events';
+import {
+  Events,
+  TransactionAcceptedEvent,
+  TransactionDeletedEvent,
+} from '@alisa-backend/common/events';
+import { TransactionStatus } from '@alisa-backend/common/types';
 
 @Injectable()
 export class BalanceService {
@@ -38,8 +43,9 @@ export class BalanceService {
   }
 
   private async _getBalance(propertyId: number): Promise<number> {
+    const status = TransactionStatus.ACCEPTED;
     const transactions = await this.repository.find({
-      where: { propertyId },
+      where: { propertyId, status },
       order: { id: 'DESC' },
       take: 1,
     });
@@ -67,6 +73,7 @@ export class BalanceService {
     const transactions = await this.repository.find({
       where: {
         propertyId: transaction.propertyId,
+        status: TransactionStatus.ACCEPTED,
         id: MoreThan(transaction.id),
       },
       order: { id: 'ASC' },
@@ -88,16 +95,23 @@ export class BalanceService {
   }
 
   @OnEvent(Events.Transaction.Deleted)
-  async handleTransactionDelete(transaction: Transaction) {
+  async handleTransactionDelete(event: TransactionDeletedEvent) {
+    const transaction = event.transaction;
+
     const transactions = await this.repository.find({
       where: {
         propertyId: transaction.propertyId,
+        status: TransactionStatus.ACCEPTED,
         id: MoreThan(transaction.id),
       },
       order: { id: 'ASC' },
       take: 1,
     });
     const nextTransaction = transactions[0];
+
+    if (nextTransaction === undefined) {
+      console.log('nextTransaction is undefined');
+    }
 
     if (!nextTransaction) {
       this.eventEmitter.emit(Events.Balance.Changed, {
@@ -122,6 +136,7 @@ export class BalanceService {
     const previousIds = await this.repository.find({
       where: {
         propertyId: transaction.propertyId,
+        status: TransactionStatus.ACCEPTED,
         id: LessThan(transaction.id),
       },
       order: { id: 'DESC' },
