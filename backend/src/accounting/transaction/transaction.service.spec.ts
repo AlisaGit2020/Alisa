@@ -29,7 +29,10 @@ import {
   getTransactionIncome2,
 } from '../../../test/data/mocks/transaction.mock';
 import { FindOptionsWhere } from 'typeorm';
-import { TransactionType } from '@alisa-backend/common/types';
+import {
+  TransactionStatus,
+  TransactionType,
+} from '@alisa-backend/common/types';
 
 describe('Transaction service', () => {
   let app: INestApplication;
@@ -103,6 +106,14 @@ describe('Transaction service', () => {
         );
       },
     );
+
+    it('throws when accepted transaction type is unknown', async () => {
+      const input = getTransactionIncome1(1);
+      input.type = TransactionType.UNKNOWN;
+      await expect(service.add(mainUser.jwtUser, input)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
   });
 
   describe('Read', () => {
@@ -134,7 +145,7 @@ describe('Transaction service', () => {
       const transaction = await addTransaction(
         app,
         testUsers.user1WithProperties.jwtUser,
-        getTransactionIncome1(1),
+        getTransactionIncome1(1, TransactionStatus.PENDING),
       );
 
       const input = {
@@ -171,7 +182,7 @@ describe('Transaction service', () => {
     });
 
     it('saves transaction amount as negative when it is an expense', async () => {
-      const input = getTransactionExpense1(1);
+      const input = getTransactionExpense1(1, TransactionStatus.PENDING);
       input.amount = 100;
       const transaction = await service.add(mainUser.jwtUser, input);
 
@@ -245,6 +256,60 @@ describe('Transaction service', () => {
           getTransactionIncome2(1),
         ),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws when trying to update accepted transaction', async () => {
+      const transaction = await addTransaction(
+        app,
+        testUsers.user1WithProperties.jwtUser,
+        getTransactionIncome1(1, TransactionStatus.ACCEPTED),
+      );
+
+      await expect(
+        service.update(
+          testUsers.user1WithProperties.jwtUser,
+          transaction.id,
+          getTransactionIncome2(1),
+        ),
+      ).rejects.toThrow(BadRequestException);
+
+      await service.delete(
+        testUsers.user1WithProperties.jwtUser,
+        transaction.id,
+      );
+    });
+
+    describe('Common validation', () => {
+      let transaction: Transaction;
+
+      beforeAll(async () => {
+        transaction = await addTransaction(
+          app,
+          mainUser.jwtUser,
+          getTransactionIncome1(1),
+        );
+      });
+
+      afterAll(async () => {
+        await service.delete(mainUser.jwtUser, transaction.id);
+      });
+
+      it.each([
+        [TransactionType.EXPENSE, getTransactionIncome1(1)],
+        [TransactionType.INCOME, getTransactionExpense1(1)],
+        [TransactionType.DEPOSIT, getTransactionIncome1(1)],
+        [TransactionType.DEPOSIT, getTransactionExpense1(1)],
+        [TransactionType.WITHDRAW, getTransactionIncome1(1)],
+        [TransactionType.WITHDRAW, getTransactionExpense1(1)],
+      ])(
+        'throws when adding invalid data to %s transaction type',
+        async (type, input) => {
+          input.type = type;
+          await expect(
+            service.update(mainUser.jwtUser, transaction.id, input),
+          ).rejects.toThrow(BadRequestException);
+        },
+      );
     });
   });
 
@@ -381,8 +446,8 @@ describe('Transaction service', () => {
   });
 
   describe('Statistics', () => {
-    it.only('calculate statistics correctly', async () => {
-      await sleep(1000);
+    it('calculate statistics correctly', async () => {
+      await sleep(100);
       const statistics = await service.statistics(
         testUsers.user1WithProperties.jwtUser,
         { where: { propertyId: 1 } },

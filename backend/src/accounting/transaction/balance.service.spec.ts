@@ -132,7 +132,7 @@ describe('Balance service', () => {
     it(`it does not change pending transaction balance when update`, async () => {
       await addTransactions();
 
-      await transactionService.update(mainUser.jwtUser, 7, {
+      await transactionService.update(mainUser.jwtUser, 8, {
         accountingDate: undefined,
         description: '',
         receiver: '',

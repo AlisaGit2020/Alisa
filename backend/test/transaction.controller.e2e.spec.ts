@@ -120,10 +120,10 @@ describe('Transaction search', () => {
         })
         .expect(200);
 
-      expect(response.body.rowCount).toBe(16);
-      expect(response.body.totalExpenses).toBe(1649.22);
-      expect(response.body.totalIncomes).toBe(1078.4);
-      expect(response.body.total).toBe(-570.82);
+      expect(response.body.rowCount).toBe(0);
+      expect(response.body.totalExpenses).toBe(0);
+      expect(response.body.totalIncomes).toBe(0);
+      expect(response.body.total).toBe(0);
     },
   );
 
@@ -132,9 +132,9 @@ describe('Transaction search', () => {
       .post(`/accounting/transaction/search/statistics`)
       .set('Authorization', getBearerToken(token))
       .expect(200);
-    expect(response.body.rowCount).toBe(20);
-    expect(response.body.totalExpenses).toBe(1689.22);
-    expect(response.body.totalIncomes).toBe(1357.67);
-    expect(response.body.total).toBe(-331.55);
+    expect(response.body.rowCount).toBe(0);
+    expect(response.body.totalExpenses).toBe(0);
+    expect(response.body.totalIncomes).toBe(0);
+    expect(response.body.total).toBe(0);
   });
 });

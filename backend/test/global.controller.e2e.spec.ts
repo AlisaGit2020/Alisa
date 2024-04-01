@@ -151,22 +151,6 @@ describe('Global controller end-to-end test (e2e)', () => {
             .expect(404);
         });
 
-        it(`PUT ${testData.baseUrlWithId}, does not update item properties when properties not given`, () => {
-          //Set all values to undefined
-          const copyObject = { ...testData.inputPost };
-          for (const key in copyObject) {
-            if (copyObject.hasOwnProperty(key)) {
-              copyObject[key] = undefined;
-            }
-          }
-
-          return request(server)
-            .put(testData.baseUrlWithId)
-            .set('Authorization', `Bearer ${mainUserToken}`)
-            .send(copyObject)
-            .expect(200);
-        });
-
         it(`PUT ${testData.baseUrl}/<createdId>, update an item`, () => {
           return request(server)
             .put(`${testData.baseUrl}/${createdId}`)

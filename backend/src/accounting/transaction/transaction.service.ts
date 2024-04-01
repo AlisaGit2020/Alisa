@@ -15,9 +15,9 @@ import { AuthService } from '@alisa-backend/auth/auth.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   Events,
+  TransactionAcceptedEvent,
   TransactionCreatedEvent,
   TransactionDeletedEvent,
-  TransactionAcceptedEvent,
 } from '@alisa-backend/common/events';
 import {
   TransactionStatus,
@@ -90,14 +90,29 @@ export class TransactionService {
     return transaction;
   }
 
+  /**
+    status PENDING
+      - update allowed
+      - type is allowed to be unknown
+
+    status ACCEPTED
+       - update not allowed
+       - type cannot be unknown
+   */
   async update(
     user: JWTUser,
     id: number,
     input: TransactionInputDto,
   ): Promise<Transaction> {
     await this.getEntityOrThrow(user, id);
+    await this.validatePutInputOrThrow(input);
 
     const oldTransaction = await this.findOne(user, id);
+
+    if (oldTransaction.status === TransactionStatus.ACCEPTED) {
+      throw new BadRequestException('Cannot update accepted transactions');
+    }
+
     const transaction = await this.findOne(user, id);
 
     this.mapData(transaction, input);
@@ -236,6 +251,22 @@ export class TransactionService {
   }
 
   private async validatePostInputOrThrow(input: TransactionInputDto) {
+    if (
+      input.status === TransactionStatus.ACCEPTED &&
+      input.type === TransactionType.UNKNOWN
+    ) {
+      throw new BadRequestException(
+        'Type cannot be unknown for accepted transactions',
+      );
+    }
+    await this.commonValidation(input);
+  }
+
+  private async validatePutInputOrThrow(input: TransactionInputDto) {
+    await this.commonValidation(input);
+  }
+
+  private async commonValidation(input: TransactionInputDto): Promise<void> {
     if (input.type === TransactionType.EXPENSE && input.incomes) {
       throw new BadRequestException('Incomes are not allowed for expenses');
     }

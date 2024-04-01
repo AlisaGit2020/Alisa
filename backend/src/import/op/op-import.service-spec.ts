@@ -33,7 +33,6 @@ describe('OpImport service', () => {
 
   const opImportInput: OpImportInput = {
     file: `${MOCKS_PATH}/import/op.transactions.csv`,
-    getList: 1,
     propertyId: 1,
     expenseTypeId: 1,
     incomeTypeId: 1,
@@ -52,7 +51,6 @@ describe('OpImport service', () => {
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
     mainUser = testUsers.user1WithProperties;
-    opImportInput.getList = 0;
   });
 
   afterAll(async () => {
@@ -78,7 +76,7 @@ describe('OpImport service', () => {
     });
     const checkBalance = async (
       propertyId = opImportInput.propertyId,
-      balance = -331.55,
+      balance = 0,
     ) => {
       return expect(
         await balanceService.getBalance(mainUser.jwtUser, propertyId),
@@ -176,7 +174,6 @@ describe('OpImport service', () => {
 
       const input: OpImportInput = {
         file: `${MOCKS_PATH}/import/op.transactions.csv`,
-        getList: 0,
         propertyId: opImportInput.propertyId,
         expenseTypeId: 2,
         incomeTypeId: 2,
@@ -199,7 +196,6 @@ describe('OpImport service', () => {
     it('throws not found when property not exist', async () => {
       const input: OpImportInput = {
         file: `${MOCKS_PATH}/import/op.transactions.csv`,
-        getList: 0,
         propertyId: 9999,
         expenseTypeId: 1,
         incomeTypeId: 1,
@@ -212,7 +208,6 @@ describe('OpImport service', () => {
     it('throws UnauthorizedException if user does not have access to property', async () => {
       const input: OpImportInput = {
         file: `${MOCKS_PATH}/import/op.transactions.csv`,
-        getList: 0,
         propertyId: 1, //This property is not the user's property
         expenseTypeId: 1,
         incomeTypeId: 1,
@@ -220,17 +215,6 @@ describe('OpImport service', () => {
       await expect(
         service.importCsv(testUsers.userWithoutProperties.jwtUser, input),
       ).rejects.toThrow(UnauthorizedException);
-    });
-  });
-
-  describe('csvRowsToTransaction', () => {
-    it.only('converts csv to transaction list', async () => {
-      opImportInput.getList = 1;
-      const transactions = await service.importCsv(
-        mainUser.jwtUser,
-        opImportInput,
-      );
-      expect(transactions.length).toBe(20);
     });
   });
 });

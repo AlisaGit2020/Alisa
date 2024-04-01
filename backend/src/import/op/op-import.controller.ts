@@ -44,7 +44,6 @@ export class OpImportController {
   async uploadFile(
     @User() user: JWTUser,
     @UploadedFile() file,
-    @Body('getList') getList: 0 | 1 = 1,
     @Body('propertyId') propertyId: number,
     @Body('expenseTypeId') expenseTypeId: number,
     @Body('incomeTypeId') incomeTypeId: number,
@@ -55,7 +54,6 @@ export class OpImportController {
     const data = new OpImportInput();
 
     data.file = file.path;
-    data.getList = Number(getList) as 0 | 1;
     data.expenseTypeId = Number(expenseTypeId);
     data.propertyId = Number(propertyId);
     data.incomeTypeId = Number(incomeTypeId);

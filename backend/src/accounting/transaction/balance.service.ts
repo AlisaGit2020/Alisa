@@ -109,10 +109,6 @@ export class BalanceService {
     });
     const nextTransaction = transactions[0];
 
-    if (nextTransaction === undefined) {
-      console.log('nextTransaction is undefined');
-    }
-
     if (!nextTransaction) {
       this.eventEmitter.emit(Events.Balance.Changed, {
         propertyId: transaction.propertyId,
