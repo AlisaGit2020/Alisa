@@ -16,6 +16,7 @@ import { ExpenseService } from '../expense/expense.service';
 import {
   addTransaction,
   addTransactionsToTestUsers,
+  emptyTablesV2,
   getTestUsers,
   prepareDatabase,
   sleep,
@@ -28,7 +29,7 @@ import {
   getTransactionIncome1,
   getTransactionIncome2,
 } from '../../../test/data/mocks/transaction.mock';
-import { FindOptionsWhere } from 'typeorm';
+import { FindOptionsWhere, In } from 'typeorm';
 import {
   TransactionStatus,
   TransactionType,
@@ -443,6 +444,59 @@ describe('Transaction service', () => {
         expect(transactions.length).toBe(expectedLength);
       },
     );
+  });
+
+  describe('Set type', () => {
+    let transactions = [];
+    beforeAll(async () => {
+      await emptyTablesV2(app, ['transaction']);
+      transactions = [
+        getTransactionIncome1(1, TransactionStatus.PENDING),
+        getTransactionIncome2(1, TransactionStatus.PENDING),
+        getTransactionExpense1(1, TransactionStatus.PENDING),
+      ];
+
+      for (const transaction of transactions) {
+        transaction.type = TransactionType.UNKNOWN;
+        await service.add(mainUser.jwtUser, transaction);
+      }
+    });
+
+    afterAll(async () => {
+      for (const transactionId of [1, 2, 3]) {
+        await service.delete(mainUser.jwtUser, transactionId);
+      }
+    });
+
+    it('saves types for multiple transactions', async () => {
+      const ids = [1, 2, 3];
+      await service.setType(
+        testUsers.user1WithProperties.jwtUser,
+        ids,
+        TransactionType.INCOME,
+      );
+      await sleep(50);
+      const savedTransactions = await service.search(
+        testUsers.user1WithProperties.jwtUser,
+        { where: { id: In(ids) } },
+      );
+
+      for (const transaction of savedTransactions) {
+        expect(transaction.type).toBe(TransactionType.INCOME);
+      }
+    });
+
+    it('throws if ids array is empty', async () => {
+      await expect(
+        service.setType(mainUser.jwtUser, [], TransactionType.INCOME),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('throws if type is not valid', async () => {
+      await expect(
+        service.setType(mainUser.jwtUser, [1], -1 as TransactionType),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
   describe('Statistics', () => {

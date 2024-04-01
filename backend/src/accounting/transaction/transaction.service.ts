@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Repository } from 'typeorm';
+import { FindManyOptions, In, Repository } from 'typeorm';
 import { TransactionInputDto } from './dtos/transaction-input.dto';
 import { Transaction } from './entities/transaction.entity';
 import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
@@ -146,6 +146,36 @@ export class TransactionService {
       Events.Transaction.Deleted,
       new TransactionDeletedEvent(transaction),
     );
+  }
+
+  async setType(jwtUser: JWTUser, ids: number[], type: TransactionType) {
+    if (ids.length === 0) {
+      throw new BadRequestException('No ids provided');
+    }
+
+    //Check if type is one of the allowed types
+    if (
+      type !== TransactionType.UNKNOWN &&
+      type !== TransactionType.EXPENSE &&
+      type !== TransactionType.INCOME &&
+      type !== TransactionType.WITHDRAW &&
+      type !== TransactionType.DEPOSIT
+    ) {
+      throw new BadRequestException('Invalid type');
+    }
+
+    const transactions = await this.repository.find({
+      where: { id: In(ids) },
+    });
+    for (const transaction of transactions) {
+      if (
+        !(await this.authService.hasOwnership(jwtUser, transaction.propertyId))
+      ) {
+        throw new UnauthorizedException();
+      }
+      transaction.type = type;
+    }
+    await this.repository.save(transactions);
   }
 
   async statistics(

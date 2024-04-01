@@ -89,7 +89,7 @@ function TransactionMain({ t }: WithTranslation) {
   };
 
   return (
-    <AlisaContent headerText={t("transactions")}>
+    <AlisaContent>
       <Box marginBottom={2}>
         <Button
           variant="outlined"

@@ -77,6 +77,14 @@ export const emptyTables = async (
   await sleep(10);
 };
 
+export const emptyTablesV2 = async (
+  app: INestApplication,
+  tables?: string[],
+): Promise<void> => {
+  const dataSource = app.get(DataSource);
+  return emptyTables(dataSource, tables);
+};
+
 export const prepareDatabase = async (app: INestApplication): Promise<void> => {
   const dataSource = app.get(DataSource);
   return emptyTables(dataSource);
