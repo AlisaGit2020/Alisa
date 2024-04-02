@@ -34,6 +34,7 @@ const en = {
 
     add: "Add",
     amount: "Amount",
+    approve: "Approve",
     property: "Property",
     back: "Back",
     cancel: "Cancel",
@@ -49,6 +50,7 @@ const en = {
     noRowsFound: "No rows found",
     quantity: "Quantity",
     rows: "Rows",
+    rowsSelected: "{{count}} rows selected",
     save: "Save",
     selectAll: "Select all",
     settings: "Settings",

@@ -18,7 +18,9 @@ import { TFunction } from "i18next";
 import AlisaConfirmDialog from "../dialog/AlisaConfirmDialog.tsx";
 import DataService from "@alisa-lib/data-service.ts";
 import AlisaDataTableActionButtons from "./AlisaDataTableActionButtons.tsx";
-import AlisaDataTableSelectRow from "./AlisaDataTableSelectRow.tsx";
+import AlisaDataTableSelectRow, {
+  AlisaDataTableSelectHeaderRow,
+} from "./AlisaDataTableSelectRow.tsx";
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(odd)": {
@@ -41,16 +43,17 @@ function AlisaDataTable<T extends { id: number }>(props: {
   fields: AlisaDataTableField<T>[];
   dataService: DataService<T>;
   onNewRow: (event?: React.MouseEvent<HTMLButtonElement>) => void;
-  onSelect?: (id: number) => void;
+  onSelectChange?: (id: number) => void;
+  onSelectAllChange?: (ids: number[]) => void;
+  selectedIds?: number[];
   onEdit?: (id: number) => void;
   onOpen: (id: number) => void;
-  onDelete: (id: number) => void;
+  onDelete?: (id: number) => void;
 }) {
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState<number>(0);
   const [idDeleted, setIdDeleted] = React.useState<number>(0);
-  const [checked, setChecked] = React.useState(false);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -75,11 +78,20 @@ function AlisaDataTable<T extends { id: number }>(props: {
     await props.dataService.delete(idToDelete);
     setTimeout(() => setIdDeleted(idToDelete), 200);
     handleDeleteClose();
-    props.onDelete(idToDelete);
+    if (props.onDelete) {
+      props.onDelete(idToDelete);
+    }
   };
 
   const handleSelectAll = () => {
-    setChecked(!checked);
+    console.log(data.length, props.selectedIds?.length);
+    if (props.onSelectAllChange) {
+      if (data.length == props.selectedIds?.length) {
+        props.onSelectAllChange([]);
+      } else {
+        props.onSelectAllChange(data.map((d) => d.id));
+      }
+    }
   };
 
   const getDataValue = (
@@ -123,13 +135,13 @@ function AlisaDataTable<T extends { id: number }>(props: {
         <Table stickyHeader size="small" aria-label="simple table">
           <TableHead>
             <TableRow>
-              {props.onSelect && (
+              {props.onSelectChange && (
                 <TableCell>
-                  <AlisaDataTableSelectRow
+                  <AlisaDataTableSelectHeaderRow
                     t={props.t}
-                    onHandleSelectAll={handleSelectAll}
-                    variant={"th"}
-                  ></AlisaDataTableSelectRow>
+                    checked={data.length == props.selectedIds?.length}
+                    onSelectAll={handleSelectAll}
+                  ></AlisaDataTableSelectHeaderRow>
                 </TableCell>
               )}
               {props.fields.map((field) => (
@@ -155,13 +167,12 @@ function AlisaDataTable<T extends { id: number }>(props: {
             <TableBody>
               {data.map((item) => (
                 <StyledTableRow key={item.id}>
-                  {props.onSelect && (
+                  {props.onSelectChange && (
                     <TableCell>
                       <AlisaDataTableSelectRow
-                        variant={"td"}
                         id={item.id}
-                        checked={checked}
-                        onSelect={props.onSelect}
+                        selectedIds={props.selectedIds || []}
+                        onSelect={props.onSelectChange}
                       />
                     </TableCell>
                   )}

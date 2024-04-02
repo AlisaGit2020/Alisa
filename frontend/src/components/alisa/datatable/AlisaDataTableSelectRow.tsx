@@ -1,29 +1,36 @@
 import { Checkbox, Tooltip } from "@mui/material";
 import { TFunction } from "i18next";
 
+interface AlisaDataTableSelectRowHeaderProps {
+  t: TFunction;
+  onSelectAll: () => void;
+  checked: boolean;
+}
+export function AlisaDataTableSelectHeaderRow(
+  props: AlisaDataTableSelectRowHeaderProps,
+) {
+  return (
+    <Tooltip title={props.t("selectAll")}>
+      <Checkbox checked={props.checked} onChange={props.onSelectAll}></Checkbox>
+    </Tooltip>
+  );
+}
+
 interface AlisaDataTableSelectRowProps {
-  variant: "th" | "td";
-  id?: number;
-  t?: TFunction;
-  onSelect?: (id: number) => void;
-  onHandleSelectAll?: () => void;
-  checked?: boolean;
+  id: number;
+  onSelect: (id: number) => void;
+  selectedIds: number[];
 }
 function AlisaDataTableSelectRow(props: AlisaDataTableSelectRowProps) {
-  if (props.variant === "th" && props.t) {
-    return (
-      <Tooltip title={props.t("selectAll")}>
-        <Checkbox onChange={props.onHandleSelectAll}></Checkbox>
-      </Tooltip>
-    );
-  }
   return (
     <>
       {props.onSelect && (
         <Checkbox
-          checked={props.checked}
+          checked={props.selectedIds.includes(props.id)}
           onChange={() => {
-            alert("onSelect");
+            if (props.onSelect) {
+              props.onSelect(props.id as number);
+            }
           }}
         ></Checkbox>
       )}
