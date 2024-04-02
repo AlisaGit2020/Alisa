@@ -74,7 +74,7 @@ function TransactionForm({
     } else {
       setReady(true);
     }
-  }, [id, propertyId]);
+  }, [id, propertyId, status, type]);
 
   const handleChange = async (name: string, value: unknown) => {
     let newData = dataService.updateNestedData(data, name, value);

@@ -50,6 +50,7 @@ const en = {
     quantity: "Quantity",
     rows: "Rows",
     save: "Save",
+    selectAll: "Select all",
     settings: "Settings",
     totalAmount: "Total",
     validationErrorTitle: "Please check following fields:",

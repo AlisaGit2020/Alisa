@@ -42,6 +42,7 @@ const fi = {
     quantity: "Määrä",
     rows: "Rivit",
     save: "Tallenna",
+    selectAll: "Valitse kaikki",
     settings: "Asetukset",
     totalAmount: "Yhteensä",
     validationErrorTitle: "Tarkasta nämä kentät:",

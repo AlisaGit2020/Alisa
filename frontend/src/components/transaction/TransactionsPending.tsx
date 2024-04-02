@@ -1,7 +1,7 @@
 import { Box, Paper } from "@mui/material";
 
 import { WithTranslation, withTranslation } from "react-i18next";
-import AlisaDataTable from "../alisa/AlisaDataTable";
+import AlisaDataTable from "../alisa/datatable/AlisaDataTable.tsx";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
 import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity";
 import DataService from "@alisa-lib/data-service";
@@ -19,11 +19,15 @@ interface TransactionsProps extends WithTranslation {}
 
 function Transactions({ t }: TransactionsProps) {
   const [propertyId, setPropertyId] = React.useState<number>(0);
+  const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
   const [detailId, setDetailId] = React.useState<number>(0);
   const [editId, setEditId] = React.useState<number>(0);
   const [deletedId, setDeletedId] = React.useState<number>(0);
   const [addType, setAddType] = React.useState<TransactionType | undefined>(
     undefined,
+  );
+  const [anchorElAdd, setAnchorElAdd] = React.useState<null | HTMLElement>(
+    null,
   );
 
   const handleOpenAddMenu = (
@@ -48,6 +52,14 @@ function Transactions({ t }: TransactionsProps) {
 
   const handleSelectProperty = (propertyId: number) => {
     setPropertyId(propertyId);
+  };
+
+  const handleSelectDataRow = (id: number) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter((i) => i !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
   };
 
   const fetchOptions = {
@@ -92,6 +104,7 @@ function Transactions({ t }: TransactionsProps) {
             { name: "amount", format: "currency" },
           ]}
           onNewRow={handleOpenAddMenu}
+          onSelect={handleSelectDataRow}
           onEdit={handleEdit}
           onOpen={handleOpenDetails}
           onDelete={handleDelete}

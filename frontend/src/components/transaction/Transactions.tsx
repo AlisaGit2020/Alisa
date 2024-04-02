@@ -1,6 +1,6 @@
 import { Box, Paper } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
-import AlisaDataTable from "../alisa/AlisaDataTable";
+import AlisaDataTable from "../alisa/datatable/AlisaDataTable.tsx";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
 import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity";
 import DataService from "@alisa-lib/data-service";
@@ -43,10 +43,6 @@ function Transactions({ t, filter }: TransactionsProps) {
 
   const handleCloseAddMenu = () => {
     setAnchorElAdd(null);
-  };
-
-  const handleEdit = (id: number) => {
-    setEditId(id);
   };
 
   const handleAdd = (type: TransactionType) => {
@@ -122,7 +118,6 @@ function Transactions({ t, filter }: TransactionsProps) {
             { name: "amount", format: "currency" },
           ]}
           onNewRow={handleOpenAddMenu}
-          onEdit={handleEdit}
           onOpen={handleOpenDetails}
           onDelete={handleDelete}
         />
