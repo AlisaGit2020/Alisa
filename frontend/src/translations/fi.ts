@@ -26,6 +26,7 @@ const fi = {
 
     add: "Lisää",
     amount: "Määrä",
+    approve: "Hyväksy",
     property: "Asunto",
     back: "Takaisin",
     cancel: "Peruuta",
@@ -41,6 +42,7 @@ const fi = {
     noRowsFound: "Rivejä ei löytynyt",
     quantity: "Määrä",
     rows: "Rivit",
+    rowsSelected: "{{count}} riviä valittu",
     save: "Tallenna",
     selectAll: "Valitse kaikki",
     settings: "Asetukset",

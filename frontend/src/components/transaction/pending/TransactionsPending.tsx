@@ -1,35 +1,35 @@
 import { Box, Paper } from "@mui/material";
+
 import { WithTranslation, withTranslation } from "react-i18next";
-import AlisaDataTable from "../alisa/datatable/AlisaDataTable.tsx";
-import { transactionContext } from "@alisa-lib/alisa-contexts";
-import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity";
-import DataService from "@alisa-lib/data-service";
-import { TypeOrmFetchOptions } from "@alisa-lib/types";
+import AlisaDataTable from "../../alisa/datatable/AlisaDataTable.tsx";
+import { transactionContext } from "@alisa-lib/alisa-contexts.ts";
+import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity.ts";
+import DataService from "@alisa-lib/data-service.ts";
+import { TypeOrmFetchOptions } from "@alisa-lib/types.ts";
 import React from "react";
-import TransactionAddMenu from "./components/TransactionAddMenu";
-import TransactionImport from "./components/TransactionImport";
-import { TransactionFilter } from "./components/TransactionListFilter";
-import TransactionListStatistics from "./components/TransactionListStatistics";
-import TransactionDetails from "./components/TransactionDetails";
-import TransactionForm from "./TransactionForm.tsx";
+import TransactionDetails from "../components/TransactionDetails.tsx";
+import TransactionForm from "../TransactionForm.tsx";
 import {
   TransactionStatus,
   TransactionType,
 } from "@alisa-backend/common/types.ts";
+import AlisaPropertySelect from "../../alisa/AlisaPropertySelect.tsx";
+import TransactionImport from "../components/TransactionImport.tsx";
+import TransactionAddMenu from "../components/TransactionAddMenu.tsx";
+import TransactionsPendingActions from "./TransactionsPendingActions.tsx";
 
-interface TransactionsProps extends WithTranslation {
-  filter: TransactionFilter;
-}
+interface TransactionsPendingProps extends WithTranslation {}
 
-function Transactions({ t, filter }: TransactionsProps) {
-  const [anchorElAdd, setAnchorElAdd] = React.useState<null | HTMLElement>(
-    null,
-  );
+function TransactionsPending({ t }: TransactionsPendingProps) {
+  const [propertyId, setPropertyId] = React.useState<number>(0);
+  const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
   const [detailId, setDetailId] = React.useState<number>(0);
   const [editId, setEditId] = React.useState<number>(0);
-  const [deletedId, setDeletedId] = React.useState<number>(0);
   const [addType, setAddType] = React.useState<TransactionType | undefined>(
     undefined,
+  );
+  const [anchorElAdd, setAnchorElAdd] = React.useState<null | HTMLElement>(
+    null,
   );
   const [importOpen, setImportOpen] = React.useState<boolean>(false);
 
@@ -49,28 +49,40 @@ function Transactions({ t, filter }: TransactionsProps) {
     setAddType(type);
     handleCloseAddMenu();
   };
-
-  const handleDelete = (id: number) => {
-    setTimeout(() => setDeletedId(id), 200);
-  };
-
   const handleOpenImport = () => {
     setImportOpen(true);
     handleCloseAddMenu();
+  };
+
+  const handleEdit = (id: number) => {
+    setEditId(id);
   };
 
   const handleOpenDetails = (id: number) => {
     setDetailId(id);
   };
 
-  const transactionDateFilter = (): object => {
-    const startDate = new Date(filter.year, filter.month - 1, 1);
-    const endDate = new Date(filter.year, filter.month, 0, 23, 59, 59);
-    return {
-      transactionDate: {
-        $between: [startDate, endDate],
-      },
-    };
+  const handleDeleteSelected = () => {};
+  const handleEditSelected = () => {};
+  const handleApproveSelected = () => {};
+  const handleCancelSelected = () => {
+    setSelectedIds([]);
+  };
+
+  const handleSelectProperty = (propertyId: number) => {
+    setPropertyId(propertyId);
+  };
+
+  const handleSelectChange = (id: number) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter((i) => i !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
+
+  const handleSelectAllChange = (ids: number[]) => {
+    setSelectedIds(ids);
   };
 
   const fetchOptions = {
@@ -91,19 +103,26 @@ function Transactions({ t, filter }: TransactionsProps) {
     },
 
     where: {
-      status: TransactionStatus.ACCEPTED,
-      propertyId: filter.propertyId,
-      ...transactionDateFilter(),
+      propertyId: propertyId,
+      status: TransactionStatus.PENDING,
     },
   } as TypeOrmFetchOptions<Transaction>;
 
   return (
     <Box>
-      <TransactionListStatistics
-        relations={fetchOptions.relations}
-        where={fetchOptions.where}
-        deletedId={deletedId}
-      ></TransactionListStatistics>
+      <AlisaPropertySelect
+        onSelectProperty={handleSelectProperty}
+      ></AlisaPropertySelect>
+
+      <TransactionsPendingActions
+        marginTop={3}
+        selectedIds={selectedIds}
+        open={selectedIds.length > 0}
+        onCancel={handleCancelSelected}
+        onApprove={handleApproveSelected}
+        onDelete={handleDeleteSelected}
+      ></TransactionsPendingActions>
+
       <Paper sx={{ marginTop: 3 }}>
         <AlisaDataTable<Transaction>
           t={t}
@@ -118,8 +137,11 @@ function Transactions({ t, filter }: TransactionsProps) {
             { name: "amount", format: "currency" },
           ]}
           onNewRow={handleOpenAddMenu}
+          onSelectChange={handleSelectChange}
+          onSelectAllChange={handleSelectAllChange}
+          selectedIds={selectedIds}
+          onEdit={handleEdit}
           onOpen={handleOpenDetails}
-          onDelete={handleDelete}
         />
       </Paper>
 
@@ -134,7 +156,7 @@ function Transactions({ t, filter }: TransactionsProps) {
         <TransactionForm
           open={true}
           id={editId}
-          propertyId={filter.propertyId}
+          propertyId={propertyId}
           onClose={() => setEditId(0)}
           onAfterSubmit={() => setEditId(0)}
           onCancel={() => setEditId(0)}
@@ -146,7 +168,7 @@ function Transactions({ t, filter }: TransactionsProps) {
           open={true}
           status={TransactionStatus.ACCEPTED}
           type={addType}
-          propertyId={filter.propertyId}
+          propertyId={propertyId}
           onClose={() => setAddType(undefined)}
           onAfterSubmit={() => setAddType(undefined)}
           onCancel={() => setAddType(undefined)}
@@ -156,7 +178,7 @@ function Transactions({ t, filter }: TransactionsProps) {
       {importOpen && (
         <TransactionImport
           open={importOpen}
-          propertyId={filter.propertyId}
+          propertyId={propertyId}
           onClose={() => setImportOpen(false)}
           t={t}
         ></TransactionImport>
@@ -173,4 +195,4 @@ function Transactions({ t, filter }: TransactionsProps) {
   );
 }
 
-export default withTranslation(transactionContext.name)(Transactions);
+export default withTranslation(transactionContext.name)(TransactionsPending);

@@ -9,7 +9,7 @@ import TransactionMain from "./transaction/TransactionMain";
 
 import SignIn from "./login/Login";
 import Breadcrumbs from "./layout/Breadcrumbs.tsx";
-import TransactionsPending from "./transaction/TransactionsPending.tsx";
+import TransactionsPending from "./transaction/pending/TransactionsPending.tsx";
 
 export default function AppRoutes() {
   return (
