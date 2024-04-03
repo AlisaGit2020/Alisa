@@ -10,7 +10,7 @@ import { IconButton } from "@mui/material";
 import { ExpenseInputDto } from "@alisa-backend/accounting/expense/dtos/expense-input.dto.ts";
 import React from "react";
 import DataService from "@alisa-lib/data-service.ts";
-import AlisaSelect from "../../alisa/AlisaSelect.tsx";
+import AlisaSelect from "../../alisa/data/AlisaSelect.tsx";
 import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity.ts";
 import Title from "../../../Title.tsx";
 import Box from "@mui/material/Box";

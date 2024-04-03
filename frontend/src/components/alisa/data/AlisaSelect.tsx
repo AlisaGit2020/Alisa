@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { ChangeEventHandler, useState } from "react";
-import AlisaSelectField from "./form/AlisaSelectField";
-import DataService from "@alisa-lib/data-service";
+import AlisaSelectField from "../form/AlisaSelectField.tsx";
+import DataService from "@alisa-lib/data-service.ts";
 
 interface InputProps<T1, T2 extends { id: number; name: string }> {
   onHandleChange: (fieldName: keyof T1, value: T1[keyof T1]) => void;
@@ -23,9 +23,7 @@ function AlisaSelect<T1, T2 extends { id: number; name: string }>({
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await dataService.search();
-
-        return result;
+        return await dataService.search();
       } catch (error) {
         handleApiError(error);
       }

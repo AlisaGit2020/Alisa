@@ -13,10 +13,10 @@ import {
   TransactionStatus,
   TransactionType,
 } from "@alisa-backend/common/types.ts";
-import AlisaPropertySelect from "../../alisa/AlisaPropertySelect.tsx";
 import TransactionImport from "../components/TransactionImport.tsx";
 import TransactionAddMenu from "../components/TransactionAddMenu.tsx";
 import TransactionsPendingActions from "./TransactionsPendingActions.tsx";
+import TransactionsPendingFilter from "./TransactionsPendingFilter.tsx";
 
 interface TransactionsPendingProps extends WithTranslation {}
 
@@ -110,9 +110,12 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
 
   return (
     <Box>
-      <AlisaPropertySelect
+      <TransactionsPendingFilter
+        marginTop={3}
+        open={selectedIds.length === 0}
         onSelectProperty={handleSelectProperty}
-      ></AlisaPropertySelect>
+        selectedPropertyId={propertyId}
+      ></TransactionsPendingFilter>
 
       <TransactionsPendingActions
         marginTop={3}

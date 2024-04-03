@@ -84,7 +84,6 @@ function AlisaDataTable<T extends { id: number }>(props: {
   };
 
   const handleSelectAll = () => {
-    console.log(data.length, props.selectedIds?.length);
     if (props.onSelectAllChange) {
       if (data.length == props.selectedIds?.length) {
         props.onSelectAllChange([]);

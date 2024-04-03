@@ -8,7 +8,7 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { TFunction } from "i18next";
 import { useState } from "react";
-import AlisaSelect from "../../alisa/AlisaSelect";
+import AlisaSelect from "../../alisa/data/AlisaSelect.tsx";
 import { OpImportInput } from "@alisa-backend/import/op/dtos/op-import-input.dto";
 import DataService from "@alisa-lib/data-service";
 import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity";
