@@ -8,6 +8,7 @@ export type TypeOrmRelationOption = {
 
 export type TypeOrmFetchOptions<T> = {
   relations?: TypeOrmRelationOption;
+  select?: string[];
   where?: Partial<T>;
   order?: TypeOrmOrderOption;
   limit?: number;

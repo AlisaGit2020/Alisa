@@ -47,6 +47,7 @@ const fi = {
     selectAll: "Valitse kaikki",
     settings: "Asetukset",
     totalAmount: "Yhteensä",
+    unknown: "Ei tiedossa",
     validationErrorTitle: "Tarkasta nämä kentät:",
     year: "Vuosi",
   },

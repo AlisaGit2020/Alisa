@@ -21,7 +21,8 @@ import TransactionsPendingFilter from "./TransactionsPendingFilter.tsx";
 interface TransactionsPendingProps extends WithTranslation {}
 
 function TransactionsPending({ t }: TransactionsPendingProps) {
-  const [propertyId, setPropertyId] = React.useState<number>(0);
+  const [propertyId, setPropertyId] = React.useState<number>(3);
+  const [transactionType, setTransactionType] = React.useState<number>(0);
   const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
   const [detailId, setDetailId] = React.useState<number>(0);
   const [editId, setEditId] = React.useState<number>(0);
@@ -73,6 +74,10 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     setPropertyId(propertyId);
   };
 
+  const handleSelectTransactionType = (transactionType: number) => {
+    setTransactionType(transactionType);
+  };
+
   const handleSelectChange = (id: number) => {
     if (selectedIds.includes(id)) {
       setSelectedIds(selectedIds.filter((i) => i !== id));
@@ -86,14 +91,14 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
   };
 
   const fetchOptions = {
-    select: {
-      id: true,
-      transactionDate: true,
-      sender: true,
-      receiver: true,
-      description: true,
-      amount: true,
-    },
+    select: [
+      "id",
+      "transactionDate",
+      "sender",
+      "receiver",
+      "description",
+      "amount",
+    ],
     relations: {
       expenses: true,
       incomes: true,
@@ -105,6 +110,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     where: {
       propertyId: propertyId,
       status: TransactionStatus.PENDING,
+      type: transactionType,
     },
   } as TypeOrmFetchOptions<Transaction>;
 
@@ -113,8 +119,12 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
       <TransactionsPendingFilter
         marginTop={3}
         open={selectedIds.length === 0}
+        data={{
+          propertyId: propertyId,
+          transactionTypeId: transactionType,
+        }}
         onSelectProperty={handleSelectProperty}
-        selectedPropertyId={propertyId}
+        onSelectTransactionType={handleSelectTransactionType}
       ></TransactionsPendingFilter>
 
       <TransactionsPendingActions

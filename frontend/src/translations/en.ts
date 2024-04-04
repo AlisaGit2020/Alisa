@@ -55,6 +55,7 @@ const en = {
     selectAll: "Select all",
     settings: "Settings",
     totalAmount: "Total",
+    unknown: "Unknown",
     validationErrorTitle: "Please check following fields:",
     year: "Year",
   },

@@ -3,15 +3,12 @@ import React, { useState } from "react";
 import DataService from "@alisa-lib/data-service.ts";
 import { Property } from "@alisa-backend/real-estate/property/entities/property.entity.ts";
 import { propertyContext } from "@alisa-lib/alisa-contexts.ts";
-import { Button, ButtonGroup } from "@mui/material";
-
-import AlisaSelectField from "../form/AlisaSelectField.tsx";
 import { TFunction } from "i18next";
-import AlisaRadioGroup from "../form/AlisaRadioGroup.tsx";
+import AlisaSelectVariant from "../form/AlisaSelectVariant.tsx";
 
 interface AlisaPropertySelectProps {
   onSelectProperty: (propertyId: number) => void;
-  defaultPropertyId?: number;
+  selectedPropertyId?: number;
   t?: TFunction;
   variant?: "select" | "radio" | "button";
   direction?: "row" | "column";
@@ -19,23 +16,33 @@ interface AlisaPropertySelectProps {
 
 function AlisaPropertySelect(props: AlisaPropertySelectProps) {
   const [properties, setProperties] = useState<Property[]>([]);
-  const dataService = new DataService<Property>({
-    context: propertyContext,
-  });
+  const [ready, setReady] = useState<boolean>(false);
 
   React.useEffect(() => {
+    const dataService = new DataService<Property>({
+      context: propertyContext,
+      fetchOptions: {
+        select: ["id", "name"],
+        order: { name: "ASC" },
+      },
+    });
     const fetchData = async () => {
+      let properties: Property[] = [];
       try {
-        return await dataService.search();
+        properties = await dataService.search();
+
+        if (!props.selectedPropertyId || props.selectedPropertyId === 0) {
+          props.selectedPropertyId = properties[0].id;
+        }
       } catch (error) {
         handleApiError(error);
       }
-
+      setReady(true);
       return properties;
     };
 
     fetchData().then(setProperties);
-  }, []);
+  }, [ready]);
 
   const handleApiError = (error: unknown) => {
     if (axios.isAxiosError(error)) {
@@ -43,55 +50,20 @@ function AlisaPropertySelect(props: AlisaPropertySelectProps) {
     }
   };
 
-  const isSelected = (propertyId: number) => {
-    return props.defaultPropertyId === propertyId;
-  };
-
-  if (properties.length > 0) {
-    if (props.variant === "select") {
-      return (
-        <AlisaSelectField
-          label={props.t ? props.t("property") : "Property"}
-          value={props.defaultPropertyId as number}
-          onChange={(e) => props.onSelectProperty(Number(e.target.value))}
-          items={properties}
-        ></AlisaSelectField>
-      );
-    }
-
-    if (props.variant === "radio") {
-      return (
-        <AlisaRadioGroup
-          label={props.t ? props.t("property") : "Property"}
-          value={props.defaultPropertyId as number}
-          items={properties}
-          onChange={props.onSelectProperty}
-          direction={props.direction}
-        />
-      );
-    }
-
-    if (props.variant === "button") {
-      const buttons = properties.map((property) => (
-        <Button
-          key={property.id}
-          onClick={() => props.onSelectProperty(property.id)}
-          variant={isSelected(property.id) ? "contained" : "outlined"}
-        >
-          {property.name}
-        </Button>
-      ));
-      return (
-        <ButtonGroup
-          orientation={props.direction === "row" ? "horizontal" : "vertical"}
-          aria-label="Property Select Buttons"
-          variant="text"
-        >
-          {buttons}
-        </ButtonGroup>
-      );
-    }
+  if (!ready) {
+    return <div>Loading...</div>;
   }
+
+  return (
+    <AlisaSelectVariant
+      variant={props.variant ? props.variant : "select"}
+      direction={props.direction ? props.direction : "column"}
+      label={props.t ? props.t("property") : "Property"}
+      value={props.selectedPropertyId as number}
+      onChange={props.onSelectProperty}
+      items={properties}
+    ></AlisaSelectVariant>
+  );
 }
 
 export default AlisaPropertySelect;

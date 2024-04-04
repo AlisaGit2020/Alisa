@@ -44,7 +44,7 @@ function TransactionListFilter({
     <Stack spacing={2} marginTop={10} width={400} padding={3}>
       <AlisaPropertySelect
         t={t}
-        defaultPropertyId={filter.propertyId}
+        selectedPropertyId={filter.propertyId}
         variant={"radio"}
         onSelectProperty={onPropertyChange}
       ></AlisaPropertySelect>

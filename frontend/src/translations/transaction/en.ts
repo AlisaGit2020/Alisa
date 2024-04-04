@@ -24,6 +24,7 @@ const transaction = {
   total: "Total",
   transaction: "Transaction",
   transactionDate: "Transaction date",
+  transactionType: "Transaction type",
   transactions: "Transactions",
   withdraw: "Withdraw",
 };

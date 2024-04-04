@@ -24,6 +24,7 @@ const transaction = {
   total: "Tulos",
   transaction: "Tilitapahtuma",
   transactionDate: "Tapahtumapäivä",
+  transactionType: "Tapahtumatyyppi",
   transactions: "Tilitapahtumat",
   withdraw: "Nosto",
 };

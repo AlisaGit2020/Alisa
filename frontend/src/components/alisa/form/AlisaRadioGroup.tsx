@@ -12,6 +12,7 @@ function AlisaRadioGroup(props: {
   onChange: (value: number) => void;
   direction?: "row" | "column";
 }) {
+  console.log(props.value);
   return (
     <RadioGroup
       aria-labelledby="demo-radio-buttons-group-label"

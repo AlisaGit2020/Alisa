@@ -2,12 +2,17 @@ import { withTranslation, WithTranslation } from "react-i18next";
 import { transactionContext } from "@alisa-lib/alisa-contexts.ts";
 import { Paper, Stack } from "@mui/material";
 import AlisaPropertySelect from "../../alisa/data/AlisaPropertySelect.tsx";
+import AlisaTransactionTypeSelect from "../../alisa/data/AlisaTransactionTypeSelect.tsx";
 
 interface TransactionsPendingFilterProps extends WithTranslation {
   marginTop?: number;
   open: boolean;
+  data: {
+    propertyId: number;
+    transactionTypeId: number;
+  };
   onSelectProperty: (propertyId: number) => void;
-  selectedPropertyId?: number;
+  onSelectTransactionType: (transactionTypeId: number) => void;
 }
 
 function TransactionsPendingFilter(props: TransactionsPendingFilterProps) {
@@ -23,10 +28,17 @@ function TransactionsPendingFilter(props: TransactionsPendingFilterProps) {
         <AlisaPropertySelect
           variant={"radio"}
           t={props.t}
-          direction={"row"}
+          direction={"column"}
           onSelectProperty={props.onSelectProperty}
-          defaultPropertyId={props.selectedPropertyId}
+          selectedPropertyId={props.data.propertyId}
         ></AlisaPropertySelect>
+        <AlisaTransactionTypeSelect
+          variant={"radio"}
+          t={props.t}
+          direction={"column"}
+          onSelectTransactionType={props.onSelectTransactionType}
+          defaultTransactionTypeId={props.data.transactionTypeId}
+        ></AlisaTransactionTypeSelect>
       </Stack>
     </Paper>
   );
