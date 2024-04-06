@@ -38,6 +38,7 @@ function TransactionsPendingFilter(props: TransactionsPendingFilterProps) {
           direction={"column"}
           onSelectTransactionType={props.onSelectTransactionType}
           defaultTransactionTypeId={props.data.transactionTypeId}
+          showLabel={true}
         ></AlisaTransactionTypeSelect>
       </Stack>
     </Paper>

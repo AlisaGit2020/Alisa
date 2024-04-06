@@ -7,6 +7,7 @@ import React from "react";
 import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import { ClearIcon } from "@mui/x-date-pickers";
+import { TransactionTypeName } from "@alisa-backend/common/types.ts";
 
 interface IconProps {
   size?: "small" | "medium" | "large";
@@ -48,7 +49,7 @@ const iconMap = {
   withdraw: AlisaWithdrawIcon,
 };
 
-const getIcon = (iconName: keyof typeof iconMap, props: IconProps) => {
+const getIcon = (iconName: TransactionTypeName, props: IconProps) => {
   const IconComponent = iconMap[iconName];
   return IconComponent ? <IconComponent {...props} /> : undefined;
 };

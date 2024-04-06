@@ -3,34 +3,33 @@ import React, { useState } from "react";
 import { TFunction } from "i18next";
 import AlisaSelectVariant from "../form/AlisaSelectVariant.tsx";
 import {
-  TransactionTypeName,
-  transactionTypeNames,
+  TransactionStatusName,
+  transactionStatusNames,
 } from "@alisa-backend/common/types.ts";
 import { AlisaSelectFieldItem } from "../form/AlisaSelectField.tsx";
 import { AlisaSelectVariantType } from "@alisa-lib/types.ts";
 
-interface AlisaTransactionTypeSelectProps {
-  onSelectTransactionType: (propertyId: number) => void;
-  defaultTransactionTypeId?: number;
+interface AlisaTransactionStatusSelectProps {
+  onSelect: (statusId: number) => void;
+  selectedValue?: number;
   t: TFunction;
   variant?: AlisaSelectVariantType;
   direction?: "row" | "column";
   showLabel?: boolean;
 }
 
-function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
-  const [transactionTypes, setTransactionTypes] = useState<
-    AlisaSelectFieldItem[]
-  >([]);
+function AlisaTransactionStatusSelect(
+  props: AlisaTransactionStatusSelectProps,
+) {
+  const [items, setItems] = useState<AlisaSelectFieldItem[]>([]);
   const [ready, setReady] = useState<boolean>(false);
   const showLabel = props.showLabel ? props.showLabel : false;
 
   React.useEffect(() => {
     const fetchData = async () => {
-      //Loop through the transactionTypeNames array and create a new array of AlisaSelectFieldItem objects
       const data: AlisaSelectFieldItem[] = [];
-      transactionTypeNames.forEach(
-        (value: TransactionTypeName, key: number) => {
+      transactionStatusNames.forEach(
+        (value: TransactionStatusName, key: number) => {
           data.push({ id: key, name: props.t(value) });
         },
       );
@@ -38,8 +37,8 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
       return data;
     };
 
-    fetchData().then(setTransactionTypes);
-  }, []);
+    fetchData().then(setItems);
+  }, [ready]);
 
   if (!ready) {
     return <div>Loading...</div>;
@@ -52,15 +51,15 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
       label={
         showLabel
           ? props.t
-            ? props.t("transactionType")
-            : "TransactionType"
+            ? props.t("transactionStatus")
+            : "TransactionStatus"
           : ""
       }
-      value={props.defaultTransactionTypeId as number}
-      onChange={props.onSelectTransactionType}
-      items={transactionTypes}
+      value={props.selectedValue as number}
+      onChange={props.onSelect}
+      items={items}
     ></AlisaSelectVariant>
   );
 }
 
-export default AlisaTransactionTypeSelect;
+export default AlisaTransactionStatusSelect;

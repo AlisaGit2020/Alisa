@@ -5,6 +5,9 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import AlisaDatePicker from "../../alisa/form/AlisaDatePicker";
 import AlisaNumberField from "../../alisa/form/AlisaNumberField";
 import AlisaTextField from "../../alisa/form/AlisaTextField";
+import AlisaTransactionStatusSelect from "../../alisa/data/AlisaTransactionStatusSelect.tsx";
+import { TransactionStatus } from "@alisa-backend/common/types.ts";
+import AlisaTransactionTypeSelect from "../../alisa/data/AlisaTransactionTypeSelect.tsx";
 
 interface ExpenseFormProps extends WithTranslation {
   data: TransactionInputDto;
@@ -18,8 +21,33 @@ function TransactionFormFields(props: ExpenseFormProps) {
     props.onHandleChange(name, value);
   };
 
+  const handleStatusChange = (value: number) => {
+    props.onHandleChange("status", value);
+  };
+
+  const handleTransactionTypeChange = (value: number) => {
+    props.onHandleChange("type", value);
+  };
+
   return (
     <>
+      <Stack direction={"row"} spacing={2} sx={{ paddingBottom: 1 }}>
+        <AlisaTransactionStatusSelect
+          variant={"split-button"}
+          t={props.t}
+          direction={"column"}
+          onSelect={handleStatusChange}
+          selectedValue={props.data.status as TransactionStatus}
+        ></AlisaTransactionStatusSelect>
+        <AlisaTransactionTypeSelect
+          variant={"split-button"}
+          t={props.t}
+          direction={"column"}
+          onSelectTransactionType={handleTransactionTypeChange}
+          defaultTransactionTypeId={props.data.type}
+        ></AlisaTransactionTypeSelect>
+      </Stack>
+
       <Stack direction={"row"} spacing={2}>
         <AlisaTextField
           label={props.t("sender")}

@@ -4,6 +4,16 @@ export enum TransactionStatus {
   PENDING = 1,
   ACCEPTED = 2,
 }
+
+export type TransactionStatusName = 'pending' | 'accepted';
+export const transactionStatusNames = new Map<
+  TransactionStatus,
+  TransactionStatusName
+>([
+  [TransactionStatus.PENDING, 'pending'],
+  [TransactionStatus.ACCEPTED, 'accepted'],
+]);
+
 export enum TransactionType {
   UNKNOWN = 0,
   INCOME = 1,
@@ -11,7 +21,6 @@ export enum TransactionType {
   DEPOSIT = 3,
   WITHDRAW = 4,
 }
-
 export enum TransactionTypeName {
   UNKNOWN = 'unknown',
   INCOME = 'income',
