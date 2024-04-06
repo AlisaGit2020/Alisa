@@ -5,12 +5,13 @@ import { Property } from "@alisa-backend/real-estate/property/entities/property.
 import { propertyContext } from "@alisa-lib/alisa-contexts.ts";
 import { TFunction } from "i18next";
 import AlisaSelectVariant from "../form/AlisaSelectVariant.tsx";
+import { AlisaSelectVariantType } from "@alisa-lib/types.ts";
 
 interface AlisaPropertySelectProps {
   onSelectProperty: (propertyId: number) => void;
   selectedPropertyId?: number;
   t?: TFunction;
-  variant?: "select" | "radio" | "button";
+  variant: AlisaSelectVariantType;
   direction?: "row" | "column";
 }
 

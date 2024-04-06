@@ -29,3 +29,9 @@ export type TransactionRow = {
   expenseTypeId?: number;
   incomeTypeId?: number;
 };
+
+export type AlisaSelectVariantType =
+  | "select"
+  | "radio"
+  | "button"
+  | "split-button";

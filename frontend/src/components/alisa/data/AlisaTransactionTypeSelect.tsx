@@ -7,12 +7,13 @@ import {
   transactionTypeNames,
 } from "@alisa-backend/common/types.ts";
 import { AlisaSelectFieldItem } from "../form/AlisaSelectField.tsx";
+import { AlisaSelectVariantType } from "@alisa-lib/types.ts";
 
 interface AlisaTransactionTypeSelectProps {
   onSelectTransactionType: (propertyId: number) => void;
   defaultTransactionTypeId?: number;
   t: TFunction;
-  variant?: "select" | "radio" | "button";
+  variant?: AlisaSelectVariantType;
   direction?: "row" | "column";
 }
 

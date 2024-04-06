@@ -1,12 +1,14 @@
 import AlisaSelectField, { AlisaSelectFieldItem } from "./AlisaSelectField.tsx";
 import AlisaRadioGroup from "./AlisaRadioGroup.tsx";
 import AlisaButtonGroup from "./AlisaButtonGroup.tsx";
+import AlisaSplitButton from "./AlisaSplitButton.tsx";
+import { AlisaSelectVariantType } from "@alisa-lib/types.ts";
 
 function AlisaSelectVariant(props: {
   label?: string;
   value: number;
   items: AlisaSelectFieldItem[];
-  variant: "select" | "radio" | "button";
+  variant: AlisaSelectVariantType;
   onChange: (value: number) => void;
   direction?: "row" | "column";
 }) {
@@ -43,6 +45,18 @@ function AlisaSelectVariant(props: {
           onChange={props.onChange}
           direction={props.direction}
         ></AlisaButtonGroup>
+      );
+    }
+
+    if (props.variant === "split-button") {
+      return (
+        <AlisaSplitButton
+          label={props.label}
+          value={props.value}
+          items={props.items}
+          onChange={props.onChange}
+          direction={props.direction}
+        ></AlisaSplitButton>
       );
     }
   }

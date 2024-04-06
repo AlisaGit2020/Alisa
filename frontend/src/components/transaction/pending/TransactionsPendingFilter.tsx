@@ -26,14 +26,14 @@ function TransactionsPendingFilter(props: TransactionsPendingFilterProps) {
     >
       <Stack direction={"row"} spacing={2}>
         <AlisaPropertySelect
-          variant={"radio"}
+          variant={"split-button"}
           t={props.t}
           direction={"column"}
           onSelectProperty={props.onSelectProperty}
           selectedPropertyId={props.data.propertyId}
         ></AlisaPropertySelect>
         <AlisaTransactionTypeSelect
-          variant={"radio"}
+          variant={"split-button"}
           t={props.t}
           direction={"column"}
           onSelectTransactionType={props.onSelectTransactionType}
