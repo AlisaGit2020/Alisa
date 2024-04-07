@@ -20,6 +20,7 @@ import {
   TransactionDeletedEvent,
 } from '@alisa-backend/common/events';
 import {
+  DataRowSaveResult,
   TransactionStatus,
   TransactionType,
 } from '@alisa-backend/common/types';
@@ -167,15 +168,27 @@ export class TransactionService {
     const transactions = await this.repository.find({
       where: { id: In(ids) },
     });
-    for (const transaction of transactions) {
-      if (
-        !(await this.authService.hasOwnership(jwtUser, transaction.propertyId))
-      ) {
-        throw new UnauthorizedException();
-      }
+
+    //Update all transactions simultaneously and gather all promises
+    const promises = transactions.map(async (transaction) => {
       transaction.type = type;
-    }
-    await this.repository.save(transactions);
+      try {
+        await this.update(jwtUser, transaction.id, transaction);
+        return {
+          id: transaction.id,
+          statusCode: 200,
+          message: 'OK',
+        } as DataRowSaveResult;
+      } catch (e) {
+        return {
+          id: transaction.id,
+          statusCode: e.status,
+          message: e.message,
+        } as DataRowSaveResult;
+      }
+    });
+
+    return Promise.all(promises);
   }
 
   async statistics(

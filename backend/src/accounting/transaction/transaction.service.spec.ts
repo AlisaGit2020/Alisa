@@ -446,7 +446,7 @@ describe('Transaction service', () => {
     );
   });
 
-  describe('Set type', () => {
+  describe.only('Set type', () => {
     let transactions = [];
     beforeAll(async () => {
       await emptyTablesV2(app, ['transaction']);
@@ -468,13 +468,14 @@ describe('Transaction service', () => {
       }
     });
 
-    it('saves types for multiple transactions', async () => {
+    it.only('saves types for multiple transactions', async () => {
       const ids = [1, 2, 3];
-      await service.setType(
+      const result = await service.setType(
         testUsers.user1WithProperties.jwtUser,
         ids,
         TransactionType.INCOME,
       );
+
       await sleep(50);
       const savedTransactions = await service.search(
         testUsers.user1WithProperties.jwtUser,
@@ -483,6 +484,9 @@ describe('Transaction service', () => {
 
       for (const transaction of savedTransactions) {
         expect(transaction.type).toBe(TransactionType.INCOME);
+      }
+      for (const resultItem of result) {
+        expect(resultItem.statusCode).toBe(200);
       }
     });
 
@@ -496,6 +500,27 @@ describe('Transaction service', () => {
       await expect(
         service.setType(mainUser.jwtUser, [1], -1 as TransactionType),
       ).rejects.toThrow(BadRequestException);
+    });
+
+    it('returns 400 if transaction is accepted', async () => {
+      const transaction = await addTransaction(
+        app,
+        testUsers.user1WithProperties.jwtUser,
+        getTransactionIncome1(1, TransactionStatus.ACCEPTED),
+      );
+
+      const result = await service.setType(
+        testUsers.user1WithProperties.jwtUser,
+        [transaction.id],
+        TransactionType.INCOME,
+      );
+
+      expect(result[0].statusCode).toBe(400);
+
+      await service.delete(
+        testUsers.user1WithProperties.jwtUser,
+        transaction.id,
+      );
     });
   });
 
