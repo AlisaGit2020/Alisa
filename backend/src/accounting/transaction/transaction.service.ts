@@ -164,6 +164,13 @@ export class TransactionService {
     //Update all transactions simultaneously and gather all promises
     const saveTask = transactions.map(async (transaction) => {
       transaction.status = TransactionStatus.ACCEPTED;
+      if (transaction.type === TransactionType.UNKNOWN) {
+        return {
+          id: transaction.id,
+          statusCode: 400,
+          message: 'Type cannot be unknown for accepted transactions',
+        } as DataSaveResultRowDto;
+      }
       return this.executeUpdateTask(jwtUser, transaction);
     });
 
@@ -343,6 +350,15 @@ export class TransactionService {
         'Expenses or incomes are not allowed for withdraws',
       );
     }
+
+    //If accept the transaction, type cannot be unknown
+    if (input.status === TransactionStatus.ACCEPTED) {
+      if (input.type === TransactionType.UNKNOWN) {
+        throw new BadRequestException(
+          'Type cannot be unknown for accepted transactions',
+        );
+      }
+    }
   }
 
   private async executeUpdateTask(jwtUser: JWTUser, transaction: Transaction) {
@@ -372,6 +388,7 @@ export class TransactionService {
     result.rows.total = transactions.length;
     result.rows.success = results.filter((r) => r.statusCode === 200).length;
     result.rows.failed = results.filter((r) => r.statusCode !== 200).length;
+    result.allSuccess = result.rows.failed === 0;
     result.results = results;
     return result;
   }

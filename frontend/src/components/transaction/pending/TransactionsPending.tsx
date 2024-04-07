@@ -17,6 +17,10 @@ import TransactionImport from "../components/TransactionImport.tsx";
 import TransactionAddMenu from "../components/TransactionAddMenu.tsx";
 import TransactionsPendingActions from "./TransactionsPendingActions.tsx";
 import TransactionsPendingFilter from "./TransactionsPendingFilter.tsx";
+import ApiClient from "@alisa-lib/api-client.ts";
+import { TransactionAcceptInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-accept-input.dto.ts";
+import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
+import { TransactionSetTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-type-input.dto.ts";
 
 interface TransactionsPendingProps extends WithTranslation {}
 
@@ -33,6 +37,9 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     null,
   );
   const [importOpen, setImportOpen] = React.useState<boolean>(false);
+  const [saveResult, setSaveResult] = React.useState<
+    DataSaveResultDto | undefined
+  >(undefined);
 
   const handleOpenAddMenu = (
     event?: React.MouseEvent<HTMLButtonElement>,
@@ -64,8 +71,39 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
   };
 
   const handleDeleteSelected = () => {};
-  const handleEditSelected = () => {};
-  const handleApproveSelected = () => {};
+
+  const handleSetTypeForSelected = async (type: number) => {
+    setSaveResult(undefined);
+    if (selectedIds.length > 0) {
+      const result = await ApiClient.postSaveTask<TransactionSetTypeInputDto>(
+        transactionContext.apiPath + "/type",
+        {
+          ids: selectedIds,
+          type: type,
+        },
+      );
+      if (result.allSuccess) {
+        setSelectedIds([]);
+        setSaveResult(undefined);
+      } else {
+        setSaveResult(result);
+      }
+    }
+  };
+  const handleApproveSelected = async () => {
+    const result = await ApiClient.postSaveTask<TransactionAcceptInputDto>(
+      transactionContext.apiPath + "/accept",
+      {
+        ids: selectedIds,
+      },
+    );
+    if (result.allSuccess) {
+      setSelectedIds([]);
+      setSaveResult(undefined);
+    } else {
+      setSaveResult(result);
+    }
+  };
   const handleCancelSelected = () => {
     setSelectedIds([]);
   };
@@ -79,6 +117,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
   };
 
   const handleSelectChange = (id: number) => {
+    setSaveResult(undefined);
     if (selectedIds.includes(id)) {
       setSelectedIds(selectedIds.filter((i) => i !== id));
     } else {
@@ -132,9 +171,10 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
         selectedIds={selectedIds}
         open={selectedIds.length > 0}
         onApprove={handleApproveSelected}
-        onEdit={handleEditSelected}
+        onSetType={handleSetTypeForSelected}
         onCancel={handleCancelSelected}
         onDelete={handleDeleteSelected}
+        saveResult={saveResult}
       ></TransactionsPendingActions>
 
       <Paper sx={{ marginTop: 3 }}>

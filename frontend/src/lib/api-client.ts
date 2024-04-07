@@ -4,6 +4,7 @@ import Logger from "./logger";
 import { VITE_API_URL } from "../constants";
 import { User } from "@alisa-backend/people/user/entities/user.entity";
 import Cookies from "js-cookie";
+import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
 
 class ApiClient {
   private static async getOptions(headers?: Record<string, string>) {
@@ -60,6 +61,18 @@ class ApiClient {
       data,
       await ApiClient.getOptions(),
     );
+  }
+
+  public static async postSaveTask<T>(
+    path: string,
+    data: T,
+  ): Promise<DataSaveResultDto> {
+    const request = await axios.post(
+      ApiClient.getApiUrl(path),
+      data,
+      await ApiClient.getOptions(),
+    );
+    return request.data;
   }
 
   public static async put<T>(path: string, id: number, data: T): Promise<T> {

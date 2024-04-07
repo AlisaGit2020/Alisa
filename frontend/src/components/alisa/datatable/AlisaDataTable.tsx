@@ -152,7 +152,10 @@ function AlisaDataTable<T extends { id: number }>(props: {
                 <AlisaDataTableAddButton
                   onClick={props.onNewRow}
                   t={props.t}
-                  visible={props.selectedIds?.length == 0}
+                  visible={
+                    props.selectedIds?.length == 0 ||
+                    props.selectedIds === undefined
+                  }
                 ></AlisaDataTableAddButton>
               </TableCell>
             </TableRow>
@@ -185,7 +188,10 @@ function AlisaDataTable<T extends { id: number }>(props: {
                       id={item.id}
                       onDelete={handleDeleteOpen}
                       onEdit={props.onEdit}
-                      visible={props.selectedIds?.length == 0}
+                      visible={
+                        props.selectedIds?.length == 0 ||
+                        props.selectedIds === undefined
+                      }
                     ></AlisaDataTableActionButtons>
                   </TableCell>
                 </StyledTableRow>

@@ -10,12 +10,13 @@ import { AlisaSelectFieldItem } from "../form/AlisaSelectField.tsx";
 import { AlisaSelectVariantType } from "@alisa-lib/types.ts";
 
 interface AlisaTransactionTypeSelectProps {
-  onSelectTransactionType: (propertyId: number) => void;
-  defaultTransactionTypeId?: number;
+  onSelect: (propertyId: number) => void;
+  selectedValue: number;
   t: TFunction;
-  variant?: AlisaSelectVariantType;
+  variant: AlisaSelectVariantType;
   direction?: "row" | "column";
   showLabel?: boolean;
+  visible?: boolean;
 }
 
 function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
@@ -24,6 +25,7 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
   >([]);
   const [ready, setReady] = useState<boolean>(false);
   const showLabel = props.showLabel ? props.showLabel : false;
+  const visible = props.visible === false ? props.visible : true;
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -45,6 +47,9 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
     return <div>Loading...</div>;
   }
 
+  if (!visible) {
+    return null;
+  }
   return (
     <AlisaSelectVariant
       variant={props.variant ? props.variant : "select"}
@@ -56,8 +61,8 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
             : "TransactionType"
           : ""
       }
-      value={props.defaultTransactionTypeId as number}
-      onChange={props.onSelectTransactionType}
+      value={props.selectedValue as number}
+      onChange={props.onSelect}
       items={transactionTypes}
     ></AlisaSelectVariant>
   );

@@ -36,8 +36,8 @@ function TransactionsPendingFilter(props: TransactionsPendingFilterProps) {
           variant={"split-button"}
           t={props.t}
           direction={"column"}
-          onSelectTransactionType={props.onSelectTransactionType}
-          defaultTransactionTypeId={props.data.transactionTypeId}
+          onSelect={props.onSelectTransactionType}
+          selectedValue={props.data.transactionTypeId}
           showLabel={true}
         ></AlisaTransactionTypeSelect>
       </Stack>

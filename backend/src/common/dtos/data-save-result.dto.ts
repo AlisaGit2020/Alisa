@@ -8,7 +8,7 @@ export class DataSaveResultDto {
     success: 0,
     failed: 0,
   };
-
+  allSuccess: boolean;
   results: DataSaveResultRowDto[];
 }
 export class DataSaveResultRowDto {

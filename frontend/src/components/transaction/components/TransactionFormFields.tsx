@@ -43,8 +43,8 @@ function TransactionFormFields(props: ExpenseFormProps) {
           variant={"split-button"}
           t={props.t}
           direction={"column"}
-          onSelectTransactionType={handleTransactionTypeChange}
-          defaultTransactionTypeId={props.data.type}
+          onSelect={handleTransactionTypeChange}
+          selectedValue={props.data.type}
         ></AlisaTransactionTypeSelect>
       </Stack>
 
