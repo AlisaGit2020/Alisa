@@ -446,7 +446,7 @@ describe('Transaction service', () => {
     );
   });
 
-  describe.only('Set type', () => {
+  describe('Accept and set type', () => {
     let transactions = [];
     beforeAll(async () => {
       await emptyTablesV2(app, ['transaction']);
@@ -468,59 +468,86 @@ describe('Transaction service', () => {
       }
     });
 
-    it.only('saves types for multiple transactions', async () => {
-      const ids = [1, 2, 3];
-      const result = await service.setType(
-        testUsers.user1WithProperties.jwtUser,
-        ids,
-        TransactionType.INCOME,
-      );
+    describe('Set type', () => {
+      it('saves types for multiple transactions', async () => {
+        const ids = [1, 2, 3];
+        const result = await service.setType(
+          testUsers.user1WithProperties.jwtUser,
+          ids,
+          TransactionType.INCOME,
+        );
 
-      await sleep(50);
-      const savedTransactions = await service.search(
-        testUsers.user1WithProperties.jwtUser,
-        { where: { id: In(ids) } },
-      );
+        await sleep(50);
+        const savedTransactions = await service.search(
+          testUsers.user1WithProperties.jwtUser,
+          { where: { id: In(ids) } },
+        );
 
-      for (const transaction of savedTransactions) {
-        expect(transaction.type).toBe(TransactionType.INCOME);
-      }
-      for (const resultItem of result) {
-        expect(resultItem.statusCode).toBe(200);
-      }
+        for (const transaction of savedTransactions) {
+          expect(transaction.type).toBe(TransactionType.INCOME);
+        }
+        for (const resultItem of result.results) {
+          expect(resultItem.statusCode).toBe(200);
+        }
+        expect(result.rows.total).toBe(3);
+        expect(result.rows.success).toBe(3);
+        expect(result.rows.failed).toBe(0);
+      });
+
+      it('throws if ids array is empty', async () => {
+        await expect(
+          service.setType(mainUser.jwtUser, [], TransactionType.INCOME),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('throws if type is not valid', async () => {
+        await expect(
+          service.setType(mainUser.jwtUser, [1], -1 as TransactionType),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('returns 400 if transaction is accepted', async () => {
+        const transaction = await addTransaction(
+          app,
+          testUsers.user1WithProperties.jwtUser,
+          getTransactionIncome1(1, TransactionStatus.ACCEPTED),
+        );
+
+        const result = await service.setType(
+          testUsers.user1WithProperties.jwtUser,
+          [transaction.id],
+          TransactionType.INCOME,
+        );
+
+        expect(result.results[0].statusCode).toBe(400);
+
+        await service.delete(
+          testUsers.user1WithProperties.jwtUser,
+          transaction.id,
+        );
+      });
     });
 
-    it('throws if ids array is empty', async () => {
-      await expect(
-        service.setType(mainUser.jwtUser, [], TransactionType.INCOME),
-      ).rejects.toThrow(BadRequestException);
-    });
+    describe('Accept', () => {
+      it('accepts multiple transactions', async () => {
+        const ids = [1, 2, 3];
+        const result = await service.accept(mainUser.jwtUser, ids);
 
-    it('throws if type is not valid', async () => {
-      await expect(
-        service.setType(mainUser.jwtUser, [1], -1 as TransactionType),
-      ).rejects.toThrow(BadRequestException);
-    });
+        await sleep(50);
+        const savedTransactions = await service.search(mainUser.jwtUser, {
+          where: { id: In(ids) },
+        });
 
-    it('returns 400 if transaction is accepted', async () => {
-      const transaction = await addTransaction(
-        app,
-        testUsers.user1WithProperties.jwtUser,
-        getTransactionIncome1(1, TransactionStatus.ACCEPTED),
-      );
-
-      const result = await service.setType(
-        testUsers.user1WithProperties.jwtUser,
-        [transaction.id],
-        TransactionType.INCOME,
-      );
-
-      expect(result[0].statusCode).toBe(400);
-
-      await service.delete(
-        testUsers.user1WithProperties.jwtUser,
-        transaction.id,
-      );
+        for (const transaction of savedTransactions) {
+          expect(transaction.status).toBe(TransactionStatus.ACCEPTED);
+        }
+        for (const resultItem of result.results) {
+          expect(resultItem.statusCode).toBe(200);
+        }
+        expect(result.rows.total).toBe(3);
+        expect(result.rows.success).toBe(3);
+        expect(result.rows.failed).toBe(0);
+      });
     });
   });
 

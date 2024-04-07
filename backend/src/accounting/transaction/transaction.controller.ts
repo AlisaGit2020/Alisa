@@ -19,6 +19,7 @@ import { JWTUser } from '@alisa-backend/auth/types';
 import { User } from '@alisa-backend/common/decorators/user.decorator';
 import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
 import { TransactionSetTypeInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-set-type-input.dto';
+import { TransactionAcceptInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-accept-input.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('accounting/transaction')
@@ -49,6 +50,14 @@ export class TransactionController {
     @Body() input: TransactionInputDto,
   ): Promise<Transaction> {
     return this.service.add(user, input);
+  }
+
+  @Post('/accept ')
+  async accept(
+    @User() user: JWTUser,
+    @Body() input: TransactionAcceptInputDto,
+  ): Promise<void> {
+    await this.service.accept(user, input.ids);
   }
 
   @Post('/type')

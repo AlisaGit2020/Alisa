@@ -20,10 +20,13 @@ import {
   TransactionDeletedEvent,
 } from '@alisa-backend/common/events';
 import {
-  DataRowSaveResult,
   TransactionStatus,
   TransactionType,
 } from '@alisa-backend/common/types';
+import {
+  DataSaveResultDto,
+  DataSaveResultRowDto,
+} from '@alisa-backend/common/dtos/data-save-result.dto';
 
 @Injectable()
 export class TransactionService {
@@ -149,6 +152,24 @@ export class TransactionService {
     );
   }
 
+  async accept(jwtUser: JWTUser, ids: number[]) {
+    if (ids.length === 0) {
+      throw new BadRequestException('No ids provided');
+    }
+
+    const transactions = await this.repository.find({
+      where: { id: In(ids) },
+    });
+
+    //Update all transactions simultaneously and gather all promises
+    const saveTask = transactions.map(async (transaction) => {
+      transaction.status = TransactionStatus.ACCEPTED;
+      return this.executeUpdateTask(jwtUser, transaction);
+    });
+
+    return this.getSaveTaskResult(saveTask, transactions);
+  }
+
   async setType(jwtUser: JWTUser, ids: number[], type: TransactionType) {
     if (ids.length === 0) {
       throw new BadRequestException('No ids provided');
@@ -170,25 +191,12 @@ export class TransactionService {
     });
 
     //Update all transactions simultaneously and gather all promises
-    const promises = transactions.map(async (transaction) => {
+    const saveTask = transactions.map(async (transaction) => {
       transaction.type = type;
-      try {
-        await this.update(jwtUser, transaction.id, transaction);
-        return {
-          id: transaction.id,
-          statusCode: 200,
-          message: 'OK',
-        } as DataRowSaveResult;
-      } catch (e) {
-        return {
-          id: transaction.id,
-          statusCode: e.status,
-          message: e.message,
-        } as DataRowSaveResult;
-      }
+      return this.executeUpdateTask(jwtUser, transaction);
     });
 
-    return Promise.all(promises);
+    return this.getSaveTaskResult(saveTask, transactions);
   }
 
   async statistics(
@@ -335,5 +343,36 @@ export class TransactionService {
         'Expenses or incomes are not allowed for withdraws',
       );
     }
+  }
+
+  private async executeUpdateTask(jwtUser: JWTUser, transaction: Transaction) {
+    try {
+      await this.update(jwtUser, transaction.id, transaction);
+      return {
+        id: transaction.id,
+        statusCode: 200,
+        message: 'OK',
+      } as DataSaveResultRowDto;
+    } catch (e) {
+      return {
+        id: transaction.id,
+        statusCode: e.status,
+        message: e.message,
+      } as DataSaveResultRowDto;
+    }
+  }
+
+  private async getSaveTaskResult(
+    saveTask: Promise<DataSaveResultRowDto>[],
+    transactions: Transaction[],
+  ) {
+    const results = await Promise.all(saveTask);
+
+    const result = new DataSaveResultDto();
+    result.rows.total = transactions.length;
+    result.rows.success = results.filter((r) => r.statusCode === 200).length;
+    result.rows.failed = results.filter((r) => r.statusCode !== 200).length;
+    result.results = results;
+    return result;
   }
 }

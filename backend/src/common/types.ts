@@ -48,16 +48,6 @@ export enum StatisticKey {
   WITHDRAW = 'withdraw',
 }
 
-export type DataSaveResult = {
-  rows: number;
-  results: DataRowSaveResult[];
-};
-export type DataRowSaveResult = {
-  id: number;
-  statusCode: number;
-  message: string;
-};
-
 export type BetweenDates = {
   $between: [string, string];
 };
