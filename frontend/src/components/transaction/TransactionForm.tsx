@@ -82,7 +82,23 @@ function TransactionForm({
     if (name === "transactionDate") {
       newData = dataService.updateNestedData(newData, "accountingDate", value);
     }
+    if (name === "type") {
+      newData = handleTypeChange(value as TransactionType, newData);
+    }
     setData(newData);
+  };
+
+  const handleTypeChange = (
+    value: TransactionType,
+    newData: TransactionInputDto,
+  ) => {
+    if (value !== TransactionType.INCOME) {
+      newData.incomes = undefined;
+    }
+    if (value !== TransactionType.EXPENSE) {
+      newData.expenses = undefined;
+    }
+    return newData;
   };
 
   const handleRowChange = async (

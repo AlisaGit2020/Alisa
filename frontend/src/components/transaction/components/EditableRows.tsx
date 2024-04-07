@@ -37,8 +37,8 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
     initialData = props.transaction.incomes || [];
   }
   const [data, setData] = React.useState<T[]>((initialData as T[]) || []);
-
   const hasRunInit = React.useRef(false);
+  const [type, setType] = React.useState<TransactionType>(props.type);
 
   const dataService = new DataService<T>({
     context:
@@ -47,15 +47,29 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
 
   React.useEffect(() => {
     if (!hasRunInit.current) {
-      const addExpenseIfEmpty = async () => {
+      const addRowIfEmpty = async () => {
         if (data.length === 0) {
-          await addExpense();
+          await addNewRow();
         }
       };
-      addExpenseIfEmpty().then();
+
+      addRowIfEmpty().then();
       hasRunInit.current = true;
+    } else {
+      if (typeHasChanged()) {
+        const setNewType = async () => {
+          setType(props.type);
+          const newData = data;
+          //remove all rows, setData([]) does not work
+          newData.splice(0, newData.length);
+          setData(newData);
+          await addNewRow();
+        };
+
+        setNewType().then();
+      }
     }
-  }, []);
+  }, [props.type]);
 
   React.useEffect(() => {
     if (props.changedDescription !== "") {
@@ -77,20 +91,25 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
     }
   }, [props.changedAmount]);
 
-  const addExpense = async () => {
-    const defaults = await dataService.getDefaults();
-    //calculate all expenses total
-    const expensesTotalAmount = data
-      .map((expense) => expense.totalAmount)
-      .reduce((a, b) => Number(a) + Number(b), 0);
-
-    defaults.totalAmount = props.transaction.amount - expensesTotalAmount;
-    data.push(defaults);
-    setData([...data]);
-    props.onHandleChange(data);
+  const typeHasChanged = () => {
+    return type !== props.type;
   };
 
-  const removeExpense = (index: number) => {
+  const addNewRow = async () => {
+    const defaults = await dataService.getDefaults();
+    //calculate all rows total
+    const rowsTotalAmount = data
+      .map((row) => row.totalAmount)
+      .reduce((a, b) => Number(a) + Number(b), 0);
+
+    defaults.totalAmount = props.transaction.amount - rowsTotalAmount;
+
+    const newData = [...data, defaults];
+    setData(newData);
+    props.onHandleChange(newData);
+  };
+
+  const removeRow = (index: number) => {
     if (data.length <= 1) {
       return;
     }
@@ -179,7 +198,7 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
         index={index}
         onHandleChange={handleChange}
         onCalculateAmount={calculateAmount}
-        onRemoveRow={removeExpense}
+        onRemoveRow={removeRow}
         t={props.t}
       ></RowDataFields>
     );
@@ -200,7 +219,7 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
         <Box marginTop={2}>{getRows()}</Box>
         <Box display="flex" sx={{ justifyContent: "flex-start" }}>
           <IconButton
-            onClick={addExpense}
+            onClick={addNewRow}
             title={props.t("add", { ns: "expense" })}
           >
             <AddIcon color={"primary"}></AddIcon>
