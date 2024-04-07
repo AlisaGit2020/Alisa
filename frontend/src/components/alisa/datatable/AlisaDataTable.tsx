@@ -1,23 +1,18 @@
 import * as React from "react";
 import { styled } from "@mui/material/styles";
-import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import {
-  Box,
-  IconButton,
-  TableContainer,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Box, TableContainer, Typography } from "@mui/material";
 import { TFunction } from "i18next";
 import AlisaConfirmDialog from "../dialog/AlisaConfirmDialog.tsx";
 import DataService from "@alisa-lib/data-service.ts";
-import AlisaDataTableActionButtons from "./AlisaDataTableActionButtons.tsx";
+import AlisaDataTableActionButtons, {
+  AlisaDataTableAddButton,
+} from "./AlisaDataTableActionButtons.tsx";
 import AlisaDataTableSelectRow, {
   AlisaDataTableSelectHeaderRow,
 } from "./AlisaDataTableSelectRow.tsx";
@@ -154,11 +149,11 @@ function AlisaDataTable<T extends { id: number }>(props: {
                 </TableCell>
               ))}
               <TableCell align="right">
-                <Tooltip title={props.t("add")}>
-                  <IconButton onClick={props.onNewRow}>
-                    <AddIcon></AddIcon>
-                  </IconButton>
-                </Tooltip>
+                <AlisaDataTableAddButton
+                  onClick={props.onNewRow}
+                  t={props.t}
+                  visible={props.selectedIds?.length == 0}
+                ></AlisaDataTableAddButton>
               </TableCell>
             </TableRow>
           </TableHead>
@@ -190,6 +185,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
                       id={item.id}
                       onDelete={handleDeleteOpen}
                       onEdit={props.onEdit}
+                      visible={props.selectedIds?.length == 0}
                     ></AlisaDataTableActionButtons>
                   </TableCell>
                 </StyledTableRow>

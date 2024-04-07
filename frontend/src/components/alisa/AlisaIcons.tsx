@@ -8,16 +8,24 @@ import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import { ClearIcon } from "@mui/x-date-pickers";
 import { TransactionTypeName } from "@alisa-backend/common/types.ts";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface IconProps {
   size?: "small" | "medium" | "large";
 }
 
+const AlisaAddIcon: React.FC<IconProps> = (props: IconProps) => {
+  return <AddIcon fontSize={props.size} />;
+};
 const AlisaApproveIcon: React.FC<IconProps> = (props: IconProps) => {
   return <CheckIcon fontSize={props.size} />;
 };
 const AlisaCloseIcon: React.FC<IconProps> = (props: IconProps) => {
   return <ClearIcon fontSize={props.size} />;
+};
+const AlisaDeleteIcon: React.FC<IconProps> = (props: IconProps) => {
+  return <DeleteIcon fontSize={props.size} />;
 };
 const AlisaDepositIcon: React.FC<IconProps> = (props: IconProps) => {
   return <ArrowCircleDownIcon fontSize={props.size} />;
@@ -39,8 +47,10 @@ const AlisaWithdrawIcon: React.FC<IconProps> = (props: IconProps) => {
 };
 
 const iconMap = {
+  add: AlisaAddIcon,
   approve: AlisaApproveIcon,
   close: AlisaCloseIcon,
+  delete: AlisaDeleteIcon,
   deposit: AlisaDepositIcon,
   edit: AlisaEditIcon,
   expense: AlisaExpenseIcon,
@@ -50,13 +60,15 @@ const iconMap = {
 };
 
 const getIcon = (iconName: TransactionTypeName, props: IconProps) => {
-  const IconComponent = iconMap[iconName];
+  const IconComponent = iconMap[iconName as keyof typeof iconMap];
   return IconComponent ? <IconComponent {...props} /> : undefined;
 };
 
 export {
+  AlisaAddIcon,
   AlisaApproveIcon,
   AlisaCloseIcon,
+  AlisaDeleteIcon,
   AlisaDepositIcon,
   AlisaEditIcon,
   AlisaExpenseIcon,
