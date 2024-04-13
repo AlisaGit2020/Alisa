@@ -44,7 +44,8 @@ function TransactionFormFields(props: ExpenseFormProps) {
           t={props.t}
           direction={"column"}
           onSelect={handleTransactionTypeChange}
-          selectedValue={props.data.type}
+          selectedValue={props.data.type as number}
+          visible={(props.data.id as number) > 0}
         ></AlisaTransactionTypeSelect>
       </Stack>
 
