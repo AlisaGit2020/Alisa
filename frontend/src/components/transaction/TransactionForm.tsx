@@ -98,6 +98,13 @@ function TransactionForm({
     if (value !== TransactionType.EXPENSE) {
       newData.expenses = undefined;
     }
+
+    //Flip amount sign if type is changed
+    if (value === TransactionType.INCOME || value === TransactionType.EXPENSE) {
+      const newAmount = newData.amount * -1;
+      newData.amount = newAmount;
+      handleAmountChange(newAmount);
+    }
     return newData;
   };
 
