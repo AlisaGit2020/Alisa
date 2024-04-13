@@ -10,9 +10,10 @@ import { AlisaSelectVariantType } from "@alisa-lib/types.ts";
 interface AlisaPropertySelectProps {
   onSelectProperty: (propertyId: number) => void;
   selectedPropertyId?: number;
-  t?: TFunction;
+  t: TFunction;
   variant: AlisaSelectVariantType;
   direction?: "row" | "column";
+  showEmptyValue?: boolean;
 }
 
 function AlisaPropertySelect(props: AlisaPropertySelectProps) {
@@ -63,6 +64,8 @@ function AlisaPropertySelect(props: AlisaPropertySelectProps) {
       value={props.selectedPropertyId as number}
       onChange={props.onSelectProperty}
       items={properties}
+      showEmptyValue={Boolean(props.showEmptyValue)}
+      t={props.t}
     ></AlisaSelectVariant>
   );
 }

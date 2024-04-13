@@ -32,6 +32,7 @@ const fi = {
     cancel: "Peruuta",
     confirm: "Vahvista",
     confirmDelete: "Poistetaanko tietue?",
+    dataNotSelected: "Valitse",
     description: "Kuvaus",
     delete: "Poista",
     edit: "Muokkaa",

@@ -40,6 +40,7 @@ const en = {
     cancel: "Cancel",
     confirm: "Confirm",
     confirmDelete: "Are you sure delete item?",
+    dataNotSelected: "Select",
     delete: "Delete",
     description: "Description",
     edit: "Edit",

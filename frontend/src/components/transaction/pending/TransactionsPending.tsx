@@ -21,12 +21,14 @@ import ApiClient from "@alisa-lib/api-client.ts";
 import { TransactionAcceptInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-accept-input.dto.ts";
 import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
 import { TransactionSetTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-type-input.dto.ts";
+import { DATA_NOT_SELECTED_ID } from "@alisa-lib/constants.ts";
 
 interface TransactionsPendingProps extends WithTranslation {}
 
 function TransactionsPending({ t }: TransactionsPendingProps) {
   const [propertyId, setPropertyId] = React.useState<number>(3);
-  const [transactionType, setTransactionType] = React.useState<number>(0);
+  const [transactionType, setTransactionType] =
+    React.useState<number>(DATA_NOT_SELECTED_ID);
   const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
   const [detailId, setDetailId] = React.useState<number>(0);
   const [editId, setEditId] = React.useState<number>(0);
@@ -149,7 +151,8 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     where: {
       propertyId: propertyId,
       status: TransactionStatus.PENDING,
-      type: transactionType,
+      type:
+        transactionType === DATA_NOT_SELECTED_ID ? undefined : transactionType,
     },
   } as TypeOrmFetchOptions<Transaction>;
 

@@ -17,6 +17,7 @@ interface AlisaTransactionTypeSelectProps {
   direction?: "row" | "column";
   showLabel?: boolean;
   visible?: boolean;
+  showEmptyValue?: boolean;
 }
 
 function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
@@ -25,9 +26,12 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
   >([]);
   const [ready, setReady] = useState<boolean>(false);
   const showLabel = props.showLabel ? props.showLabel : false;
-  const visible = props.visible === false ? props.visible : true;
+  const visible = props.visible !== undefined ? props.visible : true;
 
   React.useEffect(() => {
+    if (ready) {
+      return;
+    }
     const fetchData = async () => {
       //Loop through the transactionTypeNames array and create a new array of AlisaSelectFieldItem objects
       const data: AlisaSelectFieldItem[] = [];
@@ -36,6 +40,7 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
           data.push({ id: key, name: props.t(value) });
         },
       );
+
       setReady(true);
       return data;
     };
@@ -64,6 +69,8 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
       value={props.selectedValue as number}
       onChange={props.onSelect}
       items={transactionTypes}
+      showEmptyValue={Boolean(props.showEmptyValue)}
+      t={props.t}
     ></AlisaSelectVariant>
   );
 }

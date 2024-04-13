@@ -16,6 +16,7 @@ interface AlisaTransactionStatusSelectProps {
   variant?: AlisaSelectVariantType;
   direction?: "row" | "column";
   showLabel?: boolean;
+  showEmptyValue?: boolean;
 }
 
 function AlisaTransactionStatusSelect(
@@ -58,6 +59,8 @@ function AlisaTransactionStatusSelect(
       value={props.selectedValue as number}
       onChange={props.onSelect}
       items={items}
+      showEmptyValue={Boolean(props.showEmptyValue)}
+      t={props.t}
     ></AlisaSelectVariant>
   );
 }

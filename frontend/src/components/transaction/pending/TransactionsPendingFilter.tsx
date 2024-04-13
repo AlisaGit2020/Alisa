@@ -39,6 +39,7 @@ function TransactionsPendingFilter(props: TransactionsPendingFilterProps) {
           onSelect={props.onSelectTransactionType}
           selectedValue={props.data.transactionTypeId}
           showLabel={true}
+          showEmptyValue={true}
         ></AlisaTransactionTypeSelect>
       </Stack>
     </Paper>
