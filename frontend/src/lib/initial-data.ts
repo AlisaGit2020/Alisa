@@ -1,25 +1,31 @@
-import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity";
 import { User } from "@alisa-backend/people/user/entities/user.entity";
+import { DataKey, View } from "@alisa-lib/views.ts";
+import { DATA_NOT_SELECTED_ID } from "@alisa-lib/constants.ts";
 
 export const emptyUser: User = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    language: '',
-    photo: '',
-    ownerships: []
-}
+  firstName: "",
+  lastName: "",
+  email: "",
+  language: "",
+  photo: "",
+  ownerships: [],
+};
 
-export const emptyTransaction: Transaction = {
-    id: 0,
-    sender: '',
-    receiver: '',
-    description: '',
-    transactionDate: new Date('2000-01-01'),
-    accountingDate: new Date('2000-01-01'),
-    amount: 0,
-    quantity: 0,
-    totalAmount: 0,
-    expense: undefined,
-    income: undefined
-}
+export const getInitialId = (view: View, dataKey: DataKey): number => {
+  //Look if localstorage contains property id for view
+  const key = `view[${view}]:${dataKey}`;
+  const propertyId = localStorage.getItem(key);
+  if (propertyId) {
+    return parseInt(propertyId);
+  }
+  return DATA_NOT_SELECTED_ID;
+};
+
+export const setInitialPropertyId = (
+  view: View,
+  dataKey: DataKey,
+  id: number,
+): void => {
+  const key = `view[${view}]:${dataKey}`;
+  localStorage.setItem(key, id.toString());
+};

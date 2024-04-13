@@ -31,6 +31,7 @@ function TransactionsPendingFilter(props: TransactionsPendingFilterProps) {
           direction={"column"}
           onSelectProperty={props.onSelectProperty}
           selectedPropertyId={props.data.propertyId}
+          showEmptyValue={true}
         ></AlisaPropertySelect>
         <AlisaTransactionTypeSelect
           variant={"split-button"}
