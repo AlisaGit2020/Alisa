@@ -6,7 +6,7 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, TableContainer, Typography } from "@mui/material";
+import { Box, Stack, TableContainer, Typography } from "@mui/material";
 import { TFunction } from "i18next";
 import AlisaConfirmDialog from "../dialog/AlisaConfirmDialog.tsx";
 import DataService from "@alisa-lib/data-service.ts";
@@ -16,6 +16,12 @@ import AlisaDataTableActionButtons, {
 import AlisaDataTableSelectRow, {
   AlisaDataTableSelectHeaderRow,
 } from "./AlisaDataTableSelectRow.tsx";
+import {
+  TransactionType,
+  TransactionTypeName,
+  transactionTypeNames,
+} from "@alisa-backend/common/types.ts";
+import { getIcon } from "../AlisaIcons.tsx";
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(odd)": {
@@ -30,7 +36,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 interface AlisaDataTableField<T> {
   name: keyof T;
   maxLength?: number;
-  format?: "number" | "currency" | "date";
+  label?: string;
+  format?: "number" | "currency" | "date" | "transactionType" | "translation";
 }
 
 function AlisaDataTable<T extends { id: number }>(props: {
@@ -111,6 +118,21 @@ function AlisaDataTable<T extends { id: number }>(props: {
     if (field.format == "currency") {
       return props.t("format.currency.euro", { val: value });
     }
+    if (field.format == "translation") {
+      return props.t(value as string);
+    }
+    if (field.format == "transactionType") {
+      const typeName = transactionTypeNames.get(
+        value as TransactionType,
+      ) as TransactionTypeName;
+
+      return (
+        <Stack direction={"row"} spacing={1}>
+          {getIcon(typeName, { size: "medium" })}
+          <Box sx={{ paddingTop: 0.3 }}>{props.t(typeName)}</Box>
+        </Stack>
+      );
+    }
     if (field.format == "date") {
       return props.t("format.date", {
         val: new Date(value as string),
@@ -145,7 +167,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
                   align={field.format === "currency" ? "right" : "left"}
                 >
                   <Typography fontWeight={"bold"}>
-                    {props.t(field.name as string)}
+                    {field.label ? field.label : props.t(field.name as string)}
                   </Typography>
                 </TableCell>
               ))}

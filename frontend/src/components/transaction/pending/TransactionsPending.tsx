@@ -143,6 +143,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
   const fetchOptions = {
     select: [
       "id",
+      "type",
       "transactionDate",
       "sender",
       "receiver",
@@ -196,6 +197,11 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
             new DataService({ context: transactionContext, fetchOptions })
           }
           fields={[
+            {
+              name: "type",
+              format: "transactionType",
+              label: t("transactionType"),
+            },
             { name: "transactionDate", format: "date" },
             { name: "sender", maxLength: 30 },
             { name: "receiver", maxLength: 30 },
