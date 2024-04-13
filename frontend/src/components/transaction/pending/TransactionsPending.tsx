@@ -223,7 +223,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
       {addType !== undefined && (
         <TransactionForm
           open={true}
-          status={TransactionStatus.ACCEPTED}
+          status={TransactionStatus.PENDING}
           type={addType}
           propertyId={propertyId}
           onClose={() => setAddType(undefined)}
