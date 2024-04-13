@@ -5,10 +5,15 @@ interface AlisaDataTableSelectRowHeaderProps {
   t: TFunction;
   onSelectAll: () => void;
   checked: boolean;
+  visible?: boolean;
 }
 export function AlisaDataTableSelectHeaderRow(
   props: AlisaDataTableSelectRowHeaderProps,
 ) {
+  const visible = props.visible === undefined ? true : props.visible;
+  if (!visible) {
+    return;
+  }
   return (
     <Tooltip title={props.t("selectAll")}>
       <Checkbox checked={props.checked} onChange={props.onSelectAll}></Checkbox>

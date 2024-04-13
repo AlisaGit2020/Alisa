@@ -135,6 +135,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
                     t={props.t}
                     checked={data.length == props.selectedIds?.length}
                     onSelectAll={handleSelectAll}
+                    visible={data.length > 0}
                   ></AlisaDataTableSelectHeaderRow>
                 </TableCell>
               )}
