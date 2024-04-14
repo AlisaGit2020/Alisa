@@ -18,6 +18,7 @@ import {
   transactionTypeNames,
 } from "@alisa-backend/common/types.ts";
 import { getIcon } from "../alisa/AlisaIcons.tsx";
+import ApiClient from "@alisa-lib/api-client.ts";
 
 interface TransactionFormProps extends WithTranslation {
   id?: number;
@@ -56,15 +57,29 @@ function TransactionForm({
   });
 
   React.useEffect(() => {
+    const getDefaults = async () => {
+      const user = await ApiClient.me();
+      const defaults = new TransactionInputDto();
+      defaults.status = status;
+      defaults.type = type;
+      if (
+        type === TransactionType.EXPENSE ||
+        type === TransactionType.WITHDRAW
+      ) {
+        defaults.sender = user.firstName + " " + user.lastName;
+      }
+      if (type === TransactionType.INCOME || type === TransactionType.DEPOSIT) {
+        defaults.receiver = user.firstName + " " + user.lastName;
+      }
+      if (propertyId) {
+        defaults.propertyId = propertyId;
+      }
+      return defaults;
+    };
+
     if (id === undefined) {
       const fetchData = async () => {
-        const defaults = new TransactionInputDto();
-        defaults.status = status;
-        defaults.type = type;
-        if (propertyId) {
-          defaults.propertyId = propertyId;
-        }
-        return defaults;
+        return await getDefaults();
       };
 
       fetchData().then((data) => {
