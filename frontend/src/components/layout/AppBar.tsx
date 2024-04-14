@@ -1,12 +1,6 @@
 import { WithTranslation, withTranslation } from "react-i18next";
 import { styled } from "@mui/material/styles";
-import {
-  Box,
-  CssBaseline,
-  IconButton,
-  Toolbar,
-  Typography,
-} from "@mui/material";
+import { Box, CssBaseline, IconButton, Toolbar } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import React from "react";
@@ -15,6 +9,7 @@ import LeftMenu from "./LeftMenu";
 import UserMenu from "./UserMenu";
 import SettingsMenu from "./SettingsMenu";
 import TopMenuItems from "./TopMenuItems.tsx";
+import AppName from "./AppName.tsx";
 
 const drawerWidth: number = 240;
 
@@ -41,9 +36,7 @@ const _AppBar = styled(MuiAppBar, {
 }));
 
 function getInitialOpenState() {
-  // Yritä hakea tallennettu 'open' arvo localStoragesta
   const storedOpen = localStorage.getItem("open");
-  // Palauta tallennettu arvo, jos se on määritetty, muuten palauta true
   return storedOpen !== null ? JSON.parse(storedOpen) : true;
 }
 
@@ -82,16 +75,9 @@ function AppBar({ t }: WithTranslation) {
           >
             <MenuIcon />
           </IconButton>
-
-          <Typography
-            component="h1"
-            variant="h6"
-            color="inherit"
-            noWrap
-            sx={{ flexGrow: 0 }}
-          >
-            {t("title")}
-          </Typography>
+          <Box display="flex" flexGrow={0}>
+            <AppName t={t}></AppName>
+          </Box>
           <Box display="flex" justifyContent="center" flexGrow={1}>
             <TopMenuItems></TopMenuItems>
           </Box>
