@@ -74,14 +74,15 @@ function Transactions({ t, filter }: TransactionsProps) {
   };
 
   const fetchOptions = {
-    select: {
-      id: true,
-      transactionDate: true,
-      sender: true,
-      receiver: true,
-      description: true,
-      amount: true,
-    },
+    select: [
+      "id",
+      "type",
+      "transactionDate",
+      "sender",
+      "receiver",
+      "description",
+      "amount",
+    ],
     relations: {
       expenses: true,
       incomes: true,
@@ -111,6 +112,11 @@ function Transactions({ t, filter }: TransactionsProps) {
             new DataService({ context: transactionContext, fetchOptions })
           }
           fields={[
+            {
+              name: "type",
+              format: "transactionType",
+              label: t("transactionType"),
+            },
             { name: "transactionDate", format: "date" },
             { name: "sender", maxLength: 30 },
             { name: "receiver", maxLength: 30 },
