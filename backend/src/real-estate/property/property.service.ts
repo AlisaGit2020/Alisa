@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOptionsWhere, In, Repository } from 'typeorm';
+import { FindManyOptions, FindOptionsWhere, Repository } from 'typeorm';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
@@ -121,9 +121,10 @@ export class PropertyService {
       options.where = {} as FindOptionsWhere<Property>;
     }
     if (options.where['ownerships'] === undefined) {
-      options.where['ownerships'] = [];
+      options.where['ownerships'] = { userId: user.id };
+    } else {
+      options.where['ownerships']['userId'] = user.id;
     }
-    options.where['ownerships']['userId'] = In([user.id]);
     return options;
   }
 
