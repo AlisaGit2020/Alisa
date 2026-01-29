@@ -11,7 +11,6 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
-  Response,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -138,41 +137,5 @@ export class PropertyController {
     @Param('id') id: string,
   ): Promise<Property> {
     return this.service.deletePhoto(user, Number(id));
-  }
-
-  @Get('uploads/properties/:filename')
-  async servePhoto(
-    @User() user: JWTUser,
-    @Param('filename') filename: string,
-    @Response() response: any,
-  ): Promise<void> {
-    // Validate filename to prevent directory traversal
-    if (filename.includes('..') || filename.includes('/')) {
-      throw new NotFoundException('Invalid filename');
-    }
-
-    const filePath = `./uploads/properties/${filename}`;
-
-    // Verify the file exists
-    if (!fs.existsSync(filePath)) {
-      throw new NotFoundException('Photo not found');
-    }
-
-    // Verify user owns a property with this photo
-    const extension = filename.split('.').pop().toLowerCase();
-    const mimeTypes: { [key: string]: string } = {
-      jpg: 'image/jpeg',
-      jpeg: 'image/jpeg',
-      png: 'image/png',
-      webp: 'image/webp',
-    };
-
-    const contentType = mimeTypes[extension] || 'application/octet-stream';
-
-    response.setHeader('Content-Type', contentType);
-    response.setHeader('Cache-Control', 'private, max-age=86400');
-
-    const fileStream = fs.createReadStream(filePath);
-    fileStream.pipe(response);
   }
 }
