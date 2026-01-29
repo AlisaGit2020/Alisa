@@ -10,13 +10,15 @@ import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
 import { DTO } from '../../lib/types';
 import DataService from '../../lib/data-service';
 import { useNavigate, useParams } from 'react-router-dom';
+import PropertyPhotoUpload from './PropertyPhotoUpload';
 
 
 function PropertyForm({ t }: WithTranslation) {
     const [data, setData] = useState<DTO<PropertyInputDto>>({
         id: 0,
         name: '',
-        size: 0
+        size: 0,
+        photo: undefined
     });
     const { idParam } = useParams();
     const navigate = useNavigate();
@@ -47,6 +49,15 @@ function PropertyForm({ t }: WithTranslation) {
                 onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
                 adornment='m2'
             />
+            {data.id !== 0 && (
+                <PropertyPhotoUpload
+                    propertyId={data.id}
+                    currentPhoto={data.photo}
+                    onPhotoChange={(photoPath) => {
+                        setData({ ...data, photo: photoPath || undefined });
+                    }}
+                />
+            )}
         </Stack>
     )
 

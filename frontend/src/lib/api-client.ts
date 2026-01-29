@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
 import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
 
 class ApiClient {
-  private static async getOptions(headers?: Record<string, string>) {
+  public static async getOptions(headers?: Record<string, string>) {
     return {
       withCredentials: true,
       headers: {

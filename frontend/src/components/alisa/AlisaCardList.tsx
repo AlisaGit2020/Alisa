@@ -24,6 +24,7 @@ import AlisaConfirmDialog from "./dialog/AlisaConfirmDialog";
 import { TypeOrmFetchOptions } from "../../lib/types";
 import ApiClient from "../../lib/api-client";
 import AlisaContext from "@alisa-lib/alisa-contexts";
+import { VITE_API_URL } from "../../constants";
 
 interface AlisCardListField<T> {
   name: keyof T;
@@ -84,7 +85,7 @@ function AlisaCardList<T extends { id: number }>({
       <Link href={"/properties/add"}>{t("add")}</Link>
       {data.length > 0 && (
         <Grid container spacing={2} marginTop={2}>
-          {data.map((item: T & { name?: string; size?: number }) => (
+          {data.map((item: T & { name?: string; size?: number; photo?: string }) => (
             <Grid key={item.name} size={{ md: 4 }}>
               <Card>
                 <CardContent>
@@ -95,7 +96,7 @@ function AlisaCardList<T extends { id: number }>({
                     component="img"
                     alt={item.name}
                     height="140"
-                    image={`/assets/properties/${item.name}.jpg`}
+                    image={item.photo ? `${VITE_API_URL}/${item.photo}` : '/assets/properties/placeholder.svg'}
                   />
                   <Table>
                     <TableBody>
