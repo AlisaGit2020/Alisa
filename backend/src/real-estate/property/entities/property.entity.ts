@@ -43,4 +43,7 @@ export class Property {
     eager: false,
   })
   statistics: PropertyStatistics[];
+
+  @Column({ nullable: true })
+  public photo?: string;
 }

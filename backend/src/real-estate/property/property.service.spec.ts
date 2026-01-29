@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import type { Express } from 'express';
 import { PropertyService } from './property.service';
 import { Property } from './entities/property.entity';
 import { AuthService } from '@alisa-backend/auth/auth.service';
@@ -160,6 +161,143 @@ describe('PropertyService', () => {
       mockAuthService.hasOwnership.mockResolvedValue(false);
 
       await expect(service.delete(userWithoutProperties, 1)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+  });
+
+  describe('uploadPhoto', () => {
+    it('uploads photo successfully', async () => {
+      const property = createProperty({ id: 1 });
+      const file = {
+        originalname: 'test.jpg',
+        mimetype: 'image/jpeg',
+        size: 1024 * 100, // 100KB
+        path: 'uploads/properties/1706543210789-test.jpg',
+      } as Express.Multer.File;
+
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({
+        ...property,
+        photo: file.path,
+      });
+
+      const result = await service.uploadPhoto(testUser, 1, file);
+
+      expect(result.photo).toBe(file.path);
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
+
+    it('replaces existing photo', async () => {
+      const oldPhotoPath = 'uploads/properties/old-photo.jpg';
+      const property = createProperty({ id: 1, photo: oldPhotoPath });
+      const file = {
+        originalname: 'new.jpg',
+        mimetype: 'image/jpeg',
+        size: 1024 * 100,
+        path: 'uploads/properties/1706543210789-new.jpg',
+      } as Express.Multer.File;
+
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({
+        ...property,
+        photo: file.path,
+      });
+
+      const result = await service.uploadPhoto(testUser, 1, file);
+
+      expect(result.photo).toBe(file.path);
+    });
+
+    it('throws BadRequestException for invalid file type', async () => {
+      const property = createProperty({ id: 1 });
+      const file = {
+        originalname: 'document.pdf',
+        mimetype: 'application/pdf',
+        size: 1024 * 100,
+        path: 'uploads/properties/document.pdf',
+      } as Express.Multer.File;
+
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      await expect(service.uploadPhoto(testUser, 1, file)).rejects.toThrow(
+        'Only JPEG, PNG, and WebP images are allowed',
+      );
+    });
+
+    it('throws BadRequestException for file exceeding size limit', async () => {
+      const property = createProperty({ id: 1 });
+      const file = {
+        originalname: 'large.jpg',
+        mimetype: 'image/jpeg',
+        size: 6 * 1024 * 1024, // 6MB
+        path: 'uploads/properties/large.jpg',
+      } as Express.Multer.File;
+
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      await expect(service.uploadPhoto(testUser, 1, file)).rejects.toThrow(
+        'File size must not exceed 5MB',
+      );
+    });
+
+    it('throws UnauthorizedException when user has no ownership', async () => {
+      const property = createProperty({ id: 1 });
+      const file = {
+        originalname: 'test.jpg',
+        mimetype: 'image/jpeg',
+        size: 1024 * 100,
+        path: 'uploads/properties/test.jpg',
+      } as Express.Multer.File;
+
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      await expect(service.uploadPhoto(otherUser, 1, file)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+  });
+
+  describe('deletePhoto', () => {
+    it('deletes photo successfully', async () => {
+      const property = createProperty({
+        id: 1,
+        photo: 'uploads/properties/1706543210789-test.jpg',
+      });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...property, photo: null });
+
+      const result = await service.deletePhoto(testUser, 1);
+
+      expect(result.photo).toBeNull();
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException when property has no photo', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      await expect(service.deletePhoto(testUser, 1)).rejects.toThrow(
+        'Property does not have a photo',
+      );
+    });
+
+    it('throws UnauthorizedException when user has no ownership', async () => {
+      const property = createProperty({
+        id: 1,
+        photo: 'uploads/properties/1706543210789-test.jpg',
+      });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      await expect(service.deletePhoto(otherUser, 1)).rejects.toThrow(
         UnauthorizedException,
       );
     });

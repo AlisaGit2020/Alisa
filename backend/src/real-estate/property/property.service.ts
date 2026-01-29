@@ -2,9 +2,12 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOptionsWhere, Repository } from 'typeorm';
+import type { Express } from 'express';
+import * as fs from 'fs';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
@@ -68,7 +71,10 @@ export class PropertyService {
   }
 
   async delete(user: JWTUser, id: number): Promise<void> {
-    await this.getEntityOrThrow(user, id);
+    const property = await this.getEntityOrThrow(user, id);
+    if (property.photo) {
+      await this.deletePhotoFile(property.photo);
+    }
     await this.repository.delete(id);
   }
 
@@ -133,5 +139,72 @@ export class PropertyService {
       return undefined;
     }
     return options.where['id'];
+  }
+
+  async uploadPhoto(
+    user: JWTUser,
+    propertyId: number,
+    file: Express.Multer.File,
+  ): Promise<Property> {
+    const property = await this.getEntityOrThrow(user, propertyId);
+
+    this.validatePhotoFile(file);
+
+    if (property.photo) {
+      await this.deletePhotoFile(property.photo);
+    }
+
+    const relativePath = file.path.replace(/\\/g, '/');
+    property.photo = relativePath;
+    await this.repository.save(property);
+
+    return property;
+  }
+
+  async deletePhoto(user: JWTUser, propertyId: number): Promise<Property> {
+    const property = await this.getEntityOrThrow(user, propertyId);
+
+    if (!property.photo) {
+      throw new NotFoundException('Property does not have a photo');
+    }
+
+    await this.deletePhotoFile(property.photo);
+    property.photo = null;
+    await this.repository.save(property);
+
+    return property;
+  }
+
+  private async deletePhotoFile(photoPath: string): Promise<void> {
+    try {
+      await fs.promises.unlink(photoPath);
+    } catch (error) {
+      // Log but don't throw - file may have been deleted already
+      console.log(`Failed to delete photo file: ${photoPath}`, error.message);
+    }
+  }
+
+  private validatePhotoFile(file: Express.Multer.File): void {
+    if (!file) {
+      throw new BadRequestException('File must not be empty');
+    }
+
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+    ];
+
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException(
+        'Only JPEG, PNG, and WebP images are allowed',
+      );
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      throw new BadRequestException('File size must not exceed 5MB');
+    }
   }
 }

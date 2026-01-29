@@ -9,7 +9,14 @@ import {
   Post,
   Put,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  Response,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import * as fs from 'fs';
+import type { Express } from 'express';
 import { PropertyService } from './property.service';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
@@ -85,5 +92,87 @@ export class PropertyController {
   ): Promise<boolean> {
     await this.service.delete(user, Number(id));
     return true;
+  }
+
+  @Post('/:id/photo')
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      storage: diskStorage({
+        destination: function (req, file, cb) {
+          const dir = './uploads/properties';
+
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          cb(null, dir);
+        },
+        filename: function (req, file, cb) {
+          const sanitized = file.originalname
+            .replace(/[^a-zA-Z0-9.-]/g, '_')
+            .substring(0, 100);
+          cb(null, `${Date.now()}-${sanitized}`);
+        },
+      }),
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (allowed.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new Error('Only image files allowed'), false);
+        }
+      },
+    }),
+  )
+  async uploadPhoto(
+    @User() user: JWTUser,
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<Property> {
+    return this.service.uploadPhoto(user, Number(id), file);
+  }
+
+  @Delete('/:id/photo')
+  async deletePhoto(
+    @User() user: JWTUser,
+    @Param('id') id: string,
+  ): Promise<Property> {
+    return this.service.deletePhoto(user, Number(id));
+  }
+
+  @Get('uploads/properties/:filename')
+  async servePhoto(
+    @User() user: JWTUser,
+    @Param('filename') filename: string,
+    @Response() response: any,
+  ): Promise<void> {
+    // Validate filename to prevent directory traversal
+    if (filename.includes('..') || filename.includes('/')) {
+      throw new NotFoundException('Invalid filename');
+    }
+
+    const filePath = `./uploads/properties/${filename}`;
+
+    // Verify the file exists
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundException('Photo not found');
+    }
+
+    // Verify user owns a property with this photo
+    const extension = filename.split('.').pop().toLowerCase();
+    const mimeTypes: { [key: string]: string } = {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      webp: 'image/webp',
+    };
+
+    const contentType = mimeTypes[extension] || 'application/octet-stream';
+
+    response.setHeader('Content-Type', contentType);
+    response.setHeader('Cache-Control', 'private, max-age=86400');
+
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(response);
   }
 }

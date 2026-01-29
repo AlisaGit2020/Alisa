@@ -1,5 +1,5 @@
 import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownership-input.dto';
-import { IsNotEmpty, IsNumber, Max, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, Max, Min, IsOptional, IsString } from 'class-validator';
 
 export class PropertyInputDto {
   @IsNotEmpty()
@@ -9,6 +9,10 @@ export class PropertyInputDto {
   @Min(1)
   @Max(1000)
   size: number;
+
+  @IsOptional()
+  @IsString()
+  photo?: string;
 
   ownerships?: OwnershipInputDto[] = [];
 }
