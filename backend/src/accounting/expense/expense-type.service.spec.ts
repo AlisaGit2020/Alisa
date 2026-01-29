@@ -66,7 +66,7 @@ describe('Expense type service', () => {
         description: 'Test description',
         isTaxDeductible: false,
       };
-      await expect(service.add(mainUser.jwtUser, input)).rejects.toThrowError();
+      await expect(service.add(mainUser.jwtUser, input)).rejects.toThrow();
     });
     it('does not throw when saving with the existing name to another user', async () => {
       const input = {
@@ -99,7 +99,7 @@ describe('Expense type service', () => {
     it(`throws when reading another user's expense type`, async () => {
       await expect(
         service.findOne(testUsers.userWithoutProperties.jwtUser, 1),
-      ).rejects.toThrowError(UnauthorizedException);
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -137,7 +137,7 @@ describe('Expense type service', () => {
       };
       await expect(
         service.update(mainUser.jwtUser, 999, input),
-      ).rejects.toThrowError(NotFoundException);
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('throws when updating another user expense type', async () => {
@@ -152,7 +152,7 @@ describe('Expense type service', () => {
           expenseTypeId,
           input,
         ),
-      ).rejects.toThrowError(UnauthorizedException);
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -168,7 +168,7 @@ describe('Expense type service', () => {
     });
 
     it('throws not found when deleting non-existing expense type', async () => {
-      await expect(service.delete(mainUser.jwtUser, 999)).rejects.toThrowError(
+      await expect(service.delete(mainUser.jwtUser, 999)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -176,7 +176,7 @@ describe('Expense type service', () => {
     it('throws when deleting another user expense type', async () => {
       await expect(
         service.delete(testUsers.userWithoutProperties.jwtUser, expenseTypeId),
-      ).rejects.toThrowError(UnauthorizedException);
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('deletes user expense type', async () => {
