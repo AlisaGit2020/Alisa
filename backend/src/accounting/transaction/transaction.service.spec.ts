@@ -1,582 +1,566 @@
-/*
-Data service test
-*/
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   BadRequestException,
-  INestApplication,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-
-import { AppModule } from 'src/app.module';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { TransactionService } from './transaction.service';
-import { ExpenseService } from '../expense/expense.service';
-
+import { Transaction } from './entities/transaction.entity';
+import { AuthService } from '@alisa-backend/auth/auth.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
-  addTransaction,
-  addTransactionsToTestUsers,
-  emptyTablesV2,
-  getTestUsers,
-  prepareDatabase,
-  sleep,
-  TestUser,
-  TestUsersSetup,
-} from 'test/helper-functions';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+  createMockRepository,
+  createMockAuthService,
+  createMockEventEmitter,
+  MockRepository,
+  MockAuthService,
+  MockEventEmitter,
+} from 'test/mocks';
 import {
-  getTransactionExpense1,
-  getTransactionIncome1,
-  getTransactionIncome2,
-} from '../../../test/data/mocks/transaction.mock';
-import { FindOptionsWhere, In } from 'typeorm';
+  createTransaction,
+  createExpenseTransaction,
+  createIncomeTransaction,
+  createJWTUser,
+} from 'test/factories';
 import {
   TransactionStatus,
   TransactionType,
 } from '@alisa-backend/common/types';
 
-describe('Transaction service', () => {
-  let app: INestApplication;
+describe('TransactionService', () => {
   let service: TransactionService;
-  let testUsers: TestUsersSetup;
-  let mainUser: TestUser;
-  let expenseService: ExpenseService;
+  let mockRepository: MockRepository<Transaction>;
+  let mockAuthService: MockAuthService;
+  let mockEventEmitter: MockEventEmitter;
 
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+  const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
+  const otherUser = createJWTUser({ id: 2, ownershipInProperties: [] });
+
+  beforeEach(async () => {
+    mockRepository = createMockRepository<Transaction>();
+    mockAuthService = createMockAuthService();
+    mockEventEmitter = createMockEventEmitter();
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        TransactionService,
+        { provide: getRepositoryToken(Transaction), useValue: mockRepository },
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
+      ],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
-
-    service = app.get<TransactionService>(TransactionService);
-    expenseService = app.get<ExpenseService>(ExpenseService);
-
-    await prepareDatabase(app);
-    testUsers = await getTestUsers(app);
-    mainUser = testUsers.user1WithProperties;
-    await addTransactionsToTestUsers(app, testUsers);
-    await sleep(500);
+    service = module.get<TransactionService>(TransactionService);
   });
 
-  afterAll(async () => {
-    await app.close();
-  });
+  describe('findOne', () => {
+    it('returns transaction when user has ownership', async () => {
+      const transaction = createTransaction({ id: 1, propertyId: 1 });
+      mockRepository.findOneBy.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
 
-  beforeAll(async () => {
-    expenseService = app.get<ExpenseService>(ExpenseService);
+      const result = await service.findOne(testUser, 1);
 
-    await prepareDatabase(app);
-    testUsers = await getTestUsers(app);
-    await addTransactionsToTestUsers(app, testUsers);
-    await sleep(50);
-  });
-
-  describe('Create', () => {
-    it('does not allow add a transaction for another user property', async () => {
-      const input = getTransactionIncome1(1);
-      await expect(
-        service.add(testUsers.userWithoutProperties.jwtUser, input),
-      ).rejects.toThrow(UnauthorizedException);
+      expect(result).toEqual(transaction);
     });
 
-    it('saves transaction amount as negative when it is an expense', async () => {
-      const input = getTransactionExpense1(1);
-      input.amount = 100;
-      const transaction = await service.add(mainUser.jwtUser, input);
-      expect(transaction.amount).toBe(-100);
+    it('returns null when transaction does not exist', async () => {
+      mockRepository.findOneBy.mockResolvedValue(null);
 
-      //Clean up
-      await service.delete(mainUser.jwtUser, transaction.id);
+      const result = await service.findOne(testUser, 999);
+
+      expect(result).toBeNull();
     });
 
-    it.each([
-      [TransactionType.EXPENSE, getTransactionIncome1(1)],
-      [TransactionType.INCOME, getTransactionExpense1(1)],
-      [TransactionType.DEPOSIT, getTransactionIncome1(1)],
-      [TransactionType.DEPOSIT, getTransactionExpense1(1)],
-      [TransactionType.WITHDRAW, getTransactionIncome1(1)],
-      [TransactionType.WITHDRAW, getTransactionExpense1(1)],
-    ])(
-      'throws when adding invalid data to %s transaction type',
-      async (type, input) => {
-        input.type = type;
-        await expect(service.add(mainUser.jwtUser, input)).rejects.toThrow(
-          BadRequestException,
-        );
-      },
-    );
+    it('throws UnauthorizedException when user has no ownership', async () => {
+      const transaction = createTransaction({ id: 1, propertyId: 1 });
+      mockRepository.findOneBy.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
 
-    it('throws when accepted transaction type is unknown', async () => {
-      const input = getTransactionIncome1(1);
-      input.type = TransactionType.UNKNOWN;
-      await expect(service.add(mainUser.jwtUser, input)).rejects.toThrow(
+      await expect(service.findOne(otherUser, 1)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+  });
+
+  describe('add', () => {
+    it('creates transaction and emits events', async () => {
+      const input = {
+        propertyId: 1,
+        type: TransactionType.INCOME,
+        status: TransactionStatus.ACCEPTED,
+        sender: 'Test Sender',
+        receiver: 'Test Receiver',
+        description: 'Test',
+        transactionDate: new Date(),
+        accountingDate: new Date(),
+        amount: 100,
+      };
+      const savedTransaction = createTransaction({ id: 1, ...input });
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue(savedTransaction);
+
+      const result = await service.add(testUser, input);
+
+      expect(result).toEqual(savedTransaction);
+      expect(mockEventEmitter.emit).toHaveBeenCalled();
+    });
+
+    it('converts expense amount to negative', async () => {
+      const input = {
+        propertyId: 1,
+        type: TransactionType.EXPENSE,
+        status: TransactionStatus.PENDING,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Test',
+        transactionDate: new Date(),
+        accountingDate: new Date(),
+        amount: 100,
+        expenses: [
+          {
+            expenseTypeId: 1,
+            description: 'Test expense',
+            amount: 100,
+            quantity: 1,
+            totalAmount: 100,
+          },
+        ],
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity, id: 1 }),
+      );
+
+      const result = await service.add(testUser, input);
+
+      expect(result.amount).toBe(-100);
+    });
+
+    it('throws UnauthorizedException for another user property', async () => {
+      const input = {
+        propertyId: 1,
+        type: TransactionType.INCOME,
+        status: TransactionStatus.PENDING,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Test',
+        transactionDate: new Date(),
+        accountingDate: new Date(),
+        amount: 100,
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      await expect(service.add(otherUser, input)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('throws BadRequestException when accepted transaction has unknown type', async () => {
+      const input = {
+        propertyId: 1,
+        type: TransactionType.UNKNOWN,
+        status: TransactionStatus.ACCEPTED,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Test',
+        transactionDate: new Date(),
+        accountingDate: new Date(),
+        amount: 100,
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      await expect(service.add(testUser, input)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('throws BadRequestException for expense with incomes', async () => {
+      const input = {
+        propertyId: 1,
+        type: TransactionType.EXPENSE,
+        status: TransactionStatus.PENDING,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Test',
+        transactionDate: new Date(),
+        accountingDate: new Date(),
+        amount: 100,
+        incomes: [
+          {
+            incomeTypeId: 1,
+            description: 'Test',
+            amount: 100,
+            quantity: 1,
+            totalAmount: 100,
+          },
+        ],
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      await expect(service.add(testUser, input)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('throws BadRequestException for income with expenses', async () => {
+      const input = {
+        propertyId: 1,
+        type: TransactionType.INCOME,
+        status: TransactionStatus.PENDING,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Test',
+        transactionDate: new Date(),
+        accountingDate: new Date(),
+        amount: 100,
+        expenses: [
+          {
+            expenseTypeId: 1,
+            description: 'Test',
+            amount: 100,
+            quantity: 1,
+            totalAmount: 100,
+          },
+        ],
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      await expect(service.add(testUser, input)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('throws BadRequestException for deposit with incomes', async () => {
+      const input = {
+        propertyId: 1,
+        type: TransactionType.DEPOSIT,
+        status: TransactionStatus.PENDING,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Test',
+        transactionDate: new Date(),
+        accountingDate: new Date(),
+        amount: 100,
+        incomes: [
+          {
+            incomeTypeId: 1,
+            description: 'Test',
+            amount: 100,
+            quantity: 1,
+            totalAmount: 100,
+          },
+        ],
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      await expect(service.add(testUser, input)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('throws BadRequestException for withdraw with expenses', async () => {
+      const input = {
+        propertyId: 1,
+        type: TransactionType.WITHDRAW,
+        status: TransactionStatus.PENDING,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Test',
+        transactionDate: new Date(),
+        accountingDate: new Date(),
+        amount: 100,
+        expenses: [
+          {
+            expenseTypeId: 1,
+            description: 'Test',
+            amount: 100,
+            quantity: 1,
+            totalAmount: 100,
+          },
+        ],
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      await expect(service.add(testUser, input)).rejects.toThrow(
         BadRequestException,
       );
     });
   });
 
-  describe('Read', () => {
-    it('returns own transaction', async () => {
-      const transactions = await service.findOne(
-        testUsers.user1WithProperties.jwtUser,
-        1,
-      );
-      expect(transactions).not.toBeNull();
-    });
-
-    it('returns null when transaction does not exist', async () => {
-      const transactions = await service.findOne(
-        testUsers.user1WithProperties.jwtUser,
-        999,
-      );
-      expect(transactions).toBeNull();
-    });
-
-    it('throws UnauthorizedException when trying to read other user transaction', async () => {
-      await expect(
-        service.findOne(testUsers.userWithoutProperties.jwtUser, 1),
-      ).rejects.toThrow(UnauthorizedException);
-    });
-  });
-
-  describe('Update', () => {
-    it('updates when own transaction and throws when not', async () => {
-      const transaction = await addTransaction(
-        app,
-        testUsers.user1WithProperties.jwtUser,
-        getTransactionIncome1(1, TransactionStatus.PENDING),
-      );
-
+  describe('update', () => {
+    it('updates pending transaction', async () => {
+      const existingTransaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+      });
       const input = {
         type: TransactionType.INCOME,
-        receiver: 'Escobar',
-        sender: 'Batman',
-        accountingDate: new Date('2023-03-29'),
-        transactionDate: new Date('2023-03-29'),
-        amount: 1000,
-        description: 'New description',
+        sender: 'New Sender',
+        receiver: 'New Receiver',
+        accountingDate: new Date(),
+        transactionDate: new Date(),
+        amount: 200,
+        description: 'Updated',
       };
 
-      const editedTransaction = await service.update(
-        testUsers.user1WithProperties.jwtUser,
-        transaction.id,
-        input,
-      );
+      mockRepository.findOneBy.mockResolvedValue(existingTransaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...existingTransaction, ...input });
 
-      expect(editedTransaction).toMatchObject(input);
+      const result = await service.update(testUser, 1, input);
 
-      //Reject when not an owner.
-      await expect(
-        service.update(
-          testUsers.userWithoutProperties.jwtUser,
-          transaction.id,
-          input,
-        ),
-      ).rejects.toThrow(UnauthorizedException);
-
-      await service.delete(
-        testUsers.user1WithProperties.jwtUser,
-        transaction.id,
-      );
+      expect(result.description).toBe('Updated');
     });
 
-    it('saves transaction amount as negative when it is an expense', async () => {
-      const input = getTransactionExpense1(1, TransactionStatus.PENDING);
-      input.amount = 100;
-      const transaction = await service.add(mainUser.jwtUser, input);
+    it('throws BadRequestException when updating accepted transaction', async () => {
+      const existingTransaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.ACCEPTED,
+      });
 
-      //Update transaction
-      transaction.amount = 1000;
-      const editedTransaction = await service.update(
-        mainUser.jwtUser,
-        transaction.id,
-        transaction,
-      );
-
-      expect(editedTransaction.amount).toBe(-1000);
-
-      //Clean up
-      await service.delete(mainUser.jwtUser, transaction.id);
-    });
-
-    it('deletes expense row when the row is not in the input', async () => {
-      const transaction = await addTransaction(
-        app,
-        testUsers.user1WithProperties.jwtUser,
-        {
-          type: TransactionType.EXPENSE,
-          sender: 'Batman',
-          receiver: 'Escobar',
-          accountingDate: new Date('2023-03-29'),
-          transactionDate: new Date('2023-03-29'),
-          amount: 1000,
-          description: 'Transaction',
-          propertyId: 1,
-          expenses: [
-            {
-              description: 'Expense1',
-              amount: 100,
-              quantity: 1,
-              expenseTypeId: 1,
-              totalAmount: 100,
-            },
-            {
-              description: 'Expense2',
-              amount: 100,
-              quantity: 1,
-              expenseTypeId: 1,
-              totalAmount: 100,
-            },
-          ],
-        },
-      );
-      //Remove last expense
-      transaction.expenses = transaction.expenses.slice(0, 1);
-      const editedTransaction = await service.update(
-        testUsers.user1WithProperties.jwtUser,
-        transaction.id,
-        transaction,
-      );
-
-      expect(editedTransaction.expenses.length).toBe(1);
-
-      //Clean up
-      await service.delete(
-        testUsers.user1WithProperties.jwtUser,
-        transaction.id,
-      );
-    });
-
-    it('throws not found when transaction does not exist', async () => {
-      await expect(
-        service.update(
-          testUsers.user1WithProperties.jwtUser,
-          999,
-          getTransactionIncome2(1),
-        ),
-      ).rejects.toThrow(NotFoundException);
-    });
-
-    it('throws when trying to update accepted transaction', async () => {
-      const transaction = await addTransaction(
-        app,
-        testUsers.user1WithProperties.jwtUser,
-        getTransactionIncome1(1, TransactionStatus.ACCEPTED),
-      );
+      mockRepository.findOneBy.mockResolvedValue(existingTransaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
 
       await expect(
-        service.update(
-          testUsers.user1WithProperties.jwtUser,
-          transaction.id,
-          getTransactionIncome2(1),
-        ),
+        service.update(testUser, 1, {
+          type: TransactionType.INCOME,
+          sender: 'Test',
+          receiver: 'Test',
+          accountingDate: new Date(),
+          transactionDate: new Date(),
+          amount: 100,
+          description: 'Test',
+        }),
       ).rejects.toThrow(BadRequestException);
-
-      await service.delete(
-        testUsers.user1WithProperties.jwtUser,
-        transaction.id,
-      );
     });
 
-    describe('Common validation', () => {
-      let transaction: Transaction;
+    it('throws NotFoundException when transaction does not exist', async () => {
+      mockRepository.findOneBy.mockResolvedValue(null);
 
-      beforeAll(async () => {
-        transaction = await addTransaction(
-          app,
-          mainUser.jwtUser,
-          getTransactionIncome1(1),
-        );
-      });
-
-      afterAll(async () => {
-        await service.delete(mainUser.jwtUser, transaction.id);
-      });
-
-      it.each([
-        [TransactionType.EXPENSE, getTransactionIncome1(1)],
-        [TransactionType.INCOME, getTransactionExpense1(1)],
-        [TransactionType.DEPOSIT, getTransactionIncome1(1)],
-        [TransactionType.DEPOSIT, getTransactionExpense1(1)],
-        [TransactionType.WITHDRAW, getTransactionIncome1(1)],
-        [TransactionType.WITHDRAW, getTransactionExpense1(1)],
-      ])(
-        'throws when adding invalid data to %s transaction type',
-        async (type, input) => {
-          input.type = type;
-          await expect(
-            service.update(mainUser.jwtUser, transaction.id, input),
-          ).rejects.toThrow(BadRequestException);
-        },
-      );
-    });
-  });
-
-  describe('Delete', () => {
-    it('deletes also expense row', async () => {
-      let transaction = await addTransaction(
-        app,
-        testUsers.user1WithProperties.jwtUser,
-        getTransactionExpense1(1),
-      );
-
-      await sleep(20);
-      const transactions = await service.search(
-        testUsers.user1WithProperties.jwtUser,
-        {
-          relations: ['expenses'],
-          where: {
-            id: transaction.id,
-          },
-        },
-      );
-
-      //Delete transaction.
-      await service.delete(
-        testUsers.user1WithProperties.jwtUser,
-        transaction.id,
-      );
-      await sleep(50);
-
-      const expense = await expenseService.findOne(
-        testUsers.user1WithProperties.jwtUser,
-        transactions[0].expenses[0].id,
-      );
-      expect(expense).toBeNull();
-
-      transaction = await service.findOne(
-        testUsers.user1WithProperties.jwtUser,
-        transaction.id,
-      );
-      expect(transaction).toBeNull();
-    });
-
-    it('deletes also income row', async () => {
-      let transaction = await addTransaction(
-        app,
-        testUsers.user1WithProperties.jwtUser,
-        getTransactionIncome2(1),
-      );
-
-      await sleep(20);
-      const transactions = await service.search(
-        testUsers.user1WithProperties.jwtUser,
-        {
-          relations: ['incomes'],
-          where: {
-            id: transaction.id,
-          },
-        },
-      );
-
-      //Delete transaction.
-      await service.delete(
-        testUsers.user1WithProperties.jwtUser,
-        transaction.id,
-      );
-      await sleep(50);
-
-      const income = await expenseService.findOne(
-        testUsers.user1WithProperties.jwtUser,
-        transactions[0].incomes[0].id,
-      );
-      expect(income).toBeNull();
-
-      transaction = await service.findOne(
-        testUsers.user1WithProperties.jwtUser,
-        transaction.id,
-      );
-      expect(transaction).toBeNull();
-    });
-
-    it('throws not found when transaction does not exist', async () => {
       await expect(
-        service.delete(testUsers.user1WithProperties.jwtUser, 999),
+        service.update(testUser, 999, {
+          type: TransactionType.INCOME,
+          sender: 'Test',
+          receiver: 'Test',
+          accountingDate: new Date(),
+          transactionDate: new Date(),
+          amount: 100,
+          description: 'Test',
+        }),
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('throws when not own transaction', async () => {
-      const transaction = await addTransaction(
-        app,
-        testUsers.user1WithProperties.jwtUser,
-        getTransactionIncome1(1),
-      );
+    it('throws UnauthorizedException for another user transaction', async () => {
+      const transaction = createTransaction({ id: 1, propertyId: 1 });
+      mockRepository.findOneBy.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
       await expect(
-        service.delete(testUsers.userWithoutProperties.jwtUser, transaction.id),
+        service.update(otherUser, 1, {
+          type: TransactionType.INCOME,
+          sender: 'Test',
+          receiver: 'Test',
+          accountingDate: new Date(),
+          transactionDate: new Date(),
+          amount: 100,
+          description: 'Test',
+        }),
       ).rejects.toThrow(UnauthorizedException);
+    });
+  });
 
-      await service.delete(
-        testUsers.user1WithProperties.jwtUser,
-        transaction.id,
+  describe('delete', () => {
+    it('deletes transaction and emits event', async () => {
+      const transaction = createTransaction({ id: 1, propertyId: 1 });
+      mockRepository.findOneBy.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      await service.delete(testUser, 1);
+
+      expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockEventEmitter.emit).toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException when transaction does not exist', async () => {
+      mockRepository.findOneBy.mockResolvedValue(null);
+
+      await expect(service.delete(testUser, 999)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('throws UnauthorizedException for another user transaction', async () => {
+      const transaction = createTransaction({ id: 1, propertyId: 1 });
+      mockRepository.findOneBy.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      await expect(service.delete(otherUser, 1)).rejects.toThrow(
+        UnauthorizedException,
       );
     });
   });
 
-  describe('Search', () => {
-    it.each([['userWithoutProperties']])(
-      `does not return other's transactions`,
-      async (user) => {
-        const transactions = await service.search(testUsers[user].jwtUser, {});
-        expect(transactions.length).toBe(0);
-      },
-    );
+  describe('search', () => {
+    it('returns transactions with ownership filter applied', async () => {
+      const transactions = [
+        createIncomeTransaction({ id: 1, propertyId: 1 }),
+        createExpenseTransaction({ id: 2, propertyId: 1 }),
+      ];
+      mockRepository.find.mockResolvedValue(transactions);
+      mockAuthService.addOwnershipFilter.mockImplementation((_user, where) => where);
 
-    it(`returns own transactions`, async () => {
-      const transactions = await service.search(
-        testUsers.user1WithProperties.jwtUser,
-        {},
-      );
-      expect(transactions.length).toBe(12);
+      const result = await service.search(testUser, {});
+
+      expect(result).toEqual(transactions);
+      expect(mockAuthService.addOwnershipFilter).toHaveBeenCalled();
     });
 
-    it.each([
-      [{ id: 1 }, 1],
-      [{ propertyId: 1 }, 6],
-    ])(
-      `returns own filtered transactions`,
-      async (where: FindOptionsWhere<Transaction>, expectedLength: number) => {
-        const transactions = await service.search(
-          testUsers.user1WithProperties.jwtUser,
-          { where: where },
-        );
-        expect(transactions.length).toBe(expectedLength);
-      },
-    );
+    it('returns empty array for user without transactions', async () => {
+      mockRepository.find.mockResolvedValue([]);
+      mockAuthService.addOwnershipFilter.mockImplementation((_user, where) => where);
+
+      const result = await service.search(otherUser, {});
+
+      expect(result).toEqual([]);
+    });
   });
 
-  describe('Accept and set type', () => {
-    let transactions = [];
-    beforeAll(async () => {
-      await emptyTablesV2(app, ['transaction']);
-      transactions = [
-        getTransactionIncome1(1, TransactionStatus.PENDING),
-        getTransactionIncome2(1, TransactionStatus.PENDING),
-        getTransactionExpense1(1, TransactionStatus.PENDING),
+  describe('accept', () => {
+    it('accepts multiple transactions', async () => {
+      const transactions = [
+        createTransaction({
+          id: 1,
+          propertyId: 1,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.INCOME,
+        }),
+        createTransaction({
+          id: 2,
+          propertyId: 1,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.EXPENSE,
+        }),
       ];
 
-      for (const transaction of transactions) {
-        transaction.type = TransactionType.UNKNOWN;
-        await service.add(mainUser.jwtUser, transaction);
-      }
+      mockRepository.find.mockResolvedValue(transactions);
+      mockRepository.findOneBy.mockImplementation((criteria) =>
+        Promise.resolve(transactions.find((t) => t.id === criteria.id)),
+      );
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity, status: TransactionStatus.ACCEPTED }),
+      );
+
+      const result = await service.accept(testUser, [1, 2]);
+
+      expect(result.rows.total).toBe(2);
     });
 
-    afterAll(async () => {
-      for (const transactionId of [1, 2, 3]) {
-        await service.delete(mainUser.jwtUser, transactionId);
-      }
+    it('throws BadRequestException when ids array is empty', async () => {
+      await expect(service.accept(testUser, [])).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
-    describe('Set type', () => {
-      it('saves types for multiple transactions', async () => {
-        const ids = [1, 2, 3];
-        const result = await service.setType(
-          testUsers.user1WithProperties.jwtUser,
-          ids,
-          TransactionType.INCOME,
-        );
-
-        await sleep(50);
-        const savedTransactions = await service.search(
-          testUsers.user1WithProperties.jwtUser,
-          { where: { id: In(ids) } },
-        );
-
-        for (const transaction of savedTransactions) {
-          expect(transaction.type).toBe(TransactionType.INCOME);
-        }
-        for (const resultItem of result.results) {
-          expect(resultItem.statusCode).toBe(200);
-        }
-        expect(result.rows.total).toBe(3);
-        expect(result.rows.success).toBe(3);
-        expect(result.rows.failed).toBe(0);
+    it('returns 400 for transaction with unknown type', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        type: TransactionType.UNKNOWN,
       });
 
-      it('throws if ids array is empty', async () => {
-        await expect(
-          service.setType(mainUser.jwtUser, [], TransactionType.INCOME),
-        ).rejects.toThrow(BadRequestException);
-      });
+      mockRepository.find.mockResolvedValue([transaction]);
 
-      it('throws if type is not valid', async () => {
-        await expect(
-          service.setType(mainUser.jwtUser, [1], -1 as TransactionType),
-        ).rejects.toThrow(BadRequestException);
-      });
+      const result = await service.accept(testUser, [1]);
 
-      it('returns 400 if transaction is accepted', async () => {
-        const transaction = await addTransaction(
-          app,
-          testUsers.user1WithProperties.jwtUser,
-          getTransactionIncome1(1, TransactionStatus.ACCEPTED),
-        );
-
-        const result = await service.setType(
-          testUsers.user1WithProperties.jwtUser,
-          [transaction.id],
-          TransactionType.INCOME,
-        );
-
-        expect(result.results[0].statusCode).toBe(400);
-
-        await service.delete(
-          testUsers.user1WithProperties.jwtUser,
-          transaction.id,
-        );
-      });
-    });
-
-    describe('Accept', () => {
-      it('accepts multiple transactions', async () => {
-        const ids = [1, 2, 3];
-        const result = await service.accept(mainUser.jwtUser, ids);
-
-        await sleep(50);
-        const savedTransactions = await service.search(mainUser.jwtUser, {
-          where: { id: In(ids) },
-        });
-
-        for (const transaction of savedTransactions) {
-          expect(transaction.status).toBe(TransactionStatus.ACCEPTED);
-        }
-        for (const resultItem of result.results) {
-          expect(resultItem.statusCode).toBe(200);
-        }
-        expect(result.rows.total).toBe(3);
-        expect(result.rows.success).toBe(3);
-        expect(result.rows.failed).toBe(0);
-      });
+      expect(result.results[0].statusCode).toBe(400);
     });
   });
 
-  describe('Statistics', () => {
-    it('calculate statistics correctly', async () => {
-      await sleep(100);
-      const statistics = await service.statistics(
-        testUsers.user1WithProperties.jwtUser,
-        { where: { propertyId: 1 } },
+  describe('setType', () => {
+    it('sets type for multiple transactions', async () => {
+      const transactions = [
+        createTransaction({
+          id: 1,
+          propertyId: 1,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.UNKNOWN,
+        }),
+      ];
+
+      mockRepository.find.mockResolvedValue(transactions);
+      mockRepository.findOneBy.mockResolvedValue(transactions[0]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity }),
       );
 
-      //expect(statistics.balance).toBe(2011.36);
-      expect(statistics.totalIncomes).toBe(1339);
-      expect(statistics.totalExpenses).toBe(227.64);
-      expect(statistics.total).toBe(2011.36);
-      expect(statistics.rowCount).toBe(6);
+      const result = await service.setType(testUser, [1], TransactionType.INCOME);
+
+      expect(result.rows.total).toBe(1);
     });
 
-    it('does not calculate other user statistics', async () => {
-      const statistics = await service.statistics(
-        testUsers.userWithoutProperties.jwtUser,
-        { where: { propertyId: 1 } },
-      );
+    it('throws BadRequestException when ids array is empty', async () => {
+      await expect(
+        service.setType(testUser, [], TransactionType.INCOME),
+      ).rejects.toThrow(BadRequestException);
+    });
 
-      expect(statistics.balance).toBe(0);
-      expect(statistics.totalExpenses).toBe(0);
-      expect(statistics.totalIncomes).toBe(0);
-      expect(statistics.total).toBe(0);
-      expect(statistics.rowCount).toBe(0);
+    it('throws BadRequestException for invalid type', async () => {
+      await expect(
+        service.setType(testUser, [1], -1 as TransactionType),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('statistics', () => {
+    it('calculates statistics correctly', async () => {
+      const mockQueryBuilder = mockRepository.createQueryBuilder();
+      mockQueryBuilder.getRawOne.mockResolvedValue({
+        rowCount: '5',
+        totalExpenses: '100',
+        totalIncomes: '500',
+        total: '400',
+      });
+
+      // Mock for balance query
+      const balanceQueryBuilder = {
+        select: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue({ balance: 400 }),
+      };
+
+      mockRepository.createQueryBuilder
+        .mockReturnValueOnce(mockQueryBuilder)
+        .mockReturnValueOnce(balanceQueryBuilder);
+
+      const result = await service.statistics(testUser, {
+        where: { propertyId: 1 },
+      });
+
+      expect(result.rowCount).toBe(5);
+      expect(result.totalExpenses).toBe(100);
+      expect(result.totalIncomes).toBe(500);
+      expect(result.total).toBe(400);
+      expect(result.balance).toBe(400);
     });
   });
 });

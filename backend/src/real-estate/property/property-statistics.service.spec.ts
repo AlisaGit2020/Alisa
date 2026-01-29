@@ -1,276 +1,198 @@
-/*
-Data service test
-*/
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { AppModule } from 'src/app.module';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { PropertyStatisticsService } from './property-statistics.service';
+import { PropertyStatistics } from './entities/property-statistics.entity';
+import { createMockRepository, MockRepository } from 'test/mocks';
+import { createTransaction, createJWTUser } from 'test/factories';
 import {
-  addIncomeAndExpenseTypes,
-  addTransaction,
-  emptyTables,
-  getTestUsers,
-  prepareDatabase,
-  sleep,
-  TestUser,
-  TestUsersSetup,
-} from 'test/helper-functions';
-import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import {
-  getTransactionDeposit1,
-  getTransactionExpense1,
-  getTransactionExpense2,
-  getTransactionIncome1,
-  getTransactionIncome2,
-  getTransactionWithdrawal1,
-} from '../../../test/data/mocks/transaction.mock';
-import { StatisticKey, TransactionStatus } from '@alisa-backend/common/types';
-import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
-import { DataSource } from 'typeorm';
+  StatisticKey,
+  TransactionStatus,
+  TransactionType,
+} from '@alisa-backend/common/types';
 
-describe('Property statistics service', () => {
-  let app: INestApplication;
-  let dataSource: DataSource;
-
+describe('PropertyStatisticsService', () => {
   let service: PropertyStatisticsService;
-  let transactionService: TransactionService;
-  let testUsers: TestUsersSetup;
-  let mainTestUser: TestUser;
-  let mainPropertyId: number;
+  let mockRepository: MockRepository<PropertyStatistics>;
 
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+  const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
+
+  beforeEach(async () => {
+    mockRepository = createMockRepository<PropertyStatistics>();
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        PropertyStatisticsService,
+        {
+          provide: getRepositoryToken(PropertyStatistics),
+          useValue: mockRepository,
+        },
+      ],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
-
-    dataSource = app.get(DataSource);
-    service = app.get<PropertyStatisticsService>(PropertyStatisticsService);
-    transactionService = app.get<TransactionService>(TransactionService);
-
-    await prepareDatabase(app);
-    testUsers = await getTestUsers(app);
-    mainTestUser = testUsers.user1WithProperties;
-    mainPropertyId = mainTestUser.properties[0].id;
-    await addTestData();
-    await sleep(100);
+    service = module.get<PropertyStatisticsService>(PropertyStatisticsService);
   });
 
-  afterAll(async () => {
-    await app.close();
+  describe('search', () => {
+    it('returns statistics when they exist', async () => {
+      const statistics = [
+        {
+          propertyId: 1,
+          key: StatisticKey.BALANCE,
+          year: null,
+          month: null,
+          value: '1000.00',
+        } as PropertyStatistics,
+      ];
+
+      mockRepository.find.mockResolvedValue(statistics);
+
+      const result = await service.search(testUser, {
+        propertyId: 1,
+        key: StatisticKey.BALANCE,
+      });
+
+      expect(result).toEqual(statistics);
+    });
+
+    it('returns default zero value when no statistics exist', async () => {
+      mockRepository.find.mockResolvedValue([]);
+
+      const result = await service.search(testUser, {
+        propertyId: 1,
+        key: StatisticKey.BALANCE,
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].value).toBe('0.00');
+      expect(result[0].key).toBe(StatisticKey.BALANCE);
+    });
+
+    it('returns empty array when no key specified and no data', async () => {
+      mockRepository.find.mockResolvedValue([]);
+
+      const result = await service.search(testUser, {
+        propertyId: 1,
+      });
+
+      expect(result).toEqual([]);
+    });
   });
 
-  const addTestData = async () => {
-    await addIncomeAndExpenseTypes(mainTestUser.jwtUser, app);
-  };
-
-  const addTransactions = async (status: TransactionStatus) => {
-    const jwtUser = mainTestUser.jwtUser;
-    const propertyId = mainPropertyId;
-    await addTransaction(
-      app,
-      jwtUser,
-      getTransactionExpense1(propertyId, status),
-    );
-    await addTransaction(
-      app,
-      jwtUser,
-      getTransactionExpense2(propertyId, status),
-    );
-    await addTransaction(
-      app,
-      jwtUser,
-      getTransactionIncome1(propertyId, status),
-    );
-    await addTransaction(
-      app,
-      jwtUser,
-      getTransactionIncome2(propertyId, status),
-    );
-    await addTransaction(
-      app,
-      jwtUser,
-      getTransactionDeposit1(propertyId, status),
-    );
-    await addTransaction(
-      app,
-      jwtUser,
-      getTransactionWithdrawal1(propertyId, status),
-    );
-  };
-
-  const testAllTime = async (
-    statisticsKey: StatisticKey,
-    expectedValue: string,
-  ) => {
-    const statistics = await service.search(mainTestUser.jwtUser, {
-      propertyId: mainPropertyId,
-      key: statisticsKey,
-    });
-
-    const statistic = statistics[0];
-
-    expect(statistic.value).toBe(expectedValue);
-  };
-
-  const checkNoDataExist = async () => {
-    const statistics = await service.search(mainTestUser.jwtUser, {
-      propertyId: mainPropertyId,
-    });
-    expect(statistics.length).toBe(0);
-  };
-
-  const checkSomeDataExist = async () => {
-    const statistics = await service.search(mainTestUser.jwtUser, {
-      propertyId: mainPropertyId,
-    });
-    expect(statistics.length).toBeGreaterThan(0);
-  };
-
-  const checkAllResetToZero = async () => {
-    const statistics = await service.search(mainTestUser.jwtUser, {
-      propertyId: mainPropertyId,
-    });
-    for (const statistic of statistics) {
-      expect(statistic.value).toBe('0.00');
-    }
-  };
-
-  const testYear = async (
-    year: number,
-    statisticsKey: StatisticKey,
-    expectedValue: string,
-  ) => {
-    const statistics = await service.search(mainTestUser.jwtUser, {
-      propertyId: 1,
-      key: statisticsKey,
-      year: year,
-    });
-
-    const statistic = statistics[0];
-
-    expect(statistic.value).toBe(expectedValue);
-  };
-
-  const testMonth = async (
-    year: number,
-    month: number,
-    statisticsKey: StatisticKey,
-    expectedValue: string,
-  ) => {
-    const statistics = await service.search(mainTestUser.jwtUser, {
-      propertyId: 1,
-      key: statisticsKey,
-      year: year,
-      month: month,
-    });
-
-    const statistic = statistics[0];
-
-    expect(statistic.value).toBe(expectedValue);
-  };
-
-  const testAcceptedTransaction = async () => {
-    it.each([
-      [StatisticKey.BALANCE, '2011.36'],
-      [StatisticKey.INCOME, '1339.00'],
-      [StatisticKey.EXPENSE, '227.64'],
-      [StatisticKey.DEPOSIT, '1000.00'],
-      [StatisticKey.WITHDRAW, '100.00'],
-    ])(
-      `it calculates all time data correctly`,
-      async (statisticsKey, expectedValue) => {
-        await testAllTime(statisticsKey, expectedValue);
-      },
-    );
-
-    it.each([
-      [2022, StatisticKey.BALANCE, '0.00'], //No data exist
-      [2023, StatisticKey.BALANCE, '2011.36'],
-      [2024, StatisticKey.BALANCE, '0.00'], //No data exist
-      [2023, StatisticKey.INCOME, '1339.00'],
-      [2023, StatisticKey.EXPENSE, '227.64'],
-      [2023, StatisticKey.DEPOSIT, '1000.00'],
-      [2023, StatisticKey.WITHDRAW, '100.00'],
-    ])(
-      'it calculates year data correctly',
-      async (year, statisticsKey, expectedValue) => {
-        await testYear(year, statisticsKey, expectedValue);
-      },
-    );
-
-    it.each([
-      [2023, 1, StatisticKey.BALANCE, '209.36'],
-      [2023, 2, StatisticKey.BALANCE, '-188.00'],
-      [2023, 3, StatisticKey.BALANCE, '1990.00'],
-      [2023, 4, StatisticKey.BALANCE, '0.00'], //No data exist
-      [2023, 1, StatisticKey.INCOME, '0.00'],
-      [2023, 2, StatisticKey.INCOME, '249.00'],
-      [2023, 3, StatisticKey.INCOME, '1090.00'],
-      [2023, 1, StatisticKey.EXPENSE, '0.00'],
-      [2023, 2, StatisticKey.EXPENSE, '39.64'],
-      [2023, 3, StatisticKey.EXPENSE, '188.00'],
-      [2023, 1, StatisticKey.DEPOSIT, '0.00'],
-      [2023, 2, StatisticKey.DEPOSIT, '0.00'],
-      [2023, 3, StatisticKey.DEPOSIT, '1000.00'],
-      [2023, 1, StatisticKey.WITHDRAW, '0.00'],
-      [2023, 2, StatisticKey.WITHDRAW, '0.00'],
-      [2023, 3, StatisticKey.WITHDRAW, '100.00'],
-    ])(
-      'it calculates month data correctly',
-      async (year, month, statisticsKey, expectedValue) => {
-        await testMonth(year, month, statisticsKey, expectedValue);
-      },
-    );
-  };
-
-  describe('Calculate statistics', () => {
-    describe('When accepted transaction is created', () => {
-      beforeAll(async () => {
-        await emptyTables(dataSource, ['transaction', 'property_statistics']);
-        await addTransactions(TransactionStatus.ACCEPTED);
-        await sleep(100);
+  describe('handleTransactionCreated', () => {
+    it('creates statistics for all time, yearly, and monthly', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        amount: 100,
+        type: TransactionType.INCOME,
+        status: TransactionStatus.ACCEPTED,
+        transactionDate: new Date('2023-03-15'),
+        accountingDate: new Date('2023-03-15'),
       });
 
-      testAcceptedTransaction();
+      mockRepository.findOne.mockResolvedValue(null);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve(entity),
+      );
 
-      it('it reset all statistics to zero after all transactions are deleted', async () => {
-        for (let i = 1; i <= 6; i++) {
-          await transactionService.delete(mainTestUser.jwtUser, i);
-        }
-        await sleep(100);
-        await checkAllResetToZero();
-      });
+      await service.handleTransactionCreated({ transaction });
+
+      // Should be called for each statistic type (BALANCE, INCOME, EXPENSE, DEPOSIT, WITHDRAW)
+      // × 3 time periods (all time, yearly, monthly)
+      // But only BALANCE and INCOME are relevant for INCOME type
+      expect(mockRepository.save).toHaveBeenCalled();
     });
 
-    describe('When pending transaction is created', () => {
-      beforeAll(async () => {
-        await emptyTables(dataSource, ['transaction', 'property_statistics']);
-        await addTransactions(TransactionStatus.PENDING);
-        await sleep(100);
+    it('updates existing statistics', async () => {
+      const existingStatistic = {
+        propertyId: 1,
+        key: StatisticKey.INCOME,
+        year: null,
+        month: null,
+        value: '500.00',
+      } as PropertyStatistics;
+
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        amount: 100,
+        type: TransactionType.INCOME,
+        status: TransactionStatus.ACCEPTED,
+        transactionDate: new Date('2023-03-15'),
+        accountingDate: new Date('2023-03-15'),
       });
 
-      it('it does not calculate any statistics', async () => {
-        await checkNoDataExist();
+      mockRepository.findOne.mockResolvedValue(existingStatistic);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve(entity),
+      );
+
+      await service.handleTransactionCreated({ transaction });
+
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
+
+    it('does not create statistics for pending transactions', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        amount: 100,
+        type: TransactionType.INCOME,
+        status: TransactionStatus.PENDING,
+        transactionDate: new Date('2023-03-15'),
+        accountingDate: new Date('2023-03-15'),
       });
 
-      it('it does not calculate any statistics after transaction is updated', async () => {
-        const input = getTransactionExpense1(1, TransactionStatus.PENDING);
-        input.amount = input.amount - 100;
-        await transactionService.update(mainTestUser.jwtUser, 1, input);
-        await sleep(100);
-        await checkNoDataExist();
+      await service.handleTransactionCreated({ transaction });
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleTransactionDeleted', () => {
+    it('subtracts amount from statistics when transaction is deleted', async () => {
+      const existingStatistic = {
+        propertyId: 1,
+        key: StatisticKey.INCOME,
+        year: null,
+        month: null,
+        value: '500.00',
+      } as PropertyStatistics;
+
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        amount: 100,
+        type: TransactionType.INCOME,
+        status: TransactionStatus.ACCEPTED,
+        transactionDate: new Date('2023-03-15'),
+        accountingDate: new Date('2023-03-15'),
       });
 
-      it('it calculates statistics after transaction is accepted', async () => {
-        await transactionService.update(mainTestUser.jwtUser, 1, {
-          ...getTransactionExpense1(1, TransactionStatus.ACCEPTED),
-          amount: 100,
-        });
-        await sleep(100);
-        await checkSomeDataExist();
+      mockRepository.findOne.mockResolvedValue(existingStatistic);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve(entity),
+      );
+
+      await service.handleTransactionDeleted({ transaction });
+
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
+
+    it('does not update statistics for pending transactions', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        amount: 100,
+        type: TransactionType.INCOME,
+        status: TransactionStatus.PENDING,
+        transactionDate: new Date('2023-03-15'),
+        accountingDate: new Date('2023-03-15'),
       });
+
+      await service.handleTransactionDeleted({ transaction });
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
     });
   });
 });

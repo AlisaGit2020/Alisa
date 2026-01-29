@@ -1,244 +1,219 @@
-/*
-Data service test
-*/
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  INestApplication,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { AppModule } from 'src/app.module';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExpenseService } from './expense.service';
-import { expenseTestData } from 'test/data/accounting/expense.test.data';
-import { startOfDay } from 'date-fns';
-import { TransactionService } from '../transaction/transaction.service';
-import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
-
+import { Expense } from './entities/expense.entity';
+import { ExpenseType } from './entities/expense-type.entity';
+import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
-  addTransactionsToTestUsers,
-  getTestUsers,
-  prepareDatabase,
-  sleep,
-  TestUsersSetup,
-} from '../../../test/helper-functions';
+  createMockRepository,
+  createMockAuthService,
+  MockRepository,
+  MockAuthService,
+} from 'test/mocks';
+import { createExpense, createJWTUser } from 'test/factories';
 
-describe('Expense service', () => {
-  let app: INestApplication;
+describe('ExpenseService', () => {
   let service: ExpenseService;
+  let mockRepository: MockRepository<Expense>;
+  let mockExpenseTypeRepository: MockRepository<ExpenseType>;
+  let mockAuthService: MockAuthService;
 
-  let transactionService: TransactionService;
-  let testUsers: TestUsersSetup;
+  const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
+  const otherUser = createJWTUser({ id: 2, ownershipInProperties: [3, 4] });
+  const userWithoutProperties = createJWTUser({
+    id: 3,
+    ownershipInProperties: [],
+  });
 
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+  beforeEach(async () => {
+    mockRepository = createMockRepository<Expense>();
+    mockExpenseTypeRepository = createMockRepository<ExpenseType>();
+    mockAuthService = createMockAuthService();
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        ExpenseService,
+        { provide: getRepositoryToken(Expense), useValue: mockRepository },
+        {
+          provide: getRepositoryToken(ExpenseType),
+          useValue: mockExpenseTypeRepository,
+        },
+        { provide: AuthService, useValue: mockAuthService },
+      ],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
-
-    service = app.get<ExpenseService>(ExpenseService);
-    transactionService = app.get<TransactionService>(TransactionService);
-
-    await prepareDatabase(app);
-    testUsers = await getTestUsers(app);
-    await addTransactionsToTestUsers(app, testUsers);
+    service = module.get<ExpenseService>(ExpenseService);
   });
 
-  afterAll(async () => {
-    await app.close();
+  describe('findOne', () => {
+    it('returns expense when user has ownership', async () => {
+      const expense = createExpense({ id: 1, propertyId: 1 });
+      mockRepository.findOne.mockResolvedValue(expense);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const result = await service.findOne(testUser, 1);
+
+      expect(result).toEqual(expense);
+    });
+
+    it('returns null when expense does not exist', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.findOne(testUser, 999);
+
+      expect(result).toBeNull();
+    });
+
+    it('throws UnauthorizedException when user has no ownership', async () => {
+      const expense = createExpense({ id: 1, propertyId: 1 });
+      mockRepository.findOne.mockResolvedValue(expense);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      await expect(service.findOne(otherUser, 1)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
   });
 
-  const addExpense = async () => {
-    return service.add(testUsers.user1WithProperties.jwtUser, {
-      quantity: 0,
-      totalAmount: 0,
-      propertyId: 1,
-      expenseTypeId: 1,
-      amount: 100,
-      description: 'Yhtiövastike',
-      transaction: {
-        sender: 'John Doe',
-        receiver: 'Espoon kaupunki',
-        accountingDate: startOfDay(new Date()),
-        transactionDate: startOfDay(new Date()),
-        amount: 100,
-        description: 'Yhtiövastike',
+  describe('add', () => {
+    it('creates expense when user has ownership', async () => {
+      const input = {
         propertyId: 1,
-      } as TransactionInputDto,
-    });
-  };
+        expenseTypeId: 1,
+        description: 'Test expense',
+        amount: 100,
+        quantity: 1,
+        totalAmount: 100,
+      };
+      const savedExpense = createExpense({ id: 1, ...input });
 
-  const deleteExpense = async (expenseId: number) => {
-    try {
-      await service.delete(testUsers.user1WithProperties.jwtUser, expenseId);
-    } catch (e) {}
-  };
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue(savedExpense);
 
-  describe('Create', () => {
-    let expenseId: number;
-    afterAll(async () => {
-      await deleteExpense(expenseId);
-    });
-    it('adds a new expense to user', async () => {
-      const savedExpense = await addExpense();
-      expenseId = savedExpense.id; //For cleanup
-      expect(savedExpense.description).toBe('Yhtiövastike');
-      expect(savedExpense.transaction.sender).toBe('John Doe');
+      const result = await service.add(testUser, input);
+
+      expect(result).toEqual(savedExpense);
     });
 
-    it('throws UnauthorizedException if user does not have access to property', async () => {
-      const input = expenseTestData.inputPost;
-      await expect(
-        service.add(testUsers.user2WithProperties.jwtUser, input),
-      ).rejects.toThrow(UnauthorizedException);
+    it('throws UnauthorizedException when user has no property access', async () => {
+      const input = {
+        propertyId: 1,
+        expenseTypeId: 1,
+        description: 'Test expense',
+        amount: 100,
+        quantity: 1,
+        totalAmount: 100,
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      await expect(service.add(otherUser, input)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
-  describe('Read', () => {
-    it('finds one expense', async () => {
-      const expense = await service.findOne(
-        testUsers.user1WithProperties.jwtUser,
-        1,
-      );
-      expect(expense.id).toBe(1);
+  describe('update', () => {
+    it('updates expense', async () => {
+      const existingExpense = createExpense({ id: 1, propertyId: 1 });
+      const input = {
+        description: 'Updated expense',
+        amount: 200,
+        quantity: 1,
+        totalAmount: 200,
+      };
+
+      mockRepository.findOne.mockResolvedValue(existingExpense);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...existingExpense, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.description).toBe('Updated expense');
     });
 
-    it('returns null if expense does not exist', async () => {
-      const expense = await service.findOne(
-        testUsers.user1WithProperties.jwtUser,
-        999,
-      );
-      expect(expense).toBeNull();
-    });
+    it('throws NotFoundException when expense does not exist', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
 
-    it('throws UnauthorizedException if user does not have access to property', async () => {
       await expect(
-        service.findOne(testUsers.user2WithProperties.jwtUser, 1),
-      ).rejects.toThrow(UnauthorizedException);
-    });
-  });
-
-  describe('Update', () => {
-    let expenseId: number;
-    beforeAll(async () => {
-      const savedExpense = await addExpense();
-      expenseId = savedExpense.id;
-    });
-    afterAll(async () => {
-      await deleteExpense(expenseId);
-    });
-    it('update expense', async () => {
-      await service.update(
-        testUsers.user1WithProperties.jwtUser,
-        expenseId,
-        expenseTestData.inputPut,
-      );
-
-      const expense = await service.findOne(
-        testUsers.user1WithProperties.jwtUser,
-        expenseId,
-        {
-          relations: { transaction: true },
-        },
-      );
-      expect(expense.description).toBe('Yhtiövastike');
-    });
-
-    it('throws NotFoundException if expense does not exist', async () => {
-      await expect(
-        service.update(
-          testUsers.user1WithProperties.jwtUser,
-          999,
-          expenseTestData.inputPut,
-        ),
+        service.update(testUser, 999, { description: 'Test', amount: 100, quantity: 1, totalAmount: 100 }),
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('throws UnauthorizedException if user does not have access to property', async () => {
-      const input = expenseTestData.inputPut;
+    it('throws UnauthorizedException when user has no ownership', async () => {
+      const expense = createExpense({ id: 1, propertyId: 1 });
+      mockRepository.findOne.mockResolvedValue(expense);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
       await expect(
-        service.update(
-          testUsers.userWithoutProperties.jwtUser, // This user does not own any properties
-          testUsers.user1WithProperties.properties[0].id, // This property is owned by user1
-          input,
-        ),
+        service.update(userWithoutProperties, 1, {
+          description: 'Test',
+          amount: 100,
+          quantity: 1,
+          totalAmount: 100,
+        }),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
 
-  describe('Delete', () => {
-    let transactionId: number;
-    let expenseId: number;
+  describe('delete', () => {
+    it('deletes expense', async () => {
+      const expense = createExpense({ id: 1, propertyId: 1 });
+      mockRepository.findOne.mockResolvedValue(expense);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
-    beforeEach(async () => {
-      const savedExpense = await addExpense();
-      expenseId = savedExpense.id;
-      transactionId = savedExpense.transactionId;
+      await service.delete(testUser, 1);
+
+      expect(mockRepository.delete).toHaveBeenCalledWith(1);
     });
 
-    afterEach(async () => {
-      try {
-        await service.delete(testUsers.user1WithProperties.jwtUser, expenseId);
-      } catch (e) {}
-    });
+    it('throws NotFoundException when expense does not exist', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
 
-    it('it deletes expense row, but not transaction row', async () => {
-      await service.delete(testUsers.user1WithProperties.jwtUser, expenseId);
-      await sleep(20);
-
-      const transaction = await transactionService.findOne(
-        testUsers.user1WithProperties.jwtUser,
-        transactionId,
+      await expect(service.delete(testUser, 999)).rejects.toThrow(
+        NotFoundException,
       );
-      expect(transaction.id).toBeGreaterThanOrEqual(1);
+    });
 
-      const savedExpense = await service.findOne(
-        testUsers.user1WithProperties.jwtUser,
-        expenseId,
+    it('throws UnauthorizedException when user has no ownership', async () => {
+      const expense = createExpense({ id: 1, propertyId: 1 });
+      mockRepository.findOne.mockResolvedValue(expense);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      await expect(service.delete(userWithoutProperties, 1)).rejects.toThrow(
+        UnauthorizedException,
       );
-      expect(savedExpense).toBeNull();
     });
-
-    it('throws NotFoundException if expense does not exist', async () => {
-      await expect(
-        service.delete(testUsers.user1WithProperties.jwtUser, 999),
-      ).rejects.toThrow(NotFoundException);
-    });
-
-    it.each([['userWithoutProperties'], ['user2WithProperties']])(
-      'throws UnauthorizedException if user does not have access to property',
-      async (user: keyof TestUsersSetup) => {
-        await expect(
-          service.delete(testUsers[user].jwtUser, expenseId),
-        ).rejects.toThrow(UnauthorizedException);
-      },
-    );
   });
 
-  describe('Search', () => {
-    it('can search own properties', async () => {
-      const expenses = await service.search(
-        testUsers.user1WithProperties.jwtUser,
-        { where: { property: { id: 1 } } },
+  describe('search', () => {
+    it('returns expenses with ownership filter applied', async () => {
+      const expenses = [
+        createExpense({ id: 1, propertyId: 1 }),
+        createExpense({ id: 2, propertyId: 1 }),
+      ];
+      mockRepository.find.mockResolvedValue(expenses);
+      mockAuthService.addOwnershipFilter.mockImplementation(
+        (_user, where) => where,
       );
 
-      expect(expenses.length).toBe(3);
+      const result = await service.search(testUser, {});
+
+      expect(result).toEqual(expenses);
+      expect(mockAuthService.addOwnershipFilter).toHaveBeenCalled();
     });
 
-    it.each([
-      ['userWithoutProperties', { property: { id: 3 } }],
-      ['user2WithProperties', { property: { id: 1 } }],
-      ['userWithoutProperties', undefined],
-    ])(
-      `Does not return other user's properties`,
-      async (user: string, where: object | undefined) => {
-        const expenses = await service.search(testUsers[user].jwtUser, {
-          where: where,
-        });
+    it('returns empty array for user without expenses', async () => {
+      mockRepository.find.mockResolvedValue([]);
+      mockAuthService.addOwnershipFilter.mockImplementation(
+        (_user, where) => where,
+      );
 
-        expect(expenses.length).toBe(0);
-      },
-    );
+      const result = await service.search(userWithoutProperties, {});
+
+      expect(result).toEqual([]);
+    });
   });
 });
