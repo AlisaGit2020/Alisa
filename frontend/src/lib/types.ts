@@ -6,10 +6,14 @@ export type TypeOrmRelationOption = {
   [key: string]: boolean | TypeOrmRelationOption;
 };
 
+export type TypeOrmWhereOption<T> = {
+  [K in keyof T]?: T[K] | { $between?: T[K][] } | { $in?: T[K][] } | { $like?: string };
+};
+
 export type TypeOrmFetchOptions<T> = {
   relations?: TypeOrmRelationOption;
   select?: string[];
-  where?: Partial<T>;
+  where?: TypeOrmWhereOption<T> & Record<string, unknown>;
   order?: TypeOrmOrderOption;
   limit?: number;
 };

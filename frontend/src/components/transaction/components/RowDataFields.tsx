@@ -20,10 +20,10 @@ function RowDataFields<T extends TransactionRow>(props: RowDataFieldsProps<T>) {
   return (
     <Grid container spacing={0} rowSpacing={0}>
       <Grid container spacing={1} height={80}>
-        <Grid item xs={2}>
+        <Grid size={2}>
           {props.typeSelect}
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={4}>
           <AlisaTextField
             label={props.t("description")}
             value={props.data.description}
@@ -37,7 +37,7 @@ function RowDataFields<T extends TransactionRow>(props: RowDataFieldsProps<T>) {
             }
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={6}>
           <Stack direction={"row"} spacing={1}>
             <AlisaNumberField
               disabled={true}

@@ -1,10 +1,10 @@
 import { Box, Button, ButtonGroup } from "@mui/material"
 
 import AlisaAlert from "../dialog/AlisaAlert"
-import { ReactNode } from "react"
+import React, { ReactNode } from "react"
 
 function AlisaForm(props: {
-    formComponents: JSX.Element
+    formComponents: React.JSX.Element
     submitButtonText: string
     submitButtonIcon?: ReactNode
     cancelButtonText: string

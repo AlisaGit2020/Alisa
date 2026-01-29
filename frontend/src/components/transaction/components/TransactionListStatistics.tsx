@@ -5,11 +5,11 @@ import { TransactionStatisticsDto } from "@alisa-backend/accounting/transaction/
 import React from "react";
 import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
-import { TypeOrmRelationOption } from "@alisa-lib/types";
+import { TypeOrmRelationOption, TypeOrmWhereOption } from "@alisa-lib/types";
 
 interface TransactionListStatisticsProps extends WithTranslation {
   relations?: TypeOrmRelationOption;
-  where?: Partial<Transaction>;
+  where?: TypeOrmWhereOption<Transaction> & Record<string, unknown>;
   deletedId: number;
 }
 

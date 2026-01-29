@@ -18,9 +18,12 @@ function preventDefault(event: React.MouseEvent) {
 export default function Orders() {
   const [expenses, setData] = React.useState<Expense[]>([]);
 
-  React.useEffect(async () => {
-    const data = await ApiClient.search<Expense>(expenseContext.apiPath)
-    setData(data)
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const data = await ApiClient.search<Expense>(expenseContext.apiPath)
+      setData(data)
+    }
+    fetchData()
   }, [])
 
   if (expenses.length > 0) {
@@ -41,12 +44,12 @@ export default function Orders() {
           <TableBody>
             {expenses.map((row) => (
               <TableRow key={row.id}>
-                <TableCell>{row.transaction.transactionDate}</TableCell>
+                <TableCell>{row.transaction.transactionDate?.toString()}</TableCell>
                 <TableCell>{row.expenseType.name}</TableCell>
                 <TableCell>{row.transaction.description}</TableCell>
-                <TableCell>{row.transaction.quantity}</TableCell>
+                <TableCell>{row.quantity}</TableCell>
                 <TableCell>{row.transaction.amount}</TableCell>
-                <TableCell align='right' >{row.transaction.totalAmount}</TableCell>
+                <TableCell align='right' >{row.totalAmount}</TableCell>
               </TableRow>
             ))}
           </TableBody>

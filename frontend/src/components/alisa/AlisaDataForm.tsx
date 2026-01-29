@@ -15,7 +15,7 @@ import AlisaContext from '../../lib/alisa-contexts';
 interface InputProps<T> {
     t: TFunction
     alisaContext: AlisaContext
-    formComponents: JSX.Element
+    formComponents: React.JSX.Element
     onSetData: React.Dispatch<React.SetStateAction<T>>;
     data: object
     validateObject: object
@@ -104,7 +104,7 @@ function AlisaDataForm<T extends { id: number }>({
     return (
         <Paper sx={{ p: 2 }}>
             <Grid container>
-                <Grid item lg={6} xs={12}>
+                <Grid size={{ lg: 6, xs: 12 }}>
                     <Box marginBottom={3}>
                         <Link href={alisaContext.routePath} color="primary">
                             {t('back')}

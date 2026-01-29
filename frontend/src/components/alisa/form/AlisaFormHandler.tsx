@@ -5,7 +5,7 @@ import AlisaLoadingProgress from "../AlisaLoadingProgress";
 import { AxiosError } from "axios";
 
 function AlisaFormHandler<T extends object>(props: {
-  formComponents: JSX.Element;
+  formComponents: React.JSX.Element;
   id?: number;
   data?: T;
   dataService: DataService<T>;

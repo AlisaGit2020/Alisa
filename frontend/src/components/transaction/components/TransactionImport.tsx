@@ -30,7 +30,6 @@ function TransactionImport(props: {
 }) {
   const initialData = new OpImportInput();
   initialData.propertyId = props.propertyId;
-  initialData.getList = 1;
 
   const [data, setData] = useState<OpImportInput>(initialData);
   const dataService = new DataService<OpImportInput>({

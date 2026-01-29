@@ -2,7 +2,7 @@ import { InputAdornment, TextField } from "@mui/material";
 import { ChangeEventHandler } from "react";
 
 function AlisaNumberField(props: {
-  label: "";
+  label: string;
   value: number;
   adornment?: string;
   autoComplete?: string;

@@ -20,6 +20,12 @@ function AlisaPropertySelect(props: AlisaPropertySelectProps) {
   const [properties, setProperties] = useState<Property[]>([]);
   const [ready, setReady] = useState<boolean>(false);
 
+  const handleApiError = (error: unknown) => {
+    if (axios.isAxiosError(error)) {
+      /* empty */
+    }
+  };
+
   React.useEffect(() => {
     const dataService = new DataService<Property>({
       context: propertyContext,
@@ -29,28 +35,23 @@ function AlisaPropertySelect(props: AlisaPropertySelectProps) {
       },
     });
     const fetchData = async () => {
-      let properties: Property[] = [];
+      let fetchedProperties: Property[] = [];
       try {
-        properties = await dataService.search();
+        fetchedProperties = await dataService.search();
 
-        if (!props.selectedPropertyId || props.selectedPropertyId === 0) {
-          props.selectedPropertyId = properties[0].id;
+        if ((!props.selectedPropertyId || props.selectedPropertyId === 0) && fetchedProperties.length > 0) {
+          props.onSelectProperty(fetchedProperties[0].id);
         }
       } catch (error) {
         handleApiError(error);
       }
       setReady(true);
-      return properties;
+      return fetchedProperties;
     };
 
     fetchData().then(setProperties);
-  }, [ready]);
-
-  const handleApiError = (error: unknown) => {
-    if (axios.isAxiosError(error)) {
-      /* empty */
-    }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!ready) {
     return <div>Loading...</div>;

@@ -37,7 +37,7 @@ function Balances(props: PropertyBalanceProps) {
         return;
       }
       setTotalBalance(
-        properties.reduce((acc, item) => acc + item.statistics.balance, 0),
+        properties.reduce((acc, item) => acc + ((item.statistics as unknown as { balance: number })?.balance || 0), 0),
       );
       setProperties(properties);
     };
@@ -62,7 +62,7 @@ function Balances(props: PropertyBalanceProps) {
               <TableCell sx={{ textAlign: "right" }}>
                 <Link href={`${transactionContext.routePath}/${item.name}`}>
                   {props.t("format.currency.euro", {
-                    val: item?.statistics?.balance || 0,
+                    val: (item?.statistics as unknown as { balance: number })?.balance || 0,
                   })}
                 </Link>
               </TableCell>

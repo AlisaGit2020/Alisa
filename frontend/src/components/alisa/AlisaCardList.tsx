@@ -1,6 +1,5 @@
 import * as React from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -79,41 +78,14 @@ function AlisaCardList<T extends { id: number }>({
     handleClose();
   };
 
-  const getDataValue = (
-    field: AlisCardListField<T>,
-    dataItem: T,
-  ): React.ReactNode => {
-    const value = dataItem[field.name];
-
-    if (typeof value === "boolean") {
-      return <CheckIcon visibility={value ? "visible" : "hidden"}></CheckIcon>;
-    }
-    if (field.format == "number") {
-      return t("format.number", { val: value });
-    }
-    if (field.format == "currency") {
-      return t("format.currency.euro", { val: value });
-    }
-    if (field.format == "date") {
-      return t("format.date", {
-        val: new Date(value as string),
-        formatParams: {
-          val: { year: "numeric", month: "numeric", day: "numeric" },
-        },
-      });
-    }
-
-    return String(value);
-  };
-
   return (
     <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
       <Title>{title}</Title>
       <Link href={"/properties/add"}>{t("add")}</Link>
       {data.length > 0 && (
         <Grid container spacing={2} marginTop={2}>
-          {data.map((item) => (
-            <Grid key={item.name} item md={4}>
+          {data.map((item: T & { name?: string; size?: number }) => (
+            <Grid key={item.name} size={{ md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography gutterBottom variant="h5" component="div">

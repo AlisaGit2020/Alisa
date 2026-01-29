@@ -29,10 +29,10 @@ function Settings() {
     return (
 
         <Grid container>
-            <Grid item lg={3} >
+            <Grid size={{ lg: 3 }} >
                 <SettingsMenu onClick={handleMenuClick} selectedItem={page as SettingsPage} ></SettingsMenu>
             </Grid>
-            <Grid item xs={12} lg={9}>
+            <Grid size={{ xs: 12, lg: 9 }}>
                 {getContent(SettingsPage.ExpenseTypes, Action.List, <ExpenseTypes></ExpenseTypes>)}
                 {getContent(SettingsPage.ExpenseTypes, Action.Add, <ExpenseTypeForm></ExpenseTypeForm>)}
                 {getContent(SettingsPage.ExpenseTypes, Action.Edit, <ExpenseTypeForm></ExpenseTypeForm>)}
