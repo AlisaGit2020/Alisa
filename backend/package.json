@@ -13,12 +13,12 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json --detectOpenHandles",
-    "test:service": "jest --config ./test/jest-service.json --detectOpenHandles"
+    "test": "DB_HOST=localhost jest --runInBand",
+    "test:watch": "DB_HOST=localhost jest --watch",
+    "test:cov": "DB_HOST=localhost jest --coverage",
+    "test:debug": "DB_HOST=localhost node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "DB_HOST=localhost jest --config ./test/jest-e2e.json --detectOpenHandles",
+    "test:service": "DB_HOST=localhost jest --config ./test/jest-service.json --detectOpenHandles"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.12",
