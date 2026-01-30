@@ -135,10 +135,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
             incomeTypeId,
           },
         );
-      if (result.allSuccess) {
-        setSelectedIds([]);
-        setSelectedTransactionTypes([]);
-      } else {
+      if (!result.allSuccess) {
         setSaveResult(result);
       }
     }
