@@ -26,7 +26,7 @@ export class ExpenseTypeService {
 
   async search(
     user: JWTUser,
-    options: FindManyOptions<ExpenseType>,
+    options: FindManyOptions<ExpenseType> = {},
   ): Promise<ExpenseType[]> {
     options.where = this.authService.addUserFilter(
       user,

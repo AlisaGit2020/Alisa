@@ -26,7 +26,7 @@ export class IncomeTypeService {
 
   async search(
     user: JWTUser,
-    options: FindManyOptions<IncomeType>,
+    options: FindManyOptions<IncomeType> = {},
   ): Promise<IncomeType[]> {
     options.where = this.authService.addUserFilter(
       user,
