@@ -210,5 +210,17 @@ describe('ExpenseTypeService', () => {
 
       expect(result).toEqual([]);
     });
+
+    it('handles undefined options', async () => {
+      mockRepository.find.mockResolvedValue([]);
+      mockAuthService.addUserFilter.mockImplementation((_user, where) => ({
+        ...where,
+        userId: testUser.id,
+      }));
+
+      const result = await service.search(testUser, undefined);
+
+      expect(result).toEqual([]);
+    });
   });
 });
