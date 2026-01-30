@@ -9,6 +9,8 @@ interface InputProps<T1, T2 extends { id: number; name: string }> {
   fieldName: keyof T1;
   value: T1[keyof T1];
   dataService: DataService<T2>;
+  size?: "small" | "medium";
+  fullWidth?: boolean;
 }
 
 function AlisaSelect<T1, T2 extends { id: number; name: string }>({
@@ -17,6 +19,8 @@ function AlisaSelect<T1, T2 extends { id: number; name: string }>({
   fieldName,
   value,
   dataService,
+  size,
+  fullWidth,
 }: InputProps<T1, T2>) {
   const [data, setData] = useState<T2[]>([]);
 
@@ -62,6 +66,8 @@ function AlisaSelect<T1, T2 extends { id: number; name: string }>({
         label={label}
         items={items}
         onChange={handleChange}
+        size={size}
+        fullWidth={fullWidth}
       ></AlisaSelectField>
     );
   }

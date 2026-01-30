@@ -14,6 +14,7 @@ function AlisaSelectField(props: {
     autoFocus?: boolean,
     disabled?: boolean,
     fullWidth?: boolean,
+    size?: "small" | "medium",
     items: AlisaSelectFieldItem[],
     onChange?: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> | undefined
 }) {
@@ -22,6 +23,7 @@ function AlisaSelectField(props: {
         <TextField
             id={props.id}
             fullWidth={props.fullWidth !== undefined ? props.fullWidth : true}
+            size={props.size}
             select
             label={props.label}
             value={props.value}

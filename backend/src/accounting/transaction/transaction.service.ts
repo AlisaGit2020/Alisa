@@ -206,6 +206,86 @@ export class TransactionService {
     return this.getSaveTaskResult(saveTask, transactions);
   }
 
+  async setCategoryType(
+    jwtUser: JWTUser,
+    ids: number[],
+    expenseTypeId?: number,
+    incomeTypeId?: number,
+  ) {
+    if (ids.length === 0) {
+      throw new BadRequestException('No ids provided');
+    }
+
+    if (!expenseTypeId && !incomeTypeId) {
+      throw new BadRequestException(
+        'Either expenseTypeId or incomeTypeId must be provided',
+      );
+    }
+
+    const transactions = await this.repository.find({
+      where: { id: In(ids) },
+      relations: { expenses: true, incomes: true },
+    });
+
+    const saveTask = transactions.map(async (transaction) => {
+      // Set expense type for expense transactions
+      if (
+        expenseTypeId &&
+        transaction.type === TransactionType.EXPENSE
+      ) {
+        if (transaction.expenses && transaction.expenses.length > 0) {
+          // Update existing expenses
+          for (const expense of transaction.expenses) {
+            expense.expenseTypeId = expenseTypeId;
+          }
+        } else {
+          // Create new expense record
+          transaction.expenses = [
+            {
+              expenseTypeId: expenseTypeId,
+              propertyId: transaction.propertyId,
+              transactionId: transaction.id,
+              description: transaction.description,
+              amount: Math.abs(transaction.amount),
+              quantity: 1,
+              totalAmount: Math.abs(transaction.amount),
+            } as any,
+          ];
+        }
+      }
+
+      // Set income type for income transactions
+      if (
+        incomeTypeId &&
+        transaction.type === TransactionType.INCOME
+      ) {
+        if (transaction.incomes && transaction.incomes.length > 0) {
+          // Update existing incomes
+          for (const income of transaction.incomes) {
+            income.incomeTypeId = incomeTypeId;
+          }
+        } else {
+          // Create new income record
+          transaction.incomes = [
+            {
+              incomeTypeId: incomeTypeId,
+              propertyId: transaction.propertyId,
+              transactionId: transaction.id,
+              description: transaction.description,
+              amount: Math.abs(transaction.amount),
+              quantity: 1,
+              totalAmount: Math.abs(transaction.amount),
+            } as any,
+          ];
+        }
+      }
+
+      return this.executeUpdateTask(jwtUser, transaction);
+    });
+
+    return this.getSaveTaskResult(saveTask, transactions);
+  }
+
   async statistics(
     user: JWTUser,
     options: FindManyOptions<Transaction>,

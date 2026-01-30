@@ -23,6 +23,7 @@ import ApiClient from "@alisa-lib/api-client.ts";
 import { TransactionAcceptInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-accept-input.dto.ts";
 import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
 import { TransactionSetTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-type-input.dto.ts";
+import { TransactionSetCategoryTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-category-type-input.dto.ts";
 import { DATA_NOT_SELECTED_ID } from "@alisa-lib/constants.ts";
 import { getInitialId, setInitialPropertyId } from "@alisa-lib/initial-data.ts";
 import { DataKey, View } from "@alisa-lib/views.ts";
@@ -38,6 +39,9 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
   const [searchText, setSearchText] = React.useState<string>("");
   const [searchField, setSearchField] = React.useState<SearchField>("sender");
   const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
+  const [selectedTransactionTypes, setSelectedTransactionTypes] = React.useState<
+    TransactionType[]
+  >([]);
   const [detailId, setDetailId] = React.useState<number>(0);
   const [editId, setEditId] = React.useState<number>(0);
   const [addType, setAddType] = React.useState<TransactionType | undefined>(
@@ -84,7 +88,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
 
   const handleSetTypeForSelected = async (type: number) => {
     setSaveResult(undefined);
-    if (selectedIds.length > 0) {
+    if (selectedIds.length > 0 && type > 0) {
       const result = await ApiClient.postSaveTask<TransactionSetTypeInputDto>(
         transactionContext.apiPath + "/type",
         {
@@ -92,10 +96,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
           type: type,
         },
       );
-      if (result.allSuccess) {
-        setSelectedIds([]);
-        setSaveResult(undefined);
-      } else {
+      if (!result.allSuccess) {
         setSaveResult(result);
       }
     }
@@ -116,6 +117,31 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
   };
   const handleCancelSelected = () => {
     setSelectedIds([]);
+    setSelectedTransactionTypes([]);
+  };
+
+  const handleSetCategoryTypeForSelected = async (
+    expenseTypeId?: number,
+    incomeTypeId?: number,
+  ) => {
+    setSaveResult(undefined);
+    if (selectedIds.length > 0) {
+      const result =
+        await ApiClient.postSaveTask<TransactionSetCategoryTypeInputDto>(
+          transactionContext.apiPath + "/category-type",
+          {
+            ids: selectedIds,
+            expenseTypeId,
+            incomeTypeId,
+          },
+        );
+      if (result.allSuccess) {
+        setSelectedIds([]);
+        setSelectedTransactionTypes([]);
+      } else {
+        setSaveResult(result);
+      }
+    }
   };
 
   const handleSelectProperty = (propertyId: number) => {
@@ -139,17 +165,30 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     setSearchField(field);
   };
 
-  const handleSelectChange = (id: number) => {
+  const handleSelectChange = (id: number, item?: Transaction) => {
     setSaveResult(undefined);
     if (selectedIds.includes(id)) {
       setSelectedIds(selectedIds.filter((i) => i !== id));
+      // Remove the type for this transaction
+      const index = selectedIds.indexOf(id);
+      setSelectedTransactionTypes(
+        selectedTransactionTypes.filter((_, i) => i !== index),
+      );
     } else {
       setSelectedIds([...selectedIds, id]);
+      if (item) {
+        setSelectedTransactionTypes([...selectedTransactionTypes, item.type]);
+      }
     }
   };
 
-  const handleSelectAllChange = (ids: number[]) => {
+  const handleSelectAllChange = (ids: number[], items?: Transaction[]) => {
     setSelectedIds(ids);
+    if (items) {
+      setSelectedTransactionTypes(items.map((item) => item.type));
+    } else {
+      setSelectedTransactionTypes([]);
+    }
   };
 
   const getSearchFilter = () => {
@@ -205,8 +244,15 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
         marginTop={3}
         selectedIds={selectedIds}
         open={selectedIds.length > 0}
+        hasExpenseTransactions={selectedTransactionTypes.includes(
+          TransactionType.EXPENSE,
+        )}
+        hasIncomeTransactions={selectedTransactionTypes.includes(
+          TransactionType.INCOME,
+        )}
         onApprove={handleApproveSelected}
         onSetType={handleSetTypeForSelected}
+        onSetCategoryType={handleSetCategoryTypeForSelected}
         onCancel={handleCancelSelected}
         onDelete={handleDeleteSelected}
         saveResult={saveResult}

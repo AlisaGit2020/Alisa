@@ -45,8 +45,8 @@ function AlisaDataTable<T extends { id: number }>(props: {
   fields: AlisaDataTableField<T>[];
   dataService: DataService<T>;
   onNewRow: (event?: React.MouseEvent<HTMLButtonElement>) => void;
-  onSelectChange?: (id: number) => void;
-  onSelectAllChange?: (ids: number[]) => void;
+  onSelectChange?: (id: number, item?: T) => void;
+  onSelectAllChange?: (ids: number[], items?: T[]) => void;
   selectedIds?: number[];
   onEdit?: (id: number) => void;
   onOpen: (id: number) => void;
@@ -88,9 +88,12 @@ function AlisaDataTable<T extends { id: number }>(props: {
   const handleSelectAll = () => {
     if (props.onSelectAllChange) {
       if (data.length == props.selectedIds?.length) {
-        props.onSelectAllChange([]);
+        props.onSelectAllChange([], []);
       } else {
-        props.onSelectAllChange(data.map((d) => d.id));
+        props.onSelectAllChange(
+          data.map((d) => d.id),
+          data,
+        );
       }
     }
   };
@@ -192,7 +195,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
                       <AlisaDataTableSelectRow
                         id={item.id}
                         selectedIds={props.selectedIds || []}
-                        onSelect={props.onSelectChange}
+                        onSelect={(id) => props.onSelectChange?.(id, item)}
                       />
                     </TableCell>
                   )}
