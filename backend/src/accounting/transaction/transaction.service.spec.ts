@@ -527,6 +527,83 @@ describe('TransactionService', () => {
     });
   });
 
+  describe('setCategoryType', () => {
+    it('sets expense type for expense transactions', async () => {
+      const transaction = createExpenseTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+      });
+      transaction.expenses = [];
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockRepository.findOneBy.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity }),
+      );
+
+      const result = await service.setCategoryType(testUser, [1], 1, undefined);
+
+      expect(result.rows.total).toBe(1);
+      expect(result.rows.success).toBe(1);
+    });
+
+    it('sets income type for income transactions', async () => {
+      const transaction = createIncomeTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+      });
+      transaction.incomes = [];
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockRepository.findOneBy.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity }),
+      );
+
+      const result = await service.setCategoryType(testUser, [1], undefined, 1);
+
+      expect(result.rows.total).toBe(1);
+      expect(result.rows.success).toBe(1);
+    });
+
+    it('updates existing expense records', async () => {
+      const transaction = createExpenseTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+      });
+      transaction.expenses = [{ id: 1, expenseTypeId: 1 } as any];
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockRepository.findOneBy.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity }),
+      );
+
+      const result = await service.setCategoryType(testUser, [1], 2, undefined);
+
+      expect(result.rows.total).toBe(1);
+      expect(transaction.expenses[0].expenseTypeId).toBe(2);
+    });
+
+    it('throws BadRequestException when ids array is empty', async () => {
+      await expect(
+        service.setCategoryType(testUser, [], 1, undefined),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('throws BadRequestException when neither expenseTypeId nor incomeTypeId provided', async () => {
+      await expect(
+        service.setCategoryType(testUser, [1], undefined, undefined),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
   describe('statistics', () => {
     it('calculates statistics correctly', async () => {
       const mockQueryBuilder = mockRepository.createQueryBuilder();
