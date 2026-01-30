@@ -84,7 +84,23 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     setDetailId(id);
   };
 
-  const handleDeleteSelected = () => {};
+  const handleDeleteSelected = async () => {
+    setSaveResult(undefined);
+    if (selectedIds.length > 0) {
+      const result = await ApiClient.postSaveTask<TransactionAcceptInputDto>(
+        transactionContext.apiPath + "/delete",
+        {
+          ids: selectedIds,
+        },
+      );
+      if (result.allSuccess) {
+        setSelectedIds([]);
+        setSelectedTransactionTypes([]);
+      } else {
+        setSaveResult(result);
+      }
+    }
+  };
 
   const handleSetTypeForSelected = async (type: number) => {
     setSaveResult(undefined);

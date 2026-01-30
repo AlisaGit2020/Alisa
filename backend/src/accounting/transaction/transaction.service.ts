@@ -152,6 +152,48 @@ export class TransactionService {
     );
   }
 
+  async deleteMany(jwtUser: JWTUser, ids: number[]): Promise<DataSaveResultDto> {
+    if (ids.length === 0) {
+      throw new BadRequestException('No ids provided');
+    }
+
+    const transactions = await this.repository.find({
+      where: { id: In(ids) },
+    });
+
+    const deleteTask = transactions.map(async (transaction) => {
+      try {
+        if (!(await this.authService.hasOwnership(jwtUser, transaction.propertyId))) {
+          return {
+            id: transaction.id,
+            statusCode: 401,
+            message: 'Unauthorized',
+          } as DataSaveResultRowDto;
+        }
+
+        await this.repository.delete(transaction.id);
+        this.eventEmitter.emit(
+          Events.Transaction.Deleted,
+          new TransactionDeletedEvent(transaction),
+        );
+
+        return {
+          id: transaction.id,
+          statusCode: 200,
+          message: 'OK',
+        } as DataSaveResultRowDto;
+      } catch (e) {
+        return {
+          id: transaction.id,
+          statusCode: e.status || 500,
+          message: e.message,
+        } as DataSaveResultRowDto;
+      }
+    });
+
+    return this.getSaveTaskResult(deleteTask, transactions);
+  }
+
   async accept(jwtUser: JWTUser, ids: number[]) {
     if (ids.length === 0) {
       throw new BadRequestException('No ids provided');

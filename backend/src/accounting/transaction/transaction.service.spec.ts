@@ -604,6 +604,44 @@ describe('TransactionService', () => {
     });
   });
 
+  describe('deleteMany', () => {
+    it('deletes multiple transactions', async () => {
+      const transactions = [
+        createTransaction({ id: 1, propertyId: 1 }),
+        createTransaction({ id: 2, propertyId: 1 }),
+      ];
+
+      mockRepository.find.mockResolvedValue(transactions);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      expect(result.rows.total).toBe(2);
+      expect(result.rows.success).toBe(2);
+      expect(mockRepository.delete).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws BadRequestException when ids array is empty', async () => {
+      await expect(service.deleteMany(testUser, [])).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('returns 401 for transactions user does not own', async () => {
+      const transaction = createTransaction({ id: 1, propertyId: 1 });
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      const result = await service.deleteMany(testUser, [1]);
+
+      expect(result.rows.total).toBe(1);
+      expect(result.rows.failed).toBe(1);
+      expect(result.results[0].statusCode).toBe(401);
+    });
+  });
+
   describe('statistics', () => {
     it('calculates statistics correctly', async () => {
       const mockQueryBuilder = mockRepository.createQueryBuilder();

@@ -62,6 +62,14 @@ export class TransactionController {
     return this.service.accept(user, input.ids);
   }
 
+  @Post('/delete')
+  async deleteMany(
+    @User() user: JWTUser,
+    @Body() input: TransactionAcceptInputDto,
+  ): Promise<DataSaveResultDto> {
+    return this.service.deleteMany(user, input.ids);
+  }
+
   @Post('/type')
   async setType(
     @User() user: JWTUser,
