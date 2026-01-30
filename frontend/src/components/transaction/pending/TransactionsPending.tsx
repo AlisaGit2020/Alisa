@@ -16,7 +16,9 @@ import {
 import TransactionImport from "../components/TransactionImport.tsx";
 import TransactionAddMenu from "../components/TransactionAddMenu.tsx";
 import TransactionsPendingActions from "./TransactionsPendingActions.tsx";
-import TransactionsPendingFilter from "./TransactionsPendingFilter.tsx";
+import TransactionsPendingFilter, {
+  SearchField,
+} from "./TransactionsPendingFilter.tsx";
 import ApiClient from "@alisa-lib/api-client.ts";
 import { TransactionAcceptInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-accept-input.dto.ts";
 import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
@@ -33,6 +35,8 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
   );
   const [transactionType, setTransactionType] =
     React.useState<number>(DATA_NOT_SELECTED_ID);
+  const [searchText, setSearchText] = React.useState<string>("");
+  const [searchField, setSearchField] = React.useState<SearchField>("sender");
   const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
   const [detailId, setDetailId] = React.useState<number>(0);
   const [editId, setEditId] = React.useState<number>(0);
@@ -127,6 +131,14 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     setTransactionType(transactionType);
   };
 
+  const handleSearchTextChange = (text: string) => {
+    setSearchText(text);
+  };
+
+  const handleSearchFieldChange = (field: SearchField) => {
+    setSearchField(field);
+  };
+
   const handleSelectChange = (id: number) => {
     setSaveResult(undefined);
     if (selectedIds.includes(id)) {
@@ -138,6 +150,11 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
 
   const handleSelectAllChange = (ids: number[]) => {
     setSelectedIds(ids);
+  };
+
+  const getSearchFilter = () => {
+    if (!searchText) return undefined;
+    return { $ilike: `%${searchText}%` };
   };
 
   const fetchOptions = {
@@ -163,6 +180,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
       status: TransactionStatus.PENDING,
       type:
         transactionType === DATA_NOT_SELECTED_ID ? undefined : transactionType,
+      [searchField]: getSearchFilter(),
     },
   } as TypeOrmFetchOptions<Transaction>;
 
@@ -174,9 +192,13 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
         data={{
           propertyId: propertyId,
           transactionTypeId: transactionType,
+          searchText: searchText,
+          searchField: searchField,
         }}
         onSelectProperty={handleSelectProperty}
         onSelectTransactionType={handleSelectTransactionType}
+        onSearchTextChange={handleSearchTextChange}
+        onSearchFieldChange={handleSearchFieldChange}
       ></TransactionsPendingFilter>
 
       <TransactionsPendingActions

@@ -76,4 +76,32 @@ describe('Typeorm where transformer', () => {
       fail('property1 field not found');
     }
   });
+
+  it('transforms $ilike correctly', () => {
+    const sourceWhere = {
+      sender: { $ilike: '%test%' },
+    };
+
+    const where = typeormWhereTransformer(sourceWhere);
+    if ('sender' in where) {
+      expect(where.sender).toMatchObject({ _value: '%test%' });
+    } else {
+      fail('sender field not found');
+    }
+  });
+
+  it('transforms $ilike in array correctly', () => {
+    const sourceWhere = [
+      { sender: { $ilike: '%john%' } },
+      { receiver: { $ilike: '%doe%' } },
+    ];
+
+    const where = typeormWhereTransformer(sourceWhere);
+    if (Array.isArray(where) && where.length === 2) {
+      expect(where[0].sender).toMatchObject({ _value: '%john%' });
+      expect(where[1].receiver).toMatchObject({ _value: '%doe%' });
+    } else {
+      fail('where is not array with length 2');
+    }
+  });
 });
