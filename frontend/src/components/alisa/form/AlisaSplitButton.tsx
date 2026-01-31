@@ -31,7 +31,7 @@ function AlisaSplitButton(props: {
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLDivElement>(null);
   const width = props.width ? props.width : 175;
-  const color = props.color ? props.color : "primary";
+  const color = props.color ? props.color : "inherit";
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
@@ -56,7 +56,8 @@ function AlisaSplitButton(props: {
     if (props.items === undefined || props.items.length === 0) {
       return 0;
     }
-    return props.items.findIndex((item) => item.id === props.value);
+    const index = props.items.findIndex((item) => item.id === props.value);
+    return index >= 0 ? index : 0;
   };
 
   return (

@@ -8,8 +8,7 @@ import { TypeOrmFetchOptions } from "@alisa-lib/types";
 import React from "react";
 import TransactionAddMenu from "./components/TransactionAddMenu";
 import TransactionImport from "./components/TransactionImport";
-import { TransactionFilter } from "./components/TransactionListFilter";
-import TransactionListStatistics from "./components/TransactionListStatistics";
+import { TransactionFilterData } from "./components/TransactionFilter";
 import TransactionDetails from "./components/TransactionDetails";
 import TransactionForm from "./TransactionForm.tsx";
 import {
@@ -18,16 +17,16 @@ import {
 } from "@alisa-backend/common/types.ts";
 
 interface TransactionsProps extends WithTranslation {
-  filter: TransactionFilter;
+  filter: TransactionFilterData;
+  refreshTrigger?: number;
 }
 
-function Transactions({ t, filter }: TransactionsProps) {
+function Transactions({ t, filter, refreshTrigger }: TransactionsProps) {
   const [anchorElAdd, setAnchorElAdd] = React.useState<null | HTMLElement>(
     null,
   );
   const [detailId, setDetailId] = React.useState<number>(0);
   const [editId, setEditId] = React.useState<number>(0);
-  const [deletedId, setDeletedId] = React.useState<number>(0);
   const [addType, setAddType] = React.useState<TransactionType | undefined>(
     undefined,
   );
@@ -50,10 +49,6 @@ function Transactions({ t, filter }: TransactionsProps) {
     handleCloseAddMenu();
   };
 
-  const handleDelete = (id: number) => {
-    setTimeout(() => setDeletedId(id), 200);
-  };
-
   const handleOpenImport = () => {
     setImportOpen(true);
     handleCloseAddMenu();
@@ -63,14 +58,22 @@ function Transactions({ t, filter }: TransactionsProps) {
     setDetailId(id);
   };
 
-  const transactionDateFilter = (): object => {
-    const startDate = new Date(filter.year, filter.month - 1, 1);
-    const endDate = new Date(filter.year, filter.month, 0, 23, 59, 59);
-    return {
-      transactionDate: {
-        $between: [startDate, endDate],
-      },
-    };
+  const getSearchFilter = () => {
+    if (!filter.searchText) return undefined;
+    return { $ilike: `%${filter.searchText}%` };
+  };
+
+  const getDateFilter = () => {
+    if (filter.startDate && filter.endDate) {
+      return { $between: [filter.startDate, filter.endDate] };
+    }
+    if (filter.startDate) {
+      return { $gte: filter.startDate };
+    }
+    if (filter.endDate) {
+      return { $lte: filter.endDate };
+    }
+    return undefined;
   };
 
   const fetchOptions = {
@@ -94,17 +97,17 @@ function Transactions({ t, filter }: TransactionsProps) {
     where: {
       status: TransactionStatus.ACCEPTED,
       propertyId: filter.propertyId,
-      ...transactionDateFilter(),
+      type:
+        filter.transactionTypes && filter.transactionTypes.length > 0
+          ? { $in: filter.transactionTypes }
+          : undefined,
+      transactionDate: getDateFilter(),
+      [filter.searchField]: getSearchFilter(),
     },
   } as TypeOrmFetchOptions<Transaction>;
 
   return (
     <Box>
-      <TransactionListStatistics
-        relations={fetchOptions.relations}
-        where={fetchOptions.where}
-        deletedId={deletedId}
-      ></TransactionListStatistics>
       <Paper sx={{ marginTop: 3 }}>
         <AlisaDataTable<Transaction>
           t={t}
@@ -125,7 +128,7 @@ function Transactions({ t, filter }: TransactionsProps) {
           ]}
           onNewRow={handleOpenAddMenu}
           onOpen={handleOpenDetails}
-          onDelete={handleDelete}
+          refreshTrigger={refreshTrigger}
         />
       </Paper>
 

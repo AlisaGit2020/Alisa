@@ -18,11 +18,13 @@ function AlisaSelectField(props: {
     items: AlisaSelectFieldItem[],
     onChange?: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> | undefined
 }) {
+    const isSmall = props.size === "small";
+    const fullWidth = props.fullWidth !== undefined ? props.fullWidth : !isSmall;
 
     return (
         <TextField
             id={props.id}
-            fullWidth={props.fullWidth !== undefined ? props.fullWidth : true}
+            fullWidth={fullWidth}
             size={props.size}
             select
             label={props.label}

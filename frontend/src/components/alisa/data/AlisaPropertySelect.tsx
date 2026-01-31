@@ -14,6 +14,7 @@ interface AlisaPropertySelectProps {
   variant: AlisaSelectVariantType;
   direction?: "row" | "column";
   showEmptyValue?: boolean;
+  size?: "small" | "medium";
 }
 
 function AlisaPropertySelect(props: AlisaPropertySelectProps) {
@@ -66,6 +67,7 @@ function AlisaPropertySelect(props: AlisaPropertySelectProps) {
       onChange={props.onSelectProperty}
       items={properties}
       showEmptyValue={Boolean(props.showEmptyValue)}
+      size={props.size}
       t={props.t}
     ></AlisaSelectVariant>
   );

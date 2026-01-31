@@ -29,3 +29,29 @@ export const setInitialPropertyId = (
   const key = `view[${view}]:${dataKey}`;
   localStorage.setItem(key, id.toString());
 };
+
+export const getStoredFilter = <T>(view: View): T | null => {
+  const key = `view[${view}]:${DataKey.FILTER}`;
+  const stored = localStorage.getItem(key);
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      // Convert date strings back to Date objects
+      if (parsed.startDate) {
+        parsed.startDate = new Date(parsed.startDate);
+      }
+      if (parsed.endDate) {
+        parsed.endDate = new Date(parsed.endDate);
+      }
+      return parsed as T;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
+export const setStoredFilter = <T>(view: View, filter: T): void => {
+  const key = `view[${view}]:${DataKey.FILTER}`;
+  localStorage.setItem(key, JSON.stringify(filter));
+};

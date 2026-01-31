@@ -14,6 +14,7 @@ function AlisaSelectVariant(props: {
   onChange: (value: number) => void;
   direction?: "row" | "column";
   showEmptyValue: boolean;
+  size?: "small" | "medium";
   t: TFunction;
 }) {
   const emptyItemIndex = props.items.findIndex(
@@ -34,6 +35,7 @@ function AlisaSelectVariant(props: {
           value={props.value}
           onChange={(e) => props.onChange(Number(e.target.value))}
           items={props.items}
+          size={props.size}
         ></AlisaSelectField>
       );
     }

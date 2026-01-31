@@ -1,5 +1,11 @@
 import { isObject } from 'class-validator';
-import { Between, ILike } from 'typeorm';
+import {
+  Between,
+  ILike,
+  In,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+} from 'typeorm';
 
 export const typeormWhereTransformer = (where: object | []) => {
   if (Array.isArray(where)) {
@@ -14,6 +20,12 @@ export const typeormWhereTransformer = (where: object | []) => {
         where[key] = betweenTransformation(value);
       } else if ('$ilike' in value) {
         where[key] = ilikeTransformation(value);
+      } else if ('$in' in value) {
+        where[key] = inTransformation(value);
+      } else if ('$gte' in value) {
+        where[key] = gteTransformation(value);
+      } else if ('$lte' in value) {
+        where[key] = lteTransformation(value);
       } else {
         where[key] = typeormWhereTransformer(where[key]); //Send back to meat machine :)
       }
@@ -28,4 +40,16 @@ const betweenTransformation = (value: any) => {
 
 const ilikeTransformation = (value: any) => {
   return ILike(value.$ilike);
+};
+
+const inTransformation = (value: any) => {
+  return In(value.$in);
+};
+
+const gteTransformation = (value: any) => {
+  return MoreThanOrEqual(new Date(value.$gte));
+};
+
+const lteTransformation = (value: any) => {
+  return LessThanOrEqual(new Date(value.$lte));
 };

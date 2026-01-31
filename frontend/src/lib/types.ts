@@ -7,7 +7,13 @@ export type TypeOrmRelationOption = {
 };
 
 export type TypeOrmWhereOption<T> = {
-  [K in keyof T]?: T[K] | { $between?: T[K][] } | { $in?: T[K][] } | { $like?: string };
+  [K in keyof T]?:
+    | T[K]
+    | { $between?: T[K][] }
+    | { $in?: T[K][] }
+    | { $ilike?: string }
+    | { $gte?: T[K] }
+    | { $lte?: T[K] };
 };
 
 export type TypeOrmFetchOptions<T> = {

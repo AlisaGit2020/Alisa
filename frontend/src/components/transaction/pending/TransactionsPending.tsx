@@ -16,29 +16,35 @@ import {
 import TransactionImport from "../components/TransactionImport.tsx";
 import TransactionAddMenu from "../components/TransactionAddMenu.tsx";
 import TransactionsPendingActions from "./TransactionsPendingActions.tsx";
-import TransactionsPendingFilter, {
+import TransactionFilter, {
   SearchField,
-} from "./TransactionsPendingFilter.tsx";
+  TransactionFilterData,
+} from "../components/TransactionFilter.tsx";
 import ApiClient from "@alisa-lib/api-client.ts";
 import { TransactionAcceptInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-accept-input.dto.ts";
 import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
 import { TransactionSetTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-type-input.dto.ts";
 import { TransactionSetCategoryTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-category-type-input.dto.ts";
 import { SplitLoanPaymentBulkInputDto } from "@alisa-backend/accounting/transaction/dtos/split-loan-payment-bulk-input.dto.ts";
-import { DATA_NOT_SELECTED_ID } from "@alisa-lib/constants.ts";
-import { getInitialId, setInitialPropertyId } from "@alisa-lib/initial-data.ts";
-import { DataKey, View } from "@alisa-lib/views.ts";
+import { getStoredFilter, setStoredFilter } from "@alisa-lib/initial-data.ts";
+import { View } from "@alisa-lib/views.ts";
 
 interface TransactionsPendingProps extends WithTranslation {}
 
+const getDefaultFilter = (): TransactionFilterData => ({
+  propertyId: 0,
+  transactionTypes: [],
+  startDate: null,
+  endDate: null,
+  searchText: "",
+  searchField: "sender",
+});
+
 function TransactionsPending({ t }: TransactionsPendingProps) {
-  const [propertyId, setPropertyId] = React.useState<number>(
-    getInitialId(View.TRANSACTION_PENDING, DataKey.PROPERTY_ID),
-  );
-  const [transactionType, setTransactionType] =
-    React.useState<number>(DATA_NOT_SELECTED_ID);
-  const [searchText, setSearchText] = React.useState<string>("");
-  const [searchField, setSearchField] = React.useState<SearchField>("sender");
+  const [filter, setFilter] = React.useState<TransactionFilterData>(() => {
+    const stored = getStoredFilter<TransactionFilterData>(View.TRANSACTION_PENDING);
+    return stored || getDefaultFilter();
+  });
   const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
   const [selectedTransactionTypes, setSelectedTransactionTypes] = React.useState<
     TransactionType[]
@@ -56,6 +62,12 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     DataSaveResultDto | undefined
   >(undefined);
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
+
+  const updateFilter = (newFilter: TransactionFilterData) => {
+    setFilter(newFilter);
+    setStoredFilter(View.TRANSACTION_PENDING, newFilter);
+    setRefreshTrigger((prev) => prev + 1);
+  };
 
   const handleOpenAddMenu = (
     event?: React.MouseEvent<HTMLButtonElement>,
@@ -191,24 +203,31 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
   };
 
   const handleSelectProperty = (propertyId: number) => {
-    setInitialPropertyId(
-      View.TRANSACTION_PENDING,
-      DataKey.PROPERTY_ID,
-      propertyId,
-    );
-    setPropertyId(propertyId);
+    updateFilter({ ...filter, propertyId });
   };
 
-  const handleSelectTransactionType = (transactionType: number) => {
-    setTransactionType(transactionType);
+  const handleSelectTransactionTypes = (transactionTypes: TransactionType[]) => {
+    updateFilter({ ...filter, transactionTypes });
   };
 
-  const handleSearchTextChange = (text: string) => {
-    setSearchText(text);
+  const handleStartDateChange = (startDate: Date | null) => {
+    updateFilter({ ...filter, startDate });
   };
 
-  const handleSearchFieldChange = (field: SearchField) => {
-    setSearchField(field);
+  const handleEndDateChange = (endDate: Date | null) => {
+    updateFilter({ ...filter, endDate });
+  };
+
+  const handleSearchTextChange = (searchText: string) => {
+    updateFilter({ ...filter, searchText });
+  };
+
+  const handleSearchFieldChange = (searchField: SearchField) => {
+    updateFilter({ ...filter, searchField });
+  };
+
+  const handleReset = () => {
+    updateFilter({ ...getDefaultFilter(), propertyId: filter.propertyId });
   };
 
   const handleSelectChange = (id: number, item?: Transaction) => {
@@ -238,9 +257,24 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
   };
 
   const getSearchFilter = () => {
-    if (!searchText) return undefined;
-    return { $ilike: `%${searchText}%` };
+    if (!filter.searchText) return undefined;
+    return { $ilike: `%${filter.searchText}%` };
   };
+
+  const getDateFilter = () => {
+    if (filter.startDate && filter.endDate) {
+      return { $between: [filter.startDate, filter.endDate] };
+    }
+    if (filter.startDate) {
+      return { $gte: filter.startDate };
+    }
+    if (filter.endDate) {
+      return { $lte: filter.endDate };
+    }
+    return undefined;
+  };
+
+  const transactionTypes = filter.transactionTypes || [];
 
   const fetchOptions = {
     select: [
@@ -261,30 +295,28 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     },
 
     where: {
-      propertyId: propertyId,
+      propertyId: filter.propertyId,
       status: TransactionStatus.PENDING,
-      type:
-        transactionType === DATA_NOT_SELECTED_ID ? undefined : transactionType,
-      [searchField]: getSearchFilter(),
+      type: transactionTypes.length > 0 ? { $in: transactionTypes } : undefined,
+      transactionDate: getDateFilter(),
+      [filter.searchField]: getSearchFilter(),
     },
   } as TypeOrmFetchOptions<Transaction>;
 
   return (
     <Box>
-      <TransactionsPendingFilter
+      <TransactionFilter
         marginTop={3}
         open={selectedIds.length === 0}
-        data={{
-          propertyId: propertyId,
-          transactionTypeId: transactionType,
-          searchText: searchText,
-          searchField: searchField,
-        }}
+        data={filter}
         onSelectProperty={handleSelectProperty}
-        onSelectTransactionType={handleSelectTransactionType}
+        onSelectTransactionTypes={handleSelectTransactionTypes}
+        onStartDateChange={handleStartDateChange}
+        onEndDateChange={handleEndDateChange}
         onSearchTextChange={handleSearchTextChange}
         onSearchFieldChange={handleSearchFieldChange}
-      ></TransactionsPendingFilter>
+        onReset={handleReset}
+      ></TransactionFilter>
 
       <TransactionsPendingActions
         marginTop={3}
@@ -344,7 +376,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
         <TransactionForm
           open={true}
           id={editId}
-          propertyId={propertyId}
+          propertyId={filter.propertyId}
           onClose={() => setEditId(0)}
           onAfterSubmit={() => setEditId(0)}
           onCancel={() => setEditId(0)}
@@ -356,7 +388,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
           open={true}
           status={TransactionStatus.PENDING}
           type={addType}
-          propertyId={propertyId}
+          propertyId={filter.propertyId}
           onClose={() => setAddType(undefined)}
           onAfterSubmit={() => setAddType(undefined)}
           onCancel={() => setAddType(undefined)}
@@ -366,7 +398,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
       {importOpen && (
         <TransactionImport
           open={importOpen}
-          propertyId={propertyId}
+          propertyId={filter.propertyId}
           onClose={() => setImportOpen(false)}
           t={t}
         ></TransactionImport>
