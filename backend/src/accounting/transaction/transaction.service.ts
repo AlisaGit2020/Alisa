@@ -52,7 +52,26 @@ export class TransactionService {
       options.where = typeormWhereTransformer(options.where);
     }
     options.where = this.authService.addOwnershipFilter(user, options.where);
+
+    // When querying for balance, only ACCEPTED transactions have valid balance values
+    if (this.isSelectingBalance(options.select)) {
+      options.where = {
+        ...options.where,
+        status: TransactionStatus.ACCEPTED,
+      };
+    }
+
     return this.repository.find(options);
+  }
+
+  private isSelectingBalance(
+    select: FindManyOptions<Transaction>['select'],
+  ): boolean {
+    if (!select) return false;
+    if (Array.isArray(select)) {
+      return select.includes('balance');
+    }
+    return 'balance' in select && select.balance === true;
   }
 
   async findOne(user: JWTUser, id: number): Promise<Transaction> {

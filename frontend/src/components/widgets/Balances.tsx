@@ -9,6 +9,7 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import { Avatar } from "@mui/material";
 
 import { Property } from "@alisa-backend/real-estate/property/entities/property.entity.ts";
+import { PropertyStatistics } from "@alisa-backend/real-estate/property/entities/property-statistics.entity.ts";
 import Table from "@mui/material/Table";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
@@ -18,6 +19,14 @@ import TableHead from "@mui/material/TableHead";
 import TableBody from "@mui/material/TableBody";
 
 interface PropertyBalanceProps extends WithTranslation {}
+
+function getBalance(statistics: PropertyStatistics[] | undefined): number {
+  if (!statistics) return 0;
+  const balanceStat = statistics.find(
+    (s) => s.key === "balance" && s.year === null && s.month === null,
+  );
+  return balanceStat ? parseFloat(balanceStat.value) : 0;
+}
 
 function Balances(props: PropertyBalanceProps) {
   const [properties, setProperties] = React.useState<Property[]>([]);
@@ -37,7 +46,7 @@ function Balances(props: PropertyBalanceProps) {
         return;
       }
       setTotalBalance(
-        properties.reduce((acc, item) => acc + ((item.statistics as unknown as { balance: number })?.balance || 0), 0),
+        properties.reduce((acc, item) => acc + getBalance(item.statistics), 0),
       );
       setProperties(properties);
     };
@@ -62,7 +71,7 @@ function Balances(props: PropertyBalanceProps) {
               <TableCell sx={{ textAlign: "right" }}>
                 <Link href={`${transactionContext.routePath}/${item.name}`}>
                   {props.t("format.currency.euro", {
-                    val: (item?.statistics as unknown as { balance: number })?.balance || 0,
+                    val: getBalance(item.statistics),
                   })}
                 </Link>
               </TableCell>
