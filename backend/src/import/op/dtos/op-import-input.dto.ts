@@ -11,8 +11,4 @@ export class OpImportInput {
 
   @Min(1)
   propertyId: number = 0;
-  @Min(1)
-  expenseTypeId: number = 0;
-  @Min(1)
-  incomeTypeId: number = 0;
 }

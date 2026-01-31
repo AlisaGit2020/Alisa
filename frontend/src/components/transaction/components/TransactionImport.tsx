@@ -11,14 +11,7 @@ import { useState } from "react";
 import AlisaSelect from "../../alisa/data/AlisaSelect.tsx";
 import { OpImportInput } from "@alisa-backend/import/op/dtos/op-import-input.dto";
 import DataService from "@alisa-lib/data-service";
-import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity";
-import {
-  propertyContext,
-  expenseTypeContext,
-  incomeTypeContext,
-  opImportContext,
-} from "@alisa-lib/alisa-contexts";
-import { IncomeType } from "@alisa-backend/accounting/income/entities/income-type.entity";
+import { propertyContext, opImportContext } from "@alisa-lib/alisa-contexts";
 import { Property } from "@alisa-backend/real-estate/property/entities/property.entity";
 import AlisaFormHandler from "../../alisa/form/AlisaFormHandler";
 
@@ -57,30 +50,6 @@ function TransactionImport(props: {
         }
         fieldName="propertyId"
         value={data.propertyId}
-        onHandleChange={handleChange}
-      ></AlisaSelect>
-      <AlisaSelect<OpImportInput, ExpenseType>
-        label={props.t("defaultExpenseType")}
-        dataService={
-          new DataService<ExpenseType>({
-            context: expenseTypeContext,
-            fetchOptions: { order: { name: "ASC" } },
-          })
-        }
-        fieldName="expenseTypeId"
-        value={data.expenseTypeId}
-        onHandleChange={handleChange}
-      ></AlisaSelect>
-      <AlisaSelect<OpImportInput, IncomeType>
-        label={props.t("defaultIncomeType")}
-        dataService={
-          new DataService<IncomeType>({
-            context: incomeTypeContext,
-            fetchOptions: { order: { name: "ASC" } },
-          })
-        }
-        fieldName="incomeTypeId"
-        value={data.incomeTypeId}
         onHandleChange={handleChange}
       ></AlisaSelect>
       <TextField

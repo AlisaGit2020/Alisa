@@ -48,8 +48,6 @@ describe('Transaction search', () => {
     await addIncomeAndExpenseTypes(mainUser.jwtUser, app);
 
     const input: OpImportInput = {
-      expenseTypeId: 1,
-      incomeTypeId: 1,
       propertyId: 1,
       file: `${MOCKS_PATH}/import/op.transactions.csv`,
     };

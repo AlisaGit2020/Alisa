@@ -45,8 +45,6 @@ export class OpImportController {
     @User() user: JWTUser,
     @UploadedFile() file,
     @Body('propertyId') propertyId: number,
-    @Body('expenseTypeId') expenseTypeId: number,
-    @Body('incomeTypeId') incomeTypeId: number,
   ) {
     if (file === undefined) {
       throw new HttpException('file must not be empty', HttpStatus.BAD_REQUEST);
@@ -54,9 +52,7 @@ export class OpImportController {
     const data = new OpImportInput();
 
     data.file = file.path;
-    data.expenseTypeId = Number(expenseTypeId);
     data.propertyId = Number(propertyId);
-    data.incomeTypeId = Number(incomeTypeId);
 
     const validationErrors = await validate(data);
 

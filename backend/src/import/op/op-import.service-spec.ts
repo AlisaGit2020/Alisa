@@ -10,20 +10,16 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ExpenseService } from '@alisa-backend/accounting/expense/expense.service';
-import { IncomeService } from '@alisa-backend/accounting/income/income.service';
 import { OpImportInput } from './dtos/op-import-input.dto';
 
 import {
-  addIncomeAndExpenseTypes,
   getTestUsers,
   prepareDatabase,
-  sleep,
   TestUser,
   TestUsersSetup,
 } from '../../../test/helper-functions';
 import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { BalanceService } from '@alisa-backend/accounting/transaction/balance.service';
+import { TransactionType } from '@alisa-backend/common/types';
 
 describe('OpImport service', () => {
   let service: OpImportService;
@@ -34,8 +30,6 @@ describe('OpImport service', () => {
   const opImportInput: OpImportInput = {
     file: `${MOCKS_PATH}/import/op.transactions.csv`,
     propertyId: 1,
-    expenseTypeId: 1,
-    incomeTypeId: 1,
   };
 
   beforeAll(async () => {
@@ -58,49 +52,42 @@ describe('OpImport service', () => {
   });
 
   describe('importCsv', () => {
-    let expenseService: ExpenseService;
-    let incomeService: IncomeService;
     let transactionService: TransactionService;
-    let balanceService: BalanceService;
 
     beforeAll(async () => {
-      incomeService = app.get<IncomeService>(IncomeService);
-      expenseService = app.get<ExpenseService>(ExpenseService);
       transactionService = app.get<TransactionService>(TransactionService);
-      balanceService = app.get<BalanceService>(BalanceService);
-
-      await addIncomeAndExpenseTypes(mainUser.jwtUser, app);
 
       //Do the import
       await service.importCsv(mainUser.jwtUser, opImportInput);
     });
-    const checkBalance = async (
-      propertyId = opImportInput.propertyId,
-      balance = 0,
-    ) => {
-      return expect(
-        await balanceService.getBalance(mainUser.jwtUser, propertyId),
-      ).toBe(balance);
-    };
 
-    it('import CSV', async () => {
-      const expenses = await expenseService.search(mainUser.jwtUser, {});
-      const incomes = await incomeService.search(mainUser.jwtUser, {});
+    it('imports transactions from CSV', async () => {
+      const transactions = await transactionService.search(mainUser.jwtUser, {
+        where: { propertyId: opImportInput.propertyId },
+      });
 
-      expect(expenses.length).toBe(7);
-      expect(incomes.length).toBe(13);
-      await checkBalance();
+      // CSV file has 20 rows (7 expenses + 13 incomes)
+      expect(transactions.length).toBe(20);
     });
 
-    it('does not add double', async () => {
+    it('imports transactions with type UNKNOWN', async () => {
+      const transactions = await transactionService.search(mainUser.jwtUser, {
+        where: { propertyId: opImportInput.propertyId },
+      });
+
+      transactions.forEach((transaction) => {
+        expect(transaction.type).toBe(TransactionType.UNKNOWN);
+      });
+    });
+
+    it('does not add duplicates', async () => {
       await service.importCsv(mainUser.jwtUser, opImportInput);
 
-      const expenses = await expenseService.search(mainUser.jwtUser, {});
-      const incomes = await incomeService.search(mainUser.jwtUser, {});
+      const transactions = await transactionService.search(mainUser.jwtUser, {
+        where: { propertyId: opImportInput.propertyId },
+      });
 
-      expect(expenses.length).toBe(7);
-      expect(incomes.length).toBe(13);
-      await checkBalance();
+      expect(transactions.length).toBe(20);
     });
 
     it('saves expense transaction correctly', async () => {
@@ -131,74 +118,10 @@ describe('OpImport service', () => {
       expect(transaction.accountingDate).toEqual(new Date('2023-12-04'));
     });
 
-    it('saves expense correctly', async () => {
-      const expenses = await expenseService.search(mainUser.jwtUser, {
-        where: { id: 1 },
-        relations: { transaction: true },
-      });
-      const expense = expenses[0];
-
-      expect(expense.transactionId).toBe(1);
-      expect(expense.propertyId).toBe(1);
-      expect(expense.expenseTypeId).toBe(1);
-      expect(expense.description).toBe(
-        'Lyhennys 200,72 euroa Korko 302,13 euroa Kulut 2,50 euroa OP-bonuksista Jäljellä 74 269,77 euroa',
-      );
-      expect(expense.amount).toBe(-502.85);
-      expect(expense.quantity).toBe(1);
-      expect(expense.totalAmount).toBe(502.85);
-    });
-
-    it('saves income correctly', async () => {
-      const incomes = await incomeService.search(mainUser.jwtUser, {
-        where: { id: 1 },
-        relations: { transaction: true },
-      });
-      const income = incomes[0];
-
-      expect(income.transactionId).toBe(4);
-      expect(income.propertyId).toBe(1);
-      expect(income.incomeTypeId).toBe(1);
-
-      expect(income.description).toBe('Airbnb BOFAIE3X');
-      expect(income.amount).toBe(59.69);
-      expect(income.quantity).toBe(1);
-      expect(income.totalAmount).toBe(59.69);
-    });
-
-    it('changes income and expense type when they change', async () => {
-      let expenses = await expenseService.search(mainUser.jwtUser, {});
-      let incomes = await incomeService.search(mainUser.jwtUser, {});
-      expect(expenses[0].propertyId).toBe(1);
-      expect(incomes[0].propertyId).toBe(1);
-
-      const input: OpImportInput = {
-        file: `${MOCKS_PATH}/import/op.transactions.csv`,
-        propertyId: opImportInput.propertyId,
-        expenseTypeId: 2,
-        incomeTypeId: 2,
-      };
-
-      await service.importCsv(mainUser.jwtUser, input);
-      await sleep(50);
-      expenses = await expenseService.search(mainUser.jwtUser, {});
-      incomes = await incomeService.search(mainUser.jwtUser, {});
-
-      expect(expenses[0].propertyId).toBe(1);
-      expect(incomes[0].propertyId).toBe(1);
-      expect(expenses[0].expenseTypeId).toBe(2);
-      expect(incomes[0].incomeTypeId).toBe(2);
-      expect(expenses.length).toBe(7);
-      expect(incomes.length).toBe(13);
-      await checkBalance();
-    });
-
-    it('throws not found when property not exist', async () => {
+    it('throws NotFoundException when property does not exist', async () => {
       const input: OpImportInput = {
         file: `${MOCKS_PATH}/import/op.transactions.csv`,
         propertyId: 9999,
-        expenseTypeId: 1,
-        incomeTypeId: 1,
       };
       await expect(service.importCsv(mainUser.jwtUser, input)).rejects.toThrow(
         NotFoundException,
@@ -209,8 +132,6 @@ describe('OpImport service', () => {
       const input: OpImportInput = {
         file: `${MOCKS_PATH}/import/op.transactions.csv`,
         propertyId: 1, //This property is not the user's property
-        expenseTypeId: 1,
-        incomeTypeId: 1,
       };
       await expect(
         service.importCsv(testUsers.userWithoutProperties.jwtUser, input),
