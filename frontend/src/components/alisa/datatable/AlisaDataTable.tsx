@@ -6,7 +6,7 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, Stack, TableContainer, Typography } from "@mui/material";
+import { Box, Chip, TableContainer, Typography } from "@mui/material";
 import { TFunction } from "i18next";
 import AlisaConfirmDialog from "../dialog/AlisaConfirmDialog.tsx";
 import DataService from "@alisa-lib/data-service.ts";
@@ -21,7 +21,6 @@ import {
   TransactionTypeName,
   transactionTypeNames,
 } from "@alisa-backend/common/types.ts";
-import { getIcon } from "../AlisaIcons.tsx";
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(odd)": {
@@ -130,11 +129,25 @@ function AlisaDataTable<T extends { id: number }>(props: {
         value as TransactionType,
       ) as TransactionTypeName;
 
+      const getTransactionTypeColor = (type: TransactionType) => {
+        switch (type) {
+          case TransactionType.INCOME:
+            return "success";
+          case TransactionType.EXPENSE:
+            return "error";
+          default:
+            return "default";
+        }
+      };
+
       return (
-        <Stack direction={"row"} spacing={1}>
-          {getIcon(typeName, { size: "medium" })}
-          <Box sx={{ paddingTop: 0.3 }}>{props.t(typeName)}</Box>
-        </Stack>
+        <Chip
+          label={props.t(typeName)}
+          color={getTransactionTypeColor(value as TransactionType)}
+          variant="outlined"
+          size="small"
+          sx={{ height: 20, fontSize: "0.75rem" }}
+        />
       );
     }
     if (field.format == "date") {
