@@ -1,6 +1,12 @@
 const settings = {
     expenseTypes: 'Kululajit',
-    incomeTypes: 'Tulolajit'
+    incomeTypes: 'Tulolajit',
+    loanSettings: 'Laina-asetukset',
+    loanSettingsDescription: 'Määritä oletuskululajit lainan maksujen jakamiseen.',
+    loanPrincipal: 'Lainan lyhennys',
+    loanInterest: 'Lainan korko',
+    loanHandlingFee: 'Lainakulut',
+    save: 'Tallenna'
 }
 
 export default settings

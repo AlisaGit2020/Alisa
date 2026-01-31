@@ -22,6 +22,8 @@ import { TransactionSetTypeInputDto } from '@alisa-backend/accounting/transactio
 import { TransactionAcceptInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-accept-input.dto';
 import { TransactionSetCategoryTypeInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-set-category-type-input.dto';
 import { DataSaveResultDto } from '@alisa-backend/common/dtos/data-save-result.dto';
+import { SplitLoanPaymentInputDto } from '@alisa-backend/accounting/transaction/dtos/split-loan-payment-input.dto';
+import { SplitLoanPaymentBulkInputDto } from '@alisa-backend/accounting/transaction/dtos/split-loan-payment-bulk-input.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('accounting/transaction')
@@ -89,6 +91,23 @@ export class TransactionController {
       input.expenseTypeId,
       input.incomeTypeId,
     );
+  }
+
+  @Post('/split-loan-payment')
+  async splitLoanPaymentBulk(
+    @User() user: JWTUser,
+    @Body() input: SplitLoanPaymentBulkInputDto,
+  ): Promise<DataSaveResultDto> {
+    return this.service.splitLoanPaymentBulk(user, input);
+  }
+
+  @Post('/:id/split-loan-payment')
+  async splitLoanPayment(
+    @User() user: JWTUser,
+    @Param('id') id: string,
+    @Body() input: SplitLoanPaymentInputDto,
+  ): Promise<Transaction> {
+    return this.service.splitLoanPayment(user, Number(id), input);
   }
 
   @Get('/:id')

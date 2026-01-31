@@ -106,6 +106,19 @@ class ApiClient {
     return response.data;
   }
 
+  public static async updateUserSettings(settings: {
+    loanPrincipalExpenseTypeId?: number;
+    loanInterestExpenseTypeId?: number;
+    loanHandlingFeeExpenseTypeId?: number;
+  }): Promise<User> {
+    const response = await axios.put(
+      ApiClient.getApiUrl(`auth/user/settings`),
+      settings,
+      await ApiClient.getOptions(),
+    );
+    return response.data;
+  }
+
   public static async upload<T>(path: string, data: T): Promise<T> {
     const options = await ApiClient.getOptions({
       "Content-Type": "multipart/form-data",

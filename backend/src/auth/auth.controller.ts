@@ -1,9 +1,10 @@
 // auth/auth.controller.ts
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt.auth.guard';
 import { User } from '../people/user/entities/user.entity';
+import { UserSettingsInputDto } from './dtos/user-settings-input.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -31,6 +32,16 @@ export class AuthController {
   async findAll(@Req() req): Promise<User> {
     const user = req.user;
     return this.authService.getUserInfo(user.email);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('/user/settings')
+  async updateSettings(
+    @Req() req,
+    @Body() input: UserSettingsInputDto,
+  ): Promise<User> {
+    const user = req.user;
+    return this.authService.updateUserSettings(user.id, input);
   }
 
   @Get('logout')

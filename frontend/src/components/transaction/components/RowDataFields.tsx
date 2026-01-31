@@ -1,4 +1,4 @@
-import { Grid, IconButton, Stack } from "@mui/material";
+import { Grid, IconButton } from "@mui/material";
 import AlisaTextField from "../../alisa/form/AlisaTextField.tsx";
 import AlisaNumberField from "../../alisa/form/AlisaNumberField.tsx";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -18,74 +18,74 @@ interface RowDataFieldsProps<T> {
 
 function RowDataFields<T extends TransactionRow>(props: RowDataFieldsProps<T>) {
   return (
-    <Grid container spacing={0} rowSpacing={0}>
-      <Grid container spacing={1} height={80}>
-        <Grid size={2}>
-          {props.typeSelect}
-        </Grid>
-        <Grid size={4}>
-          <AlisaTextField
-            label={props.t("description")}
-            value={props.data.description}
-            autoComplete="off"
-            onChange={(e) =>
-              props.onHandleChange(
-                props.index,
-                "description",
-                e.target.value as T[keyof T],
-              )
-            }
-          />
-        </Grid>
-        <Grid size={6}>
-          <Stack direction={"row"} spacing={1}>
-            <AlisaNumberField
-              disabled={true}
-              label={props.t("amount")}
-              value={props.data.amount}
-              onChange={(e) =>
-                props.onHandleChange(
-                  props.index,
-                  "amount",
-                  e.target.value as T[keyof T],
-                )
-              }
-              adornment="€"
-            />
-            <AlisaNumberField
-              label={props.t("quantity")}
-              value={props.data.quantity}
-              onChange={(e) =>
-                props.onHandleChange(
-                  props.index,
-                  "quantity",
-                  e.target.value as T[keyof T],
-                )
-              }
-              onBlur={() => props.onCalculateAmount(props.index)}
-            />
-            <AlisaNumberField
-              label={props.t("totalAmount")}
-              value={props.data.totalAmount}
-              autoComplete="off"
-              onChange={(e) =>
-                props.onHandleChange(
-                  props.index,
-                  "totalAmount",
-                  e.target.value as T[keyof T],
-                )
-              }
-              onBlur={() => props.onCalculateAmount(props.index)}
-              adornment="€"
-            />
-            <IconButton
-              onClick={() => props.onRemoveRow(props.index)}
-              title={props.t("delete")}
-            >
-              <DeleteIcon color={"secondary"}></DeleteIcon>
-            </IconButton>
-          </Stack>
-        </Grid>
+    <Grid container spacing={1} alignItems="center" sx={{ mb: 1 }}>
+      <Grid size={2.5}>{props.typeSelect}</Grid>
+      <Grid size={3}>
+        <AlisaTextField
+          label={props.t("description")}
+          value={props.data.description}
+          autoComplete="off"
+          onChange={(e) =>
+            props.onHandleChange(
+              props.index,
+              "description",
+              e.target.value as T[keyof T],
+            )
+          }
+        />
+      </Grid>
+      <Grid size={2}>
+        <AlisaNumberField
+          disabled={true}
+          label={props.t("amount")}
+          value={props.data.amount}
+          onChange={(e) =>
+            props.onHandleChange(
+              props.index,
+              "amount",
+              e.target.value as T[keyof T],
+            )
+          }
+          adornment="€"
+        />
+      </Grid>
+      <Grid size={1.5}>
+        <AlisaNumberField
+          label={props.t("quantity")}
+          value={props.data.quantity}
+          onChange={(e) =>
+            props.onHandleChange(
+              props.index,
+              "quantity",
+              e.target.value as T[keyof T],
+            )
+          }
+          onBlur={() => props.onCalculateAmount(props.index)}
+        />
+      </Grid>
+      <Grid size={2}>
+        <AlisaNumberField
+          label={props.t("totalAmount")}
+          value={props.data.totalAmount}
+          autoComplete="off"
+          onChange={(e) =>
+            props.onHandleChange(
+              props.index,
+              "totalAmount",
+              e.target.value as T[keyof T],
+            )
+          }
+          onBlur={() => props.onCalculateAmount(props.index)}
+          adornment="€"
+        />
+      </Grid>
+      <Grid size={1} sx={{ display: "flex", justifyContent: "center" }}>
+        <IconButton
+          onClick={() => props.onRemoveRow(props.index)}
+          title={props.t("delete")}
+        >
+          <DeleteIcon color={"secondary"}></DeleteIcon>
+        </IconButton>
       </Grid>
     </Grid>
   );

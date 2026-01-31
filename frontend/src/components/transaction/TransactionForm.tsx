@@ -1,7 +1,7 @@
-import { Dialog, DialogContent, Stack } from "@mui/material";
+import { Button, Dialog, DialogContent, Stack } from "@mui/material";
 import React, { useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
-import { transactionContext } from "@alisa-lib/alisa-contexts";
+import { expenseTypeContext, transactionContext } from "@alisa-lib/alisa-contexts";
 import AlisaFormHandler from "../alisa/form/AlisaFormHandler";
 import DataService from "@alisa-lib/data-service";
 import { TransactionInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-input.dto";
@@ -19,6 +19,12 @@ import {
 } from "@alisa-backend/common/types.ts";
 import { getIcon } from "../alisa/AlisaIcons.tsx";
 import ApiClient from "@alisa-lib/api-client.ts";
+import {
+  isLoanPaymentMessage,
+  parseLoanPaymentMessage,
+} from "@alisa-lib/loan-message-parser.ts";
+import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity.ts";
+import CallSplitIcon from "@mui/icons-material/CallSplit";
 
 interface TransactionFormProps extends WithTranslation {
   id?: number;
@@ -49,6 +55,7 @@ function TransactionForm({
 
   const [description, setDescription] = useState<string>("");
   const [amount, setAmount] = useState<number>(0);
+  const [expenseTypes, setExpenseTypes] = useState<ExpenseType[]>([]);
 
   const dataService = new DataService<TransactionInputDto>({
     context: transactionContext,
@@ -90,6 +97,109 @@ function TransactionForm({
       setReady(true);
     }
   }, [id, propertyId, status, type]);
+
+  // Load expense types for loan payment splitting
+  React.useEffect(() => {
+    const loadExpenseTypes = async () => {
+      const expenseTypeService = new DataService<ExpenseType>({
+        context: expenseTypeContext,
+      });
+      const types = await expenseTypeService.search();
+      setExpenseTypes(types);
+    };
+    loadExpenseTypes();
+  }, []);
+
+  const findExpenseTypeByKeyword = (
+    ...keywords: string[]
+  ): ExpenseType | undefined => {
+    // Try exact match first
+    for (const keyword of keywords) {
+      const exact = expenseTypes.find(
+        (et) => et.name.toLowerCase() === keyword.toLowerCase()
+      );
+      if (exact) return exact;
+    }
+    // Then try partial match (contains keyword)
+    for (const keyword of keywords) {
+      const partial = expenseTypes.find((et) =>
+        et.name.toLowerCase().includes(keyword.toLowerCase())
+      );
+      if (partial) return partial;
+    }
+    return undefined;
+  };
+
+  const canSplitLoanPayment = (): boolean => {
+    // Can only split if:
+    // 1. Transaction is pending
+    // 2. Description matches loan payment pattern
+    // 3. Transaction doesn't already have multiple expenses
+    if (data.status !== TransactionStatus.PENDING) return false;
+    if (!data.description) return false;
+    if (!isLoanPaymentMessage(data.description)) return false;
+    if (data.expenses && data.expenses.length > 1) return false;
+    return true;
+  };
+
+  const handleSplitLoanPayment = async () => {
+    const loanComponents = parseLoanPaymentMessage(data.description);
+    if (!loanComponents) return;
+
+    // Find expense types by name or use user's configured defaults
+    const user = await ApiClient.me();
+
+    const principalType =
+      expenseTypes.find((et) => et.id === user.loanPrincipalExpenseTypeId) ||
+      findExpenseTypeByKeyword("Lainan lyhennys", "lyhennys");
+    const interestType =
+      expenseTypes.find((et) => et.id === user.loanInterestExpenseTypeId) ||
+      findExpenseTypeByKeyword("Lainan korko", "korko");
+    const handlingFeeType =
+      expenseTypes.find((et) => et.id === user.loanHandlingFeeExpenseTypeId) ||
+      findExpenseTypeByKeyword("Lainakulut", "lainakulu", "pankkikulu", "kulu");
+
+    const expenses: ExpenseInputDto[] = [];
+
+    // Principal (Lyhennys)
+    if (loanComponents.principal > 0) {
+      expenses.push({
+        description: t("loanPrincipal"),
+        amount: loanComponents.principal,
+        quantity: 1,
+        totalAmount: loanComponents.principal,
+        expenseTypeId: principalType?.id,
+      });
+    }
+
+    // Interest (Korko)
+    if (loanComponents.interest > 0) {
+      expenses.push({
+        description: t("loanInterest"),
+        amount: loanComponents.interest,
+        quantity: 1,
+        totalAmount: loanComponents.interest,
+        expenseTypeId: interestType?.id,
+      });
+    }
+
+    // Handling fee (Kulut)
+    if (loanComponents.handlingFee > 0) {
+      expenses.push({
+        description: t("loanHandlingFee"),
+        amount: loanComponents.handlingFee,
+        quantity: 1,
+        totalAmount: loanComponents.handlingFee,
+        expenseTypeId: handlingFeeType?.id,
+      });
+    }
+
+    // Update the transaction with expenses and set type to EXPENSE
+    const newData = { ...data };
+    newData.type = TransactionType.EXPENSE;
+    newData.expenses = expenses;
+    setData(newData);
+  };
 
   const handleChange = async (name: string, value: unknown) => {
     let newData = dataService.updateNestedData(data, name, value);
@@ -182,6 +292,15 @@ function TransactionForm({
           onDescriptionChange={(value) => handleDescriptionChange(value)}
           onAmountChange={(value) => handleAmountChange(value)}
         ></TransactionFormFields>
+        {canSplitLoanPayment() && (
+          <Button
+            variant="outlined"
+            startIcon={<CallSplitIcon />}
+            onClick={handleSplitLoanPayment}
+          >
+            {t("splitLoanPayment")}
+          </Button>
+        )}
         {getDetailComponents()}
       </Stack>
     );

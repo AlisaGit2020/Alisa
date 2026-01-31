@@ -7,6 +7,7 @@ import { JWTUser } from './types';
 import { FindOptionsWhere } from 'typeorm';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import { FindOptionsWhereWithUserId } from '@alisa-backend/common/types';
+import { UserSettingsInputDto } from './dtos/user-settings-input.dto';
 
 @Injectable()
 export class AuthService {
@@ -49,6 +50,29 @@ export class AuthService {
 
   async getUserInfo(email: string): Promise<User> {
     return this.getUserByEmail(email);
+  }
+
+  async updateUserSettings(
+    userId: number,
+    input: UserSettingsInputDto,
+  ): Promise<User> {
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      return null;
+    }
+
+    // Update only settings fields
+    if (input.loanPrincipalExpenseTypeId !== undefined) {
+      user.loanPrincipalExpenseTypeId = input.loanPrincipalExpenseTypeId;
+    }
+    if (input.loanInterestExpenseTypeId !== undefined) {
+      user.loanInterestExpenseTypeId = input.loanInterestExpenseTypeId;
+    }
+    if (input.loanHandlingFeeExpenseTypeId !== undefined) {
+      user.loanHandlingFeeExpenseTypeId = input.loanHandlingFeeExpenseTypeId;
+    }
+
+    return this.userService.save(user as UserInputDto);
   }
 
   async hasOwnership(

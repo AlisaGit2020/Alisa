@@ -42,4 +42,14 @@ export class User {
     eager: false,
   })
   incomeTypes?: IncomeType[];
+
+  // Loan payment expense type defaults
+  @Column({ nullable: true })
+  loanPrincipalExpenseTypeId?: number;
+
+  @Column({ nullable: true })
+  loanInterestExpenseTypeId?: number;
+
+  @Column({ nullable: true })
+  loanHandlingFeeExpenseTypeId?: number;
 }

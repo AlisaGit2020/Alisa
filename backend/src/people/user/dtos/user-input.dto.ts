@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export class UserInputDto {
   id?: number;
@@ -15,4 +15,16 @@ export class UserInputDto {
   language?: string;
 
   photo?: string;
+
+  @IsOptional()
+  @IsNumber()
+  loanPrincipalExpenseTypeId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  loanInterestExpenseTypeId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  loanHandlingFeeExpenseTypeId?: number;
 }

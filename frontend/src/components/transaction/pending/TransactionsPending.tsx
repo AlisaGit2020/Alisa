@@ -24,6 +24,7 @@ import { TransactionAcceptInputDto } from "@alisa-backend/accounting/transaction
 import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
 import { TransactionSetTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-type-input.dto.ts";
 import { TransactionSetCategoryTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-category-type-input.dto.ts";
+import { SplitLoanPaymentBulkInputDto } from "@alisa-backend/accounting/transaction/dtos/split-loan-payment-bulk-input.dto.ts";
 import { DATA_NOT_SELECTED_ID } from "@alisa-lib/constants.ts";
 import { getInitialId, setInitialPropertyId } from "@alisa-lib/initial-data.ts";
 import { DataKey, View } from "@alisa-lib/views.ts";
@@ -157,6 +158,29 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     }
   };
 
+  const handleSplitLoanPaymentForSelected = async (
+    principalExpenseTypeId: number,
+    interestExpenseTypeId: number,
+    handlingFeeExpenseTypeId?: number,
+  ) => {
+    setSaveResult(undefined);
+    if (selectedIds.length > 0) {
+      const result =
+        await ApiClient.postSaveTask<SplitLoanPaymentBulkInputDto>(
+          transactionContext.apiPath + "/split-loan-payment",
+          {
+            ids: selectedIds,
+            principalExpenseTypeId,
+            interestExpenseTypeId,
+            handlingFeeExpenseTypeId,
+          },
+        );
+      if (!result.allSuccess) {
+        setSaveResult(result);
+      }
+    }
+  };
+
   const handleSelectProperty = (propertyId: number) => {
     setInitialPropertyId(
       View.TRANSACTION_PENDING,
@@ -266,6 +290,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
         onApprove={handleApproveSelected}
         onSetType={handleSetTypeForSelected}
         onSetCategoryType={handleSetCategoryTypeForSelected}
+        onSplitLoanPayment={handleSplitLoanPaymentForSelected}
         onCancel={handleCancelSelected}
         onDelete={handleDeleteSelected}
         saveResult={saveResult}

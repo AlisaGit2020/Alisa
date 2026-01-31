@@ -642,6 +642,241 @@ describe('TransactionService', () => {
     });
   });
 
+  describe('splitLoanPayment', () => {
+    const loanPaymentMessage =
+      'Lyhennys 244,25 euroa Korko 166,37 euroa Kulut 2,50 euroa OP-bonuksista Jäljellä 65 851,63 euroa';
+
+    it('splits loan payment into expense components', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        description: loanPaymentMessage,
+      });
+
+      mockRepository.findOne.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity }),
+      );
+
+      const result = await service.splitLoanPayment(testUser, 1, {
+        principalExpenseTypeId: 1,
+        interestExpenseTypeId: 2,
+        handlingFeeExpenseTypeId: 3,
+      });
+
+      expect(result.type).toBe(TransactionType.EXPENSE);
+      expect(result.expenses).toHaveLength(3);
+      expect(result.expenses[0].totalAmount).toBe(244.25);
+      expect(result.expenses[0].expenseTypeId).toBe(1);
+      expect(result.expenses[1].totalAmount).toBe(166.37);
+      expect(result.expenses[1].expenseTypeId).toBe(2);
+      expect(result.expenses[2].totalAmount).toBe(2.5);
+      expect(result.expenses[2].expenseTypeId).toBe(3);
+    });
+
+    it('throws NotFoundException when transaction does not exist', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.splitLoanPayment(testUser, 999, {
+          principalExpenseTypeId: 1,
+          interestExpenseTypeId: 2,
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws UnauthorizedException when user has no ownership', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        description: loanPaymentMessage,
+      });
+
+      mockRepository.findOne.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      await expect(
+        service.splitLoanPayment(otherUser, 1, {
+          principalExpenseTypeId: 1,
+          interestExpenseTypeId: 2,
+        }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('throws BadRequestException for non-pending transaction', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.ACCEPTED,
+        description: loanPaymentMessage,
+      });
+
+      mockRepository.findOne.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      await expect(
+        service.splitLoanPayment(testUser, 1, {
+          principalExpenseTypeId: 1,
+          interestExpenseTypeId: 2,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('throws BadRequestException for non-loan payment message', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        description: 'Regular bank transfer',
+      });
+
+      mockRepository.findOne.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      await expect(
+        service.splitLoanPayment(testUser, 1, {
+          principalExpenseTypeId: 1,
+          interestExpenseTypeId: 2,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('skips handling fee when not provided in input', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        description: loanPaymentMessage,
+      });
+
+      mockRepository.findOne.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity }),
+      );
+
+      const result = await service.splitLoanPayment(testUser, 1, {
+        principalExpenseTypeId: 1,
+        interestExpenseTypeId: 2,
+      });
+
+      expect(result.expenses).toHaveLength(2);
+    });
+  });
+
+  describe('splitLoanPaymentBulk', () => {
+    const loanPaymentMessage =
+      'Lyhennys 244,25 euroa Korko 166,37 euroa Jäljellä 65 851,63 euroa';
+
+    it('splits multiple loan payment transactions', async () => {
+      const transactions = [
+        createTransaction({
+          id: 1,
+          propertyId: 1,
+          status: TransactionStatus.PENDING,
+          description: loanPaymentMessage,
+        }),
+        createTransaction({
+          id: 2,
+          propertyId: 1,
+          status: TransactionStatus.PENDING,
+          description: loanPaymentMessage,
+        }),
+      ];
+
+      mockRepository.find.mockResolvedValue(transactions);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity }),
+      );
+
+      const result = await service.splitLoanPaymentBulk(testUser, {
+        ids: [1, 2],
+        principalExpenseTypeId: 1,
+        interestExpenseTypeId: 2,
+      });
+
+      expect(result.rows.total).toBe(2);
+      expect(result.rows.success).toBe(2);
+    });
+
+    it('throws BadRequestException when ids array is empty', async () => {
+      await expect(
+        service.splitLoanPaymentBulk(testUser, {
+          ids: [],
+          principalExpenseTypeId: 1,
+          interestExpenseTypeId: 2,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('returns 401 for transactions user does not own', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        description: loanPaymentMessage,
+      });
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      const result = await service.splitLoanPaymentBulk(testUser, {
+        ids: [1],
+        principalExpenseTypeId: 1,
+        interestExpenseTypeId: 2,
+      });
+
+      expect(result.rows.failed).toBe(1);
+      expect(result.results[0].statusCode).toBe(401);
+    });
+
+    it('returns 400 for non-pending transactions', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.ACCEPTED,
+        description: loanPaymentMessage,
+      });
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const result = await service.splitLoanPaymentBulk(testUser, {
+        ids: [1],
+        principalExpenseTypeId: 1,
+        interestExpenseTypeId: 2,
+      });
+
+      expect(result.rows.failed).toBe(1);
+      expect(result.results[0].statusCode).toBe(400);
+    });
+
+    it('returns 400 for non-loan payment messages', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        description: 'Regular bank transfer',
+      });
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const result = await service.splitLoanPaymentBulk(testUser, {
+        ids: [1],
+        principalExpenseTypeId: 1,
+        interestExpenseTypeId: 2,
+      });
+
+      expect(result.rows.failed).toBe(1);
+      expect(result.results[0].statusCode).toBe(400);
+    });
+  });
+
   describe('statistics', () => {
     it('calculates statistics correctly', async () => {
       const mockQueryBuilder = mockRepository.createQueryBuilder();

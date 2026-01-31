@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import ExpenseTypeForm from './expense-type/ExpenseTypeForm';
 import IncomeTypes from './income-type/IncomeTypes';
 import IncomeTypeForm from './income-type/IncomeTypeForm';
+import LoanSettings from './loan-settings/LoanSettings';
 
 function Settings() {
     const { page = 'expense-types', action = ''} = useParams();
@@ -40,6 +41,8 @@ function Settings() {
                 {getContent(SettingsPage.IncomeTypes, Action.List, <IncomeTypes></IncomeTypes>)}
                 {getContent(SettingsPage.IncomeTypes, Action.Add, <IncomeTypeForm></IncomeTypeForm>)}
                 {getContent(SettingsPage.IncomeTypes, Action.Edit, <IncomeTypeForm></IncomeTypeForm>)}
+
+                {getContent(SettingsPage.LoanSettings, Action.List, <LoanSettings></LoanSettings>)}
             </Grid>
         </Grid>
 
@@ -48,7 +51,8 @@ function Settings() {
 
 export enum SettingsPage {
     ExpenseTypes = 'expense-types',
-    IncomeTypes = 'income-types'
+    IncomeTypes = 'income-types',
+    LoanSettings = 'loan-settings'
 }
 
 export enum Action {

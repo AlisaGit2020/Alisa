@@ -23,6 +23,12 @@ import {
   TransactionStatus,
   TransactionType,
 } from '@alisa-backend/common/types';
+import { SplitLoanPaymentInputDto } from './dtos/split-loan-payment-input.dto';
+import { SplitLoanPaymentBulkInputDto } from './dtos/split-loan-payment-bulk-input.dto';
+import {
+  parseLoanPaymentMessage,
+  isLoanPaymentMessage,
+} from '@alisa-backend/common/utils/loan-message-parser';
 import {
   DataSaveResultDto,
   DataSaveResultRowDto,
@@ -323,6 +329,191 @@ export class TransactionService {
       }
 
       return this.executeUpdateTask(jwtUser, transaction);
+    });
+
+    return this.getSaveTaskResult(saveTask, transactions);
+  }
+
+  async splitLoanPayment(
+    user: JWTUser,
+    transactionId: number,
+    input: SplitLoanPaymentInputDto,
+  ): Promise<Transaction> {
+    const transaction = await this.repository.findOne({
+      where: { id: transactionId },
+      relations: { expenses: true },
+    });
+
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found');
+    }
+
+    if (!(await this.authService.hasOwnership(user, transaction.propertyId))) {
+      throw new UnauthorizedException();
+    }
+
+    if (transaction.status !== TransactionStatus.PENDING) {
+      throw new BadRequestException('Can only split pending transactions');
+    }
+
+    const loanComponents = parseLoanPaymentMessage(transaction.description);
+    if (!loanComponents) {
+      throw new BadRequestException(
+        'Transaction description does not match loan payment format',
+      );
+    }
+
+    // Create expense records for each loan component
+    const expenses = [];
+
+    // Principal (Lyhennys)
+    if (loanComponents.principal > 0) {
+      expenses.push({
+        expenseTypeId: input.principalExpenseTypeId,
+        propertyId: transaction.propertyId,
+        transactionId: transaction.id,
+        description: 'Lainan lyhennys',
+        amount: loanComponents.principal,
+        quantity: 1,
+        totalAmount: loanComponents.principal,
+      });
+    }
+
+    // Interest (Korko)
+    if (loanComponents.interest > 0) {
+      expenses.push({
+        expenseTypeId: input.interestExpenseTypeId,
+        propertyId: transaction.propertyId,
+        transactionId: transaction.id,
+        description: 'Lainan korko',
+        amount: loanComponents.interest,
+        quantity: 1,
+        totalAmount: loanComponents.interest,
+      });
+    }
+
+    // Handling fee (Kulut)
+    if (loanComponents.handlingFee > 0 && input.handlingFeeExpenseTypeId) {
+      expenses.push({
+        expenseTypeId: input.handlingFeeExpenseTypeId,
+        propertyId: transaction.propertyId,
+        transactionId: transaction.id,
+        description: 'Lainakulut',
+        amount: loanComponents.handlingFee,
+        quantity: 1,
+        totalAmount: loanComponents.handlingFee,
+      });
+    }
+
+    // Update transaction
+    transaction.type = TransactionType.EXPENSE;
+    transaction.expenses = expenses as any;
+
+    return this.repository.save(transaction);
+  }
+
+  async splitLoanPaymentBulk(
+    user: JWTUser,
+    input: SplitLoanPaymentBulkInputDto,
+  ): Promise<DataSaveResultDto> {
+    if (input.ids.length === 0) {
+      throw new BadRequestException('No ids provided');
+    }
+
+    const transactions = await this.repository.find({
+      where: { id: In(input.ids) },
+      relations: { expenses: true },
+    });
+
+    const saveTask = transactions.map(async (transaction) => {
+      try {
+        // Check ownership
+        if (
+          !(await this.authService.hasOwnership(user, transaction.propertyId))
+        ) {
+          return {
+            id: transaction.id,
+            statusCode: 401,
+            message: 'Unauthorized',
+          } as DataSaveResultRowDto;
+        }
+
+        // Check if pending
+        if (transaction.status !== TransactionStatus.PENDING) {
+          return {
+            id: transaction.id,
+            statusCode: 400,
+            message: 'Can only split pending transactions',
+          } as DataSaveResultRowDto;
+        }
+
+        // Check if loan payment message
+        if (!isLoanPaymentMessage(transaction.description)) {
+          return {
+            id: transaction.id,
+            statusCode: 400,
+            message: 'Transaction description does not match loan payment format',
+          } as DataSaveResultRowDto;
+        }
+
+        const loanComponents = parseLoanPaymentMessage(transaction.description);
+
+        // Create expense records
+        const expenses = [];
+
+        if (loanComponents.principal > 0) {
+          expenses.push({
+            expenseTypeId: input.principalExpenseTypeId,
+            propertyId: transaction.propertyId,
+            transactionId: transaction.id,
+            description: 'Lainan lyhennys',
+            amount: loanComponents.principal,
+            quantity: 1,
+            totalAmount: loanComponents.principal,
+          });
+        }
+
+        if (loanComponents.interest > 0) {
+          expenses.push({
+            expenseTypeId: input.interestExpenseTypeId,
+            propertyId: transaction.propertyId,
+            transactionId: transaction.id,
+            description: 'Lainan korko',
+            amount: loanComponents.interest,
+            quantity: 1,
+            totalAmount: loanComponents.interest,
+          });
+        }
+
+        if (loanComponents.handlingFee > 0 && input.handlingFeeExpenseTypeId) {
+          expenses.push({
+            expenseTypeId: input.handlingFeeExpenseTypeId,
+            propertyId: transaction.propertyId,
+            transactionId: transaction.id,
+            description: 'Lainakulut',
+            amount: loanComponents.handlingFee,
+            quantity: 1,
+            totalAmount: loanComponents.handlingFee,
+          });
+        }
+
+        transaction.type = TransactionType.EXPENSE;
+        transaction.expenses = expenses as any;
+
+        await this.repository.save(transaction);
+
+        return {
+          id: transaction.id,
+          statusCode: 200,
+          message: 'OK',
+        } as DataSaveResultRowDto;
+      } catch (e) {
+        return {
+          id: transaction.id,
+          statusCode: e.status || 500,
+          message: e.message,
+        } as DataSaveResultRowDto;
+      }
     });
 
     return this.getSaveTaskResult(saveTask, transactions);
