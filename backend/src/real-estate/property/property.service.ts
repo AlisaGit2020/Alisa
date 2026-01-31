@@ -27,6 +27,9 @@ export class PropertyService {
     user: JWTUser,
     options: FindManyOptions<Property>,
   ): Promise<Property[]> {
+    if (!options) {
+      options = {};
+    }
     await this.validate(user, options);
     options = this.handleOptions(user, options);
 

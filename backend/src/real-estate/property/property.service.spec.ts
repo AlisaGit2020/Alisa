@@ -334,5 +334,25 @@ describe('PropertyService', () => {
         service.search(otherUser, { where: { id: 1 } }),
       ).rejects.toThrow(UnauthorizedException);
     });
+
+    it('handles undefined options without throwing', async () => {
+      const properties = [createProperty({ id: 1, name: 'Property 1' })];
+      mockRepository.find.mockResolvedValue(properties);
+
+      const result = await service.search(testUser, undefined);
+
+      expect(result).toEqual(properties);
+      expect(mockRepository.find).toHaveBeenCalled();
+    });
+
+    it('handles null options without throwing', async () => {
+      const properties = [createProperty({ id: 1, name: 'Property 1' })];
+      mockRepository.find.mockResolvedValue(properties);
+
+      const result = await service.search(testUser, null);
+
+      expect(result).toEqual(properties);
+      expect(mockRepository.find).toHaveBeenCalled();
+    });
   });
 });
