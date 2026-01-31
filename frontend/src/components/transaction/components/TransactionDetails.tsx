@@ -2,16 +2,30 @@ import { Transaction } from "@alisa-backend/accounting/transaction/entities/tran
 import DataService from "@alisa-lib/data-service";
 import { WithTranslation, withTranslation } from "react-i18next";
 import {
+  Box,
+  Chip,
   Dialog,
   DialogContent,
   DialogTitle,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
+  Divider,
+  Grid,
+  IconButton,
+  Paper,
+  Stack,
+  Typography,
 } from "@mui/material";
 import React from "react";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
+import CloseIcon from "@mui/icons-material/Close";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import PersonIcon from "@mui/icons-material/Person";
+import DescriptionIcon from "@mui/icons-material/Description";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import {
+  TransactionType,
+  transactionTypeNames,
+} from "@alisa-backend/common/types";
 
 interface TransactionDetailsProps extends WithTranslation {
   id: number;
@@ -19,20 +33,7 @@ interface TransactionDetailsProps extends WithTranslation {
 }
 
 function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
-  const [data, setData] = React.useState<Transaction>({
-    id: 0,
-    sender: "",
-    receiver: "",
-    description: "",
-    transactionDate: new Date("2000-01-01"),
-    accountingDate: new Date("2000-01-01"),
-    amount: 0,
-    expenses: undefined,
-    incomes: undefined,
-    balance: 0,
-    externalId: "",
-    propertyId: 0,
-  } as unknown as Transaction);
+  const [data, setData] = React.useState<Transaction | null>(null);
 
   React.useEffect(() => {
     if (id) {
@@ -45,7 +46,6 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
       });
       const fetchData = async () => {
         const newData: Transaction = await dataService.read(id);
-        console.log(newData);
         setData(newData);
       };
 
@@ -66,71 +66,196 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
     return t("format.currency.euro", { val: value });
   };
 
+  const getTransactionTypeColor = (type: TransactionType) => {
+    switch (type) {
+      case TransactionType.INCOME:
+        return "success";
+      case TransactionType.EXPENSE:
+        return "error";
+      default:
+        return "default";
+    }
+  };
+
+  const getTransactionTypeName = (type: TransactionType) => {
+    const name = transactionTypeNames.get(type);
+    return name ? t(name) : "";
+  };
+
+  if (!data) {
+    return null;
+  }
+
+  const DetailRow = ({
+    icon,
+    label,
+    value,
+  }: {
+    icon?: React.ReactNode;
+    label: string;
+    value: React.ReactNode;
+  }) => (
+    <Grid container spacing={2} sx={{ py: 1 }}>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <Stack direction="row" spacing={1} alignItems="center">
+          {icon && (
+            <Box sx={{ color: "text.secondary", display: "flex" }}>{icon}</Box>
+          )}
+          <Typography variant="body2" color="text.secondary">
+            {label}
+          </Typography>
+        </Stack>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 8 }}>
+        <Typography
+          variant="body1"
+          sx={{
+            wordBreak: "break-all",
+            overflowWrap: "break-word",
+          }}
+        >
+          {value}
+        </Typography>
+      </Grid>
+    </Grid>
+  );
+
   return (
     <Dialog
       open={Boolean(id)}
       onClose={onClose}
       fullWidth={true}
-      maxWidth={"lg"}
+      maxWidth={"sm"}
     >
-      <DialogTitle>{t("detailsTitle")}</DialogTitle>
-      <DialogContent dividers>
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell>{t("id")}:</TableCell>
-              <TableCell>{data.id}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>{t("externalId")}:</TableCell>
-              <TableCell>{data.externalId}</TableCell>
-            </TableRow>
-            {data.expenses && data.expenses.length > 0 && (
-              <>
-                <TableRow>
-                  <TableCell>{t("expenseType")}:</TableCell>
-                  <TableCell>{data.expenses[0].expenseType.name}</TableCell>
-                </TableRow>
-              </>
-            )}
-            {data.incomes && data.incomes.length > 0 && (
-              <>
-                <TableRow>
-                  <TableCell>{t("incomeType")}:</TableCell>
-                  <TableCell>{data.incomes[0].incomeType.name}</TableCell>
-                </TableRow>
-              </>
-            )}
-            <TableRow>
-              <TableCell>{t("sender")}:</TableCell>
-              <TableCell>{data.sender}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>{t("receiver")}:</TableCell>
-              <TableCell>{data.receiver}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>{t("description")}:</TableCell>
-              <TableCell>{data.description}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>{t("transactionDate")}:</TableCell>
-              <TableCell>{getFormatDate(data.transactionDate)}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>{t("accountingDate")}:</TableCell>
-              <TableCell>{getFormatDate(data.accountingDate)}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>{t("totalAmount")}:</TableCell>
-              <TableCell>{getCurrency(data.amount)}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>{t("balance")}:</TableCell>
-              <TableCell>{getCurrency(data.balance)}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+      <DialogTitle sx={{ pr: 6 }}>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Typography variant="h6">{t("detailsTitle")}</Typography>
+          <Chip
+            label={getTransactionTypeName(data.type)}
+            color={getTransactionTypeColor(data.type)}
+            size="small"
+          />
+        </Stack>
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent>
+        <Stack spacing={3}>
+          {/* Amount Section */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              bgcolor: "grey.100",
+              textAlign: "center",
+            }}
+          >
+            <Typography variant="h4" fontWeight="bold">
+              {getCurrency(data.amount)}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t("totalAmount")}
+            </Typography>
+          </Paper>
+
+          {/* Category Section */}
+          {((data.expenses && data.expenses.length > 0) ||
+            (data.incomes && data.incomes.length > 0)) && (
+            <Box>
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+                gutterBottom
+              >
+                {t("category")}
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                {data.expenses?.map((expense, index) => (
+                  <Chip
+                    key={`expense-${index}`}
+                    label={expense.expenseType?.name}
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                  />
+                ))}
+                {data.incomes?.map((income, index) => (
+                  <Chip
+                    key={`income-${index}`}
+                    label={income.incomeType?.name}
+                    variant="outlined"
+                    color="success"
+                    size="small"
+                  />
+                ))}
+              </Stack>
+            </Box>
+          )}
+
+          <Divider />
+
+          {/* Transaction Details */}
+          <Box>
+            <DetailRow
+              icon={<PersonIcon fontSize="small" />}
+              label={t("sender")}
+              value={data.sender || "-"}
+            />
+            <DetailRow
+              icon={<PersonIcon fontSize="small" />}
+              label={t("receiver")}
+              value={data.receiver || "-"}
+            />
+            <DetailRow
+              icon={<DescriptionIcon fontSize="small" />}
+              label={t("description")}
+              value={data.description || "-"}
+            />
+          </Box>
+
+          <Divider />
+
+          {/* Dates */}
+          <Box>
+            <DetailRow
+              icon={<CalendarTodayIcon fontSize="small" />}
+              label={t("transactionDate")}
+              value={getFormatDate(data.transactionDate)}
+            />
+            <DetailRow
+              icon={<CalendarTodayIcon fontSize="small" />}
+              label={t("accountingDate")}
+              value={getFormatDate(data.accountingDate)}
+            />
+          </Box>
+
+          <Divider />
+
+          {/* Additional Info */}
+          <Box>
+            <DetailRow
+              icon={<AccountBalanceIcon fontSize="small" />}
+              label={t("balance")}
+              value={getCurrency(data.balance)}
+            />
+            <DetailRow
+              icon={<ReceiptIcon fontSize="small" />}
+              label={t("externalId")}
+              value={data.externalId || "-"}
+            />
+            <DetailRow label={t("id")} value={`#${data.id}`} />
+          </Box>
+        </Stack>
       </DialogContent>
     </Dialog>
   );
