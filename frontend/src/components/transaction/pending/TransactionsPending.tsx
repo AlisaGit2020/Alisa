@@ -55,6 +55,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
   const [saveResult, setSaveResult] = React.useState<
     DataSaveResultDto | undefined
   >(undefined);
+  const [refreshTrigger, setRefreshTrigger] = React.useState(0);
 
   const handleOpenAddMenu = (
     event?: React.MouseEvent<HTMLButtonElement>,
@@ -97,6 +98,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
       if (result.allSuccess) {
         setSelectedIds([]);
         setSelectedTransactionTypes([]);
+        setRefreshTrigger((prev) => prev + 1);
       } else {
         setSaveResult(result);
       }
@@ -115,6 +117,8 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
       );
       if (!result.allSuccess) {
         setSaveResult(result);
+      } else {
+        setRefreshTrigger((prev) => prev + 1);
       }
     }
   };
@@ -128,6 +132,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     if (result.allSuccess) {
       setSelectedIds([]);
       setSaveResult(undefined);
+      setRefreshTrigger((prev) => prev + 1);
     } else {
       setSaveResult(result);
     }
@@ -154,6 +159,8 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
         );
       if (!result.allSuccess) {
         setSaveResult(result);
+      } else {
+        setRefreshTrigger((prev) => prev + 1);
       }
     }
   };
@@ -177,6 +184,8 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
         );
       if (!result.allSuccess) {
         setSaveResult(result);
+      } else {
+        setRefreshTrigger((prev) => prev + 1);
       }
     }
   };
@@ -320,6 +329,7 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
           selectedIds={selectedIds}
           onEdit={handleEdit}
           onOpen={handleOpenDetails}
+          refreshTrigger={refreshTrigger}
         />
       </Paper>
 

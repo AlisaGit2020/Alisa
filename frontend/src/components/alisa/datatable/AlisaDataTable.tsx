@@ -51,6 +51,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
   onEdit?: (id: number) => void;
   onOpen: (id: number) => void;
   onDelete?: (id: number) => void;
+  refreshTrigger?: number;
 }) {
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -64,7 +65,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
     };
 
     fetchData().then(() => {});
-  }, [idDeleted, props.dataService]);
+  }, [idDeleted, props.dataService, props.refreshTrigger]);
 
   const handleDeleteOpen = (apartmentId: number) => {
     setIdToDelete(apartmentId);
