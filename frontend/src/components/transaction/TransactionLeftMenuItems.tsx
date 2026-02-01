@@ -26,6 +26,7 @@ function TransactionsLeftMenuItems({ t, open }: TransactionsLeftMenuItemsProps) 
     getTransactionPropertyId()
   );
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const currentPath = window.location.pathname;
 
   const handleSelectProperty = (propertyId: number) => {
     setSelectedPropertyId(propertyId);
@@ -95,7 +96,11 @@ function TransactionsLeftMenuItems({ t, open }: TransactionsLeftMenuItemsProps) 
 
       <Divider sx={{ my: 1 }} />
 
-      <ListItemButton component="a" href={transactionContext.routePath}>
+      <ListItemButton
+        component="a"
+        href={transactionContext.routePath}
+        selected={currentPath === transactionContext.routePath}
+      >
         <ListItemIcon>
           <DoneIcon />
         </ListItemIcon>
@@ -105,6 +110,7 @@ function TransactionsLeftMenuItems({ t, open }: TransactionsLeftMenuItemsProps) 
       <ListItemButton
         component="a"
         href={`${transactionContext.routePath}/pending`}
+        selected={currentPath === `${transactionContext.routePath}/pending`}
       >
         <ListItemIcon>
           <HourglassTopIcon />

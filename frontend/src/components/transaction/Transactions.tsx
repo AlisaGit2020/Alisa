@@ -123,7 +123,7 @@ function Transactions({ t, filter, refreshTrigger }: TransactionsProps) {
             { name: "transactionDate", format: "date" },
             { name: "sender", maxLength: 20 },
             { name: "receiver", maxLength: 20 },
-            { name: "description", maxLength: 30 },
+            { name: "description", maxLength: 40 },
             { name: "amount", format: "currency", sum: true },
           ]}
           onNewRow={handleOpenAddMenu}
