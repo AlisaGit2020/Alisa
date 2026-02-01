@@ -6,6 +6,7 @@ import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { Box, Chip, TableContainer, Typography } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { TFunction } from "i18next";
 import AlisaConfirmDialog from "../dialog/AlisaConfirmDialog.tsx";
 import DataService from "@alisa-lib/data-service.ts";
@@ -35,7 +36,7 @@ interface AlisaDataTableField<T> {
   name: keyof T;
   maxLength?: number;
   label?: string;
-  format?: "number" | "currency" | "date" | "transactionType" | "translation";
+  format?: "number" | "currency" | "date" | "transactionType" | "translation" | "boolean";
   sum?: boolean;
 }
 
@@ -165,6 +166,11 @@ function AlisaDataTable<T extends { id: number }>(props: {
           val: { year: "numeric", month: "numeric", day: "numeric" },
         },
       });
+    }
+    if (field.format == "boolean") {
+      return value ? (
+        <CheckCircleIcon color="success" fontSize="small" />
+      ) : null;
     }
 
     return String(value);

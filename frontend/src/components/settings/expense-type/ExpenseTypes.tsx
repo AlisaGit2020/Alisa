@@ -28,7 +28,7 @@ function ExpenseTypes({ t, onAdd, onEdit }: ExpenseTypesProps) {
         fields={[
           { name: "name" },
           { name: "description" },
-          { name: "isTaxDeductible" },
+          { name: "isTaxDeductible", format: "boolean" },
         ]}
         onNewRow={handleAdd}
         onEdit={handleEdit}
