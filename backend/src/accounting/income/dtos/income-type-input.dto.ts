@@ -7,4 +7,6 @@ export class IncomeTypeInputDto {
   name: string;
 
   description?: string;
+
+  isTaxable?: boolean = false;
 }

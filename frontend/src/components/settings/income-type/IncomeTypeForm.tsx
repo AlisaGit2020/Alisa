@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
 import AlisaTextField from '../../alisa/form/AlisaTextField';
+import AlisaSwitch from '../../alisa/form/AlisaSwitch';
 import { incomeTypeContext } from '@alisa-lib/alisa-contexts';
 import DataService from '@alisa-lib/data-service';
 import AlisaFormHandler from '../../alisa/form/AlisaFormHandler';
@@ -18,6 +19,7 @@ function IncomeTypeForm({ t, id, onCancel, onAfterSubmit }: IncomeTypeFormProps)
     const [data, setData] = useState<IncomeTypeInputDto>({
         name: '',
         description: '',
+        isTaxable: false
     });
 
     const dataService = new DataService<IncomeTypeInputDto>({
@@ -46,6 +48,11 @@ function IncomeTypeForm({ t, id, onCancel, onAfterSubmit }: IncomeTypeFormProps)
                 value={data.description}
                 autoComplete='off'
                 onChange={(e) => handleChange('description', e.target.value)}
+            />
+            <AlisaSwitch
+                value={data.isTaxable}
+                onChange={(e) => handleChange('isTaxable', e.target.checked)}
+                label={t('isTaxable')}
             />
         </Stack>
     )

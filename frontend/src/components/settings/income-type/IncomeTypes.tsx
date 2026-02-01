@@ -24,8 +24,12 @@ function IncomeTypes({ t, onAdd, onEdit }: IncomeTypesProps) {
     <AlisaContent headerText={t("incomeTypes")}>
       <AlisaDataTable<IncomeType>
         t={t}
-        dataService={new DataService({ context: incomeTypeContext })}
-        fields={[{ name: "name" }, { name: "description" }]}
+        dataService={new DataService({ context: incomeTypeContext, fetchOptions: { order: { name: 'ASC' } } })}
+        fields={[
+          { name: "name" },
+          { name: "description" },
+          { name: "isTaxable", format: "boolean" },
+        ]}
         onNewRow={handleAdd}
         onEdit={handleEdit}
         onOpen={() => {}}

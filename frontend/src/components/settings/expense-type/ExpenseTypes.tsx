@@ -24,7 +24,7 @@ function ExpenseTypes({ t, onAdd, onEdit }: ExpenseTypesProps) {
     <AlisaContent headerText={t("expenseTypes")}>
       <AlisaDataTable<ExpenseType>
         t={t}
-        dataService={new DataService({ context: expenseTypeContext })}
+        dataService={new DataService({ context: expenseTypeContext, fetchOptions: { order: { name: 'ASC' } } })}
         fields={[
           { name: "name" },
           { name: "description" },

@@ -33,4 +33,7 @@ export class IncomeType {
 
   @Column()
   description: string;
+
+  @Column({ default: false })
+  isTaxable: boolean;
 }

@@ -1,6 +1,7 @@
 const incomeTypes = {
     add: 'Add new income type',
-    incomeTypes: 'Expense types',
+    incomeTypes: 'Income types',
+    isTaxable: 'Taxable',
 }
 
 export default incomeTypes

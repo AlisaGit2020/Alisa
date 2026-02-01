@@ -145,9 +145,9 @@ function SettingsDialog({ t, open, onClose }: SettingsDialogProps) {
         sx: fullscreen
           ? {}
           : {
-              width: "70vw",
+              width: "85vw",
               height: "70vh",
-              maxWidth: "1000px",
+              maxWidth: "1200px",
               maxHeight: "700px",
             },
       }}
