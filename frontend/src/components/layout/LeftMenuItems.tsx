@@ -11,7 +11,7 @@ function LeftMenuItems({ open }: LeftMenuItemsProps) {
 
   const getItems = () => {
     if (currentPath.includes(transactionContext.routePath)) {
-      return <TransactionLeftMenuItems open={open}></TransactionLeftMenuItems>;
+      return <TransactionLeftMenuItems open={open} />;
     }
   };
   return <List component="nav">{getItems()}</List>;

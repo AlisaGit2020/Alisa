@@ -6,6 +6,7 @@ import { loadTranslations } from './translation-loader';
 
 const availableLanguages = ['en', 'fi'];
 const namespaces = [
+    'dashboard',
     'property',
     'expense',
     'expense-type',

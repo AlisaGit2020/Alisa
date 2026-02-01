@@ -8,6 +8,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import createStore from "react-auth-kit/createStore";
 import AuthProvider from "react-auth-kit";
 import { ThemeContextProvider, useThemeMode } from "@alisa-lib/theme-context";
+import { DashboardProvider } from "./components/dashboard/context/DashboardContext";
 import { useMemo } from "react";
 
 const store = createStore({
@@ -37,10 +38,12 @@ function ThemedApp() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider store={store}>
-        <Box sx={{ display: "flex" }} maxWidth="100vw">
-          <AppBar />
-          <AppContainer />
-        </Box>
+        <DashboardProvider>
+          <Box sx={{ display: "flex" }} maxWidth="100vw">
+            <AppBar />
+            <AppContainer />
+          </Box>
+        </DashboardProvider>
       </AuthProvider>
     </ThemeProvider>
   );

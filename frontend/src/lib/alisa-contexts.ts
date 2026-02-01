@@ -65,3 +65,9 @@ export const userContext: AlisaContext = {
     apiPath: 'auth',
     routePath: '/',
 }
+
+export const dashboardContext: AlisaContext = {
+    name: 'dashboard',
+    apiPath: 'real-estate/property',
+    routePath: '/',
+}

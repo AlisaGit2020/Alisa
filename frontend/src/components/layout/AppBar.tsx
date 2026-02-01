@@ -10,6 +10,7 @@ import UserMenu from "./UserMenu";
 import SettingsMenu from "./SettingsMenu";
 import TopMenuItems from "./TopMenuItems.tsx";
 import AppName from "./AppName.tsx";
+import PropertyBadge from "./PropertyBadge.tsx";
 
 const drawerWidth: number = 240;
 
@@ -75,8 +76,9 @@ function AppBar({ t }: WithTranslation) {
           >
             <MenuIcon />
           </IconButton>
-          <Box display="flex" flexGrow={0}>
+          <Box display="flex" flexGrow={0} alignItems="center" gap={2}>
             <AppName t={t}></AppName>
+            <PropertyBadge />
           </Box>
           <Box display="flex" justifyContent="center" flexGrow={1}>
             <TopMenuItems></TopMenuItems>

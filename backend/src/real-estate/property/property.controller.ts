@@ -26,6 +26,7 @@ import { JWTUser } from '@alisa-backend/auth/types';
 import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
 import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
 import { PropertyStatisticsFilterDto } from '@alisa-backend/real-estate/property/dtos/property-statistics-filter.dto';
+import { PropertyStatisticsSearchDto } from '@alisa-backend/real-estate/property/dtos/property-statistics-search.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('real-estate/property')
@@ -42,6 +43,15 @@ export class PropertyController {
     @Body() options: FindManyOptions<Property>,
   ): Promise<Property[]> {
     return this.service.search(jwtUser, options);
+  }
+
+  @Post('/statistics/search')
+  @HttpCode(200)
+  async statisticsSearch(
+    @User() jwtUser: JWTUser,
+    @Body() filter: PropertyStatisticsSearchDto,
+  ): Promise<PropertyStatistics[]> {
+    return this.propertyStatisticsService.searchAll(jwtUser, filter);
   }
 
   @Get('/:id')

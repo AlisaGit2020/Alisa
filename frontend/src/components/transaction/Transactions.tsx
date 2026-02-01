@@ -96,7 +96,7 @@ function Transactions({ t, filter, refreshTrigger }: TransactionsProps) {
 
     where: {
       status: TransactionStatus.ACCEPTED,
-      propertyId: filter.propertyId,
+      propertyId: filter.propertyId > 0 ? filter.propertyId : undefined,
       type:
         filter.transactionTypes && filter.transactionTypes.length > 0
           ? { $in: filter.transactionTypes }

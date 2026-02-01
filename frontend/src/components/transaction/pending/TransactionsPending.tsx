@@ -319,7 +319,7 @@ function TransactionsPending({ t }: WithTranslation) {
     },
 
     where: {
-      propertyId: filter.propertyId,
+      propertyId: filter.propertyId > 0 ? filter.propertyId : undefined,
       status: TransactionStatus.PENDING,
       type: transactionTypes.length > 0 ? { $in: transactionTypes } : undefined,
       transactionDate: getDateFilter(),

@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, IsNull, Repository } from 'typeorm';
+import { FindManyOptions, In, IsNull, Not, Repository } from 'typeorm';
 import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
@@ -16,12 +16,16 @@ import {
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { PropertyStatisticsFilterDto } from '@alisa-backend/real-estate/property/dtos/property-statistics-filter.dto';
+import { PropertyStatisticsSearchDto } from '@alisa-backend/real-estate/property/dtos/property-statistics-search.dto';
+import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
 
 @Injectable()
 export class PropertyStatisticsService {
   constructor(
     @InjectRepository(PropertyStatistics)
     private repository: Repository<PropertyStatistics>,
+    @Inject(forwardRef(() => PropertyService))
+    private propertyService: PropertyService,
   ) {}
   EventCases = {
     CREATED: 'CREATED',
@@ -83,6 +87,77 @@ export class PropertyStatisticsService {
         value: this.getFormattedValue(0, filter.key),
       } as PropertyStatistics,
     ];
+  }
+
+  async searchAll(
+    user: JWTUser,
+    filter: PropertyStatisticsSearchDto,
+  ): Promise<PropertyStatistics[]> {
+    console.log('searchAll called with filter:', JSON.stringify(filter));
+
+    let propertyIds: number[];
+
+    if (filter.propertyId) {
+      // Single property specified
+      propertyIds = [filter.propertyId];
+    } else {
+      // Get all user's properties
+      const properties = await this.propertyService.search(user, {
+        select: ['id'],
+      });
+
+      console.log('Found properties:', properties.length);
+
+      if (properties.length === 0) {
+        return [];
+      }
+
+      propertyIds = properties.map((p) => p.id);
+    }
+
+    console.log('Property IDs:', propertyIds);
+
+    // Build query based on filter
+    const whereCondition: Record<string, unknown> = {
+      propertyId: In(propertyIds),
+    };
+
+    if (filter.key) {
+      whereCondition.key = filter.key;
+    }
+
+    if (filter.year !== undefined) {
+      whereCondition.year = filter.year;
+    } else if (filter.includeYearly) {
+      // Get all yearly records (year is not null)
+      whereCondition.year = Not(IsNull());
+    } else {
+      whereCondition.year = IsNull();
+    }
+
+    if (filter.month !== undefined) {
+      whereCondition.month = filter.month;
+    } else if (filter.includeMonthly) {
+      // Get all monthly records (month is not null)
+      whereCondition.month = Not(IsNull());
+    } else {
+      whereCondition.month = IsNull();
+    }
+
+    console.log('Where condition:', JSON.stringify(whereCondition));
+
+    const statistics = await this.repository.find({
+      where: whereCondition,
+      order: {
+        year: 'ASC',
+        month: 'ASC',
+        key: 'ASC',
+      },
+    });
+
+    console.log('Found statistics:', statistics.length);
+
+    return statistics;
   }
 
   @OnEvent(Events.Transaction.Accepted)
