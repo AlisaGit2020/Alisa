@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { ChangeEventHandler, useState } from "react";
 import AlisaSelectField from "../form/AlisaSelectField.tsx";
 import DataService from "@alisa-lib/data-service.ts";
@@ -24,20 +23,6 @@ function AlisaSelect<T1, T2 extends { id: number; name: string }>({
 }: InputProps<T1, T2>) {
   const [data, setData] = useState<T2[]>([]);
 
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        return await dataService.search();
-      } catch (error) {
-        handleApiError(error);
-      }
-
-      return data;
-    };
-
-    fetchData().then(setData);
-  }, []);
-
   const handleChange:
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
     | undefined = (e) => {
@@ -45,11 +30,20 @@ function AlisaSelect<T1, T2 extends { id: number; name: string }>({
     onHandleChange(fieldName, selectedValue);
   };
 
-  const handleApiError = (error: unknown) => {
-    if (axios.isAxiosError(error)) {
-      /* empty */
-    }
-  };
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        return await dataService.search();
+      } catch {
+        // Ignore API errors
+      }
+
+      return data;
+    };
+
+    fetchData().then(setData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (data.length > 0) {
     const findItemById = (id: T1[keyof T1]) =>
