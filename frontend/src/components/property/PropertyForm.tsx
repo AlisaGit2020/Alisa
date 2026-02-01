@@ -11,6 +11,7 @@ import { DTO } from '../../lib/types';
 import DataService from '../../lib/data-service';
 import { useNavigate, useParams } from 'react-router-dom';
 import PropertyPhotoUpload from './PropertyPhotoUpload';
+import AlisaContent from '../alisa/AlisaContent';
 
 
 function PropertyForm({ t }: WithTranslation) {
@@ -120,23 +121,23 @@ function PropertyForm({ t }: WithTranslation) {
     )
 
     return (
-
-        <AlisaFormHandler<DTO<PropertyInputDto>>
-            id={Number(idParam)}
-            dataService={dataService}
-            data={data}
-            formComponents={formComponents}
-            onSetData={setData}
-            translation={{
-                cancelButton: t('cancel'),
-                submitButton: t('save'),
-                validationMessageTitle: t('validationErrorTitle'),
-            }}
-
-            onCancel={() => navigate(propertyContext.routePath)}
-            onAfterSubmit={() => navigate(propertyContext.routePath)}
-        >
-        </AlisaFormHandler>
+        <AlisaContent>
+            <AlisaFormHandler<DTO<PropertyInputDto>>
+                id={Number(idParam)}
+                dataService={dataService}
+                data={data}
+                formComponents={formComponents}
+                onSetData={setData}
+                translation={{
+                    cancelButton: t('cancel'),
+                    submitButton: t('save'),
+                    validationMessageTitle: t('validationErrorTitle'),
+                }}
+                onCancel={() => navigate(propertyContext.routePath)}
+                onAfterSubmit={() => navigate(propertyContext.routePath)}
+            >
+            </AlisaFormHandler>
+        </AlisaContent>
     );
 }
 
