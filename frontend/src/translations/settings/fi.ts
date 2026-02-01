@@ -6,7 +6,10 @@ const settings = {
     loanPrincipal: 'Lainan lyhennys',
     loanInterest: 'Lainan korko',
     loanHandlingFee: 'Lainakulut',
-    save: 'Tallenna'
+    save: 'Tallenna',
+    themeSettings: 'Teema',
+    lightTheme: 'Vaalea',
+    darkTheme: 'Tumma'
 }
 
 export default settings

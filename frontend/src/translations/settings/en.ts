@@ -6,7 +6,10 @@ const settings = {
     loanPrincipal: 'Loan principal',
     loanInterest: 'Loan interest',
     loanHandlingFee: 'Loan handling fee',
-    save: 'Save'
+    save: 'Save',
+    themeSettings: 'Theme',
+    lightTheme: 'Light',
+    darkTheme: 'Dark'
 }
 
 export default settings

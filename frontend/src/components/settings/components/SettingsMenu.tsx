@@ -4,6 +4,7 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import PaymentIcon from '@mui/icons-material/Payment';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import PaletteIcon from '@mui/icons-material/Palette';
 import SettingsMenuItem from "./SettingsMenuItem";
 import { SettingsPage } from "../Settings";
 
@@ -38,6 +39,13 @@ function SettingsMenu({ t, onClick, selectedItem }: SettingsMenuProps) {
                     selected={selectedItem === SettingsPage.LoanSettings}
                     onClick={() => handleOnClick(SettingsPage.LoanSettings)}
                     itemText={t('loanSettings')}
+                >
+                </SettingsMenuItem>
+                <SettingsMenuItem
+                    icon={<PaletteIcon fontSize="small" />}
+                    selected={selectedItem === SettingsPage.Theme}
+                    onClick={() => handleOnClick(SettingsPage.Theme)}
+                    itemText={t('themeSettings')}
                 >
                 </SettingsMenuItem>
             </MenuList>
