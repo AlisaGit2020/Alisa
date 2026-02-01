@@ -10,7 +10,13 @@ import AlisaFormHandler from '../../alisa/form/AlisaFormHandler';
 import { useNavigate, useParams } from 'react-router-dom';
 import AlisaContent from '../../alisa/AlisaContent';
 
-function ExpenseTypeForm({ t }: WithTranslation) {
+interface ExpenseTypeFormProps extends WithTranslation {
+    id?: number;
+    onCancel?: () => void;
+    onAfterSubmit?: () => void;
+}
+
+function ExpenseTypeForm({ t, id, onCancel, onAfterSubmit }: ExpenseTypeFormProps) {
     const [data, setData] = useState<ExpenseTypeInputDto>({
         name: '',
         description: '',
@@ -18,6 +24,10 @@ function ExpenseTypeForm({ t }: WithTranslation) {
     });
     const { idParam } = useParams();
     const navigate = useNavigate();
+
+    const effectiveId = id ?? Number(idParam);
+    const handleCancel = onCancel ?? (() => navigate(expenseTypeContext.routePath));
+    const handleAfterSubmit = onAfterSubmit ?? (() => navigate(expenseTypeContext.routePath));
 
     const dataService = new DataService<ExpenseTypeInputDto>({
         context: expenseTypeContext,
@@ -54,9 +64,9 @@ function ExpenseTypeForm({ t }: WithTranslation) {
         </Stack>
     )
     return (
-        <AlisaContent headerText={t(idParam ? 'edit': 'add')}>
+        <AlisaContent headerText={t(effectiveId ? 'edit': 'add')}>
             <AlisaFormHandler<ExpenseTypeInputDto>
-                id={Number(idParam)}
+                id={effectiveId}
                 dataService={dataService}
                 data={data}
                 formComponents={formComponents}
@@ -66,9 +76,8 @@ function ExpenseTypeForm({ t }: WithTranslation) {
                     submitButton: t('save'),
                     validationMessageTitle: t('validationErrorTitle'),
                 }}
-
-                onCancel={() => navigate(expenseTypeContext.routePath)}
-                onAfterSubmit={() => navigate(expenseTypeContext.routePath)}
+                onCancel={handleCancel}
+                onAfterSubmit={handleAfterSubmit}
             >
             </AlisaFormHandler>
         </AlisaContent>

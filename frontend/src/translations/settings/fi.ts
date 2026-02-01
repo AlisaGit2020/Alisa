@@ -1,4 +1,5 @@
 const settings = {
+    settings: 'Asetukset',
     expenseTypes: 'Kululajit',
     incomeTypes: 'Tulolajit',
     loanSettings: 'Laina-asetukset',

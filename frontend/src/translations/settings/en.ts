@@ -1,4 +1,5 @@
 const settings = {
+    settings: 'Settings',
     expenseTypes: 'Expense types',
     incomeTypes: 'Income types',
     loanSettings: 'Loan settings',

@@ -4,22 +4,33 @@ import AlisaDataTable from "../../alisa/datatable/AlisaDataTable.tsx";
 import { incomeTypeContext } from "@alisa-lib/alisa-contexts";
 import { IncomeType } from "@alisa-backend/accounting/income/entities/income-type.entity";
 import DataService from "@alisa-lib/data-service";
-import { useNavigate } from "react-router-dom";
 import AlisaContent from "../../alisa/AlisaContent";
 
-function IncomeTypes({ t }: WithTranslation) {
-  const navigate = useNavigate();
+interface IncomeTypesProps extends WithTranslation {
+  onAdd?: () => void;
+  onEdit?: (id: number) => void;
+}
 
+function IncomeTypes({ t, onAdd, onEdit }: IncomeTypesProps) {
   const handleEdit = (id: number) => {
-    navigate(`${incomeTypeContext.routePath}/edit/${id}`);
+    if (onEdit) {
+      onEdit(id);
+    }
   };
+
+  const handleAdd = () => {
+    if (onAdd) {
+      onAdd();
+    }
+  };
+
   return (
     <AlisaContent headerText={t("incomeTypes")}>
       <AlisaDataTable<IncomeType>
         t={t}
         dataService={new DataService({ context: incomeTypeContext })}
         fields={[{ name: "name" }, { name: "description" }]}
-        onNewRow={() => navigate(`${incomeTypeContext.routePath}/add`)}
+        onNewRow={handleAdd}
         onEdit={handleEdit}
         onOpen={() => {}}
         onDelete={() => {}}

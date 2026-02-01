@@ -4,15 +4,26 @@ import AlisaDataTable from "../../alisa/datatable/AlisaDataTable.tsx";
 import { expenseTypeContext } from "@alisa-lib/alisa-contexts";
 import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity";
 import DataService from "@alisa-lib/data-service";
-import { useNavigate } from "react-router-dom";
 import AlisaContent from "../../alisa/AlisaContent";
 
-function ExpenseTypes({ t }: WithTranslation) {
-  const navigate = useNavigate();
+interface ExpenseTypesProps extends WithTranslation {
+  onAdd?: () => void;
+  onEdit?: (id: number) => void;
+}
 
+function ExpenseTypes({ t, onAdd, onEdit }: ExpenseTypesProps) {
   const handleEdit = (id: number) => {
-    navigate(`${expenseTypeContext.routePath}/edit/${id}`);
+    if (onEdit) {
+      onEdit(id);
+    }
   };
+
+  const handleAdd = () => {
+    if (onAdd) {
+      onAdd();
+    }
+  };
+
   return (
     <AlisaContent headerText={t("expenseTypes")}>
       <AlisaDataTable<ExpenseType>
@@ -23,7 +34,7 @@ function ExpenseTypes({ t }: WithTranslation) {
           { name: "description" },
           { name: "isTaxDeductible" },
         ]}
-        onNewRow={() => navigate(`${expenseTypeContext.routePath}/add`)}
+        onNewRow={handleAdd}
         onEdit={handleEdit}
         onOpen={() => {}}
         onDelete={() => {}}

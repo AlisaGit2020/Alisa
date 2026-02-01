@@ -9,13 +9,23 @@ import AlisaFormHandler from '../../alisa/form/AlisaFormHandler';
 import { useNavigate, useParams } from 'react-router-dom';
 import AlisaContent from '../../alisa/AlisaContent';
 
-function IncomeTypeForm({ t }: WithTranslation) {
+interface IncomeTypeFormProps extends WithTranslation {
+    id?: number;
+    onCancel?: () => void;
+    onAfterSubmit?: () => void;
+}
+
+function IncomeTypeForm({ t, id, onCancel, onAfterSubmit }: IncomeTypeFormProps) {
     const [data, setData] = useState<IncomeTypeInputDto>({
         name: '',
         description: '',
     });
     const { idParam } = useParams();
     const navigate = useNavigate();
+
+    const effectiveId = id ?? Number(idParam);
+    const handleCancel = onCancel ?? (() => navigate(incomeTypeContext.routePath));
+    const handleAfterSubmit = onAfterSubmit ?? (() => navigate(incomeTypeContext.routePath));
 
     const dataService = new DataService<IncomeTypeInputDto>({
         context: incomeTypeContext,
@@ -47,9 +57,9 @@ function IncomeTypeForm({ t }: WithTranslation) {
         </Stack>
     )
     return (
-        <AlisaContent headerText={t(idParam ? 'edit': 'add')}>
+        <AlisaContent headerText={t(effectiveId ? 'edit': 'add')}>
             <AlisaFormHandler<IncomeTypeInputDto>
-                id={Number(idParam)}
+                id={effectiveId}
                 dataService={dataService}
                 data={data}
                 formComponents={formComponents}
@@ -59,9 +69,8 @@ function IncomeTypeForm({ t }: WithTranslation) {
                     submitButton: t('save'),
                     validationMessageTitle: t('validationErrorTitle'),
                 }}
-
-                onCancel={() => navigate(incomeTypeContext.routePath)}
-                onAfterSubmit={() => navigate(incomeTypeContext.routePath)}
+                onCancel={handleCancel}
+                onAfterSubmit={handleAfterSubmit}
             >
             </AlisaFormHandler>
         </AlisaContent>
