@@ -36,7 +36,7 @@ function AlisaBreadcrumbs({ t }: WithTranslation) {
                         const contextSegment = pathSegments.find(s => s === 'properties');
                         if (contextSegment) {
                             try {
-                                const property = await ApiClient.get<{ id: number; name: string }>('/real-estate/property', id);
+                                const property = await ApiClient.get<{ id: number; name: string }>('real-estate/property', id);
                                 if (property?.name) {
                                     newNames[cacheKey] = property.name;
                                 }
