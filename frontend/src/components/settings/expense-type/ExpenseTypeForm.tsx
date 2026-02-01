@@ -7,13 +7,12 @@ import AlisaSwitch from '../../alisa/form/AlisaSwitch';
 import { expenseTypeContext } from '@alisa-lib/alisa-contexts';
 import DataService from '@alisa-lib/data-service';
 import AlisaFormHandler from '../../alisa/form/AlisaFormHandler';
-import { useNavigate, useParams } from 'react-router-dom';
 import AlisaContent from '../../alisa/AlisaContent';
 
 interface ExpenseTypeFormProps extends WithTranslation {
     id?: number;
-    onCancel?: () => void;
-    onAfterSubmit?: () => void;
+    onCancel: () => void;
+    onAfterSubmit: () => void;
 }
 
 function ExpenseTypeForm({ t, id, onCancel, onAfterSubmit }: ExpenseTypeFormProps) {
@@ -22,12 +21,6 @@ function ExpenseTypeForm({ t, id, onCancel, onAfterSubmit }: ExpenseTypeFormProp
         description: '',
         isTaxDeductible: false
     });
-    const { idParam } = useParams();
-    const navigate = useNavigate();
-
-    const effectiveId = id ?? Number(idParam);
-    const handleCancel = onCancel ?? (() => navigate(expenseTypeContext.routePath));
-    const handleAfterSubmit = onAfterSubmit ?? (() => navigate(expenseTypeContext.routePath));
 
     const dataService = new DataService<ExpenseTypeInputDto>({
         context: expenseTypeContext,
@@ -64,9 +57,9 @@ function ExpenseTypeForm({ t, id, onCancel, onAfterSubmit }: ExpenseTypeFormProp
         </Stack>
     )
     return (
-        <AlisaContent headerText={t(effectiveId ? 'edit': 'add')}>
+        <AlisaContent headerText={t(id ? 'edit': 'add')}>
             <AlisaFormHandler<ExpenseTypeInputDto>
-                id={effectiveId}
+                id={id}
                 dataService={dataService}
                 data={data}
                 formComponents={formComponents}
@@ -76,8 +69,8 @@ function ExpenseTypeForm({ t, id, onCancel, onAfterSubmit }: ExpenseTypeFormProp
                     submitButton: t('save'),
                     validationMessageTitle: t('validationErrorTitle'),
                 }}
-                onCancel={handleCancel}
-                onAfterSubmit={handleAfterSubmit}
+                onCancel={onCancel}
+                onAfterSubmit={onAfterSubmit}
             >
             </AlisaFormHandler>
         </AlisaContent>

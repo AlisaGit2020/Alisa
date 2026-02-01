@@ -7,21 +7,17 @@ import DataService from "@alisa-lib/data-service";
 import AlisaContent from "../../alisa/AlisaContent";
 
 interface ExpenseTypesProps extends WithTranslation {
-  onAdd?: () => void;
-  onEdit?: (id: number) => void;
+  onAdd: () => void;
+  onEdit: (id: number) => void;
 }
 
 function ExpenseTypes({ t, onAdd, onEdit }: ExpenseTypesProps) {
   const handleEdit = (id: number) => {
-    if (onEdit) {
-      onEdit(id);
-    }
+    onEdit(id);
   };
 
   const handleAdd = () => {
-    if (onAdd) {
-      onAdd();
-    }
+    onAdd();
   };
 
   return (

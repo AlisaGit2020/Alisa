@@ -6,13 +6,12 @@ import AlisaTextField from '../../alisa/form/AlisaTextField';
 import { incomeTypeContext } from '@alisa-lib/alisa-contexts';
 import DataService from '@alisa-lib/data-service';
 import AlisaFormHandler from '../../alisa/form/AlisaFormHandler';
-import { useNavigate, useParams } from 'react-router-dom';
 import AlisaContent from '../../alisa/AlisaContent';
 
 interface IncomeTypeFormProps extends WithTranslation {
     id?: number;
-    onCancel?: () => void;
-    onAfterSubmit?: () => void;
+    onCancel: () => void;
+    onAfterSubmit: () => void;
 }
 
 function IncomeTypeForm({ t, id, onCancel, onAfterSubmit }: IncomeTypeFormProps) {
@@ -20,12 +19,6 @@ function IncomeTypeForm({ t, id, onCancel, onAfterSubmit }: IncomeTypeFormProps)
         name: '',
         description: '',
     });
-    const { idParam } = useParams();
-    const navigate = useNavigate();
-
-    const effectiveId = id ?? Number(idParam);
-    const handleCancel = onCancel ?? (() => navigate(incomeTypeContext.routePath));
-    const handleAfterSubmit = onAfterSubmit ?? (() => navigate(incomeTypeContext.routePath));
 
     const dataService = new DataService<IncomeTypeInputDto>({
         context: incomeTypeContext,
@@ -57,9 +50,9 @@ function IncomeTypeForm({ t, id, onCancel, onAfterSubmit }: IncomeTypeFormProps)
         </Stack>
     )
     return (
-        <AlisaContent headerText={t(effectiveId ? 'edit': 'add')}>
+        <AlisaContent headerText={t(id ? 'edit': 'add')}>
             <AlisaFormHandler<IncomeTypeInputDto>
-                id={effectiveId}
+                id={id}
                 dataService={dataService}
                 data={data}
                 formComponents={formComponents}
@@ -69,8 +62,8 @@ function IncomeTypeForm({ t, id, onCancel, onAfterSubmit }: IncomeTypeFormProps)
                     submitButton: t('save'),
                     validationMessageTitle: t('validationErrorTitle'),
                 }}
-                onCancel={handleCancel}
-                onAfterSubmit={handleAfterSubmit}
+                onCancel={onCancel}
+                onAfterSubmit={onAfterSubmit}
             >
             </AlisaFormHandler>
         </AlisaContent>
