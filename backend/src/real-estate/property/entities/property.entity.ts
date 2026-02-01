@@ -49,4 +49,19 @@ export class Property {
 
   @Column({ nullable: true, type: 'text' })
   public description?: string;
+
+  @Column({ nullable: true })
+  public address?: string;
+
+  @Column({ nullable: true })
+  public city?: string;
+
+  @Column({ nullable: true })
+  public postalCode?: string;
+
+  @Column({ nullable: true })
+  public buildYear?: number;
+
+  @Column({ nullable: true })
+  public apartmentType?: string;
 }

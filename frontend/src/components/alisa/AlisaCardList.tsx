@@ -85,29 +85,71 @@ function AlisaCardList<T extends { id: number }>({
       <Link href={"/properties/add"}>{t("add")}</Link>
       {data.length > 0 && (
         <Grid container spacing={2} marginTop={2}>
-          {data.map((item: T & { name?: string; size?: number; photo?: string }) => (
+          {data.map((item: T & {
+            name?: string;
+            size?: number;
+            photo?: string;
+            description?: string;
+            address?: string;
+            city?: string;
+            postalCode?: string;
+            buildYear?: number;
+            apartmentType?: string;
+          }) => (
             <Grid key={item.name} size={{ md: 4 }}>
-              <Card>
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
+              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <CardMedia
+                  component="img"
+                  alt={item.name}
+                  height="160"
+                  image={item.photo ? `${VITE_API_URL}/${item.photo}` : '/assets/properties/placeholder.svg'}
+                  sx={{ objectFit: 'cover' }}
+                />
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography gutterBottom variant="h6" component="div">
                     {item.name}
+                    {item.apartmentType && (
+                      <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                        {item.apartmentType}
+                      </Typography>
+                    )}
                   </Typography>
-                  <CardMedia
-                    component="img"
-                    alt={item.name}
-                    height="140"
-                    image={item.photo ? `${VITE_API_URL}/${item.photo}` : '/assets/properties/placeholder.svg'}
-                  />
-                  <Table>
+                  {(item.address || item.city) && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      {item.address}
+                      {item.address && item.city && ', '}
+                      {item.postalCode && `${item.postalCode} `}
+                      {item.city}
+                    </Typography>
+                  )}
+                  <Table size="small">
                     <TableBody>
                       <TableRow>
-                        <TableCell>{t("size")}</TableCell>
-                        <TableCell align="right">{item.size} m2</TableCell>
+                        <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("size")}</TableCell>
+                        <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.size} m²</TableCell>
                       </TableRow>
+                      {item.buildYear && (
+                        <TableRow>
+                          <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("buildYear")}</TableCell>
+                          <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.buildYear}</TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                   </Table>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
-                  nec condimentum nisl.
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      mt: 1,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      fontStyle: item.description ? 'normal' : 'italic'
+                    }}
+                  >
+                    {item.description || t("noDescription")}
+                  </Typography>
                 </CardContent>
                 <CardActions>
                   <Button

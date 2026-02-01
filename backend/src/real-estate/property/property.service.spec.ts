@@ -129,6 +129,30 @@ describe('PropertyService', () => {
       expect(result.description).toBe('A beautiful apartment in the city center');
       expect(mockRepository.save).toHaveBeenCalled();
     });
+
+    it('creates property with address and location fields', async () => {
+      const input = {
+        name: 'City Apartment',
+        size: 65,
+        address: 'Mannerheimintie 1 A 5',
+        city: 'Helsinki',
+        postalCode: '00100',
+        buildYear: 1985,
+        apartmentType: '3h+k',
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({ id: 1, ...input });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result.address).toBe('Mannerheimintie 1 A 5');
+      expect(result.city).toBe('Helsinki');
+      expect(result.postalCode).toBe('00100');
+      expect(result.buildYear).toBe(1985);
+      expect(result.apartmentType).toBe('3h+k');
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
   });
 
   describe('update', () => {

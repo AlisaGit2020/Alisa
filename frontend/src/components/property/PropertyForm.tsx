@@ -19,7 +19,12 @@ function PropertyForm({ t }: WithTranslation) {
         name: '',
         size: 0,
         photo: undefined,
-        description: ''
+        description: '',
+        address: '',
+        city: '',
+        postalCode: '',
+        buildYear: undefined,
+        apartmentType: ''
     });
     const { idParam } = useParams();
     const navigate = useNavigate();
@@ -49,11 +54,48 @@ function PropertyForm({ t }: WithTranslation) {
                         />
                     </Box>
                     <Box sx={{ flex: 1, minWidth: 120 }}>
+                        <AlisaTextField
+                            label={t('apartmentType')}
+                            value={data.apartmentType || ''}
+                            onChange={(e) => handleChange('apartmentType', e.target.value)}
+                        />
+                    </Box>
+                </Stack>
+                <AlisaTextField
+                    label={t('address')}
+                    value={data.address || ''}
+                    onChange={(e) => handleChange('address', e.target.value)}
+                />
+                <Stack direction="row" spacing={2}>
+                    <Box sx={{ flex: 1 }}>
+                        <AlisaTextField
+                            label={t('postalCode')}
+                            value={data.postalCode || ''}
+                            onChange={(e) => handleChange('postalCode', e.target.value)}
+                        />
+                    </Box>
+                    <Box sx={{ flex: 2 }}>
+                        <AlisaTextField
+                            label={t('city')}
+                            value={data.city || ''}
+                            onChange={(e) => handleChange('city', e.target.value)}
+                        />
+                    </Box>
+                </Stack>
+                <Stack direction="row" spacing={2}>
+                    <Box sx={{ flex: 1 }}>
                         <AlisaNumberField
                             label={t('size')}
                             value={data.size}
                             onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
                             adornment='m2'
+                        />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                        <AlisaNumberField
+                            label={t('buildYear')}
+                            value={data.buildYear || 0}
+                            onChange={(e) => handleChange('buildYear', getNumber(e.target.value, 0) || undefined)}
                         />
                     </Box>
                 </Stack>
