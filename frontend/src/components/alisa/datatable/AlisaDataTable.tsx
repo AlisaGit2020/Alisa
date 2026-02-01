@@ -182,7 +182,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
             alignItems: "center",
             px: 2,
             py: 1,
-            backgroundColor: "grey.100",
+            backgroundColor: "action.hover",
             borderBottom: 1,
             borderColor: "divider",
           }}

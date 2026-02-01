@@ -1,20 +1,26 @@
 import { MenuItem, ListItemText, ListItemIcon } from "@mui/material";
 import { MouseEventHandler, ReactNode } from "react"
-import { blueGrey } from '@mui/material/colors';
 
 
-function SettingsMenuItem(props: { 
-    onClick: MouseEventHandler<HTMLLIElement>; 
+function SettingsMenuItem(props: {
+    onClick: MouseEventHandler<HTMLLIElement>;
     selected: boolean,
     icon: ReactNode,
-    itemText: string 
+    itemText: string
 }) {
-
-    const getBgColor = () => props.selected ? blueGrey[100] : '';
-
     return (
-
-        <MenuItem onClick={props.onClick} sx={{ bgcolor: getBgColor()}}>
+        <MenuItem
+            onClick={props.onClick}
+            selected={props.selected}
+            sx={{
+                "&.Mui-selected": {
+                    backgroundColor: "action.selected",
+                },
+                "&.Mui-selected:hover": {
+                    backgroundColor: "action.hover",
+                },
+            }}
+        >
             <ListItemIcon>
                 {props.icon}
             </ListItemIcon>

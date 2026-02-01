@@ -156,7 +156,7 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
             elevation={0}
             sx={{
               p: 3,
-              bgcolor: "grey.100",
+              bgcolor: "action.hover",
               textAlign: "center",
             }}
           >
