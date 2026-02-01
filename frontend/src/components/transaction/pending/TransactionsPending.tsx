@@ -376,7 +376,7 @@ function TransactionsPending({ t }: WithTranslation) {
             { name: "sender", maxLength: 30 },
             { name: "receiver", maxLength: 30 },
             { name: "description", maxLength: 40 },
-            { name: "amount", format: "currency" },
+            { name: "amount", format: "currency", sum: true },
           ]}
           onNewRow={handleOpenAddMenu}
           onSelectChange={handleSelectChange}

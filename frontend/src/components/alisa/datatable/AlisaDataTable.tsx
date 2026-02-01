@@ -37,6 +37,7 @@ interface AlisaDataTableField<T> {
   maxLength?: number;
   label?: string;
   format?: "number" | "currency" | "date" | "transactionType" | "translation";
+  sum?: boolean;
 }
 
 function AlisaDataTable<T extends { id: number }>(props: {
@@ -97,6 +98,16 @@ function AlisaDataTable<T extends { id: number }>(props: {
       }
     }
   };
+
+  const calculateSum = (field: AlisaDataTableField<T>): number => {
+    if (!field.sum) return 0;
+    return data.reduce((acc, item) => {
+      const value = item[field.name];
+      return acc + (typeof value === "number" ? value : 0);
+    }, 0);
+  };
+
+  const hasSumFields = props.fields.some((field) => field.sum);
 
   const getDataValue = (
     field: AlisaDataTableField<T>,
@@ -162,8 +173,42 @@ function AlisaDataTable<T extends { id: number }>(props: {
     return String(value);
   };
 
+  const sumFields = props.fields.filter((field) => field.sum);
+
   return (
     <>
+      {data.length > 0 && hasSumFields && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: 2,
+            py: 1,
+            backgroundColor: "grey.100",
+            borderBottom: 1,
+            borderColor: "divider",
+          }}
+        >
+          <Typography variant="body1" color="text.secondary">
+            {props.t("rowCount", { count: data.length })}
+          </Typography>
+          <Box sx={{ display: "flex", gap: 3 }}>
+            {sumFields.map((field) => (
+              <Box key={`summary-${field.name as string}`}>
+                <Typography variant="body1" component="span" color="text.secondary">
+                  {props.t("totalAmount")}:{" "}
+                </Typography>
+                <Typography variant="body1" component="span" fontWeight="bold">
+                  {field.format === "currency"
+                    ? props.t("format.currency.euro", { val: calculateSum(field) })
+                    : props.t("format.number", { val: calculateSum(field) })}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      )}
       <TableContainer sx={{ maxHeight: 960 }}>
         <Table stickyHeader size="small" aria-label="simple table">
           <TableHead>

@@ -124,7 +124,7 @@ function Transactions({ t, filter, refreshTrigger }: TransactionsProps) {
             { name: "sender", maxLength: 30 },
             { name: "receiver", maxLength: 30 },
             { name: "description", maxLength: 40 },
-            { name: "amount", format: "currency" },
+            { name: "amount", format: "currency", sum: true },
           ]}
           onNewRow={handleOpenAddMenu}
           onOpen={handleOpenDetails}
