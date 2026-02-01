@@ -26,10 +26,13 @@ import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.d
 import { TransactionSetTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-type-input.dto.ts";
 import { TransactionSetCategoryTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-category-type-input.dto.ts";
 import { SplitLoanPaymentBulkInputDto } from "@alisa-backend/accounting/transaction/dtos/split-loan-payment-bulk-input.dto.ts";
-import { getStoredFilter, setStoredFilter } from "@alisa-lib/initial-data.ts";
+import {
+  getStoredFilter,
+  setStoredFilter,
+  getTransactionPropertyId,
+} from "@alisa-lib/initial-data.ts";
 import { View } from "@alisa-lib/views.ts";
-
-interface TransactionsPendingProps extends WithTranslation {}
+import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../TransactionLeftMenuItems.tsx";
 
 const getDefaultFilter = (): TransactionFilterData => ({
   propertyId: 0,
@@ -40,10 +43,14 @@ const getDefaultFilter = (): TransactionFilterData => ({
   searchField: "sender",
 });
 
-function TransactionsPending({ t }: TransactionsPendingProps) {
+function TransactionsPending({ t }: WithTranslation) {
   const [filter, setFilter] = React.useState<TransactionFilterData>(() => {
     const stored = getStoredFilter<TransactionFilterData>(View.TRANSACTION_PENDING);
-    return stored || getDefaultFilter();
+    const storedPropertyId = getTransactionPropertyId();
+    if (stored) {
+      return { ...stored, propertyId: storedPropertyId || stored.propertyId };
+    }
+    return { ...getDefaultFilter(), propertyId: storedPropertyId };
   });
   const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
   const [selectedTransactionTypes, setSelectedTransactionTypes] = React.useState<
@@ -68,6 +75,27 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     setStoredFilter(View.TRANSACTION_PENDING, newFilter);
     setRefreshTrigger((prev) => prev + 1);
   };
+
+  React.useEffect(() => {
+    const handlePropertyChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{ propertyId: number }>;
+      const propertyId = customEvent.detail.propertyId;
+      updateFilter({ ...filter, propertyId });
+    };
+
+    window.addEventListener(
+      TRANSACTION_PROPERTY_CHANGE_EVENT,
+      handlePropertyChange
+    );
+
+    return () => {
+      window.removeEventListener(
+        TRANSACTION_PROPERTY_CHANGE_EVENT,
+        handlePropertyChange
+      );
+    };
+     
+  }, [filter]);
 
   const handleOpenAddMenu = (
     event?: React.MouseEvent<HTMLButtonElement>,
@@ -202,10 +230,6 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
     }
   };
 
-  const handleSelectProperty = (propertyId: number) => {
-    updateFilter({ ...filter, propertyId });
-  };
-
   const handleSelectTransactionTypes = (transactionTypes: TransactionType[]) => {
     updateFilter({ ...filter, transactionTypes });
   };
@@ -309,7 +333,6 @@ function TransactionsPending({ t }: TransactionsPendingProps) {
         marginTop={3}
         open={selectedIds.length === 0}
         data={filter}
-        onSelectProperty={handleSelectProperty}
         onSelectTransactionTypes={handleSelectTransactionTypes}
         onStartDateChange={handleStartDateChange}
         onEndDateChange={handleEndDateChange}

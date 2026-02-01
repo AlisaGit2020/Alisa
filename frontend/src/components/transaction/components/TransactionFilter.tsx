@@ -1,7 +1,6 @@
 import { withTranslation, WithTranslation } from "react-i18next";
 import { transactionContext } from "@alisa-lib/alisa-contexts.ts";
 import {
-  Box,
   Button,
   Checkbox,
   Chip,
@@ -20,7 +19,6 @@ import {
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import ClearIcon from "@mui/icons-material/Clear";
-import AlisaPropertySelect from "../../alisa/data/AlisaPropertySelect.tsx";
 import {
   TransactionType,
   transactionTypeNames,
@@ -41,8 +39,6 @@ interface TransactionFilterProps extends WithTranslation {
   marginTop?: number;
   open: boolean;
   data: TransactionFilterData;
-  propertyName?: string;
-  onSelectProperty: (propertyId: number) => void;
   onSelectTransactionTypes: (transactionTypes: TransactionType[]) => void;
   onStartDateChange: (date: Date | null) => void;
   onEndDateChange: (date: Date | null) => void;
@@ -135,18 +131,6 @@ function TransactionFilter(props: TransactionFilterProps) {
     >
       <Stack spacing={1.5}>
         <Stack direction={"row"} spacing={2} flexWrap="wrap" useFlexGap alignItems="flex-end">
-          <Box sx={{ width: 180 }}>
-            <AlisaPropertySelect
-              variant={"select"}
-              t={props.t}
-              direction={"column"}
-              onSelectProperty={props.onSelectProperty}
-              selectedPropertyId={props.data.propertyId}
-              showEmptyValue={true}
-              size="small"
-            ></AlisaPropertySelect>
-          </Box>
-
           <FormControl size="small" sx={{ width: 180 }}>
             <InputLabel>{props.t("transactionType")}</InputLabel>
             <Select

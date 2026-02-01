@@ -56,7 +56,7 @@ function LeftMenu({ open, onToggleDrawer }: LeftMenuProps) {
             </Toolbar>
             <Divider />
 
-            <LeftMenuItems></LeftMenuItems>
+            <LeftMenuItems open={open}></LeftMenuItems>
 
         </Drawer>
     );

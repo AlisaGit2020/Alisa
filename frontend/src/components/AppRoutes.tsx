@@ -33,7 +33,7 @@ export default function AppRoutes() {
           ></Route>
 
           <Route
-            path={`${transactionContext.routePath}/:propertyName?`}
+            path={transactionContext.routePath}
             element={<TransactionMain></TransactionMain>}
           ></Route>
 

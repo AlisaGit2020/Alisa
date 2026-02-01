@@ -55,3 +55,11 @@ export const setStoredFilter = <T>(view: View, filter: T): void => {
   const key = `view[${view}]:${DataKey.FILTER}`;
   localStorage.setItem(key, JSON.stringify(filter));
 };
+
+export const getTransactionPropertyId = (): number => {
+  return getInitialId(View.TRANSACTION_PROPERTY, DataKey.PROPERTY_ID);
+};
+
+export const setTransactionPropertyId = (id: number): void => {
+  setInitialPropertyId(View.TRANSACTION_PROPERTY, DataKey.PROPERTY_ID, id);
+};
