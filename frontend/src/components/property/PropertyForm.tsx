@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { useState } from 'react';
 import { getNumber } from '../../lib/functions';
 import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/property-input.dto'
@@ -37,36 +37,44 @@ function PropertyForm({ t }: WithTranslation) {
     }
 
     const formComponents = (
-        <Stack spacing={2} marginBottom={2}>
-            <AlisaTextField
-                label={t('name')}
-                value={data.name}
-                autoFocus={true}
-                onChange={(e) => handleChange('name', e.target.value)}
-            />
-            <AlisaNumberField
-                label={t('size')}
-                value={data.size}
-                onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
-                adornment='m2'
-            />
-            <AlisaTextField
-                label={t('description')}
-                value={data.description || ''}
-                multiline
-                rows={4}
-                onChange={(e) => handleChange('description', e.target.value)}
-            />
-            {data.id !== 0 && (
-                <PropertyPhotoUpload
-                    propertyId={data.id}
-                    currentPhoto={data.photo}
-                    onPhotoChange={(photoPath) => {
-                        setData({ ...data, photo: photoPath || undefined });
-                    }}
+        <Box sx={{ maxWidth: 600 }}>
+            <Stack spacing={2} marginBottom={2}>
+                <Stack direction="row" spacing={2}>
+                    <Box sx={{ flex: 2 }}>
+                        <AlisaTextField
+                            label={t('name')}
+                            value={data.name}
+                            autoFocus={true}
+                            onChange={(e) => handleChange('name', e.target.value)}
+                        />
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 120 }}>
+                        <AlisaNumberField
+                            label={t('size')}
+                            value={data.size}
+                            onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
+                            adornment='m2'
+                        />
+                    </Box>
+                </Stack>
+                <AlisaTextField
+                    label={t('description')}
+                    value={data.description || ''}
+                    multiline
+                    rows={4}
+                    onChange={(e) => handleChange('description', e.target.value)}
                 />
-            )}
-        </Stack>
+                {data.id !== 0 && (
+                    <PropertyPhotoUpload
+                        propertyId={data.id}
+                        currentPhoto={data.photo}
+                        onPhotoChange={(photoPath) => {
+                            setData({ ...data, photo: photoPath || undefined });
+                        }}
+                    />
+                )}
+            </Stack>
+        </Box>
     )
 
     return (
