@@ -7,8 +7,11 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import createStore from "react-auth-kit/createStore";
 import AuthProvider from "react-auth-kit";
 
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
+const theme = createTheme({
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+  },
+});
 
 export default function App() {
   const store = createStore({
@@ -20,7 +23,7 @@ export default function App() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <ThemeProvider theme={defaultTheme}>
+      <ThemeProvider theme={theme}>
         <AuthProvider store={store}>
           <Box sx={{ display: "flex" }} maxWidth="100vw">
             <AppBar></AppBar>
