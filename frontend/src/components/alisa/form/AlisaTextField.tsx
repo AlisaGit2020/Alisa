@@ -9,6 +9,8 @@ function AlisaTextField(props: {
   autoFocus?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
+  multiline?: boolean;
+  rows?: number;
   onChange?:
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
     | undefined;
@@ -25,6 +27,8 @@ function AlisaTextField(props: {
         props.autoComplete !== undefined ? props.autoComplete : "off"
       }
       disabled={props.disabled !== undefined ? props.disabled : false}
+      multiline={props.multiline}
+      rows={props.rows}
       onChange={props.onChange}
       onBlur={props.onBlur}
       InputProps={{

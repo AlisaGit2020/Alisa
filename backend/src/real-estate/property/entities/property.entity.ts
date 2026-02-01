@@ -46,4 +46,7 @@ export class Property {
 
   @Column({ nullable: true })
   public photo?: string;
+
+  @Column({ nullable: true, type: 'text' })
+  public description?: string;
 }

@@ -51,6 +51,20 @@ describe('PropertyService', () => {
       expect(result).toEqual(property);
     });
 
+    it('returns property with description', async () => {
+      const property = createProperty({
+        id: 1,
+        name: 'Test Property',
+        description: 'A nice property with a view',
+      });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const result = await service.findOne(testUser, 1);
+
+      expect(result.description).toBe('A nice property with a view');
+    });
+
     it('returns null when property does not exist', async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
@@ -99,6 +113,22 @@ describe('PropertyService', () => {
 
       expect(mockRepository.save).toHaveBeenCalled();
     });
+
+    it('creates property with description', async () => {
+      const input = {
+        name: 'New Property',
+        size: 50,
+        description: 'A beautiful apartment in the city center',
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({ id: 1, ...input });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result.description).toBe('A beautiful apartment in the city center');
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
   });
 
   describe('update', () => {
@@ -113,6 +143,20 @@ describe('PropertyService', () => {
       const result = await service.update(testUser, 1, input);
 
       expect(result.name).toBe('New Name');
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
+
+    it('updates property description', async () => {
+      const existingProperty = createProperty({ id: 1, name: 'Test Property' });
+      const input = { name: 'Test Property', size: 50, description: 'Updated description' };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...existingProperty, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.description).toBe('Updated description');
       expect(mockRepository.save).toHaveBeenCalled();
     });
 

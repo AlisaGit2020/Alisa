@@ -5,6 +5,7 @@ export interface CreatePropertyOptions {
   name?: string;
   size?: number;
   photo?: string;
+  description?: string;
 }
 
 export const createProperty = (options: CreatePropertyOptions = {}): Property => {
@@ -13,5 +14,6 @@ export const createProperty = (options: CreatePropertyOptions = {}): Property =>
   property.name = options.name ?? 'Test Property';
   property.size = options.size ?? 50;
   property.photo = options.photo;
+  property.description = options.description;
   return property;
 };

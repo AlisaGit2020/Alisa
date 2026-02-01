@@ -18,7 +18,8 @@ function PropertyForm({ t }: WithTranslation) {
         id: 0,
         name: '',
         size: 0,
-        photo: undefined
+        photo: undefined,
+        description: ''
     });
     const { idParam } = useParams();
     const navigate = useNavigate();
@@ -48,6 +49,13 @@ function PropertyForm({ t }: WithTranslation) {
                 value={data.size}
                 onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
                 adornment='m2'
+            />
+            <AlisaTextField
+                label={t('description')}
+                value={data.description || ''}
+                multiline
+                rows={4}
+                onChange={(e) => handleChange('description', e.target.value)}
             />
             {data.id !== 0 && (
                 <PropertyPhotoUpload

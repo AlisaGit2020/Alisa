@@ -3,6 +3,7 @@ const property = {
     properties: 'Properties',
     confirmDelete: 'Are you sure you want to delete the property?',
     size: 'Size',
+    description: 'Description',
     propertyPhoto: 'Property Photo',
     uploadPhoto: 'Upload Photo',
     deletePhoto: 'Delete Photo',

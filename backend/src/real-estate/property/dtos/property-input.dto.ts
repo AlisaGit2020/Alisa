@@ -14,5 +14,9 @@ export class PropertyInputDto {
   @IsString()
   photo?: string;
 
+  @IsOptional()
+  @IsString()
+  description?: string;
+
   ownerships?: OwnershipInputDto[] = [];
 }

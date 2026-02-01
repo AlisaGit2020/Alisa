@@ -4,6 +4,7 @@ const property = {
     confirmDelete: 'Poistetaanko asunto?',
     name: 'Nimi',
     size: 'Pinta-ala',
+    description: 'Kuvaus',
     propertyPhoto: 'Kohteen kuva',
     uploadPhoto: 'Lataa kuva',
     deletePhoto: 'Poista kuva',
