@@ -58,6 +58,16 @@ Shared utilities in `frontend/src/lib/`:
 - `api-client.ts` - Axios wrapper with JWT token injection
 - `data-service.ts` - Frontend data layer
 - `alisa-contexts.ts` - React context providers
+- `theme-context.tsx` - Theme mode context (light/dark)
+
+### Theming
+The app supports light and dark themes. Theme selection is stored in localStorage and can be changed from Settings > Theme.
+
+When writing frontend code:
+- Avoid hardcoding colors; use Material-UI theme colors (`theme.palette.*`)
+- Use `sx` prop with theme-aware values (e.g., `backgroundColor: "grey.100"` instead of `backgroundColor: "#f5f5f5"`)
+- For custom colors, use theme palette colors that adapt to light/dark mode
+- Access current theme mode via `useThemeMode()` hook from `@alisa-lib/theme-context` if needed
 
 ### Path Aliases
 Both projects use TypeScript path aliases:
