@@ -1,6 +1,5 @@
 import * as React from "react";
 import { styled } from "@mui/material/styles";
-import CheckIcon from "@mui/icons-material/Check";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -123,9 +122,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
       value = (value.substring(0, field.maxLength) + "...") as T[keyof T];
     }
 
-    if (typeof value === "boolean") {
-      return <CheckIcon visibility={value ? "visible" : "hidden"}></CheckIcon>;
-    }
+
     if (field.format == "number") {
       return props.t("format.number", { val: value });
     }
@@ -227,13 +224,16 @@ function AlisaDataTable<T extends { id: number }>(props: {
                 <TableCell
                   key={field.name as string}
                   align={field.format === "currency" ? "right" : "left"}
+                  sx={{ whiteSpace: "nowrap" }}
                 >
                   <Typography fontWeight={"bold"}>
-                    {field.label ? field.label : props.t(field.name as string)}
+                    {field.label !== undefined
+                      ? field.label
+                      : props.t(field.name as string)}
                   </Typography>
                 </TableCell>
               ))}
-              <TableCell align="right">
+              <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                 <AlisaDataTableAddButton
                   onClick={props.onNewRow}
                   t={props.t}
@@ -262,13 +262,14 @@ function AlisaDataTable<T extends { id: number }>(props: {
                     <TableCell
                       key={field.name as string}
                       align={field.format === "currency" ? "right" : "left"}
+                      sx={{ whiteSpace: "nowrap" }}
                       onClick={() => props.onOpen(item.id)}
                     >
                       {getDataValue(field, item)}
                     </TableCell>
                   ))}
 
-                  <TableCell align="right">
+                  <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <AlisaDataTableActionButtons
                       id={item.id}
                       onDelete={handleDeleteOpen}

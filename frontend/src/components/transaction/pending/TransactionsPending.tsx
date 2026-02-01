@@ -370,12 +370,12 @@ function TransactionsPending({ t }: WithTranslation) {
             {
               name: "type",
               format: "transactionType",
-              label: t("transactionType"),
+              label: "",
             },
             { name: "transactionDate", format: "date" },
-            { name: "sender", maxLength: 30 },
-            { name: "receiver", maxLength: 30 },
-            { name: "description", maxLength: 40 },
+            { name: "sender", maxLength: 20 },
+            { name: "receiver", maxLength: 20 },
+            { name: "description", maxLength: 30 },
             { name: "amount", format: "currency", sum: true },
           ]}
           onNewRow={handleOpenAddMenu}
