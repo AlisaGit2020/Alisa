@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
 import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
 import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
+import type { DashboardConfig } from '@alisa-backend/common/dashboard-config';
 
 @Entity()
 export class User {
@@ -52,4 +53,7 @@ export class User {
 
   @Column({ nullable: true })
   loanHandlingFeeExpenseTypeId?: number;
+
+  @Column({ type: 'jsonb', nullable: true })
+  dashboardConfig?: DashboardConfig;
 }

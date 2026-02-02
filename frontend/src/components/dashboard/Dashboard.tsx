@@ -12,19 +12,51 @@ import {
   Stack,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import IncomeExpenseChart from "./widgets/IncomeExpenseChart.tsx";
-import IncomeChart from "./widgets/IncomeChart.tsx";
-import ExpenseChart from "./widgets/ExpenseChart.tsx";
-import NetResultChart from "./widgets/NetResultChart.tsx";
-import DepositChart from "./widgets/DepositChart.tsx";
-import WithdrawChart from "./widgets/WithdrawChart.tsx";
-import { useDashboard, ViewMode } from "./context/DashboardContext.tsx";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useDashboard, ViewMode } from "./context/DashboardContext";
+import { getWidgetById, getGridSize, WidgetSize } from "./config/widget-registry";
+import { SortableWidget } from "./components/SortableWidget";
+import { DashboardToolbar } from "./components/DashboardToolbar";
 
 function Dashboard() {
   const { t } = useTranslation("dashboard");
   const { t: tAppBar } = useTranslation("appBar");
-  const { viewMode, setViewMode, selectedYear, setSelectedYear, availableYears } =
-    useDashboard();
+  const {
+    viewMode,
+    setViewMode,
+    selectedYear,
+    setSelectedYear,
+    availableYears,
+    isEditMode,
+    getVisibleWidgets,
+    reorderWidgets,
+    updateWidgetVisibility,
+    updateWidgetSize,
+  } = useDashboard();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const handleViewModeChange = (
     _event: React.MouseEvent<HTMLElement>,
@@ -39,136 +71,122 @@ function Dashboard() {
     setSelectedYear(event.target.value as number);
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      reorderWidgets(active.id as string, over.id as string);
+    }
+  };
+
+  const handleHideWidget = (widgetId: string) => {
+    updateWidgetVisibility(widgetId, false);
+  };
+
+  const handleSizeChange = (widgetId: string, size: WidgetSize) => {
+    updateWidgetSize(widgetId, size);
+  };
+
+  const visibleWidgets = getVisibleWidgets();
+  const widgetIds = visibleWidgets.map((w) => w.id);
+
   return (
-    <Grid container spacing={3}>
-      {/* Welcome message and controls */}
-      <Grid size={12}>
-        <Paper elevation={5} sx={{ p: 2 }}>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            justifyContent="space-between"
-            alignItems={{ xs: "flex-start", sm: "center" }}
-            spacing={2}
-          >
-            <Typography sx={{ fontSize: "medium" }}>{tAppBar("slogan")}</Typography>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: 100,
-                  visibility: viewMode === "monthly" ? "visible" : "hidden",
-                }}
-              >
-                <InputLabel id="dashboard-year-select">{t("year")}</InputLabel>
-                <Select
-                  labelId="dashboard-year-select"
-                  value={selectedYear}
-                  label={t("year")}
-                  onChange={handleYearChange}
+    <>
+      <DashboardToolbar />
+      <Grid container spacing={3}>
+        {/* Welcome message and controls */}
+        <Grid size={12}>
+          <Paper elevation={5} sx={{ p: 2 }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              justifyContent="space-between"
+              alignItems={{ xs: "flex-start", sm: "center" }}
+              spacing={2}
+            >
+              <Typography sx={{ fontSize: "medium" }}>{tAppBar("slogan")}</Typography>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <FormControl
+                  size="small"
+                  sx={{
+                    minWidth: 100,
+                    visibility: viewMode === "monthly" ? "visible" : "hidden",
+                  }}
                 >
-                  {availableYears.map((year) => (
-                    <MenuItem key={year} value={year}>
-                      {year}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                  <InputLabel id="dashboard-year-select">{t("year")}</InputLabel>
+                  <Select
+                    labelId="dashboard-year-select"
+                    value={selectedYear}
+                    label={t("year")}
+                    onChange={handleYearChange}
+                  >
+                    {availableYears.map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-              <ToggleButtonGroup
-                value={viewMode}
-                exclusive
-                onChange={handleViewModeChange}
-                size="small"
-              >
-                <ToggleButton value="monthly">{t("monthly")}</ToggleButton>
-                <ToggleButton value="yearly">{t("yearly")}</ToggleButton>
-              </ToggleButtonGroup>
+                <ToggleButtonGroup
+                  value={viewMode}
+                  exclusive
+                  onChange={handleViewModeChange}
+                  size="small"
+                >
+                  <ToggleButton value="monthly">{t("monthly")}</ToggleButton>
+                  <ToggleButton value="yearly">{t("yearly")}</ToggleButton>
+                </ToggleButtonGroup>
+              </Stack>
             </Stack>
-          </Stack>
-        </Paper>
-      </Grid>
+          </Paper>
+        </Grid>
 
-      {/* #summary - Income & Expenses combined chart */}
-      <Grid size={12} id="summary">
-        <Paper
-          sx={{
-            p: 2,
-            display: "flex",
-            flexDirection: "column",
-            height: 400,
-          }}
-        >
-          <IncomeExpenseChart />
-        </Paper>
-      </Grid>
+      {/* Dynamic widgets */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={widgetIds} strategy={rectSortingStrategy}>
+          {visibleWidgets.map((widgetConfig) => {
+            const widgetDef = getWidgetById(widgetConfig.id);
+            if (!widgetDef) return null;
 
-      {/* #income, #expenses, #netResult - Three charts */}
-      <Grid size={{ xs: 12, md: 4 }} id="income">
-        <Paper
-          sx={{
-            p: 2,
-            display: "flex",
-            flexDirection: "column",
-            height: 300,
-          }}
-        >
-          <IncomeChart />
-        </Paper>
-      </Grid>
+            const WidgetComponent = widgetDef.component;
+            const currentSize = widgetConfig.size ?? widgetDef.defaultSize;
+            const gridMd = getGridSize(currentSize);
 
-      <Grid size={{ xs: 12, md: 4 }} id="expenses">
-        <Paper
-          sx={{
-            p: 2,
-            display: "flex",
-            flexDirection: "column",
-            height: 300,
-          }}
-        >
-          <ExpenseChart />
-        </Paper>
-      </Grid>
+            return (
+              <Grid
+                key={widgetConfig.id}
+                size={{ xs: 12, md: gridMd }}
+                id={widgetConfig.id}
+              >
+                <SortableWidget
+                  id={widgetConfig.id}
+                  height={widgetDef.height}
+                  isEditMode={isEditMode}
+                  currentSize={currentSize}
+                  onHide={handleHideWidget}
+                  onSizeChange={handleSizeChange}
+                >
+                  <WidgetComponent />
+                </SortableWidget>
+              </Grid>
+            );
+          })}
+        </SortableContext>
+      </DndContext>
 
-      <Grid size={{ xs: 12, md: 4 }} id="netResult">
-        <Paper
-          sx={{
-            p: 2,
-            display: "flex",
-            flexDirection: "column",
-            height: 300,
-          }}
-        >
-          <NetResultChart />
-        </Paper>
+        {/* Show message when no widgets are visible */}
+        {visibleWidgets.length === 0 && (
+          <Grid size={12}>
+            <Paper elevation={5} sx={{ p: 4, textAlign: "center" }}>
+              <Typography color="text.secondary">{t("noWidgetsVisible")}</Typography>
+            </Paper>
+          </Grid>
+        )}
       </Grid>
-
-      {/* #deposits, #withdrawals - Two charts */}
-      <Grid size={{ xs: 12, md: 6 }} id="deposits">
-        <Paper
-          sx={{
-            p: 2,
-            display: "flex",
-            flexDirection: "column",
-            height: 300,
-          }}
-        >
-          <DepositChart />
-        </Paper>
-      </Grid>
-
-      <Grid size={{ xs: 12, md: 6 }} id="withdrawals">
-        <Paper
-          sx={{
-            p: 2,
-            display: "flex",
-            flexDirection: "column",
-            height: 300,
-          }}
-        >
-          <WithdrawChart />
-        </Paper>
-      </Grid>
-    </Grid>
+    </>
   );
 }
 

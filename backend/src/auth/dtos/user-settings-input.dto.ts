@@ -1,4 +1,36 @@
-import { IsNumber, IsOptional } from 'class-validator';
+import {
+  IsNumber,
+  IsOptional,
+  IsArray,
+  ValidateNested,
+  IsString,
+  IsBoolean,
+  IsIn,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import type { WidgetSize } from '@alisa-backend/common/dashboard-config';
+
+class WidgetConfigDto {
+  @IsString()
+  id: string;
+
+  @IsBoolean()
+  visible: boolean;
+
+  @IsNumber()
+  order: number;
+
+  @IsOptional()
+  @IsIn(['1/1', '1/2', '1/3', '1/4'])
+  size?: WidgetSize;
+}
+
+class DashboardConfigDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => WidgetConfigDto)
+  widgets: WidgetConfigDto[];
+}
 
 export class UserSettingsInputDto {
   @IsOptional()
@@ -12,4 +44,9 @@ export class UserSettingsInputDto {
   @IsOptional()
   @IsNumber()
   loanHandlingFeeExpenseTypeId?: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DashboardConfigDto)
+  dashboardConfig?: DashboardConfigDto;
 }

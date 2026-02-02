@@ -110,6 +110,14 @@ class ApiClient {
     loanPrincipalExpenseTypeId?: number;
     loanInterestExpenseTypeId?: number;
     loanHandlingFeeExpenseTypeId?: number;
+    dashboardConfig?: {
+      widgets: Array<{
+        id: string;
+        visible: boolean;
+        order: number;
+        size?: string;
+      }>;
+    };
   }): Promise<User> {
     const response = await axios.put(
       ApiClient.getApiUrl(`auth/user/settings`),

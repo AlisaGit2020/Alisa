@@ -71,6 +71,9 @@ export class AuthService {
     if (input.loanHandlingFeeExpenseTypeId !== undefined) {
       user.loanHandlingFeeExpenseTypeId = input.loanHandlingFeeExpenseTypeId;
     }
+    if (input.dashboardConfig !== undefined) {
+      user.dashboardConfig = input.dashboardConfig;
+    }
 
     return this.userService.save(user as UserInputDto);
   }

@@ -12,6 +12,11 @@ const dashboard = {
   year: "Vuosi",
   noData: "Ei dataa saatavilla",
   netResult: "Tulos",
+  editDashboard: "Muokkaa",
+  doneEditing: "Valmis",
+  widgets: "Widgetit",
+  hideWidget: "Piilota widget",
+  noWidgetsVisible: "Ei näkyviä widgettejä. Paina Muokkaa lisätäksesi widgettejä.",
 };
 
 export default dashboard;

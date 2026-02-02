@@ -12,6 +12,11 @@ const dashboard = {
   year: "Year",
   noData: "No data available",
   netResult: "Net result",
+  editDashboard: "Edit",
+  doneEditing: "Done",
+  widgets: "Widgets",
+  hideWidget: "Hide widget",
+  noWidgetsVisible: "No visible widgets. Click Edit to add widgets.",
 };
 
 export default dashboard;
