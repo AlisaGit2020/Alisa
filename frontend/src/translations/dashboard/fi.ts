@@ -5,6 +5,8 @@ const dashboard = {
   summary: "Yhteenveto",
   income: "Tulot",
   expenses: "Menot",
+  deposits: "Talletukset",
+  withdrawals: "Nostot",
   properties: "Kohteet",
   incomeAndExpenses: "Tulot ja menot",
   year: "Vuosi",

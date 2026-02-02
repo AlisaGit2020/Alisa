@@ -16,6 +16,8 @@ import IncomeExpenseChart from "./widgets/IncomeExpenseChart.tsx";
 import IncomeChart from "./widgets/IncomeChart.tsx";
 import ExpenseChart from "./widgets/ExpenseChart.tsx";
 import NetResultChart from "./widgets/NetResultChart.tsx";
+import DepositChart from "./widgets/DepositChart.tsx";
+import WithdrawChart from "./widgets/WithdrawChart.tsx";
 import { useDashboard, ViewMode } from "./context/DashboardContext.tsx";
 
 function Dashboard() {
@@ -137,6 +139,33 @@ function Dashboard() {
           }}
         >
           <NetResultChart />
+        </Paper>
+      </Grid>
+
+      {/* #deposits, #withdrawals - Two charts */}
+      <Grid size={{ xs: 12, md: 6 }} id="deposits">
+        <Paper
+          sx={{
+            p: 2,
+            display: "flex",
+            flexDirection: "column",
+            height: 300,
+          }}
+        >
+          <DepositChart />
+        </Paper>
+      </Grid>
+
+      <Grid size={{ xs: 12, md: 6 }} id="withdrawals">
+        <Paper
+          sx={{
+            p: 2,
+            display: "flex",
+            flexDirection: "column",
+            height: 300,
+          }}
+        >
+          <WithdrawChart />
         </Paper>
       </Grid>
     </Grid>

@@ -9,6 +9,8 @@ export interface ChartDataPoint {
   label: string;
   income: number;
   expense: number;
+  deposit: number;
+  withdraw: number;
   net: number;
   month?: number;
   year?: number;
@@ -64,6 +66,8 @@ function aggregateStatistics(
       year,
       income: 0,
       expense: 0,
+      deposit: 0,
+      withdraw: 0,
       net: 0,
     }));
 
@@ -77,6 +81,10 @@ function aggregateStatistics(
             dataPoints[monthIndex].income += value;
           } else if (stat.key === "expense") {
             dataPoints[monthIndex].expense += value;
+          } else if (stat.key === "deposit") {
+            dataPoints[monthIndex].deposit += value;
+          } else if (stat.key === "withdraw") {
+            dataPoints[monthIndex].withdraw += Math.abs(value);
           }
         }
       }
@@ -100,6 +108,8 @@ function aggregateStatistics(
         year: y,
         income: 0,
         expense: 0,
+        deposit: 0,
+        withdraw: 0,
         net: 0,
       });
     }
@@ -113,6 +123,10 @@ function aggregateStatistics(
             existing.income += value;
           } else if (stat.key === "expense") {
             existing.expense += value;
+          } else if (stat.key === "deposit") {
+            existing.deposit += value;
+          } else if (stat.key === "withdraw") {
+            existing.withdraw += Math.abs(value);
           }
         }
       }

@@ -5,6 +5,8 @@ const dashboard = {
   summary: "Summary",
   income: "Income",
   expenses: "Expenses",
+  deposits: "Deposits",
+  withdrawals: "Withdrawals",
   properties: "Properties",
   incomeAndExpenses: "Income & Expenses",
   year: "Year",
