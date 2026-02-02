@@ -42,6 +42,7 @@ function Dashboard() {
     availableYears,
     isEditMode,
     getVisibleWidgets,
+    getAllWidgets,
     reorderWidgets,
     updateWidgetVisibility,
     updateWidgetSize,
@@ -78,16 +79,17 @@ function Dashboard() {
     }
   };
 
-  const handleHideWidget = (widgetId: string) => {
-    updateWidgetVisibility(widgetId, false);
+  const handleToggleVisibility = (widgetId: string, currentlyHidden: boolean) => {
+    updateWidgetVisibility(widgetId, currentlyHidden);
   };
 
   const handleSizeChange = (widgetId: string, size: WidgetSize) => {
     updateWidgetSize(widgetId, size);
   };
 
-  const visibleWidgets = getVisibleWidgets();
-  const widgetIds = visibleWidgets.map((w) => w.id);
+  // In edit mode, show all widgets (including hidden ones). Otherwise, show only visible.
+  const displayWidgets = isEditMode ? getAllWidgets() : getVisibleWidgets();
+  const widgetIds = displayWidgets.map((w) => w.id);
 
   return (
     <>
@@ -147,13 +149,14 @@ function Dashboard() {
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={widgetIds} strategy={rectSortingStrategy}>
-          {visibleWidgets.map((widgetConfig) => {
+          {displayWidgets.map((widgetConfig) => {
             const widgetDef = getWidgetById(widgetConfig.id);
             if (!widgetDef) return null;
 
             const WidgetComponent = widgetDef.component;
             const currentSize = widgetConfig.size ?? widgetDef.defaultSize;
             const gridMd = getGridSize(currentSize);
+            const isHidden = !widgetConfig.visible;
 
             return (
               <Grid
@@ -165,8 +168,9 @@ function Dashboard() {
                   id={widgetConfig.id}
                   height={widgetDef.height}
                   isEditMode={isEditMode}
+                  isHidden={isHidden}
                   currentSize={currentSize}
-                  onHide={handleHideWidget}
+                  onToggleVisibility={handleToggleVisibility}
                   onSizeChange={handleSizeChange}
                 >
                   <WidgetComponent />
@@ -177,8 +181,8 @@ function Dashboard() {
         </SortableContext>
       </DndContext>
 
-        {/* Show message when no widgets are visible */}
-        {visibleWidgets.length === 0 && (
+        {/* Show message when no widgets are visible (only in normal mode) */}
+        {!isEditMode && getVisibleWidgets().length === 0 && (
           <Grid size={12}>
             <Paper elevation={5} sx={{ p: 4, textAlign: "center" }}>
               <Typography color="text.secondary">{t("noWidgetsVisible")}</Typography>

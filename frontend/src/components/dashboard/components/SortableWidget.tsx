@@ -9,6 +9,7 @@ import {
   SelectChangeEvent,
 } from "@mui/material";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { ReactNode } from "react";
 import { WidgetSize, WIDGET_SIZES } from "../config/widget-registry";
@@ -18,8 +19,9 @@ interface SortableWidgetProps {
   children: ReactNode;
   height: number;
   isEditMode: boolean;
+  isHidden: boolean;
   currentSize: WidgetSize;
-  onHide: (id: string) => void;
+  onToggleVisibility: (id: string, visible: boolean) => void;
   onSizeChange: (id: string, size: WidgetSize) => void;
 }
 
@@ -28,8 +30,9 @@ export function SortableWidget({
   children,
   height,
   isEditMode,
+  isHidden,
   currentSize,
-  onHide,
+  onToggleVisibility,
   onSizeChange,
 }: SortableWidgetProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -49,7 +52,7 @@ export function SortableWidget({
     <Paper
       ref={setNodeRef}
       style={style}
-      elevation={5}
+      elevation={isHidden ? 1 : 5}
       sx={{
         p: 2,
         display: "flex",
@@ -57,6 +60,9 @@ export function SortableWidget({
         height,
         position: "relative",
         cursor: isEditMode ? "grab" : "default",
+        opacity: isHidden ? 0.5 : 1,
+        border: isHidden ? "2px dashed" : "none",
+        borderColor: "divider",
       }}
     >
       {isEditMode && (
@@ -99,8 +105,16 @@ export function SortableWidget({
           >
             <DragIndicatorIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small" onClick={() => onHide(id)}>
-            <VisibilityOffIcon fontSize="small" />
+          <IconButton
+            size="small"
+            onClick={() => onToggleVisibility(id, isHidden)}
+            color={isHidden ? "primary" : "default"}
+          >
+            {isHidden ? (
+              <VisibilityIcon fontSize="small" />
+            ) : (
+              <VisibilityOffIcon fontSize="small" />
+            )}
           </IconButton>
         </Box>
       )}

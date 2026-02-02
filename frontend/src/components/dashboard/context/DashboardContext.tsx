@@ -36,6 +36,7 @@ interface DashboardContextType {
   reorderWidgets: (activeId: string, overId: string) => void;
   saveDashboardConfig: () => Promise<void>;
   getVisibleWidgets: () => WidgetConfig[];
+  getAllWidgets: () => WidgetConfig[];
 }
 
 const STORAGE_KEY = "dashboard_filters";
@@ -215,6 +216,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       .sort((a, b) => a.order - b.order);
   }, [dashboardConfig]);
 
+  const getAllWidgets = useCallback((): WidgetConfig[] => {
+    return [...dashboardConfig.widgets].sort((a, b) => a.order - b.order);
+  }, [dashboardConfig]);
+
   // Don't render children until config is loaded
   if (!configLoaded) {
     return null;
@@ -238,6 +243,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         reorderWidgets,
         saveDashboardConfig,
         getVisibleWidgets,
+        getAllWidgets,
       }}
     >
       {children}
