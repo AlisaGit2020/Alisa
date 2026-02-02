@@ -1,6 +1,13 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, In, IsNull, Not, Repository } from 'typeorm';
+import {
+  DataSource,
+  FindManyOptions,
+  In,
+  IsNull,
+  Not,
+  Repository,
+} from 'typeorm';
 import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
@@ -26,6 +33,7 @@ export class PropertyStatisticsService {
     private repository: Repository<PropertyStatistics>,
     @Inject(forwardRef(() => PropertyService))
     private propertyService: PropertyService,
+    private dataSource: DataSource,
   ) {}
   EventCases = {
     CREATED: 'CREATED',
@@ -184,6 +192,34 @@ export class PropertyStatisticsService {
     }
   }
 
+  private async upsertStatistic(
+    propertyId: number,
+    key: StatisticKey,
+    year: number | null,
+    month: number | null,
+    eventCase: string,
+    transaction: Transaction,
+  ): Promise<void> {
+    const amount = this.getTransactionAmount(key, transaction);
+    const delta = eventCase === this.EventCases.CREATED ? amount : -amount;
+    const decimals = this.decimals.get(key) ?? 2;
+
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = (CAST(property_statistics."value" AS DECIMAL) + $6)::TEXT`,
+      [propertyId, key, year, month, delta.toFixed(decimals), delta],
+    );
+  }
+
+  private getTransactionAmount(key: StatisticKey, transaction: Transaction): number {
+    if (key === StatisticKey.WITHDRAW) {
+      return -transaction.amount;
+    }
+    return transaction.amount;
+  }
+
   private async transactionAcceptedAllTime(
     eventCase: string,
     key: StatisticKey,
@@ -192,32 +228,14 @@ export class PropertyStatisticsService {
     if (!this.weInterestedIn(key, transaction)) {
       return;
     }
-    let statistics: PropertyStatistics;
-    if (transaction === undefined) {
-      console.log('transaction is undefined');
-    }
-    statistics = await this.repository.findOne({
-      where: {
-        propertyId: transaction.propertyId,
-        key,
-        year: IsNull(),
-        month: IsNull(),
-      },
-    });
-
-    let value: number;
-    if (statistics) {
-      value = this.getEventNewValue(eventCase, key, transaction, statistics);
-    } else {
-      statistics = new PropertyStatistics();
-      statistics.propertyId = transaction.propertyId;
-      statistics.key = key;
-      value = this.getEventNewValue(eventCase, key, transaction);
-    }
-
-    statistics.value = this.getFormattedValue(value, key);
-
-    await this.repository.save(statistics);
+    await this.upsertStatistic(
+      transaction.propertyId,
+      key,
+      null,
+      null,
+      eventCase,
+      transaction,
+    );
   }
 
   private async transactionAcceptedYearly(
@@ -228,33 +246,15 @@ export class PropertyStatisticsService {
     if (!this.weInterestedIn(key, transaction)) {
       return;
     }
-    let statistics: PropertyStatistics;
-
     const year = this.getYear(key, transaction);
-
-    statistics = await this.repository.findOne({
-      where: {
-        propertyId: transaction.propertyId,
-        key,
-        year: year,
-        month: IsNull(),
-      },
-    });
-
-    let value: number;
-    if (statistics) {
-      value = this.getEventNewValue(eventCase, key, transaction, statistics);
-    } else {
-      statistics = new PropertyStatistics();
-      statistics.propertyId = transaction.propertyId;
-      statistics.key = key;
-      statistics.year = year;
-      value = this.getEventNewValue(eventCase, key, transaction);
-    }
-
-    statistics.value = this.getFormattedValue(value, key);
-
-    await this.repository.save(statistics);
+    await this.upsertStatistic(
+      transaction.propertyId,
+      key,
+      year,
+      null,
+      eventCase,
+      transaction,
+    );
   }
 
   private async transactionAcceptedMonthly(
@@ -265,35 +265,16 @@ export class PropertyStatisticsService {
     if (!this.weInterestedIn(key, transaction)) {
       return;
     }
-    let statistics: PropertyStatistics;
-
-    const month = this.getMonth(key, transaction);
     const year = this.getYear(key, transaction);
-
-    statistics = await this.repository.findOne({
-      where: {
-        propertyId: transaction.propertyId,
-        key,
-        year: year,
-        month: month,
-      },
-    });
-
-    let value: number;
-    if (statistics) {
-      value = this.getEventNewValue(eventCase, key, transaction, statistics);
-    } else {
-      statistics = new PropertyStatistics();
-      statistics.propertyId = transaction.propertyId;
-      statistics.key = key;
-      statistics.year = year;
-      statistics.month = month;
-      value = this.getEventNewValue(eventCase, key, transaction);
-    }
-
-    statistics.value = this.getFormattedValue(value, key);
-
-    await this.repository.save(statistics);
+    const month = this.getMonth(key, transaction);
+    await this.upsertStatistic(
+      transaction.propertyId,
+      key,
+      year,
+      month,
+      eventCase,
+      transaction,
+    );
   }
 
   private getYear(key: string, transaction: Transaction): number {
@@ -306,26 +287,6 @@ export class PropertyStatisticsService {
     return (
       new Date(transaction[this.relevanceDateField.get(key)]).getMonth() + 1
     );
-  }
-
-  private getEventNewValue(
-    eventCase: string,
-    key: StatisticKey,
-    transaction: Transaction,
-    statistics?: PropertyStatistics,
-  ): number {
-    let amount = transaction.amount;
-    if (key === StatisticKey.EXPENSE || key === StatisticKey.WITHDRAW) {
-      amount = -transaction.amount;
-    }
-    if (statistics) {
-      if (eventCase === this.EventCases.CREATED) {
-        return parseFloat(statistics.value) + amount;
-      } else {
-        return parseFloat(statistics.value) - amount;
-      }
-    }
-    return amount;
   }
 
   private getFormattedValue(value: number, key: string): string {
@@ -368,4 +329,309 @@ export class PropertyStatisticsService {
       transaction.type === TransactionType.WITHDRAW
     );
   }
+
+  /**
+   * Recalculates property statistics from source tables.
+   * Recalculates: income, expense, deposit, withdraw (NOT balance).
+   * @param propertyId Optional - if provided, only recalculates for that property
+   * @returns Summary of recalculated statistics
+   */
+  async recalculate(propertyId?: number): Promise<RecalculateResult> {
+    const propertyFilter = propertyId ? 'AND t."propertyId" = $1' : '';
+    const incomePropertyFilter = propertyId ? 'AND i."propertyId" = $1' : '';
+    const expensePropertyFilter = propertyId ? 'AND e."propertyId" = $1' : '';
+    const params = propertyId ? [propertyId] : [];
+
+    // Delete existing statistics (except balance)
+    const keysToRecalculate = [
+      StatisticKey.INCOME,
+      StatisticKey.EXPENSE,
+      StatisticKey.DEPOSIT,
+      StatisticKey.WITHDRAW,
+    ];
+
+    if (propertyId) {
+      await this.repository.delete({
+        propertyId,
+        key: In(keysToRecalculate),
+      });
+    } else {
+      await this.repository.delete({
+        key: In(keysToRecalculate),
+      });
+    }
+
+    // Recalculate INCOME from income table
+    await this.recalculateIncomeStatistics(incomePropertyFilter, params);
+
+    // Recalculate EXPENSE from expense table
+    await this.recalculateExpenseStatistics(expensePropertyFilter, params);
+
+    // Recalculate DEPOSIT from transaction table
+    await this.recalculateTransactionTypeStatistics(
+      StatisticKey.DEPOSIT,
+      TransactionType.DEPOSIT,
+      propertyFilter,
+      params,
+      false, // not negative
+    );
+
+    // Recalculate WITHDRAW from transaction table
+    await this.recalculateTransactionTypeStatistics(
+      StatisticKey.WITHDRAW,
+      TransactionType.WITHDRAW,
+      propertyFilter,
+      params,
+      true, // negative
+    );
+
+    // Return summary
+    const summary = await this.getRecalculateSummary(propertyId);
+    return summary;
+  }
+
+  private async recalculateIncomeStatistics(
+    propertyFilter: string,
+    params: number[],
+  ): Promise<void> {
+    const decimals = this.decimals.get(StatisticKey.INCOME);
+
+    // All-time
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       SELECT
+         i."propertyId",
+         '${StatisticKey.INCOME}',
+         NULL,
+         NULL,
+         ROUND(COALESCE(SUM(i."totalAmount"), 0), ${decimals})::TEXT
+       FROM income i
+       INNER JOIN transaction t ON t.id = i."transactionId"
+       WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
+       GROUP BY i."propertyId"
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = EXCLUDED."value"`,
+      params,
+    );
+
+    // Yearly
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       SELECT
+         i."propertyId",
+         '${StatisticKey.INCOME}',
+         EXTRACT(YEAR FROM t."accountingDate")::SMALLINT,
+         NULL,
+         ROUND(COALESCE(SUM(i."totalAmount"), 0), ${decimals})::TEXT
+       FROM income i
+       INNER JOIN transaction t ON t.id = i."transactionId"
+       WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
+       GROUP BY i."propertyId", EXTRACT(YEAR FROM t."accountingDate")
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = EXCLUDED."value"`,
+      params,
+    );
+
+    // Monthly
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       SELECT
+         i."propertyId",
+         '${StatisticKey.INCOME}',
+         EXTRACT(YEAR FROM t."accountingDate")::SMALLINT,
+         EXTRACT(MONTH FROM t."accountingDate")::SMALLINT,
+         ROUND(COALESCE(SUM(i."totalAmount"), 0), ${decimals})::TEXT
+       FROM income i
+       INNER JOIN transaction t ON t.id = i."transactionId"
+       WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
+       GROUP BY i."propertyId", EXTRACT(YEAR FROM t."accountingDate"), EXTRACT(MONTH FROM t."accountingDate")
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = EXCLUDED."value"`,
+      params,
+    );
+  }
+
+  private async recalculateExpenseStatistics(
+    propertyFilter: string,
+    params: number[],
+  ): Promise<void> {
+    const decimals = this.decimals.get(StatisticKey.EXPENSE);
+
+    // All-time (positive value)
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       SELECT
+         e."propertyId",
+         '${StatisticKey.EXPENSE}',
+         NULL,
+         NULL,
+         ROUND(COALESCE(SUM(e."totalAmount"), 0), ${decimals})::TEXT
+       FROM expense e
+       INNER JOIN transaction t ON t.id = e."transactionId"
+       WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
+       GROUP BY e."propertyId"
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = EXCLUDED."value"`,
+      params,
+    );
+
+    // Yearly (positive value)
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       SELECT
+         e."propertyId",
+         '${StatisticKey.EXPENSE}',
+         EXTRACT(YEAR FROM t."accountingDate")::SMALLINT,
+         NULL,
+         ROUND(COALESCE(SUM(e."totalAmount"), 0), ${decimals})::TEXT
+       FROM expense e
+       INNER JOIN transaction t ON t.id = e."transactionId"
+       WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
+       GROUP BY e."propertyId", EXTRACT(YEAR FROM t."accountingDate")
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = EXCLUDED."value"`,
+      params,
+    );
+
+    // Monthly (positive value)
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       SELECT
+         e."propertyId",
+         '${StatisticKey.EXPENSE}',
+         EXTRACT(YEAR FROM t."accountingDate")::SMALLINT,
+         EXTRACT(MONTH FROM t."accountingDate")::SMALLINT,
+         ROUND(COALESCE(SUM(e."totalAmount"), 0), ${decimals})::TEXT
+       FROM expense e
+       INNER JOIN transaction t ON t.id = e."transactionId"
+       WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
+       GROUP BY e."propertyId", EXTRACT(YEAR FROM t."accountingDate"), EXTRACT(MONTH FROM t."accountingDate")
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = EXCLUDED."value"`,
+      params,
+    );
+  }
+
+  private async recalculateTransactionTypeStatistics(
+    key: StatisticKey,
+    transactionType: TransactionType,
+    propertyFilter: string,
+    params: number[],
+    negative: boolean,
+  ): Promise<void> {
+    const decimals = this.decimals.get(key);
+    const sign = negative ? '-' : '';
+
+    // All-time
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       SELECT
+         t."propertyId",
+         '${key}',
+         NULL,
+         NULL,
+         ROUND(${sign}COALESCE(SUM(t.amount), 0), ${decimals})::TEXT
+       FROM transaction t
+       WHERE t.status = ${TransactionStatus.ACCEPTED} AND t.type = ${transactionType} ${propertyFilter}
+       GROUP BY t."propertyId"
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = EXCLUDED."value"`,
+      params,
+    );
+
+    // Yearly
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       SELECT
+         t."propertyId",
+         '${key}',
+         EXTRACT(YEAR FROM t."accountingDate")::SMALLINT,
+         NULL,
+         ROUND(${sign}COALESCE(SUM(t.amount), 0), ${decimals})::TEXT
+       FROM transaction t
+       WHERE t.status = ${TransactionStatus.ACCEPTED} AND t.type = ${transactionType} ${propertyFilter}
+       GROUP BY t."propertyId", EXTRACT(YEAR FROM t."accountingDate")
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = EXCLUDED."value"`,
+      params,
+    );
+
+    // Monthly
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       SELECT
+         t."propertyId",
+         '${key}',
+         EXTRACT(YEAR FROM t."accountingDate")::SMALLINT,
+         EXTRACT(MONTH FROM t."accountingDate")::SMALLINT,
+         ROUND(${sign}COALESCE(SUM(t.amount), 0), ${decimals})::TEXT
+       FROM transaction t
+       WHERE t.status = ${TransactionStatus.ACCEPTED} AND t.type = ${transactionType} ${propertyFilter}
+       GROUP BY t."propertyId", EXTRACT(YEAR FROM t."accountingDate"), EXTRACT(MONTH FROM t."accountingDate")
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = EXCLUDED."value"`,
+      params,
+    );
+  }
+
+  private async getRecalculateSummary(
+    propertyId?: number,
+  ): Promise<RecalculateResult> {
+    const keysToRecalculate = [
+      StatisticKey.INCOME,
+      StatisticKey.EXPENSE,
+      StatisticKey.DEPOSIT,
+      StatisticKey.WITHDRAW,
+    ];
+
+    // Only count all-time statistics (year IS NULL, month IS NULL) for the summary
+    const whereCondition: Record<string, unknown> = {
+      key: In(keysToRecalculate),
+      year: IsNull(),
+      month: IsNull(),
+    };
+    if (propertyId) {
+      whereCondition.propertyId = propertyId;
+    }
+
+    const stats = await this.repository.find({ where: whereCondition });
+
+    const result: RecalculateResult = {
+      income: { count: 0, total: 0 },
+      expense: { count: 0, total: 0 },
+      deposit: { count: 0, total: 0 },
+      withdraw: { count: 0, total: 0 },
+    };
+
+    for (const stat of stats) {
+      const value = parseFloat(stat.value) || 0;
+      switch (stat.key) {
+        case StatisticKey.INCOME:
+          result.income.count++;
+          result.income.total += value;
+          break;
+        case StatisticKey.EXPENSE:
+          result.expense.count++;
+          result.expense.total += value;
+          break;
+        case StatisticKey.DEPOSIT:
+          result.deposit.count++;
+          result.deposit.total += value;
+          break;
+        case StatisticKey.WITHDRAW:
+          result.withdraw.count++;
+          result.withdraw.total += value;
+          break;
+      }
+    }
+
+    return result;
+  }
+}
+
+export interface RecalculateResult {
+  income: { count: number; total: number };
+  expense: { count: number; total: number };
+  deposit: { count: number; total: number };
+  withdraw: { count: number; total: number };
 }
