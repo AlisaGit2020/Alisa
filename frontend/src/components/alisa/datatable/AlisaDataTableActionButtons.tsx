@@ -1,4 +1,4 @@
-import { IconButton, Tooltip } from "@mui/material";
+import { Fab, IconButton, Tooltip } from "@mui/material";
 import { TFunction } from "i18next";
 import {
   AlisaAddIcon,
@@ -19,9 +19,21 @@ export function AlisaDataTableAddButton(props: AlisaDataTableAddButtonProps) {
   }
   return (
     <Tooltip title={props.t("add")}>
-      <IconButton onClick={props.onClick}>
-        <AlisaAddIcon></AlisaAddIcon>
-      </IconButton>
+      <Fab
+        color="primary"
+        size="small"
+        onClick={props.onClick}
+        sx={{
+          boxShadow: 2,
+          "&:hover": {
+            transform: "scale(1.1)",
+            boxShadow: 4,
+          },
+          transition: "transform 0.2s, box-shadow 0.2s",
+        }}
+      >
+        <AlisaAddIcon />
+      </Fab>
     </Tooltip>
   );
 }
