@@ -12,6 +12,12 @@ export const propertyContext: AlisaContext = {
     routePath: '/properties',
 }
 
+export const accountingContext: AlisaContext = {
+    name: 'accounting',
+    apiPath: 'accounting',
+    routePath: '/accounting',
+}
+
 export const expenseTypeContext: AlisaContext = {
     name: 'expense-type',
     apiPath: 'accounting/expense/type',
@@ -21,7 +27,7 @@ export const expenseTypeContext: AlisaContext = {
 export const expenseContext: AlisaContext = {
     name: 'expense',
     apiPath: 'accounting/expense',
-    routePath: '/transactions',
+    routePath: '/accounting/expenses',
 }
 
 export const incomeTypeContext: AlisaContext = {
@@ -33,7 +39,7 @@ export const incomeTypeContext: AlisaContext = {
 export const incomeContext: AlisaContext = {
     name: 'income',
     apiPath: 'accounting/income',
-    routePath: '/transactions',
+    routePath: '/accounting/incomes',
 }
 
 export const loginContext: AlisaContext = {
@@ -45,7 +51,7 @@ export const loginContext: AlisaContext = {
 export const opImportContext: AlisaContext = {
     name: 'op-import',
     apiPath: 'import/op',
-    routePath: '/transactions/import/op',
+    routePath: '/accounting/transactions/import/op',
 }
 
 export const settingsContext: AlisaContext = {
@@ -57,7 +63,7 @@ export const settingsContext: AlisaContext = {
 export const transactionContext: AlisaContext = {
     name: 'transaction',
     apiPath: 'accounting/transaction',
-    routePath: '/transactions',
+    routePath: '/accounting/transactions',
 }
 
 export const userContext: AlisaContext = {

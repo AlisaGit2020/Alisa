@@ -10,6 +10,7 @@ import { ExpenseInputDto } from './dtos/expense-input.dto';
 import { ExpenseType } from './entities/expense-type.entity';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
+import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
 
 @Injectable()
 export class ExpenseService {
@@ -25,6 +26,9 @@ export class ExpenseService {
     user: JWTUser,
     options: FindManyOptions<Expense>,
   ): Promise<Expense[]> {
+    if (options.where !== undefined) {
+      options.where = typeormWhereTransformer(options.where);
+    }
     options.where = this.authService.addOwnershipFilter(user, options.where);
     return this.repository.find(options);
   }
@@ -107,6 +111,10 @@ export class ExpenseService {
     if (expense.transaction !== undefined) {
       expense.transaction.propertyId = expense.propertyId;
       expense.transaction.property = expense.property;
+      // Copy accountingDate from transaction if not explicitly set
+      if (!expense.accountingDate && expense.transaction.accountingDate) {
+        expense.accountingDate = expense.transaction.accountingDate;
+      }
     }
     if (expense.expenseType !== undefined) {
       expense.expenseType.userId = user.id;

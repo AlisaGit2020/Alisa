@@ -27,6 +27,9 @@ export class Income {
   @Column(columnOptionTwoDecimal)
   public totalAmount: number;
 
+  @Column({ type: 'timestamp', nullable: true })
+  public accountingDate: Date;
+
   /*Income type*/
   @ManyToOne(() => IncomeType, (incomeType) => incomeType.incomes, {
     eager: false,
@@ -54,11 +57,12 @@ export class Income {
     eager: false,
     cascade: ['insert', 'update'],
     orphanedRowAction: 'delete',
-    onDelete: 'CASCADE',
+    onDelete: 'SET NULL',
+    nullable: true,
   })
   @JoinColumn({ name: 'transactionId' })
   transaction: Transaction;
 
-  @Column({ nullable: false })
-  transactionId: number;
+  @Column({ nullable: true })
+  transactionId: number | null;
 }

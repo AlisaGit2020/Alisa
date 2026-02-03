@@ -1,7 +1,7 @@
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import { WithTranslation, withTranslation } from "react-i18next";
-import { propertyContext, transactionContext } from "@alisa-lib/alisa-contexts";
+import { propertyContext, accountingContext, transactionContext } from "@alisa-lib/alisa-contexts";
 import { Stack } from "@mui/material";
 
 function TopMenuItems({ t }: WithTranslation) {
@@ -49,10 +49,10 @@ function TopMenuItems({ t }: WithTranslation) {
       <ListItemButton
         component="a"
         href={transactionContext.routePath}
-        selected={currentPath.startsWith(transactionContext.routePath)}
+        selected={currentPath.startsWith(accountingContext.routePath)}
         sx={menuItemSx}
       >
-        <ListItemText primary={t("transactions")} />
+        <ListItemText primary={t("accounting")} />
       </ListItemButton>
 
       <ListItemButton component="a" sx={menuItemSx}>

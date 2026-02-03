@@ -13,6 +13,7 @@ import { IncomeType } from './entities/income-type.entity';
 import { Transaction } from '../transaction/entities/transaction.entity';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
+import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
 
 @Injectable()
 export class IncomeService {
@@ -32,6 +33,9 @@ export class IncomeService {
     user: JWTUser,
     options: FindManyOptions<Income>,
   ): Promise<Income[]> {
+    if (options.where !== undefined) {
+      options.where = typeormWhereTransformer(options.where);
+    }
     options.where = this.authService.addOwnershipFilter(user, options.where);
 
     return this.repository.find(options);
@@ -116,6 +120,10 @@ export class IncomeService {
     if (income.transaction !== undefined) {
       income.transaction.propertyId = income.propertyId;
       income.transaction.property = income.property;
+      // Copy accountingDate from transaction if not explicitly set
+      if (!income.accountingDate && income.transaction.accountingDate) {
+        income.accountingDate = income.transaction.accountingDate;
+      }
     }
   }
 

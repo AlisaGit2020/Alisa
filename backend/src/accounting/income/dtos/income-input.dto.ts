@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsNumber, IsObject, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsObject, IsOptional, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
 import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/property-input.dto';
 import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
@@ -17,6 +18,10 @@ export class IncomeInputDto {
   @Min(0.01)
   totalAmount: number = 0;
 
+  @IsOptional()
+  @Transform(({ value }) => (value ? new Date(value) : undefined))
+  accountingDate?: Date;
+
   incomeType?: IncomeTypeInputDto;
 
   @IsNumber()
@@ -27,8 +32,10 @@ export class IncomeInputDto {
   @IsNumber()
   propertyId?: number;
 
+  @IsOptional()
   @IsObject()
   transaction?: TransactionInputDto;
 
-  transactionId?: number;
+  @IsOptional()
+  transactionId?: number | null;
 }

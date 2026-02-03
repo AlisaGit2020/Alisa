@@ -1,15 +1,22 @@
 import AuthOutlet from "@auth-kit/react-router/AuthOutlet";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./dashboard/Dashboard";
 import Properties from "./property/Properties";
 import PropertyForm from "./property/PropertyForm";
 import Settings from "./settings/Settings";
-import { propertyContext, transactionContext } from "@alisa-lib/alisa-contexts";
+import {
+  propertyContext,
+  transactionContext,
+  expenseContext,
+  incomeContext,
+} from "@alisa-lib/alisa-contexts";
 import TransactionMain from "./transaction/TransactionMain";
 
 import SignIn from "./login/Login";
 import Breadcrumbs from "./layout/Breadcrumbs.tsx";
 import TransactionsPending from "./transaction/pending/TransactionsPending.tsx";
+import Expenses from "./accounting/expenses/Expenses.tsx";
+import Incomes from "./accounting/incomes/Incomes.tsx";
 
 export default function AppRoutes() {
   return (
@@ -32,14 +39,31 @@ export default function AppRoutes() {
             element={<Properties></Properties>}
           ></Route>
 
+          {/* Accounting routes */}
           <Route
             path={transactionContext.routePath}
             element={<TransactionMain></TransactionMain>}
           ></Route>
 
           <Route
-            path={`${transactionContext.routePath}/pending/`}
+            path={`${transactionContext.routePath}/pending`}
             element={<TransactionsPending></TransactionsPending>}
+          ></Route>
+
+          <Route
+            path={expenseContext.routePath}
+            element={<Expenses></Expenses>}
+          ></Route>
+
+          <Route
+            path={incomeContext.routePath}
+            element={<Incomes></Incomes>}
+          ></Route>
+
+          {/* Backward compatibility redirect */}
+          <Route
+            path="/transactions/*"
+            element={<Navigate to="/accounting/transactions" replace />}
           ></Route>
 
           <Route

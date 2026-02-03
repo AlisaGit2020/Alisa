@@ -129,7 +129,7 @@ function TransactionFilter(props: TransactionFilterProps) {
         padding: 2,
       }}
     >
-      <Stack spacing={1.5}>
+      <Stack spacing={3}>
         <Stack direction={"row"} spacing={2} flexWrap="wrap" useFlexGap alignItems="flex-end">
           <FormControl size="small" sx={{ width: 180 }}>
             <InputLabel>{props.t("transactionType")}</InputLabel>

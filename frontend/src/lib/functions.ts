@@ -32,8 +32,11 @@ export function copyMatchingKeyValues<T extends object>(
         const sourceValue = source[typedKey];
 
         if (sourceValue !== undefined) {
-            if (typeof sourceValue === 'object' && sourceValue !== null) {
-                
+            // Handle Date objects directly (don't recursively copy)
+            if (sourceValue instanceof Date) {
+                target[typedKey] = sourceValue as T[keyof T];
+            } else if (typeof sourceValue === 'object' && sourceValue !== null) {
+
                 if (typeof target[typedKey] === 'object' && target[typedKey] !== null) {
                     copyMatchingKeyValues(target[typedKey] as object, sourceValue);
                 } else {
@@ -41,7 +44,7 @@ export function copyMatchingKeyValues<T extends object>(
                     copyMatchingKeyValues(target[typedKey] as object, sourceValue);
                 }
             } else {
-                
+
                 target[typedKey] = sourceValue as T[keyof T];
             }
         }

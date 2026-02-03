@@ -5,6 +5,7 @@ import AppBar from "./components/layout/AppBar";
 import AppContainer from "./components/layout/AppContainer";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import "dayjs/locale/fi";
 import createStore from "react-auth-kit/createStore";
 import AuthProvider from "react-auth-kit";
 import { ThemeContextProvider, useThemeMode } from "@alisa-lib/theme-context";
@@ -51,7 +52,7 @@ function ThemedApp() {
 
 export default function App() {
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="fi">
       <ThemeContextProvider>
         <ThemedApp />
       </ThemeContextProvider>

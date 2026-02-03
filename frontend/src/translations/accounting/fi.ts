@@ -1,0 +1,55 @@
+const accounting = {
+  // Left menu
+  accepted: "Hyväksytyt",
+  pending: "Odottaa",
+  expenses: "Kulut",
+  incomes: "Tulot",
+
+  // Common form fields
+  accountingDate: "Kirjanpito pvm",
+  property: "Asunto",
+  description: "Kuvaus",
+  quantity: "Määrä",
+  amount: "Hinta",
+  totalAmount: "Yhteensä",
+  expenseType: "Kululaji",
+  incomeType: "Tulolaji",
+
+  // Form actions
+  save: "Tallenna",
+  cancel: "Peruuta",
+  validationErrorTitle: "Tarkista syötetyt tiedot",
+
+  // Expense form
+  addExpense: "Lisää kulu",
+  editExpense: "Muokkaa kulua",
+
+  // Income form
+  addIncome: "Lisää tulo",
+  editIncome: "Muokkaa tuloa",
+
+  // Filter
+  all: "Kaikki",
+  search: "Haku",
+  reset: "Tyhjennä",
+  startDate: "Alkupäivä",
+  endDate: "Loppupäivä",
+  dataNotSelected: "Ei valittu",
+  activeFilters: "Aktiiviset suodattimet",
+
+  // Data table
+  rowCount_one: "{{count}} rivi",
+  rowCount_other: "{{count}} riviä",
+  noRowsFound: "Ei rivejä",
+  confirm: "Vahvista",
+  confirmDelete: "Haluatko varmasti poistaa?",
+  delete: "Poista",
+  add: "Lisää",
+
+  // Format helpers
+  "format.number": "{{val, number}}",
+  "format.currency.euro": "{{val, number(minimumFractionDigits: 2; maximumFractionDigits: 2)}} €",
+  "format.date": "{{val, datetime}}",
+};
+
+export default accounting;
