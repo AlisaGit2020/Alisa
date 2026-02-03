@@ -84,7 +84,7 @@ function aggregateStatistics(
           } else if (stat.key === "deposit") {
             dataPoints[monthIndex].deposit += value;
           } else if (stat.key === "withdraw") {
-            dataPoints[monthIndex].withdraw += Math.abs(value);
+            dataPoints[monthIndex].withdraw += value;
           }
         }
       }
@@ -126,7 +126,7 @@ function aggregateStatistics(
           } else if (stat.key === "deposit") {
             existing.deposit += value;
           } else if (stat.key === "withdraw") {
-            existing.withdraw += Math.abs(value);
+            existing.withdraw += value;
           }
         }
       }

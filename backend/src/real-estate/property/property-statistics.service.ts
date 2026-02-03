@@ -214,7 +214,11 @@ export class PropertyStatisticsService {
   }
 
   private getTransactionAmount(key: StatisticKey, transaction: Transaction): number {
-    if (key === StatisticKey.WITHDRAW) {
+    // WITHDRAW and EXPENSE transactions have negative amounts (e.g., -100)
+    // We negate to store positive values in statistics (e.g., 100)
+    // This matches recalculation behavior which uses positive totalAmount from expense table
+    // and -SUM(amount) for withdrawals
+    if (key === StatisticKey.WITHDRAW || key === StatisticKey.EXPENSE) {
       return -transaction.amount;
     }
     return transaction.amount;

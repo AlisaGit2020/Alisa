@@ -82,3 +82,14 @@ Backend requires in `.env`:
 
 ### Internationalization
 Frontend uses i18next with translation files in `frontend/src/translations/` organized by feature domain.
+
+### Financial Data Conventions
+**Transaction amounts:**
+- INCOME and DEPOSIT: Store as **positive** values
+- EXPENSE and WITHDRAW: Store as **negative** values
+- This allows simple balance calculation: `balance = SUM(all transaction amounts)`
+
+**Property statistics:**
+- All statistic values (income, expense, deposit, withdraw) are stored as **positive** numbers
+- The `key` field indicates the type, so the sign is not needed
+- This simplifies display in charts and reports (no need for `Math.abs()` in UI)

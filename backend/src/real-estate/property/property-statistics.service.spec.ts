@@ -161,10 +161,11 @@ describe('PropertyStatisticsService', () => {
     });
 
     it('uses positive delta for expense transactions', async () => {
+      // Real expense transactions have negative amounts (e.g., -50)
       const transaction = createTransaction({
         id: 1,
         propertyId: 1,
-        amount: 50,
+        amount: -50,
         type: TransactionType.EXPENSE,
         status: TransactionStatus.ACCEPTED,
         transactionDate: new Date('2023-03-15'),
@@ -173,7 +174,7 @@ describe('PropertyStatisticsService', () => {
 
       await service.handleTransactionCreated({ transaction });
 
-      // Find the call for EXPENSE key - delta should be positive
+      // Find the call for EXPENSE key - delta should be positive (negated from -50)
       const expenseCalls = mockDataSource.query.mock.calls.filter(
         (call) => call[1][1] === StatisticKey.EXPENSE,
       );
@@ -224,10 +225,11 @@ describe('PropertyStatisticsService', () => {
     });
 
     it('uses negative delta when deleting expense transaction', async () => {
+      // Real expense transactions have negative amounts (e.g., -50)
       const transaction = createTransaction({
         id: 1,
         propertyId: 1,
-        amount: 50,
+        amount: -50,
         type: TransactionType.EXPENSE,
         status: TransactionStatus.ACCEPTED,
         transactionDate: new Date('2023-03-15'),
@@ -236,7 +238,7 @@ describe('PropertyStatisticsService', () => {
 
       await service.handleTransactionDeleted({ transaction });
 
-      // For deletion of expense, delta becomes negative (subtracting a positive)
+      // For deletion of expense, delta becomes negative (subtracting the positive stored value)
       const expenseCalls = mockDataSource.query.mock.calls.filter(
         (call) => call[1][1] === StatisticKey.EXPENSE,
       );
