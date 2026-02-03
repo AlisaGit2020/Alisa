@@ -75,6 +75,14 @@ Both projects use TypeScript path aliases:
 - `@alisa-lib/*` → Frontend lib directory
 - `@alisa-mocks/*` → Test mocks
 
+### Assets
+Always store images and other static assets in the `frontend/assets/` folder, organized by category:
+- `frontend/assets/banks/` - Bank logos (e.g., op-logo.svg)
+- `frontend/assets/flags/` - Country/language flags
+- `frontend/assets/properties/` - Property images
+
+Import assets in components using relative paths from the assets folder.
+
 ### Environment Variables
 Backend requires in `.env`:
 - `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE` - PostgreSQL connection

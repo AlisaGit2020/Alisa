@@ -1,4 +1,15 @@
 const transaction = {
+  // Overview page
+  overviewTitle: "Tilitapahtumat",
+  overviewDescription:
+    "Tuo, tarkista ja hallitse tilitapahtumia. Luokittele odottavat tapahtumat ja seuraa hyväksyttyjä kirjanpitotietoja.",
+  acceptedDescription:
+    "Näytä ja hallitse tarkistettuja ja hyväksyttyjä tapahtumia.",
+  pendingDescription:
+    "Tarkista tuodut tapahtumat, aseta luokat ja hyväksy ne kirjanpitoon.",
+  importDescription:
+    "Tuo uusia tilitapahtumia pankistasi viedyistä CSV-tiedostoista.",
+
   accepted: "Hyväksytty",
   activeFilters: "Aktiiviset suodattimet",
   accountingDate: "Kirjanpito pvm",
@@ -40,6 +51,46 @@ const transaction = {
   transactionType: "Tapahtumatyyppi",
   transactions: "Tilitapahtumat",
   withdraw: "Nosto",
+  unknown: "Tuntematon",
+  importWizard: {
+    title: "Tuo pankkitapahtumat",
+    steps: {
+      import: "Tuo",
+      review: "Tarkista",
+      accept: "Hyväksy",
+      done: "Valmis",
+    },
+    supportedBanks: "Tuetut pankit",
+    importingTo: "Tuodaan kohteeseen",
+    loadingProperty: "Ladataan...",
+    selectPropertyWarning:
+      "Valitse tietty kohde navigointipalkista ennen tuontia.",
+    dropFileHere: "Pudota tiedosto tähän",
+    dragDropOrClick:
+      "Vedä ja pudota CSV-tiedosto tähän tai napsauta valitaksesi",
+    csvFilesOnly: "Vain CSV-tiedostot (.csv)",
+    selectedFile: "Valittu tiedosto",
+    uploading: "Ladataan...",
+    uploadAndContinue: "Lataa ja jatka",
+    unknownTypesWarning:
+      "Joidenkin tapahtumien tyyppi on tuntematon. Luokittele kaikki tapahtumat ennen jatkamista.",
+    back: "Takaisin",
+    next: "Seuraava",
+    readyToApprove: "Valmiina hyväksyttäväksi",
+    transactionCount: "{{count}} tapahtumaa on valmiina hyväksyttäväksi",
+    breakdown: "Erittely tyypeittäin",
+    transactions: "tapahtumaa",
+    total: "Yhteensä",
+    approving: "Hyväksytään...",
+    approveAll: "Hyväksy kaikki",
+    importComplete: "Tuonti valmis!",
+    successMessage: "{{count}} tapahtumaa tuotu ja hyväksytty onnistuneesti.",
+    transactionsImported: "Tapahtumia tuotu",
+    netAmount: "Nettosumma",
+    importAnotherFile: "Tuo toinen tiedosto",
+    viewTransactions: "Siirry tapahtumiin",
+    allFields: "Kaikki kentät",
+  },
 };
 
 export default transaction;

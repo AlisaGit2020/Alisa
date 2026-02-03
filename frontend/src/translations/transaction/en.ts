@@ -1,4 +1,15 @@
 const transaction = {
+  // Overview page
+  overviewTitle: "Bank Transactions",
+  overviewDescription:
+    "Import, review, and manage bank transactions. Categorize pending transactions and track your approved financial records.",
+  acceptedDescription:
+    "View and manage transactions that have been reviewed and approved.",
+  pendingDescription:
+    "Review imported transactions, set categories, and approve them for your records.",
+  importDescription:
+    "Import new bank transactions from CSV files exported from your bank.",
+
   accepted: "Accepted",
   activeFilters: "Active filters",
   accountingDate: "Accounting date",
@@ -40,6 +51,46 @@ const transaction = {
   transactionType: "Transaction type",
   transactions: "Transactions",
   withdraw: "Withdraw",
+  unknown: "Unknown",
+  importWizard: {
+    title: "Import Bank Transactions",
+    steps: {
+      import: "Import",
+      review: "Review",
+      accept: "Approve",
+      done: "Done",
+    },
+    supportedBanks: "Supported Banks",
+    importingTo: "Importing to",
+    loadingProperty: "Loading...",
+    selectPropertyWarning:
+      "Please select a specific property from the navigation bar before importing.",
+    dropFileHere: "Drop file here",
+    dragDropOrClick: "Drag and drop a CSV file here, or click to select",
+    csvFilesOnly: "CSV files only (.csv)",
+    selectedFile: "Selected file",
+    uploading: "Uploading...",
+    uploadAndContinue: "Upload and Continue",
+    unknownTypesWarning:
+      "Some transactions have unknown types. Please categorize all transactions before proceeding.",
+    back: "Back",
+    next: "Next",
+    readyToApprove: "Ready to Approve",
+    transactionCount: "{{count}} transactions are ready to be approved",
+    breakdown: "Breakdown by type",
+    transactions: "transactions",
+    total: "Total",
+    approving: "Approving...",
+    approveAll: "Approve All",
+    importComplete: "Import Complete!",
+    successMessage:
+      "Successfully imported and approved {{count}} transactions.",
+    transactionsImported: "Transactions Imported",
+    netAmount: "Net Amount",
+    importAnotherFile: "Import Another File",
+    viewTransactions: "Go to Transactions",
+    allFields: "All fields",
+  },
 };
 
 export default transaction;

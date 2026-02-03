@@ -30,6 +30,8 @@ interface TransactionsPendingActionsProps extends WithTranslation {
   selectedIds: number[];
   hasExpenseTransactions: boolean;
   hasIncomeTransactions: boolean;
+  hideApprove?: boolean;
+  hideSplitLoanPayment?: boolean;
   onCancel: () => void;
   onApprove: () => void;
   onSetType: (type: number) => Promise<void>;
@@ -183,14 +185,16 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
           spacing={2}
           sx={{ display: !editState && !loanSplitState ? "flex" : "none" }}
         >
-          <Button
-            variant={"text"}
-            color={"success"}
-            onClick={props.onApprove}
-            endIcon={<AlisaApproveIcon></AlisaApproveIcon>}
-          >
-            {props.t("approve")}
-          </Button>
+          {!props.hideApprove && (
+            <Button
+              variant={"text"}
+              color={"success"}
+              onClick={props.onApprove}
+              endIcon={<AlisaApproveIcon></AlisaApproveIcon>}
+            >
+              {props.t("approve")}
+            </Button>
+          )}
           <Button
             variant="text"
             onClick={handleEdit}
@@ -198,13 +202,15 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
           >
             {props.t("edit")}
           </Button>
-          <Button
-            variant="text"
-            onClick={handleLoanSplit}
-            endIcon={<CallSplitIcon></CallSplitIcon>}
-          >
-            {props.t("splitLoanPayment")}
-          </Button>
+          {!props.hideSplitLoanPayment && (
+            <Button
+              variant="text"
+              onClick={handleLoanSplit}
+              endIcon={<CallSplitIcon></CallSplitIcon>}
+            >
+              {props.t("splitLoanPayment")}
+            </Button>
+          )}
           <Button
             variant="text"
             color={"error"}
