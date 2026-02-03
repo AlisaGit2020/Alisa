@@ -16,7 +16,10 @@ const dashboard = {
   doneEditing: "Valmis",
   widgets: "Widgetit",
   hideWidget: "Piilota widget",
+  showWidget: "Näytä widget",
+  dragToReorder: "Vedä järjestääksesi",
   noWidgetsVisible: "Ei näkyviä widgettejä. Paina Muokkaa lisätäksesi widgettejä.",
+  recalculate: "Laske tilastot uudelleen",
 };
 
 export default dashboard;

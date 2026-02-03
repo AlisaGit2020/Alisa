@@ -7,11 +7,13 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  Tooltip,
 } from "@mui/material";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { WidgetSize, WIDGET_SIZES } from "../config/widget-registry";
 
 interface SortableWidgetProps {
@@ -35,6 +37,7 @@ export function SortableWidget({
   onToggleVisibility,
   onSizeChange,
 }: SortableWidgetProps) {
+  const { t } = useTranslation("dashboard");
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id });
 
@@ -97,25 +100,29 @@ export function SortableWidget({
               </MenuItem>
             ))}
           </Select>
-          <IconButton
-            size="small"
-            {...attributes}
-            {...listeners}
-            sx={{ cursor: "grab" }}
-          >
-            <DragIndicatorIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={() => onToggleVisibility(id, isHidden)}
-            color={isHidden ? "primary" : "default"}
-          >
-            {isHidden ? (
-              <VisibilityIcon fontSize="small" />
-            ) : (
-              <VisibilityOffIcon fontSize="small" />
-            )}
-          </IconButton>
+          <Tooltip title={t("dragToReorder")}>
+            <IconButton
+              size="small"
+              {...attributes}
+              {...listeners}
+              sx={{ cursor: "grab" }}
+            >
+              <DragIndicatorIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={isHidden ? t("showWidget") : t("hideWidget")}>
+            <IconButton
+              size="small"
+              onClick={() => onToggleVisibility(id, isHidden)}
+              color={isHidden ? "primary" : "default"}
+            >
+              {isHidden ? (
+                <VisibilityIcon fontSize="small" />
+              ) : (
+                <VisibilityOffIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
         </Box>
       )}
       {children}

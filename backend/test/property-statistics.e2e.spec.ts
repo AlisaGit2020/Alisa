@@ -6,11 +6,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { DataSource } from 'typeorm';
+import * as request from 'supertest';
 import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
 import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
+import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
   addIncomeAndExpenseTypes,
+  getBearerToken,
   getTestUsers,
+  getUserAccessToken2,
   prepareDatabase,
   TestUser,
   TestUsersSetup,
@@ -31,6 +35,7 @@ describe('PropertyStatisticsService (e2e)', () => {
   let dataSource: DataSource;
   let propertyStatisticsService: PropertyStatisticsService;
   let transactionService: TransactionService;
+  let authService: AuthService;
   let testUsers: TestUsersSetup;
   let mainUser: TestUser;
 
@@ -45,6 +50,7 @@ describe('PropertyStatisticsService (e2e)', () => {
     dataSource = app.get(DataSource);
     propertyStatisticsService = app.get(PropertyStatisticsService);
     transactionService = app.get(TransactionService);
+    authService = app.get(AuthService);
 
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
@@ -545,6 +551,215 @@ describe('PropertyStatisticsService (e2e)', () => {
       `, [propertyId]);
       expect(incomeAfter.length).toBe(1);
       expect(parseFloat(incomeAfter[0].value)).toBeCloseTo(249, 2);
+    });
+  });
+
+  describe('recalculateForProperties (user isolation)', () => {
+    let user2: typeof mainUser;
+
+    beforeEach(async () => {
+      user2 = testUsers.user2WithProperties;
+
+      // Clean up all tables
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await dataSource.query('DELETE FROM income');
+      await dataSource.query('DELETE FROM expense');
+      await dataSource.query('DELETE FROM property_statistics');
+      await dataSource.query('DELETE FROM transaction');
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    it('only recalculates statistics for specified property IDs', async () => {
+      const user1Property = mainUser.properties[0].id;
+      const user2Property = user2.properties[0].id;
+
+      // Add transactions for both users
+      await transactionService.add(mainUser.jwtUser, getTransactionIncome1(user1Property));
+      await transactionService.add(user2.jwtUser, getTransactionIncome2(user2Property));
+
+      // Wait for event handlers
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify both have statistics
+      const user1StatsBefore = await dataSource.query(`
+        SELECT value FROM property_statistics
+        WHERE "propertyId" = $1 AND "key" = 'income' AND "year" IS NULL AND "month" IS NULL
+      `, [user1Property]);
+      const user2StatsBefore = await dataSource.query(`
+        SELECT value FROM property_statistics
+        WHERE "propertyId" = $1 AND "key" = 'income' AND "year" IS NULL AND "month" IS NULL
+      `, [user2Property]);
+
+      expect(user1StatsBefore.length).toBe(1);
+      expect(user2StatsBefore.length).toBe(1);
+
+      // Corrupt user1's statistics to verify recalculation works
+      await dataSource.query(`
+        UPDATE property_statistics SET value = '9999.00'
+        WHERE "propertyId" = $1 AND "key" = 'income'
+      `, [user1Property]);
+
+      // Recalculate only for user1's properties
+      const result = await propertyStatisticsService.recalculateForProperties([user1Property]);
+
+      // Verify user1's stats were recalculated (back to correct value)
+      const user1StatsAfter = await dataSource.query(`
+        SELECT value FROM property_statistics
+        WHERE "propertyId" = $1 AND "key" = 'income' AND "year" IS NULL AND "month" IS NULL
+      `, [user1Property]);
+      expect(parseFloat(user1StatsAfter[0].value)).toBeCloseTo(249, 2);
+
+      // Verify user2's stats were NOT affected (still the original value)
+      const user2StatsAfter = await dataSource.query(`
+        SELECT value FROM property_statistics
+        WHERE "propertyId" = $1 AND "key" = 'income' AND "year" IS NULL AND "month" IS NULL
+      `, [user2Property]);
+      expect(parseFloat(user2StatsAfter[0].value)).toBeCloseTo(1090, 2);
+
+      // Verify result only contains user1's data
+      expect(result.income.total).toBeCloseTo(249, 2);
+    });
+
+    it('does not delete or modify statistics for other properties', async () => {
+      const user1Property = mainUser.properties[0].id;
+      const user2Property = user2.properties[0].id;
+
+      // Add transactions for both users
+      await transactionService.add(mainUser.jwtUser, getTransactionExpense1(user1Property));
+      await transactionService.add(user2.jwtUser, getTransactionExpense2(user2Property));
+
+      // Wait for event handlers
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Record user2's statistics before
+      const user2StatsBefore = await dataSource.query(`
+        SELECT * FROM property_statistics
+        WHERE "propertyId" = $1
+      `, [user2Property]);
+
+      // Recalculate only for user1's properties
+      await propertyStatisticsService.recalculateForProperties([user1Property]);
+
+      // Verify user2's statistics are unchanged
+      const user2StatsAfter = await dataSource.query(`
+        SELECT * FROM property_statistics
+        WHERE "propertyId" = $1
+      `, [user2Property]);
+
+      expect(user2StatsAfter.length).toBe(user2StatsBefore.length);
+      for (let i = 0; i < user2StatsBefore.length; i++) {
+        expect(user2StatsAfter[i].value).toBe(user2StatsBefore[i].value);
+        expect(user2StatsAfter[i].key).toBe(user2StatsBefore[i].key);
+      }
+    });
+
+    it('handles empty property ID array gracefully', async () => {
+      const result = await propertyStatisticsService.recalculateForProperties([]);
+
+      expect(result.income.count).toBe(0);
+      expect(result.income.total).toBe(0);
+      expect(result.expense.count).toBe(0);
+      expect(result.expense.total).toBe(0);
+    });
+  });
+
+  describe('POST /real-estate/property/statistics/recalculate (HTTP endpoint)', () => {
+    let user2: typeof mainUser;
+
+    beforeEach(async () => {
+      user2 = testUsers.user2WithProperties;
+
+      // Clean up all tables
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await dataSource.query('DELETE FROM income');
+      await dataSource.query('DELETE FROM expense');
+      await dataSource.query('DELETE FROM property_statistics');
+      await dataSource.query('DELETE FROM transaction');
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    it('only recalculates statistics for the authenticated user\'s properties', async () => {
+      const user1Property = mainUser.properties[0].id;
+      const user2Property = user2.properties[0].id;
+
+      // Add transactions for both users
+      await transactionService.add(mainUser.jwtUser, getTransactionIncome1(user1Property));
+      await transactionService.add(user2.jwtUser, getTransactionIncome2(user2Property));
+
+      // Wait for event handlers
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Corrupt user1's statistics
+      await dataSource.query(`
+        UPDATE property_statistics SET value = '9999.00'
+        WHERE "propertyId" = $1 AND "key" = 'income'
+      `, [user1Property]);
+
+      // Get auth tokens for both users
+      const user1Token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      // User1 calls recalculate endpoint
+      const response = await request(app.getHttpServer())
+        .post('/real-estate/property/statistics/recalculate')
+        .set('Authorization', getBearerToken(user1Token))
+        .expect(200);
+
+      // Verify response contains only user1's data
+      expect(response.body.income.total).toBeCloseTo(249, 0);
+
+      // Verify user1's stats were recalculated (back to correct value)
+      const user1StatsAfter = await dataSource.query(`
+        SELECT value FROM property_statistics
+        WHERE "propertyId" = $1 AND "key" = 'income' AND "year" IS NULL AND "month" IS NULL
+      `, [user1Property]);
+      expect(parseFloat(user1StatsAfter[0].value)).toBeCloseTo(249, 2);
+
+      // Verify user2's stats were NOT affected
+      const user2StatsAfter = await dataSource.query(`
+        SELECT value FROM property_statistics
+        WHERE "propertyId" = $1 AND "key" = 'income' AND "year" IS NULL AND "month" IS NULL
+      `, [user2Property]);
+      expect(parseFloat(user2StatsAfter[0].value)).toBeCloseTo(1090, 2);
+    });
+
+    it('user cannot recalculate another user\'s property statistics', async () => {
+      const user1Property = mainUser.properties[0].id;
+      const user2Property = user2.properties[0].id;
+
+      // Add transactions for both users
+      await transactionService.add(mainUser.jwtUser, getTransactionIncome1(user1Property));
+      await transactionService.add(user2.jwtUser, getTransactionIncome2(user2Property));
+
+      // Wait for event handlers
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Corrupt user2's statistics to a known bad value
+      await dataSource.query(`
+        UPDATE property_statistics SET value = '9999.00'
+        WHERE "propertyId" = $1 AND "key" = 'income'
+      `, [user2Property]);
+
+      // Get auth token for user1
+      const user1Token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      // User1 calls recalculate endpoint
+      await request(app.getHttpServer())
+        .post('/real-estate/property/statistics/recalculate')
+        .set('Authorization', getBearerToken(user1Token))
+        .expect(200);
+
+      // User2's corrupted stats should remain corrupted (not recalculated by user1)
+      const user2StatsAfter = await dataSource.query(`
+        SELECT value FROM property_statistics
+        WHERE "propertyId" = $1 AND "key" = 'income' AND "year" IS NULL AND "month" IS NULL
+      `, [user2Property]);
+      expect(user2StatsAfter[0].value).toBe('9999.00');
+    });
+
+    it('requires authentication', async () => {
+      await request(app.getHttpServer())
+        .post('/real-estate/property/statistics/recalculate')
+        .expect(401);
     });
   });
 });

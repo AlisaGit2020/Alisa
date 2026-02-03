@@ -142,7 +142,7 @@ function aggregateStatistics(
 }
 
 export function useStatisticsData(): UseStatisticsDataResult {
-  const { selectedPropertyId, viewMode, selectedYear } = useDashboard();
+  const { selectedPropertyId, viewMode, selectedYear, refreshKey } = useDashboard();
   const [data, setData] = useState<ChartDataPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -182,7 +182,7 @@ export function useStatisticsData(): UseStatisticsDataResult {
     return () => {
       cancelled = true;
     };
-  }, [selectedPropertyId, viewMode, selectedYear]);
+  }, [selectedPropertyId, viewMode, selectedYear, refreshKey]);
 
   return { data, loading, error };
 }

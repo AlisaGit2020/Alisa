@@ -148,4 +148,19 @@ export class PropertyController {
   ): Promise<Property> {
     return this.service.deletePhoto(user, Number(id));
   }
+
+  @Post('/statistics/recalculate')
+  @HttpCode(200)
+  async recalculateStatistics(@User() user: JWTUser) {
+    // Get all properties owned by the user
+    const properties = await this.service.search(user, { select: ['id'] });
+    const propertyIds = properties.map((p) => p.id);
+
+    if (propertyIds.length === 0) {
+      return { income: { count: 0, total: 0 }, expense: { count: 0, total: 0 }, deposit: { count: 0, total: 0 }, withdraw: { count: 0, total: 0 } };
+    }
+
+    // Recalculate statistics for user's properties only
+    return this.propertyStatisticsService.recalculateForProperties(propertyIds);
+  }
 }

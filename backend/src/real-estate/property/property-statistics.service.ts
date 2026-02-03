@@ -394,6 +394,35 @@ export class PropertyStatisticsService {
     return summary;
   }
 
+  /**
+   * Recalculates property statistics for multiple properties.
+   * Only recalculates statistics for the specified property IDs.
+   * @param propertyIds Array of property IDs to recalculate
+   * @returns Combined summary of recalculated statistics
+   */
+  async recalculateForProperties(propertyIds: number[]): Promise<RecalculateResult> {
+    const combinedResult: RecalculateResult = {
+      income: { count: 0, total: 0 },
+      expense: { count: 0, total: 0 },
+      deposit: { count: 0, total: 0 },
+      withdraw: { count: 0, total: 0 },
+    };
+
+    for (const propertyId of propertyIds) {
+      const result = await this.recalculate(propertyId);
+      combinedResult.income.count += result.income.count;
+      combinedResult.income.total += result.income.total;
+      combinedResult.expense.count += result.expense.count;
+      combinedResult.expense.total += result.expense.total;
+      combinedResult.deposit.count += result.deposit.count;
+      combinedResult.deposit.total += result.deposit.total;
+      combinedResult.withdraw.count += result.withdraw.count;
+      combinedResult.withdraw.total += result.withdraw.total;
+    }
+
+    return combinedResult;
+  }
+
   private async recalculateIncomeStatistics(
     propertyFilter: string,
     params: number[],

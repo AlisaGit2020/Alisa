@@ -37,6 +37,8 @@ interface DashboardContextType {
   saveDashboardConfig: () => Promise<void>;
   getVisibleWidgets: () => WidgetConfig[];
   getAllWidgets: () => WidgetConfig[];
+  refreshData: () => void;
+  refreshKey: number;
 }
 
 const STORAGE_KEY = "dashboard_filters";
@@ -89,6 +91,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   );
   const [isEditMode, setIsEditMode] = useState(false);
   const [configLoaded, setConfigLoaded] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Generate available years (last 5 years)
   const availableYears = Array.from({ length: 5 }, (_, i) => currentYear - i);
@@ -220,6 +223,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     return [...dashboardConfig.widgets].sort((a, b) => a.order - b.order);
   }, [dashboardConfig]);
 
+  const refreshData = useCallback(() => {
+    setRefreshKey((prev) => prev + 1);
+  }, []);
+
   // Don't render children until config is loaded
   if (!configLoaded) {
     return null;
@@ -244,6 +251,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         saveDashboardConfig,
         getVisibleWidgets,
         getAllWidgets,
+        refreshData,
+        refreshKey,
       }}
     >
       {children}

@@ -16,7 +16,10 @@ const dashboard = {
   doneEditing: "Done",
   widgets: "Widgets",
   hideWidget: "Hide widget",
+  showWidget: "Show widget",
+  dragToReorder: "Drag to reorder",
   noWidgetsVisible: "No visible widgets. Click Edit to add widgets.",
+  recalculate: "Recalculate statistics",
 };
 
 export default dashboard;
