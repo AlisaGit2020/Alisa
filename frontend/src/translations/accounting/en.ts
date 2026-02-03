@@ -1,9 +1,22 @@
 const accounting = {
   // Left menu
+  accounting: "Accounting",
+  bankTransactions: "Bank transactions",
   accepted: "Accepted",
   pending: "Pending",
   expenses: "Expenses",
   incomes: "Incomes",
+
+  // Overview page
+  overviewTitle: "Accounting",
+  overviewDescription:
+    "Manage your property finances. Track expenses, record income, and review bank transactions to keep your bookkeeping organized and up-to-date.",
+  expensesDescription:
+    "Record and categorize property-related expenses such as maintenance, repairs, and utilities.",
+  incomesDescription:
+    "Track rental income and other revenue sources from your properties.",
+  bankTransactionsDescription:
+    "Review and reconcile imported bank transactions with your accounting records.",
 
   // Common form fields
   accountingDate: "Accounting Date",

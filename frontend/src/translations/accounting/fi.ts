@@ -1,9 +1,22 @@
 const accounting = {
   // Left menu
+  accounting: "Kirjanpito",
+  bankTransactions: "Pankkitapahtumat",
   accepted: "Hyväksytyt",
   pending: "Odottaa",
   expenses: "Kulut",
   incomes: "Tulot",
+
+  // Overview page
+  overviewTitle: "Kirjanpito",
+  overviewDescription:
+    "Hallitse kiinteistöjesi taloutta. Seuraa kuluja, kirjaa tuloja ja tarkista pankkitapahtumat pitääksesi kirjanpitosi järjestyksessä ja ajan tasalla.",
+  expensesDescription:
+    "Kirjaa ja luokittele kiinteistöihin liittyvät kulut, kuten huolto, korjaukset ja sähköt.",
+  incomesDescription:
+    "Seuraa vuokratuloja ja muita kiinteistöistäsi saatavia tuloja.",
+  bankTransactionsDescription:
+    "Tarkista ja täsmäytä tuodut pankkitapahtumat kirjanpitotietoihisi.",
 
   // Common form fields
   accountingDate: "Kirjanpito pvm",

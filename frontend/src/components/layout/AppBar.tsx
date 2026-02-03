@@ -8,7 +8,6 @@ import LanguageSelector from "./LanguageSelector";
 import LeftMenu from "./LeftMenu";
 import UserMenu from "./UserMenu";
 import SettingsMenu from "./SettingsMenu";
-import TopMenuItems from "./TopMenuItems.tsx";
 import AppName from "./AppName.tsx";
 import PropertyBadge from "./PropertyBadge.tsx";
 
@@ -80,9 +79,7 @@ function AppBar({ t }: WithTranslation) {
             <AppName t={t}></AppName>
             <PropertyBadge />
           </Box>
-          <Box display="flex" justifyContent="center" flexGrow={1}>
-            <TopMenuItems></TopMenuItems>
-          </Box>
+          <Box flexGrow={1} />
           <LanguageSelector></LanguageSelector>
           <SettingsMenu></SettingsMenu>
           <UserMenu></UserMenu>

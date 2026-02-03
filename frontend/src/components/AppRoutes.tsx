@@ -6,15 +6,16 @@ import PropertyForm from "./property/PropertyForm";
 import Settings from "./settings/Settings";
 import {
   propertyContext,
+  accountingContext,
   transactionContext,
   expenseContext,
   incomeContext,
 } from "@alisa-lib/alisa-contexts";
-import TransactionMain from "./transaction/TransactionMain";
+import BankTransactions from "./transaction/BankTransactions";
 
 import SignIn from "./login/Login";
 import Breadcrumbs from "./layout/Breadcrumbs.tsx";
-import TransactionsPending from "./transaction/pending/TransactionsPending.tsx";
+import AccountingOverview from "./accounting/AccountingOverview.tsx";
 import Expenses from "./accounting/expenses/Expenses.tsx";
 import Incomes from "./accounting/incomes/Incomes.tsx";
 
@@ -41,13 +42,19 @@ export default function AppRoutes() {
 
           {/* Accounting routes */}
           <Route
-            path={transactionContext.routePath}
-            element={<TransactionMain></TransactionMain>}
+            path={accountingContext.routePath}
+            element={<AccountingOverview></AccountingOverview>}
           ></Route>
 
           <Route
+            path={transactionContext.routePath}
+            element={<BankTransactions></BankTransactions>}
+          ></Route>
+
+          {/* Redirect old pending URL to main transactions page */}
+          <Route
             path={`${transactionContext.routePath}/pending`}
-            element={<TransactionsPending></TransactionsPending>}
+            element={<Navigate to={transactionContext.routePath} replace />}
           ></Route>
 
           <Route
