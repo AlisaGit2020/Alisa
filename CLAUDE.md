@@ -101,3 +101,24 @@ Frontend uses i18next with translation files in `frontend/src/translations/` org
 - All statistic values (income, expense, deposit, withdraw) are stored as **positive** numbers
 - The `key` field indicates the type, so the sign is not needed
 - This simplifies display in charts and reports (no need for `Math.abs()` in UI)
+
+## Testing Requirements
+
+**Every backend service must have both unit tests AND e2e tests.**
+
+### Unit Tests
+- Colocate `.spec.ts` files with their service (e.g., `example.service.ts` → `example.service.spec.ts`)
+- Use existing mock utilities from `backend/test/mocks/`
+- Use test factories from `backend/test/factories/` to create test data
+- Test authorization/ownership checks to ensure users can only access their own data
+- Cover these scenarios:
+  - Success cases (happy path)
+  - Not found errors (404)
+  - Unauthorized access (403)
+  - Validation errors (400)
+
+### E2E Tests
+- Place in `backend/test/*.e2e-spec.ts`
+- Use helper functions from `backend/test/helper-functions.ts`
+- Test full HTTP request/response cycle including authentication
+- Verify response status codes and body structure
