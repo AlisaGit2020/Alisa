@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, IsNull, Repository } from 'typeorm';
+import { DataSource, In, IsNull, Repository } from 'typeorm';
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { PropertyService } from './property.service';
 import { JWTUser } from '@alisa-backend/auth/types';
@@ -75,12 +75,12 @@ export class TaxService {
 
     // Get saved statistics
     const stats = await this.statisticsRepository.find({
-      where: propertyIds.map((id) => ({
-        propertyId: id,
+      where: {
+        propertyId: In(propertyIds),
         year,
         month: IsNull(),
         key: StatisticKey.TAX_GROSS_INCOME,
-      })),
+      },
     });
 
     if (stats.length === 0) {
@@ -89,11 +89,11 @@ export class TaxService {
 
     // Aggregate values across properties
     const allStats = await this.statisticsRepository.find({
-      where: propertyIds.map((id) => ({
-        propertyId: id,
+      where: {
+        propertyId: In(propertyIds),
         year,
         month: IsNull(),
-      })),
+      },
     });
 
     const grossIncome = this.sumStatsByKey(allStats, StatisticKey.TAX_GROSS_INCOME);
