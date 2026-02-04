@@ -16,6 +16,7 @@ const namespaces = [
     'menu',
     'route',
     'settings',
+    'tax',
     'transaction',
     'user'
 ];
