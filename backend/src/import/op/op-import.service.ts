@@ -22,10 +22,10 @@ export class OpImportService {
     private authService: AuthService,
   ) {}
 
-  async importCsv(user: JWTUser, options: OpImportInput) {
+  async importCsv(user: JWTUser, options: OpImportInput): Promise<number[]> {
     await this.validate(user, options);
     const rows: CSVRow[] = await this.readCsv(options);
-    await this.saveRows(user, rows, options);
+    return await this.saveRows(user, rows, options);
   }
 
   private async readCsv(options: OpImportInput): Promise<CSVRow[]> {
@@ -83,15 +83,20 @@ export class OpImportService {
     user: JWTUser,
     rows: CSVRow[],
     options: OpImportInput,
-  ) {
+  ): Promise<number[]> {
+    const savedIds: number[] = [];
     for (const opCsvRow of rows) {
       const transaction = await this.toTransaction(user, opCsvRow, options);
       try {
-        await this.transactionService.save(user, transaction);
+        const saved = await this.transactionService.save(user, transaction);
+        if (saved?.id) {
+          savedIds.push(saved.id);
+        }
       } catch (error: unknown) {
         this.handleError(error);
       }
     }
+    return savedIds;
   }
 
   private async getTransactionId(

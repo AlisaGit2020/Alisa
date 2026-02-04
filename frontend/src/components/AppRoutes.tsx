@@ -11,7 +11,10 @@ import {
   expenseContext,
   incomeContext,
 } from "@alisa-lib/alisa-contexts";
-import BankTransactions from "./transaction/BankTransactions";
+import TransactionsOverview from "./transaction/TransactionsOverview";
+import TransactionMain from "./transaction/TransactionMain";
+import TransactionsPending from "./transaction/pending/TransactionsPending";
+import TransactionImportWizard from "./transaction/import-wizard/TransactionImportWizard";
 
 import SignIn from "./login/Login";
 import Breadcrumbs from "./layout/Breadcrumbs.tsx";
@@ -46,15 +49,25 @@ export default function AppRoutes() {
             element={<AccountingOverview></AccountingOverview>}
           ></Route>
 
+          {/* Transaction routes */}
           <Route
             path={transactionContext.routePath}
-            element={<BankTransactions></BankTransactions>}
+            element={<TransactionsOverview />}
           ></Route>
 
-          {/* Redirect old pending URL to main transactions page */}
+          <Route
+            path={`${transactionContext.routePath}/accepted`}
+            element={<TransactionMain />}
+          ></Route>
+
           <Route
             path={`${transactionContext.routePath}/pending`}
-            element={<Navigate to={transactionContext.routePath} replace />}
+            element={<TransactionsPending />}
+          ></Route>
+
+          <Route
+            path={`${transactionContext.routePath}/import`}
+            element={<TransactionImportWizard />}
           ></Route>
 
           <Route

@@ -41,7 +41,7 @@ export function AlisaDataTableAddButton(props: AlisaDataTableAddButtonProps) {
 interface AlisaDataTableActionButtonsProps {
   id: number;
   onEdit?: (id: number) => void;
-  onDelete: (id: number) => void;
+  onDelete?: (id: number) => void;
   visible?: boolean;
 }
 function AlisaDataTableActionButtons(props: AlisaDataTableActionButtonsProps) {
@@ -62,9 +62,11 @@ function AlisaDataTableActionButtons(props: AlisaDataTableActionButtonsProps) {
           <AlisaEditIcon></AlisaEditIcon>
         </IconButton>
       )}
-      <IconButton onClick={() => props.onDelete(props.id)}>
-        <AlisaDeleteIcon></AlisaDeleteIcon>
-      </IconButton>
+      {props.onDelete && (
+        <IconButton onClick={() => props.onDelete?.(props.id)}>
+          <AlisaDeleteIcon></AlisaDeleteIcon>
+        </IconButton>
+      )}
     </>
   );
 }

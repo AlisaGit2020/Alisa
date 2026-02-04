@@ -43,28 +43,34 @@ interface AlisaDataTableField<T> {
 function AlisaDataTable<T extends { id: number }>(props: {
   t: TFunction;
   fields: AlisaDataTableField<T>[];
-  dataService: DataService<T>;
-  onNewRow: (event?: React.MouseEvent<HTMLButtonElement>) => void;
+  dataService?: DataService<T>;
+  data?: T[];
+  onNewRow?: (event?: React.MouseEvent<HTMLButtonElement>) => void;
   onSelectChange?: (id: number, item?: T) => void;
   onSelectAllChange?: (ids: number[], items?: T[]) => void;
   selectedIds?: number[];
   onEdit?: (id: number) => void;
-  onOpen: (id: number) => void;
+  onOpen?: (id: number) => void;
   onDelete?: (id: number) => void;
   refreshTrigger?: number;
 }) {
-  const [data, setData] = React.useState<T[]>([]);
+  const [fetchedData, setFetchedData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState<number>(0);
   const [idDeleted, setIdDeleted] = React.useState<number>(0);
 
-  React.useEffect(() => {
-    const fetchData = async () => {
-      const data: T[] = await props.dataService.search();
-      setData(data);
-    };
+  // Use static data if provided, otherwise fetch from dataService
+  const data = props.data ?? fetchedData;
 
-    fetchData().then(() => {});
+  React.useEffect(() => {
+    if (props.dataService) {
+      const fetchData = async () => {
+        const result: T[] = await props.dataService!.search();
+        setFetchedData(result);
+      };
+
+      fetchData().then(() => {});
+    }
   }, [idDeleted, props.dataService, props.refreshTrigger]);
 
   const handleDeleteOpen = (apartmentId: number) => {
@@ -78,7 +84,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
   };
 
   const handleDelete = async () => {
-    await props.dataService.delete(idToDelete);
+    await props.dataService?.delete(idToDelete);
     setTimeout(() => setIdDeleted(idToDelete), 200);
     handleDeleteClose();
     if (props.onDelete) {
@@ -239,16 +245,18 @@ function AlisaDataTable<T extends { id: number }>(props: {
                   </Typography>
                 </TableCell>
               ))}
-              <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                <AlisaDataTableAddButton
-                  onClick={props.onNewRow}
-                  t={props.t}
-                  visible={
-                    props.selectedIds?.length == 0 ||
-                    props.selectedIds === undefined
-                  }
-                ></AlisaDataTableAddButton>
-              </TableCell>
+              {props.onNewRow && (
+                <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                  <AlisaDataTableAddButton
+                    onClick={props.onNewRow}
+                    t={props.t}
+                    visible={
+                      props.selectedIds?.length == 0 ||
+                      props.selectedIds === undefined
+                    }
+                  ></AlisaDataTableAddButton>
+                </TableCell>
+              )}
             </TableRow>
           </TableHead>
           {data.length > 0 && (
@@ -268,24 +276,26 @@ function AlisaDataTable<T extends { id: number }>(props: {
                     <TableCell
                       key={field.name as string}
                       align={field.format === "currency" ? "right" : "left"}
-                      sx={{ whiteSpace: "nowrap" }}
-                      onClick={() => props.onOpen(item.id)}
+                      sx={{ whiteSpace: "nowrap", cursor: props.onOpen ? "pointer" : "default" }}
+                      onClick={() => props.onOpen?.(item.id)}
                     >
                       {getDataValue(field, item)}
                     </TableCell>
                   ))}
 
-                  <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                    <AlisaDataTableActionButtons
-                      id={item.id}
-                      onDelete={handleDeleteOpen}
-                      onEdit={props.onEdit}
-                      visible={
-                        props.selectedIds?.length == 0 ||
-                        props.selectedIds === undefined
-                      }
-                    ></AlisaDataTableActionButtons>
-                  </TableCell>
+                  {(props.onEdit || props.onDelete || props.onNewRow) && (
+                    <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                      <AlisaDataTableActionButtons
+                        id={item.id}
+                        onDelete={props.onDelete ? handleDeleteOpen : undefined}
+                        onEdit={props.onEdit}
+                        visible={
+                          props.selectedIds?.length == 0 ||
+                          props.selectedIds === undefined
+                        }
+                      ></AlisaDataTableActionButtons>
+                    </TableCell>
+                  )}
                 </StyledTableRow>
               ))}
             </TableBody>
