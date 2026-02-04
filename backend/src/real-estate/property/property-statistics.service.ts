@@ -1,30 +1,15 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import {
-  DataSource,
-  FindManyOptions,
-  In,
-  IsNull,
-  Not,
-  Repository,
-} from 'typeorm';
-import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
-import { OnEvent } from '@nestjs/event-emitter';
-import {
-  Events,
-  TransactionCreatedEvent,
-  TransactionDeletedEvent,
-} from '@alisa-backend/common/events';
-import {
-  StatisticKey,
-  TransactionStatus,
-  TransactionType,
-} from '@alisa-backend/common/types';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { PropertyStatisticsFilterDto } from '@alisa-backend/real-estate/property/dtos/property-statistics-filter.dto';
-import { PropertyStatisticsSearchDto } from '@alisa-backend/real-estate/property/dtos/property-statistics-search.dto';
-import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
+import {forwardRef, Inject, Injectable} from '@nestjs/common';
+import {InjectRepository} from '@nestjs/typeorm';
+import {DataSource, FindManyOptions, In, IsNull, Not, Repository,} from 'typeorm';
+import {PropertyStatistics} from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
+import {OnEvent} from '@nestjs/event-emitter';
+import {Events, TransactionCreatedEvent, TransactionDeletedEvent,} from '@alisa-backend/common/events';
+import {StatisticKey, TransactionStatus, TransactionType,} from '@alisa-backend/common/types';
+import {Transaction} from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+import {JWTUser} from '@alisa-backend/auth/types';
+import {PropertyStatisticsFilterDto} from '@alisa-backend/real-estate/property/dtos/property-statistics-filter.dto';
+import {PropertyStatisticsSearchDto} from '@alisa-backend/real-estate/property/dtos/property-statistics-search.dto';
+import {PropertyService} from '@alisa-backend/real-estate/property/property.service';
 
 @Injectable()
 export class PropertyStatisticsService {
@@ -101,7 +86,6 @@ export class PropertyStatisticsService {
     user: JWTUser,
     filter: PropertyStatisticsSearchDto,
   ): Promise<PropertyStatistics[]> {
-    console.log('searchAll called with filter:', JSON.stringify(filter));
 
     let propertyIds: number[];
 
@@ -114,16 +98,12 @@ export class PropertyStatisticsService {
         select: ['id'],
       });
 
-      console.log('Found properties:', properties.length);
-
       if (properties.length === 0) {
         return [];
       }
 
       propertyIds = properties.map((p) => p.id);
     }
-
-    console.log('Property IDs:', propertyIds);
 
     // Build query based on filter
     const whereCondition: Record<string, unknown> = {
@@ -152,9 +132,7 @@ export class PropertyStatisticsService {
       whereCondition.month = IsNull();
     }
 
-    console.log('Where condition:', JSON.stringify(whereCondition));
-
-    const statistics = await this.repository.find({
+    return await this.repository.find({
       where: whereCondition,
       order: {
         year: 'ASC',
@@ -162,10 +140,6 @@ export class PropertyStatisticsService {
         key: 'ASC',
       },
     });
-
-    console.log('Found statistics:', statistics.length);
-
-    return statistics;
   }
 
   @OnEvent(Events.Transaction.Accepted)
