@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { PropertyService } from './property.service';
 import { JWTUser } from '@alisa-backend/auth/types';
@@ -78,7 +78,7 @@ export class TaxService {
       where: propertyIds.map((id) => ({
         propertyId: id,
         year,
-        month: null as unknown as number,
+        month: IsNull(),
         key: StatisticKey.TAX_GROSS_INCOME,
       })),
     });
@@ -92,7 +92,7 @@ export class TaxService {
       where: propertyIds.map((id) => ({
         propertyId: id,
         year,
-        month: null as unknown as number,
+        month: IsNull(),
       })),
     });
 

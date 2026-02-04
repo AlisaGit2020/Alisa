@@ -11,6 +11,7 @@ const route = {
   "income-types": "Tulolajit",
   pending: "Odottaa",
   properties: "Asunnot",
+  tax: "Verotus",
   transactions: "Pankkitapahtumat",
 };
 

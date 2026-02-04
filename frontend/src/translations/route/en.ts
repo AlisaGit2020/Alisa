@@ -11,6 +11,7 @@ const route = {
   "income-types": "Income types",
   pending: "Pending",
   properties: "Apartments",
+  tax: "Taxes",
   transactions: "Bank Transactions",
 };
 
