@@ -147,7 +147,7 @@ function AccountingFilter({
           alignItems="flex-end"
         >
           {types.length > 0 && (
-            <FormControl size="small" sx={{ minWidth: 180 }}>
+            <FormControl size="small" sx={{ width: 250 }}>
               <InputLabel>{typeLabel}</InputLabel>
               <Select
                 multiple

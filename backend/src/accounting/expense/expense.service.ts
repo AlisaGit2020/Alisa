@@ -8,9 +8,11 @@ import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { Expense } from './entities/expense.entity';
 import { ExpenseInputDto } from './dtos/expense-input.dto';
 import { ExpenseType } from './entities/expense-type.entity';
+import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
+import { DepreciationService } from '@alisa-backend/accounting/depreciation/depreciation.service';
 
 @Injectable()
 export class ExpenseService {
@@ -19,7 +21,10 @@ export class ExpenseService {
     private repository: Repository<Expense>,
     @InjectRepository(ExpenseType)
     private expenseTypeRepository: Repository<ExpenseType>,
+    @InjectRepository(Transaction)
+    private transactionRepository: Repository<Transaction>,
     private authService: AuthService,
+    private depreciationService: DepreciationService,
   ) {}
 
   async search(
@@ -57,7 +62,12 @@ export class ExpenseService {
 
     this.mapData(user, expenseEntity, input);
 
-    return await this.repository.save(expenseEntity);
+    const savedExpense = await this.repository.save(expenseEntity);
+
+    // Create depreciation asset if this is a capital improvement
+    await this.handleDepreciationAsset(savedExpense);
+
+    return savedExpense;
   }
 
   async save(user: JWTUser, input: ExpenseInputDto): Promise<Expense> {
@@ -93,12 +103,53 @@ export class ExpenseService {
     }
 
     await this.repository.save(expenseEntity);
+
+    // Update or create depreciation asset if applicable
+    await this.handleDepreciationAsset(expenseEntity);
+
     return expenseEntity;
   }
 
   async delete(user: JWTUser, id: number): Promise<void> {
-    await this.getEntityOrThrow(user, id);
+    const expense = await this.getEntityOrThrow(user, id);
+    const transactionId = expense.transactionId;
+
+    // Delete associated depreciation asset
+    await this.depreciationService.deleteByExpenseId(id);
+
+    // Delete the expense
     await this.repository.delete(id);
+
+    // Delete associated transaction if it exists
+    if (transactionId) {
+      await this.transactionRepository.delete(transactionId);
+    }
+  }
+
+  private async handleDepreciationAsset(expense: Expense): Promise<void> {
+    // Get the expense type to check if it's a capital improvement
+    const expenseType = await this.expenseTypeRepository.findOne({
+      where: { id: expense.expenseTypeId },
+    });
+
+    if (!expenseType) {
+      return;
+    }
+
+    if (expenseType.isCapitalImprovement) {
+      // Check if asset already exists
+      const existingAsset = await this.depreciationService.getByExpenseId(expense.id);
+      if (existingAsset) {
+        // Update existing asset
+        await this.depreciationService.updateFromExpense(expense);
+      } else {
+        // Create new depreciation asset
+        await this.depreciationService.createFromExpense(expense);
+      }
+    } else {
+      // If expense type changed from capital improvement to regular, delete the asset
+      await this.depreciationService.deleteByExpenseId(expense.id);
+    }
   }
 
   private mapData(user, expense: Expense, input: ExpenseInputDto) {

@@ -106,8 +106,16 @@ export class IncomeService {
   }
 
   async delete(user: JWTUser, id: number): Promise<void> {
-    await this.getEntityOrThrow(user, id);
+    const income = await this.getEntityOrThrow(user, id);
+    const transactionId = income.transactionId;
+
+    // Delete the income
     await this.repository.delete(id);
+
+    // Delete associated transaction if it exists
+    if (transactionId) {
+      await this.transactionRepository.delete(transactionId);
+    }
   }
 
   private mapData(income: Income, input: IncomeInputDto) {

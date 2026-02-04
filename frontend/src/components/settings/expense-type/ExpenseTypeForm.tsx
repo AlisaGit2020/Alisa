@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material';
+import { Stack, FormHelperText, Box } from '@mui/material';
 import { useState } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { ExpenseTypeInputDto } from '@alisa-backend/accounting/expense/dtos/expense-type-input.dto';
@@ -55,11 +55,16 @@ function ExpenseTypeForm({ t, id, onCancel, onAfterSubmit }: ExpenseTypeFormProp
                 onChange={(e) => handleChange('isTaxDeductible', e.target.checked)}
                 label={t('isTaxDeductible')}
             />
-            <AlisaSwitch
-                value={data.isCapitalImprovement}
-                onChange={(e) => handleChange('isCapitalImprovement', e.target.checked)}
-                label={t('isCapitalImprovement')}
-            />
+            <Box>
+                <AlisaSwitch
+                    value={data.isCapitalImprovement}
+                    onChange={(e) => handleChange('isCapitalImprovement', e.target.checked)}
+                    label={t('isCapitalImprovement')}
+                />
+                <FormHelperText sx={{ ml: 2 }}>
+                    {t('isCapitalImprovementHelp')}
+                </FormHelperText>
+            </Box>
         </Stack>
     )
     return (

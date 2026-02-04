@@ -6,6 +6,19 @@ export class TaxBreakdownItemDto {
   depreciationAmount?: number;
 }
 
+export class DepreciationAssetBreakdownDto {
+  assetId: number;
+  expenseId: number;
+  description: string;
+  acquisitionYear: number;
+  acquisitionMonth?: number;
+  originalAmount: number;
+  depreciationAmount: number;
+  remainingAmount: number;
+  yearsRemaining: number;
+  isFullyDepreciated: boolean;
+}
+
 export class TaxResponseDto {
   year: number;
   propertyId?: number;
@@ -14,5 +27,6 @@ export class TaxResponseDto {
   depreciation: number;
   netIncome: number;
   breakdown: TaxBreakdownItemDto[];
+  depreciationBreakdown?: DepreciationAssetBreakdownDto[];
   calculatedAt?: Date;
 }

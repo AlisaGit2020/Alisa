@@ -16,7 +16,7 @@ export const createIncome = (options: CreateIncomeOptions = {}): Income => {
   const income = new Income();
   income.id = options.id ?? 1;
   income.propertyId = options.propertyId ?? 1;
-  income.transactionId = options.transactionId ?? 1;
+  income.transactionId = options.transactionId !== undefined ? options.transactionId : 1;
   income.incomeTypeId = options.incomeTypeId ?? 1;
   income.description = options.description ?? 'Test Income';
   income.amount = options.amount ?? 100;

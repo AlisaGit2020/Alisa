@@ -74,6 +74,7 @@ describe('ExpenseTypeService', () => {
         name: 'Test expense type',
         description: 'Test description',
         isTaxDeductible: false,
+        isCapitalImprovement: false,
       };
       const savedExpenseType = createExpenseType({
         id: 1,
@@ -95,6 +96,7 @@ describe('ExpenseTypeService', () => {
         name: 'Existing name',
         description: 'Test description',
         isTaxDeductible: false,
+        isCapitalImprovement: false,
       };
 
       mockRepository.exist.mockResolvedValue(true);
@@ -115,6 +117,7 @@ describe('ExpenseTypeService', () => {
         name: 'Updated name',
         description: 'Updated description',
         isTaxDeductible: true,
+        isCapitalImprovement: false,
       };
 
       mockRepository.findOne.mockResolvedValue(existingExpenseType);
@@ -134,6 +137,7 @@ describe('ExpenseTypeService', () => {
           name: 'Test',
           description: '',
           isTaxDeductible: false,
+          isCapitalImprovement: false,
         }),
       ).rejects.toThrow(NotFoundException);
     });
@@ -147,6 +151,7 @@ describe('ExpenseTypeService', () => {
           name: 'Test',
           description: '',
           isTaxDeductible: false,
+          isCapitalImprovement: false,
         }),
       ).rejects.toThrow(UnauthorizedException);
     });

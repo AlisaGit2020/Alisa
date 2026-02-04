@@ -177,8 +177,8 @@ describe('IncomeService', () => {
   });
 
   describe('delete', () => {
-    it('deletes income', async () => {
-      const income = createIncome({ id: 1, propertyId: 1 });
+    it('deletes income without transaction', async () => {
+      const income = createIncome({ id: 1, propertyId: 1, transactionId: null });
       mockRepository.findOne.mockResolvedValue(income);
       mockAuthService.hasOwnership.mockResolvedValue(true);
       mockRepository.delete.mockResolvedValue({ affected: 1 });
@@ -186,6 +186,20 @@ describe('IncomeService', () => {
       await service.delete(testUser, 1);
 
       expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockTransactionRepository.delete).not.toHaveBeenCalled();
+    });
+
+    it('deletes income and associated transaction', async () => {
+      const income = createIncome({ id: 1, propertyId: 1, transactionId: 100 });
+      mockRepository.findOne.mockResolvedValue(income);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+      mockTransactionRepository.delete.mockResolvedValue({ affected: 1 });
+
+      await service.delete(testUser, 1);
+
+      expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockTransactionRepository.delete).toHaveBeenCalledWith(100);
     });
 
     it('throws NotFoundException when income does not exist', async () => {

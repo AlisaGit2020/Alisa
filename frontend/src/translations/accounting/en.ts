@@ -56,6 +56,8 @@ const accounting = {
   noRowsFound: "No rows found",
   confirm: "Confirm",
   confirmDelete: "Are you sure you want to delete?",
+  confirmDeleteExpense: "Are you sure you want to delete this expense?",
+  confirmDeleteIncome: "Are you sure you want to delete this income?",
   delete: "Delete",
   add: "Add",
 

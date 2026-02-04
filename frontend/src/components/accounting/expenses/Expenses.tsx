@@ -154,6 +154,7 @@ function Expenses({ t }: WithTranslation) {
   };
 
   // Create a simple data service wrapper for the transformed data
+  // Include refreshTrigger in dependencies to force refresh after form submit
   const rowDataService = useMemo(() => {
     const service = {
       search: async () => {
@@ -173,7 +174,8 @@ function Expenses({ t }: WithTranslation) {
       },
     } as DataService<ExpenseRow>;
     return service;
-  }, [dataService]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataService, refreshTrigger]);
 
   return (
     <AlisaContent>
@@ -202,6 +204,7 @@ function Expenses({ t }: WithTranslation) {
           onNewRow={handleAdd}
           onOpen={handleOpenDetails}
           onEdit={handleOpenDetails}
+          onDelete={() => setRefreshTrigger((prev) => prev + 1)}
           refreshTrigger={refreshTrigger}
         />
       </Paper>

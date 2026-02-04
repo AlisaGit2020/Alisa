@@ -4,7 +4,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExpenseService } from './expense.service';
 import { Expense } from './entities/expense.entity';
 import { ExpenseType } from './entities/expense-type.entity';
+import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import { AuthService } from '@alisa-backend/auth/auth.service';
+import { DepreciationService } from '@alisa-backend/accounting/depreciation/depreciation.service';
 import {
   createMockRepository,
   createMockAuthService,
@@ -17,7 +19,14 @@ describe('ExpenseService', () => {
   let service: ExpenseService;
   let mockRepository: MockRepository<Expense>;
   let mockExpenseTypeRepository: MockRepository<ExpenseType>;
+  let mockTransactionRepository: MockRepository<Transaction>;
   let mockAuthService: MockAuthService;
+  let mockDepreciationService: {
+    createFromExpense: jest.Mock;
+    deleteByExpenseId: jest.Mock;
+    getByExpenseId: jest.Mock;
+    updateFromExpense: jest.Mock;
+  };
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
   const otherUser = createJWTUser({ id: 2, ownershipInProperties: [3, 4] });
@@ -29,7 +38,14 @@ describe('ExpenseService', () => {
   beforeEach(async () => {
     mockRepository = createMockRepository<Expense>();
     mockExpenseTypeRepository = createMockRepository<ExpenseType>();
+    mockTransactionRepository = createMockRepository<Transaction>();
     mockAuthService = createMockAuthService();
+    mockDepreciationService = {
+      createFromExpense: jest.fn(),
+      deleteByExpenseId: jest.fn(),
+      getByExpenseId: jest.fn().mockResolvedValue(null),
+      updateFromExpense: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -39,7 +55,12 @@ describe('ExpenseService', () => {
           provide: getRepositoryToken(ExpenseType),
           useValue: mockExpenseTypeRepository,
         },
+        {
+          provide: getRepositoryToken(Transaction),
+          useValue: mockTransactionRepository,
+        },
         { provide: AuthService, useValue: mockAuthService },
+        { provide: DepreciationService, useValue: mockDepreciationService },
       ],
     }).compile();
 
@@ -90,6 +111,7 @@ describe('ExpenseService', () => {
 
       mockAuthService.hasOwnership.mockResolvedValue(true);
       mockRepository.save.mockResolvedValue(savedExpense);
+      mockExpenseTypeRepository.findOne.mockResolvedValue({ id: 1, isCapitalImprovement: false });
 
       const result = await service.add(testUser, input);
 
@@ -116,7 +138,7 @@ describe('ExpenseService', () => {
 
   describe('update', () => {
     it('updates expense', async () => {
-      const existingExpense = createExpense({ id: 1, propertyId: 1 });
+      const existingExpense = createExpense({ id: 1, propertyId: 1, expenseTypeId: 1 });
       const input = {
         description: 'Updated expense',
         amount: 200,
@@ -127,6 +149,7 @@ describe('ExpenseService', () => {
       mockRepository.findOne.mockResolvedValue(existingExpense);
       mockAuthService.hasOwnership.mockResolvedValue(true);
       mockRepository.save.mockResolvedValue({ ...existingExpense, ...input });
+      mockExpenseTypeRepository.findOne.mockResolvedValue({ id: 1, isCapitalImprovement: false });
 
       const result = await service.update(testUser, 1, input);
 
@@ -158,8 +181,8 @@ describe('ExpenseService', () => {
   });
 
   describe('delete', () => {
-    it('deletes expense', async () => {
-      const expense = createExpense({ id: 1, propertyId: 1 });
+    it('deletes expense without transaction', async () => {
+      const expense = createExpense({ id: 1, propertyId: 1, transactionId: null });
       mockRepository.findOne.mockResolvedValue(expense);
       mockAuthService.hasOwnership.mockResolvedValue(true);
       mockRepository.delete.mockResolvedValue({ affected: 1 });
@@ -167,6 +190,22 @@ describe('ExpenseService', () => {
       await service.delete(testUser, 1);
 
       expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockDepreciationService.deleteByExpenseId).toHaveBeenCalledWith(1);
+      expect(mockTransactionRepository.delete).not.toHaveBeenCalled();
+    });
+
+    it('deletes expense and associated transaction', async () => {
+      const expense = createExpense({ id: 1, propertyId: 1, transactionId: 100 });
+      mockRepository.findOne.mockResolvedValue(expense);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+      mockTransactionRepository.delete.mockResolvedValue({ affected: 1 });
+
+      await service.delete(testUser, 1);
+
+      expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockDepreciationService.deleteByExpenseId).toHaveBeenCalledWith(1);
+      expect(mockTransactionRepository.delete).toHaveBeenCalledWith(100);
     });
 
     it('throws NotFoundException when expense does not exist', async () => {

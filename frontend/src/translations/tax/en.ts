@@ -4,6 +4,7 @@ const tax = {
   year: 'Tax year',
   calculate: 'Calculate tax data',
   calculating: 'Calculating...',
+  calculateError: 'Failed to calculate tax data',
   grossIncome: 'Rental income',
   deductions: 'Deductions',
   depreciation: 'Depreciation',
@@ -18,6 +19,15 @@ const tax = {
   noData: 'Tax data has not been calculated for this year yet.',
   noDataHint: 'Press "Calculate tax data" button to start.',
   allProperties: 'All properties',
+  yearsRemaining: '{{acquisitionYear}}, {{years}} years remaining',
+  fullyDepreciated: 'Fully depreciated',
+  depreciationInfoTitle: 'Capital Improvement Depreciation',
+  depreciationInfoText1: 'Capital improvements are renovations that increase property value, such as:',
+  depreciationInfoExample1: 'Bathroom or kitchen renovations',
+  depreciationInfoExample2: 'Balcony glazing',
+  depreciationInfoExample3: 'Heating system replacement',
+  depreciationInfoText2: 'Depreciation is calculated at 10% per year of the original purchase price. Depreciation is applied for a maximum of 10 years until the entire amount has been deducted.',
+  depreciationInfoText3: 'Annual repairs (e.g., faucet replacement, painting) are deducted in full in the same year as an expense, not as depreciation.',
 }
 
 export default tax

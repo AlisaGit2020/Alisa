@@ -4,6 +4,7 @@ const tax = {
   year: 'Verovuosi',
   calculate: 'Laske verotiedot',
   calculating: 'Lasketaan...',
+  calculateError: 'Verotietojen laskenta epäonnistui',
   grossIncome: 'Vuokratulot',
   deductions: 'Vähennykset',
   depreciation: 'Poistot',
@@ -18,6 +19,15 @@ const tax = {
   noData: 'Verotietoja ei ole vielä laskettu tälle vuodelle.',
   noDataHint: 'Paina "Laske verotiedot" -painiketta aloittaaksesi.',
   allProperties: 'Kaikki asunnot',
+  yearsRemaining: '{{acquisitionYear}}, {{years}} vuotta jäljellä',
+  fullyDepreciated: 'Kokonaan poistettu',
+  depreciationInfoTitle: 'Perusparannusten poistot',
+  depreciationInfoText1: 'Perusparannukset ovat asunnon arvoa nostavia remontteja, kuten:',
+  depreciationInfoExample1: 'Kylpyhuone- tai keittiöremontit',
+  depreciationInfoExample2: 'Parvekelasitukset',
+  depreciationInfoExample3: 'Lämmitysjärjestelmän uusiminen',
+  depreciationInfoText2: 'Poistot lasketaan 10% vuodessa alkuperäisestä hankintahinnasta. Poisto tehdään enintään 10 vuoden ajan, kunnes koko summa on vähennetty.',
+  depreciationInfoText3: 'Vuosikorjaukset (esim. hanan vaihto, maalaus) vähennetään kokonaan samana vuonna kuluna, ei poistoina.',
 }
 
 export default tax

@@ -56,6 +56,8 @@ const accounting = {
   noRowsFound: "Ei rivejä",
   confirm: "Vahvista",
   confirmDelete: "Haluatko varmasti poistaa?",
+  confirmDeleteExpense: "Haluatko varmasti poistaa tämän kulun?",
+  confirmDeleteIncome: "Haluatko varmasti poistaa tämän tulon?",
   delete: "Poista",
   add: "Lisää",
 

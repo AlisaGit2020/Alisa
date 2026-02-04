@@ -8,8 +8,10 @@ import {
   TableRow,
   Divider,
   Box,
+  Chip,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import InfoTooltip from "../alisa/InfoTooltip";
 
 interface BreakdownItem {
   category: string;
@@ -19,12 +21,26 @@ interface BreakdownItem {
   depreciationAmount?: number;
 }
 
+interface DepreciationAssetBreakdown {
+  assetId: number;
+  expenseId: number;
+  description: string;
+  acquisitionYear: number;
+  acquisitionMonth?: number;
+  originalAmount: number;
+  depreciationAmount: number;
+  remainingAmount: number;
+  yearsRemaining: number;
+  isFullyDepreciated: boolean;
+}
+
 interface TaxBreakdownProps {
   grossIncome: number;
   deductions: number;
   depreciation: number;
   netIncome: number;
   breakdown: BreakdownItem[];
+  depreciationBreakdown?: DepreciationAssetBreakdown[];
 }
 
 function TaxBreakdown({
@@ -33,6 +49,7 @@ function TaxBreakdown({
   depreciation,
   netIncome,
   breakdown,
+  depreciationBreakdown,
 }: TaxBreakdownProps) {
   const { t } = useTranslation("tax");
 
@@ -44,7 +61,29 @@ function TaxBreakdown({
   };
 
   const deductionItems = breakdown.filter((item) => !item.isCapitalImprovement);
-  const depreciationItems = breakdown.filter((item) => item.isCapitalImprovement);
+
+  // Use new depreciation breakdown if available, otherwise fall back to legacy
+  const hasNewDepreciationBreakdown =
+    depreciationBreakdown && depreciationBreakdown.length > 0;
+
+  const depreciationInfoContent = (
+    <Box>
+      <Typography variant="body2" paragraph>
+        {t("depreciationInfoText1")}
+      </Typography>
+      <Typography variant="body2" component="ul" sx={{ pl: 2, mb: 1 }}>
+        <li>{t("depreciationInfoExample1")}</li>
+        <li>{t("depreciationInfoExample2")}</li>
+        <li>{t("depreciationInfoExample3")}</li>
+      </Typography>
+      <Typography variant="body2" paragraph>
+        {t("depreciationInfoText2")}
+      </Typography>
+      <Typography variant="body2">
+        {t("depreciationInfoText3")}
+      </Typography>
+    </Box>
+  );
 
   return (
     <Paper elevation={3} sx={{ mt: 3 }}>
@@ -106,28 +145,81 @@ function TaxBreakdown({
             </TableRow>
 
             {/* Depreciation Header */}
-            {depreciationItems.length > 0 && (
+            {depreciation > 0 || (depreciationBreakdown && depreciationBreakdown.length > 0) ? (
               <>
                 <TableRow>
                   <TableCell
                     colSpan={2}
                     sx={{ bgcolor: "grey.50", fontWeight: "bold" }}
                   >
-                    {t("depreciationSection")}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      {t("depreciationSection")}
+                      <InfoTooltip
+                        title={t("depreciationInfoTitle")}
+                        content={depreciationInfoContent}
+                        variant="dialog"
+                      />
+                    </Box>
                   </TableCell>
                 </TableRow>
 
-                {/* Depreciation Items */}
-                {depreciationItems.map((item) => (
-                  <TableRow key={item.category}>
-                    <TableCell sx={{ pl: 4 }}>
-                      {item.category} ({formatCurrency(item.amount)} × 10%)
-                    </TableCell>
-                    <TableCell align="right">
-                      {formatCurrency(item.depreciationAmount || 0)}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {/* New Depreciation Breakdown - Per Asset */}
+                {hasNewDepreciationBreakdown ? (
+                  depreciationBreakdown.map((asset) => (
+                    <TableRow key={asset.assetId}>
+                      <TableCell sx={{ pl: 4 }}>
+                        <Box>
+                          <Typography variant="body2">
+                            {asset.description}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            component="div"
+                          >
+                            {formatCurrency(asset.originalAmount)} × 10% = {formatCurrency(asset.depreciationAmount)}
+                          </Typography>
+                          <Box sx={{ mt: 0.5 }}>
+                            {asset.isFullyDepreciated ? (
+                              <Chip
+                                label={t("fullyDepreciated")}
+                                size="small"
+                                color="default"
+                              />
+                            ) : (
+                              <Chip
+                                label={t("yearsRemaining", {
+                                  years: asset.yearsRemaining,
+                                  acquisitionYear: asset.acquisitionYear,
+                                })}
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                              />
+                            )}
+                          </Box>
+                        </Box>
+                      </TableCell>
+                      <TableCell align="right" sx={{ verticalAlign: "top" }}>
+                        {formatCurrency(asset.depreciationAmount)}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  // Legacy fallback - grouped by category
+                  breakdown
+                    .filter((item) => item.isCapitalImprovement)
+                    .map((item) => (
+                      <TableRow key={item.category}>
+                        <TableCell sx={{ pl: 4 }}>
+                          {item.category} ({formatCurrency(item.amount)} × 10%)
+                        </TableCell>
+                        <TableCell align="right">
+                          {formatCurrency(item.depreciationAmount || 0)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                )}
 
                 {/* Depreciation Total */}
                 <TableRow>
@@ -145,7 +237,7 @@ function TaxBreakdown({
                   </TableCell>
                 </TableRow>
               </>
-            )}
+            ) : null}
 
             {/* Taxable Income */}
             <TableRow sx={{ bgcolor: "grey.100" }}>

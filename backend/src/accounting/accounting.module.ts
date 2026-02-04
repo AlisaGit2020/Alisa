@@ -19,6 +19,10 @@ import { Income } from './income/entities/income.entity';
 import { AuthModule } from '@alisa-backend/auth/auth.module';
 import { RealEstateModule } from '@alisa-backend/real-estate/real-estate.module';
 import { BalanceService } from '@alisa-backend/accounting/transaction/balance.service';
+import { DepreciationAsset } from './depreciation/entities/depreciation-asset.entity';
+import { DepreciationRecord } from './depreciation/entities/depreciation-record.entity';
+import { DepreciationService } from './depreciation/depreciation.service';
+import { DepreciationMigrationService } from './depreciation/depreciation-migration.service';
 
 @Module({
   controllers: [
@@ -30,6 +34,8 @@ import { BalanceService } from '@alisa-backend/accounting/transaction/balance.se
   ],
   providers: [
     BalanceService,
+    DepreciationMigrationService,
+    DepreciationService,
     ExpenseService,
     ExpenseTypeService,
     IncomeService,
@@ -47,8 +53,10 @@ import { BalanceService } from '@alisa-backend/accounting/transaction/balance.se
       Income,
       IncomeType,
       Property,
+      DepreciationAsset,
+      DepreciationRecord,
     ]),
   ],
-  exports: [BalanceService, ExpenseService, IncomeService, TransactionService],
+  exports: [BalanceService, DepreciationMigrationService, DepreciationService, ExpenseService, IncomeService, TransactionService],
 })
 export class AccountingModule {}

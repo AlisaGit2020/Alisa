@@ -55,7 +55,7 @@ class DataService<T extends object> {
     }
 
     public async delete(id: number): Promise<void>{
-        ApiClient.delete(this.apiPath, id)
+        await ApiClient.delete(this.apiPath, id)
     }
 
     public updateNestedData(data: T, name: string, value: unknown): T {

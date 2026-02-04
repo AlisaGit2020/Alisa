@@ -16,7 +16,7 @@ export const createExpense = (options: CreateExpenseOptions = {}): Expense => {
   const expense = new Expense();
   expense.id = options.id ?? 1;
   expense.propertyId = options.propertyId ?? 1;
-  expense.transactionId = options.transactionId ?? 1;
+  expense.transactionId = options.transactionId !== undefined ? options.transactionId : 1;
   expense.expenseTypeId = options.expenseTypeId ?? 1;
   expense.description = options.description ?? 'Test Expense';
   expense.amount = options.amount ?? 100;

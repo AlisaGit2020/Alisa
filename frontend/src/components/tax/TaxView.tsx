@@ -32,6 +32,19 @@ interface BreakdownItem {
   depreciationAmount?: number;
 }
 
+interface DepreciationAssetBreakdown {
+  assetId: number;
+  expenseId: number;
+  description: string;
+  acquisitionYear: number;
+  acquisitionMonth?: number;
+  originalAmount: number;
+  depreciationAmount: number;
+  remainingAmount: number;
+  yearsRemaining: number;
+  isFullyDepreciated: boolean;
+}
+
 interface TaxData {
   year: number;
   propertyId?: number;
@@ -40,6 +53,7 @@ interface TaxData {
   depreciation: number;
   netIncome: number;
   breakdown: BreakdownItem[];
+  depreciationBreakdown?: DepreciationAssetBreakdown[];
   calculatedAt?: string;
 }
 
@@ -222,6 +236,7 @@ function TaxView() {
             depreciation={taxData.depreciation}
             netIncome={taxData.netIncome}
             breakdown={taxData.breakdown}
+            depreciationBreakdown={taxData.depreciationBreakdown}
           />
         </>
       )}

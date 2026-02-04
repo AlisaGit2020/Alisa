@@ -5,8 +5,13 @@ import { PropertyStatistics } from './entities/property-statistics.entity';
 import { PropertyService } from './property.service';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { TaxCalculateInputDto } from './dtos/tax-calculate-input.dto';
-import { TaxResponseDto, TaxBreakdownItemDto } from './dtos/tax-response.dto';
+import {
+  TaxResponseDto,
+  TaxBreakdownItemDto,
+  DepreciationAssetBreakdownDto,
+} from './dtos/tax-response.dto';
 import { StatisticKey, TransactionStatus } from '@alisa-backend/common/types';
+import { DepreciationService } from '@alisa-backend/accounting/depreciation/depreciation.service';
 
 @Injectable()
 export class TaxService {
@@ -16,6 +21,7 @@ export class TaxService {
     @Inject(forwardRef(() => PropertyService))
     private propertyService: PropertyService,
     private dataSource: DataSource,
+    private depreciationService: DepreciationService,
   ) {}
 
   async calculate(
@@ -35,9 +41,34 @@ export class TaxService {
     const { total: deductions, breakdown: deductionBreakdown } =
       await this.calculateDeductions(propertyIds, input.year);
 
-    // Calculate depreciation (capital improvements at 10%)
-    const { total: depreciation, breakdown: depreciationBreakdown } =
-      await this.calculateDepreciation(propertyIds, input.year);
+    // Calculate depreciation using DepreciationService
+    const depreciationBreakdownData = await this.depreciationService.getYearlyBreakdown(
+      user,
+      propertyIds,
+      input.year,
+    );
+
+    const depreciation = depreciationBreakdownData.totalDepreciation;
+
+    // Convert to DTO format
+    const depreciationBreakdown: DepreciationAssetBreakdownDto[] =
+      depreciationBreakdownData.items.map((item) => ({
+        assetId: item.assetId,
+        expenseId: item.expenseId,
+        description: item.description,
+        acquisitionYear: item.acquisitionYear,
+        acquisitionMonth: item.acquisitionMonth,
+        originalAmount: item.originalAmount,
+        depreciationAmount: item.depreciationAmount,
+        remainingAmount: item.remainingAmount,
+        yearsRemaining: item.yearsRemaining,
+        isFullyDepreciated: item.isFullyDepreciated,
+      }));
+
+    // Legacy breakdown for backward compatibility
+    const legacyDepreciationBreakdown = this.convertToLegacyBreakdown(
+      depreciationBreakdownData.items,
+    );
 
     // Calculate net income
     const netIncome = grossIncome - deductions - depreciation;
@@ -57,7 +88,8 @@ export class TaxService {
       deductions,
       depreciation,
       netIncome,
-      breakdown: [...deductionBreakdown, ...depreciationBreakdown],
+      breakdown: [...deductionBreakdown, ...legacyDepreciationBreakdown],
+      depreciationBreakdown,
       calculatedAt: new Date(),
     };
   }
@@ -106,9 +138,30 @@ export class TaxService {
       propertyIds,
       year,
     );
-    const { breakdown: depreciationBreakdown } = await this.calculateDepreciation(
+
+    // Get depreciation breakdown from service
+    const depreciationBreakdownData = await this.depreciationService.getYearlyBreakdown(
+      user,
       propertyIds,
       year,
+    );
+
+    const depreciationBreakdown: DepreciationAssetBreakdownDto[] =
+      depreciationBreakdownData.items.map((item) => ({
+        assetId: item.assetId,
+        expenseId: item.expenseId,
+        description: item.description,
+        acquisitionYear: item.acquisitionYear,
+        acquisitionMonth: item.acquisitionMonth,
+        originalAmount: item.originalAmount,
+        depreciationAmount: item.depreciationAmount,
+        remainingAmount: item.remainingAmount,
+        yearsRemaining: item.yearsRemaining,
+        isFullyDepreciated: item.isFullyDepreciated,
+      }));
+
+    const legacyDepreciationBreakdown = this.convertToLegacyBreakdown(
+      depreciationBreakdownData.items,
     );
 
     return {
@@ -118,8 +171,21 @@ export class TaxService {
       deductions,
       depreciation,
       netIncome,
-      breakdown: [...deductionBreakdown, ...depreciationBreakdown],
+      breakdown: [...deductionBreakdown, ...legacyDepreciationBreakdown],
+      depreciationBreakdown,
     };
+  }
+
+  private convertToLegacyBreakdown(
+    items: { description: string; originalAmount: number; depreciationAmount: number }[],
+  ): TaxBreakdownItemDto[] {
+    return items.map((item) => ({
+      category: item.description,
+      amount: item.originalAmount,
+      isTaxDeductible: true,
+      isCapitalImprovement: true,
+      depreciationAmount: item.depreciationAmount,
+    }));
   }
 
   private async getPropertyIds(
@@ -189,48 +255,6 @@ export class TaxService {
     return { total, breakdown };
   }
 
-  private async calculateDepreciation(
-    propertyIds: number[],
-    year: number,
-  ): Promise<{ total: number; breakdown: TaxBreakdownItemDto[] }> {
-    // Get all capital improvements up to and including this year
-    const propertyIdsArray = `{${propertyIds.join(',')}}`;
-    const result = await this.dataSource.query(
-      `SELECT
-         et.name as category,
-         COALESCE(SUM(e."totalAmount"), 0) as amount
-       FROM expense e
-       LEFT JOIN transaction t ON t.id = e."transactionId"
-       INNER JOIN expense_type et ON et.id = e."expenseTypeId"
-       WHERE e."propertyId" = ANY($1::int[])
-         AND (e."transactionId" IS NULL OR t.status = $2)
-         AND EXTRACT(YEAR FROM e."accountingDate") <= $3
-         AND et."isCapitalImprovement" = true
-       GROUP BY et.id, et.name
-       ORDER BY et.name`,
-      [propertyIdsArray, TransactionStatus.ACCEPTED, year],
-    );
-
-    const breakdown: TaxBreakdownItemDto[] = result.map((row: { category: string; amount: string }) => {
-      const totalAmount = parseFloat(row.amount) || 0;
-      const depreciationAmount = totalAmount * 0.1; // 10% depreciation
-      return {
-        category: row.category,
-        amount: totalAmount,
-        isTaxDeductible: true,
-        isCapitalImprovement: true,
-        depreciationAmount,
-      };
-    });
-
-    const total = breakdown.reduce(
-      (sum, item) => sum + (item.depreciationAmount || 0),
-      0,
-    );
-
-    return { total, breakdown };
-  }
-
   private async saveStatistics(
     propertyIds: number[],
     year: number,
@@ -278,6 +302,7 @@ export class TaxService {
       depreciation: 0,
       netIncome: 0,
       breakdown: [],
+      depreciationBreakdown: [],
     };
   }
 }
