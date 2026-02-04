@@ -37,4 +37,7 @@ export class ExpenseType {
 
   @Column()
   isTaxDeductible: boolean;
+
+  @Column({ default: false })
+  isCapitalImprovement: boolean;
 }
