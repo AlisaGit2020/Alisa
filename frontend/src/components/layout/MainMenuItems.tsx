@@ -25,6 +25,7 @@ import {
   transactionContext,
   expenseContext,
   incomeContext,
+  taxContext,
 } from "@alisa-lib/alisa-contexts";
 
 interface MainMenuItemsProps {
@@ -160,10 +161,10 @@ function MainMenuItems({ open }: MainMenuItemsProps) {
 
       {menuItem(
         "taxes",
-        "#",
+        taxContext.routePath,
         t("taxes"),
         <CalculateIcon sx={{ color: "warning.main" }} />,
-        false
+        currentPath.startsWith(taxContext.routePath)
       )}
     </List>
   );
