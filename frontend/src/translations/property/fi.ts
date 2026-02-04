@@ -1,6 +1,8 @@
 const property = {
     add: 'Lisää uusi asunto',
     properties: 'Asunnot',
+    overviewTitle: 'Asunnot',
+    overviewDescription: 'Hallinnoi vuokra-asuntojasi täältä. Lisää uusia asuntoja, muokkaa tietoja ja seuraa jokaisen asunnon taloudellista tilannetta.',
     confirmDelete: 'Poistetaanko asunto?',
     name: 'Nimi',
     size: 'Pinta-ala',

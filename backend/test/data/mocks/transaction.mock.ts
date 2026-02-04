@@ -171,6 +171,7 @@ export const expenseType1: ExpenseTypeInputDto = {
   name: 'Siivous',
   description: '',
   isTaxDeductible: true,
+  isCapitalImprovement: false,
 };
 
 export const expenseType2: ExpenseTypeInputDto = {
@@ -178,12 +179,14 @@ export const expenseType2: ExpenseTypeInputDto = {
   name: 'Rahoitusvastike',
   description: '',
   isTaxDeductible: true,
+  isCapitalImprovement: false,
 };
 export const expenseType3: ExpenseTypeInputDto = {
   id: 3,
   name: 'Hoito- ja ylläpitovastike',
   description: '',
   isTaxDeductible: true,
+  isCapitalImprovement: false,
 };
 
 export const incomeType1: IncomeTypeInputDto = {

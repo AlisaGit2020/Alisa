@@ -1,6 +1,8 @@
 const property = {
     add: 'Add new property',
     properties: 'Properties',
+    overviewTitle: 'Properties',
+    overviewDescription: 'Manage your rental properties here. Add new properties, edit details, and track the financial status of each property.',
     confirmDelete: 'Are you sure you want to delete the property?',
     name: 'Name',
     size: 'Size',

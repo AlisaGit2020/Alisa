@@ -9,4 +9,6 @@ export class ExpenseTypeInputDto {
   description?: string;
 
   isTaxDeductible: boolean;
+
+  isCapitalImprovement: boolean;
 }

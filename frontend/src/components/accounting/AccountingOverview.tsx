@@ -4,9 +4,9 @@ import {
   CardActionArea,
   CardContent,
   Grid,
-  Paper,
   Typography,
 } from "@mui/material";
+import PageHeader from "../alisa/PageHeader";
 import { useTranslation } from "react-i18next";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import PaymentsIcon from "@mui/icons-material/Payments";
@@ -58,14 +58,10 @@ function AccountingOverview() {
 
   return (
     <Box>
-      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          {t("overviewTitle")}
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          {t("overviewDescription")}
-        </Typography>
-      </Paper>
+      <PageHeader
+        title={t("overviewTitle")}
+        description={t("overviewDescription")}
+      />
 
       <Grid container spacing={3}>
         {subPages.map((page) => (

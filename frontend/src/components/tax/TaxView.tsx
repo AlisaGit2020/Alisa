@@ -20,6 +20,9 @@ import ApiClient from "@alisa-lib/api-client";
 import { VITE_API_URL } from "../../constants";
 import TaxSummaryCards from "./TaxSummaryCards";
 import TaxBreakdown from "./TaxBreakdown";
+import PageHeader from "../alisa/PageHeader";
+import { getTransactionPropertyId } from "@alisa-lib/initial-data";
+import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../transaction/TransactionLeftMenuItems";
 
 interface BreakdownItem {
   category: string;
@@ -47,6 +50,9 @@ function TaxView() {
   const defaultYear = currentYear - 1;
 
   const [selectedYear, setSelectedYear] = useState<number>(defaultYear);
+  const [propertyId, setPropertyId] = useState<number>(() =>
+    getTransactionPropertyId()
+  );
   const [taxData, setTaxData] = useState<TaxData | null>(null);
   const [loading, setLoading] = useState(false);
   const [calculating, setCalculating] = useState(false);
@@ -54,12 +60,36 @@ function TaxView() {
 
   const yearOptions = Array.from({ length: 10 }, (_, i) => currentYear - 1 - i);
 
+  // Listen for global property changes
+  useEffect(() => {
+    const handlePropertyChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{ propertyId: number }>;
+      setPropertyId(customEvent.detail.propertyId);
+    };
+
+    window.addEventListener(
+      TRANSACTION_PROPERTY_CHANGE_EVENT,
+      handlePropertyChange
+    );
+
+    return () => {
+      window.removeEventListener(
+        TRANSACTION_PROPERTY_CHANGE_EVENT,
+        handlePropertyChange
+      );
+    };
+  }, []);
+
   const fetchTaxData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
+      const params = new URLSearchParams({ year: selectedYear.toString() });
+      if (propertyId > 0) {
+        params.append("propertyId", propertyId.toString());
+      }
       const response = await axios.get<TaxData>(
-        `${VITE_API_URL}/real-estate/property/tax?year=${selectedYear}`,
+        `${VITE_API_URL}/real-estate/property/tax?${params.toString()}`,
         await ApiClient.getOptions()
       );
       if (response.data) {
@@ -73,15 +103,19 @@ function TaxView() {
     } finally {
       setLoading(false);
     }
-  }, [selectedYear]);
+  }, [selectedYear, propertyId]);
 
   const calculateTaxData = async () => {
     setCalculating(true);
     setError(null);
     try {
+      const body: { year: number; propertyId?: number } = { year: selectedYear };
+      if (propertyId > 0) {
+        body.propertyId = propertyId;
+      }
       const response = await axios.post<TaxData>(
         `${VITE_API_URL}/real-estate/property/tax/calculate`,
-        { year: selectedYear },
+        body,
         await ApiClient.getOptions()
       );
       setTaxData(response.data);
@@ -103,14 +137,15 @@ function TaxView() {
 
   return (
     <Box>
+      <PageHeader title={t("title")} description={t("infoText")} />
+
       <Stack
-        direction={{ xs: "column", sm: "row" }}
-        justifyContent="space-between"
-        alignItems={{ xs: "flex-start", sm: "center" }}
+        direction="row"
+        justifyContent="flex-start"
+        alignItems="center"
         spacing={2}
         sx={{ mb: 3 }}
       >
-        <Typography variant="h4">{t("title")}</Typography>
         <FormControl size="small" sx={{ minWidth: 120 }}>
           <InputLabel id="tax-year-select">{t("year")}</InputLabel>
           <Select
@@ -127,10 +162,6 @@ function TaxView() {
           </Select>
         </FormControl>
       </Stack>
-
-      <Alert severity="info" sx={{ mb: 3 }}>
-        {t("infoText")}
-      </Alert>
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>

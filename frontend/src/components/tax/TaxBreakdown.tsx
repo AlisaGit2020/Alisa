@@ -48,7 +48,7 @@ function TaxBreakdown({
 
   return (
     <Paper elevation={3} sx={{ mt: 3 }}>
-      <Box sx={{ p: 2, bgcolor: "primary.main", color: "primary.contrastText" }}>
+      <Box sx={{ p: 2, bgcolor: "grey.100" }}>
         <Typography variant="h6">{t("form7H")}</Typography>
       </Box>
 
@@ -75,7 +75,7 @@ function TaxBreakdown({
             <TableRow>
               <TableCell
                 colSpan={2}
-                sx={{ bgcolor: "grey.100", fontWeight: "bold" }}
+                sx={{ bgcolor: "grey.50", fontWeight: "bold" }}
               >
                 {t("deductionsSection")}
               </TableCell>
@@ -111,7 +111,7 @@ function TaxBreakdown({
                 <TableRow>
                   <TableCell
                     colSpan={2}
-                    sx={{ bgcolor: "grey.100", fontWeight: "bold" }}
+                    sx={{ bgcolor: "grey.50", fontWeight: "bold" }}
                   >
                     {t("depreciationSection")}
                   </TableCell>
@@ -148,13 +148,13 @@ function TaxBreakdown({
             )}
 
             {/* Taxable Income */}
-            <TableRow sx={{ bgcolor: "primary.light" }}>
-              <TableCell sx={{ fontWeight: "bold", color: "primary.contrastText" }}>
+            <TableRow sx={{ bgcolor: "grey.100" }}>
+              <TableCell sx={{ fontWeight: "bold" }}>
                 {t("taxableIncome")}
               </TableCell>
               <TableCell
                 align="right"
-                sx={{ fontWeight: "bold", fontSize: "1.1rem", color: "primary.contrastText" }}
+                sx={{ fontWeight: "bold", fontSize: "1.1rem" }}
               >
                 {formatCurrency(netIncome)}
               </TableCell>

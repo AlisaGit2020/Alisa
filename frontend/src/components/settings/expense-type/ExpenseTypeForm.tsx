@@ -19,7 +19,8 @@ function ExpenseTypeForm({ t, id, onCancel, onAfterSubmit }: ExpenseTypeFormProp
     const [data, setData] = useState<ExpenseTypeInputDto>({
         name: '',
         description: '',
-        isTaxDeductible: false
+        isTaxDeductible: false,
+        isCapitalImprovement: false
     });
 
     const dataService = new DataService<ExpenseTypeInputDto>({
@@ -53,6 +54,11 @@ function ExpenseTypeForm({ t, id, onCancel, onAfterSubmit }: ExpenseTypeFormProp
                 value={data.isTaxDeductible}
                 onChange={(e) => handleChange('isTaxDeductible', e.target.checked)}
                 label={t('isTaxDeductible')}
+            />
+            <AlisaSwitch
+                value={data.isCapitalImprovement}
+                onChange={(e) => handleChange('isCapitalImprovement', e.target.checked)}
+                label={t('isCapitalImprovement')}
             />
         </Stack>
     )

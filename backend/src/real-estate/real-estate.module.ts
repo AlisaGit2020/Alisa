@@ -16,7 +16,7 @@ import { TaxController } from './property/tax.controller';
 import { TaxService } from './property/tax.service';
 
 @Module({
-  controllers: [InvestmentController, PropertyController, TaxController],
+  controllers: [InvestmentController, TaxController, PropertyController],
   providers: [InvestmentService, PropertyService, PropertyStatisticsService, TaxService],
   imports: [
     TypeOrmModule.forFeature([

@@ -142,14 +142,15 @@ export class TaxService {
     propertyIds: number[],
     year: number,
   ): Promise<number> {
+    const propertyIdsArray = `{${propertyIds.join(',')}}`;
     const result = await this.dataSource.query(
       `SELECT COALESCE(SUM(i."totalAmount"), 0) as total
        FROM income i
-       INNER JOIN transaction t ON t.id = i."transactionId"
-       WHERE i."propertyId" = ANY($1)
-         AND t.status = $2
-         AND EXTRACT(YEAR FROM t."accountingDate") = $3`,
-      [propertyIds, TransactionStatus.ACCEPTED, year],
+       LEFT JOIN transaction t ON t.id = i."transactionId"
+       WHERE i."propertyId" = ANY($1::int[])
+         AND (i."transactionId" IS NULL OR t.status = $2)
+         AND EXTRACT(YEAR FROM i."accountingDate") = $3`,
+      [propertyIdsArray, TransactionStatus.ACCEPTED, year],
     );
     return parseFloat(result[0]?.total) || 0;
   }
@@ -158,21 +159,22 @@ export class TaxService {
     propertyIds: number[],
     year: number,
   ): Promise<{ total: number; breakdown: TaxBreakdownItemDto[] }> {
+    const propertyIdsArray = `{${propertyIds.join(',')}}`;
     const result = await this.dataSource.query(
       `SELECT
          et.name as category,
          COALESCE(SUM(e."totalAmount"), 0) as amount
        FROM expense e
-       INNER JOIN transaction t ON t.id = e."transactionId"
+       LEFT JOIN transaction t ON t.id = e."transactionId"
        INNER JOIN expense_type et ON et.id = e."expenseTypeId"
-       WHERE e."propertyId" = ANY($1)
-         AND t.status = $2
-         AND EXTRACT(YEAR FROM t."accountingDate") = $3
+       WHERE e."propertyId" = ANY($1::int[])
+         AND (e."transactionId" IS NULL OR t.status = $2)
+         AND EXTRACT(YEAR FROM e."accountingDate") = $3
          AND et."isTaxDeductible" = true
          AND et."isCapitalImprovement" = false
        GROUP BY et.id, et.name
        ORDER BY et.name`,
-      [propertyIds, TransactionStatus.ACCEPTED, year],
+      [propertyIdsArray, TransactionStatus.ACCEPTED, year],
     );
 
     const breakdown: TaxBreakdownItemDto[] = result.map((row: { category: string; amount: string }) => ({
@@ -192,20 +194,21 @@ export class TaxService {
     year: number,
   ): Promise<{ total: number; breakdown: TaxBreakdownItemDto[] }> {
     // Get all capital improvements up to and including this year
+    const propertyIdsArray = `{${propertyIds.join(',')}}`;
     const result = await this.dataSource.query(
       `SELECT
          et.name as category,
          COALESCE(SUM(e."totalAmount"), 0) as amount
        FROM expense e
-       INNER JOIN transaction t ON t.id = e."transactionId"
+       LEFT JOIN transaction t ON t.id = e."transactionId"
        INNER JOIN expense_type et ON et.id = e."expenseTypeId"
-       WHERE e."propertyId" = ANY($1)
-         AND t.status = $2
-         AND EXTRACT(YEAR FROM t."accountingDate") <= $3
+       WHERE e."propertyId" = ANY($1::int[])
+         AND (e."transactionId" IS NULL OR t.status = $2)
+         AND EXTRACT(YEAR FROM e."accountingDate") <= $3
          AND et."isCapitalImprovement" = true
        GROUP BY et.id, et.name
        ORDER BY et.name`,
-      [propertyIds, TransactionStatus.ACCEPTED, year],
+      [propertyIdsArray, TransactionStatus.ACCEPTED, year],
     );
 
     const breakdown: TaxBreakdownItemDto[] = result.map((row: { category: string; amount: string }) => {
