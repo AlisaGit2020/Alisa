@@ -46,6 +46,10 @@ export enum StatisticKey {
   EXPENSE = 'expense',
   DEPOSIT = 'deposit',
   WITHDRAW = 'withdraw',
+  TAX_GROSS_INCOME = 'tax_gross_income',
+  TAX_DEDUCTIONS = 'tax_deductions',
+  TAX_DEPRECIATION = 'tax_depreciation',
+  TAX_NET_INCOME = 'tax_net_income',
 }
 
 export type BetweenDates = {
