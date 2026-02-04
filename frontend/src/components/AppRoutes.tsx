@@ -10,7 +10,9 @@ import {
   transactionContext,
   expenseContext,
   incomeContext,
+  taxContext,
 } from "@alisa-lib/alisa-contexts";
+import TaxView from "./tax/TaxView";
 import TransactionsOverview from "./transaction/TransactionsOverview";
 import TransactionMain from "./transaction/TransactionMain";
 import TransactionsPending from "./transaction/pending/TransactionsPending";
@@ -78,6 +80,11 @@ export default function AppRoutes() {
           <Route
             path={incomeContext.routePath}
             element={<Incomes></Incomes>}
+          ></Route>
+
+          <Route
+            path={taxContext.routePath}
+            element={<TaxView />}
           ></Route>
 
           {/* Backward compatibility redirect */}
