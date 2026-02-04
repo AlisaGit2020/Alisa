@@ -48,6 +48,9 @@ export class TransactionService {
     user: JWTUser,
     options: FindManyOptions<Transaction>,
   ): Promise<Transaction[]> {
+    if (!options) {
+      options = {};
+    }
     if (options.where !== undefined) {
       options.where = typeormWhereTransformer(options.where);
     }
@@ -542,6 +545,9 @@ export class TransactionService {
     user: JWTUser,
     options: FindManyOptions<Transaction>,
   ): Promise<TransactionStatisticsDto> {
+    if (!options) {
+      options = {};
+    }
     const queryBuilder = this.repository.createQueryBuilder('transaction');
 
     if (options.where === undefined) {

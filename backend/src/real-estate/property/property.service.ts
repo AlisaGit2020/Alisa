@@ -14,12 +14,15 @@ import { JWTUser } from '@alisa-backend/auth/types';
 import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownership-input.dto';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
+import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
 
 @Injectable()
 export class PropertyService {
   constructor(
     @InjectRepository(Property)
     private repository: Repository<Property>,
+    @InjectRepository(Ownership)
+    private ownershipRepository: Repository<Ownership>,
     private authService: AuthService,
   ) {}
 
@@ -67,6 +70,12 @@ export class PropertyService {
   ): Promise<Property> {
     const propertyEntity = await this.getEntityOrThrow(user, id);
 
+    // If updating ownerships, delete existing ones first to avoid TypeORM cascade issues
+    // with NOT NULL constraint on propertyId when orphaning records
+    if (input.ownerships !== undefined) {
+      await this.ownershipRepository.delete({ propertyId: id });
+    }
+
     this.mapData(user, propertyEntity, input);
 
     await this.repository.save(propertyEntity);
@@ -85,6 +94,10 @@ export class PropertyService {
     if (input.ownerships !== undefined) {
       input?.ownerships.forEach((ownership) => {
         ownership.userId = user.id;
+        // Set propertyId for updates (when property already has an ID)
+        if (property.id !== undefined) {
+          ownership.propertyId = property.id;
+        }
       });
     }
     Object.entries(input).forEach(([key, value]) => {

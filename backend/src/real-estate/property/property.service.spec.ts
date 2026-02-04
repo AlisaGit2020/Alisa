@@ -4,6 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import type { Express } from 'express';
 import { PropertyService } from './property.service';
 import { Property } from './entities/property.entity';
+import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
   createMockRepository,
@@ -16,6 +17,7 @@ import { createProperty, createJWTUser } from 'test/factories';
 describe('PropertyService', () => {
   let service: PropertyService;
   let mockRepository: MockRepository<Property>;
+  let mockOwnershipRepository: MockRepository<Ownership>;
   let mockAuthService: MockAuthService;
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
@@ -27,12 +29,14 @@ describe('PropertyService', () => {
 
   beforeEach(async () => {
     mockRepository = createMockRepository<Property>();
+    mockOwnershipRepository = createMockRepository<Ownership>();
     mockAuthService = createMockAuthService();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PropertyService,
         { provide: getRepositoryToken(Property), useValue: mockRepository },
+        { provide: getRepositoryToken(Ownership), useValue: mockOwnershipRepository },
         { provide: AuthService, useValue: mockAuthService },
       ],
     }).compile();
@@ -200,6 +204,28 @@ describe('PropertyService', () => {
       await expect(
         service.update(otherUser, 1, { name: 'Test', size: 50 }),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('sets propertyId on ownership when updating with ownership data', async () => {
+      const existingProperty = createProperty({ id: 1, name: 'Test Property' });
+      const input = {
+        name: 'Test Property',
+        size: 50,
+        ownerships: [{ share: 75, userId: testUser.id }],
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockOwnershipRepository.delete.mockResolvedValue({ affected: 1 });
+      mockRepository.save.mockImplementation((entity) => Promise.resolve(entity));
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(mockOwnershipRepository.delete).toHaveBeenCalledWith({ propertyId: 1 });
+      expect(result.ownerships).toBeDefined();
+      expect(result.ownerships[0].propertyId).toBe(1);
+      expect(result.ownerships[0].userId).toBe(testUser.id);
+      expect(result.ownerships[0].share).toBe(75);
     });
   });
 
