@@ -12,10 +12,12 @@ import { AuthModule } from '@alisa-backend/auth/auth.module';
 import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
 import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
 import { AccountingModule } from '@alisa-backend/accounting/accounting.module';
+import { TaxController } from './property/tax.controller';
+import { TaxService } from './property/tax.service';
 
 @Module({
-  controllers: [InvestmentController, PropertyController],
-  providers: [InvestmentService, PropertyService, PropertyStatisticsService],
+  controllers: [InvestmentController, PropertyController, TaxController],
+  providers: [InvestmentService, PropertyService, PropertyStatisticsService, TaxService],
   imports: [
     TypeOrmModule.forFeature([
       Investment,
