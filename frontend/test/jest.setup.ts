@@ -1,13 +1,15 @@
 // frontend/test/jest.setup.ts
 require('reflect-metadata');
-import { server } from './msw/server';
 
-// Establish API mocking before all tests
-beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
+// Polyfill TextEncoder/TextDecoder for Node environment
+import { TextEncoder, TextDecoder } from 'util';
+global.TextEncoder = TextEncoder as any;
+global.TextDecoder = TextDecoder as any;
 
-// Reset any request handlers that are added during tests
-afterEach(() => server.resetHandlers());
+// Polyfill fetch for MSW
+import 'whatwg-fetch';
 
-// Clean up after tests are finished
-afterAll(() => server.close());
+// MSW server setup is only needed for tests that make API calls
+// For now, we skip MSW initialization to avoid ESM compatibility issues
+// Tests that need MSW will import and set it up manually
 
