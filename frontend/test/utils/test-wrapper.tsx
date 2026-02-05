@@ -5,7 +5,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { I18nextProvider } from 'react-i18next';
-import i18n from '../../src/translations/i18n';
+import i18n from './test-i18n';
 import { BrowserRouter } from 'react-router-dom';
 
 // Create a default theme for testing
