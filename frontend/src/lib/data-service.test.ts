@@ -1,5 +1,4 @@
 
-import { mockConstants } from "@alisa-mocks/mocks";
 import DataService from "./data-service";
 import AlisaContext from "@alisa-lib/alisa-contexts";
 import { TestInputDto } from "../../test/mocks/TestInputDto";
@@ -7,7 +6,7 @@ import { TestNestedInputDto } from "../../test/mocks/TestNestedInputDto";
 import "reflect-metadata";
 import ApiClient from "./api-client";
 
-jest.mock('../../src/constants', () => mockConstants);
+// Constants are mocked via jest.config.js moduleNameMapper
 
 describe('Data service', () => {
 

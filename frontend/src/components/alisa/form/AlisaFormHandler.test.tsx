@@ -2,14 +2,13 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
-import { mockConstants } from '@alisa-mocks/mocks';
 import AlisaFormHandler from './AlisaFormHandler';
-import DataService from '../../../lib/data-service';
+import DataService from '@alisa-lib/data-service';
 import AlisaContext from '@alisa-lib/alisa-contexts';
 import { TestInputDto } from '../../../../test/mocks/TestInputDto';
 
-jest.mock('../../../constants', () => mockConstants);
-jest.mock('../../../lib/data-service');
+// Constants are mocked via jest.config.js moduleNameMapper
+jest.mock('@alisa-lib/data-service');
 
 describe('AlisaFormHandler', () => {
   beforeEach(() => {

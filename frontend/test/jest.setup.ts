@@ -1,15 +1,17 @@
 // frontend/test/jest.setup.ts
-require('reflect-metadata');
-
-// Polyfill TextEncoder/TextDecoder for Node environment
-import { TextEncoder, TextDecoder } from 'util';
-global.TextEncoder = TextEncoder as any;
-global.TextDecoder = TextDecoder as any;
-
-// Polyfill fetch for MSW
+import 'reflect-metadata';
 import 'whatwg-fetch';
 
-// MSW server setup is only needed for tests that make API calls
-// For now, we skip MSW initialization to avoid ESM compatibility issues
-// Tests that need MSW will import and set it up manually
+// Import jest globals for ESM mode
+import { jest, beforeAll, afterEach, afterAll } from '@jest/globals';
+
+// Make jest available globally for all tests
+(globalThis as any).jest = jest;
+
+// MSW server setup
+import { server } from './msw/server.js';
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
