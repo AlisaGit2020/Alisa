@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Grid,
   Paper,
@@ -30,6 +31,7 @@ import { useDashboard, ViewMode } from "./context/DashboardContext";
 import { getWidgetById, getGridSize, WidgetSize } from "./config/widget-registry";
 import { SortableWidget } from "./components/SortableWidget";
 import { DashboardToolbar } from "./components/DashboardToolbar";
+import { DashboardPageTemplate } from "../templates";
 
 function Dashboard() {
   const { t } = useTranslation("dashboard");
@@ -92,10 +94,10 @@ function Dashboard() {
   const widgetIds = displayWidgets.map((w) => w.id);
 
   return (
-    <>
+    <DashboardPageTemplate translationPrefix="dashboard">
       <DashboardToolbar />
       <Grid container spacing={3}>
-        {/* Welcome message and controls */}
+        {/* View controls */}
         <Grid size={12}>
           <Paper elevation={5} sx={{ p: 2 }}>
             <Stack
@@ -142,44 +144,44 @@ function Dashboard() {
           </Paper>
         </Grid>
 
-      {/* Dynamic widgets */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={widgetIds} strategy={rectSortingStrategy}>
-          {displayWidgets.map((widgetConfig) => {
-            const widgetDef = getWidgetById(widgetConfig.id);
-            if (!widgetDef) return null;
+        {/* Dynamic widgets */}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={widgetIds} strategy={rectSortingStrategy}>
+            {displayWidgets.map((widgetConfig) => {
+              const widgetDef = getWidgetById(widgetConfig.id);
+              if (!widgetDef) return null;
 
-            const WidgetComponent = widgetDef.component;
-            const currentSize = widgetConfig.size ?? widgetDef.defaultSize;
-            const gridMd = getGridSize(currentSize);
-            const isHidden = !widgetConfig.visible;
+              const WidgetComponent = widgetDef.component;
+              const currentSize = widgetConfig.size ?? widgetDef.defaultSize;
+              const gridMd = getGridSize(currentSize);
+              const isHidden = !widgetConfig.visible;
 
-            return (
-              <Grid
-                key={widgetConfig.id}
-                size={{ xs: 12, md: gridMd }}
-                id={widgetConfig.id}
-              >
-                <SortableWidget
+              return (
+                <Grid
+                  key={widgetConfig.id}
+                  size={{ xs: 12, md: gridMd }}
                   id={widgetConfig.id}
-                  height={widgetDef.height}
-                  isEditMode={isEditMode}
-                  isHidden={isHidden}
-                  currentSize={currentSize}
-                  onToggleVisibility={handleToggleVisibility}
-                  onSizeChange={handleSizeChange}
                 >
-                  <WidgetComponent />
-                </SortableWidget>
-              </Grid>
-            );
-          })}
-        </SortableContext>
-      </DndContext>
+                  <SortableWidget
+                    id={widgetConfig.id}
+                    height={widgetDef.height}
+                    isEditMode={isEditMode}
+                    isHidden={isHidden}
+                    currentSize={currentSize}
+                    onToggleVisibility={handleToggleVisibility}
+                    onSizeChange={handleSizeChange}
+                  >
+                    <WidgetComponent />
+                  </SortableWidget>
+                </Grid>
+              );
+            })}
+          </SortableContext>
+        </DndContext>
 
         {/* Show message when no widgets are visible (only in normal mode) */}
         {!isEditMode && getVisibleWidgets().length === 0 && (
@@ -190,7 +192,7 @@ function Dashboard() {
           </Grid>
         )}
       </Grid>
-    </>
+    </DashboardPageTemplate>
   );
 }
 

@@ -1,4 +1,16 @@
 const accounting = {
+  // Page template
+  pageTitle: "Accounting",
+  pageDescription: "Access financial reports and accounting tools.",
+
+  // Page template for incomes
+  incomesPageTitle: "Incomes",
+  incomesPageDescription: "Track rental income and other revenue from your properties.",
+
+  // Page template for expenses
+  expensesPageTitle: "Expenses",
+  expensesPageDescription: "Manage costs and expenses related to your properties.",
+
   // Left menu
   accounting: "Accounting",
   bankTransactions: "Bank transactions",

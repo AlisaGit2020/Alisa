@@ -1,4 +1,8 @@
 const tax = {
+  // Page template
+  pageTitle: 'Tax Report',
+  pageDescription: 'Generate tax reports for your properties.',
+
   title: 'Taxes',
   infoText: 'You need this information for your tax return. Copy the figures to form 7H (Apartments).',
   year: 'Tax year',

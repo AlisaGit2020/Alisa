@@ -1,4 +1,12 @@
 const transaction = {
+  // Page template
+  pageTitle: "Transactions",
+  pageDescription: "View and manage all financial transactions for your properties.",
+
+  // Pending page template
+  pendingPageTitle: "Pending Transactions",
+  pendingPageDescription: "Review imported transactions, set categories, and approve them for your records.",
+
   // Overview page
   overviewTitle: "Bank Transactions",
   overviewDescription:

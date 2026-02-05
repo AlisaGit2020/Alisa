@@ -1,4 +1,8 @@
 const tax = {
+  // Page template
+  pageTitle: 'Veroraportti',
+  pageDescription: 'Luo veroraportteja kiinteistöillesi.',
+
   title: 'Verotus',
   infoText: 'Nämä tiedot tarvitset veroilmoitukseen. Kopioi luvut lomakkeelle 7H (Osakehuoneistot).',
   year: 'Verovuosi',

@@ -1,4 +1,8 @@
 const settings = {
+    // Page template
+    pageTitle: 'Asetukset',
+    pageDescription: 'Määritä tilisi ja sovelluksen asetukset.',
+
     settings: 'Asetukset',
     expenseTypes: 'Kululajit',
     incomeTypes: 'Tulolajit',

@@ -1,4 +1,12 @@
 const transaction = {
+  // Page template
+  pageTitle: "Tapahtumat",
+  pageDescription: "Näytä ja hallitse kaikkia kiinteistöjesi rahoitustapahtumia.",
+
+  // Pending page template
+  pendingPageTitle: "Odottavat tapahtumat",
+  pendingPageDescription: "Tarkista tuodut tapahtumat, aseta kategoriat ja hyväksy ne kirjanpitoon.",
+
   // Overview page
   overviewTitle: "Tilitapahtumat",
   overviewDescription:

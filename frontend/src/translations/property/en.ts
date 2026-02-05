@@ -1,4 +1,8 @@
 const property = {
+    // Page template
+    pageTitle: 'Properties',
+    pageDescription: 'View and manage your real estate portfolio.',
+
     add: 'Add new property',
     properties: 'Properties',
     overviewTitle: 'Properties',

@@ -1,4 +1,8 @@
 const dashboard = {
+  // Page template
+  pageTitle: "Hallintapaneeli",
+  pageDescription: "Yleiskatsaus kiinteistösalkkusi suorituskyvystä.",
+
   allProperties: "Kaikki kohteet",
   monthly: "Kuukausittain",
   yearly: "Vuosittain",

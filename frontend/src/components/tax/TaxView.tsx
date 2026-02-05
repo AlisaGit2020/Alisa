@@ -20,7 +20,7 @@ import ApiClient from "@alisa-lib/api-client";
 import { VITE_API_URL } from "../../constants";
 import TaxSummaryCards from "./TaxSummaryCards";
 import TaxBreakdown from "./TaxBreakdown";
-import PageHeader from "../alisa/PageHeader";
+import { ListPageTemplate } from "../templates";
 import { getTransactionPropertyId } from "@alisa-lib/initial-data";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../transaction/TransactionLeftMenuItems";
 
@@ -150,9 +150,7 @@ function TaxView() {
   };
 
   return (
-    <Box>
-      <PageHeader title={t("title")} description={t("infoText")} />
-
+    <ListPageTemplate translationPrefix="tax">
       <Stack
         direction="row"
         justifyContent="flex-start"
@@ -240,7 +238,7 @@ function TaxView() {
           />
         </>
       )}
-    </Box>
+    </ListPageTemplate>
   );
 }
 

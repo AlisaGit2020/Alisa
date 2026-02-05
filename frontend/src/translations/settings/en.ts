@@ -1,4 +1,8 @@
 const settings = {
+    // Page template
+    pageTitle: 'Settings',
+    pageDescription: 'Configure your account and application preferences.',
+
     settings: 'Settings',
     expenseTypes: 'Expense types',
     incomeTypes: 'Income types',

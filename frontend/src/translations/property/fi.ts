@@ -1,4 +1,8 @@
 const property = {
+    // Page template
+    pageTitle: 'Asunnot',
+    pageDescription: 'Näytä ja hallinnoi kiinteistösalkkuasi.',
+
     add: 'Lisää uusi asunto',
     properties: 'Asunnot',
     overviewTitle: 'Asunnot',

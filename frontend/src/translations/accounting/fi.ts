@@ -1,4 +1,16 @@
 const accounting = {
+  // Page template
+  pageTitle: "Kirjanpito",
+  pageDescription: "Pääsy talousraportteihin ja kirjanpitotyökaluihin.",
+
+  // Page template for incomes
+  incomesPageTitle: "Tulot",
+  incomesPageDescription: "Seuraa vuokratuloja ja muita kiinteistöjesi tuottoja.",
+
+  // Page template for expenses
+  expensesPageTitle: "Kulut",
+  expensesPageDescription: "Hallitse kiinteistöihisi liittyviä kustannuksia ja kuluja.",
+
   // Left menu
   accounting: "Kirjanpito",
   bankTransactions: "Pankkitapahtumat",

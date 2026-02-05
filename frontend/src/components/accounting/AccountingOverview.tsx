@@ -1,12 +1,12 @@
+import { ReactNode } from "react";
 import {
-  Box,
   Card,
   CardActionArea,
   CardContent,
+  Box,
   Grid,
   Typography,
 } from "@mui/material";
-import PageHeader from "../alisa/PageHeader";
 import { useTranslation } from "react-i18next";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import PaymentsIcon from "@mui/icons-material/Payments";
@@ -16,12 +16,13 @@ import {
   expenseContext,
   incomeContext,
 } from "@alisa-lib/alisa-contexts";
+import { HubPageTemplate } from "../templates";
 
 interface SubPageCard {
   id: string;
   titleKey: string;
   descriptionKey: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   href: string;
   color: string;
 }
@@ -57,11 +58,7 @@ function AccountingOverview() {
   const { t } = useTranslation("accounting");
 
   return (
-    <Box>
-      <PageHeader
-        title={t("overviewTitle")}
-        description={t("overviewDescription")}
-      />
+    <HubPageTemplate translationPrefix="accounting">
 
       <Grid container spacing={3}>
         {subPages.map((page) => (
@@ -115,7 +112,7 @@ function AccountingOverview() {
           </Grid>
         ))}
       </Grid>
-    </Box>
+    </HubPageTemplate>
   );
 }
 

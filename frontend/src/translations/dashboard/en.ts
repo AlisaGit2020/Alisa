@@ -1,4 +1,8 @@
 const dashboard = {
+  // Page template
+  pageTitle: "Dashboard",
+  pageDescription: "Overview of your property portfolio performance.",
+
   allProperties: "All properties",
   monthly: "Monthly",
   yearly: "Yearly",

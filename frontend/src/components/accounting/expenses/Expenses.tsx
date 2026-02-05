@@ -1,4 +1,4 @@
-import { Paper } from "@mui/material";
+import { Paper, Stack } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import AlisaDataTable from "../../alisa/datatable/AlisaDataTable";
 import { expenseContext } from "@alisa-lib/alisa-contexts";
@@ -6,7 +6,7 @@ import { Expense } from "@alisa-backend/accounting/expense/entities/expense.enti
 import DataService from "@alisa-lib/data-service";
 import { TypeOrmFetchOptions } from "@alisa-lib/types";
 import { useState, useEffect, useMemo } from "react";
-import AlisaContent from "../../alisa/AlisaContent";
+import { ListPageTemplate } from "../../templates";
 import ExpenseForm from "./ExpenseForm";
 import AccountingFilter, { AccountingFilterData } from "../AccountingFilter";
 import {
@@ -178,36 +178,42 @@ function Expenses({ t }: WithTranslation) {
   }, [dataService, refreshTrigger]);
 
   return (
-    <AlisaContent>
-      <AccountingFilter
-        mode="expense"
-        data={filter}
-        onTypeChange={handleTypeChange}
-        onSearchTextChange={handleSearchTextChange}
-        onStartDateChange={handleStartDateChange}
-        onEndDateChange={handleEndDateChange}
-        onReset={handleReset}
-      />
-
-      <Paper>
-        <AlisaDataTable<ExpenseRow>
-          t={t}
-          dataService={rowDataService}
-          fields={[
-            { name: "accountingDate", format: "date" },
-            { name: "expenseTypeName", label: t("expenseType") },
-            { name: "description", maxLength: 40 },
-            { name: "quantity", format: "number" },
-            { name: "amount", format: "currency" },
-            { name: "totalAmount", format: "currency", sum: true },
-          ]}
-          onNewRow={handleAdd}
-          onOpen={handleOpenDetails}
-          onEdit={handleOpenDetails}
-          onDelete={() => setRefreshTrigger((prev) => prev + 1)}
-          refreshTrigger={refreshTrigger}
+    <ListPageTemplate
+      translationPrefix="accounting"
+      titleKey="expensesPageTitle"
+      descriptionKey="expensesPageDescription"
+    >
+      <Stack spacing={2}>
+        <AccountingFilter
+          mode="expense"
+          data={filter}
+          onTypeChange={handleTypeChange}
+          onSearchTextChange={handleSearchTextChange}
+          onStartDateChange={handleStartDateChange}
+          onEndDateChange={handleEndDateChange}
+          onReset={handleReset}
         />
-      </Paper>
+
+        <Paper>
+          <AlisaDataTable<ExpenseRow>
+            t={t}
+            dataService={rowDataService}
+            fields={[
+              { name: "accountingDate", format: "date" },
+              { name: "expenseTypeName", label: t("expenseType") },
+              { name: "description", maxLength: 40 },
+              { name: "quantity", format: "number" },
+              { name: "amount", format: "currency" },
+              { name: "totalAmount", format: "currency", sum: true },
+            ]}
+            onNewRow={handleAdd}
+            onOpen={handleOpenDetails}
+            onEdit={handleOpenDetails}
+            onDelete={() => setRefreshTrigger((prev) => prev + 1)}
+            refreshTrigger={refreshTrigger}
+          />
+        </Paper>
+      </Stack>
 
       {(editId !== undefined || addNew) && (
         <ExpenseForm
@@ -219,7 +225,7 @@ function Expenses({ t }: WithTranslation) {
           onCancel={handleFormClose}
         />
       )}
-    </AlisaContent>
+    </ListPageTemplate>
   );
 }
 

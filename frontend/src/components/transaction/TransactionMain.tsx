@@ -1,8 +1,9 @@
+import { Stack } from "@mui/material";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
 import Transactions from "./Transactions";
 import { withTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
-import AlisaContent from "../alisa/AlisaContent";
+import { ListPageTemplate } from "../templates";
 import TransactionFilter, {
   SearchField,
   TransactionFilterData,
@@ -92,23 +93,25 @@ function TransactionMain() {
   };
 
   return (
-    <AlisaContent>
-      <TransactionFilter
-        marginTop={0}
-        open={true}
-        data={filter}
-        onSelectTransactionTypes={handleSelectTransactionTypes}
-        onStartDateChange={handleStartDateChange}
-        onEndDateChange={handleEndDateChange}
-        onSearchTextChange={handleSearchTextChange}
-        onSearchFieldChange={handleSearchFieldChange}
-        onReset={handleReset}
-      ></TransactionFilter>
-      <Transactions
-        filter={filter}
-        refreshTrigger={refreshTrigger}
-      ></Transactions>
-    </AlisaContent>
+    <ListPageTemplate translationPrefix="transaction">
+      <Stack spacing={2}>
+        <TransactionFilter
+          marginTop={0}
+          open={true}
+          data={filter}
+          onSelectTransactionTypes={handleSelectTransactionTypes}
+          onStartDateChange={handleStartDateChange}
+          onEndDateChange={handleEndDateChange}
+          onSearchTextChange={handleSearchTextChange}
+          onSearchFieldChange={handleSearchFieldChange}
+          onReset={handleReset}
+        ></TransactionFilter>
+        <Transactions
+          filter={filter}
+          refreshTrigger={refreshTrigger}
+        ></Transactions>
+      </Stack>
+    </ListPageTemplate>
   );
 }
 

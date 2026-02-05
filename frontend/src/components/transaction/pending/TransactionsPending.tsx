@@ -1,4 +1,4 @@
-import { Box, Paper } from "@mui/material";
+import { Paper, Stack } from "@mui/material";
 
 import { WithTranslation, withTranslation } from "react-i18next";
 import AlisaDataTable from "../../alisa/datatable/AlisaDataTable.tsx";
@@ -33,6 +33,7 @@ import {
 } from "@alisa-lib/initial-data.ts";
 import { View } from "@alisa-lib/views.ts";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../TransactionLeftMenuItems.tsx";
+import { ListPageTemplate } from "../../templates";
 
 const getDefaultFilter = (): TransactionFilterData => ({
   propertyId: 0,
@@ -328,65 +329,71 @@ function TransactionsPending({ t }: WithTranslation) {
   } as TypeOrmFetchOptions<Transaction>;
 
   return (
-    <Box>
-      <TransactionFilter
-        marginTop={3}
-        open={selectedIds.length === 0}
-        data={filter}
-        onSelectTransactionTypes={handleSelectTransactionTypes}
-        onStartDateChange={handleStartDateChange}
-        onEndDateChange={handleEndDateChange}
-        onSearchTextChange={handleSearchTextChange}
-        onSearchFieldChange={handleSearchFieldChange}
-        onReset={handleReset}
-      ></TransactionFilter>
+    <ListPageTemplate
+      translationPrefix="transaction"
+      titleKey="pendingPageTitle"
+      descriptionKey="pendingPageDescription"
+    >
+      <Stack spacing={2}>
+        <TransactionFilter
+          marginTop={0}
+          open={selectedIds.length === 0}
+          data={filter}
+          onSelectTransactionTypes={handleSelectTransactionTypes}
+          onStartDateChange={handleStartDateChange}
+          onEndDateChange={handleEndDateChange}
+          onSearchTextChange={handleSearchTextChange}
+          onSearchFieldChange={handleSearchFieldChange}
+          onReset={handleReset}
+        ></TransactionFilter>
 
-      <TransactionsPendingActions
-        marginTop={3}
-        selectedIds={selectedIds}
-        open={selectedIds.length > 0}
-        hasExpenseTransactions={selectedTransactionTypes.includes(
-          TransactionType.EXPENSE,
-        )}
-        hasIncomeTransactions={selectedTransactionTypes.includes(
-          TransactionType.INCOME,
-        )}
-        onApprove={handleApproveSelected}
-        onSetType={handleSetTypeForSelected}
-        onSetCategoryType={handleSetCategoryTypeForSelected}
-        onSplitLoanPayment={handleSplitLoanPaymentForSelected}
-        onCancel={handleCancelSelected}
-        onDelete={handleDeleteSelected}
-        saveResult={saveResult}
-      ></TransactionsPendingActions>
-
-      <Paper sx={{ marginTop: 3 }}>
-        <AlisaDataTable<Transaction>
-          t={t}
-          dataService={
-            new DataService({ context: transactionContext, fetchOptions })
-          }
-          fields={[
-            {
-              name: "type",
-              format: "transactionType",
-              label: "",
-            },
-            { name: "transactionDate", format: "date" },
-            { name: "sender", maxLength: 20 },
-            { name: "receiver", maxLength: 20 },
-            { name: "description", maxLength: 30 },
-            { name: "amount", format: "currency", sum: true },
-          ]}
-          onNewRow={handleOpenAddMenu}
-          onSelectChange={handleSelectChange}
-          onSelectAllChange={handleSelectAllChange}
+        <TransactionsPendingActions
+          marginTop={0}
           selectedIds={selectedIds}
-          onEdit={handleEdit}
-          onOpen={handleOpenDetails}
-          refreshTrigger={refreshTrigger}
-        />
-      </Paper>
+          open={selectedIds.length > 0}
+          hasExpenseTransactions={selectedTransactionTypes.includes(
+            TransactionType.EXPENSE,
+          )}
+          hasIncomeTransactions={selectedTransactionTypes.includes(
+            TransactionType.INCOME,
+          )}
+          onApprove={handleApproveSelected}
+          onSetType={handleSetTypeForSelected}
+          onSetCategoryType={handleSetCategoryTypeForSelected}
+          onSplitLoanPayment={handleSplitLoanPaymentForSelected}
+          onCancel={handleCancelSelected}
+          onDelete={handleDeleteSelected}
+          saveResult={saveResult}
+        ></TransactionsPendingActions>
+
+        <Paper>
+          <AlisaDataTable<Transaction>
+            t={t}
+            dataService={
+              new DataService({ context: transactionContext, fetchOptions })
+            }
+            fields={[
+              {
+                name: "type",
+                format: "transactionType",
+                label: "",
+              },
+              { name: "transactionDate", format: "date" },
+              { name: "sender", maxLength: 20 },
+              { name: "receiver", maxLength: 20 },
+              { name: "description", maxLength: 30 },
+              { name: "amount", format: "currency", sum: true },
+            ]}
+            onNewRow={handleOpenAddMenu}
+            onSelectChange={handleSelectChange}
+            onSelectAllChange={handleSelectAllChange}
+            selectedIds={selectedIds}
+            onEdit={handleEdit}
+            onOpen={handleOpenDetails}
+            refreshTrigger={refreshTrigger}
+          />
+        </Paper>
+      </Stack>
 
       {detailId > 0 && (
         <TransactionDetails
@@ -434,7 +441,7 @@ function TransactionsPending({ t }: WithTranslation) {
         onAddTransaction={handleAdd}
         onImport={handleOpenImport}
       ></TransactionAddMenu>
-    </Box>
+    </ListPageTemplate>
   );
 }
 

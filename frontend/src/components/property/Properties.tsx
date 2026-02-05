@@ -1,17 +1,13 @@
-import { Box, Grid } from "@mui/material";
+import { Grid } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { Property } from "@alisa-backend/real-estate/property/entities/property.entity";
 import AlisaCardList from "../alisa/AlisaCardList";
 import { propertyContext } from "@alisa-lib/alisa-contexts";
-import PageHeader from "../alisa/PageHeader";
+import { CardGridPageTemplate } from "../templates";
 
 function Properties({ t }: WithTranslation) {
   return (
-    <Box>
-      <PageHeader
-        title={t("overviewTitle")}
-        description={t("overviewDescription")}
-      />
+    <CardGridPageTemplate translationPrefix="property">
       <Grid container>
         <Grid size={{ xs: 12, lg: 12 }}>
           <AlisaCardList<Property>
@@ -22,7 +18,7 @@ function Properties({ t }: WithTranslation) {
           />
         </Grid>
       </Grid>
-    </Box>
+    </CardGridPageTemplate>
   );
 }
 

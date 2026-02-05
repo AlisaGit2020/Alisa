@@ -1,4 +1,4 @@
-import { Paper } from "@mui/material";
+import { Paper, Stack } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import AlisaDataTable from "../../alisa/datatable/AlisaDataTable";
 import { incomeContext } from "@alisa-lib/alisa-contexts";
@@ -6,7 +6,7 @@ import { Income } from "@alisa-backend/accounting/income/entities/income.entity"
 import DataService from "@alisa-lib/data-service";
 import { TypeOrmFetchOptions } from "@alisa-lib/types";
 import { useState, useEffect, useMemo } from "react";
-import AlisaContent from "../../alisa/AlisaContent";
+import { ListPageTemplate } from "../../templates";
 import IncomeForm from "./IncomeForm";
 import AccountingFilter, { AccountingFilterData } from "../AccountingFilter";
 import {
@@ -178,36 +178,42 @@ function Incomes({ t }: WithTranslation) {
   }, [dataService, refreshTrigger]);
 
   return (
-    <AlisaContent>
-      <AccountingFilter
-        mode="income"
-        data={filter}
-        onTypeChange={handleTypeChange}
-        onSearchTextChange={handleSearchTextChange}
-        onStartDateChange={handleStartDateChange}
-        onEndDateChange={handleEndDateChange}
-        onReset={handleReset}
-      />
-
-      <Paper>
-        <AlisaDataTable<IncomeRow>
-          t={t}
-          dataService={rowDataService}
-          fields={[
-            { name: "accountingDate", format: "date" },
-            { name: "incomeTypeName", label: t("incomeType") },
-            { name: "description", maxLength: 40 },
-            { name: "quantity", format: "number" },
-            { name: "amount", format: "currency" },
-            { name: "totalAmount", format: "currency", sum: true },
-          ]}
-          onNewRow={handleAdd}
-          onOpen={handleOpenDetails}
-          onEdit={handleOpenDetails}
-          onDelete={() => setRefreshTrigger((prev) => prev + 1)}
-          refreshTrigger={refreshTrigger}
+    <ListPageTemplate
+      translationPrefix="accounting"
+      titleKey="incomesPageTitle"
+      descriptionKey="incomesPageDescription"
+    >
+      <Stack spacing={2}>
+        <AccountingFilter
+          mode="income"
+          data={filter}
+          onTypeChange={handleTypeChange}
+          onSearchTextChange={handleSearchTextChange}
+          onStartDateChange={handleStartDateChange}
+          onEndDateChange={handleEndDateChange}
+          onReset={handleReset}
         />
-      </Paper>
+
+        <Paper>
+          <AlisaDataTable<IncomeRow>
+            t={t}
+            dataService={rowDataService}
+            fields={[
+              { name: "accountingDate", format: "date" },
+              { name: "incomeTypeName", label: t("incomeType") },
+              { name: "description", maxLength: 40 },
+              { name: "quantity", format: "number" },
+              { name: "amount", format: "currency" },
+              { name: "totalAmount", format: "currency", sum: true },
+            ]}
+            onNewRow={handleAdd}
+            onOpen={handleOpenDetails}
+            onEdit={handleOpenDetails}
+            onDelete={() => setRefreshTrigger((prev) => prev + 1)}
+            refreshTrigger={refreshTrigger}
+          />
+        </Paper>
+      </Stack>
 
       {(editId !== undefined || addNew) && (
         <IncomeForm
@@ -219,7 +225,7 @@ function Incomes({ t }: WithTranslation) {
           onCancel={handleFormClose}
         />
       )}
-    </AlisaContent>
+    </ListPageTemplate>
   );
 }
 
