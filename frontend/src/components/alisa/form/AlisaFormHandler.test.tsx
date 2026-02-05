@@ -1,6 +1,8 @@
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { renderWithProviders } from '@test-utils/test-wrapper';
 import { mockConstants } from '@alisa-mocks/mocks';
-import { render, fireEvent, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils'; // Import act to handle async code
 import AlisaFormHandler from './AlisaFormHandler';
 import DataService from '../../../lib/data-service';
 import AlisaContext from '@alisa-lib/alisa-contexts';
@@ -11,33 +13,22 @@ jest.mock('../../../lib/data-service');
 
 describe('AlisaFormHandler', () => {
   beforeEach(() => {
-    // Clear all mocks and reset their instances before each test
     jest.clearAllMocks();
   });
 
-  test('renders AlisaFormHandler', async () => {
-    // Mock DataService's read method to return exampleData
-    const mockRead = jest.fn().mockResolvedValueOnce({ id: 1, name: 'Mocked Data' });
-    const mockSave = jest.fn().mockResolvedValueOnce({ id: 1, name: 'Saved Data' });
-
-    // Mock the DataService constructor
-    jest.spyOn(DataService.prototype, 'read').mockImplementationOnce(mockRead);
-    jest.spyOn(DataService.prototype, 'save').mockImplementationOnce(mockSave);
-
-    // Define a mock function for onSetData
-    const mockSetData = jest.fn();
-    const mockAfterSubmit = jest.fn();
+  it('renders form components', async () => {
+    const mockRead = jest.fn().mockResolvedValue({ id: 1, name: 'Mocked Data' });
+    jest.spyOn(DataService.prototype, 'read').mockImplementation(mockRead);
 
     const context: AlisaContext = {
       apiPath: 'test/data',
       name: 'Test context',
       routePath: '/test/data'
-    }
+    };
 
-    // Render AlisaFormHandler with necessary props
-    const { getByText } = render(
+    renderWithProviders(
       <AlisaFormHandler<TestInputDto>
-        formComponents={<div data-test-id="formComponents" />}
+        formComponents={<div data-testid="formComponents">Form Content</div>}
         id={1}
         dataService={new DataService<TestInputDto>({
           context: context,
@@ -48,33 +39,97 @@ describe('AlisaFormHandler', () => {
           cancelButton: 'Cancel'
         }}
         data={{ name: 'Test name' }}
-        onCancel={() => { }}
-        onSetData={mockSetData}
-        onAfterSubmit={mockAfterSubmit}
+        onCancel={() => {}}
+        onSetData={jest.fn()}
+        onAfterSubmit={jest.fn()}
       />
     );
 
-    // Wait for the useEffect to fetch data
     await waitFor(() => {
-      expect(DataService.prototype.read).toHaveBeenCalledWith(1);
+      expect(screen.getByTestId('formComponents')).toBeInTheDocument();
     });
+  });
 
-    // Wait for the formComponents element to be rendered
+  it('shows loading state initially', () => {
+    const mockRead = jest.fn().mockResolvedValue({ id: 1, name: 'Mocked Data' });
+    jest.spyOn(DataService.prototype, 'read').mockImplementation(mockRead);
+
+    const context: AlisaContext = {
+      apiPath: 'test/data',
+      name: 'Test context',
+      routePath: '/test/data'
+    };
+
+    renderWithProviders(
+      <AlisaFormHandler<TestInputDto>
+        formComponents={<div data-testid="formComponents">Form Content</div>}
+        id={1}
+        dataService={new DataService<TestInputDto>({
+          context: context,
+          dataValidateInstance: new TestInputDto()
+        })}
+        translation={{
+          submitButton: 'Save',
+          cancelButton: 'Cancel'
+        }}
+        data={{ name: 'Test name' }}
+        onCancel={() => {}}
+        onSetData={jest.fn()}
+        onAfterSubmit={jest.fn()}
+      />
+    );
+
+    // Initially, loading should show progress bar
+    const progressBar = screen.getByRole('progressbar');
+    expect(progressBar).toBeInTheDocument();
+  });
+
+  it('calls save when submit button is clicked', async () => {
+    const user = userEvent.setup();
+    const mockRead = jest.fn().mockResolvedValue({ id: 1, name: 'Mocked Data' });
+    const mockSave = jest.fn().mockResolvedValue({ id: 1, name: 'Saved Data' });
+
+    jest.spyOn(DataService.prototype, 'read').mockImplementation(mockRead);
+    jest.spyOn(DataService.prototype, 'save').mockImplementation(mockSave);
+
+    const context: AlisaContext = {
+      apiPath: 'test/data',
+      name: 'Test context',
+      routePath: '/test/data'
+    };
+
+    renderWithProviders(
+      <AlisaFormHandler<TestInputDto>
+        formComponents={<div data-testid="formComponents">Form Content</div>}
+        id={1}
+        dataService={new DataService<TestInputDto>({
+          context: context,
+          dataValidateInstance: new TestInputDto()
+        })}
+        translation={{
+          submitButton: 'Save',
+          cancelButton: 'Cancel'
+        }}
+        data={{ name: 'Test name' }}
+        onCancel={() => {}}
+        onSetData={jest.fn()}
+        onAfterSubmit={jest.fn()}
+      />
+    );
+
+    // Wait for loading to complete
     await waitFor(() => {
-      
+      expect(screen.getByText('Save')).not.toBeDisabled();
     });
 
-    // Trigger save button click after the formComponents element is rendered
-    await act(async () => {
-      fireEvent.click(getByText('Save'));
-    });
+    const saveButton = screen.getByText('Save');
+    await user.click(saveButton);
 
-    // Wait for save operation to complete
     await waitFor(() => {
       expect(DataService.prototype.save).toHaveBeenCalledWith(
-        { name: "Test name" }, 1
+        { name: 'Test name' },
+        1
       );
-      // You may add more assertions based on the actual behavior of your code
     });
   });
 });
