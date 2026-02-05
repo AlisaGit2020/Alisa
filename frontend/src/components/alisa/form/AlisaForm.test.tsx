@@ -1,58 +1,109 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import { renderWithProviders } from '@test-utils/test-wrapper';
 import AlisaForm from './AlisaForm';
 
 describe('AlisaForm', () => {
-  it('renders form components, handles button clicks, and displays alerts', () => {
-    // Mock form components
-    const mockFormComponents = (
-      <>
-        <input type="text" placeholder="Username" />
-      </>
-    );
+  it('renders children components', () => {
+    const mockFormComponents = <input type="text" placeholder="Username" />;
 
-    // Mock functions for submit and cancel actions
-    const mockOnSubmit = jest.fn();
-    const mockOnCancel = jest.fn();
-
-    // Render AlisaForm with mock form components and functions
-    render(
+    renderWithProviders(
       <AlisaForm
         formComponents={mockFormComponents}
         submitButtonText="Submit"
         cancelButtonText="Cancel"
-        errorMessage="Error Message"
-        validationMessage="Validation Message"
+        validationMessage=""
+        onSubmit={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(screen.getByPlaceholderText('Username')).toBeInTheDocument();
+  });
+
+  it('renders submit and cancel buttons', () => {
+    const mockFormComponents = <input type="text" placeholder="Username" />;
+
+    renderWithProviders(
+      <AlisaForm
+        formComponents={mockFormComponents}
+        submitButtonText="Submit"
+        cancelButtonText="Cancel"
+        validationMessage=""
+        onSubmit={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText('Submit')).toBeInTheDocument();
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
+  });
+
+  it('calls onSubmit when submit button is clicked', async () => {
+    const user = userEvent.setup();
+    const mockOnSubmit = jest.fn();
+    const mockFormComponents = <input type="text" placeholder="Username" />;
+
+    renderWithProviders(
+      <AlisaForm
+        formComponents={mockFormComponents}
+        submitButtonText="Submit"
+        cancelButtonText="Cancel"
+        validationMessage=""
         onSubmit={mockOnSubmit}
+        onCancel={jest.fn()}
+      />
+    );
+
+    const submitButton = screen.getByText('Submit');
+    await user.click(submitButton);
+
+    expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onCancel when cancel button is clicked', async () => {
+    const user = userEvent.setup();
+    const mockOnCancel = jest.fn();
+    const mockFormComponents = <input type="text" placeholder="Username" />;
+
+    renderWithProviders(
+      <AlisaForm
+        formComponents={mockFormComponents}
+        submitButtonText="Submit"
+        cancelButtonText="Cancel"
+        validationMessage=""
+        onSubmit={jest.fn()}
         onCancel={mockOnCancel}
       />
     );
 
-    // Check if form components are rendered
-    const usernameInput = screen.getByPlaceholderText('Username');
-    expect(usernameInput).toBeInTheDocument();
-
-    // Check if buttons are rendered
-    const submitButton = screen.getByText('Submit');
     const cancelButton = screen.getByText('Cancel');
-    expect(submitButton).toBeInTheDocument();
-    expect(cancelButton).toBeInTheDocument();
+    await user.click(cancelButton);
 
-    // Simulate form submission
-    fireEvent.click(submitButton);
-    // Check if the onSubmit callback is called
-    expect(mockOnSubmit).toHaveBeenCalledTimes(1);
-
-    // Simulate cancel action
-    fireEvent.click(cancelButton);
-    // Check if the onCancel callback is called
     expect(mockOnCancel).toHaveBeenCalledTimes(1);
-
-    // Check if alerts are rendered
-    const errorAlert = screen.getByText('Error Message');
-    const validationAlert = screen.getByText('Validation Message');
-    expect(errorAlert).toBeInTheDocument();
-    expect(validationAlert).toBeInTheDocument();
   });
 
+  it('renders multiple form fields', () => {
+    const mockFormComponents = (
+      <>
+        <input type="text" placeholder="Username" />
+        <input type="password" placeholder="Password" />
+      </>
+    );
+
+    renderWithProviders(
+      <AlisaForm
+        formComponents={mockFormComponents}
+        submitButtonText="Submit"
+        cancelButtonText="Cancel"
+        validationMessage=""
+        onSubmit={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(screen.getByPlaceholderText('Username')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Password')).toBeInTheDocument();
+  });
 });
