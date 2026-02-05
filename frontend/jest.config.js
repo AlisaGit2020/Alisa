@@ -3,6 +3,10 @@ export default {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node', 'mjs'],
+  testMatch: [
+    '**/__tests__/**/*.(test|spec).[jt]s?(x)',
+    '**/*.(test|spec).[jt]s?(x)',
+  ],
   moduleNameMapper: {
     "^@alisa-backend/(.*)": "<rootDir>../backend/src/$1",
     "^@alisa-lib/(.*)": "<rootDir>/src/lib/$1",
