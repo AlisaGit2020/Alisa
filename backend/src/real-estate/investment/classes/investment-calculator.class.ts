@@ -178,10 +178,12 @@ export class InvestmentCalculator {
   }
 
   private getRentalYieldPercent(): number {
+    const totalPrice = this.deptFreePrice + this.transferTax;
+    if (totalPrice === 0) {
+      return 0;
+    }
     const rentalYield =
-      (((this.rentPerMonth - this.maintenanceFee) * 12) /
-        (this.deptFreePrice + this.transferTax)) *
-      100;
+      (((this.rentPerMonth - this.maintenanceFee) * 12) / totalPrice) * 100;
     return this.roundToTwo(rentalYield);
   }
 
@@ -190,6 +192,9 @@ export class InvestmentCalculator {
   }
 
   private getPricePerSquareMeter(): number {
+    if (this.apartmentSize === 0) {
+      return 0;
+    }
     return this.roundToTwo(this.deptFreePrice / this.apartmentSize);
   }
 
@@ -205,6 +210,9 @@ export class InvestmentCalculator {
   }
 
   private getLoanFirstMonthInstallment(): number {
+    if (this.loanPeriod === 0 || this.loanFinancing === 0) {
+      return 0;
+    }
     const installment = pmt(
       this.loanInterestPercent / 100 / 12,
       12 * this.loanPeriod,
@@ -248,6 +256,9 @@ export class InvestmentCalculator {
   }
 
   private roundToTwo(num: number): number {
+    if (!isFinite(num)) {
+      return 0;
+    }
     return Math.round(num * 100) / 100;
   }
 }

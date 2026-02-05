@@ -1,0 +1,62 @@
+const investmentCalculator = {
+  title: 'Investment Calculator',
+  pageTitle: 'Investment Calculator',
+  pageDescription: 'Calculate the profitability of your investment property and compare different options. Save your calculations and track the performance of your investments.',
+  newCalculation: 'New Calculation',
+  savedCalculations: 'Saved Calculations',
+  calculate: 'Calculate',
+  save: 'Save',
+  saveSuccess: 'Calculation saved successfully',
+  mustLoginToSave: 'Log in to save calculations',
+
+  // Input fields
+  name: 'Calculation name',
+  deptFreePrice: 'Debt-free price',
+  deptShare: 'Share of company loan',
+  transferTaxPercent: 'Transfer tax (%)',
+  maintenanceFee: 'Maintenance fee (€/month)',
+  chargeForFinancialCosts: 'Financial charge (€/month)',
+  rentPerMonth: 'Rent (€/month)',
+  apartmentSize: 'Apartment size (m²)',
+  waterCharge: 'Water charge (€/month)',
+  downPayment: 'Down payment (€)',
+  loanInterestPercent: 'Loan interest (%)',
+  loanPeriod: 'Loan period (years)',
+
+  // Result fields - Purchase costs
+  sellingPrice: 'Purchase price',
+  transferTax: 'Transfer tax',
+  pricePerSquareMeter: 'Price per m²',
+
+  // Result fields - Loan details
+  loanFinancing: 'Loan amount',
+  loanFirstMonthInstallment: 'Principal 1st month',
+  loanFirstMonthInterest: 'Interest 1st month',
+
+  // Result fields - Income & Expenses
+  rentalIncomePerYear: 'Rental income/year',
+  maintenanceCosts: 'Maintenance costs/year',
+  expensesPerMonth: 'Total expenses/month',
+
+  // Result fields - Returns
+  rentalYieldPercent: 'Gross yield %',
+  cashFlowPerMonth: 'Cash flow/month',
+  cashFlowAfterTaxPerMonth: 'Cash flow after tax/month',
+  profitPerYear: 'Profit/year',
+  taxPerYear: 'Taxes/year',
+  taxDeductibleExpensesPerYear: 'Deductible expenses/year',
+
+  // Saved calculations
+  createdAt: 'Created',
+  associatedProperty: 'Property',
+  actions: 'Actions',
+  view: 'View',
+  edit: 'Edit',
+  delete: 'Delete',
+  associate: 'Associate with property',
+  deleteConfirm: 'Are you sure you want to delete this calculation?',
+  noCalculations: 'No saved calculations',
+  calculation: 'Calculation',
+}
+
+export default investmentCalculator

@@ -1,8 +1,5 @@
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
-import Box from "@mui/material/Box";
-import AppBar from "./components/layout/AppBar";
-import AppContainer from "./components/layout/AppContainer";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/fi";
@@ -11,6 +8,7 @@ import AuthProvider from "react-auth-kit";
 import { ThemeContextProvider, useThemeMode } from "@alisa-lib/theme-context";
 import { DashboardProvider } from "./components/dashboard/context/DashboardContext";
 import { useMemo } from "react";
+import AppRoutes from "./components/AppRoutes";
 
 const store = createStore({
   authName: "_auth",
@@ -40,10 +38,7 @@ function ThemedApp() {
       <CssBaseline />
       <AuthProvider store={store}>
         <DashboardProvider>
-          <Box sx={{ display: "flex" }} maxWidth="100vw">
-            <AppBar />
-            <AppContainer />
-          </Box>
+          <AppRoutes />
         </DashboardProvider>
       </AuthProvider>
     </ThemeProvider>

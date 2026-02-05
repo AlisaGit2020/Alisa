@@ -10,4 +10,6 @@ export class InvestmentInputDto {
   downPayment?: number;
   loanInterestPercent?: number;
   loanPeriod?: number; //in years
+  propertyId?: number;
+  name?: string;
 }

@@ -1,12 +1,29 @@
 //TypeOrm entity for investment table. Fields are same as in investment-calculator.class.ts
 
 import { columnOptionTwoDecimal } from 'src/common/typeorm.column.definitions';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 
 @Entity()
 export class Investment {
   @PrimaryGeneratedColumn()
   public id: number;
+
+  @ManyToOne(() => User)
+  user: User;
+
+  @Column()
+  userId: number;
+
+  @ManyToOne(() => Property, { nullable: true })
+  property?: Property;
+
+  @Column({ nullable: true })
+  propertyId?: number;
+
+  @Column({ nullable: true })
+  name?: string;
 
   @Column(columnOptionTwoDecimal)
   public deptFreePrice: number;
@@ -26,20 +43,20 @@ export class Investment {
   @Column(columnOptionTwoDecimal)
   public rentPerMonth: number;
 
-  @Column(columnOptionTwoDecimal)
-  public apartmentSize: number;
+  @Column({ ...columnOptionTwoDecimal, nullable: true })
+  public apartmentSize?: number;
 
-  @Column(columnOptionTwoDecimal)
-  public waterCharge: number;
+  @Column({ ...columnOptionTwoDecimal, nullable: true })
+  public waterCharge?: number;
 
-  @Column(columnOptionTwoDecimal)
-  public downPayment: number;
+  @Column({ ...columnOptionTwoDecimal, nullable: true })
+  public downPayment?: number;
 
-  @Column(columnOptionTwoDecimal)
-  public loanInterestPercent: number;
+  @Column({ ...columnOptionTwoDecimal, nullable: true })
+  public loanInterestPercent?: number;
 
-  @Column()
-  public loanPeriod: number;
+  @Column({ nullable: true })
+  public loanPeriod?: number;
 
   @Column(columnOptionTwoDecimal)
   public sellingPrice: number;

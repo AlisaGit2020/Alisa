@@ -13,7 +13,7 @@ function AlisaBreadcrumbs({ t }: WithTranslation) {
     const [entityNames, setEntityNames] = useState<EntityNameCache>({});
 
     const pathSegments = useMemo(() =>
-        location.pathname.split('/').filter(crumb => crumb !== '' && crumb !== '0'),
+        location.pathname.split('/').filter(crumb => crumb !== '' && crumb !== '0' && crumb !== 'app'),
         [location.pathname]
     );
 
@@ -57,8 +57,14 @@ function AlisaBreadcrumbs({ t }: WithTranslation) {
     }, [pathSegments]);
 
     const crumbs = useMemo(() => {
+        // Check if we're in an /app route to reconstruct proper links
+        const isAppRoute = location.pathname.startsWith('/app');
+
         return pathSegments.map((crumb, index) => {
-            const linkPath = '/' + pathSegments.slice(0, index + 1).join('/');
+            // Build the path from filtered segments
+            const segmentPath = pathSegments.slice(0, index + 1).join('/');
+            // Prepend /app if we're in an app route
+            const linkPath = isAppRoute ? `/app/${segmentPath}` : `/${segmentPath}`;
             const prevSegment = index > 0 ? pathSegments[index - 1] : null;
 
             let displayText = t(decodeURIComponent(crumb));
@@ -75,7 +81,7 @@ function AlisaBreadcrumbs({ t }: WithTranslation) {
                 <Link key={index} href={linkPath}>{displayText + ' / '}</Link>
             );
         });
-    }, [pathSegments, entityNames, t]);
+    }, [pathSegments, entityNames, t, location.pathname]);
 
     return (
         <Breadcrumbs aria-label="breadcrumb">

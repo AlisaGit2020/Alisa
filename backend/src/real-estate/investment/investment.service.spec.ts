@@ -1,18 +1,28 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InvestmentService } from './investment.service';
 import { Investment } from './entities/investment.entity';
 import { InvestmentCalculator } from './classes/investment-calculator.class';
 import { InvestmentInputDto } from './dtos/investment-input.dto';
-import { createMockRepository, MockRepository } from 'test/mocks';
+import { AuthService } from '@alisa-backend/auth/auth.service';
+import { createMockRepository, createMockAuthService, MockRepository, MockAuthService } from 'test/mocks';
+import { createJWTUser } from 'test/factories';
 
 describe('InvestmentService', () => {
   let service: InvestmentService;
   let mockRepository: MockRepository<Investment>;
+  let mockAuthService: MockAuthService;
+
+  const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
+  const otherUser = createJWTUser({ id: 2, ownershipInProperties: [3] });
 
   const createInvestment = (options: Partial<Investment> = {}): Investment => {
     const investment = new Investment();
     investment.id = options.id ?? 1;
+    investment.userId = options.userId ?? testUser.id;
+    investment.propertyId = options.propertyId;
+    investment.name = options.name ?? 'Test Investment';
     investment.deptFreePrice = options.deptFreePrice ?? 100000;
     investment.deptShare = options.deptShare ?? 0;
     investment.transferTaxPercent = options.transferTaxPercent ?? 2;
@@ -58,11 +68,13 @@ describe('InvestmentService', () => {
 
   beforeEach(async () => {
     mockRepository = createMockRepository<Investment>();
+    mockAuthService = createMockAuthService();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InvestmentService,
         { provide: getRepositoryToken(Investment), useValue: mockRepository },
+        { provide: AuthService, useValue: mockAuthService },
       ],
     }).compile();
 
@@ -169,104 +181,153 @@ describe('InvestmentService', () => {
   });
 
   describe('findAll', () => {
-    it('returns all investments', async () => {
+    it('returns only user investments', async () => {
       const investments = [
-        createInvestment({ id: 1 }),
-        createInvestment({ id: 2 }),
+        createInvestment({ id: 1, userId: testUser.id }),
+        createInvestment({ id: 2, userId: testUser.id }),
       ];
       mockRepository.find.mockResolvedValue(investments);
 
-      const result = await service.findAll();
+      const result = await service.findAll(testUser);
 
       expect(result).toEqual(investments);
-      expect(mockRepository.find).toHaveBeenCalled();
+      expect(mockRepository.find).toHaveBeenCalledWith({
+        where: { userId: testUser.id },
+      });
     });
 
-    it('returns empty array when no investments exist', async () => {
+    it('returns empty array when user has no investments', async () => {
       mockRepository.find.mockResolvedValue([]);
 
-      const result = await service.findAll();
+      const result = await service.findAll(otherUser);
 
       expect(result).toEqual([]);
     });
   });
 
   describe('search', () => {
-    it('returns investments matching search options', async () => {
-      const investments = [createInvestment({ id: 1, rentPerMonth: 1000 })];
+    it('returns user investments with filter applied', async () => {
+      const investments = [
+        createInvestment({ id: 1, userId: testUser.id }),
+        createInvestment({ id: 2, userId: testUser.id }),
+      ];
       mockRepository.find.mockResolvedValue(investments);
+      mockAuthService.addUserFilter.mockImplementation((_user, where) => ({
+        ...where,
+        userId: testUser.id,
+      }));
 
-      const result = await service.search({ where: { rentPerMonth: 1000 } });
+      const result = await service.search(testUser, {});
 
       expect(result).toEqual(investments);
-      expect(mockRepository.find).toHaveBeenCalledWith({
-        where: { rentPerMonth: 1000 },
-      });
+      expect(mockAuthService.addUserFilter).toHaveBeenCalled();
     });
 
-    it('returns empty array when no investments match', async () => {
+    it('handles undefined options', async () => {
       mockRepository.find.mockResolvedValue([]);
+      mockAuthService.addUserFilter.mockImplementation((_user, where) => ({
+        ...where,
+        userId: testUser.id,
+      }));
 
-      const result = await service.search({ where: { rentPerMonth: 99999 } });
+      const result = await service.search(testUser, undefined);
 
       expect(result).toEqual([]);
     });
   });
 
   describe('findOne', () => {
-    it('returns investment when found', async () => {
-      const investment = createInvestment({ id: 1 });
+    it('returns investment when user owns it', async () => {
+      const investment = createInvestment({ id: 1, userId: testUser.id });
       mockRepository.findOneBy.mockResolvedValue(investment);
 
-      const result = await service.findOne(1);
+      const result = await service.findOne(testUser, 1);
 
       expect(result).toEqual(investment);
-      expect(mockRepository.findOneBy).toHaveBeenCalledWith({ id: 1 });
+      expect(mockRepository.findOneBy).toHaveBeenCalledWith({
+        id: 1,
+        userId: testUser.id,
+      });
     });
 
-    it('returns null when investment not found', async () => {
+    it('throws NotFoundException when investment does not exist', async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
-      const result = await service.findOne(999);
+      await expect(service.findOne(testUser, 999)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
 
-      expect(result).toBeNull();
+    it('throws NotFoundException when user does not own investment', async () => {
+      mockRepository.findOneBy.mockResolvedValue(null);
+
+      await expect(service.findOne(otherUser, 1)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('saveCalculation', () => {
-    it('creates new investment when id is not provided', async () => {
+    it('creates new investment without property association', async () => {
       const input = createTestInput();
       const calculator = new InvestmentCalculator(input);
-      const savedInvestment = createInvestment({ id: 1 });
+      const savedInvestment = createInvestment({ id: 1, userId: testUser.id });
       mockRepository.save.mockResolvedValue(savedInvestment);
 
-      const result = await service.saveCalculation(calculator);
+      const result = await service.saveCalculation(testUser, calculator, input);
 
       expect(result).toBeDefined();
       expect(mockRepository.save).toHaveBeenCalled();
     });
 
-    it('updates existing investment when id is provided', async () => {
-      const input = createTestInput();
+    it('creates new investment with property association', async () => {
+      const input = { ...createTestInput(), propertyId: 1, name: 'Test Investment' };
       const calculator = new InvestmentCalculator(input);
-      const existingInvestment = createInvestment({ id: 1 });
-      mockRepository.findOneBy.mockResolvedValue(existingInvestment);
-      mockRepository.save.mockResolvedValue(existingInvestment);
 
-      const result = await service.saveCalculation(calculator, 1);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) => Promise.resolve(entity));
 
-      expect(result.id).toBe(1);
-      expect(mockRepository.findOneBy).toHaveBeenCalledWith({ id: 1 });
+      const result = await service.saveCalculation(testUser, calculator, input);
+
+      expect(result).toBeDefined();
+      expect(result.userId).toBe(testUser.id);
+      expect(result.propertyId).toBe(1);
+      expect(result.name).toBe('Test Investment');
+      expect(mockAuthService.hasOwnership).toHaveBeenCalledWith(testUser, 1);
       expect(mockRepository.save).toHaveBeenCalled();
     });
 
-    it('throws error when investment not found for update', async () => {
+    it('throws UnauthorizedException when property is not owned by user', async () => {
+      const input = { ...createTestInput(), propertyId: 99 };
+      const calculator = new InvestmentCalculator(input);
+
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      await expect(
+        service.saveCalculation(testUser, calculator, input),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('updates existing investment', async () => {
+      const input = { ...createTestInput(), name: 'Updated Investment' };
+      const calculator = new InvestmentCalculator(input);
+      const existingInvestment = createInvestment({ id: 1, userId: testUser.id });
+      mockRepository.findOneBy.mockResolvedValue(existingInvestment);
+      mockRepository.save.mockResolvedValue({ ...existingInvestment, ...input });
+
+      const result = await service.saveCalculation(testUser, calculator, input, 1);
+
+      expect(result.name).toBe('Updated Investment');
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException when investment not found for update', async () => {
       const input = createTestInput();
       const calculator = new InvestmentCalculator(input);
       mockRepository.findOneBy.mockResolvedValue(null);
 
-      await expect(service.saveCalculation(calculator, 999)).rejects.toThrow(
-        'Investment not found',
+      await expect(service.saveCalculation(testUser, calculator, input, 999)).rejects.toThrow(
+        NotFoundException,
       );
     });
 
@@ -275,7 +336,7 @@ describe('InvestmentService', () => {
       const calculator = new InvestmentCalculator(input);
       mockRepository.save.mockImplementation((entity) => Promise.resolve(entity));
 
-      const result = await service.saveCalculation(calculator);
+      const result = await service.saveCalculation(testUser, calculator, input);
 
       expect(result.deptFreePrice).toBe(calculator.deptFreePrice);
       expect(result.deptShare).toBe(calculator.deptShare);
@@ -290,18 +351,30 @@ describe('InvestmentService', () => {
   });
 
   describe('delete', () => {
-    it('deletes investment by id', async () => {
+    it('deletes investment when user owns it', async () => {
+      const investment = createInvestment({ id: 1, userId: testUser.id });
+      mockRepository.findOneBy.mockResolvedValue(investment);
       mockRepository.delete.mockResolvedValue({ affected: 1 });
 
-      await service.delete(1);
+      await service.delete(testUser, 1);
 
       expect(mockRepository.delete).toHaveBeenCalledWith(1);
     });
 
-    it('completes without error when investment does not exist', async () => {
-      mockRepository.delete.mockResolvedValue({ affected: 0 });
+    it('throws NotFoundException when investment does not exist', async () => {
+      mockRepository.findOneBy.mockResolvedValue(null);
 
-      await expect(service.delete(999)).resolves.toBeUndefined();
+      await expect(service.delete(testUser, 999)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('cannot delete another user investment', async () => {
+      mockRepository.findOneBy.mockResolvedValue(null);
+
+      await expect(service.delete(otherUser, 1)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

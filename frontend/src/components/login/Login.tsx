@@ -22,7 +22,7 @@ function Login({t}: WithTranslation) {
 
         const doLogin = async () => {
             const accessToken = searchParams.get('access_token')
-            if (accessToken) {                
+            if (accessToken) {
                 if (signIn({
                     auth: {
                         token: accessToken,
@@ -31,7 +31,27 @@ function Login({t}: WithTranslation) {
                 })) {
                     const user = await ApiClient.me()
                     i18n.changeLanguage(user.language)
-                    navigate('/')
+
+                    // Check for pending investment calculation (from anonymous save)
+                    const returnUrl = sessionStorage.getItem('returnUrl')
+                    const pendingCalc = sessionStorage.getItem('pendingInvestmentCalculation')
+
+                    if (returnUrl && pendingCalc) {
+                        try {
+                            await ApiClient.post('real-estate/investment', JSON.parse(pendingCalc))
+                            sessionStorage.removeItem('returnUrl')
+                            sessionStorage.removeItem('pendingInvestmentCalculation')
+                            navigate(returnUrl + '?saved=true')
+                        } catch (error) {
+                            console.error('Error saving pending calculation:', error)
+                            navigate('/app/dashboard')
+                        }
+                    } else if (returnUrl) {
+                        sessionStorage.removeItem('returnUrl')
+                        navigate(returnUrl)
+                    } else {
+                        navigate('/app/dashboard')
+                    }
                 } else {
                     //Throw error
                 }

@@ -41,7 +41,7 @@ function UserMenu({ t }: WithTranslation) {
 
     const handleSignOut = () => {
         signOut()
-        window.location.href = ''
+        window.location.href = '/'
     };
 
     const getFullName = (user: User) => {

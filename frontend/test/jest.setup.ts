@@ -1,6 +1,7 @@
 // frontend/test/jest.setup.ts
 import 'reflect-metadata';
 import 'whatwg-fetch';
+import '@testing-library/jest-dom';
 
 // Import jest globals for ESM mode
 import { jest, beforeAll, afterEach, afterAll } from '@jest/globals';

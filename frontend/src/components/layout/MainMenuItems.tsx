@@ -14,6 +14,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import CalculateIcon from "@mui/icons-material/Calculate";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
@@ -109,10 +110,10 @@ function MainMenuItems({ open }: MainMenuItemsProps) {
     <List component="nav">
       {menuItem(
         "dashboard",
-        "/",
+        "/app/dashboard",
         t("dashboard"),
         <DashboardIcon sx={{ color: "info.main" }} />,
-        currentPath === "/"
+        currentPath === "/app/dashboard"
       )}
       {menuItem(
         "properties",
@@ -120,6 +121,13 @@ function MainMenuItems({ open }: MainMenuItemsProps) {
         t("properties"),
         <ApartmentIcon sx={{ color: "secondary.main" }} />,
         currentPath.startsWith(propertyContext.routePath)
+      )}
+      {menuItem(
+        "investmentCalculator",
+        "/app/investment-calculations",
+        t("investmentCalculator"),
+        <TrendingUpIcon sx={{ color: "success.main" }} />,
+        currentPath.startsWith("/app/investment-calculations")
       )}
 
       {open ? (

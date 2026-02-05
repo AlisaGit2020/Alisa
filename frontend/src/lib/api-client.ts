@@ -55,11 +55,12 @@ class ApiClient {
     return result[0];
   }
 
-  public static async post<T>(path: string, data: T): Promise<T> {
+  public static async post<T>(path: string, data: T, skipAuth = false): Promise<T> {
+    const options = skipAuth ? { withCredentials: true } : await ApiClient.getOptions();
     return axios.post(
       ApiClient.getApiUrl(path),
       data,
-      await ApiClient.getOptions(),
+      options,
     );
   }
 

@@ -1,0 +1,384 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from '../src/app.module';
+import { AuthService } from '@alisa-backend/auth/auth.service';
+import {
+  getBearerToken,
+  getTestUsers,
+  getUserAccessToken2,
+  prepareDatabase,
+  TestUsersSetup,
+} from './helper-functions';
+
+describe('Investment Calculator endpoints (e2e)', () => {
+  let app: INestApplication;
+  let server: any;
+  let authService: AuthService;
+  let testUsers: TestUsersSetup;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+    server = app.getHttpServer();
+
+    authService = app.get(AuthService);
+
+    await prepareDatabase(app);
+    testUsers = await getTestUsers(app);
+  });
+
+  afterAll(async () => {
+    await app.close();
+    server.close();
+  });
+
+  const validCalculationInput = {
+    deptFreePrice: 100000,
+    deptShare: 50000,
+    transferTaxPercent: 2,
+    maintenanceFee: 200,
+    chargeForFinancialCosts: 50,
+    rentPerMonth: 800,
+    apartmentSize: 50,
+    waterCharge: 20,
+    downPayment: 20000,
+    loanInterestPercent: 3.5,
+    loanPeriod: 25,
+  };
+
+  describe('POST /real-estate/investment/calculate', () => {
+    it('returns calculated investment results without authentication', async () => {
+      const response = await request(server)
+        .post('/real-estate/investment/calculate')
+        .send(validCalculationInput)
+        .expect(200);
+
+      expect(response.body).toBeDefined();
+      expect(response.body.sellingPrice).toBeDefined();
+      expect(response.body.transferTax).toBeDefined();
+      expect(response.body.rentalYieldPercent).toBeDefined();
+      expect(response.body.cashFlowPerMonth).toBeDefined();
+    });
+
+    it('calculates correct values', async () => {
+      const response = await request(server)
+        .post('/real-estate/investment/calculate')
+        .send(validCalculationInput)
+        .expect(200);
+
+      // Selling price = deptFreePrice - deptShare
+      expect(response.body.sellingPrice).toBe(50000);
+      // Transfer tax = deptFreePrice * transferTaxPercent / 100
+      expect(response.body.transferTax).toBe(2000);
+    });
+  });
+
+  describe('POST /real-estate/investment', () => {
+    it('requires authentication', async () => {
+      await request(server)
+        .post('/real-estate/investment')
+        .send(validCalculationInput)
+        .expect(401);
+    });
+
+    it('saves calculation with authentication', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      const response = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token))
+        .send({ ...validCalculationInput, name: 'Test Investment' })
+        .expect(201);
+
+      expect(response.body).toBeDefined();
+      expect(response.body.id).toBeDefined();
+      expect(response.body.userId).toBe(user.user.id);
+      expect(response.body.name).toBe('Test Investment');
+    });
+
+    it('saves calculation with property association', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+      const propertyId = user.properties[0].id;
+
+      const response = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token))
+        .send({
+          ...validCalculationInput,
+          name: 'Property Investment',
+          propertyId,
+        })
+        .expect(201);
+
+      expect(response.body.propertyId).toBe(propertyId);
+      expect(response.body.userId).toBe(user.user.id);
+    });
+
+    it('rejects property association when user does not own property', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+      const otherUserPropertyId = testUsers.user2WithProperties.properties[0].id;
+
+      await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token))
+        .send({
+          ...validCalculationInput,
+          propertyId: otherUserPropertyId,
+        })
+        .expect(401);
+    });
+  });
+
+  describe('GET /real-estate/investment', () => {
+    it('requires authentication', async () => {
+      await request(server)
+        .get('/real-estate/investment')
+        .expect(401);
+    });
+
+    it('returns only user investments', async () => {
+      const user1 = testUsers.user1WithProperties;
+      const user2 = testUsers.user2WithProperties;
+      const token1 = await getUserAccessToken2(authService, user1.jwtUser);
+      const token2 = await getUserAccessToken2(authService, user2.jwtUser);
+
+      // Create investment for user1
+      await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token1))
+        .send({ ...validCalculationInput, name: 'User1 Investment' })
+        .expect(201);
+
+      // Create investment for user2
+      await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token2))
+        .send({ ...validCalculationInput, name: 'User2 Investment' })
+        .expect(201);
+
+      // Get user1 investments
+      const response1 = await request(server)
+        .get('/real-estate/investment')
+        .set('Authorization', getBearerToken(token1))
+        .expect(200);
+
+      // Verify user1 only sees their own investments
+      expect(Array.isArray(response1.body)).toBe(true);
+      expect(response1.body.every((inv: any) => inv.userId === user1.user.id)).toBe(true);
+      expect(response1.body.some((inv: any) => inv.name === 'User2 Investment')).toBe(false);
+    });
+  });
+
+  describe('GET /real-estate/investment/:id', () => {
+    it('requires authentication', async () => {
+      await request(server)
+        .get('/real-estate/investment/1')
+        .expect(401);
+    });
+
+    it('returns investment when user owns it', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create investment
+      const createResponse = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token))
+        .send({ ...validCalculationInput, name: 'Test Investment' })
+        .expect(201);
+
+      const investmentId = createResponse.body.id;
+
+      // Get investment
+      const response = await request(server)
+        .get(`/real-estate/investment/${investmentId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(200);
+
+      expect(response.body.id).toBe(investmentId);
+      expect(response.body.userId).toBe(user.user.id);
+    });
+
+    it('returns 404 when user does not own investment', async () => {
+      const user1 = testUsers.user1WithProperties;
+      const user2 = testUsers.user2WithProperties;
+      const token1 = await getUserAccessToken2(authService, user1.jwtUser);
+      const token2 = await getUserAccessToken2(authService, user2.jwtUser);
+
+      // Create investment for user1
+      const createResponse = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token1))
+        .send({ ...validCalculationInput, name: 'User1 Investment' })
+        .expect(201);
+
+      const investmentId = createResponse.body.id;
+
+      // Try to get it as user2
+      await request(server)
+        .get(`/real-estate/investment/${investmentId}`)
+        .set('Authorization', getBearerToken(token2))
+        .expect(404);
+    });
+  });
+
+  describe('PUT /real-estate/investment/:id', () => {
+    it('requires authentication', async () => {
+      await request(server)
+        .put('/real-estate/investment/1')
+        .send(validCalculationInput)
+        .expect(401);
+    });
+
+    it('updates investment when user owns it', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create investment
+      const createResponse = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token))
+        .send({ ...validCalculationInput, name: 'Original Name' })
+        .expect(201);
+
+      const investmentId = createResponse.body.id;
+
+      // Update investment
+      const response = await request(server)
+        .put(`/real-estate/investment/${investmentId}`)
+        .set('Authorization', getBearerToken(token))
+        .send({ ...validCalculationInput, name: 'Updated Name' })
+        .expect(200);
+
+      expect(response.body.name).toBe('Updated Name');
+      expect(response.body.id).toBe(investmentId);
+    });
+
+    it('returns 404 when user does not own investment', async () => {
+      const user1 = testUsers.user1WithProperties;
+      const user2 = testUsers.user2WithProperties;
+      const token1 = await getUserAccessToken2(authService, user1.jwtUser);
+      const token2 = await getUserAccessToken2(authService, user2.jwtUser);
+
+      // Create investment for user1
+      const createResponse = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token1))
+        .send({ ...validCalculationInput, name: 'User1 Investment' })
+        .expect(201);
+
+      const investmentId = createResponse.body.id;
+
+      // Try to update as user2
+      await request(server)
+        .put(`/real-estate/investment/${investmentId}`)
+        .set('Authorization', getBearerToken(token2))
+        .send({ ...validCalculationInput, name: 'Hacked Name' })
+        .expect(404);
+    });
+  });
+
+  describe('DELETE /real-estate/investment/:id', () => {
+    it('requires authentication', async () => {
+      await request(server)
+        .delete('/real-estate/investment/1')
+        .expect(401);
+    });
+
+    it('deletes investment when user owns it', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create investment
+      const createResponse = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token))
+        .send({ ...validCalculationInput, name: 'To Delete' })
+        .expect(201);
+
+      const investmentId = createResponse.body.id;
+
+      // Delete investment
+      await request(server)
+        .delete(`/real-estate/investment/${investmentId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(200);
+
+      // Verify it's deleted
+      await request(server)
+        .get(`/real-estate/investment/${investmentId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(404);
+    });
+
+    it('returns 404 when user does not own investment', async () => {
+      const user1 = testUsers.user1WithProperties;
+      const user2 = testUsers.user2WithProperties;
+      const token1 = await getUserAccessToken2(authService, user1.jwtUser);
+      const token2 = await getUserAccessToken2(authService, user2.jwtUser);
+
+      // Create investment for user1
+      const createResponse = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token1))
+        .send({ ...validCalculationInput, name: 'User1 Investment' })
+        .expect(201);
+
+      const investmentId = createResponse.body.id;
+
+      // Try to delete as user2
+      await request(server)
+        .delete(`/real-estate/investment/${investmentId}`)
+        .set('Authorization', getBearerToken(token2))
+        .expect(404);
+    });
+  });
+
+  describe('POST /real-estate/investment/search', () => {
+    it('requires authentication', async () => {
+      await request(server)
+        .post('/real-estate/investment/search')
+        .send({})
+        .expect(401);
+    });
+
+    it('returns only user investments', async () => {
+      const user1 = testUsers.user1WithProperties;
+      const user2 = testUsers.user2WithProperties;
+      const token1 = await getUserAccessToken2(authService, user1.jwtUser);
+      const token2 = await getUserAccessToken2(authService, user2.jwtUser);
+
+      // Create investments
+      await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token1))
+        .send({ ...validCalculationInput, name: 'User1 Investment A', rentPerMonth: 1000 })
+        .expect(201);
+
+      await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token2))
+        .send({ ...validCalculationInput, name: 'User2 Investment B', rentPerMonth: 1000 })
+        .expect(201);
+
+      // Search as user1
+      const response = await request(server)
+        .post('/real-estate/investment/search')
+        .set('Authorization', getBearerToken(token1))
+        .send({ where: { rentPerMonth: 1000 } })
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.every((inv: any) => inv.userId === user1.user.id)).toBe(true);
+      expect(response.body.some((inv: any) => inv.name === 'User2 Investment B')).toBe(false);
+    });
+  });
+});

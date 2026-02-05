@@ -7,62 +7,84 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { InvestmentCalculator } from './classes/investment-calculator.class';
 import { InvestmentInputDto } from './dtos/investment-input.dto';
 import { InvestmentService } from './investment.service';
 import { Investment } from './entities/investment.entity';
 import { FindManyOptions } from 'typeorm';
+import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
+import { JWTUser } from '@alisa-backend/auth/types';
+import { User } from '@alisa-backend/common/decorators/user.decorator';
 
 @Controller('real-estate/investment')
 export class InvestmentController {
   constructor(private service: InvestmentService) {}
 
-  @Post('/search')
-  @HttpCode(200)
-  async search(
-    @Body() options: FindManyOptions<Investment>,
-  ): Promise<Investment[]> {
-    return this.service.search(options);
-  }
-
-  @Get('/')
-  async findAll(): Promise<Investment[]> {
-    return this.service.findAll();
-  }
-
-  @Get('/:id')
-  async findOne(@Param('id') id: string): Promise<Investment> {
-    return this.service.findOne(Number(id));
-  }
-
+  // Public endpoint - no authentication required
   @Post('/calculate')
+  @HttpCode(200)
   async calculateInvestment(
     @Body() investment: InvestmentInputDto,
   ): Promise<InvestmentCalculator> {
     return this.service.calculate(investment);
   }
 
+  // Protected endpoints below
+  @UseGuards(JwtAuthGuard)
+  @Post('/search')
+  @HttpCode(200)
+  async search(
+    @User() user: JWTUser,
+    @Body() options: FindManyOptions<Investment>,
+  ): Promise<Investment[]> {
+    return this.service.search(user, options);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/')
+  async findAll(@User() user: JWTUser): Promise<Investment[]> {
+    return this.service.findAll(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/:id')
+  async findOne(
+    @User() user: JWTUser,
+    @Param('id') id: string,
+  ): Promise<Investment> {
+    return this.service.findOne(user, Number(id));
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('/')
   async saveInvestmentCalculation(
+    @User() user: JWTUser,
     @Body() investment: InvestmentInputDto,
     id?: number,
   ): Promise<Investment> {
     const calculatedInvestment = this.service.calculate(investment);
-    return this.service.saveCalculation(calculatedInvestment, id);
+    return this.service.saveCalculation(user, calculatedInvestment, investment, id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put('/:id')
   async updateInvestment(
+    @User() user: JWTUser,
     @Param('id') id: string,
     @Body() investment: InvestmentInputDto,
   ): Promise<Investment> {
-    return this.saveInvestmentCalculation(investment, Number(id));
+    return this.saveInvestmentCalculation(user, investment, Number(id));
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete('/:id')
-  async deleteInvestment(@Param('id') id: number): Promise<boolean> {
-    await this.service.delete(id);
+  async deleteInvestment(
+    @User() user: JWTUser,
+    @Param('id') id: number,
+  ): Promise<boolean> {
+    await this.service.delete(user, id);
     return true;
   }
 }

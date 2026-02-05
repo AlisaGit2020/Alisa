@@ -35,6 +35,10 @@ import userEn from '../src/translations/user/en';
 import userFi from '../src/translations/user/fi';
 import importWizardEn from '../src/translations/import-wizard/en';
 import importWizardFi from '../src/translations/import-wizard/fi';
+import investmentCalculatorEn from '../src/translations/investment-calculator/en';
+import investmentCalculatorFi from '../src/translations/investment-calculator/fi';
+import landingEn from '../src/translations/landing/en';
+import landingFi from '../src/translations/landing/fi';
 
 // Combine all translations
 const en = {
@@ -46,6 +50,8 @@ const en = {
   'expense-type': expenseTypeEn,
   'income-type': incomeTypeEn,
   'import-wizard': importWizardEn,
+  'investment-calculator': investmentCalculatorEn,
+  landing: landingEn,
   login: loginEn,
   menu: menuEn,
   route: routeEn,
@@ -64,6 +70,8 @@ const fi = {
   'expense-type': expenseTypeFi,
   'income-type': incomeTypeFi,
   'import-wizard': importWizardFi,
+  'investment-calculator': investmentCalculatorFi,
+  landing: landingFi,
   login: loginFi,
   menu: menuFi,
   route: routeFi,
@@ -193,6 +201,13 @@ describe('Translation Coverage', () => {
       // Check if key exists directly
       if (availableKeys.has(key)) return false;
 
+      // Check if key has namespace prefix (e.g., 'namespace:key')
+      // Convert colon notation to dot notation for checking
+      if (key.includes(':')) {
+        const dotKey = key.replace(':', '.');
+        if (availableKeys.has(dotKey)) return false;
+      }
+
       // Check if key exists in common namespace (fallback)
       // i18n config has fallbackNS: ['common'], so keys without namespace
       // will fallback to common.*
@@ -203,7 +218,7 @@ describe('Translation Coverage', () => {
       // Keys can be used without namespace prefix and i18n will search all namespaces
       const namespaces = [
         'appBar', 'accounting', 'dashboard', 'property', 'expense', 'expense-type',
-        'income-type', 'import-wizard', 'login', 'menu', 'route',
+        'income-type', 'import-wizard', 'investment-calculator', 'landing', 'login', 'menu', 'route',
         'settings', 'tax', 'transaction', 'user'
       ];
 
@@ -251,5 +266,63 @@ describe('Translation Coverage', () => {
     // This is a warning test - we log but don't fail
     // Uncomment the line below to enforce no unused keys
     // expect(unusedKeys).toEqual([]);
+  });
+
+  it('should have translations for all route segments (breadcrumbs)', () => {
+    // Read AppRoutes.tsx to extract all route paths
+    const routesFile = path.join(__dirname, '../src/components/AppRoutes.tsx');
+    const routesContent = fs.readFileSync(routesFile, 'utf-8');
+
+    // Extract all path props from Route components
+    // Matches: path="something" or path='something' or path={`something`}
+    const pathMatches = routesContent.matchAll(/path=["'`]([^"'`]+)["'`]/g);
+
+    const allSegments = new Set<string>();
+
+    for (const match of pathMatches) {
+      const routePath = match[1];
+      // Split path into segments and filter out empty, parameters, and special segments
+      const segments = routePath
+        .split('/')
+        .filter(segment => {
+          // Filter out empty segments, parameters (:idParam), app prefix, wildcards, and dynamic segments
+          return segment !== '' &&
+                 !segment.startsWith(':') &&
+                 segment !== 'app' &&
+                 segment !== '*' && // exclude wildcard routes
+                 !/^\d+$/.test(segment); // exclude numeric IDs
+        });
+
+      segments.forEach(segment => allSegments.add(segment));
+    }
+
+    // Check that all segments have translations in route namespace
+    const routeFi = fi.route || {};
+    const routeEn = en.route || {};
+
+    const missingInFi: string[] = [];
+    const missingInEn: string[] = [];
+
+    for (const segment of allSegments) {
+      if (!(segment in routeFi)) {
+        missingInFi.push(segment);
+      }
+      if (!(segment in routeEn)) {
+        missingInEn.push(segment);
+      }
+    }
+
+    if (missingInFi.length > 0) {
+      console.log('\nRoute segments missing Finnish translations (route/fi.ts):');
+      missingInFi.forEach(key => console.log(`  - ${key}`));
+    }
+
+    if (missingInEn.length > 0) {
+      console.log('\nRoute segments missing English translations (route/en.ts):');
+      missingInEn.forEach(key => console.log(`  - ${key}`));
+    }
+
+    expect(missingInFi).toEqual([]);
+    expect(missingInEn).toEqual([]);
   });
 });

@@ -47,6 +47,7 @@ const fi = {
     edit: "Muokkaa",
     externalId: "Ulkoinen tunniste",
     id: "Tunniste",
+    loading: "Ladataan...",
     month: "Kuukausi",
     name: "Nimi",
     noRowsFound: "Rivejä ei löytynyt",

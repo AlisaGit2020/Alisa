@@ -7,7 +7,7 @@ export type AlisaSelectFieldItem = {
 }
 function AlisaSelectField(props: {
     label: string,
-    value: number,
+    value: number | "",
     id?: string,
     adornment?: string,
     autoComplete?: string,

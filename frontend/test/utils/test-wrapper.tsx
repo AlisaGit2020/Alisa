@@ -6,7 +6,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './test-i18n';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 
 // Create a default theme for testing
 const theme = createTheme();
@@ -46,6 +46,36 @@ export function renderWithProviders(
   options?: Omit<RenderOptions, 'wrapper'>
 ) {
   return render(ui, { wrapper: AllProviders, ...options });
+}
+
+/**
+ * Custom render function for components that need to test routing behavior
+ * Allows setting initial route entries for MemoryRouter
+ */
+export function renderWithRouter(
+  ui: ReactElement,
+  {
+    initialEntries = ['/'],
+    ...renderOptions
+  }: {
+    initialEntries?: string[];
+  } & Omit<RenderOptions, 'wrapper'> = {}
+) {
+  function Wrapper({ children }: { children: ReactNode }) {
+    return (
+      <MemoryRouter initialEntries={initialEntries}>
+        <ThemeProvider theme={theme}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <I18nextProvider i18n={i18n}>
+              {children}
+            </I18nextProvider>
+          </LocalizationProvider>
+        </ThemeProvider>
+      </MemoryRouter>
+    );
+  }
+
+  return render(ui, { wrapper: Wrapper, ...renderOptions });
 }
 
 // Re-export everything from React Testing Library

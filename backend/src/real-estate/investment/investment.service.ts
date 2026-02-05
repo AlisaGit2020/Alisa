@@ -1,47 +1,73 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InvestmentCalculator } from './classes/investment-calculator.class';
 import { InvestmentInputDto } from './dtos/investment-input.dto';
 import { Investment } from './entities/investment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Repository } from 'typeorm';
+import { JWTUser } from '@alisa-backend/auth/types';
+import { AuthService } from '@alisa-backend/auth/auth.service';
+import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
 
 @Injectable()
 export class InvestmentService {
   constructor(
     @InjectRepository(Investment)
     private repository: Repository<Investment>,
+    private authService: AuthService,
   ) {}
 
   calculate(investment: InvestmentInputDto): InvestmentCalculator {
     return new InvestmentCalculator(investment);
   }
 
-  async search(options: FindManyOptions<Investment>): Promise<Investment[]> {
+  async search(user: JWTUser, options: FindManyOptions<Investment>): Promise<Investment[]> {
+    if (!options) {
+      options = {};
+    }
+    if (options.where !== undefined) {
+      options.where = typeormWhereTransformer(options.where);
+    }
+    options.where = this.authService.addUserFilter(user, options.where as any) as any;
     return this.repository.find(options);
   }
 
-  async findAll(): Promise<Investment[]> {
-    return this.repository.find();
+  async findAll(user: JWTUser): Promise<Investment[]> {
+    return this.repository.find({ where: { userId: user.id } });
   }
 
-  async findOne(id: number): Promise<Investment> {
-    return this.repository.findOneBy({ id: id });
+  async findOne(user: JWTUser, id: number): Promise<Investment> {
+    const investment = await this.repository.findOneBy({ id, userId: user.id });
+    if (!investment) {
+      throw new NotFoundException('Investment not found');
+    }
+    return investment;
   }
 
   async saveCalculation(
+    user: JWTUser,
     investmentCalculation: InvestmentCalculator,
+    inputDto: InvestmentInputDto,
     id?: number,
   ): Promise<Investment> {
+    // Validate property ownership if propertyId is provided
+    if (inputDto.propertyId) {
+      const hasOwnership = await this.authService.hasOwnership(user, inputDto.propertyId);
+      if (!hasOwnership) {
+        throw new UnauthorizedException('You do not have access to this property');
+      }
+    }
+
     // save to database
     let investmentEntity: Investment;
 
     if (id) {
-      investmentEntity = await this.findOne(id);
+      investmentEntity = await this.findOne(user, id);
     } else {
       investmentEntity = new Investment();
+      investmentEntity.userId = user.id;
     }
     if (!investmentEntity) {
-      throw new Error('Investment not found');
+      throw new NotFoundException('Investment not found');
     }
 
     investmentEntity.deptFreePrice = investmentCalculation.deptFreePrice;
@@ -80,12 +106,15 @@ export class InvestmentService {
     investmentEntity.cashFlowPerMonth = investmentCalculation.cashFlowPerMonth;
     investmentEntity.cashFlowAfterTaxPerMonth =
       investmentCalculation.cashFlowAfterTaxPerMonth;
+    investmentEntity.propertyId = inputDto.propertyId;
+    investmentEntity.name = inputDto.name;
 
     await this.repository.save(investmentEntity);
     return investmentEntity;
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(user: JWTUser, id: number): Promise<void> {
+    const investment = await this.findOne(user, id);
     await this.repository.delete(id);
   }
 }

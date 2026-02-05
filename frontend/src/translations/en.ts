@@ -47,6 +47,7 @@ const en = {
     edit: "Edit",
     externalId: "External id",
     id: "Id",
+    loading: "Loading...",
     month: "Month",
     name: "Name",
     noRowsFound: "No rows found",

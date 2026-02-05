@@ -28,9 +28,10 @@
 
     "baseUrl": ".",
     "paths": {
-      "@alisa-backend/*": ["../backend/src/*"],      
+      "@alisa-backend/*": ["../backend/src/*"],
       "@alisa-lib/*": ["src/lib/*"],
       "@alisa-mocks/*": ["test/mocks/*"],
+      "@test-utils/*": ["test/utils/*"]
     }
   },
   "include": ["src"],  

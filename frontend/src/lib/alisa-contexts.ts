@@ -9,37 +9,37 @@ export default AlisaContext
 export const propertyContext: AlisaContext = {
     name: 'property',
     apiPath: 'real-estate/property',
-    routePath: '/properties',
+    routePath: '/app/properties',
 }
 
 export const accountingContext: AlisaContext = {
     name: 'accounting',
     apiPath: 'accounting',
-    routePath: '/accounting',
+    routePath: '/app/accounting',
 }
 
 export const expenseTypeContext: AlisaContext = {
     name: 'expense-type',
     apiPath: 'accounting/expense/type',
-    routePath: '/settings/expense-types',
+    routePath: '/app/settings/expense-types',
 }
 
 export const expenseContext: AlisaContext = {
     name: 'expense',
     apiPath: 'accounting/expense',
-    routePath: '/accounting/expenses',
+    routePath: '/app/accounting/expenses',
 }
 
 export const incomeTypeContext: AlisaContext = {
     name: 'income-type',
     apiPath: 'accounting/income/type',
-    routePath: '/settings/income-types',
+    routePath: '/app/settings/income-types',
 }
 
 export const incomeContext: AlisaContext = {
     name: 'income',
     apiPath: 'accounting/income',
-    routePath: '/accounting/incomes',
+    routePath: '/app/accounting/incomes',
 }
 
 export const loginContext: AlisaContext = {
@@ -51,35 +51,35 @@ export const loginContext: AlisaContext = {
 export const opImportContext: AlisaContext = {
     name: 'op-import',
     apiPath: 'import/op',
-    routePath: '/accounting/transactions/import/op',
+    routePath: '/app/accounting/transactions/import/op',
 }
 
 export const settingsContext: AlisaContext = {
     name: 'settings',
     apiPath: '',
-    routePath: '/settings',
+    routePath: '/app/settings',
 }
 
 export const transactionContext: AlisaContext = {
     name: 'transaction',
     apiPath: 'accounting/transaction',
-    routePath: '/accounting/transactions',
+    routePath: '/app/accounting/transactions',
 }
 
 export const userContext: AlisaContext = {
     name: 'user',
     apiPath: 'auth',
-    routePath: '/',
+    routePath: '/app',
 }
 
 export const dashboardContext: AlisaContext = {
     name: 'dashboard',
     apiPath: 'real-estate/property',
-    routePath: '/',
+    routePath: '/app/dashboard',
 }
 
 export const taxContext: AlisaContext = {
     name: 'tax',
     apiPath: 'real-estate/property/tax',
-    routePath: '/tax',
+    routePath: '/app/tax',
 }
