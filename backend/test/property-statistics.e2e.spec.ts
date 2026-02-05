@@ -762,4 +762,126 @@ describe('PropertyStatisticsService (e2e)', () => {
         .expect(401);
     });
   });
+
+  describe('Data isolation security - POST /real-estate/property/statistics/search', () => {
+    let user2: typeof mainUser;
+
+    beforeEach(async () => {
+      user2 = testUsers.user2WithProperties;
+
+      // Clean up all tables
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await dataSource.query('DELETE FROM income');
+      await dataSource.query('DELETE FROM expense');
+      await dataSource.query('DELETE FROM property_statistics');
+      await dataSource.query('DELETE FROM transaction');
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    it('user cannot see another user\'s property statistics via searchAll with explicit propertyId', async () => {
+      const user1Property = mainUser.properties[0].id;
+      const user2Property = user2.properties[0].id;
+
+      // Add transactions for both users
+      await transactionService.add(mainUser.jwtUser, getTransactionIncome1(user1Property));
+      await transactionService.add(user2.jwtUser, getTransactionIncome2(user2Property));
+
+      // Wait for event handlers
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify user2 has statistics
+      const user2Stats = await dataSource.query(`
+        SELECT value FROM property_statistics
+        WHERE "propertyId" = $1 AND "key" = 'income' AND "year" IS NULL AND "month" IS NULL
+      `, [user2Property]);
+      expect(user2Stats.length).toBe(1);
+      expect(parseFloat(user2Stats[0].value)).toBeCloseTo(1090, 2);
+
+      // Get auth token for user1
+      const user1Token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      // User1 tries to access user2's property statistics by specifying propertyId
+      const response = await request(app.getHttpServer())
+        .post('/real-estate/property/statistics/search')
+        .set('Authorization', getBearerToken(user1Token))
+        .send({ propertyId: user2Property })
+        .expect(200);
+
+      // User1 should NOT see user2's statistics - should return empty array
+      expect(response.body).toEqual([]);
+    });
+
+    it('user cannot see another user\'s property statistics via search endpoint', async () => {
+      const user1Property = mainUser.properties[0].id;
+      const user2Property = user2.properties[0].id;
+
+      // Add transactions for both users
+      await transactionService.add(mainUser.jwtUser, getTransactionIncome1(user1Property));
+      await transactionService.add(user2.jwtUser, getTransactionIncome2(user2Property));
+
+      // Wait for event handlers
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Get auth token for user1
+      const user1Token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      // User1 tries to access user2's property statistics via /:id/statistics/search
+      const response = await request(app.getHttpServer())
+        .post(`/real-estate/property/${user2Property}/statistics/search`)
+        .set('Authorization', getBearerToken(user1Token))
+        .send({ key: StatisticKey.INCOME })
+        .expect(200);
+
+      // User1 should NOT see user2's statistics - should return empty array
+      expect(response.body).toEqual([]);
+    });
+
+    it('user can only see their own property statistics via searchAll without propertyId', async () => {
+      const user1Property = mainUser.properties[0].id;
+      const user2Property = user2.properties[0].id;
+
+      // Add transactions for both users
+      await transactionService.add(mainUser.jwtUser, getTransactionIncome1(user1Property));
+      await transactionService.add(user2.jwtUser, getTransactionIncome2(user2Property));
+
+      // Wait for event handlers
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Get auth token for user1
+      const user1Token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      // User1 fetches all their statistics (no propertyId specified)
+      const response = await request(app.getHttpServer())
+        .post('/real-estate/property/statistics/search')
+        .set('Authorization', getBearerToken(user1Token))
+        .send({})
+        .expect(200);
+
+      // Should only contain user1's property statistics
+      const propertyIds = [...new Set(response.body.map((s: { propertyId: number }) => s.propertyId))];
+      const user1PropertyIds = mainUser.properties.map((p) => p.id);
+
+      // All returned statistics should belong to user1's properties
+      for (const propId of propertyIds) {
+        expect(user1PropertyIds).toContain(propId);
+      }
+
+      // Should NOT contain user2's property
+      expect(propertyIds).not.toContain(user2Property);
+    });
+
+    it('requires authentication for statistics/search', async () => {
+      await request(app.getHttpServer())
+        .post('/real-estate/property/statistics/search')
+        .send({})
+        .expect(401);
+    });
+
+    it('requires authentication for /:id/statistics/search', async () => {
+      await request(app.getHttpServer())
+        .post('/real-estate/property/1/statistics/search')
+        .send({})
+        .expect(401);
+    });
+  });
 });

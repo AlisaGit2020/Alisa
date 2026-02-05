@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { PropertyStatisticsService } from './property-statistics.service';
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { PropertyService } from './property.service';
+import { AuthService } from '@alisa-backend/auth/auth.service';
 import { createMockRepository, MockRepository } from 'test/mocks';
 import { createTransaction, createJWTUser } from 'test/factories';
 import {
@@ -17,6 +18,7 @@ describe('PropertyStatisticsService', () => {
   let mockRepository: MockRepository<PropertyStatistics>;
   let mockDataSource: { query: jest.Mock };
   let mockPropertyService: { search: jest.Mock };
+  let mockAuthService: { hasOwnership: jest.Mock };
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
 
@@ -27,6 +29,9 @@ describe('PropertyStatisticsService', () => {
     };
     mockPropertyService = {
       search: jest.fn().mockResolvedValue([]),
+    };
+    mockAuthService = {
+      hasOwnership: jest.fn().mockResolvedValue(true),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -43,6 +48,10 @@ describe('PropertyStatisticsService', () => {
         {
           provide: DataSource,
           useValue: mockDataSource,
+        },
+        {
+          provide: AuthService,
+          useValue: mockAuthService,
         },
       ],
     }).compile();
@@ -93,6 +102,22 @@ describe('PropertyStatisticsService', () => {
       });
 
       expect(result).toEqual([]);
+    });
+
+    it('returns empty array when user does not own the property', async () => {
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+      mockRepository.find.mockResolvedValue([
+        { propertyId: 999, key: StatisticKey.BALANCE, value: '1000.00' },
+      ]);
+
+      const result = await service.search(testUser, {
+        propertyId: 999,
+        key: StatisticKey.BALANCE,
+      });
+
+      expect(result).toEqual([]);
+      expect(mockAuthService.hasOwnership).toHaveBeenCalledWith(testUser, 999);
+      expect(mockRepository.find).not.toHaveBeenCalled();
     });
   });
 

@@ -10,6 +10,7 @@ import {JWTUser} from '@alisa-backend/auth/types';
 import {PropertyStatisticsFilterDto} from '@alisa-backend/real-estate/property/dtos/property-statistics-filter.dto';
 import {PropertyStatisticsSearchDto} from '@alisa-backend/real-estate/property/dtos/property-statistics-search.dto';
 import {PropertyService} from '@alisa-backend/real-estate/property/property.service';
+import {AuthService} from '@alisa-backend/auth/auth.service';
 
 @Injectable()
 export class PropertyStatisticsService {
@@ -19,6 +20,7 @@ export class PropertyStatisticsService {
     @Inject(forwardRef(() => PropertyService))
     private propertyService: PropertyService,
     private dataSource: DataSource,
+    private authService: AuthService,
   ) {}
   EventCases = {
     CREATED: 'CREATED',
@@ -54,6 +56,11 @@ export class PropertyStatisticsService {
     user: JWTUser,
     filter: PropertyStatisticsFilterDto,
   ): Promise<PropertyStatistics[]> {
+    // Validate user owns the property before returning statistics
+    if (!(await this.authService.hasOwnership(user, filter.propertyId))) {
+      return [];
+    }
+
     const options: FindManyOptions<PropertyStatistics> = {
       where: {
         propertyId: filter.propertyId,
@@ -90,7 +97,10 @@ export class PropertyStatisticsService {
     let propertyIds: number[];
 
     if (filter.propertyId) {
-      // Single property specified
+      // Single property specified - validate user owns it
+      if (!(await this.authService.hasOwnership(user, filter.propertyId))) {
+        return [];
+      }
       propertyIds = [filter.propertyId];
     } else {
       // Get all user's properties
