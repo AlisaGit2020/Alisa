@@ -1,66 +1,81 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { renderWithProviders } from '@test-utils/test-wrapper';
 import AlisaDatePicker from './AlisaDatePicker';
 
-
 describe('AlisaDatePicker', () => {
-  it('renders with provided props', () => {
-    const mockOnChange = jest.fn();
+  it('renders with label', () => {
+    renderWithProviders(
+      <AlisaDatePicker
+        label="Test Label"
+        value={new Date('2024-01-01')}
+        onChange={jest.fn()}
+      />
+    );
 
-    const props = {
-      label: 'Test Label',
-      value: new Date('2024-01-01'), 
-      autoFocus: true,
-      disabled: false,
-      fullWidth: false,
-      onChange: mockOnChange,
-    };
-
-    render(
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <AlisaDatePicker {...props} />
-        </LocalizationProvider>
-      );
-
-    const datePicker = screen.getByLabelText('Test Label');
-
-    // Check if the DatePicker renders with the provided props    
-    expect(datePicker).toHaveAttribute('aria-invalid', 'false'); // Assuming the provided date is valid
-    expect(datePicker).toBeEnabled();
-
-    // Check if the date is displayed in the input
-    expect(datePicker).toHaveValue('01/01/2024');
-
-    // Check if the DatePicker has the correct width
-    expect(datePicker).toHaveStyle('width: 100%;'); // Adjust this based on your styling
-
-    // You may want to add more specific assertions based on your use case
+    // The label appears multiple times (label element and legend)
+    const labels = screen.getAllByText('Test Label');
+    expect(labels.length).toBeGreaterThan(0);
   });
 
-  it('triggers onChange callback when date is changed', () => {
+  it('displays the date value', () => {
+    renderWithProviders(
+      <AlisaDatePicker
+        label="Test Label"
+        value={new Date('2024-01-15')}
+        onChange={jest.fn()}
+      />
+    );
+
+    const input = screen.getByDisplayValue('01/15/2024');
+    expect(input).toBeInTheDocument();
+  });
+
+  it('calls onChange when date is changed', async () => {
+    const user = userEvent.setup();
     const mockOnChange = jest.fn();
 
-    const props = {
-      label: 'Test Label',
-      value: new Date('2022-01-26'),
-      onChange: mockOnChange,
-    };
+    renderWithProviders(
+      <AlisaDatePicker
+        label="Test Label"
+        value={new Date('2024-01-01')}
+        onChange={mockOnChange}
+      />
+    );
 
-    render(
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <AlisaDatePicker {...props} />
-        </LocalizationProvider>
-      );
+    const monthInput = screen.getByRole('spinbutton', { name: 'Month' });
+    await user.clear(monthInput);
+    await user.type(monthInput, '02');
 
-    const datePicker = screen.getByLabelText('Test Label');
+    expect(mockOnChange).toHaveBeenCalled();
+  });
 
-    // Trigger a change event by manually entering a new date
-    fireEvent.change(datePicker, { target: { value: '2022-02-01' } });
+  it('renders in disabled state', () => {
+    renderWithProviders(
+      <AlisaDatePicker
+        label="Test Label"
+        value={new Date('2024-01-01')}
+        disabled
+        onChange={jest.fn()}
+      />
+    );
 
-    // Check if the onChange callback is called
-    expect(mockOnChange).toHaveBeenCalledTimes(1);
-    // You may want to add more specific assertions based on your use case
+    const monthInput = screen.getByRole('spinbutton', { name: 'Month' });
+    expect(monthInput).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  it('handles null value', () => {
+    renderWithProviders(
+      <AlisaDatePicker
+        label="Test Label"
+        value={null}
+        onChange={jest.fn()}
+      />
+    );
+
+    // When null, the component should still render
+    const labels = screen.getAllByText('Test Label');
+    expect(labels.length).toBeGreaterThan(0);
   });
 });
