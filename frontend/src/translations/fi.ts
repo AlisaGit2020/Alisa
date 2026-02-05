@@ -8,6 +8,14 @@ const fi = {
   },
 
   common: {
+    format: {
+      currency: {
+        euro: "{{val, number(minimumFractionDigits:2)}} €",
+      },
+      date: "{{val, datetime}}",
+      number: "{{val, number}}",
+    },
+
     january: "Tammikuu",
     february: "Helmikuu",
     march: "Maaliskuu",
@@ -30,6 +38,7 @@ const fi = {
     property: "Asunto",
     back: "Takaisin",
     cancel: "Peruuta",
+    category: "Kategoria",
     confirm: "Vahvista",
     confirmDelete: "Poistetaanko tietue?",
     dataNotSelected: "Valitse",
@@ -50,6 +59,7 @@ const fi = {
     selectAll: "Valitse kaikki",
     settings: "Asetukset",
     totalAmount: "Yhteensä",
+    transactionStatus: "Tapahtuman tila",
     unknown: "Ei tiedossa",
     validationErrorTitle: "Tarkasta nämä kentät:",
     year: "Vuosi",

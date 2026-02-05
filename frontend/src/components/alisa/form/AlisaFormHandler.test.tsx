@@ -49,7 +49,7 @@ describe('AlisaFormHandler', () => {
     });
   });
 
-  it('shows loading state initially', () => {
+  it('shows loading state initially', async () => {
     const mockRead = jest.fn().mockResolvedValue({ id: 1, name: 'Mocked Data' });
     jest.spyOn(DataService.prototype, 'read').mockImplementation(mockRead);
 
@@ -81,6 +81,11 @@ describe('AlisaFormHandler', () => {
     // Initially, loading should show progress bar
     const progressBar = screen.getByRole('progressbar');
     expect(progressBar).toBeInTheDocument();
+
+    // Wait for async state updates to complete
+    await waitFor(() => {
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    });
   });
 
   it('calls save when submit button is clicked', async () => {

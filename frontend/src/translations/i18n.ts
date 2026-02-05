@@ -12,6 +12,7 @@ const namespaces = [
     'expense',
     'expense-type',
     'income-type',
+    'import-wizard',
     'login',
     'menu',
     'route',

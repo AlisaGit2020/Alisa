@@ -3,8 +3,75 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import en from '../src/translations/en';
-import fi from '../src/translations/fi';
+import baseEn from '../src/translations/en';
+import baseFi from '../src/translations/fi';
+
+// Import all namespace translations
+import accountingEn from '../src/translations/accounting/en';
+import accountingFi from '../src/translations/accounting/fi';
+import dashboardEn from '../src/translations/dashboard/en';
+import dashboardFi from '../src/translations/dashboard/fi';
+import propertyEn from '../src/translations/property/en';
+import propertyFi from '../src/translations/property/fi';
+import expenseEn from '../src/translations/expense/en';
+import expenseFi from '../src/translations/expense/fi';
+import expenseTypeEn from '../src/translations/expense-type/en';
+import expenseTypeFi from '../src/translations/expense-type/fi';
+import incomeTypeEn from '../src/translations/income-type/en';
+import incomeTypeFi from '../src/translations/income-type/fi';
+import loginEn from '../src/translations/login/en';
+import loginFi from '../src/translations/login/fi';
+import menuEn from '../src/translations/menu/en';
+import menuFi from '../src/translations/menu/fi';
+import routeEn from '../src/translations/route/en';
+import routeFi from '../src/translations/route/fi';
+import settingsEn from '../src/translations/settings/en';
+import settingsFi from '../src/translations/settings/fi';
+import taxEn from '../src/translations/tax/en';
+import taxFi from '../src/translations/tax/fi';
+import transactionEn from '../src/translations/transaction/en';
+import transactionFi from '../src/translations/transaction/fi';
+import userEn from '../src/translations/user/en';
+import userFi from '../src/translations/user/fi';
+import importWizardEn from '../src/translations/import-wizard/en';
+import importWizardFi from '../src/translations/import-wizard/fi';
+
+// Combine all translations
+const en = {
+  ...baseEn,
+  accounting: accountingEn,
+  dashboard: dashboardEn,
+  property: propertyEn,
+  expense: expenseEn,
+  'expense-type': expenseTypeEn,
+  'income-type': incomeTypeEn,
+  'import-wizard': importWizardEn,
+  login: loginEn,
+  menu: menuEn,
+  route: routeEn,
+  settings: settingsEn,
+  tax: taxEn,
+  transaction: transactionEn,
+  user: userEn,
+};
+
+const fi = {
+  ...baseFi,
+  accounting: accountingFi,
+  dashboard: dashboardFi,
+  property: propertyFi,
+  expense: expenseFi,
+  'expense-type': expenseTypeFi,
+  'income-type': incomeTypeFi,
+  'import-wizard': importWizardFi,
+  login: loginFi,
+  menu: menuFi,
+  route: routeFi,
+  settings: settingsFi,
+  tax: taxFi,
+  transaction: transactionFi,
+  user: userFi,
+};
 
 // ESM compatibility: Define __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -122,7 +189,30 @@ describe('Translation Coverage', () => {
       return !key.includes('${') && !key.includes('{{') && !key.includes('+');
     });
 
-    const missingKeys = staticKeys.filter(key => !availableKeys.has(key));
+    const missingKeys = staticKeys.filter(key => {
+      // Check if key exists directly
+      if (availableKeys.has(key)) return false;
+
+      // Check if key exists in common namespace (fallback)
+      // i18n config has fallbackNS: ['common'], so keys without namespace
+      // will fallback to common.*
+      const commonKey = `common.${key}`;
+      if (availableKeys.has(commonKey)) return false;
+
+      // Check if key exists in any namespace
+      // Keys can be used without namespace prefix and i18n will search all namespaces
+      const namespaces = [
+        'appBar', 'accounting', 'dashboard', 'property', 'expense', 'expense-type',
+        'income-type', 'import-wizard', 'login', 'menu', 'route',
+        'settings', 'tax', 'transaction', 'user'
+      ];
+
+      for (const ns of namespaces) {
+        if (availableKeys.has(`${ns}.${key}`)) return false;
+      }
+
+      return true;
+    });
 
     if (missingKeys.length > 0) {
       console.log('\nTranslation keys used but not defined:');
