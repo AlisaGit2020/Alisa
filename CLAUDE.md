@@ -106,6 +106,51 @@ Frontend uses i18next with translation files in `frontend/src/translations/` org
 
 **Every backend service must have both unit tests AND e2e tests.**
 
+### Frontend Tests
+
+**Every React component and view should have tests.**
+
+#### Component Unit Tests
+- Colocate `.test.tsx` files with components (e.g., `AlisaTextField.tsx` → `AlisaTextField.test.tsx`)
+- Use `renderWithProviders` from `@test-utils/test-wrapper` for rendering
+- Use `@testing-library/user-event` for user interactions
+- Cover these scenarios:
+  - Renders with required props
+  - User interactions trigger callbacks
+  - Disabled/loading states work correctly
+  - Edge cases (empty, null values)
+
+#### View Integration Tests
+- Place in `frontend/test/views/*.test.tsx`
+- Use MSW to mock API responses
+- Test critical paths + error scenarios:
+  - Happy path (user workflow completes successfully)
+  - Not found errors (404)
+  - Server errors (500)
+  - Validation errors
+
+#### Translation Validation
+- All translation keys must exist in all language files (en.json, fi.json)
+- Translation coverage test runs automatically
+- Missing keys cause test failures
+
+#### Running Frontend Tests
+```bash
+cd frontend
+npm test              # Run all tests
+npm test -- --watch   # Watch mode for TDD
+npm test -- --coverage # Check coverage
+```
+
+#### Test Utilities
+- `renderWithProviders(component)` - Render with all providers (theme, i18n, router)
+- `createMockProperty(overrides)` - Factory for test property data
+- `createMockTransaction(overrides)` - Factory for test transaction data
+- `handlers.get/post/put/delete(endpoint, data)` - MSW handler builders
+- `handlers.error(endpoint, status, message)` - MSW error responses
+
+See `frontend/docs/testing-guide.md` for detailed examples and patterns.
+
 ### Unit Tests
 - Colocate `.spec.ts` files with their service (e.g., `example.service.ts` → `example.service.spec.ts`)
 - Use existing mock utilities from `backend/test/mocks/`
