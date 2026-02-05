@@ -1,44 +1,56 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import { renderWithProviders } from '@test-utils/test-wrapper';
 import AlisaSwitch from './AlisaSwitch';
 
 describe('AlisaSwitch', () => {
-  it('renders with provided props', () => {
-    const mockOnChange = jest.fn();
+  it('renders with label', () => {
+    renderWithProviders(
+      <AlisaSwitch label="Test Switch" value={false} onChange={jest.fn()} />
+    );
 
-    const props = {
-      label: 'Test Label',
-      value: true,
-      disabled: false,
-      onChange: mockOnChange,
-    };
-
-    render(<AlisaSwitch {...props} />);
-
-    const switchElement = screen.getByLabelText('Test Label');
-
-    // Check if the Switch renders with the provided props
-    expect(switchElement).toBeChecked();
-    expect(switchElement).not.toBeDisabled();
+    expect(screen.getByText('Test Switch')).toBeInTheDocument();
   });
 
-  it('triggers onChange callback when switched', () => {
+  it('renders checked state', () => {
+    renderWithProviders(
+      <AlisaSwitch label="Test Switch" value={true} onChange={jest.fn()} />
+    );
+
+    const switchElement = screen.getByRole('switch');
+    expect(switchElement).toBeChecked();
+  });
+
+  it('renders unchecked state', () => {
+    renderWithProviders(
+      <AlisaSwitch label="Test Switch" value={false} onChange={jest.fn()} />
+    );
+
+    const switchElement = screen.getByRole('switch');
+    expect(switchElement).not.toBeChecked();
+  });
+
+  it('calls onChange when clicked', async () => {
+    const user = userEvent.setup();
     const mockOnChange = jest.fn();
 
-    const props = {
-      label: 'Test Label',
-      onChange: mockOnChange,
-    };
+    renderWithProviders(
+      <AlisaSwitch label="Test Switch" value={false} onChange={mockOnChange} />
+    );
 
-    render(<AlisaSwitch {...props} />);
+    const switchElement = screen.getByRole('switch');
+    await user.click(switchElement);
 
-    const switchElement = screen.getByLabelText('Test Label');
-
-    // Trigger a change event by clicking the switch
-    fireEvent.click(switchElement);
-
-    // Check if the onChange callback is called
     expect(mockOnChange).toHaveBeenCalledTimes(1);
-    // You may want to add more specific assertions based on your use case
+  });
+
+  it('renders in disabled state', () => {
+    renderWithProviders(
+      <AlisaSwitch label="Test Switch" value={false} disabled onChange={jest.fn()} />
+    );
+
+    const switchElement = screen.getByRole('switch');
+    expect(switchElement).toBeDisabled();
   });
 });
