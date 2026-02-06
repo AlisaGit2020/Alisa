@@ -16,7 +16,7 @@ COPY backend/src/ ../backend/src/
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
 
-RUN npm run build
+RUN npx vite build
 
 # Stage 2: Nginx
 FROM nginx:1.27-alpine
