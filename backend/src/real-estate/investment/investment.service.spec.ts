@@ -117,7 +117,7 @@ describe('InvestmentService', () => {
 
       const result = service.calculate(input);
 
-      expect(result.maintenanceCosts).toBe(250);
+      expect(result.maintenanceCosts).toBe(3240);
     });
 
     it('calculates rental income per year correctly', () => {

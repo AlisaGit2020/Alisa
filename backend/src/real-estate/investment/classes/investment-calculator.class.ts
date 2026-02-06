@@ -174,7 +174,10 @@ export class InvestmentCalculator {
   }
 
   private getMaintenanceCosts(): number {
-    return this.roundToTwo(this.maintenanceFee + this.chargeForFinancialCosts);
+    return this.roundToTwo(
+      (this.maintenanceFee + this.chargeForFinancialCosts + this.waterCharge) *
+        12,
+    );
   }
 
   private getRentalYieldPercent(): number {
@@ -223,7 +226,7 @@ export class InvestmentCalculator {
 
   private getTaxDeductibleExpensesPerYear(): number {
     return this.roundToTwo(
-      this.maintenanceCosts * 12 + this.loanFirstMonthInterest * 12,
+      this.maintenanceCosts + this.loanFirstMonthInterest * 12,
     );
   }
 
@@ -243,7 +246,7 @@ export class InvestmentCalculator {
 
   private getExpensesPerMonth(): number {
     return this.roundToTwo(
-      this.maintenanceCosts + this.loanFirstMonthInstallment,
+      this.maintenanceCosts / 12 + this.loanFirstMonthInstallment,
     );
   }
 

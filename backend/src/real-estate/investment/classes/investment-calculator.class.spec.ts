@@ -35,18 +35,18 @@ describe('InvestmentCalculator', () => {
     //Calculation checks
     expect(calc.sellingPrice).toBe(97000.21);
     expect(calc.transferTax).toBe(2000);
-    expect(calc.maintenanceCosts).toBe(85.63);
+    expect(calc.maintenanceCosts).toBe(1219.56);
     expect(calc.rentalYieldPercent).toBe(5.11);
     expect(calc.rentalIncomePerYear).toBe(6000);
     expect(calc.pricePerSquareMeter).toBe(3333.33);
     expect(calc.loanFinancing).toBe(89000.21);
     expect(calc.loanFirstMonthInterest).toBe(370.83);
     expect(calc.loanFirstMonthInstallment).toBe(587.36);
-    expect(calc.taxDeductibleExpensesPerYear).toBe(5477.52);
-    expect(calc.profitPerYear).toBe(522.48);
-    expect(calc.taxPerYear).toBe(156.74);
-    expect(calc.expensesPerMonth).toBe(672.99);
-    expect(calc.cashFlowPerMonth).toBe(-172.99);
-    expect(calc.cashFlowAfterTaxPerMonth).toBe(-186.05);
+    expect(calc.taxDeductibleExpensesPerYear).toBe(5669.52);
+    expect(calc.profitPerYear).toBe(330.48);
+    expect(calc.taxPerYear).toBe(99.14);
+    expect(calc.expensesPerMonth).toBe(688.99);
+    expect(calc.cashFlowPerMonth).toBe(-188.99);
+    expect(calc.cashFlowAfterTaxPerMonth).toBe(-197.25);
   });
 });
