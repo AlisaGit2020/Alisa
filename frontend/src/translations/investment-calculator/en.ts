@@ -24,6 +24,12 @@ const investmentCalculator = {
   loanInterestPercent: 'Loan interest (%)',
   loanPeriod: 'Loan period (years)',
 
+  // Result section headers
+  purchaseCosts: 'Purchase costs',
+  loanDetails: 'Loan details',
+  incomeAndExpenses: 'Income and expenses',
+  returns: 'Returns',
+
   // Result fields - Purchase costs
   sellingPrice: 'Purchase price',
   transferTax: 'Transfer tax',

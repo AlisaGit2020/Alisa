@@ -109,7 +109,7 @@ function InvestmentCalculatorResults({ t, results, onSave, showSaveButton = true
 
           {/* Purchase Costs */}
           <Typography variant="subtitle1" gutterBottom fontWeight="medium" sx={{ mt: 2 }}>
-            Hankintakulut
+            {t('investment-calculator:purchaseCosts')}
           </Typography>
           <Grid container spacing={2}>
             <ResultItem label={t('investment-calculator:sellingPrice')} value={results.sellingPrice} />
@@ -121,7 +121,7 @@ function InvestmentCalculatorResults({ t, results, onSave, showSaveButton = true
 
           {/* Loan Details */}
           <Typography variant="subtitle1" gutterBottom fontWeight="medium">
-            Lainatiedot
+            {t('investment-calculator:loanDetails')}
           </Typography>
           <Grid container spacing={2}>
             <ResultItem label={t('investment-calculator:loanFinancing')} value={results.loanFinancing} />
@@ -133,7 +133,7 @@ function InvestmentCalculatorResults({ t, results, onSave, showSaveButton = true
 
           {/* Income & Expenses */}
           <Typography variant="subtitle1" gutterBottom fontWeight="medium">
-            Tulot ja kulut
+            {t('investment-calculator:incomeAndExpenses')}
           </Typography>
           <Grid container spacing={2}>
             <ResultItem label={t('investment-calculator:rentalIncomePerYear')} value={results.rentalIncomePerYear} />
@@ -145,7 +145,7 @@ function InvestmentCalculatorResults({ t, results, onSave, showSaveButton = true
 
           {/* Returns */}
           <Typography variant="subtitle1" gutterBottom fontWeight="medium">
-            Tuotto
+            {t('investment-calculator:returns')}
           </Typography>
           <Grid container spacing={2}>
             <ResultItem label={t('investment-calculator:rentalYieldPercent')} value={results.rentalYieldPercent} isPercent />

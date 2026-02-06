@@ -91,6 +91,8 @@ Backend requires in `.env`:
 ### Internationalization
 Frontend uses i18next with translation files in `frontend/src/translations/` organized by feature domain.
 
+**Never hardcode user-visible text in components.** Always use translation keys via `t('namespace:key')`. This applies to all labels, headings, descriptions, button texts, error messages, and any other text shown to the user. Add new keys to both `en.ts` and `fi.ts` translation files.
+
 ### Financial Data Conventions
 **Transaction amounts:**
 - INCOME and DEPOSIT: Store as **positive** values

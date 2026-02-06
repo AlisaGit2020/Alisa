@@ -24,6 +24,12 @@ const investmentCalculator = {
   loanInterestPercent: 'Lainan korko (%)',
   loanPeriod: 'Laina-aika (vuotta)',
 
+  // Result section headers
+  purchaseCosts: 'Hankintakulut',
+  loanDetails: 'Lainatiedot',
+  incomeAndExpenses: 'Tulot ja kulut',
+  returns: 'Tuotto',
+
   // Result fields - Purchase costs
   sellingPrice: 'Kauppahinta',
   transferTax: 'Varainsiirtovero',
