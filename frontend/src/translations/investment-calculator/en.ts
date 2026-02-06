@@ -1,7 +1,8 @@
 const investmentCalculator = {
   title: 'Investment Calculator',
   pageTitle: 'Investment Calculator',
-  pageDescription: 'Calculate the profitability of your investment property and compare different options. Save your calculations and track the performance of your investments.',
+  pageDescription: 'Calculate your investment property profitability for free and compare different options. Save your calculations and track the performance of your investments.',
+  subtitle: 'Calculate your investment property profitability for free',
   newCalculation: 'New Calculation',
   savedCalculations: 'Saved Calculations',
   calculate: 'Calculate',

@@ -133,7 +133,7 @@ function InvestmentCalculatorPublic({ t }: WithTranslation) {
               {t('investment-calculator:title')}
             </Typography>
             <Typography variant="subtitle1" color="text.secondary">
-              Laske sijoitusasuntosi kannattavuus ilmaiseksi
+              {t('investment-calculator:subtitle')}
             </Typography>
           </Box>
 

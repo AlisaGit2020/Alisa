@@ -24,7 +24,7 @@ const transaction = {
   add: "Uusi tilitapahtuma",
   amount: "Yksikköhinta",
   balance: "Saldo",
-  chooseTransactionType: "Valitse tapahtumatyyyppi",
+  chooseTransactionType: "Valitse tapahtumatyyppi",
   dateRange: "Aikaväli",
   defaultIncomeType: "Oletustulolaji",
   defaultExpenseType: "Oletuskululaji",
