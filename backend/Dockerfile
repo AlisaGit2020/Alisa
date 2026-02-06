@@ -1,14 +1,26 @@
+# Stage 1: Build
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY backend/package*.json ./
+RUN npm ci
+
+COPY backend/ .
+RUN npm run build
+
+# Stage 2: Production
 FROM node:20-alpine
 
 WORKDIR /app
 
-COPY backend/package*.json .
-COPY backend/tsconfig.json .
+COPY --from=builder /app/package*.json ./
+RUN npm ci --omit=dev
 
-RUN npm install
+COPY --from=builder /app/dist ./dist
 
-COPY backend/. .
+RUN mkdir -p uploads
 
-RUN npm run build
+EXPOSE 3000
 
-CMD [ "npm", "run", "start:dev" ]
+CMD ["node", "dist/main"]

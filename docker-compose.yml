@@ -15,7 +15,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: backend/Dockerfile.dev
     container_name: alisa-backend
     ports:
       - '3000:3000'

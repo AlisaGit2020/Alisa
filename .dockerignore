@@ -1,0 +1,28 @@
+.git
+.gitignore
+.idea
+.worktrees
+
+# Node modules (installed in container)
+backend/node_modules
+frontend/node_modules
+
+# Build output
+backend/dist
+frontend/dist
+
+# Test and coverage
+backend/coverage
+frontend/coverage
+
+# Environment files
+.env
+.env.production
+backend/.env
+
+# Data
+postgres-data
+backups
+
+# Docs
+*.md
