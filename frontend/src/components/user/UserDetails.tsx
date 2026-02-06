@@ -1,5 +1,5 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Avatar, Box, Dialog, DialogContent, Divider, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Chip, Dialog, DialogContent, Divider, Stack, Typography } from "@mui/material";
 import React from "react";
 import { userContext } from "@alisa-lib/alisa-contexts";
 import { emptyUser } from "@alisa-lib/initial-data";
@@ -7,6 +7,9 @@ import { User } from "@alisa-backend/people/user/entities/user.entity";
 import ApiClient from "@alisa-lib/api-client";
 import EmailIcon from '@mui/icons-material/Email';
 import LanguageIcon from '@mui/icons-material/Language';
+import LayersIcon from '@mui/icons-material/Layers';
+import PaymentIcon from '@mui/icons-material/Payment';
+import HomeIcon from '@mui/icons-material/Home';
 
 
 interface UserDetailsProps extends WithTranslation {
@@ -56,6 +59,41 @@ function UserDetails({ t, open, onClose }: UserDetailsProps) {
                             <Box sx={{ lineHeight: '24px' }}>{t(data.language as string)}</Box>
                         </Stack>
                     </Stack>
+                </Typography>
+                <Divider></Divider>
+                <Typography fontSize={14}>
+                    <Stack spacing={2} margin={2}>
+                        <Stack direction={'row'} spacing={1} alignItems={'center'}>
+                            <LayersIcon></LayersIcon>
+                            <Box sx={{ lineHeight: '24px' }}>{t('tier')}</Box>
+                            <Chip
+                                label={data.tier?.name ?? t('tierNoTier')}
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                            />
+                        </Stack>
+                    </Stack>
+                    {data.tier && (
+                        <>
+                            <Stack spacing={2} margin={2}>
+                                <Stack direction={'row'} spacing={1}>
+                                    <PaymentIcon></PaymentIcon>
+                                    <Box sx={{ lineHeight: '24px' }}>
+                                        {t('tierPrice')}: {Number(data.tier.price).toFixed(2)} {t('tierCurrency')}
+                                    </Box>
+                                </Stack>
+                            </Stack>
+                            <Stack spacing={2} margin={2}>
+                                <Stack direction={'row'} spacing={1}>
+                                    <HomeIcon></HomeIcon>
+                                    <Box sx={{ lineHeight: '24px' }}>
+                                        {t('tierMaxProperties')}: {data.tier.maxProperties === 0 ? t('tierUnlimited') : data.tier.maxProperties}
+                                    </Box>
+                                </Stack>
+                            </Stack>
+                        </>
+                    )}
                 </Typography>
             </DialogContent>
         </Dialog>
