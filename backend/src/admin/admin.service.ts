@@ -7,6 +7,8 @@ export class AdminService {
   constructor(private userService: UserService) {}
 
   async findAllUsers(): Promise<User[]> {
-    return this.userService.findAll();
+    return this.userService.search({
+      relations: { tier: true },
+    });
   }
 }

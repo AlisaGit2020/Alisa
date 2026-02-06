@@ -16,7 +16,7 @@ function Settings() {
     const navigate = useNavigate();
 
     const handleMenuClick = (selectedItem: SettingsPage) => {
-        navigate(`/settings/${selectedItem}`)
+        navigate(`/app/settings/${selectedItem}`)
     }
 
     const getContent = (iPage: SettingsPage, iAction: Action, content: ReactNode) => {
@@ -39,41 +39,41 @@ function Settings() {
                 <Grid size={{ xs: 12, lg: 9 }}>
                     {getContent(SettingsPage.ExpenseTypes, Action.List,
                         <ExpenseTypes
-                            onAdd={() => navigate('/settings/expense-types/add')}
-                            onEdit={(id) => navigate(`/settings/expense-types/edit/${id}`)}
+                            onAdd={() => navigate('/app/settings/expense-types/add')}
+                            onEdit={(id) => navigate(`/app/settings/expense-types/edit/${id}`)}
                         />
                     )}
                     {getContent(SettingsPage.ExpenseTypes, Action.Add,
                         <ExpenseTypeForm
-                            onCancel={() => navigate('/settings/expense-types')}
-                            onAfterSubmit={() => navigate('/settings/expense-types')}
+                            onCancel={() => navigate('/app/settings/expense-types')}
+                            onAfterSubmit={() => navigate('/app/settings/expense-types')}
                         />
                     )}
                     {getContent(SettingsPage.ExpenseTypes, Action.Edit,
                         <ExpenseTypeForm
                             id={parsedId}
-                            onCancel={() => navigate('/settings/expense-types')}
-                            onAfterSubmit={() => navigate('/settings/expense-types')}
+                            onCancel={() => navigate('/app/settings/expense-types')}
+                            onAfterSubmit={() => navigate('/app/settings/expense-types')}
                         />
                     )}
 
                     {getContent(SettingsPage.IncomeTypes, Action.List,
                         <IncomeTypes
-                            onAdd={() => navigate('/settings/income-types/add')}
-                            onEdit={(id) => navigate(`/settings/income-types/edit/${id}`)}
+                            onAdd={() => navigate('/app/settings/income-types/add')}
+                            onEdit={(id) => navigate(`/app/settings/income-types/edit/${id}`)}
                         />
                     )}
                     {getContent(SettingsPage.IncomeTypes, Action.Add,
                         <IncomeTypeForm
-                            onCancel={() => navigate('/settings/income-types')}
-                            onAfterSubmit={() => navigate('/settings/income-types')}
+                            onCancel={() => navigate('/app/settings/income-types')}
+                            onAfterSubmit={() => navigate('/app/settings/income-types')}
                         />
                     )}
                     {getContent(SettingsPage.IncomeTypes, Action.Edit,
                         <IncomeTypeForm
                             id={parsedId}
-                            onCancel={() => navigate('/settings/income-types')}
-                            onAfterSubmit={() => navigate('/settings/income-types')}
+                            onCancel={() => navigate('/app/settings/income-types')}
+                            onAfterSubmit={() => navigate('/app/settings/income-types')}
                         />
                     )}
 

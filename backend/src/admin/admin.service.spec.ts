@@ -10,6 +10,7 @@ describe('AdminService', () => {
   beforeEach(async () => {
     mockUserService = {
       findAll: jest.fn(),
+      search: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -28,16 +29,18 @@ describe('AdminService', () => {
         createUser({ id: 1, firstName: 'John', lastName: 'Doe' }),
         createUser({ id: 2, firstName: 'Jane', lastName: 'Smith' }),
       ];
-      mockUserService.findAll.mockResolvedValue(users);
+      mockUserService.search.mockResolvedValue(users);
 
       const result = await service.findAllUsers();
 
       expect(result).toEqual(users);
-      expect(mockUserService.findAll).toHaveBeenCalled();
+      expect(mockUserService.search).toHaveBeenCalledWith({
+        relations: { tier: true },
+      });
     });
 
     it('returns empty array when no users exist', async () => {
-      mockUserService.findAll.mockResolvedValue([]);
+      mockUserService.search.mockResolvedValue([]);
 
       const result = await service.findAllUsers();
 

@@ -3,9 +3,10 @@ import { PeopleModule } from '@alisa-backend/people/people.module';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { AdminGuard } from './admin.guard';
+import { TierModule } from './tier.module';
 
 @Module({
-  imports: [PeopleModule],
+  imports: [PeopleModule, TierModule],
   controllers: [AdminController],
   providers: [AdminService, AdminGuard],
 })

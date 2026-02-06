@@ -15,6 +15,8 @@ import { UserService } from '@alisa-backend/people/user/user.service';
 import { User } from '@alisa-backend/people/user/entities/user.entity';
 import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
 import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
+import { TierService } from '@alisa-backend/admin/tier.service';
+import { Tier } from '@alisa-backend/admin/entities/tier.entity';
 import {
   expenseType1,
   expenseType2,
@@ -62,6 +64,7 @@ export const emptyTables = async (
     'user',
     'property',
     'property_statistics',
+    'tier',
   ],
 ) => {
   const sqlStatements: string[] = [];
@@ -289,4 +292,22 @@ export type TestUser = {
   user: User;
   jwtUser: JWTUser;
   properties: Property[];
+};
+
+export const addTier = async (
+  app: INestApplication,
+  name: string,
+  price: number,
+  maxProperties: number,
+  isDefault: boolean = false,
+  sortOrder: number = 0,
+): Promise<Tier> => {
+  const tierService = app.get<TierService>(TierService);
+  return tierService.add({
+    name,
+    price,
+    maxProperties,
+    isDefault,
+    sortOrder,
+  });
 };

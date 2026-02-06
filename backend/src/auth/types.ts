@@ -6,4 +6,7 @@ export type JWTUser = {
   language: string;
   ownershipInProperties: number[];
   isAdmin: boolean;
+  tierId?: number;
+  tierName?: string;
+  tierMaxProperties?: number;
 };

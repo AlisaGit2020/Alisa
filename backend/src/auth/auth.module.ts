@@ -9,6 +9,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { jwtConstants } from './constants';
 import { PeopleModule } from '../people/people.module';
 import { DefaultsModule } from '../defaults/defaults.module';
+import { TierModule } from '@alisa-backend/admin/tier.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { DefaultsModule } from '../defaults/defaults.module';
     }),
     PeopleModule,
     DefaultsModule,
+    TierModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, GoogleStrategy, JwtStrategy],

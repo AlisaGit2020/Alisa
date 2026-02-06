@@ -14,6 +14,7 @@ import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/p
 import { AccountingModule } from '@alisa-backend/accounting/accounting.module';
 import { TaxController } from './property/tax.controller';
 import { TaxService } from './property/tax.service';
+import { TierModule } from '@alisa-backend/admin/tier.module';
 
 @Module({
   controllers: [InvestmentController, TaxController, PropertyController],
@@ -28,6 +29,7 @@ import { TaxService } from './property/tax.service';
     forwardRef(() => AccountingModule),
     AuthModule,
     PeopleModule,
+    TierModule,
   ],
   exports: [PropertyService],
 })

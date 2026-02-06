@@ -9,6 +9,7 @@ import { Transaction } from '@alisa-backend/accounting/transaction/entities/tran
 import { FindOptionsWhereWithUserId } from '@alisa-backend/common/types';
 import { UserSettingsInputDto } from './dtos/user-settings-input.dto';
 import { UserDefaultsService } from '@alisa-backend/defaults/user-defaults.service';
+import { TierService } from '@alisa-backend/admin/tier.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
     private jwtService: JwtService,
     private userService: UserService,
     private userDefaultsService: UserDefaultsService,
+    private tierService: TierService,
   ) {}
 
   async login(user: UserInputDto) {
@@ -30,12 +32,21 @@ export class AuthService {
         userEntity.id,
         userEntity.language,
       );
+
+      const defaultTier = await this.tierService.findDefault();
+      if (defaultTier) {
+        await this.userService.update(userEntity.id, {
+          ...user,
+          tierId: defaultTier.id,
+        } as any);
+      }
     }
 
     const users = await this.userService.search({
       where: { id: userEntity.id },
       relations: {
         ownerships: true,
+        tier: true,
       },
     });
 
@@ -50,6 +61,9 @@ export class AuthService {
       ownershipInProperties:
         userEntity?.ownerships?.map((ownership) => ownership.propertyId) ?? [],
       isAdmin: userEntity.isAdmin ?? false,
+      tierId: userEntity.tierId,
+      tierName: userEntity.tier?.name,
+      tierMaxProperties: userEntity.tier?.maxProperties,
     };
 
     return this.jwtService.sign(jtwUser);

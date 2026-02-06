@@ -3,6 +3,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOptionsWhere, Repository } from 'typeorm';
@@ -15,6 +16,7 @@ import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownershi
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
 import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
+import { TierService } from '@alisa-backend/admin/tier.service';
 
 @Injectable()
 export class PropertyService {
@@ -24,6 +26,7 @@ export class PropertyService {
     @InjectRepository(Ownership)
     private ownershipRepository: Repository<Ownership>,
     private authService: AuthService,
+    private tierService: TierService,
   ) {}
 
   async search(
@@ -54,11 +57,22 @@ export class PropertyService {
   async add(user: JWTUser, input: PropertyInputDto): Promise<Property> {
     const propertyEntity = new Property();
 
-    if (input.ownerships === undefined) {
+    if (!input.ownerships || input.ownerships.length === 0) {
       const ownership = new OwnershipInputDto();
       ownership.share = 100;
       input.ownerships = [ownership];
     }
+
+    // Determine the owner: use explicitly provided userId if set, otherwise the logged-in user
+    const ownerId = input.ownerships[0]?.userId || user.id;
+
+    const canCreate = await this.tierService.canCreateProperty(ownerId);
+    if (!canCreate) {
+      throw new ForbiddenException(
+        'Property limit reached for your current tier',
+      );
+    }
+
     this.mapData(user, propertyEntity, input);
     return this.repository.save(propertyEntity);
   }
@@ -93,7 +107,9 @@ export class PropertyService {
   private mapData(user: JWTUser, property: Property, input: PropertyInputDto) {
     if (input.ownerships !== undefined) {
       input?.ownerships.forEach((ownership) => {
-        ownership.userId = user.id;
+        if (!ownership.userId) {
+          ownership.userId = user.id;
+        }
         // Set propertyId for updates (when property already has an ID)
         if (property.id !== undefined) {
           ownership.propertyId = property.id;

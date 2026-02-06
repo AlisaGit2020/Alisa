@@ -1,11 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import type { Express } from 'express';
 import { PropertyService } from './property.service';
 import { Property } from './entities/property.entity';
 import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
 import { AuthService } from '@alisa-backend/auth/auth.service';
+import { TierService } from '@alisa-backend/admin/tier.service';
 import {
   createMockRepository,
   createMockAuthService,
@@ -19,6 +24,7 @@ describe('PropertyService', () => {
   let mockRepository: MockRepository<Property>;
   let mockOwnershipRepository: MockRepository<Ownership>;
   let mockAuthService: MockAuthService;
+  let mockTierService: Partial<Record<keyof TierService, jest.Mock>>;
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
   const otherUser = createJWTUser({ id: 2, ownershipInProperties: [3, 4] });
@@ -31,13 +37,20 @@ describe('PropertyService', () => {
     mockRepository = createMockRepository<Property>();
     mockOwnershipRepository = createMockRepository<Ownership>();
     mockAuthService = createMockAuthService();
+    mockTierService = {
+      canCreateProperty: jest.fn().mockResolvedValue(true),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PropertyService,
         { provide: getRepositoryToken(Property), useValue: mockRepository },
-        { provide: getRepositoryToken(Ownership), useValue: mockOwnershipRepository },
+        {
+          provide: getRepositoryToken(Ownership),
+          useValue: mockOwnershipRepository,
+        },
         { provide: AuthService, useValue: mockAuthService },
+        { provide: TierService, useValue: mockTierService },
       ],
     }).compile();
 
@@ -130,7 +143,9 @@ describe('PropertyService', () => {
 
       const result = await service.add(testUser, input);
 
-      expect(result.description).toBe('A beautiful apartment in the city center');
+      expect(result.description).toBe(
+        'A beautiful apartment in the city center',
+      );
       expect(mockRepository.save).toHaveBeenCalled();
     });
 
@@ -157,6 +172,55 @@ describe('PropertyService', () => {
       expect(result.apartmentType).toBe('3h+k');
       expect(mockRepository.save).toHaveBeenCalled();
     });
+
+    it('throws ForbiddenException when tier property limit is reached', async () => {
+      mockTierService.canCreateProperty.mockResolvedValue(false);
+
+      const input = {
+        name: 'New Property',
+        size: 50,
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+
+      await expect(service.add(testUser, input)).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('succeeds when tier allows property creation', async () => {
+      mockTierService.canCreateProperty.mockResolvedValue(true);
+
+      const input = {
+        name: 'New Property',
+        size: 50,
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({ id: 1, ...input });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result).toEqual(savedProperty);
+      expect(mockTierService.canCreateProperty).toHaveBeenCalledWith(
+        testUser.id,
+      );
+    });
+
+    it('succeeds when tier is unlimited (maxProperties=0)', async () => {
+      mockTierService.canCreateProperty.mockResolvedValue(true);
+
+      const input = {
+        name: 'Another Property',
+        size: 75,
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({ id: 5, ...input });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result).toEqual(savedProperty);
+    });
   });
 
   describe('update', () => {
@@ -175,8 +239,15 @@ describe('PropertyService', () => {
     });
 
     it('updates property description', async () => {
-      const existingProperty = createProperty({ id: 1, name: 'Test Property' });
-      const input = { name: 'Test Property', size: 50, description: 'Updated description' };
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Test Property',
+      });
+      const input = {
+        name: 'Test Property',
+        size: 50,
+        description: 'Updated description',
+      };
 
       mockRepository.findOneBy.mockResolvedValue(existingProperty);
       mockAuthService.hasOwnership.mockResolvedValue(true);
@@ -207,7 +278,10 @@ describe('PropertyService', () => {
     });
 
     it('sets propertyId on ownership when updating with ownership data', async () => {
-      const existingProperty = createProperty({ id: 1, name: 'Test Property' });
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Test Property',
+      });
       const input = {
         name: 'Test Property',
         size: 50,
@@ -217,11 +291,15 @@ describe('PropertyService', () => {
       mockRepository.findOneBy.mockResolvedValue(existingProperty);
       mockAuthService.hasOwnership.mockResolvedValue(true);
       mockOwnershipRepository.delete.mockResolvedValue({ affected: 1 });
-      mockRepository.save.mockImplementation((entity) => Promise.resolve(entity));
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve(entity),
+      );
 
       const result = await service.update(testUser, 1, input);
 
-      expect(mockOwnershipRepository.delete).toHaveBeenCalledWith({ propertyId: 1 });
+      expect(mockOwnershipRepository.delete).toHaveBeenCalledWith({
+        propertyId: 1,
+      });
       expect(result.ownerships).toBeDefined();
       expect(result.ownerships[0].propertyId).toBe(1);
       expect(result.ownerships[0].userId).toBe(testUser.id);

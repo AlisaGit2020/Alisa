@@ -9,6 +9,9 @@ export interface CreateJWTUserOptions {
   language?: string;
   ownershipInProperties?: number[];
   isAdmin?: boolean;
+  tierId?: number;
+  tierName?: string;
+  tierMaxProperties?: number;
 }
 
 export const createJWTUser = (options: CreateJWTUserOptions = {}): JWTUser => ({
@@ -19,6 +22,9 @@ export const createJWTUser = (options: CreateJWTUserOptions = {}): JWTUser => ({
   language: options.language ?? 'fi',
   ownershipInProperties: options.ownershipInProperties ?? [1, 2],
   isAdmin: options.isAdmin ?? false,
+  tierId: options.tierId,
+  tierName: options.tierName,
+  tierMaxProperties: options.tierMaxProperties,
 });
 
 export interface CreateUserOptions {
@@ -29,6 +35,7 @@ export interface CreateUserOptions {
   language?: string;
   photo?: string;
   isAdmin?: boolean;
+  tierId?: number;
 }
 
 export const createUser = (options: CreateUserOptions = {}): User => {
@@ -40,6 +47,7 @@ export const createUser = (options: CreateUserOptions = {}): User => {
   user.language = options.language ?? 'fi';
   user.photo = options.photo ?? 'https://example.com/photo.jpg';
   user.isAdmin = options.isAdmin ?? false;
+  user.tierId = options.tierId;
   user.ownerships = [];
   return user;
 };

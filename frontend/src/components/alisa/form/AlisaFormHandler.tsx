@@ -67,6 +67,10 @@ function AlisaFormHandler<T extends object>(props: {
           setValidationMessage(error.response.data.message);
           return;
         }
+        if (error.response?.data?.message) {
+          setErrorMessage(error.response.data.message);
+          return;
+        }
       }
 
       setErrorMessage(JSON.stringify(error));

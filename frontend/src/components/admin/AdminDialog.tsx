@@ -14,13 +14,16 @@ import CloseIcon from "@mui/icons-material/Close";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import PeopleIcon from "@mui/icons-material/People";
+import LayersIcon from "@mui/icons-material/Layers";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { useState } from "react";
 import AdminUserList from "./users/AdminUserList";
+import AdminTierList from "./tiers/AdminTierList";
 import { adminContext } from "@alisa-lib/alisa-contexts";
 
 enum AdminPage {
   Users = "users",
+  Tiers = "tiers",
 }
 
 interface AdminDialogProps extends WithTranslation {
@@ -40,6 +43,8 @@ function AdminDialog({ t, open, onClose }: AdminDialogProps) {
     switch (page) {
       case AdminPage.Users:
         return <AdminUserList />;
+      case AdminPage.Tiers:
+        return <AdminTierList />;
       default:
         return <AdminUserList />;
     }
@@ -104,6 +109,19 @@ function AdminDialog({ t, open, onClose }: AdminDialogProps) {
                 <PeopleIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText primary={t("users")} />
+            </ListItemButton>
+            <ListItemButton
+              selected={page === AdminPage.Tiers}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleMenuClick(AdminPage.Tiers);
+              }}
+            >
+              <ListItemIcon>
+                <LayersIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary={t("tiers")} />
             </ListItemButton>
           </List>
         </Paper>

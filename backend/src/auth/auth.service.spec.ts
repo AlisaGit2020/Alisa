@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { UserService } from '../people/user/user.service';
 import { UserDefaultsService } from '../defaults/user-defaults.service';
+import { TierService } from '@alisa-backend/admin/tier.service';
 import { createUser, createJWTUser } from 'test/factories';
 
 describe('AuthService', () => {
@@ -12,6 +13,7 @@ describe('AuthService', () => {
   let mockUserDefaultsService: Partial<
     Record<keyof UserDefaultsService, jest.Mock>
   >;
+  let mockTierService: Partial<Record<keyof TierService, jest.Mock>>;
 
   beforeEach(async () => {
     mockJwtService = {
@@ -30,12 +32,17 @@ describe('AuthService', () => {
       initializeDefaults: jest.fn().mockResolvedValue(undefined),
     };
 
+    mockTierService = {
+      findDefault: jest.fn().mockResolvedValue(null),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: JwtService, useValue: mockJwtService },
         { provide: UserService, useValue: mockUserService },
         { provide: UserDefaultsService, useValue: mockUserDefaultsService },
+        { provide: TierService, useValue: mockTierService },
       ],
     }).compile();
 

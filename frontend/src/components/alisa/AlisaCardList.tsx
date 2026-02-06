@@ -82,7 +82,7 @@ function AlisaCardList<T extends { id: number }>({
   return (
     <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
       <Title>{title}</Title>
-      <Link href={"/properties/add"}>{t("add")}</Link>
+      <Link href={`${alisaContext.routePath}/add`}>{t("add")}</Link>
       {data.length > 0 && (
         <Grid container spacing={2} marginTop={2}>
           {data.map((item: T & {
@@ -154,7 +154,7 @@ function AlisaCardList<T extends { id: number }>({
                 <CardActions>
                   <Button
                     size="small"
-                    onClick={() => navigate(`edit/${item.id}`)}
+                    onClick={() => navigate(`${alisaContext.routePath}/edit/${item.id}`)}
                     startIcon={<EditIcon></EditIcon>}
                   >
                     {t("edit")}
