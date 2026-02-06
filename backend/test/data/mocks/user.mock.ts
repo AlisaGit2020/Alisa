@@ -6,6 +6,7 @@ export const getJWTUser = (
   lastName: string,
   email: string,
   ownershipInProperties: number[],
+  isAdmin: boolean = false,
 ): JWTUser => {
   return {
     id: id,
@@ -14,6 +15,7 @@ export const getJWTUser = (
     email: email,
     language: 'fi',
     ownershipInProperties: ownershipInProperties,
+    isAdmin: isAdmin,
   };
 };
 

@@ -8,6 +8,7 @@ import LanguageSelector from "./LanguageSelector";
 import LeftMenu from "./LeftMenu";
 import UserMenu from "./UserMenu";
 import SettingsMenu from "./SettingsMenu";
+import AdminMenu from "../admin/AdminMenu";
 import AppName from "./AppName.tsx";
 import PropertyBadge from "./PropertyBadge.tsx";
 
@@ -81,6 +82,7 @@ function AppBar({ t }: WithTranslation) {
           </Box>
           <Box flexGrow={1} />
           <LanguageSelector></LanguageSelector>
+          <AdminMenu></AdminMenu>
           <SettingsMenu></SettingsMenu>
           <UserMenu></UserMenu>
         </Toolbar>

@@ -7,6 +7,7 @@ import { loadTranslations } from './translation-loader';
 const availableLanguages = ['en', 'fi'];
 const namespaces = [
     'accounting',
+    'admin',
     'dashboard',
     'property',
     'expense',

@@ -56,4 +56,7 @@ export class User {
 
   @Column({ type: 'jsonb', nullable: true })
   dashboardConfig?: DashboardConfig;
+
+  @Column({ default: false })
+  isAdmin: boolean;
 }

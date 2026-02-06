@@ -39,11 +39,14 @@ import investmentCalculatorEn from '../src/translations/investment-calculator/en
 import investmentCalculatorFi from '../src/translations/investment-calculator/fi';
 import landingEn from '../src/translations/landing/en';
 import landingFi from '../src/translations/landing/fi';
+import adminEn from '../src/translations/admin/en';
+import adminFi from '../src/translations/admin/fi';
 
 // Combine all translations
 const en = {
   ...baseEn,
   accounting: accountingEn,
+  admin: adminEn,
   dashboard: dashboardEn,
   property: propertyEn,
   expense: expenseEn,
@@ -64,6 +67,7 @@ const en = {
 const fi = {
   ...baseFi,
   accounting: accountingFi,
+  admin: adminFi,
   dashboard: dashboardFi,
   property: propertyFi,
   expense: expenseFi,
@@ -217,7 +221,7 @@ describe('Translation Coverage', () => {
       // Check if key exists in any namespace
       // Keys can be used without namespace prefix and i18n will search all namespaces
       const namespaces = [
-        'appBar', 'accounting', 'dashboard', 'property', 'expense', 'expense-type',
+        'appBar', 'accounting', 'admin', 'dashboard', 'property', 'expense', 'expense-type',
         'income-type', 'import-wizard', 'investment-calculator', 'landing', 'login', 'menu', 'route',
         'settings', 'tax', 'transaction', 'user'
       ];

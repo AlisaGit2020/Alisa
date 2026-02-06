@@ -8,6 +8,7 @@ export interface CreateJWTUserOptions {
   email?: string;
   language?: string;
   ownershipInProperties?: number[];
+  isAdmin?: boolean;
 }
 
 export const createJWTUser = (options: CreateJWTUserOptions = {}): JWTUser => ({
@@ -17,6 +18,7 @@ export const createJWTUser = (options: CreateJWTUserOptions = {}): JWTUser => ({
   email: options.email ?? 'test@example.com',
   language: options.language ?? 'fi',
   ownershipInProperties: options.ownershipInProperties ?? [1, 2],
+  isAdmin: options.isAdmin ?? false,
 });
 
 export interface CreateUserOptions {
@@ -26,6 +28,7 @@ export interface CreateUserOptions {
   email?: string;
   language?: string;
   photo?: string;
+  isAdmin?: boolean;
 }
 
 export const createUser = (options: CreateUserOptions = {}): User => {
@@ -36,6 +39,7 @@ export const createUser = (options: CreateUserOptions = {}): User => {
   user.email = options.email ?? 'test@example.com';
   user.language = options.language ?? 'fi';
   user.photo = options.photo ?? 'https://example.com/photo.jpg';
+  user.isAdmin = options.isAdmin ?? false;
   user.ownerships = [];
   return user;
 };

@@ -7,6 +7,7 @@ import { RealEstateModule } from './real-estate/real-estate.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config'; //d
 import { AccountingModule } from './accounting/accounting.module';
+import { AdminModule } from './admin/admin.module';
 import { GoogleModule } from './google/google.module';
 import { ImportModule } from './import/import.module';
 import { AuthModule } from './auth/auth.module';
@@ -33,6 +34,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       autoLoadEntities: true,
     }),
     AccountingModule,
+    AdminModule,
     AuthModule,
     DefaultsModule,
     GoogleModule,

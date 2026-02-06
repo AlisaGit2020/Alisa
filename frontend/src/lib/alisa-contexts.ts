@@ -6,6 +6,12 @@ type AlisaContext = {
 
 export default AlisaContext
 
+export const adminContext: AlisaContext = {
+    name: 'admin',
+    apiPath: 'admin',
+    routePath: '/app/admin',
+}
+
 export const propertyContext: AlisaContext = {
     name: 'property',
     apiPath: 'real-estate/property',

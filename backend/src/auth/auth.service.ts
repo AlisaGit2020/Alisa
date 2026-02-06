@@ -49,6 +49,7 @@ export class AuthService {
       language: userEntity.language,
       ownershipInProperties:
         userEntity?.ownerships?.map((ownership) => ownership.propertyId) ?? [],
+      isAdmin: userEntity.isAdmin ?? false,
     };
 
     return this.jwtService.sign(jtwUser);
