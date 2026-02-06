@@ -2,12 +2,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { UserService } from '../people/user/user.service';
+import { UserDefaultsService } from '../defaults/user-defaults.service';
 import { createUser, createJWTUser } from 'test/factories';
 
 describe('AuthService', () => {
   let service: AuthService;
   let mockJwtService: Partial<Record<keyof JwtService, jest.Mock>>;
   let mockUserService: Partial<Record<keyof UserService, jest.Mock>>;
+  let mockUserDefaultsService: Partial<
+    Record<keyof UserDefaultsService, jest.Mock>
+  >;
 
   beforeEach(async () => {
     mockJwtService = {
@@ -22,11 +26,16 @@ describe('AuthService', () => {
       hasOwnership: jest.fn(),
     };
 
+    mockUserDefaultsService = {
+      initializeDefaults: jest.fn().mockResolvedValue(undefined),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: JwtService, useValue: mockJwtService },
         { provide: UserService, useValue: mockUserService },
+        { provide: UserDefaultsService, useValue: mockUserDefaultsService },
       ],
     }).compile();
 
@@ -58,6 +67,53 @@ describe('AuthService', () => {
       expect(result).toBe('mock-jwt-token');
       expect(mockUserService.add).toHaveBeenCalled();
       expect(mockJwtService.sign).toHaveBeenCalled();
+    });
+
+    it('calls initializeDefaults for new users', async () => {
+      const userInput = {
+        email: 'new@email.com',
+        firstName: 'New',
+        lastName: 'User',
+        language: 'fi',
+      };
+
+      const savedUser = createUser({ id: 5, ...userInput });
+      savedUser.ownerships = [];
+
+      mockUserService.search
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([savedUser])
+        .mockResolvedValueOnce([savedUser]);
+
+      mockUserService.add.mockResolvedValue(savedUser);
+
+      await service.login(userInput);
+
+      expect(mockUserDefaultsService.initializeDefaults).toHaveBeenCalledWith(
+        5,
+        'fi',
+      );
+    });
+
+    it('does not call initializeDefaults for existing users', async () => {
+      const userInput = {
+        email: 'existing@email.com',
+        firstName: 'Existing',
+        lastName: 'User',
+        language: 'fi',
+      };
+
+      const existingUser = createUser({ id: 1, ...userInput });
+      existingUser.ownerships = [];
+
+      mockUserService.search.mockResolvedValue([existingUser]);
+      mockUserService.update.mockResolvedValue(existingUser);
+
+      await service.login(userInput);
+
+      expect(
+        mockUserDefaultsService.initializeDefaults,
+      ).not.toHaveBeenCalled();
     });
 
     it('updates existing user on re-login', async () => {

@@ -8,12 +8,14 @@ import { FindOptionsWhere } from 'typeorm';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import { FindOptionsWhereWithUserId } from '@alisa-backend/common/types';
 import { UserSettingsInputDto } from './dtos/user-settings-input.dto';
+import { UserDefaultsService } from '@alisa-backend/defaults/user-defaults.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private userService: UserService,
+    private userDefaultsService: UserDefaultsService,
   ) {}
 
   async login(user: UserInputDto) {
@@ -24,6 +26,10 @@ export class AuthService {
     } else {
       await this.userService.add(user);
       userEntity = await this.getUserByEmail(user.email);
+      await this.userDefaultsService.initializeDefaults(
+        userEntity.id,
+        userEntity.language,
+      );
     }
 
     const users = await this.userService.search({

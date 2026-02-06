@@ -8,6 +8,7 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { jwtConstants } from './constants';
 import { PeopleModule } from '../people/people.module';
+import { DefaultsModule } from '../defaults/defaults.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PeopleModule } from '../people/people.module';
       signOptions: { expiresIn: '1d' },
     }),
     PeopleModule,
+    DefaultsModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, GoogleStrategy, JwtStrategy],

@@ -24,14 +24,26 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: Profile,
     done: VerifyCallback,
   ): Promise<any> {
+    const language =
+      profile._json.locale ||
+      this.parseAcceptLanguage(request.headers?.['accept-language']);
+
     const user: UserInputDto = {
       firstName: profile.name.givenName,
       lastName: profile.name.familyName,
       email: profile.emails[0].value,
-      language: profile._json.locale,
+      language,
       photo: profile._json.picture,
     };
 
     return done(null, user);
+  }
+
+  private parseAcceptLanguage(header: string): string | undefined {
+    if (!header) {
+      return undefined;
+    }
+    const first = header.split(',')[0];
+    return first?.split(';')[0]?.trim() || undefined;
   }
 }

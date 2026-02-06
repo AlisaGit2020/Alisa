@@ -11,6 +11,7 @@ import { GoogleModule } from './google/google.module';
 import { ImportModule } from './import/import.module';
 import { AuthModule } from './auth/auth.module';
 import { PeopleModule } from './people/people.module';
+import { DefaultsModule } from './defaults/defaults.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
@@ -33,6 +34,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     }),
     AccountingModule,
     AuthModule,
+    DefaultsModule,
     GoogleModule,
     ImportModule,
     PeopleModule,
