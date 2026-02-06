@@ -16,4 +16,4 @@ echo "Cleaning up old images..."
 docker image prune -f
 
 echo "Deploy complete."
-docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml --env-file .env.production ps
