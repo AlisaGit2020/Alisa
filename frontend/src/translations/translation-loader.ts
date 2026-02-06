@@ -6,7 +6,9 @@ const modules = import.meta.glob<{ default: Record<string, string> }>([
     './*.ts',
     './**/*.ts',
     '!./i18n.ts',
-    '!./translation-loader.ts'
+    '!./translation-loader.ts',
+    '!./**/*.test.ts',
+    '!./**/*.spec.ts'
 ], { eager: true });
 
 export const loadTranslations = async (availableLanguages: string[], namespaces: string[]): Promise<Resource> => {
