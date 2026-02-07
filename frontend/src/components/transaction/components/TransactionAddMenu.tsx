@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 
 import { TFunction } from "i18next";
-import { TransactionType } from "@alisa-backend/common/types.ts";
+import { TransactionType } from "@alisa-types";
 import {
   AlisaDepositIcon,
   AlisaExpenseIcon,

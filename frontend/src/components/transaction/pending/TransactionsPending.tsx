@@ -3,16 +3,21 @@ import { Paper, Stack } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import AlisaDataTable from "../../alisa/datatable/AlisaDataTable.tsx";
 import { transactionContext } from "@alisa-lib/alisa-contexts.ts";
-import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity.ts";
+import {
+  Transaction,
+  TransactionStatus,
+  TransactionType,
+  TransactionAcceptInput,
+  DataSaveResult,
+  TransactionSetTypeInput,
+  TransactionSetCategoryTypeInput,
+  SplitLoanPaymentBulkInput,
+} from "@alisa-types";
 import DataService from "@alisa-lib/data-service.ts";
 import { TypeOrmFetchOptions } from "@alisa-lib/types.ts";
 import React from "react";
 import TransactionDetails from "../components/TransactionDetails.tsx";
 import TransactionForm from "../TransactionForm.tsx";
-import {
-  TransactionStatus,
-  TransactionType,
-} from "@alisa-backend/common/types.ts";
 import TransactionImport from "../components/TransactionImport.tsx";
 import TransactionAddMenu from "../components/TransactionAddMenu.tsx";
 import TransactionsPendingActions from "./TransactionsPendingActions.tsx";
@@ -21,11 +26,6 @@ import TransactionFilter, {
   TransactionFilterData,
 } from "../components/TransactionFilter.tsx";
 import ApiClient from "@alisa-lib/api-client.ts";
-import { TransactionAcceptInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-accept-input.dto.ts";
-import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
-import { TransactionSetTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-type-input.dto.ts";
-import { TransactionSetCategoryTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-category-type-input.dto.ts";
-import { SplitLoanPaymentBulkInputDto } from "@alisa-backend/accounting/transaction/dtos/split-loan-payment-bulk-input.dto.ts";
 import {
   getStoredFilter,
   setStoredFilter,
@@ -67,7 +67,7 @@ function TransactionsPending({ t }: WithTranslation) {
   );
   const [importOpen, setImportOpen] = React.useState<boolean>(false);
   const [saveResult, setSaveResult] = React.useState<
-    DataSaveResultDto | undefined
+    DataSaveResult | undefined
   >(undefined);
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
 
@@ -130,7 +130,7 @@ function TransactionsPending({ t }: WithTranslation) {
   const handleDeleteSelected = async () => {
     setSaveResult(undefined);
     if (selectedIds.length > 0) {
-      const result = await ApiClient.postSaveTask<TransactionAcceptInputDto>(
+      const result = await ApiClient.postSaveTask<TransactionAcceptInput>(
         transactionContext.apiPath + "/delete",
         {
           ids: selectedIds,
@@ -149,7 +149,7 @@ function TransactionsPending({ t }: WithTranslation) {
   const handleSetTypeForSelected = async (type: number) => {
     setSaveResult(undefined);
     if (selectedIds.length > 0 && type > 0) {
-      const result = await ApiClient.postSaveTask<TransactionSetTypeInputDto>(
+      const result = await ApiClient.postSaveTask<TransactionSetTypeInput>(
         transactionContext.apiPath + "/type",
         {
           ids: selectedIds,
@@ -164,7 +164,7 @@ function TransactionsPending({ t }: WithTranslation) {
     }
   };
   const handleApproveSelected = async () => {
-    const result = await ApiClient.postSaveTask<TransactionAcceptInputDto>(
+    const result = await ApiClient.postSaveTask<TransactionAcceptInput>(
       transactionContext.apiPath + "/accept",
       {
         ids: selectedIds,
@@ -190,7 +190,7 @@ function TransactionsPending({ t }: WithTranslation) {
     setSaveResult(undefined);
     if (selectedIds.length > 0) {
       const result =
-        await ApiClient.postSaveTask<TransactionSetCategoryTypeInputDto>(
+        await ApiClient.postSaveTask<TransactionSetCategoryTypeInput>(
           transactionContext.apiPath + "/category-type",
           {
             ids: selectedIds,
@@ -214,7 +214,7 @@ function TransactionsPending({ t }: WithTranslation) {
     setSaveResult(undefined);
     if (selectedIds.length > 0) {
       const result =
-        await ApiClient.postSaveTask<SplitLoanPaymentBulkInputDto>(
+        await ApiClient.postSaveTask<SplitLoanPaymentBulkInput>(
           transactionContext.apiPath + "/split-loan-payment",
           {
             ids: selectedIds,

@@ -1,7 +1,7 @@
 import { Box, Stack } from '@mui/material';
 import { useState } from 'react';
 import { getNumber } from '../../lib/functions';
-import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/property-input.dto'
+import { PropertyInput } from '@alisa-types'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AlisaNumberField from '../alisa/form/AlisaNumberField';
 import AlisaTextField from '../alisa/form/AlisaTextField';
@@ -15,7 +15,7 @@ import AlisaContent from '../alisa/AlisaContent';
 
 
 function PropertyForm({ t }: WithTranslation) {
-    const [data, setData] = useState<DTO<PropertyInputDto>>({
+    const [data, setData] = useState<DTO<PropertyInput>>({
         id: 0,
         name: '',
         size: 0,
@@ -30,14 +30,13 @@ function PropertyForm({ t }: WithTranslation) {
     const { idParam } = useParams();
     const navigate = useNavigate();
 
-    const dataService = new DataService<DTO<PropertyInputDto>>({
+    const dataService = new DataService<DTO<PropertyInput>>({
         context: propertyContext,
-        dataValidateInstance: new PropertyInputDto()
     })
 
     const handleChange = (
-        name: keyof PropertyInputDto,
-        value: PropertyInputDto[keyof PropertyInputDto]
+        name: keyof PropertyInput,
+        value: PropertyInput[keyof PropertyInput]
     ) => {
         setData(dataService.updateNestedData(data, name, value));
     }
@@ -122,7 +121,7 @@ function PropertyForm({ t }: WithTranslation) {
 
     return (
         <AlisaContent>
-            <AlisaFormHandler<DTO<PropertyInputDto>>
+            <AlisaFormHandler<DTO<PropertyInput>>
                 id={Number(idParam)}
                 dataService={dataService}
                 data={data}

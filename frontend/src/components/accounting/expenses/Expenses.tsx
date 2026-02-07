@@ -2,7 +2,7 @@ import { Paper, Stack } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import AlisaDataTable from "../../alisa/datatable/AlisaDataTable";
 import { expenseContext } from "@alisa-lib/alisa-contexts";
-import { Expense } from "@alisa-backend/accounting/expense/entities/expense.entity";
+import { Expense } from "@alisa-types";
 import DataService from "@alisa-lib/data-service";
 import { TypeOrmFetchOptions } from "@alisa-lib/types";
 import { useState, useEffect, useMemo } from "react";

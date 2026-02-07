@@ -1,5 +1,4 @@
-import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity";
-import { TransactionType } from "@alisa-backend/common/types";
+import { Transaction, TransactionType } from "@alisa-types";
 
 export interface ImportWizardState {
   activeStep: number;

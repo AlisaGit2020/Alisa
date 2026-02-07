@@ -2,7 +2,7 @@ import { WithTranslation, withTranslation } from "react-i18next";
 
 import AlisaDataTable from "../../alisa/datatable/AlisaDataTable.tsx";
 import { incomeTypeContext } from "@alisa-lib/alisa-contexts";
-import { IncomeType } from "@alisa-backend/accounting/income/entities/income-type.entity";
+import { IncomeType } from "@alisa-types";
 import DataService from "@alisa-lib/data-service";
 import AlisaContent from "../../alisa/AlisaContent";
 

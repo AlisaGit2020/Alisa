@@ -1,14 +1,17 @@
 import { useState, useCallback, useEffect } from "react";
-import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity";
-import { TransactionType, TransactionStatus } from "@alisa-backend/common/types";
+import {
+  Transaction,
+  TransactionType,
+  TransactionStatus,
+  TransactionAcceptInput,
+  TransactionSetTypeInput,
+  TransactionSetCategoryTypeInput,
+} from "@alisa-types";
 import { ImportWizardState, ImportStats, ImportResponse } from "../types";
 import ApiClient from "@alisa-lib/api-client";
 import { transactionContext, opImportContext } from "@alisa-lib/alisa-contexts";
 import { getTransactionPropertyId } from "@alisa-lib/initial-data";
 import { TypeOrmFetchOptions } from "@alisa-lib/types";
-import { TransactionAcceptInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-accept-input.dto";
-import { TransactionSetTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-type-input.dto";
-import { TransactionSetCategoryTypeInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-set-category-type-input.dto";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../../TransactionLeftMenuItems";
 
 // Session persistence for resuming interrupted imports
@@ -286,7 +289,7 @@ export function useImportWizard() {
     async (type: number) => {
       if (state.selectedIds.length === 0 || type <= 0) return;
 
-      await ApiClient.postSaveTask<TransactionSetTypeInputDto>(
+      await ApiClient.postSaveTask<TransactionSetTypeInput>(
         transactionContext.apiPath + "/type",
         {
           ids: state.selectedIds,
@@ -305,7 +308,7 @@ export function useImportWizard() {
     async (expenseTypeId?: number, incomeTypeId?: number) => {
       if (state.selectedIds.length === 0) return;
 
-      await ApiClient.postSaveTask<TransactionSetCategoryTypeInputDto>(
+      await ApiClient.postSaveTask<TransactionSetCategoryTypeInput>(
         transactionContext.apiPath + "/category-type",
         {
           ids: state.selectedIds,
@@ -324,7 +327,7 @@ export function useImportWizard() {
   const deleteSelected = useCallback(async () => {
     if (state.selectedIds.length === 0) return;
 
-    const result = await ApiClient.postSaveTask<TransactionAcceptInputDto>(
+    const result = await ApiClient.postSaveTask<TransactionAcceptInput>(
       transactionContext.apiPath + "/delete",
       {
         ids: state.selectedIds,
@@ -365,7 +368,7 @@ export function useImportWizard() {
     setState((prev) => ({ ...prev, isApproving: true, approveError: null }));
 
     try {
-      const result = await ApiClient.postSaveTask<TransactionAcceptInputDto>(
+      const result = await ApiClient.postSaveTask<TransactionAcceptInput>(
         transactionContext.apiPath + "/accept",
         {
           ids: state.importedTransactionIds,

@@ -1,4 +1,4 @@
-import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity";
+import { Transaction, TransactionType, transactionTypeNames } from "@alisa-types";
 import DataService from "@alisa-lib/data-service";
 import { WithTranslation, withTranslation } from "react-i18next";
 import {
@@ -22,10 +22,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import DescriptionIcon from "@mui/icons-material/Description";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import {
-  TransactionType,
-  transactionTypeNames,
-} from "@alisa-backend/common/types";
 
 interface TransactionDetailsProps extends WithTranslation {
   id: number;

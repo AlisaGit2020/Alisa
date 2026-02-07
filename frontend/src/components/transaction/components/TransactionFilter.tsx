@@ -19,10 +19,7 @@ import {
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import ClearIcon from "@mui/icons-material/Clear";
-import {
-  TransactionType,
-  transactionTypeNames,
-} from "@alisa-backend/common/types.ts";
+import { TransactionType, transactionTypeNames } from "@alisa-types";
 
 export type SearchField = "sender" | "receiver" | "description";
 

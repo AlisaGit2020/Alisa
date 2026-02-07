@@ -4,26 +4,26 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import { expenseTypeContext, transactionContext } from "@alisa-lib/alisa-contexts";
 import AlisaFormHandler from "../alisa/form/AlisaFormHandler";
 import DataService from "@alisa-lib/data-service";
-import { TransactionInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-input.dto";
-import AlisaLoadingProgress from "../alisa/AlisaLoadingProgress";
-import TransactionFormFields from "./components/TransactionFormFields";
-import AlisaContent from "../alisa/AlisaContent";
-import EditableRows from "./components/EditableRows.tsx";
-import { ExpenseInputDto } from "@alisa-backend/accounting/expense/dtos/expense-input.dto.ts";
-import { IncomeInputDto } from "@alisa-backend/accounting/income/dtos/income-input.dto.ts";
 import {
+  TransactionInput,
+  ExpenseInput,
+  IncomeInput,
   TransactionStatus,
   TransactionType,
   TransactionTypeName,
   transactionTypeNames,
-} from "@alisa-backend/common/types.ts";
+  ExpenseType,
+} from "@alisa-types";
+import AlisaLoadingProgress from "../alisa/AlisaLoadingProgress";
+import TransactionFormFields from "./components/TransactionFormFields";
+import AlisaContent from "../alisa/AlisaContent";
+import EditableRows from "./components/EditableRows.tsx";
 import { getIcon } from "../alisa/AlisaIcons.tsx";
 import ApiClient from "@alisa-lib/api-client.ts";
 import {
   isLoanPaymentMessage,
   parseLoanPaymentMessage,
 } from "@alisa-lib/loan-message-parser.ts";
-import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity.ts";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 
 interface TransactionFormProps extends WithTranslation {
@@ -48,8 +48,8 @@ function TransactionForm({
   onCancel,
   onClose,
 }: TransactionFormProps) {
-  const [data, setData] = useState<TransactionInputDto>(
-    new TransactionInputDto(),
+  const [data, setData] = useState<TransactionInput>(
+    {} as TransactionInput,
   );
   const [ready, setReady] = useState<boolean>(false);
 
@@ -57,16 +57,15 @@ function TransactionForm({
   const [amount, setAmount] = useState<number>(0);
   const [expenseTypes, setExpenseTypes] = useState<ExpenseType[]>([]);
 
-  const dataService = new DataService<TransactionInputDto>({
+  const dataService = new DataService<TransactionInput>({
     context: transactionContext,
     relations: { expenses: true, incomes: true },
-    dataValidateInstance: new TransactionInputDto(),
   });
 
   React.useEffect(() => {
     const getDefaults = async () => {
       const user = await ApiClient.me();
-      const defaults = new TransactionInputDto();
+      const defaults = {} as TransactionInput;
       defaults.status = status;
       defaults.type = type;
       if (
@@ -159,7 +158,7 @@ function TransactionForm({
       expenseTypes.find((et) => et.id === user.loanHandlingFeeExpenseTypeId) ||
       findExpenseTypeByKeyword("Lainakulut", "lainakulu", "pankkikulu", "kulu");
 
-    const expenses: ExpenseInputDto[] = [];
+    const expenses: ExpenseInput[] = [];
 
     // Principal (Lyhennys)
     if (loanComponents.principal > 0) {
@@ -215,7 +214,7 @@ function TransactionForm({
 
   const handleTypeChange = (
     value: TransactionType,
-    newData: TransactionInputDto,
+    newData: TransactionInput,
   ) => {
     if (value !== TransactionType.INCOME) {
       newData.incomes = undefined;
@@ -246,7 +245,7 @@ function TransactionForm({
   };
 
   const handleRowChange = async (
-    rows: ExpenseInputDto[] | IncomeInputDto[],
+    rows: ExpenseInput[] | IncomeInput[],
   ) => {
     if (getType() === TransactionType.EXPENSE) {
       await handleChange("expenses", rows);
@@ -340,7 +339,7 @@ function TransactionForm({
             chipText={t(getTypeName())}
             icon={getIcon(getTypeName(), { size: "medium" })}
           >
-            <AlisaFormHandler<TransactionInputDto>
+            <AlisaFormHandler<TransactionInput>
               id={id}
               dataService={dataService}
               data={data}

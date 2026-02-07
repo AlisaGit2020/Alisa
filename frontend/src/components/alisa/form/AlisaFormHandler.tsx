@@ -51,20 +51,19 @@ function AlisaFormHandler<T extends object>(props: {
       return;
     }
 
-    const validationErrors = await dataService.getStrValidationErrors(
-      props.data,
-    );
-    if (validationErrors !== undefined && validationErrors.length > 0) {
-      return setValidationMessage(validationErrors);
-    }
-
     try {
       await dataService.save(props.data, props.id);
       props.onAfterSubmit();
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
         if (error.response?.status === 400) {
-          setValidationMessage(error.response.data.message);
+          // Backend validation errors
+          const message = error.response.data.message;
+          if (Array.isArray(message)) {
+            setValidationMessage(message);
+          } else {
+            setValidationMessage([message]);
+          }
           return;
         }
         if (error.response?.data?.message) {

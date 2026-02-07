@@ -4,7 +4,7 @@ import {
   incomeTypeContext,
   transactionContext,
 } from "@alisa-lib/alisa-contexts.ts";
-import { TransactionType } from "@alisa-backend/common/types.ts";
+import { TransactionType, DataSaveResult, ExpenseType, IncomeType } from "@alisa-types";
 import { Box, Button, Paper, Stack } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
@@ -14,14 +14,11 @@ import {
   AlisaEditIcon,
 } from "../../alisa/AlisaIcons.tsx";
 import Typography from "@mui/material/Typography";
-import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
 import AlisaDataSaveResult from "../../alisa/AlisaDataSaveResult.tsx";
 import AlisaTransactionTypeSelect from "../../alisa/data/AlisaTransactionTypeSelect.tsx";
 import React from "react";
 import AlisaSelect from "../../alisa/data/AlisaSelect.tsx";
 import DataService from "@alisa-lib/data-service.ts";
-import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity.ts";
-import { IncomeType } from "@alisa-backend/accounting/income/entities/income-type.entity.ts";
 import ApiClient from "@alisa-lib/api-client.ts";
 
 interface TransactionsPendingActionsProps extends WithTranslation {
@@ -42,7 +39,7 @@ interface TransactionsPendingActionsProps extends WithTranslation {
     handlingFeeExpenseTypeId?: number,
   ) => Promise<void>;
   onDelete: () => void;
-  saveResult?: DataSaveResultDto;
+  saveResult?: DataSaveResult;
 }
 
 interface CategoryTypeData {
@@ -387,7 +384,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
         </Stack>
       </Stack>
       <AlisaDataSaveResult
-        result={props.saveResult as DataSaveResultDto}
+        result={props.saveResult as DataSaveResult}
         visible={props.saveResult !== undefined && !editState && !loanSplitState}
         t={props.t}
       ></AlisaDataSaveResult>

@@ -2,8 +2,7 @@ import { Dialog, DialogContent, Stack, Button, Box } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
-import { IncomeInputDto } from "@alisa-backend/accounting/income/dtos/income-input.dto";
-import { IncomeType } from "@alisa-backend/accounting/income/entities/income-type.entity";
+import { IncomeInput, IncomeType } from "@alisa-types";
 import AlisaTextField from "../../alisa/form/AlisaTextField";
 import AlisaNumberField from "../../alisa/form/AlisaNumberField";
 import AlisaDatePicker from "../../alisa/form/AlisaDatePicker";
@@ -33,7 +32,7 @@ function IncomeForm({
   onAfterSubmit,
   onClose,
 }: IncomeFormProps) {
-  const [data, setData] = useState<IncomeInputDto>({
+  const [data, setData] = useState<IncomeInput>({
     description: "",
     amount: 0,
     quantity: 1,
@@ -45,14 +44,13 @@ function IncomeForm({
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const dataService = new DataService<IncomeInputDto>({
+  const dataService = new DataService<IncomeInput>({
     context: incomeContext,
-    dataValidateInstance: new IncomeInputDto(),
   });
 
   const handleChange = (
-    name: keyof IncomeInputDto,
-    value: IncomeInputDto[keyof IncomeInputDto]
+    name: keyof IncomeInput,
+    value: IncomeInput[keyof IncomeInput]
   ) => {
     let newData = dataService.updateNestedData(data, name, value);
 
@@ -94,7 +92,7 @@ function IncomeForm({
         }
       />
 
-      <AlisaSelect<IncomeInputDto, IncomeType>
+      <AlisaSelect<IncomeInput, IncomeType>
         label={t("incomeType")}
         dataService={
           new DataService<IncomeType>({
@@ -154,7 +152,7 @@ function IncomeForm({
       <Dialog open={true} onClose={onClose} fullWidth={true} maxWidth="sm">
         <DialogContent dividers>
           <AlisaContent headerText={t(id ? "editIncome" : "addIncome")}>
-            <AlisaFormHandler<IncomeInputDto>
+            <AlisaFormHandler<IncomeInput>
               id={id}
               dataService={dataService}
               data={data}

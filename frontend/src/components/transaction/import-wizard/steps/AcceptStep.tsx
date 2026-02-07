@@ -12,8 +12,7 @@ import {
   ListItemText,
 } from "@mui/material";
 import { TFunction } from "i18next";
-import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity";
-import { TransactionType, transactionTypeNames } from "@alisa-backend/common/types";
+import { Transaction, TransactionType, transactionTypeNames } from "@alisa-types";
 import { AlisaApproveIcon } from "../../../alisa/AlisaIcons";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import MoneyOffIcon from "@mui/icons-material/MoneyOff";

@@ -7,25 +7,27 @@ import {
   transactionContext,
 } from "@alisa-lib/alisa-contexts.ts";
 import { IconButton } from "@mui/material";
-import { ExpenseInputDto } from "@alisa-backend/accounting/expense/dtos/expense-input.dto.ts";
+import {
+  ExpenseInput,
+  ExpenseType,
+  TransactionInput,
+  IncomeInput,
+  IncomeType,
+  TransactionType,
+} from "@alisa-types";
 import React from "react";
 import DataService from "@alisa-lib/data-service.ts";
 import AlisaSelect from "../../alisa/data/AlisaSelect.tsx";
-import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity.ts";
 import Title from "../../../Title.tsx";
 import Box from "@mui/material/Box";
-import { TransactionInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-input.dto.ts";
 import AddIcon from "@mui/icons-material/Add";
 import RowDataFields from "./RowDataFields.tsx";
 import { TransactionRow } from "@alisa-lib/types.ts";
-import { IncomeInputDto } from "@alisa-backend/accounting/income/dtos/income-input.dto.ts";
-import { IncomeType } from "@alisa-backend/accounting/income/entities/income-type.entity.ts";
-import { TransactionType } from "@alisa-backend/common/types.ts";
 
 interface EditableRowsProps extends WithTranslation {
-  transaction: TransactionInputDto;
+  transaction: TransactionInput;
   type: TransactionType;
-  onHandleChange: (rows: ExpenseInputDto[] | IncomeInputDto[]) => void;
+  onHandleChange: (rows: ExpenseInput[] | IncomeInput[]) => void;
   changedDescription: string;
   changedAmount: number;
 }
@@ -141,15 +143,15 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
 
   const getRowContent = (row: T, index: number) => {
     const handleExpenseTypeChange = (
-      fieldName: keyof ExpenseInputDto,
-      value: ExpenseInputDto[keyof ExpenseInputDto],
+      fieldName: keyof ExpenseInput,
+      value: ExpenseInput[keyof ExpenseInput],
     ) => {
       handleChange(index, fieldName as keyof T, value as T[keyof T]);
     };
 
     const handleIncomeTypeChange = (
-      fieldName: keyof IncomeInputDto,
-      value: IncomeInputDto[keyof IncomeInputDto],
+      fieldName: keyof IncomeInput,
+      value: IncomeInput[keyof IncomeInput],
     ) => {
       handleChange(index, fieldName as keyof T, value as T[keyof T]);
     };
@@ -157,7 +159,7 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
     const getTypeSelect = (row: T) => {
       if (props.type === TransactionType.EXPENSE) {
         return (
-          <AlisaSelect<ExpenseInputDto, ExpenseType>
+          <AlisaSelect<ExpenseInput, ExpenseType>
             label={props.t("expenseType")}
             dataService={
               new DataService<ExpenseType>({
@@ -174,7 +176,7 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
 
       if (props.type === TransactionType.INCOME) {
         return (
-          <AlisaSelect<IncomeInputDto, IncomeType>
+          <AlisaSelect<IncomeInput, IncomeType>
             label={props.t("incomeType")}
             dataService={
               new DataService<IncomeType>({

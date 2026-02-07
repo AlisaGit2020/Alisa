@@ -1,11 +1,10 @@
-import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
-import { DataSaveResultRowDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
+import { DataSaveResult, DataSaveResultRow } from "@alisa-types";
 import { TFunction } from "i18next";
 import Typography from "@mui/material/Typography";
 import { Box, Chip, Stack, Tooltip } from "@mui/material";
 
 interface AlisaDataSaveResultProps {
-  result: DataSaveResultDto;
+  result: DataSaveResult;
   visible: boolean;
   t: TFunction;
 }
@@ -26,7 +25,7 @@ function AlisaDataSaveResult(props: AlisaDataSaveResultProps) {
       </Stack>
 
       <Typography variant={"body2"}>
-        {props.result.results.map((row: DataSaveResultRowDto) => (
+        {props.result.results.map((row: DataSaveResultRow) => (
           <Stack direction={"row"} spacing={2} sx={{ padding: 0.5 }}>
             {row.statusCode === 200 ? (
               <Box color={"success.main"}>✅</Box>

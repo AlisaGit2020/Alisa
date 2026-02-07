@@ -20,7 +20,7 @@ import {
   TransactionType,
   TransactionTypeName,
   transactionTypeNames,
-} from "@alisa-backend/common/types.ts";
+} from "@alisa-types";
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(odd)": {

@@ -2,8 +2,7 @@ import { Dialog, DialogContent, Stack, Button, Box } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
-import { ExpenseInputDto } from "@alisa-backend/accounting/expense/dtos/expense-input.dto";
-import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity";
+import { ExpenseInput, ExpenseType } from "@alisa-types";
 import AlisaTextField from "../../alisa/form/AlisaTextField";
 import AlisaNumberField from "../../alisa/form/AlisaNumberField";
 import AlisaDatePicker from "../../alisa/form/AlisaDatePicker";
@@ -33,7 +32,7 @@ function ExpenseForm({
   onAfterSubmit,
   onClose,
 }: ExpenseFormProps) {
-  const [data, setData] = useState<ExpenseInputDto>({
+  const [data, setData] = useState<ExpenseInput>({
     description: "",
     amount: 0,
     quantity: 1,
@@ -45,14 +44,13 @@ function ExpenseForm({
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const dataService = new DataService<ExpenseInputDto>({
+  const dataService = new DataService<ExpenseInput>({
     context: expenseContext,
-    dataValidateInstance: new ExpenseInputDto(),
   });
 
   const handleChange = (
-    name: keyof ExpenseInputDto,
-    value: ExpenseInputDto[keyof ExpenseInputDto]
+    name: keyof ExpenseInput,
+    value: ExpenseInput[keyof ExpenseInput]
   ) => {
     let newData = dataService.updateNestedData(data, name, value);
 
@@ -94,7 +92,7 @@ function ExpenseForm({
         }
       />
 
-      <AlisaSelect<ExpenseInputDto, ExpenseType>
+      <AlisaSelect<ExpenseInput, ExpenseType>
         label={t("expenseType")}
         dataService={
           new DataService<ExpenseType>({
@@ -154,7 +152,7 @@ function ExpenseForm({
       <Dialog open={true} onClose={onClose} fullWidth={true} maxWidth="sm">
         <DialogContent dividers>
           <AlisaContent headerText={t(id ? "editExpense" : "addExpense")}>
-            <AlisaFormHandler<ExpenseInputDto>
+            <AlisaFormHandler<ExpenseInput>
               id={id}
               dataService={dataService}
               data={data}

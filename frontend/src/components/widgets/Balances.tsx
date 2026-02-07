@@ -8,8 +8,7 @@ import {
 import { WithTranslation, withTranslation } from "react-i18next";
 import { Avatar } from "@mui/material";
 
-import { Property } from "@alisa-backend/real-estate/property/entities/property.entity.ts";
-import { PropertyStatistics } from "@alisa-backend/real-estate/property/entities/property-statistics.entity.ts";
+import { Property, PropertyStatistics } from "@alisa-types";
 import Table from "@mui/material/Table";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";

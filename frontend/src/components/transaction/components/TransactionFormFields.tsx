@@ -1,4 +1,4 @@
-import { TransactionInputDto } from "@alisa-backend/accounting/transaction/dtos/transaction-input.dto";
+import { TransactionInput, TransactionStatus } from "@alisa-types";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
 import { Stack } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
@@ -6,18 +6,17 @@ import AlisaDatePicker from "../../alisa/form/AlisaDatePicker";
 import AlisaNumberField from "../../alisa/form/AlisaNumberField";
 import AlisaTextField from "../../alisa/form/AlisaTextField";
 import AlisaTransactionStatusSelect from "../../alisa/data/AlisaTransactionStatusSelect.tsx";
-import { TransactionStatus } from "@alisa-backend/common/types.ts";
 import AlisaTransactionTypeSelect from "../../alisa/data/AlisaTransactionTypeSelect.tsx";
 
 interface ExpenseFormProps extends WithTranslation {
-  data: TransactionInputDto;
+  data: TransactionInput;
   onHandleChange: (name: string, value: unknown) => void;
   onDescriptionChange: (value: string) => void;
   onAmountChange: (value: number) => void;
 }
 
 function TransactionFormFields(props: ExpenseFormProps) {
-  const handleChange = (name: keyof TransactionInputDto, value: unknown) => {
+  const handleChange = (name: keyof TransactionInput, value: unknown) => {
     props.onHandleChange(name, value);
   };
 

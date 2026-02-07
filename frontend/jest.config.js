@@ -8,8 +8,9 @@ export default {
     '**/*.(test|spec).[jt]s?(x)',
   ],
   moduleNameMapper: {
-    "^@alisa-backend/(.*)": "<rootDir>/../backend/src/$1",
     "^@alisa-lib/(.*)": "<rootDir>/src/lib/$1",
+    "^@alisa-types$": "<rootDir>/src/types/index.ts",
+    "^@alisa-types/(.*)": "<rootDir>/src/types/$1",
     "^@alisa-mocks/(.*)": "<rootDir>/test/mocks/$1",
     "^@test-utils/(.*)": "<rootDir>/test/utils/$1",
     // Map .js imports to .ts files (for ESM compatibility)

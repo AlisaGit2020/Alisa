@@ -3,7 +3,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useDropzone } from "react-dropzone";
 import { TFunction } from "i18next";
 import { useCallback, useEffect, useState } from "react";
-import { Property } from "@alisa-backend/real-estate/property/entities/property.entity";
+import { Property } from "@alisa-types";
 import ApiClient from "@alisa-lib/api-client";
 import { propertyContext } from "@alisa-lib/alisa-contexts";
 interface SupportedBank {

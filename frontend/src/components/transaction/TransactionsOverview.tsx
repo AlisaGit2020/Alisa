@@ -15,8 +15,7 @@ import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
 import ApiClient from "@alisa-lib/api-client";
-import { TransactionStatus } from "@alisa-backend/common/types";
-import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity";
+import { TransactionStatus, Transaction } from "@alisa-types";
 import { getTransactionPropertyId } from "@alisa-lib/initial-data";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "./TransactionLeftMenuItems";
 

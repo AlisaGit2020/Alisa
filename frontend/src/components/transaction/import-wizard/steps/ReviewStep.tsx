@@ -15,12 +15,10 @@ import SearchIcon from "@mui/icons-material/Search";
 
 type SearchField = "all" | "sender" | "receiver" | "description" | "amount";
 import { TFunction } from "i18next";
-import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity";
-import { TransactionType } from "@alisa-backend/common/types";
+import { Transaction, TransactionType, DataSaveResult } from "@alisa-types";
 import AlisaDataTable from "../../../alisa/datatable/AlisaDataTable";
 import TransactionsPendingActions from "../../pending/TransactionsPendingActions";
 import { useState, useMemo } from "react";
-import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto";
 
 interface ReviewStepProps {
   t: TFunction;
@@ -53,7 +51,7 @@ export default function ReviewStep({
   onNext,
   onBack,
 }: ReviewStepProps) {
-  const [saveResult, setSaveResult] = useState<DataSaveResultDto | undefined>(
+  const [saveResult, setSaveResult] = useState<DataSaveResult | undefined>(
     undefined
   );
   const [searchText, setSearchText] = useState("");

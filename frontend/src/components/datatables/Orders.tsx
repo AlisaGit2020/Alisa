@@ -8,7 +8,7 @@ import TableRow from '@mui/material/TableRow';
 import Title from '../../Title';
 import ApiClient from '../../lib/api-client';
 import { expenseContext } from '@alisa-lib/alisa-contexts';
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
+import { Expense } from '@alisa-types';
 
 
 function preventDefault(event: React.MouseEvent) {
@@ -44,11 +44,11 @@ export default function Orders() {
           <TableBody>
             {expenses.map((row) => (
               <TableRow key={row.id}>
-                <TableCell>{row.transaction.transactionDate?.toString()}</TableCell>
-                <TableCell>{row.expenseType.name}</TableCell>
-                <TableCell>{row.transaction.description}</TableCell>
+                <TableCell>{row.transaction?.transactionDate?.toString()}</TableCell>
+                <TableCell>{row.expenseType?.name}</TableCell>
+                <TableCell>{row.transaction?.description}</TableCell>
                 <TableCell>{row.quantity}</TableCell>
-                <TableCell>{row.transaction.amount}</TableCell>
+                <TableCell>{row.transaction?.amount}</TableCell>
                 <TableCell align='right' >{row.totalAmount}</TableCell>
               </TableRow>
             ))}

@@ -9,7 +9,7 @@ import {
 } from "@alisa-lib/initial-data";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../transaction/TransactionLeftMenuItems";
 import DataService from "@alisa-lib/data-service";
-import { Property } from "@alisa-backend/real-estate/property/entities/property.entity";
+import { Property } from "@alisa-types";
 import { propertyContext } from "@alisa-lib/alisa-contexts";
 
 function PropertyBadge() {

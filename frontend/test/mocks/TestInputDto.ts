@@ -1,6 +1,4 @@
-import { IsNotEmpty } from "class-validator";
-export class TestInputDto {
-    @IsNotEmpty()
-    name!: string;
+// Simple interface for testing - no decorators needed
+export interface TestInputDto {
+    name: string;
 }
-

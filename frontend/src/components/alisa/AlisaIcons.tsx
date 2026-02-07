@@ -7,7 +7,7 @@ import React from "react";
 import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import { ClearIcon } from "@mui/x-date-pickers";
-import { TransactionTypeName } from "@alisa-backend/common/types.ts";
+import { TransactionTypeName } from "@alisa-types";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 

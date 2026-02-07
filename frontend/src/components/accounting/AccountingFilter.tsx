@@ -21,8 +21,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { useEffect, useState } from "react";
 import DataService from "@alisa-lib/data-service";
 import { expenseTypeContext, incomeTypeContext } from "@alisa-lib/alisa-contexts";
-import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity";
-import { IncomeType } from "@alisa-backend/accounting/income/entities/income-type.entity";
+import { ExpenseType, IncomeType } from "@alisa-types";
 
 export type AccountingFilterMode = "expense" | "income";
 

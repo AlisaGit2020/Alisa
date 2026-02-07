@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 import DataService from "@alisa-lib/data-service.ts";
-import { Property } from "@alisa-backend/real-estate/property/entities/property.entity.ts";
+import { Property } from "@alisa-types";
 import { propertyContext } from "@alisa-lib/alisa-contexts.ts";
 import { TFunction } from "i18next";
 import AlisaSelectVariant from "../form/AlisaSelectVariant.tsx";

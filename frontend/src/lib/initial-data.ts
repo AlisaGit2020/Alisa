@@ -1,4 +1,4 @@
-import { User } from "@alisa-backend/people/user/entities/user.entity";
+import { User } from "@alisa-types";
 import { DataKey, View } from "@alisa-lib/views.ts";
 import { DATA_NOT_SELECTED_ID } from "@alisa-lib/constants.ts";
 

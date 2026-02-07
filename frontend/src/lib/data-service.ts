@@ -1,25 +1,20 @@
-import { ValidationError, validate } from "class-validator";
 import ApiClient from "./api-client";
 import { DTO, TypeOrmFetchOptions, TypeOrmRelationOption } from "./types";
 import AlisaContext from "@alisa-lib/alisa-contexts";
-import { copyMatchingKeyValues } from "./functions";
 
 class DataService<T extends object> {
     private apiPath: string;
     private relations?: TypeOrmRelationOption;
     private fetchOptions?: TypeOrmFetchOptions<T>;
-    private dataValidateInstance?: object;
 
     constructor(options: {
         context: AlisaContext,
         relations?: TypeOrmRelationOption,
         fetchOptions?: TypeOrmFetchOptions<T>,
-        dataValidateInstance?: object
     }) {
         this.apiPath = options.context.apiPath;
-        this.relations = options.relations;        
+        this.relations = options.relations;
         this.fetchOptions = options.fetchOptions;
-        this.dataValidateInstance = options.dataValidateInstance
     }
 
     public async read(id: number): Promise<T> {        
@@ -30,17 +25,13 @@ class DataService<T extends object> {
         return ApiClient.getDefault<T>(this.apiPath)
     }
 
-    public async save(data: T, id?: number,): Promise<T | ValidationError[]> {
-        const validationErrors = await this.getValidationErrors(data as object);
-        if (validationErrors.length > 0) {
-            return validationErrors
-        }
+    public async save(data: T, id?: number): Promise<T> {
         if (id) {
             return ApiClient.put<T>(this.apiPath, id, data)
-        } else {    
-            if ('file' in data) {                
+        } else {
+            if ('file' in data) {
                 return ApiClient.upload<T>(this.apiPath, data)
-            }else{                
+            } else {
                 return ApiClient.post<T>(this.apiPath, data)
             }
         }
@@ -85,37 +76,6 @@ class DataService<T extends object> {
         }
     }
 
-    public async getStrValidationErrors(data: T): Promise<string[]> {
-        return this.transformToStringArray(await this.getValidationErrors(data as object))
-    }
-
-    private transformToStringArray(errors: ValidationError[]): string[] {
-        const strErrors: string[] = []
-        if (errors.length > 0) {
-            errors.forEach((error: ValidationError) => {
-                if (error.constraints && typeof error.constraints === 'object') {
-                    Object.values(error.constraints).forEach((constraint: string) => {
-                        strErrors.push(constraint);
-                    });
-                }
-                if (error.children && typeof error.children === 'object') {
-                    const childrenErrors = this.transformToStringArray(error.children);
-                    childrenErrors.forEach((childError: string) => {
-                        strErrors.push(error.property + ' ' + childError);
-                    });
-                }
-            });
-        }
-        return strErrors
-    }
-
-    private async getValidationErrors<T extends object>(data: T): Promise<ValidationError[]> {
-        if (this.dataValidateInstance === undefined) {
-            return []
-        }
-        copyMatchingKeyValues<T>(this.dataValidateInstance as T, data)
-        return await validate(this.dataValidateInstance, { skipMissingProperties: true });
-    }
 }
 
 export default DataService

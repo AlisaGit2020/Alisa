@@ -8,7 +8,7 @@ import TransactionFilter, {
   SearchField,
   TransactionFilterData,
 } from "./components/TransactionFilter";
-import { TransactionType } from "@alisa-backend/common/types";
+import { TransactionType } from "@alisa-types";
 import {
   getStoredFilter,
   setStoredFilter,

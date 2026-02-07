@@ -1,7 +1,7 @@
 import { Stack } from '@mui/material';
 import { useState } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
-import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
+import { IncomeTypeInput } from '@alisa-types';
 import AlisaTextField from '../../alisa/form/AlisaTextField';
 import AlisaSwitch from '../../alisa/form/AlisaSwitch';
 import { incomeTypeContext } from '@alisa-lib/alisa-contexts';
@@ -16,20 +16,19 @@ interface IncomeTypeFormProps extends WithTranslation {
 }
 
 function IncomeTypeForm({ t, id, onCancel, onAfterSubmit }: IncomeTypeFormProps) {
-    const [data, setData] = useState<IncomeTypeInputDto>({
+    const [data, setData] = useState<IncomeTypeInput>({
         name: '',
         description: '',
         isTaxable: false
     });
 
-    const dataService = new DataService<IncomeTypeInputDto>({
+    const dataService = new DataService<IncomeTypeInput>({
         context: incomeTypeContext,
-        dataValidateInstance: new IncomeTypeInputDto()
     })
 
     const handleChange = (
-        name: keyof IncomeTypeInputDto,
-        value: IncomeTypeInputDto[keyof IncomeTypeInputDto]
+        name: keyof IncomeTypeInput,
+        value: IncomeTypeInput[keyof IncomeTypeInput]
     ) => {
         setData(dataService.updateNestedData(data, name, value));
     }
@@ -58,7 +57,7 @@ function IncomeTypeForm({ t, id, onCancel, onAfterSubmit }: IncomeTypeFormProps)
     )
     return (
         <AlisaContent headerText={t(id ? 'edit': 'add')}>
-            <AlisaFormHandler<IncomeTypeInputDto>
+            <AlisaFormHandler<IncomeTypeInput>
                 id={id}
                 dataService={dataService}
                 data={data}

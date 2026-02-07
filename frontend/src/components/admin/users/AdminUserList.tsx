@@ -13,11 +13,9 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
-import { User } from "@alisa-backend/people/user/entities/user.entity";
+import { User, Tier } from "@alisa-types";
 import ApiClient from "@alisa-lib/api-client";
 import { adminContext } from "@alisa-lib/alisa-contexts";
-
-import { Tier } from "@alisa-backend/admin/entities/tier.entity";
 
 function AdminUserList({ t }: WithTranslation) {
   const [users, setUsers] = useState<User[]>([]);

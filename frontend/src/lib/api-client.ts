@@ -2,9 +2,8 @@ import axios from "axios";
 import { TypeOrmFetchOptions, TypeOrmRelationOption } from "./types";
 import Logger from "./logger";
 import { VITE_API_URL } from "../constants";
-import { User } from "@alisa-backend/people/user/entities/user.entity";
+import { User, DataSaveResult } from "@alisa-types";
 import Cookies from "js-cookie";
-import { DataSaveResultDto } from "@alisa-backend/common/dtos/data-save-result.dto.ts";
 
 class ApiClient {
   public static async getOptions(headers?: Record<string, string>) {
@@ -67,7 +66,7 @@ class ApiClient {
   public static async postSaveTask<T>(
     path: string,
     data: T,
-  ): Promise<DataSaveResultDto> {
+  ): Promise<DataSaveResult> {
     const request = await axios.post(
       ApiClient.getApiUrl(path),
       data,

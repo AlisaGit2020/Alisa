@@ -3,7 +3,7 @@ import { Avatar, Box, Chip, Dialog, DialogContent, Divider, Stack, Typography } 
 import React from "react";
 import { userContext } from "@alisa-lib/alisa-contexts";
 import { emptyUser } from "@alisa-lib/initial-data";
-import { User } from "@alisa-backend/people/user/entities/user.entity";
+import { User } from "@alisa-types";
 import ApiClient from "@alisa-lib/api-client";
 import EmailIcon from '@mui/icons-material/Email';
 import LanguageIcon from '@mui/icons-material/Language';

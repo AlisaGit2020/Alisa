@@ -2,7 +2,7 @@ import { WithTranslation, withTranslation } from "react-i18next";
 
 import AlisaDataTable from "../../alisa/datatable/AlisaDataTable.tsx";
 import { expenseTypeContext } from "@alisa-lib/alisa-contexts";
-import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity";
+import { ExpenseType } from "@alisa-types";
 import DataService from "@alisa-lib/data-service";
 import AlisaContent from "../../alisa/AlisaContent";
 

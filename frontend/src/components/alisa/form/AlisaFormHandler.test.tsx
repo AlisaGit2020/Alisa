@@ -31,7 +31,6 @@ describe('AlisaFormHandler', () => {
         id={1}
         dataService={new DataService<TestInputDto>({
           context: context,
-          dataValidateInstance: new TestInputDto()
         })}
         translation={{
           submitButton: 'Save',
@@ -65,7 +64,6 @@ describe('AlisaFormHandler', () => {
         id={1}
         dataService={new DataService<TestInputDto>({
           context: context,
-          dataValidateInstance: new TestInputDto()
         })}
         translation={{
           submitButton: 'Save',
@@ -108,7 +106,6 @@ describe('AlisaFormHandler', () => {
         id={1}
         dataService={new DataService<TestInputDto>({
           context: context,
-          dataValidateInstance: new TestInputDto()
         })}
         translation={{
           submitButton: 'Save',

@@ -4,7 +4,7 @@ import { MenuItem, Box, Menu, Fade, IconButton, Tooltip, Avatar, ListItemIcon } 
 import useSignOut from 'react-auth-kit/hooks/useSignOut';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { User } from '@alisa-types';
 import ApiClient from '@alisa-lib/api-client';
 import { emptyUser } from '@alisa-lib/initial-data';
 import UserDetails from '../user/UserDetails';

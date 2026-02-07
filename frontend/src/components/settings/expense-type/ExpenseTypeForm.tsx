@@ -1,7 +1,7 @@
 import { Stack, FormHelperText, Box } from '@mui/material';
 import { useState } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
-import { ExpenseTypeInputDto } from '@alisa-backend/accounting/expense/dtos/expense-type-input.dto';
+import { ExpenseTypeInput } from '@alisa-types';
 import AlisaTextField from '../../alisa/form/AlisaTextField';
 import AlisaSwitch from '../../alisa/form/AlisaSwitch';
 import { expenseTypeContext } from '@alisa-lib/alisa-contexts';
@@ -16,21 +16,20 @@ interface ExpenseTypeFormProps extends WithTranslation {
 }
 
 function ExpenseTypeForm({ t, id, onCancel, onAfterSubmit }: ExpenseTypeFormProps) {
-    const [data, setData] = useState<ExpenseTypeInputDto>({
+    const [data, setData] = useState<ExpenseTypeInput>({
         name: '',
         description: '',
         isTaxDeductible: false,
         isCapitalImprovement: false
     });
 
-    const dataService = new DataService<ExpenseTypeInputDto>({
+    const dataService = new DataService<ExpenseTypeInput>({
         context: expenseTypeContext,
-        dataValidateInstance: new ExpenseTypeInputDto()
     })
 
     const handleChange = (
-        name: keyof ExpenseTypeInputDto,
-        value: ExpenseTypeInputDto[keyof ExpenseTypeInputDto]
+        name: keyof ExpenseTypeInput,
+        value: ExpenseTypeInput[keyof ExpenseTypeInput]
     ) => {
         setData(dataService.updateNestedData(data, name, value));
     }
@@ -69,7 +68,7 @@ function ExpenseTypeForm({ t, id, onCancel, onAfterSubmit }: ExpenseTypeFormProp
     )
     return (
         <AlisaContent headerText={t(id ? 'edit': 'add')}>
-            <AlisaFormHandler<ExpenseTypeInputDto>
+            <AlisaFormHandler<ExpenseTypeInput>
                 id={id}
                 dataService={dataService}
                 data={data}

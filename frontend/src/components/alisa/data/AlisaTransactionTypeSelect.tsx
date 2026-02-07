@@ -2,10 +2,7 @@ import React, { useState } from "react";
 
 import { TFunction } from "i18next";
 import AlisaSelectVariant from "../form/AlisaSelectVariant.tsx";
-import {
-  TransactionTypeName,
-  transactionTypeNames,
-} from "@alisa-backend/common/types.ts";
+import { TransactionTypeName, transactionTypeNames } from "@alisa-types";
 import { AlisaSelectFieldItem } from "../form/AlisaSelectField.tsx";
 import { AlisaSelectVariantType } from "@alisa-lib/types.ts";
 

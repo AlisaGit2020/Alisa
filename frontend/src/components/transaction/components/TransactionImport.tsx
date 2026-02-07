@@ -9,10 +9,9 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { TFunction } from "i18next";
 import { useState } from "react";
 import AlisaSelect from "../../alisa/data/AlisaSelect.tsx";
-import { OpImportInput } from "@alisa-backend/import/op/dtos/op-import-input.dto";
 import DataService from "@alisa-lib/data-service";
 import { propertyContext, opImportContext } from "@alisa-lib/alisa-contexts";
-import { Property } from "@alisa-backend/real-estate/property/entities/property.entity";
+import { Property, OpImportInput } from "@alisa-types";
 import AlisaFormHandler from "../../alisa/form/AlisaFormHandler";
 
 function TransactionImport(props: {
@@ -21,13 +20,15 @@ function TransactionImport(props: {
   propertyId: number;
   onClose: () => void;
 }) {
-  const initialData = new OpImportInput();
-  initialData.propertyId = props.propertyId;
+  const initialData: OpImportInput = {
+    file: '',
+    fileName: '',
+    propertyId: props.propertyId,
+  };
 
   const [data, setData] = useState<OpImportInput>(initialData);
   const dataService = new DataService<OpImportInput>({
     context: opImportContext,
-    dataValidateInstance: new OpImportInput(),
   });
 
   const handleChange = async (name: string, value: unknown) => {
@@ -87,7 +88,6 @@ function TransactionImport(props: {
           dataService={
             new DataService<OpImportInput>({
               context: opImportContext,
-              dataValidateInstance: new OpImportInput(),
             })
           }
           data={data}

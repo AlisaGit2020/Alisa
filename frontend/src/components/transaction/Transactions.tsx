@@ -2,7 +2,7 @@ import { Box, Paper } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import AlisaDataTable from "../alisa/datatable/AlisaDataTable.tsx";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
-import { Transaction } from "@alisa-backend/accounting/transaction/entities/transaction.entity";
+import { Transaction, TransactionStatus, TransactionType } from "@alisa-types";
 import DataService from "@alisa-lib/data-service";
 import { TypeOrmFetchOptions } from "@alisa-lib/types";
 import React from "react";
@@ -11,10 +11,6 @@ import TransactionImport from "./components/TransactionImport";
 import { TransactionFilterData } from "./components/TransactionFilter";
 import TransactionDetails from "./components/TransactionDetails";
 import TransactionForm from "./TransactionForm.tsx";
-import {
-  TransactionStatus,
-  TransactionType,
-} from "@alisa-backend/common/types.ts";
 
 interface TransactionsProps extends WithTranslation {
   filter: TransactionFilterData;

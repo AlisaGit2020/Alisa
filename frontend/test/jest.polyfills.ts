@@ -13,12 +13,14 @@ import { dirname } from 'path';
 (globalThis as any).ReadableStream = ReadableStream;
 (globalThis as any).TransformStream = TransformStream;
 
-// Mock Vite's import.meta.env
+// Mock Vite's import.meta.env and import.meta.glob
 (globalThis as any).import = {
   meta: {
     env: {
       VITE_API_URL: 'http://localhost:3000',
     },
+    // Mock glob for translation-loader
+    glob: () => ({}),
   },
 };
 

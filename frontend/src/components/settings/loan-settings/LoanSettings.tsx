@@ -5,7 +5,7 @@ import React from "react";
 import ApiClient from "@alisa-lib/api-client";
 import AlisaSelect from "../../alisa/data/AlisaSelect";
 import DataService from "@alisa-lib/data-service";
-import { ExpenseType } from "@alisa-backend/accounting/expense/entities/expense-type.entity";
+import { ExpenseType } from "@alisa-types";
 import { AlisaApproveIcon } from "../../alisa/AlisaIcons";
 
 interface LoanSettingsData {

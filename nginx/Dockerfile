@@ -10,9 +10,6 @@ RUN npm ci
 # Copy frontend source
 COPY frontend/ .
 
-# Copy backend/src for @alisa-backend path alias resolution
-COPY backend/src/ ../backend/src/
-
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
 

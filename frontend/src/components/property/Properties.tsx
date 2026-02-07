@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Property } from "@alisa-backend/real-estate/property/entities/property.entity";
+import { Property } from '@alisa-types';
 import AlisaCardList from "../alisa/AlisaCardList";
 import { propertyContext } from "@alisa-lib/alisa-contexts";
 import { CardGridPageTemplate } from "../templates";
