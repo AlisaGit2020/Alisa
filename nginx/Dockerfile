@@ -13,6 +13,10 @@ COPY frontend/ .
 # Copy backend/src for @alisa-backend path alias resolution
 COPY backend/src/ ../backend/src/
 
+# Create symlink so backend source files can resolve node_modules
+# (Rollup looks for node_modules in ancestor directories of the importing file)
+RUN ln -s /app/node_modules /backend/node_modules
+
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
 
