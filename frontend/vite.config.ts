@@ -10,7 +10,7 @@ function stubBackendDeps(): Plugin {
   const deps = ['typeorm', 'class-validator', 'class-transformer'];
   return {
     name: 'stub-backend-deps',
-    enforce: 'pre',
+    apply: 'build',
     resolveId(source) {
       if (deps.includes(source)) {
         return { id: `\0stub:${source}`, syntheticNamedExports: 'default' };
