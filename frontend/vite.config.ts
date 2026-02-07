@@ -2,17 +2,27 @@ import { UserConfig, defineConfig, Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-// Stub typeorm which is imported transitively through @alisa-backend/*
-// path aliases. The frontend only uses TypeScript types from backend
-// entities, not the ORM runtime. class-validator and class-transformer
-// are NOT stubbed because the frontend uses them directly for validation.
+// Stub backend-only dependencies when imported from backend source files.
+// The frontend imports backend DTOs/entities for TypeScript types, but the
+// decorators cause runtime errors in the production bundle due to Rollup's
+// module ordering. We stub these imports ONLY from /backend/ paths, while
+// allowing frontend code to use the real libraries for validation.
 function stubBackendDeps(): Plugin {
-  const deps = ['typeorm'];
+  // Always stub typeorm (frontend never uses it)
+  const alwaysStub = ['typeorm'];
+  // Stub these only when imported from backend source files
+  const stubFromBackend = ['class-validator', 'class-transformer'];
+
   return {
     name: 'stub-backend-deps',
     apply: 'build',
-    resolveId(source) {
-      if (deps.includes(source)) {
+    resolveId(source, importer) {
+      // Always stub typeorm
+      if (alwaysStub.includes(source)) {
+        return { id: `\0stub:${source}`, syntheticNamedExports: 'default' };
+      }
+      // Stub class-validator/class-transformer only when imported from backend
+      if (stubFromBackend.includes(source) && importer?.includes('/backend/')) {
         return { id: `\0stub:${source}`, syntheticNamedExports: 'default' };
       }
     },
