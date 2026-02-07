@@ -15,7 +15,7 @@ function stubBackendDeps(): Plugin {
 
   return {
     name: 'stub-backend-deps',
-    apply: 'build',
+    // No 'apply' restriction - runs in both dev and build for consistency
     resolveId(source, importer) {
       // Always stub typeorm
       if (alwaysStub.includes(source)) {
