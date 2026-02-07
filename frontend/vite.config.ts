@@ -40,10 +40,15 @@ export default defineConfig({
     include: ['tsconfig.json'],
   },
   resolve: {
-    alias: {      
-      '@alisa-backend': path.resolve(__dirname, '../backend/src'),      
+    alias: {
+      '@alisa-backend': path.resolve(__dirname, '../backend/src'),
       '@alisa-lib': path.resolve(__dirname, './src/lib'),
       '@alisa-mocks': path.resolve(__dirname, './test/mocks'),
+      // Force backend source files to resolve these from frontend's node_modules.
+      // Without this, imports from /backend/src/ can't find them in Docker
+      // because /app/node_modules/ is not an ancestor of /backend/src/.
+      'class-validator': path.resolve(__dirname, 'node_modules/class-validator'),
+      'class-transformer': path.resolve(__dirname, 'node_modules/class-transformer'),
     },
   },
   
