@@ -319,6 +319,7 @@ export class TransactionService {
               amount: Math.abs(transaction.amount),
               quantity: 1,
               totalAmount: Math.abs(transaction.amount),
+              accountingDate: transaction.accountingDate,
             } as any,
           ];
         }
@@ -345,6 +346,7 @@ export class TransactionService {
               amount: Math.abs(transaction.amount),
               quantity: 1,
               totalAmount: Math.abs(transaction.amount),
+              accountingDate: transaction.accountingDate,
             } as any,
           ];
         }
@@ -398,6 +400,7 @@ export class TransactionService {
         amount: loanComponents.principal,
         quantity: 1,
         totalAmount: loanComponents.principal,
+        accountingDate: transaction.accountingDate,
       });
     }
 
@@ -411,6 +414,7 @@ export class TransactionService {
         amount: loanComponents.interest,
         quantity: 1,
         totalAmount: loanComponents.interest,
+        accountingDate: transaction.accountingDate,
       });
     }
 
@@ -424,6 +428,7 @@ export class TransactionService {
         amount: loanComponents.handlingFee,
         quantity: 1,
         totalAmount: loanComponents.handlingFee,
+        accountingDate: transaction.accountingDate,
       });
     }
 
@@ -492,6 +497,7 @@ export class TransactionService {
             amount: loanComponents.principal,
             quantity: 1,
             totalAmount: loanComponents.principal,
+            accountingDate: transaction.accountingDate,
           });
         }
 
@@ -504,6 +510,7 @@ export class TransactionService {
             amount: loanComponents.interest,
             quantity: 1,
             totalAmount: loanComponents.interest,
+            accountingDate: transaction.accountingDate,
           });
         }
 
@@ -516,6 +523,7 @@ export class TransactionService {
             amount: loanComponents.handlingFee,
             quantity: 1,
             totalAmount: loanComponents.handlingFee,
+            accountingDate: transaction.accountingDate,
           });
         }
 
@@ -622,12 +630,20 @@ export class TransactionService {
       for (const expense of input.expenses) {
         expense.transactionId = transaction.id;
         expense.propertyId = transaction.propertyId;
+        // Copy accountingDate from transaction if not set on expense
+        if (!expense.accountingDate && transaction.accountingDate) {
+          expense.accountingDate = transaction.accountingDate;
+        }
       }
     }
     if (input.incomes !== undefined) {
       for (const income of input.incomes) {
         income.transactionId = transaction.id;
         income.propertyId = transaction.propertyId;
+        // Copy accountingDate from transaction if not set on income
+        if (!income.accountingDate && transaction.accountingDate) {
+          income.accountingDate = transaction.accountingDate;
+        }
       }
     }
   }

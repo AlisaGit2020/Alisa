@@ -14,6 +14,7 @@ import { Transaction } from '../transaction/entities/transaction.entity';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
+import { TransactionStatus } from '@alisa-backend/common/types';
 
 @Injectable()
 export class IncomeService {
@@ -38,7 +39,26 @@ export class IncomeService {
     }
     options.where = this.authService.addOwnershipFilter(user, options.where);
 
-    return this.repository.find(options);
+    // Ensure transaction relation is loaded to filter by status
+    if (!options.relations) {
+      options.relations = ['transaction'];
+    } else if (Array.isArray(options.relations)) {
+      if (!options.relations.includes('transaction')) {
+        options.relations = [...options.relations, 'transaction'];
+      }
+    } else if (typeof options.relations === 'object') {
+      // Handle object format: { incomeType: true, property: true }
+      options.relations = { ...options.relations, transaction: true };
+    }
+
+    const results = await this.repository.find(options);
+
+    // Filter out incomes with pending transactions
+    return results.filter(
+      (income) =>
+        !income.transaction ||
+        income.transaction.status === TransactionStatus.ACCEPTED,
+    );
   }
 
   async findOne(
@@ -47,10 +67,32 @@ export class IncomeService {
     options: FindOneOptions<Income> = {},
   ): Promise<Income> {
     options.where = { id: id };
+
+    // Ensure transaction relation is loaded to check status
+    if (!options.relations) {
+      options.relations = ['transaction'];
+    } else if (Array.isArray(options.relations)) {
+      if (!options.relations.includes('transaction')) {
+        options.relations = [...options.relations, 'transaction'];
+      }
+    } else if (typeof options.relations === 'object') {
+      // Handle object format: { incomeType: true, property: true }
+      options.relations = { ...options.relations, transaction: true };
+    }
+
     const income = await this.repository.findOne(options);
     if (!income) {
       return null;
     }
+
+    // Hide incomes with pending transactions
+    if (
+      income.transaction &&
+      income.transaction.status !== TransactionStatus.ACCEPTED
+    ) {
+      return null;
+    }
+
     if (!(await this.authService.hasOwnership(user, income.propertyId))) {
       throw new UnauthorizedException();
     }

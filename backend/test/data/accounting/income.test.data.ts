@@ -4,6 +4,7 @@ import { TransactionInputDto } from 'src/accounting/transaction/dtos/transaction
 import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { Income } from 'src/accounting/income/entities/income.entity';
 import { startOfDay } from 'date-fns';
+import { TransactionStatus } from '@alisa-backend/common/types';
 
 export const incomeTestData = {
   name: 'Income',
@@ -19,6 +20,7 @@ export const incomeTestData = {
     quantity: 1,
     totalAmount: 39.64,
     transaction: {
+      status: TransactionStatus.ACCEPTED,
       externalId: '123',
       sender: 'Aurora',
       receiver: 'Bolag asuntoyhtiö Oy',
@@ -36,6 +38,7 @@ export const incomeTestData = {
     totalAmount: 188,
     transaction: {
       id: 1,
+      status: TransactionStatus.ACCEPTED,
       externalId: '124',
       sender: 'Yrjöntie',
       receiver: 'Espoon kaupunki',

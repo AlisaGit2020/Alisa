@@ -5,6 +5,7 @@ import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { Expense } from 'src/accounting/expense/entities/expense.entity';
 import { propertyTestData } from '../real-estate/property.test.data';
 import { startOfDay } from 'date-fns';
+import { TransactionStatus } from '@alisa-backend/common/types';
 
 export const expenseTestData = {
   name: 'Expense',
@@ -21,6 +22,7 @@ export const expenseTestData = {
     quantity: 1,
     totalAmount: 39.64,
     transaction: {
+      status: TransactionStatus.ACCEPTED,
       externalId: '123',
       sender: 'Aurora',
       receiver: 'Bolag asuntoyhtiö Oy',
@@ -38,6 +40,7 @@ export const expenseTestData = {
     totalAmount: 188,
     transaction: {
       id: 1,
+      status: TransactionStatus.ACCEPTED,
       externalId: '124',
       sender: 'Yrjöntie',
       receiver: 'Espoon kaupunki',

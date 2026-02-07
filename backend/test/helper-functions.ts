@@ -242,6 +242,7 @@ export const addProperty = async (
   const inputProperty = new PropertyInputDto();
   inputProperty.name = name;
   inputProperty.size = size;
+  inputProperty.ownerships = [];
 
   const ownership = new OwnershipInputDto();
   ownership.share = 100;

@@ -140,6 +140,107 @@ describe('TransactionService', () => {
       expect(result.amount).toBe(-100);
     });
 
+    it('copies accountingDate from transaction to expenses', async () => {
+      const accountingDate = new Date('2023-06-15');
+      const input = {
+        propertyId: 1,
+        type: TransactionType.EXPENSE,
+        status: TransactionStatus.PENDING,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Test',
+        transactionDate: new Date(),
+        accountingDate: accountingDate,
+        amount: 100,
+        expenses: [
+          {
+            expenseTypeId: 1,
+            description: 'Test expense',
+            amount: 100,
+            quantity: 1,
+            totalAmount: 100,
+          },
+        ],
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity, id: 1 }),
+      );
+
+      const result = await service.add(testUser, input);
+
+      expect(result.expenses[0].accountingDate).toEqual(accountingDate);
+    });
+
+    it('copies accountingDate from transaction to incomes', async () => {
+      const accountingDate = new Date('2023-06-15');
+      const input = {
+        propertyId: 1,
+        type: TransactionType.INCOME,
+        status: TransactionStatus.PENDING,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Test',
+        transactionDate: new Date(),
+        accountingDate: accountingDate,
+        amount: 100,
+        incomes: [
+          {
+            incomeTypeId: 1,
+            description: 'Test income',
+            amount: 100,
+            quantity: 1,
+            totalAmount: 100,
+          },
+        ],
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity, id: 1 }),
+      );
+
+      const result = await service.add(testUser, input);
+
+      expect(result.incomes[0].accountingDate).toEqual(accountingDate);
+    });
+
+    it('does not overwrite expense accountingDate if already set', async () => {
+      const transactionAccountingDate = new Date('2023-06-15');
+      const expenseAccountingDate = new Date('2023-07-01');
+      const input = {
+        propertyId: 1,
+        type: TransactionType.EXPENSE,
+        status: TransactionStatus.PENDING,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Test',
+        transactionDate: new Date(),
+        accountingDate: transactionAccountingDate,
+        amount: 100,
+        expenses: [
+          {
+            expenseTypeId: 1,
+            description: 'Test expense',
+            amount: 100,
+            quantity: 1,
+            totalAmount: 100,
+            accountingDate: expenseAccountingDate,
+          },
+        ],
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity, id: 1 }),
+      );
+
+      const result = await service.add(testUser, input);
+
+      expect(result.expenses[0].accountingDate).toEqual(expenseAccountingDate);
+    });
+
     it('throws UnauthorizedException for another user property', async () => {
       const input = {
         propertyId: 1,

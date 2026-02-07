@@ -13,7 +13,8 @@ import {
   MockRepository,
   MockAuthService,
 } from 'test/mocks';
-import { createIncome, createJWTUser } from 'test/factories';
+import { createIncome, createJWTUser, createTransaction } from 'test/factories';
+import { TransactionStatus } from '@alisa-backend/common/types';
 
 describe('IncomeService', () => {
   let service: IncomeService;
@@ -247,6 +248,173 @@ describe('IncomeService', () => {
       const result = await service.search(userWithoutProperties, {});
 
       expect(result).toEqual([]);
+    });
+
+    it('excludes incomes with pending transaction from search results', async () => {
+      const pendingTransaction = createTransaction({
+        id: 1,
+        status: TransactionStatus.PENDING,
+      });
+      const acceptedTransaction = createTransaction({
+        id: 2,
+        status: TransactionStatus.ACCEPTED,
+      });
+
+      const incomeWithPendingTransaction = createIncome({
+        id: 1,
+        propertyId: 1,
+        transactionId: 1,
+      });
+      incomeWithPendingTransaction.transaction = pendingTransaction;
+
+      const incomeWithAcceptedTransaction = createIncome({
+        id: 2,
+        propertyId: 1,
+        transactionId: 2,
+      });
+      incomeWithAcceptedTransaction.transaction = acceptedTransaction;
+
+      const incomeWithoutTransaction = createIncome({
+        id: 3,
+        propertyId: 1,
+        transactionId: null,
+      });
+
+      mockRepository.find.mockResolvedValue([
+        incomeWithPendingTransaction,
+        incomeWithAcceptedTransaction,
+        incomeWithoutTransaction,
+      ]);
+      mockAuthService.addOwnershipFilter.mockImplementation(
+        (_user, where) => where,
+      );
+
+      const result = await service.search(testUser, {
+        relations: ['transaction'],
+      });
+
+      expect(result).toHaveLength(2);
+      expect(result.map((i) => i.id)).toEqual([2, 3]);
+    });
+
+    it('excludes incomes with pending transaction when relations is object format', async () => {
+      const pendingTransaction = createTransaction({
+        id: 1,
+        status: TransactionStatus.PENDING,
+      });
+      const acceptedTransaction = createTransaction({
+        id: 2,
+        status: TransactionStatus.ACCEPTED,
+      });
+
+      const incomeWithPendingTransaction = createIncome({
+        id: 1,
+        propertyId: 1,
+        transactionId: 1,
+      });
+      incomeWithPendingTransaction.transaction = pendingTransaction;
+
+      const incomeWithAcceptedTransaction = createIncome({
+        id: 2,
+        propertyId: 1,
+        transactionId: 2,
+      });
+      incomeWithAcceptedTransaction.transaction = acceptedTransaction;
+
+      mockRepository.find.mockResolvedValue([
+        incomeWithPendingTransaction,
+        incomeWithAcceptedTransaction,
+      ]);
+      mockAuthService.addOwnershipFilter.mockImplementation(
+        (_user, where) => where,
+      );
+
+      // Frontend uses object format for relations
+      const result = await service.search(testUser, {
+        relations: { incomeType: true, property: true },
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe(2);
+    });
+
+    it('includes incomes without transaction in search results', async () => {
+      const incomeWithoutTransaction = createIncome({
+        id: 1,
+        propertyId: 1,
+        transactionId: null,
+      });
+
+      mockRepository.find.mockResolvedValue([incomeWithoutTransaction]);
+      mockAuthService.addOwnershipFilter.mockImplementation(
+        (_user, where) => where,
+      );
+
+      const result = await service.search(testUser, {});
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe(1);
+    });
+  });
+
+  describe('findOne with transaction status', () => {
+    it('returns null when income has pending transaction', async () => {
+      const pendingTransaction = createTransaction({
+        id: 1,
+        status: TransactionStatus.PENDING,
+      });
+      const income = createIncome({
+        id: 1,
+        propertyId: 1,
+        transactionId: 1,
+      });
+      income.transaction = pendingTransaction;
+
+      mockRepository.findOne.mockResolvedValue(income);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const result = await service.findOne(testUser, 1, {
+        relations: ['transaction'],
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('returns income when transaction is accepted', async () => {
+      const acceptedTransaction = createTransaction({
+        id: 1,
+        status: TransactionStatus.ACCEPTED,
+      });
+      const income = createIncome({
+        id: 1,
+        propertyId: 1,
+        transactionId: 1,
+      });
+      income.transaction = acceptedTransaction;
+
+      mockRepository.findOne.mockResolvedValue(income);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const result = await service.findOne(testUser, 1, {
+        relations: ['transaction'],
+      });
+
+      expect(result).toEqual(income);
+    });
+
+    it('returns income when it has no transaction', async () => {
+      const income = createIncome({
+        id: 1,
+        propertyId: 1,
+        transactionId: null,
+      });
+
+      mockRepository.findOne.mockResolvedValue(income);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const result = await service.findOne(testUser, 1);
+
+      expect(result).toEqual(income);
     });
   });
 });
