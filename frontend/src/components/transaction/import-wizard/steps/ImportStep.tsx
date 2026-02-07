@@ -6,8 +6,6 @@ import { useCallback, useEffect, useState } from "react";
 import { Property } from "@alisa-backend/real-estate/property/entities/property.entity";
 import ApiClient from "@alisa-lib/api-client";
 import { propertyContext } from "@alisa-lib/alisa-contexts";
-import opLogo from "../../../../../assets/banks/op-logo.svg";
-
 interface SupportedBank {
   id: string;
   name: string;
@@ -18,7 +16,7 @@ const supportedBanks: SupportedBank[] = [
   {
     id: "op",
     name: "Osuuspankki (OP)",
-    logo: opLogo,
+    logo: "/assets/banks/op-logo.svg",
   },
 ];
 
