@@ -2,27 +2,23 @@ import { UserConfig, defineConfig, Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-// Stub backend-only dependencies when imported from backend source files.
+// Stub backend-only dependencies in production builds.
 // The frontend imports backend DTOs/entities for TypeScript types, but the
 // decorators cause runtime errors in the production bundle due to Rollup's
-// module ordering. We stub these imports ONLY from /backend/ paths, while
-// allowing frontend code to use the real libraries for validation.
+// module ordering. We stub ALL class-validator/class-transformer imports
+// in production because:
+// 1. Backend DTOs have stubbed decorators (no validation metadata)
+// 2. Calling real validate() on DTOs without metadata fails
+// 3. Backend validation is mandatory anyway, so frontend validation is optional
 function stubBackendDeps(): Plugin {
-  // Always stub typeorm (frontend never uses it)
-  const alwaysStub = ['typeorm'];
-  // Stub these only when imported from backend source files
-  const stubFromBackend = ['class-validator', 'class-transformer'];
+  // These libraries are always stubbed in production
+  const stubInProd = ['typeorm', 'class-validator', 'class-transformer'];
 
   return {
     name: 'stub-backend-deps',
-    // No 'apply' restriction - runs in both dev and build for consistency
-    resolveId(source, importer) {
-      // Always stub typeorm
-      if (alwaysStub.includes(source)) {
-        return `\0stub:${source}`;
-      }
-      // Stub class-validator/class-transformer only when imported from backend
-      if (stubFromBackend.includes(source) && importer?.includes('/backend/')) {
+    apply: 'build', // Only stub in production builds
+    resolveId(source) {
+      if (stubInProd.includes(source)) {
         return `\0stub:${source}`;
       }
     },
