@@ -40,5 +40,5 @@ export class PropertyInputDto {
   @IsString()
   apartmentType?: string;
 
-  ownerships?: OwnershipInputDto[] = [];
+  ownerships?: OwnershipInputDto[];
 }
