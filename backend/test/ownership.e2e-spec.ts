@@ -10,10 +10,12 @@ import {
   prepareDatabase,
   TestUsersSetup,
 } from './helper-functions';
+import * as http from 'http';
+import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 
 describe('Ownership via Property endpoints (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let authService: AuthService;
   let testUsers: TestUsersSetup;
 
@@ -118,8 +120,8 @@ describe('Ownership via Property endpoints (e2e)', () => {
         .send({})
         .expect(200);
 
-      const user1PropertyIds = response1.body.map((p: any) => p.id);
-      const user2PropertyIds = response2.body.map((p: any) => p.id);
+      const user1PropertyIds = response1.body.map((p: Property) => p.id);
+      const user2PropertyIds = response2.body.map((p: Property) => p.id);
 
       const overlap = user1PropertyIds.filter((id: number) =>
         user2PropertyIds.includes(id),

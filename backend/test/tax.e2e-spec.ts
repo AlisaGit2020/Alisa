@@ -15,10 +15,11 @@ import {
   TestUsersSetup,
 } from './helper-functions';
 import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
+import * as http from 'http';
 
 describe('Tax endpoints (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let authService: AuthService;
   let testUsers: TestUsersSetup;
   let transactionService: TransactionService;

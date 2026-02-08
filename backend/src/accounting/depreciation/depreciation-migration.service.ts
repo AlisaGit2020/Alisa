@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { DepreciationAsset } from './entities/depreciation-asset.entity';
 import { DepreciationRecord } from './entities/depreciation-record.entity';
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 import { TransactionStatus } from '@alisa-backend/common/types';
 
 interface MigrationResult {

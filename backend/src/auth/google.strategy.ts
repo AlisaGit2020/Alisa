@@ -2,6 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback, Profile } from 'passport-google-oauth20';
+import { Request } from 'express';
 import { UserInputDto } from '../people/user/dtos/user-input.dto';
 import { googleConstants } from './constants';
 
@@ -18,12 +19,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(
-    request: any,
+    request: Request,
     accessToken: string,
     refreshToken: string,
     profile: Profile,
     done: VerifyCallback,
-  ): Promise<any> {
+  ): Promise<void> {
     const language =
       profile._json.locale ||
       this.parseAcceptLanguage(request.headers?.['accept-language']);

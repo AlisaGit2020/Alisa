@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { FindOptionsWhere, Not, Repository } from 'typeorm';
 import { Tier } from './entities/tier.entity';
 import { TierInputDto } from './dtos/tier-input.dto';
 import { UserService } from '@alisa-backend/people/user/user.service';
@@ -109,7 +109,7 @@ export class TierService {
   }
 
   private async clearDefaultFlag(excludeId?: number): Promise<void> {
-    const where: any = { isDefault: true };
+    const where: FindOptionsWhere<Tier> = { isDefault: true };
     if (excludeId !== undefined) {
       where.id = Not(excludeId);
     }

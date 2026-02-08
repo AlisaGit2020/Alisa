@@ -11,10 +11,12 @@ import {
   prepareDatabase,
   TestUsersSetup,
 } from './helper-functions';
+import { User } from '@alisa-backend/people/user/entities/user.entity';
+import * as http from 'http';
 
 describe('Admin endpoints (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let authService: AuthService;
   let userService: UserService;
   let testUsers: TestUsersSetup;
@@ -48,7 +50,7 @@ describe('Admin endpoints (e2e)', () => {
       await userService.update(adminUser.user.id, {
         ...adminUser.jwtUser,
         isAdmin: true,
-      } as any);
+      } as Partial<User>);
 
       // Re-login to get updated JWT with isAdmin
       const token = await getUserAccessToken2(authService, {

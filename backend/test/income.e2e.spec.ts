@@ -16,10 +16,12 @@ import {
   getTransactionIncome1,
 } from './data/mocks/transaction.mock';
 import { TransactionStatus } from '@alisa-backend/common/types';
+import * as http from 'http';
+import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 
 describe('Income with transaction status (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let authService: AuthService;
   let testUsers: TestUsersSetup;
 
@@ -73,7 +75,7 @@ describe('Income with transaction status (e2e)', () => {
       // Only the incomes with ACCEPTED transaction should be returned
       // (getTransactionIncome1 creates 2 incomes per transaction)
       expect(response.body.length).toBe(2);
-      response.body.forEach((income: any) => {
+      response.body.forEach((income: Income) => {
         expect(income.transaction.status).toBe(TransactionStatus.ACCEPTED);
       });
     });

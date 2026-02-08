@@ -12,10 +12,12 @@ import {
   prepareDatabase,
 } from './helper-functions';
 import { JWTUser } from '@alisa-backend/auth/types';
+import * as http from 'http';
+import { User } from '@alisa-backend/people/user/entities/user.entity';
 
 describe('Tier enforcement (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let authService: AuthService;
   let userService: UserService;
   let tierService: TierService;
@@ -42,7 +44,7 @@ describe('Tier enforcement (e2e)', () => {
   const createUserWithTier = async (
     email: string,
     tierId: number,
-  ): Promise<{ user: any; token: string; jwtUser: JWTUser }> => {
+  ): Promise<{ user: User; token: string; jwtUser: JWTUser }> => {
     const jwtUser: JWTUser = {
       id: 0,
       firstName: 'Test',
@@ -52,7 +54,7 @@ describe('Tier enforcement (e2e)', () => {
       ownershipInProperties: [],
       isAdmin: false,
     };
-    await userService.add(jwtUser as any);
+    await userService.add(jwtUser as Partial<User>);
     const users = await userService.search({ where: { email } });
     const user = users[0];
     jwtUser.id = user.id;

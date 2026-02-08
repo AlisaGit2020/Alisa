@@ -13,10 +13,12 @@ import {
   TestUsersSetup,
 } from './helper-functions';
 import { TierService } from '@alisa-backend/admin/tier.service';
+import * as http from 'http';
+import { User } from '@alisa-backend/people/user/entities/user.entity';
 
 describe('Tier admin endpoints (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let authService: AuthService;
   let userService: UserService;
   let tierService: TierService;
@@ -45,7 +47,7 @@ describe('Tier admin endpoints (e2e)', () => {
     await userService.update(adminUser.user.id, {
       ...adminUser.jwtUser,
       isAdmin: true,
-    } as any);
+    } as Partial<User>);
     adminToken = await getUserAccessToken2(authService, {
       ...adminUser.jwtUser,
       isAdmin: true,

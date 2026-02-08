@@ -16,7 +16,7 @@ export class GoogleService {
       // Tarkista, onko tokeni jo tallennettu
       await fs.promises.readFile(this.TOKEN_PATH, 'utf-8');
       return false; // Token löytyy, ei tarvita uutta autentikointia
-    } catch (error) {
+    } catch {
       return true; // Tokenia ei löydy, autentikointi tarvitaan
     }
   }

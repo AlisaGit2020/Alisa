@@ -7,7 +7,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { Income } from './entities/income.entity';
 import { IncomeInputDto } from './dtos/income-input.dto';
-import { TransactionInputDto } from '../transaction/dtos/transaction-input.dto';
 import { Property } from 'src/real-estate/property/entities/property.entity';
 import { IncomeType } from './entities/income-type.entity';
 import { Transaction } from '../transaction/entities/transaction.entity';

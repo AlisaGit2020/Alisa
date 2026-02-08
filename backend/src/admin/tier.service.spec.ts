@@ -7,6 +7,7 @@ import { User } from '@alisa-backend/people/user/entities/user.entity';
 import { UserService } from '@alisa-backend/people/user/user.service';
 import { createMockRepository, MockRepository } from 'test/mocks';
 import { createTier, createFreeTier, createUser } from 'test/factories';
+import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
 
 describe('TierService', () => {
   let service: TierService;
@@ -242,7 +243,7 @@ describe('TierService', () => {
       const tier = createFreeTier({ maxProperties: 5 });
       const user = createUser({ id: 1, tierId: 1 });
       user.tier = tier;
-      user.ownerships = [{ propertyId: 1 } as any];
+      user.ownerships = [{ propertyId: 1 } as Partial<Ownership> as Ownership];
 
       mockUserService.findOne.mockResolvedValue(user);
       mockUserService.search.mockResolvedValue([user]);
@@ -256,7 +257,7 @@ describe('TierService', () => {
       const tier = createFreeTier({ maxProperties: 1 });
       const user = createUser({ id: 1, tierId: 1 });
       user.tier = tier;
-      user.ownerships = [{ propertyId: 1 } as any];
+      user.ownerships = [{ propertyId: 1 } as Partial<Ownership> as Ownership];
 
       mockUserService.findOne.mockResolvedValue(user);
       mockUserService.search.mockResolvedValue([user]);
@@ -272,7 +273,7 @@ describe('TierService', () => {
       user.tier = tier;
       user.ownerships = Array(100)
         .fill(null)
-        .map((_, i) => ({ propertyId: i + 1 }) as any);
+        .map((_, i) => ({ propertyId: i + 1 }) as Partial<Ownership> as Ownership);
 
       mockUserService.findOne.mockResolvedValue(user);
 

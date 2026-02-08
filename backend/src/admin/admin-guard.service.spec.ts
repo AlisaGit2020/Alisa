@@ -1,6 +1,7 @@
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { AdminGuard } from './admin.guard';
 import { createJWTUser } from 'test/factories';
+import { JWTUser } from '@alisa-backend/auth/types';
 
 describe('AdminGuard', () => {
   let guard: AdminGuard;
@@ -9,7 +10,7 @@ describe('AdminGuard', () => {
     guard = new AdminGuard();
   });
 
-  const createMockContext = (user: any): ExecutionContext => {
+  const createMockContext = (user: JWTUser | undefined): ExecutionContext => {
     return {
       switchToHttp: () => ({
         getRequest: () => ({ user }),

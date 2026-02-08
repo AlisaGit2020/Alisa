@@ -1,7 +1,6 @@
 import {
   parseLoanPaymentMessage,
   isLoanPaymentMessage,
-  LoanPaymentComponents,
 } from './loan-message-parser';
 
 describe('loan-message-parser', () => {

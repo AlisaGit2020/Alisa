@@ -34,22 +34,23 @@ export const typeormWhereTransformer = (where: object | []) => {
   return where;
 };
 
-const betweenTransformation = (value: any) => {
-  return Between(new Date(value.$between[0]), new Date(value.$between[1]));
+const betweenTransformation = (value: Record<string, unknown>) => {
+  const between = value.$between as [string, string];
+  return Between(new Date(between[0]), new Date(between[1]));
 };
 
-const ilikeTransformation = (value: any) => {
-  return ILike(value.$ilike);
+const ilikeTransformation = (value: Record<string, unknown>) => {
+  return ILike(value.$ilike as string);
 };
 
-const inTransformation = (value: any) => {
-  return In(value.$in);
+const inTransformation = (value: Record<string, unknown>) => {
+  return In(value.$in as unknown[]);
 };
 
-const gteTransformation = (value: any) => {
-  return MoreThanOrEqual(new Date(value.$gte));
+const gteTransformation = (value: Record<string, unknown>) => {
+  return MoreThanOrEqual(new Date(value.$gte as string));
 };
 
-const lteTransformation = (value: any) => {
-  return LessThanOrEqual(new Date(value.$lte));
+const lteTransformation = (value: Record<string, unknown>) => {
+  return LessThanOrEqual(new Date(value.$lte as string));
 };

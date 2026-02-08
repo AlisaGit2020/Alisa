@@ -5,6 +5,8 @@ import { UserService } from '../people/user/user.service';
 import { UserDefaultsService } from '../defaults/user-defaults.service';
 import { TierService } from '@alisa-backend/admin/tier.service';
 import { createUser, createJWTUser } from 'test/factories';
+import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
+import { FindOptionsWhereWithUserId } from '@alisa-backend/common/types';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -155,7 +157,7 @@ describe('AuthService', () => {
       existingUser.ownerships = [
         { id: 1, propertyId: 1, userId: 1, share: 100 },
         { id: 2, propertyId: 2, userId: 1, share: 50 },
-      ] as any;
+      ] as Ownership[];
 
       mockUserService.search.mockResolvedValue([existingUser]);
       mockUserService.update.mockResolvedValue(existingUser);
@@ -243,14 +245,14 @@ describe('AuthService', () => {
     it('adds userId to empty where clause', () => {
       const user = createJWTUser({ id: 1 });
 
-      const result = service.addUserFilter(user, undefined as any);
+      const result = service.addUserFilter(user, undefined as unknown as FindOptionsWhereWithUserId<unknown>);
 
       expect(result).toEqual({ userId: 1 });
     });
 
     it('adds userId to existing where clause', () => {
       const user = createJWTUser({ id: 1 });
-      const where = { name: 'Test' } as any;
+      const where = { name: 'Test', userId: 0 } as FindOptionsWhereWithUserId<{ name: string; userId: number }>;
 
       const result = service.addUserFilter(user, where);
 
@@ -262,7 +264,7 @@ describe('AuthService', () => {
 
     it('handles array of where clauses', () => {
       const user = createJWTUser({ id: 1 });
-      const where = [{ name: 'A' }, { name: 'B' }] as any;
+      const where = [{ name: 'A', userId: 0 }, { name: 'B', userId: 0 }] as FindOptionsWhereWithUserId<{ name: string; userId: number }>[];
 
       const result = service.addUserFilter(user, where);
 

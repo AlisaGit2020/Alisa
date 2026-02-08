@@ -16,10 +16,11 @@ import {
   getTransactionExpense1,
 } from './data/mocks/transaction.mock';
 import { TransactionStatus } from '@alisa-backend/common/types';
+import * as http from 'http';
 
 describe('Expense with transaction status (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let authService: AuthService;
   let testUsers: TestUsersSetup;
 

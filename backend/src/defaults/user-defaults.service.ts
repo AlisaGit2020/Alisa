@@ -6,6 +6,7 @@ import { IncomeTypeDefault } from './entities/income-type-default.entity';
 import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
 import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
 import { UserService } from '@alisa-backend/people/user/user.service';
+import { UserInputDto } from '@alisa-backend/people/user/dtos/user-input.dto';
 
 @Injectable()
 export class UserDefaultsService {
@@ -121,6 +122,6 @@ export class UserDefaultsService {
       user.loanHandlingFeeExpenseTypeId = loanSettingMap.handlingFee;
     }
 
-    await this.userService.update(userId, user as any);
+    await this.userService.update(userId, user as UserInputDto);
   }
 }

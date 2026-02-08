@@ -10,10 +10,11 @@ import {
   prepareDatabase,
   TestUsersSetup,
 } from './helper-functions';
+import * as http from 'http';
 
 describe('User endpoints (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let authService: AuthService;
   let testUsers: TestUsersSetup;
 

@@ -33,6 +33,8 @@ import {
   DataSaveResultDto,
   DataSaveResultRowDto,
 } from '@alisa-backend/common/dtos/data-save-result.dto';
+import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
+import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 
 @Injectable()
 export class TransactionService {
@@ -320,7 +322,7 @@ export class TransactionService {
               quantity: 1,
               totalAmount: Math.abs(transaction.amount),
               accountingDate: transaction.accountingDate,
-            } as any,
+            } as Expense,
           ];
         }
       }
@@ -347,7 +349,7 @@ export class TransactionService {
               quantity: 1,
               totalAmount: Math.abs(transaction.amount),
               accountingDate: transaction.accountingDate,
-            } as any,
+            } as Income,
           ];
         }
       }
@@ -434,7 +436,7 @@ export class TransactionService {
 
     // Update transaction
     transaction.type = TransactionType.EXPENSE;
-    transaction.expenses = expenses as any;
+    transaction.expenses = expenses as Expense[];
 
     return this.repository.save(transaction);
   }
@@ -528,7 +530,7 @@ export class TransactionService {
         }
 
         transaction.type = TransactionType.EXPENSE;
-        transaction.expenses = expenses as any;
+        transaction.expenses = expenses as Expense[];
 
         await this.repository.save(transaction);
 

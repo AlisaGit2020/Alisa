@@ -22,10 +22,11 @@ import {
   TestUser,
   TestUsersSetup,
 } from './helper-functions';
+import * as http from 'http';
 
 describe('Global controller end-to-end test (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let authService: AuthService;
   let mainUserToken: string;
   let noDataUserToken: string;

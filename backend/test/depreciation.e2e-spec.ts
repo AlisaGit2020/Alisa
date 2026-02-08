@@ -5,7 +5,6 @@ import { AppModule } from '../src/app.module';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
 import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
-import { DepreciationService } from '@alisa-backend/accounting/depreciation/depreciation.service';
 import {
   getBearerToken,
   getTestUsers,
@@ -15,15 +14,15 @@ import {
   TestUsersSetup,
 } from './helper-functions';
 import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
+import * as http from 'http';
 
 describe('Depreciation via Tax endpoints (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let authService: AuthService;
   let testUsers: TestUsersSetup;
   let transactionService: TransactionService;
   let expenseTypeService: ExpenseTypeService;
-  let depreciationService: DepreciationService;
   let mainUser: TestUser;
   let capitalImprovementExpenseTypeId: number;
 
@@ -39,7 +38,6 @@ describe('Depreciation via Tax endpoints (e2e)', () => {
     authService = app.get(AuthService);
     transactionService = app.get(TransactionService);
     expenseTypeService = app.get(ExpenseTypeService);
-    depreciationService = app.get(DepreciationService);
 
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
@@ -274,7 +272,7 @@ describe('Depreciation via Tax endpoints (e2e)', () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       // First calculate to save data
-      const calcResponse = await request(server)
+      await request(server)
         .post('/real-estate/property/tax/calculate')
         .set('Authorization', getBearerToken(token))
         .send({ year: 2024, propertyId: mainUser.properties[0].id })

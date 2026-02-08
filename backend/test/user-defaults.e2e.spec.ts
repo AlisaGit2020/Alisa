@@ -8,11 +8,12 @@ import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-
 import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
 import { User } from '@alisa-backend/people/user/entities/user.entity';
 import { AuthService } from '@alisa-backend/auth/auth.service';
-import { emptyTables, sleep } from './helper-functions';
+import { emptyTables } from './helper-functions';
+import * as http from 'http';
 
 describe('User defaults (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let dataSource: DataSource;
   let authService: AuthService;
 

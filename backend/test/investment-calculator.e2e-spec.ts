@@ -10,10 +10,12 @@ import {
   prepareDatabase,
   TestUsersSetup,
 } from './helper-functions';
+import * as http from 'http';
+import { InvestmentCalculation } from '@alisa-backend/real-estate/investment/entities/investment-calculation.entity';
 
 describe('Investment Calculator endpoints (e2e)', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let authService: AuthService;
   let testUsers: TestUsersSetup;
 
@@ -172,8 +174,8 @@ describe('Investment Calculator endpoints (e2e)', () => {
 
       // Verify user1 only sees their own investments
       expect(Array.isArray(response1.body)).toBe(true);
-      expect(response1.body.every((inv: any) => inv.userId === user1.user.id)).toBe(true);
-      expect(response1.body.some((inv: any) => inv.name === 'User2 Investment')).toBe(false);
+      expect(response1.body.every((inv: InvestmentCalculation) => inv.userId === user1.user.id)).toBe(true);
+      expect(response1.body.some((inv: InvestmentCalculation) => inv.name === 'User2 Investment')).toBe(false);
     });
   });
 
@@ -377,8 +379,8 @@ describe('Investment Calculator endpoints (e2e)', () => {
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.every((inv: any) => inv.userId === user1.user.id)).toBe(true);
-      expect(response.body.some((inv: any) => inv.name === 'User2 Investment B')).toBe(false);
+      expect(response.body.every((inv: InvestmentCalculation) => inv.userId === user1.user.id)).toBe(true);
+      expect(response.body.some((inv: InvestmentCalculation) => inv.name === 'User2 Investment B')).toBe(false);
     });
   });
 });

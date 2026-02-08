@@ -5,6 +5,8 @@ import { DepreciationService } from './depreciation.service';
 import { DepreciationAsset } from './entities/depreciation-asset.entity';
 import { DepreciationRecord } from './entities/depreciation-record.entity';
 import { AuthService } from '@alisa-backend/auth/auth.service';
+import { JWTUser } from '@alisa-backend/auth/types';
+import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 
 describe('DepreciationService', () => {
   let service: DepreciationService;
@@ -198,7 +200,7 @@ describe('DepreciationService', () => {
       assetRepository.find.mockResolvedValue(assets);
 
       const result = await service.getYearlyBreakdown(
-        { id: 1 } as any,
+        { id: 1 } as JWTUser,
         [1],
         2020,
       );
@@ -216,7 +218,7 @@ describe('DepreciationService', () => {
       assetRepository.find.mockResolvedValue(assets);
 
       const result = await service.getYearlyBreakdown(
-        { id: 1 } as any,
+        { id: 1 } as JWTUser,
         [1],
         2020,
       );
@@ -234,7 +236,7 @@ describe('DepreciationService', () => {
 
       // In 2024, asset from 2020 has 4 years elapsed (2020-2023), 5 years remaining
       const result = await service.getYearlyBreakdown(
-        { id: 1 } as any,
+        { id: 1 } as JWTUser,
         [1],
         2024,
       );
@@ -255,7 +257,7 @@ describe('DepreciationService', () => {
       assetRepository.find.mockResolvedValue(assets);
 
       const result = await service.getYearlyBreakdown(
-        { id: 1 } as any,
+        { id: 1 } as JWTUser,
         [1],
         2024,
       );
@@ -278,7 +280,7 @@ describe('DepreciationService', () => {
 
       // In 2024, asset is still within 10-year window (2020-2029)
       const result = await service.getYearlyBreakdown(
-        { id: 1 } as any,
+        { id: 1 } as JWTUser,
         [1],
         2024,
       );
@@ -297,7 +299,7 @@ describe('DepreciationService', () => {
         totalAmount: -10000, // Expenses are stored as negative
         accountingDate: new Date('2024-06-15'),
         description: 'Bathroom renovation',
-      } as any;
+      } as Partial<Expense> as Expense;
 
       assetRepository.findOne.mockResolvedValue(null);
       assetRepository.save.mockResolvedValue({
@@ -326,7 +328,7 @@ describe('DepreciationService', () => {
         totalAmount: -5000,
         accountingDate: new Date('2022-01-01'),
         description: 'Kitchen renovation',
-      } as any;
+      } as Partial<Expense> as Expense;
 
       assetRepository.findOne.mockResolvedValue(null);
       assetRepository.save.mockResolvedValue({
@@ -354,7 +356,7 @@ describe('DepreciationService', () => {
         totalAmount: -10000,
         accountingDate: new Date('2024-06-15'),
         description: 'Bathroom renovation',
-      } as any;
+      } as Partial<Expense> as Expense;
 
       const result = await service.createFromExpense(expense);
 
@@ -376,7 +378,7 @@ describe('DepreciationService', () => {
       recordRepository.save.mockResolvedValue({ id: 1 });
       assetRepository.save.mockResolvedValue(asset);
 
-      await service.processYearlyDepreciation({ id: 1 } as any, [1], 2020);
+      await service.processYearlyDepreciation({ id: 1 } as JWTUser, [1], 2020);
 
       expect(recordRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -400,7 +402,7 @@ describe('DepreciationService', () => {
       recordRepository.save.mockResolvedValue({ id: 1 });
       assetRepository.save.mockResolvedValue(asset);
 
-      await service.processYearlyDepreciation({ id: 1 } as any, [1], 2020);
+      await service.processYearlyDepreciation({ id: 1 } as JWTUser, [1], 2020);
 
       expect(assetRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -421,7 +423,7 @@ describe('DepreciationService', () => {
       recordRepository.save.mockResolvedValue({ id: 1 });
       assetRepository.save.mockResolvedValue(asset);
 
-      await service.processYearlyDepreciation({ id: 1 } as any, [1], 2020);
+      await service.processYearlyDepreciation({ id: 1 } as JWTUser, [1], 2020);
 
       expect(assetRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -433,11 +435,11 @@ describe('DepreciationService', () => {
 
     it('should skip if already processed for year', async () => {
       const asset = createMockAsset();
-      const existingRecord = { id: 1, depreciationAssetId: 1, year: 2020 } as any;
+      const existingRecord = { id: 1, depreciationAssetId: 1, year: 2020 } as Partial<DepreciationRecord>;
       assetRepository.find.mockResolvedValue([asset]);
       recordRepository.findOne.mockResolvedValue(existingRecord);
 
-      await service.processYearlyDepreciation({ id: 1 } as any, [1], 2020);
+      await service.processYearlyDepreciation({ id: 1 } as JWTUser, [1], 2020);
 
       expect(recordRepository.save).not.toHaveBeenCalled();
       expect(assetRepository.save).not.toHaveBeenCalled();

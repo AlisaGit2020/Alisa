@@ -5,10 +5,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
+import * as http from 'http';
 
 describe('Google services', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({

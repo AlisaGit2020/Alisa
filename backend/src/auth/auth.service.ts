@@ -38,7 +38,7 @@ export class AuthService {
         await this.userService.update(userEntity.id, {
           ...user,
           tierId: defaultTier.id,
-        } as any);
+        } as UserInputDto & { tierId: number });
       }
     }
 

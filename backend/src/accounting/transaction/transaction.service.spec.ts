@@ -27,6 +27,7 @@ import {
   TransactionStatus,
   TransactionType,
 } from '@alisa-backend/common/types';
+import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 
 describe('TransactionService', () => {
   let service: TransactionService;
@@ -677,7 +678,7 @@ describe('TransactionService', () => {
         propertyId: 1,
         status: TransactionStatus.PENDING,
       });
-      transaction.expenses = [{ id: 1, expenseTypeId: 1 } as any];
+      transaction.expenses = [{ id: 1, expenseTypeId: 1 } as Partial<Expense> as Expense];
 
       mockRepository.find.mockResolvedValue([transaction]);
       mockRepository.findOneBy.mockResolvedValue(transaction);

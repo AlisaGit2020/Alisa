@@ -7,6 +7,7 @@ import { FindManyOptions, Repository } from 'typeorm';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
+import { FindOptionsWhereWithUserId } from '@alisa-backend/common/types';
 
 @Injectable()
 export class InvestmentService {
@@ -27,7 +28,10 @@ export class InvestmentService {
     if (options.where !== undefined) {
       options.where = typeormWhereTransformer(options.where);
     }
-    options.where = this.authService.addUserFilter(user, options.where as any) as any;
+    options.where = this.authService.addUserFilter<Investment>(
+      user,
+      options.where as FindOptionsWhereWithUserId<Investment>,
+    ) as FindOptionsWhereWithUserId<Investment>;
     return this.repository.find(options);
   }
 
@@ -114,7 +118,7 @@ export class InvestmentService {
   }
 
   async delete(user: JWTUser, id: number): Promise<void> {
-    const investment = await this.findOne(user, id);
+    await this.findOne(user, id);
     await this.repository.delete(id);
   }
 }

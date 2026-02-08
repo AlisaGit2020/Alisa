@@ -18,10 +18,11 @@ import {
   TestUser,
   TestUsersSetup,
 } from './helper-functions';
+import * as http from 'http';
 
 describe('Transaction search', () => {
   let app: INestApplication;
-  let server: any;
+  let server: http.Server;
   let token: string;
   let testUsers: TestUsersSetup;
   let mainUser: TestUser;
