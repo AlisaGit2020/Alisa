@@ -1,18 +1,3 @@
-import {
-  Box,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Paper,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import FullscreenIcon from "@mui/icons-material/Fullscreen";
-import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import PaletteIcon from "@mui/icons-material/Palette";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import PaymentIcon from "@mui/icons-material/Payment";
@@ -26,6 +11,9 @@ import ExpenseTypeForm from "./expense-type/ExpenseTypeForm";
 import IncomeTypes from "./income-type/IncomeTypes";
 import IncomeTypeForm from "./income-type/IncomeTypeForm";
 import { settingsContext } from "@alisa-lib/alisa-contexts";
+import FullscreenDialogLayout, {
+  MenuItem,
+} from "../layout/FullscreenDialogLayout";
 
 enum SettingsPage {
   Theme = "theme",
@@ -50,7 +38,29 @@ function SettingsDialog({ t, open, onClose }: SettingsDialogProps) {
   const [action, setAction] = useState<Action>(Action.List);
   const [editId, setEditId] = useState<number | undefined>(undefined);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [fullscreen, setFullscreen] = useState(false);
+
+  const menuItems: MenuItem[] = [
+    {
+      id: SettingsPage.Theme,
+      label: t("themeSettings"),
+      icon: <PaletteIcon fontSize="small" sx={{ color: "secondary.main" }} />,
+    },
+    {
+      id: SettingsPage.ExpenseTypes,
+      label: t("expenseTypes"),
+      icon: <PaymentIcon fontSize="small" sx={{ color: "error.main" }} />,
+    },
+    {
+      id: SettingsPage.IncomeTypes,
+      label: t("incomeTypes"),
+      icon: <MonetizationOnIcon fontSize="small" sx={{ color: "success.main" }} />,
+    },
+    {
+      id: SettingsPage.LoanSettings,
+      label: t("loanSettings"),
+      icon: <AccountBalanceIcon fontSize="small" sx={{ color: "primary.main" }} />,
+    },
+  ];
 
   const handleMenuClick = (selectedPage: SettingsPage) => {
     setPage(selectedPage);
@@ -136,93 +146,16 @@ function SettingsDialog({ t, open, onClose }: SettingsDialogProps) {
   };
 
   return (
-    <Dialog
+    <FullscreenDialogLayout
       open={open}
       onClose={onClose}
-      maxWidth={false}
-      fullScreen={fullscreen}
-      PaperProps={{
-        sx: fullscreen
-          ? {}
-          : {
-              width: "85vw",
-              height: "70vh",
-              maxWidth: "1200px",
-              maxHeight: "700px",
-            },
-      }}
+      title={t("settings")}
+      menuItems={menuItems}
+      selectedMenuId={page}
+      onMenuSelect={(id) => handleMenuClick(id as SettingsPage)}
     >
-      <DialogTitle>
-        {t("settings")}
-        <IconButton
-          aria-label="toggle fullscreen"
-          onClick={() => setFullscreen(!fullscreen)}
-          sx={{
-            position: "absolute",
-            right: 48,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          {fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-        </IconButton>
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ display: "flex", gap: 2, p: 2 }}>
-        <Paper sx={{ minWidth: 200 }}>
-          <List component="nav">
-            <ListItemButton
-              selected={page === SettingsPage.Theme}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMenuClick(SettingsPage.Theme); }}
-            >
-              <ListItemIcon>
-                <PaletteIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary={t("themeSettings")} />
-            </ListItemButton>
-            <ListItemButton
-              selected={page === SettingsPage.ExpenseTypes}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMenuClick(SettingsPage.ExpenseTypes); }}
-            >
-              <ListItemIcon>
-                <PaymentIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary={t("expenseTypes")} />
-            </ListItemButton>
-            <ListItemButton
-              selected={page === SettingsPage.IncomeTypes}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMenuClick(SettingsPage.IncomeTypes); }}
-            >
-              <ListItemIcon>
-                <MonetizationOnIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary={t("incomeTypes")} />
-            </ListItemButton>
-            <ListItemButton
-              selected={page === SettingsPage.LoanSettings}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMenuClick(SettingsPage.LoanSettings); }}
-            >
-              <ListItemIcon>
-                <AccountBalanceIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary={t("loanSettings")} />
-            </ListItemButton>
-          </List>
-        </Paper>
-        <Box sx={{ flex: 1, overflow: "auto" }}>{getContent()}</Box>
-      </DialogContent>
-    </Dialog>
+      {getContent()}
+    </FullscreenDialogLayout>
   );
 }
 

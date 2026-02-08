@@ -1,6 +1,10 @@
 const en = {
   appBar: {
+    admin: "Admin",
+    language: "Language",
+    more: "More",
     profile: "Profile",
+    settings: "Settings",
     title: "Alisa",
     slogan: "Alisa, the superhero of investment is shaking numbers!",
     selectLanguage: "Select language",

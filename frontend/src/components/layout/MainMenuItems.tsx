@@ -31,9 +31,10 @@ import {
 
 interface MainMenuItemsProps {
   open: boolean;
+  isMobile?: boolean;
 }
 
-function MainMenuItems({ open }: MainMenuItemsProps) {
+function MainMenuItems({ open, isMobile = false }: MainMenuItemsProps) {
   const { t } = useTranslation("menu");
   const { t: tAccounting } = useTranslation("accounting");
   const currentPath = window.location.pathname;
@@ -134,42 +135,46 @@ function MainMenuItems({ open }: MainMenuItemsProps) {
         currentPath.startsWith("/app/investment-calculations")
       )}
 
-      {open ? (
-        accountingButton
-      ) : (
-        <Tooltip title={t("accounting")} placement="right">
-          {accountingButton}
-        </Tooltip>
-      )}
+      {!isMobile && (
+        <>
+          {open ? (
+            accountingButton
+          ) : (
+            <Tooltip title={t("accounting")} placement="right">
+              {accountingButton}
+            </Tooltip>
+          )}
 
-      <Collapse in={open && accountingOpen} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
-          {menuItem(
-            "expenses",
-            expenseContext.routePath,
-            tAccounting("expenses"),
-            <ReceiptIcon sx={{ color: "error.main" }} />,
-            currentPath.startsWith(expenseContext.routePath),
-            1
-          )}
-          {menuItem(
-            "incomes",
-            incomeContext.routePath,
-            tAccounting("incomes"),
-            <PaymentsIcon sx={{ color: "success.main" }} />,
-            currentPath.startsWith(incomeContext.routePath),
-            1
-          )}
-          {menuItem(
-            "bank-transactions",
-            transactionContext.routePath,
-            tAccounting("bankTransactions"),
-            <AccountBalanceWalletIcon sx={{ color: "primary.main" }} />,
-            currentPath.startsWith(transactionContext.routePath),
-            1
-          )}
-        </List>
-      </Collapse>
+          <Collapse in={open && accountingOpen} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {menuItem(
+                "expenses",
+                expenseContext.routePath,
+                tAccounting("expenses"),
+                <ReceiptIcon sx={{ color: "error.main" }} />,
+                currentPath.startsWith(expenseContext.routePath),
+                1
+              )}
+              {menuItem(
+                "incomes",
+                incomeContext.routePath,
+                tAccounting("incomes"),
+                <PaymentsIcon sx={{ color: "success.main" }} />,
+                currentPath.startsWith(incomeContext.routePath),
+                1
+              )}
+              {menuItem(
+                "bank-transactions",
+                transactionContext.routePath,
+                tAccounting("bankTransactions"),
+                <AccountBalanceWalletIcon sx={{ color: "primary.main" }} />,
+                currentPath.startsWith(transactionContext.routePath),
+                1
+              )}
+            </List>
+          </Collapse>
+        </>
+      )}
 
       {menuItem(
         "taxes",

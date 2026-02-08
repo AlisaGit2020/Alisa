@@ -1,18 +1,3 @@
-import {
-  Box,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Paper,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import FullscreenIcon from "@mui/icons-material/Fullscreen";
-import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import PeopleIcon from "@mui/icons-material/People";
 import LayersIcon from "@mui/icons-material/Layers";
 import { WithTranslation, withTranslation } from "react-i18next";
@@ -20,6 +5,9 @@ import { useState } from "react";
 import AdminUserList from "./users/AdminUserList";
 import AdminTierList from "./tiers/AdminTierList";
 import { adminContext } from "@alisa-lib/alisa-contexts";
+import FullscreenDialogLayout, {
+  MenuItem,
+} from "../layout/FullscreenDialogLayout";
 
 enum AdminPage {
   Users = "users",
@@ -33,11 +21,19 @@ interface AdminDialogProps extends WithTranslation {
 
 function AdminDialog({ t, open, onClose }: AdminDialogProps) {
   const [page, setPage] = useState<AdminPage>(AdminPage.Users);
-  const [fullscreen, setFullscreen] = useState(false);
 
-  const handleMenuClick = (selectedPage: AdminPage) => {
-    setPage(selectedPage);
-  };
+  const menuItems: MenuItem[] = [
+    {
+      id: AdminPage.Users,
+      label: t("users"),
+      icon: <PeopleIcon fontSize="small" sx={{ color: "primary.main" }} />,
+    },
+    {
+      id: AdminPage.Tiers,
+      label: t("tiers"),
+      icon: <LayersIcon fontSize="small" sx={{ color: "secondary.main" }} />,
+    },
+  ];
 
   const getContent = () => {
     switch (page) {
@@ -51,83 +47,16 @@ function AdminDialog({ t, open, onClose }: AdminDialogProps) {
   };
 
   return (
-    <Dialog
+    <FullscreenDialogLayout
       open={open}
       onClose={onClose}
-      maxWidth={false}
-      fullScreen={fullscreen}
-      PaperProps={{
-        sx: fullscreen
-          ? {}
-          : {
-              width: "85vw",
-              height: "70vh",
-              maxWidth: "1200px",
-              maxHeight: "700px",
-            },
-      }}
+      title={t("title")}
+      menuItems={menuItems}
+      selectedMenuId={page}
+      onMenuSelect={(id) => setPage(id as AdminPage)}
     >
-      <DialogTitle>
-        {t("title")}
-        <IconButton
-          aria-label="toggle fullscreen"
-          onClick={() => setFullscreen(!fullscreen)}
-          sx={{
-            position: "absolute",
-            right: 48,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          {fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-        </IconButton>
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ display: "flex", gap: 2, p: 2 }}>
-        <Paper sx={{ minWidth: 200 }}>
-          <List component="nav">
-            <ListItemButton
-              selected={page === AdminPage.Users}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleMenuClick(AdminPage.Users);
-              }}
-            >
-              <ListItemIcon>
-                <PeopleIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary={t("users")} />
-            </ListItemButton>
-            <ListItemButton
-              selected={page === AdminPage.Tiers}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleMenuClick(AdminPage.Tiers);
-              }}
-            >
-              <ListItemIcon>
-                <LayersIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary={t("tiers")} />
-            </ListItemButton>
-          </List>
-        </Paper>
-        <Box sx={{ flex: 1, overflow: "auto" }}>{getContent()}</Box>
-      </DialogContent>
-    </Dialog>
+      {getContent()}
+    </FullscreenDialogLayout>
   );
 }
 

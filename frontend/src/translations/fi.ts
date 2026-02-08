@@ -1,6 +1,10 @@
 const fi = {
   appBar: {
+    admin: "Hallinta",
+    language: "Kieli",
+    more: "Lisää",
     profile: "Käyttäjätiedot",
+    settings: "Asetukset",
     title: "Alisa",
     slogan: "Alisa, sijoittamisen supersankari kyykyttää numeroita!",
     selectLanguage: "Valitse kieli",
