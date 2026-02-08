@@ -2,6 +2,7 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogTitle, IconButton, Card, CardContent } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import React from "react";
+import { AxiosResponse } from "axios";
 import ApiClient from "@alisa-lib/api-client";
 import InvestmentCalculatorForm, { InvestmentInputData } from "./InvestmentCalculatorForm";
 import InvestmentCalculatorResults, { InvestmentResults, SavedInvestmentCalculation } from "./InvestmentCalculatorResults";
@@ -51,8 +52,8 @@ function InvestmentCalculationEditDialog({
   const handleCalculate = async (data: InvestmentInputData) => {
     try {
       setInputData(data); // Store input data for saving
-      const response: any = await ApiClient.post('real-estate/investment/calculate', data, true);
-      setResults(response.data || response);
+      const response = await ApiClient.post('real-estate/investment/calculate', data, true) as unknown as AxiosResponse<InvestmentResults>;
+      setResults(response.data);
     } catch (error) {
       console.error('Calculation error:', error);
     }

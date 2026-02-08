@@ -23,6 +23,40 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 
+interface DetailRowProps {
+  icon?: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}
+
+function DetailRow({ icon, label, value }: DetailRowProps) {
+  return (
+    <Grid container spacing={2} sx={{ py: 1 }}>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <Stack direction="row" spacing={1} alignItems="center">
+          {icon && (
+            <Box sx={{ color: "text.secondary", display: "flex" }}>{icon}</Box>
+          )}
+          <Typography variant="body2" color="text.secondary">
+            {label}
+          </Typography>
+        </Stack>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 8 }}>
+        <Typography
+          variant="body1"
+          sx={{
+            wordBreak: "break-all",
+            overflowWrap: "break-word",
+          }}
+        >
+          {value}
+        </Typography>
+      </Grid>
+    </Grid>
+  );
+}
+
 interface TransactionDetailsProps extends WithTranslation {
   id: number;
   onClose: () => void;
@@ -81,40 +115,6 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
   if (!data) {
     return null;
   }
-
-  const DetailRow = ({
-    icon,
-    label,
-    value,
-  }: {
-    icon?: React.ReactNode;
-    label: string;
-    value: React.ReactNode;
-  }) => (
-    <Grid container spacing={2} sx={{ py: 1 }}>
-      <Grid size={{ xs: 12, sm: 4 }}>
-        <Stack direction="row" spacing={1} alignItems="center">
-          {icon && (
-            <Box sx={{ color: "text.secondary", display: "flex" }}>{icon}</Box>
-          )}
-          <Typography variant="body2" color="text.secondary">
-            {label}
-          </Typography>
-        </Stack>
-      </Grid>
-      <Grid size={{ xs: 12, sm: 8 }}>
-        <Typography
-          variant="body1"
-          sx={{
-            wordBreak: "break-all",
-            overflowWrap: "break-word",
-          }}
-        >
-          {value}
-        </Typography>
-      </Grid>
-    </Grid>
-  );
 
   return (
     <Dialog

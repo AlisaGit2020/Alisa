@@ -2,6 +2,7 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import { Alert, Box, Card, CardContent, Tab, Tabs } from "@mui/material";
 import React from "react";
 import { useSearchParams } from "react-router-dom";
+import { AxiosResponse } from "axios";
 import InvestmentCalculatorForm, { InvestmentInputData } from "./InvestmentCalculatorForm";
 import InvestmentCalculatorResults, { InvestmentResults } from "./InvestmentCalculatorResults";
 import SavedCalculations from "./SavedCalculations";
@@ -58,8 +59,8 @@ function InvestmentCalculatorProtected({ t }: WithTranslation) {
   const handleCalculate = async (data: InvestmentInputData) => {
     try {
       setInputData(data);
-      const response: any = await ApiClient.post('real-estate/investment/calculate', data, true);
-      setResults(response.data || response);
+      const response = await ApiClient.post('real-estate/investment/calculate', data, true) as unknown as AxiosResponse<InvestmentResults>;
+      setResults(response.data);
     } catch (error) {
       console.error('Calculation error:', error);
     }

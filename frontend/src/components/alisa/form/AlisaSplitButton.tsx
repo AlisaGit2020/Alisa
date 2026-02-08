@@ -29,7 +29,7 @@ function AlisaSplitButton(props: {
     | "warning";
 }) {
   const [open, setOpen] = React.useState(false);
-  const anchorRef = React.useRef<HTMLDivElement>(null);
+  const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement | null>(null);
   const width = props.width ? props.width : 175;
   const color = props.color ? props.color : "inherit";
   const handleToggle = () => {
@@ -37,10 +37,7 @@ function AlisaSplitButton(props: {
   };
 
   const handleClose = (event: Event) => {
-    if (
-      anchorRef.current &&
-      anchorRef.current.contains(event.target as HTMLElement)
-    ) {
+    if (anchorEl && anchorEl.contains(event.target as HTMLElement)) {
       return;
     }
 
@@ -68,7 +65,7 @@ function AlisaSplitButton(props: {
       <Box>
         <ButtonGroup
           variant="contained"
-          ref={anchorRef}
+          ref={setAnchorEl}
           aria-label="Button group with a nested menu"
           color={color}
         >
@@ -92,7 +89,7 @@ function AlisaSplitButton(props: {
             zIndex: 10,
           }}
           open={open}
-          anchorEl={anchorRef.current}
+          anchorEl={anchorEl}
           role={undefined}
           transition
           disablePortal

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Box, Tab, Tabs } from "@mui/material";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";

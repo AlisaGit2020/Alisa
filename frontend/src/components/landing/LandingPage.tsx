@@ -44,8 +44,17 @@ function LandingPage({ t }: WithTranslation) {
   const handleCalculate = async (data: InvestmentInputData) => {
     try {
       setInputData(data);
-      const response: any = await ApiClient.post('real-estate/investment/calculate', data, true);
-      setResults(response.data || response);
+      const response = await ApiClient.post<InvestmentResults | { data: InvestmentResults }>(
+        'real-estate/investment/calculate',
+        data,
+        true
+      );
+      const responseData = response as InvestmentResults | { data: InvestmentResults };
+      if ('data' in responseData) {
+        setResults(responseData.data);
+      } else {
+        setResults(responseData);
+      }
     } catch (error) {
       console.error('Calculation error:', error);
     }

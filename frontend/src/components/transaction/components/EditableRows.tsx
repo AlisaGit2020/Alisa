@@ -47,6 +47,27 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
       props.type === TransactionType.EXPENSE ? expenseContext : incomeContext,
   });
 
+  // Define helper functions before useEffect to avoid accessing before declaration
+  const typeHasChanged = React.useCallback(() => {
+    return type !== props.type;
+  }, [type, props.type]);
+
+  const addNewRow = React.useCallback(async () => {
+    const defaults = await dataService.getDefaults();
+    setData((prevData) => {
+      //calculate all rows total
+      const rowsTotalAmount = prevData
+        .map((row) => row.totalAmount)
+        .reduce((a, b) => Number(a) + Number(b), 0);
+
+      defaults.totalAmount = props.transaction.amount - rowsTotalAmount;
+
+      const newData = [...prevData, defaults];
+      props.onHandleChange(newData);
+      return newData;
+    });
+  }, [dataService, props.transaction.amount, props.onHandleChange]);
+
   React.useEffect(() => {
     if (!hasRunInit.current) {
       const addRowIfEmpty = async () => {
@@ -61,76 +82,68 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
       if (typeHasChanged()) {
         const setNewType = async () => {
           setType(props.type);
-          const newData = data;
-          //remove all rows, setData([]) does not work
-          newData.splice(0, newData.length);
-          setData(newData);
+          setData([]);
           await addNewRow();
         };
 
         setNewType().then();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.type]);
 
   React.useEffect(() => {
     if (props.changedDescription !== "") {
-      if (data.length > 0 && data[0].description === "") {
-        data[0].description = props.changedDescription;
-        setData([...data]);
-        props.onHandleChange(data);
-      }
+      setData((prevData) => {
+        if (prevData.length > 0 && prevData[0].description === "") {
+          const newData = [...prevData];
+          newData[0] = { ...newData[0], description: props.changedDescription };
+          props.onHandleChange(newData);
+          return newData;
+        }
+        return prevData;
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.changedDescription]);
 
   React.useEffect(() => {
     if (props.changedAmount !== 0) {
-      if (data.length > 0 && data[0].amount === 0) {
-        data[0].totalAmount = props.changedAmount;
-        setData([...data]);
-        props.onHandleChange(data);
-      }
+      setData((prevData) => {
+        if (prevData.length > 0 && prevData[0].amount === 0) {
+          const newData = [...prevData];
+          newData[0] = { ...newData[0], totalAmount: props.changedAmount };
+          props.onHandleChange(newData);
+          return newData;
+        }
+        return prevData;
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.changedAmount]);
-
-  const typeHasChanged = () => {
-    return type !== props.type;
-  };
-
-  const addNewRow = async () => {
-    const defaults = await dataService.getDefaults();
-    //calculate all rows total
-    const rowsTotalAmount = data
-      .map((row) => row.totalAmount)
-      .reduce((a, b) => Number(a) + Number(b), 0);
-
-    defaults.totalAmount = props.transaction.amount - rowsTotalAmount;
-
-    const newData = [...data, defaults];
-    setData(newData);
-    props.onHandleChange(newData);
-  };
 
   const removeRow = (index: number) => {
     if (data.length <= 1) {
       return;
     }
-    data.splice(index, 1);
-    setData([...data]);
-    props.onHandleChange(data);
+    const newData = [...data];
+    newData.splice(index, 1);
+    setData(newData);
+    props.onHandleChange(newData);
   };
 
   const handleChange = (index: number, name: keyof T, value: T[keyof T]) => {
     if (data === undefined) {
       return;
     }
-    data[index] = dataService.updateNestedData(
-      data[index],
+    const newData = [...data];
+    newData[index] = dataService.updateNestedData(
+      newData[index],
       name as string,
       value,
     );
-    setData([...data]);
-    props.onHandleChange(data);
+    setData(newData);
+    props.onHandleChange(newData);
   };
 
   const calculateAmount = (index: number) => {

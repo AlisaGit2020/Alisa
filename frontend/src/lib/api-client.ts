@@ -142,7 +142,7 @@ class ApiClient {
     try {
       return (await axios.post<T[]>(url, options, await ApiClient.getOptions()))
         .data;
-    } catch (error) {
+    } catch {
       ApiClient.handleError(`Error in search path ${url}`);
     }
   }
@@ -155,7 +155,7 @@ class ApiClient {
     try {
       return (await axios.post<K>(url, options, await ApiClient.getOptions()))
         .data;
-    } catch (error) {
+    } catch {
       ApiClient.handleError(`Error in search path ${url}`);
     }
   }

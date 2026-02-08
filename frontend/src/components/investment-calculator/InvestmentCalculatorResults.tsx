@@ -52,35 +52,33 @@ interface InvestmentCalculatorResultsProps extends WithTranslation {
   showSaveButton?: boolean;
 }
 
-function InvestmentCalculatorResults({ t, results, onSave, showSaveButton = true }: InvestmentCalculatorResultsProps) {
-  if (!results) {
-    return null;
-  }
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('fi-FI', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+  }).format(value);
+};
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('fi-FI', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 2,
-    }).format(value);
-  };
+const formatPercent = (value: number) => {
+  return `${value.toFixed(2)} %`;
+};
 
-  const formatPercent = (value: number) => {
-    return `${value.toFixed(2)} %`;
-  };
+const getCashFlowColor = (value: number) => {
+  if (value > 0) return 'success.main';
+  if (value < 0) return 'error.main';
+  return 'text.primary';
+};
 
-  const getCashFlowColor = (value: number) => {
-    if (value > 0) return 'success.main';
-    if (value < 0) return 'error.main';
-    return 'text.primary';
-  };
+interface ResultItemProps {
+  label: string;
+  value: number;
+  isPercent?: boolean;
+  colorize?: boolean;
+}
 
-  const ResultItem = ({ label, value, isPercent = false, colorize = false }: {
-    label: string;
-    value: number;
-    isPercent?: boolean;
-    colorize?: boolean;
-  }) => (
+function ResultItem({ label, value, isPercent = false, colorize = false }: ResultItemProps) {
+  return (
     <Grid size={{ xs: 12 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ py: 0.5 }}>
         <Typography variant="body2" color="text.secondary">
@@ -96,6 +94,12 @@ function InvestmentCalculatorResults({ t, results, onSave, showSaveButton = true
       </Box>
     </Grid>
   );
+}
+
+function InvestmentCalculatorResults({ t, results, onSave, showSaveButton = true }: InvestmentCalculatorResultsProps) {
+  if (!results) {
+    return null;
+  }
 
   return (
     <Box sx={{ mt: 4, maxWidth: 800 }}>

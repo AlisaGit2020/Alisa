@@ -1,3 +1,4 @@
+import React, { useMemo } from "react";
 import {
   Box,
   Paper,
@@ -18,7 +19,6 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import MoneyOffIcon from "@mui/icons-material/MoneyOff";
 import SavingsIcon from "@mui/icons-material/Savings";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import { useMemo } from "react";
 
 interface AcceptStepProps {
   t: TFunction;

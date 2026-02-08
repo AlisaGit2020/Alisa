@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Box,
@@ -41,11 +41,15 @@ function MainMenuItems({ open }: MainMenuItemsProps) {
   const isAccountingRoute = currentPath.startsWith(accountingContext.routePath);
   const [accountingOpen, setAccountingOpen] = useState(isAccountingRoute);
 
-  useEffect(() => {
-    if (isAccountingRoute) {
+  // Initialize accounting menu state based on current route
+  const [accountingInitialized, setAccountingInitialized] = useState(false);
+
+  React.useLayoutEffect(() => {
+    if (!accountingInitialized && isAccountingRoute) {
       setAccountingOpen(true);
+      setAccountingInitialized(true);
     }
-  }, [isAccountingRoute]);
+  }, [isAccountingRoute, accountingInitialized]);
 
   const handleExpandClick = (e: React.MouseEvent) => {
     e.preventDefault();

@@ -3,6 +3,7 @@ import { Alert, Box, Container, Link, Typography } from "@mui/material";
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
+import { AxiosResponse } from "axios";
 import InvestmentCalculatorForm, { InvestmentInputData } from "./InvestmentCalculatorForm";
 import InvestmentCalculatorResults, { InvestmentResults } from "./InvestmentCalculatorResults";
 import LoginDialog from "../login/LoginDialog";
@@ -42,8 +43,8 @@ function InvestmentCalculatorPublic({ t }: WithTranslation) {
     try {
       setInputData(data);
       // Call the public calculate endpoint (no auth required)
-      const response: any = await ApiClient.post('real-estate/investment/calculate', data, true);
-      setResults(response.data || response);
+      const response = await ApiClient.post('real-estate/investment/calculate', data, true) as unknown as AxiosResponse<InvestmentResults>;
+      setResults(response.data);
     } catch (error) {
       console.error('Calculation error:', error);
     }

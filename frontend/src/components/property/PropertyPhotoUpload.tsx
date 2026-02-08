@@ -69,8 +69,9 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
       const newPhotoPath = response.data.photo;
       setPhotoPath(newPhotoPath);
       onPhotoChange?.(newPhotoPath);
-    } catch (err: any) {
-      setError(err.response?.data?.message || t('photoUploadError'));
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setError(axiosError.response?.data?.message || t('photoUploadError'));
     } finally {
       setUploading(false);
     }
@@ -91,8 +92,9 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
 
       setPhotoPath(undefined);
       onPhotoChange?.(null);
-    } catch (err: any) {
-      setError(err.response?.data?.message || t('photoDeleteError'));
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setError(axiosError.response?.data?.message || t('photoDeleteError'));
     } finally {
       setUploading(false);
     }

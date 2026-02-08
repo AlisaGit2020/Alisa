@@ -49,7 +49,7 @@ const getStoredFilters = (): Partial<DashboardFilters> => {
     if (stored) {
       return JSON.parse(stored);
     }
-  } catch (e) {
+  } catch {
     // Ignore parsing errors
   }
   return {};
@@ -58,7 +58,7 @@ const getStoredFilters = (): Partial<DashboardFilters> => {
 const storeFilters = (filters: DashboardFilters) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
-  } catch (e) {
+  } catch {
     // Ignore storage errors
   }
 };
@@ -112,7 +112,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           setDashboardConfig(user.dashboardConfig);
         }
         setConfigLoaded(true);
-      } catch (e) {
+      } catch {
         setConfigLoaded(true);
       }
     };
@@ -133,13 +133,13 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener(
       TRANSACTION_PROPERTY_CHANGE_EVENT,
-      handlePropertyChange as EventListener
+      handlePropertyChange as (event: Event) => void
     );
 
     return () => {
       window.removeEventListener(
         TRANSACTION_PROPERTY_CHANGE_EVENT,
-        handlePropertyChange as EventListener
+        handlePropertyChange as (event: Event) => void
       );
     };
   }, []);

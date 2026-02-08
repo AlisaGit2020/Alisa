@@ -48,13 +48,13 @@ function PropertyBadge() {
 
     window.addEventListener(
       TRANSACTION_PROPERTY_CHANGE_EVENT,
-      handlePropertyChange as EventListener
+      handlePropertyChange as unknown as globalThis.EventListener
     );
 
     return () => {
       window.removeEventListener(
         TRANSACTION_PROPERTY_CHANGE_EVENT,
-        handlePropertyChange as EventListener
+        handlePropertyChange as unknown as globalThis.EventListener
       );
     };
   }, []);

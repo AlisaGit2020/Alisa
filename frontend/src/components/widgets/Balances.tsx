@@ -17,7 +17,7 @@ import Link from "@mui/material/Link";
 import TableHead from "@mui/material/TableHead";
 import TableBody from "@mui/material/TableBody";
 
-interface PropertyBalanceProps extends WithTranslation {}
+type PropertyBalanceProps = WithTranslation;
 
 function getBalance(statistics: PropertyStatistics[] | undefined): number {
   if (!statistics) return 0;
