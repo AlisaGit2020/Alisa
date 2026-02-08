@@ -124,11 +124,22 @@ Alisa/
 ├── frontend/                 # React frontend application
 │   ├── src/
 │   │   ├── components/       # React components by domain
+│   │   │   ├── accounting/   # Accounting views
+│   │   │   ├── admin/        # Admin panel
+│   │   │   ├── alisa/        # Shared UI components (AlisaTextField, etc.)
 │   │   │   ├── dashboard/    # Dashboard and widgets
+│   │   │   ├── datatables/   # Reusable data table components
+│   │   │   ├── investment-calculator/ # Investment calculator
+│   │   │   ├── landing/      # Landing page
+│   │   │   ├── layout/       # App shell components
+│   │   │   ├── login/        # Login views
 │   │   │   ├── property/     # Property management
-│   │   │   ├── transaction/  # Transaction views
 │   │   │   ├── settings/     # User settings
-│   │   │   └── layout/       # App shell components
+│   │   │   ├── tax/          # Tax-related views
+│   │   │   ├── templates/    # Template components
+│   │   │   ├── transaction/  # Transaction views
+│   │   │   ├── user/         # User profile views
+│   │   │   └── widgets/      # Shared UI widgets
 │   │   ├── lib/              # Utilities and services
 │   │   │   ├── api-client.ts # API communication
 │   │   │   └── data-service.ts
@@ -138,11 +149,14 @@ Alisa/
 ├── backend/                  # NestJS backend application
 │   ├── src/
 │   │   ├── accounting/       # Transaction, income, expense modules
+│   │   ├── admin/            # Admin functionality
 │   │   ├── auth/             # Authentication (JWT, Google OAuth)
-│   │   ├── real-estate/      # Property and investment modules
-│   │   ├── people/           # User and ownership management
+│   │   ├── common/           # Shared utilities and base classes
+│   │   ├── defaults/         # Default data management
 │   │   ├── google/           # Google service integrations
-│   │   └── import/           # Bank CSV import utilities
+│   │   ├── import/           # Bank CSV import utilities
+│   │   ├── people/           # User and ownership management
+│   │   └── real-estate/      # Property and investment modules
 │   └── package.json
 │
 ├── docker-compose.yml        # Docker orchestration
@@ -181,6 +195,10 @@ The backend exposes RESTful endpoints:
 | `npm run lint` | Run ESLint with auto-fix |
 | `npm run test` | Run unit tests |
 | `npm run test:e2e` | Run end-to-end tests |
+
+## Documentation Maintenance
+
+**Keep this README up to date.** When making changes that affect this documentation (new features, architecture changes, dependency updates, etc.), update this file as part of the same commit or PR.
 
 ## License
 

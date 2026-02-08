@@ -34,7 +34,7 @@ docker-compose up    # Start all services (database:5432, backend:3000, frontend
 ## Architecture
 
 ### Tech Stack
-- **Frontend:** React 18 + TypeScript + Vite + Material-UI + i18next
+- **Frontend:** React 19 + TypeScript + Vite + Material-UI + i18next
 - **Backend:** NestJS + TypeORM + PostgreSQL + Passport JWT/Google OAuth
 - **Database:** PostgreSQL with TypeORM auto-sync enabled
 
@@ -194,3 +194,7 @@ git commit -m "ci: update workflow config [skip deploy]"
 The project uses Husky for git hooks:
 - **pre-commit**: Runs lint-staged on changed files
 - **pre-push**: Runs unit tests for backend and frontend
+
+## Documentation Maintenance
+
+**Keep README.md and CLAUDE.md up to date.** When making changes that affect documentation accuracy (new features, architecture changes, dependency updates, new modules, etc.), update the relevant documentation as part of the same commit or PR.
