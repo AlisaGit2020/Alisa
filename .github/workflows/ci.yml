@@ -56,6 +56,9 @@ jobs:
           DB_PASSWORD: mysecretpassword
           DB_DATABASE: postgres
 
+      - name: Create test database
+        run: PGPASSWORD=mysecretpassword psql -h localhost -U postgres -c "CREATE DATABASE alisa_test;"
+
       - name: Run backend e2e tests
         run: npm run test:e2e
         working-directory: backend
@@ -64,7 +67,7 @@ jobs:
           DB_PORT: 5432
           DB_USERNAME: postgres
           DB_PASSWORD: mysecretpassword
-          DB_DATABASE: postgres
+          DB_DATABASE: alisa_test
 
       # Frontend
       - name: Install frontend dependencies
