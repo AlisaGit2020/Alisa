@@ -22,6 +22,7 @@ export class DepreciationAssetBreakdownDto {
 export class TaxResponseDto {
   year: number;
   propertyId?: number;
+  ownershipShare?: number;
   grossIncome: number;
   deductions: number;
   depreciation: number;

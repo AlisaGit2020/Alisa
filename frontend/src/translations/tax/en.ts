@@ -32,6 +32,7 @@ const tax = {
   depreciationInfoExample3: 'Heating system replacement',
   depreciationInfoText2: 'Depreciation is calculated at 10% per year of the original purchase price. Depreciation is applied for a maximum of 10 years until the entire amount has been deducted.',
   depreciationInfoText3: 'Annual repairs (e.g., faucet replacement, painting) are deducted in full in the same year as an expense, not as depreciation.',
+  ownershipShare: 'Your ownership share',
 }
 
 export default tax

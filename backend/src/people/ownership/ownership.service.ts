@@ -19,8 +19,8 @@ export class OwnershipService {
     return this.repository.find();
   }
 
-  async findOne(id: number): Promise<Ownership> {
-    return this.repository.findOneBy({ id: id });
+  async findOne(propertyId: number, userId: number): Promise<Ownership> {
+    return this.repository.findOneBy({ propertyId, userId });
   }
 
   async add(input: OwnershipInputDto): Promise<Ownership> {
@@ -31,8 +31,12 @@ export class OwnershipService {
     return await this.repository.save(ownershipEntity);
   }
 
-  async update(id: number, input: OwnershipInputDto): Promise<Ownership> {
-    const ownershipEntity = await this.findOne(id);
+  async update(
+    propertyId: number,
+    userId: number,
+    input: OwnershipInputDto,
+  ): Promise<Ownership> {
+    const ownershipEntity = await this.findOne(propertyId, userId);
 
     this.mapData(ownershipEntity, input);
 
@@ -40,8 +44,8 @@ export class OwnershipService {
     return ownershipEntity;
   }
 
-  async delete(id: number): Promise<void> {
-    await this.repository.delete(id);
+  async delete(propertyId: number, userId: number): Promise<void> {
+    await this.repository.delete({ propertyId, userId });
   }
 
   private mapData(ownership: Ownership, input: OwnershipInputDto) {

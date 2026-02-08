@@ -4,7 +4,6 @@ import { TransactionStatus, TransactionType } from './common';
 
 // Ownership input
 export interface OwnershipInput {
-  id?: number;
   userId: number;
   propertyId?: number;
   share: number;

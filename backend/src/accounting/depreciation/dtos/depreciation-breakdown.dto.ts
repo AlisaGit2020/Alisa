@@ -2,6 +2,7 @@ export class DepreciationBreakdownItemDto {
   // Asset identification
   assetId: number;
   expenseId: number;
+  propertyId: number;
   description: string;
 
   // Acquisition info

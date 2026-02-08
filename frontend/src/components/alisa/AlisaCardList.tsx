@@ -95,6 +95,7 @@ function AlisaCardList<T extends { id: number }>({
             postalCode?: string;
             buildYear?: number;
             apartmentType?: string;
+            ownerships?: { share: number }[];
           }) => (
             <Grid key={item.name} size={{ md: 4 }}>
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -132,6 +133,12 @@ function AlisaCardList<T extends { id: number }>({
                         <TableRow>
                           <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("buildYear")}</TableCell>
                           <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.buildYear}</TableCell>
+                        </TableRow>
+                      )}
+                      {item.ownerships?.[0]?.share !== undefined && item.ownerships[0].share < 100 && (
+                        <TableRow>
+                          <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("ownershipShare")}</TableCell>
+                          <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.ownerships[0].share} %</TableCell>
                         </TableRow>
                       )}
                     </TableBody>

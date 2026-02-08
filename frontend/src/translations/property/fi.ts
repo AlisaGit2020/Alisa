@@ -26,6 +26,7 @@ const property = {
     photoUploadError: 'Kuvan lataus epäonnistui. Yritä uudelleen.',
     photoDeleteError: 'Kuvan poisto epäonnistui. Yritä uudelleen.',
     savePropertyFirst: 'Tallenna kohde ensin lisätäksesi kuvan',
+    ownershipShare: 'Omistusosuus',
 }
 
 export default property

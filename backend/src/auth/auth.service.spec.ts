@@ -155,8 +155,8 @@ describe('AuthService', () => {
 
       const existingUser = createUser({ id: 1, ...userInput });
       existingUser.ownerships = [
-        { id: 1, propertyId: 1, userId: 1, share: 100 },
-        { id: 2, propertyId: 2, userId: 1, share: 50 },
+        { propertyId: 1, userId: 1, share: 100 },
+        { propertyId: 2, userId: 1, share: 50 },
       ] as Ownership[];
 
       mockUserService.search.mockResolvedValue([existingUser]);

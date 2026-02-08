@@ -208,6 +208,7 @@ export class DepreciationService {
         items.push({
           assetId: asset.id,
           expenseId: asset.expenseId,
+          propertyId: asset.propertyId,
           description: asset.description,
           acquisitionYear: asset.acquisitionYear,
           acquisitionMonth: asset.acquisitionMonth,

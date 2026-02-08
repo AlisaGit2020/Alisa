@@ -3,8 +3,6 @@ import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/prope
 import { IsNumber, Max, Min } from 'class-validator';
 
 export class OwnershipInputDto {
-  id?: number;
-
   user?: UserInputDto;
 
   @IsNumber()

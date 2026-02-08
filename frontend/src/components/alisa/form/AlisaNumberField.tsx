@@ -28,6 +28,7 @@ function AlisaNumberField(props: {
       disabled={props.disabled !== undefined ? props.disabled : false}
       onChange={props.onChange}
       onBlur={props.onBlur}
+      onFocus={(e) => e.target.select()}
       InputProps={{
         endAdornment: props.adornment ? (
           <InputAdornment position="end">{props.adornment}</InputAdornment>

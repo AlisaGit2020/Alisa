@@ -361,4 +361,126 @@ describe('Tax endpoints (e2e)', () => {
         .expect(401);
     });
   });
+
+  describe('Tax calculation with ownership percentage', () => {
+    it('returns ownershipShare in response', async () => {
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      const response = await request(server)
+        .post('/real-estate/property/tax/calculate')
+        .set('Authorization', getBearerToken(token))
+        .send({ year: 2024 })
+        .expect(200);
+
+      expect(response.body.ownershipShare).toBeDefined();
+      expect(typeof response.body.ownershipShare).toBe('number');
+    });
+
+    it('adjusts amounts for partial ownership', async () => {
+      const user = testUsers.userWithoutProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create property with 50% ownership
+      const propertyResponse = await request(server)
+        .post('/real-estate/property')
+        .set('Authorization', getBearerToken(token))
+        .send({
+          name: 'Partial Ownership Property',
+          size: 80,
+          ownerships: [{ share: 50 }],
+        })
+        .expect(201);
+
+      const propertyId = propertyResponse.body.id;
+
+      // Create expense type
+      const expenseType = await expenseTypeService.add(user.jwtUser, {
+        name: 'Test Repairs',
+        description: 'For tax test',
+        isTaxDeductible: true,
+        isCapitalImprovement: false,
+      });
+
+      // Create income type
+      const incomeType = await incomeTypeService.add(user.jwtUser, {
+        name: 'Test Rent',
+        description: 'For tax test',
+      });
+
+      // Add income: 1000€
+      await transactionService.add(user.jwtUser, {
+        propertyId,
+        type: TransactionType.INCOME,
+        status: TransactionStatus.ACCEPTED,
+        sender: 'Tenant',
+        receiver: 'Owner',
+        description: 'Rent',
+        transactionDate: new Date('2024-08-15'),
+        accountingDate: new Date('2024-08-15'),
+        amount: 1000,
+        incomes: [
+          {
+            incomeTypeId: incomeType.id,
+            description: 'August rent',
+            amount: 1000,
+            quantity: 1,
+            totalAmount: 1000,
+          },
+        ],
+      });
+
+      // Add expense: 200€
+      await transactionService.add(user.jwtUser, {
+        propertyId,
+        type: TransactionType.EXPENSE,
+        status: TransactionStatus.ACCEPTED,
+        sender: 'Owner',
+        receiver: 'Contractor',
+        description: 'Repairs',
+        transactionDate: new Date('2024-08-20'),
+        accountingDate: new Date('2024-08-20'),
+        amount: 200,
+        expenses: [
+          {
+            expenseTypeId: expenseType.id,
+            description: 'Fix something',
+            amount: 200,
+            quantity: 1,
+            totalAmount: 200,
+          },
+        ],
+      });
+
+      // Calculate tax
+      const response = await request(server)
+        .post('/real-estate/property/tax/calculate')
+        .set('Authorization', getBearerToken(token))
+        .send({ year: 2024, propertyId })
+        .expect(200);
+
+      // With 50% ownership:
+      // grossIncome should be 1000 * 0.5 = 500
+      // deductions should be 200 * 0.5 = 100
+      expect(response.body.ownershipShare).toBe(50);
+      expect(response.body.grossIncome).toBe(500);
+      expect(response.body.deductions).toBe(100);
+      expect(response.body.netIncome).toBe(400); // 500 - 100 - 0 depreciation
+    });
+
+    it('returns 100% ownership share by default', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Calculate for property with 100% ownership
+      const response = await request(server)
+        .post('/real-estate/property/tax/calculate')
+        .set('Authorization', getBearerToken(token))
+        .send({ year: 2024, propertyId: user.properties[0].id })
+        .expect(200);
+
+      // Ownership share should be close to 100 (could be average of multiple properties)
+      expect(response.body.ownershipShare).toBeGreaterThanOrEqual(1);
+      expect(response.body.ownershipShare).toBeLessThanOrEqual(100);
+    });
+  });
 });

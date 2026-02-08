@@ -34,7 +34,6 @@ export interface User {
 
 // Ownership
 export interface Ownership {
-  id: number;
   share: number;
   user?: User;
   userId: number;

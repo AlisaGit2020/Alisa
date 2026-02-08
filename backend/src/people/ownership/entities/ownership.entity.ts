@@ -3,16 +3,15 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
+  Unique,
 } from 'typeorm';
 import { User } from '@alisa-backend/people/user/entities/user.entity';
 import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 
 @Entity()
+@Unique(['propertyId', 'userId'])
 export class Ownership {
-  @PrimaryGeneratedColumn()
-  public id: number;
-
   @Column()
   share: number;
 
@@ -24,7 +23,7 @@ export class Ownership {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ nullable: false })
+  @PrimaryColumn()
   userId: number;
 
   //Property
@@ -35,6 +34,6 @@ export class Ownership {
   @JoinColumn({ name: 'propertyId' })
   property: Property;
 
-  @Column({ nullable: false })
+  @PrimaryColumn()
   propertyId: number;
 }

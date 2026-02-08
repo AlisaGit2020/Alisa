@@ -14,7 +14,7 @@ function Properties({ t }: WithTranslation) {
             t={t}
             alisaContext={propertyContext}
             fields={[{ name: "name" }, { name: "size", format: "number" }]}
-            fetchOptions={{ order: { name: "ASC" } }}
+            fetchOptions={{ order: { name: "ASC" }, relations: { ownerships: true } }}
           />
         </Grid>
       </Grid>

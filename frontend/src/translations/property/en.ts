@@ -26,6 +26,7 @@ const property = {
     photoUploadError: 'Failed to upload photo. Please try again.',
     photoDeleteError: 'Failed to delete photo. Please try again.',
     savePropertyFirst: 'Save the property first to add a photo',
+    ownershipShare: 'Ownership share',
 }
 
 export default property

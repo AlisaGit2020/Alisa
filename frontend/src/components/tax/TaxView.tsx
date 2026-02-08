@@ -48,6 +48,7 @@ interface DepreciationAssetBreakdown {
 interface TaxData {
   year: number;
   propertyId?: number;
+  ownershipShare?: number;
   grossIncome: number;
   deductions: number;
   depreciation: number;
@@ -216,6 +217,11 @@ function TaxView() {
             depreciation={taxData.depreciation}
             netIncome={taxData.netIncome}
           />
+          {taxData.ownershipShare !== undefined && taxData.ownershipShare < 100 && (
+            <Alert severity="info" sx={{ mt: 2 }}>
+              {t("ownershipShare")}: {taxData.ownershipShare}%
+            </Alert>
+          )}
           <Box sx={{ mt: 3, mb: 2 }}>
             <Button
               variant="outlined"

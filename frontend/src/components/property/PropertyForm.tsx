@@ -25,7 +25,8 @@ function PropertyForm({ t }: WithTranslation) {
         city: '',
         postalCode: '',
         buildYear: undefined,
-        apartmentType: ''
+        apartmentType: '',
+        ownerships: [{ userId: 0, share: 100 }]
     });
     const { idParam } = useParams();
     const navigate = useNavigate();
@@ -39,6 +40,12 @@ function PropertyForm({ t }: WithTranslation) {
         value: PropertyInput[keyof PropertyInput]
     ) => {
         setData(dataService.updateNestedData(data, name, value));
+    }
+
+    const handleOwnershipChange = (share: number) => {
+        const ownerships = data.ownerships ?? [{ userId: 0, share: 100 }];
+        const updatedOwnerships = [{ ...ownerships[0], share }];
+        setData({ ...data, ownerships: updatedOwnerships });
     }
 
     const formComponents = (
@@ -106,6 +113,14 @@ function PropertyForm({ t }: WithTranslation) {
                     rows={4}
                     onChange={(e) => handleChange('description', e.target.value)}
                 />
+                <Box sx={{ maxWidth: 200 }}>
+                    <AlisaNumberField
+                        label={t('ownershipShare')}
+                        value={data.ownerships?.[0]?.share ?? 100}
+                        onChange={(e) => handleOwnershipChange(getNumber(e.target.value, 1))}
+                        adornment='%'
+                    />
+                </Box>
                 {data.id !== 0 && (
                     <PropertyPhotoUpload
                         propertyId={data.id}

@@ -32,6 +32,7 @@ const tax = {
   depreciationInfoExample3: 'Lämmitysjärjestelmän uusiminen',
   depreciationInfoText2: 'Poistot lasketaan 10% vuodessa alkuperäisestä hankintahinnasta. Poisto tehdään enintään 10 vuoden ajan, kunnes koko summa on vähennetty.',
   depreciationInfoText3: 'Vuosikorjaukset (esim. hanan vaihto, maalaus) vähennetään kokonaan samana vuonna kuluna, ei poistoina.',
+  ownershipShare: 'Omistusosuutesi',
 }
 
 export default tax

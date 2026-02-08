@@ -10,7 +10,6 @@ describe('OwnershipService', () => {
 
   const createOwnership = (options: Partial<Ownership> = {}): Ownership => {
     const ownership = new Ownership();
-    ownership.id = options.id ?? 1;
     ownership.userId = options.userId ?? 1;
     ownership.propertyId = options.propertyId ?? 1;
     ownership.share = options.share ?? 100;
@@ -33,8 +32,8 @@ describe('OwnershipService', () => {
   describe('findAll', () => {
     it('returns all ownerships', async () => {
       const ownerships = [
-        createOwnership({ id: 1, userId: 1, propertyId: 1 }),
-        createOwnership({ id: 2, userId: 2, propertyId: 2 }),
+        createOwnership({ userId: 1, propertyId: 1 }),
+        createOwnership({ userId: 2, propertyId: 2 }),
       ];
       mockRepository.find.mockResolvedValue(ownerships);
 
@@ -55,7 +54,7 @@ describe('OwnershipService', () => {
 
   describe('search', () => {
     it('returns ownerships matching search options', async () => {
-      const ownerships = [createOwnership({ id: 1, userId: 1 })];
+      const ownerships = [createOwnership({ userId: 1 })];
       mockRepository.find.mockResolvedValue(ownerships);
 
       const result = await service.search({ where: { userId: 1 } });
@@ -75,7 +74,7 @@ describe('OwnershipService', () => {
     });
 
     it('supports relations in search options', async () => {
-      const ownership = createOwnership({ id: 1 });
+      const ownership = createOwnership({ propertyId: 1, userId: 1 });
       mockRepository.find.mockResolvedValue([ownership]);
 
       const result = await service.search({ relations: ['user', 'property'] });
@@ -88,8 +87,8 @@ describe('OwnershipService', () => {
 
     it('supports filtering by propertyId', async () => {
       const ownerships = [
-        createOwnership({ id: 1, propertyId: 1 }),
-        createOwnership({ id: 2, propertyId: 1 }),
+        createOwnership({ propertyId: 1, userId: 1 }),
+        createOwnership({ propertyId: 1, userId: 2 }),
       ];
       mockRepository.find.mockResolvedValue(ownerships);
 
@@ -103,20 +102,23 @@ describe('OwnershipService', () => {
   });
 
   describe('findOne', () => {
-    it('returns ownership when found', async () => {
-      const ownership = createOwnership({ id: 1 });
+    it('returns ownership when found by composite key', async () => {
+      const ownership = createOwnership({ propertyId: 1, userId: 1 });
       mockRepository.findOneBy.mockResolvedValue(ownership);
 
-      const result = await service.findOne(1);
+      const result = await service.findOne(1, 1);
 
       expect(result).toEqual(ownership);
-      expect(mockRepository.findOneBy).toHaveBeenCalledWith({ id: 1 });
+      expect(mockRepository.findOneBy).toHaveBeenCalledWith({
+        propertyId: 1,
+        userId: 1,
+      });
     });
 
     it('returns null when ownership not found', async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
-      const result = await service.findOne(999);
+      const result = await service.findOne(999, 999);
 
       expect(result).toBeNull();
     });
@@ -129,7 +131,7 @@ describe('OwnershipService', () => {
         propertyId: 1,
         share: 100,
       };
-      const savedOwnership = createOwnership({ id: 1, ...input });
+      const savedOwnership = createOwnership(input);
       mockRepository.save.mockResolvedValue(savedOwnership);
 
       const result = await service.add(input);
@@ -144,7 +146,7 @@ describe('OwnershipService', () => {
         propertyId: 1,
         share: 50,
       };
-      const savedOwnership = createOwnership({ id: 1, ...input });
+      const savedOwnership = createOwnership(input);
       mockRepository.save.mockResolvedValue(savedOwnership);
 
       const result = await service.add(input);
@@ -156,8 +158,8 @@ describe('OwnershipService', () => {
       const input1 = { userId: 1, propertyId: 1, share: 50 };
       const input2 = { userId: 2, propertyId: 1, share: 50 };
 
-      const savedOwnership1 = createOwnership({ id: 1, ...input1 });
-      const savedOwnership2 = createOwnership({ id: 2, ...input2 });
+      const savedOwnership1 = createOwnership(input1);
+      const savedOwnership2 = createOwnership(input2);
 
       mockRepository.save
         .mockResolvedValueOnce(savedOwnership1)
@@ -173,8 +175,12 @@ describe('OwnershipService', () => {
   });
 
   describe('update', () => {
-    it('updates existing ownership', async () => {
-      const existingOwnership = createOwnership({ id: 1, share: 100 });
+    it('updates existing ownership by composite key', async () => {
+      const existingOwnership = createOwnership({
+        propertyId: 1,
+        userId: 1,
+        share: 100,
+      });
       const input = {
         userId: 1,
         propertyId: 1,
@@ -183,7 +189,7 @@ describe('OwnershipService', () => {
       mockRepository.findOneBy.mockResolvedValue(existingOwnership);
       mockRepository.save.mockResolvedValue({ ...existingOwnership, ...input });
 
-      const result = await service.update(1, input);
+      const result = await service.update(1, 1, input);
 
       expect(result.share).toBe(75);
       expect(mockRepository.save).toHaveBeenCalled();
@@ -191,7 +197,6 @@ describe('OwnershipService', () => {
 
     it('only updates provided fields', async () => {
       const existingOwnership = createOwnership({
-        id: 1,
         userId: 1,
         propertyId: 1,
         share: 100,
@@ -203,48 +208,35 @@ describe('OwnershipService', () => {
       mockRepository.findOneBy.mockResolvedValue(existingOwnership);
       mockRepository.save.mockImplementation((entity) => Promise.resolve(entity));
 
-      const result = await service.update(1, input);
+      const result = await service.update(1, 1, input);
 
       expect(result.share).toBe(50);
       expect(result.propertyId).toBe(1);
     });
-
-    it('updates userId when changing ownership', async () => {
-      const existingOwnership = createOwnership({ id: 1, userId: 1 });
-      const input = {
-        userId: 2,
-        propertyId: 1,
-        share: 100,
-      };
-      mockRepository.findOneBy.mockResolvedValue(existingOwnership);
-      mockRepository.save.mockImplementation((entity) => Promise.resolve(entity));
-
-      const result = await service.update(1, input);
-
-      expect(result.userId).toBe(2);
-    });
   });
 
   describe('delete', () => {
-    it('deletes ownership by id', async () => {
+    it('deletes ownership by composite key', async () => {
       mockRepository.delete.mockResolvedValue({ affected: 1 });
 
-      await service.delete(1);
+      await service.delete(1, 1);
 
-      expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockRepository.delete).toHaveBeenCalledWith({
+        propertyId: 1,
+        userId: 1,
+      });
     });
 
     it('completes without error when ownership does not exist', async () => {
       mockRepository.delete.mockResolvedValue({ affected: 0 });
 
-      await expect(service.delete(999)).resolves.toBeUndefined();
+      await expect(service.delete(999, 999)).resolves.toBeUndefined();
     });
   });
 
   describe('mapData', () => {
     it('skips undefined values when mapping', async () => {
       const existingOwnership = createOwnership({
-        id: 1,
         userId: 1,
         propertyId: 1,
         share: 100,
@@ -257,7 +249,7 @@ describe('OwnershipService', () => {
       mockRepository.findOneBy.mockResolvedValue(existingOwnership);
       mockRepository.save.mockImplementation((entity) => Promise.resolve(entity));
 
-      const result = await service.update(1, input);
+      const result = await service.update(1, 1, input);
 
       expect(result.share).toBe(75);
       expect(result.propertyId).toBe(1);
