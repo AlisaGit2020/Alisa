@@ -10,6 +10,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
@@ -56,43 +59,60 @@ export default function ReviewStep({
   );
   const [searchText, setSearchText] = useState("");
   const [searchField, setSearchField] = useState<SearchField>("all");
+  const [showOnlyUnknown, setShowOnlyUnknown] = useState(true);
 
-  // Filter transactions based on search text and selected field
+  // Filter transactions based on unknown filter, search text, and selected field
   const filteredTransactions = useMemo(() => {
-    if (!searchText.trim()) {
-      return transactions;
-    }
-    const search = searchText.toLowerCase();
-    return transactions.filter((tx) => {
-      const sender = (tx.sender || "").toLowerCase();
-      const receiver = (tx.receiver || "").toLowerCase();
-      const description = (tx.description || "").toLowerCase();
-      const amount = tx.amount.toString();
+    let filtered = transactions;
 
-      switch (searchField) {
-        case "sender":
-          return sender.includes(search);
-        case "receiver":
-          return receiver.includes(search);
-        case "description":
-          return description.includes(search);
-        case "amount":
-          return amount.includes(search);
-        case "all":
-        default:
-          return (
-            sender.includes(search) ||
-            receiver.includes(search) ||
-            description.includes(search) ||
-            amount.includes(search)
-          );
-      }
-    });
-  }, [transactions, searchText, searchField]);
+    // First filter by unknown type if enabled
+    if (showOnlyUnknown) {
+      filtered = filtered.filter((tx) => tx.type === TransactionType.UNKNOWN);
+    }
+
+    // Then filter by search text
+    if (searchText.trim()) {
+      const search = searchText.toLowerCase();
+      filtered = filtered.filter((tx) => {
+        const sender = (tx.sender || "").toLowerCase();
+        const receiver = (tx.receiver || "").toLowerCase();
+        const description = (tx.description || "").toLowerCase();
+        const amount = tx.amount.toString();
+
+        switch (searchField) {
+          case "sender":
+            return sender.includes(search);
+          case "receiver":
+            return receiver.includes(search);
+          case "description":
+            return description.includes(search);
+          case "amount":
+            return amount.includes(search);
+          case "all":
+          default:
+            return (
+              sender.includes(search) ||
+              receiver.includes(search) ||
+              description.includes(search) ||
+              amount.includes(search)
+            );
+        }
+      });
+    }
+
+    return filtered;
+  }, [transactions, searchText, searchField, showOnlyUnknown]);
+
+  // Count unknown transactions
+  const unknownCount = useMemo(() => {
+    return transactions.filter((tx) => tx.type === TransactionType.UNKNOWN).length;
+  }, [transactions]);
 
   const handleSetType = async (type: number) => {
     setSaveResult(undefined);
     await onSetType(type);
+    // Clear search to show remaining unknown rows
+    setSearchText("");
   };
 
   const handleSetCategoryType = async (
@@ -123,8 +143,26 @@ export default function ReviewStep({
         </Alert>
       )}
 
-      {/* Search filter */}
-      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+      {/* Filter controls */}
+      <Stack direction="row" spacing={2} sx={{ mb: 2 }} alignItems="center">
+        <ToggleButtonGroup
+          value={showOnlyUnknown ? "unknown" : "all"}
+          exclusive
+          onChange={(_, value) => {
+            if (value !== null) {
+              setShowOnlyUnknown(value === "unknown");
+            }
+          }}
+          size="small"
+        >
+          <ToggleButton value="unknown">
+            {t("importWizard.unknownOnly")} ({unknownCount})
+          </ToggleButton>
+          <ToggleButton value="all">
+            {t("importWizard.showAll")} ({transactions.length})
+          </ToggleButton>
+        </ToggleButtonGroup>
+
         <FormControl size="small" sx={{ minWidth: 140 }}>
           <InputLabel>{t("searchField")}</InputLabel>
           <Select
@@ -155,6 +193,10 @@ export default function ReviewStep({
           }}
           sx={{ width: 250 }}
         />
+
+        <Typography variant="body2" color="text.secondary" sx={{ ml: "auto" }}>
+          {t("importWizard.showingCount", { count: filteredTransactions.length })}
+        </Typography>
       </Stack>
 
       {/* Bulk actions */}

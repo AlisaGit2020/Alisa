@@ -99,6 +99,9 @@ const transaction = {
     importAnotherFile: "Import Another File",
     viewTransactions: "Go to Transactions",
     allFields: "All fields",
+    unknownOnly: "Unknown only",
+    showAll: "Show all",
+    showingCount: "Showing {{count}} rows",
   },
 };
 

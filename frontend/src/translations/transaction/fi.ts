@@ -99,6 +99,9 @@ const transaction = {
     importAnotherFile: "Tuo toinen tiedosto",
     viewTransactions: "Siirry tapahtumiin",
     allFields: "Kaikki kentät",
+    unknownOnly: "Vain tuntemattomat",
+    showAll: "Näytä kaikki",
+    showingCount: "Näytetään {{count}} riviä",
   },
 };
 
