@@ -1,0 +1,17 @@
+{
+  "name": "alisa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Alisa - Financial and property management application",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0"
+  },
+  "lint-staged": {
+    "backend/**/*.ts": "npm run lint --prefix backend --",
+    "frontend/**/*.{ts,tsx}": "npm run lint --prefix frontend --"
+  }
+}
