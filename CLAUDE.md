@@ -195,6 +195,181 @@ The project uses Husky for git hooks:
 - **pre-commit**: Runs lint-staged on changed files
 - **pre-push**: Runs unit tests for backend and frontend
 
+## Backend DTOs and Input Types
+
+### DTO Location
+DTOs are located in `/dtos` subdirectories within each service module:
+- `backend/src/accounting/transaction/dtos/` - Transaction-related DTOs
+- `backend/src/accounting/expense/dtos/` - Expense DTOs
+- `backend/src/accounting/income/dtos/` - Income DTOs
+- `backend/src/real-estate/property/dtos/` - Property DTOs
+- `backend/src/import/*/dtos/` - Import-specific DTOs
+- `backend/src/common/dtos/` - Shared DTOs (e.g., `DataSaveResultDto`)
+
+### DTO Creation Pattern
+DTOs use `class-validator` decorators for validation:
+
+```typescript
+import { IsNotEmpty } from 'class-validator';
+
+export class TransactionInputDto {
+  id?: number;  // Optional for create, used for update
+
+  @IsNotEmpty()
+  sender: string = '';
+
+  @IsNotEmpty()
+  description: string = '';
+
+  amount: number = 0;
+  propertyId?: number;
+}
+```
+
+### When to Use DTO vs Entity
+- **DTO (Data Transfer Object)**: Use for API input/output, validation, and data transformation
+- **Entity**: Use for database operations and TypeORM relationships
+- DTOs are named `*InputDto` for inputs (e.g., `PropertyInputDto`)
+- Response DTOs are named `*Dto` (e.g., `TransactionStatisticsDto`)
+
+### Frontend Type Synchronization
+Frontend types in `frontend/src/types/` mirror backend DTOs:
+- `inputs.ts` - Mirrors backend `*InputDto` classes as TypeScript interfaces
+- `entities.ts` - Entity types for frontend display
+- `common.ts` - Shared enums and types (e.g., `TransactionStatus`, `TransactionType`)
+
+When modifying backend DTOs, update corresponding frontend types in `frontend/src/types/inputs.ts`.
+
+## Error Handling Patterns
+
+### Backend (NestJS)
+Use NestJS built-in exceptions:
+
+```typescript
+import { NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+
+// 404 - Resource not found
+throw new NotFoundException('Property not found');
+
+// 401 - Unauthorized access
+throw new UnauthorizedException();
+
+// 400 - Validation error
+throw new BadRequestException('Invalid input');
+```
+
+Standard HTTP status codes:
+- `200` - Success
+- `201` - Created
+- `400` - Bad Request (validation errors)
+- `401` - Unauthorized (no access)
+- `403` - Forbidden
+- `404` - Not Found
+
+### Frontend Error Handling
+Use try/catch with user notifications:
+
+```typescript
+try {
+  await apiClient.post('/endpoint', data);
+  // Success handling
+} catch (error) {
+  // Display error to user via snackbar or alert
+  console.error(error);
+}
+```
+
+## Common Module & Utilities
+
+The `backend/src/common/` directory contains shared utilities:
+
+### Types (`common/types.ts`)
+- `TransactionStatus` - PENDING, ACCEPTED
+- `TransactionType` - UNKNOWN, INCOME, EXPENSE, DEPOSIT, WITHDRAW
+- `StatisticKey` - Balance and tax-related keys
+- `FindOptionsWhereWithUserId<T>` - TypeORM helper for user filtering
+
+### Decorators (`common/decorators/`)
+- `@User()` - Parameter decorator to extract JWT user from request
+
+### Transformers (`common/transformer/`)
+- `DecimalToNumberTransformer` - TypeORM value transformer for decimal columns
+- `TypeormWhereTransformer` - Transforms frontend filter objects to TypeORM where clauses
+
+### Other Utilities
+- `typeorm.column.definitions.ts` - Reusable column definitions
+- `event-tracker.service.ts` - Tracks async events for graceful shutdown
+- `dashboard-config.ts` - Dashboard configuration
+- `loan-message-parser.ts` - Parses loan payment messages
+
+## Import Module
+
+The import module (`backend/src/import/`) handles CSV imports from Finnish banks.
+
+### Supported Banks
+| Bank | Service | Controller |
+|------|---------|------------|
+| OP | `OpImportService` | `OpImportController` |
+| S-Pankki | `SPankkiImportService` | `SPankkiImportController` |
+
+### Architecture
+Each bank import follows the same pattern:
+1. **Controller** - Handles HTTP request with file upload
+2. **Service** - Validates, parses CSV, transforms to transactions
+3. **DTO** - Input validation (`*ImportInput`)
+
+### Import Flow
+```
+CSV File → Validate User Ownership → Parse CSV Rows → Transform to TransactionInputDto → Save
+```
+
+Key features:
+- Generates unique `externalId` from CSV row hash to prevent duplicates
+- Skips already accepted transactions during re-import
+- Returns `ImportResultDto` with saved IDs and skip count
+
+### Adding a New Bank Format
+
+1. Create service directory: `backend/src/import/newbank/`
+
+2. Create DTO:
+```typescript
+// dtos/newbank-import-input.dto.ts
+export class NewBankImportInput {
+  file: string;
+  fileName?: string;
+  propertyId: number;
+}
+```
+
+3. Create service following existing pattern:
+```typescript
+@Injectable()
+export class NewBankImportService {
+  constructor(
+    private transactionService: TransactionService,
+    private propertyService: PropertyService,
+    private authService: AuthService,
+  ) {}
+
+  async importCsv(user: JWTUser, options: NewBankImportInput): Promise<ImportResultDto> {
+    await this.validate(user, options);
+    const rows = await this.readCsv(options);
+    return await this.saveRows(user, rows, options);
+  }
+
+  private async readCsv(options): Promise<CSVRow[]> {
+    // Parse CSV with bank-specific column mapping
+  }
+}
+```
+
+4. Create controller and register in `import.module.ts`
+
+5. Add frontend type in `frontend/src/types/inputs.ts`
+
+6. Add bank logo to `frontend/assets/banks/`
+
 ## Documentation Maintenance
 
 **Keep README.md and CLAUDE.md up to date.** When making changes that affect documentation accuracy (new features, architecture changes, dependency updates, new modules, etc.), update the relevant documentation as part of the same commit or PR.
