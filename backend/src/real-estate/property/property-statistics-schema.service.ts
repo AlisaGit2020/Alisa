@@ -16,6 +16,17 @@ export class PropertyStatisticsSchemaService implements OnApplicationBootstrap {
   }
 
   private async fixUniqueConstraint(): Promise<void> {
+    // First, remove duplicate rows (keep the one with the highest id)
+    await this.dataSource.query(`
+      DELETE FROM property_statistics
+      WHERE id NOT IN (
+        SELECT MAX(id)
+        FROM property_statistics
+        GROUP BY "propertyId", year, month, key
+      );
+    `);
+
+    // Then fix the constraint
     await this.dataSource.query(`
       DO $$
       BEGIN
