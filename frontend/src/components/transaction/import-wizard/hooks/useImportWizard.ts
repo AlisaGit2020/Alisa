@@ -6,6 +6,7 @@ import {
   TransactionAcceptInput,
   TransactionSetTypeInput,
   TransactionSetCategoryTypeInput,
+  SplitLoanPaymentBulkInput,
 } from "@alisa-types";
 import { ImportWizardState, ImportStats, ImportResponse } from "../types";
 import ApiClient from "@alisa-lib/api-client";
@@ -342,6 +343,31 @@ export function useImportWizard() {
     [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection]
   );
 
+  const splitLoanPaymentForSelected = useCallback(
+    async (
+      principalExpenseTypeId: number,
+      interestExpenseTypeId: number,
+      handlingFeeExpenseTypeId?: number
+    ) => {
+      if (state.selectedIds.length === 0) return;
+
+      await ApiClient.postSaveTask<SplitLoanPaymentBulkInput>(
+        transactionContext.apiPath + "/split-loan-payment",
+        {
+          ids: state.selectedIds,
+          principalExpenseTypeId,
+          interestExpenseTypeId,
+          handlingFeeExpenseTypeId,
+        }
+      );
+
+      // Refetch transactions to update UI
+      await fetchTransactions(state.importedTransactionIds);
+      clearSelection();
+    },
+    [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection]
+  );
+
   const deleteSelected = useCallback(async () => {
     if (state.selectedIds.length === 0) return;
 
@@ -454,6 +480,7 @@ export function useImportWizard() {
     clearSelection,
     setTypeForSelected,
     setCategoryTypeForSelected,
+    splitLoanPaymentForSelected,
     deleteSelected,
     approveAll,
     reset,

@@ -35,6 +35,11 @@ interface ReviewStepProps {
   onClearSelection: () => void;
   onSetType: (type: number) => Promise<void>;
   onSetCategoryType: (expenseTypeId?: number, incomeTypeId?: number) => Promise<void>;
+  onSplitLoanPayment: (
+    principalExpenseTypeId: number,
+    interestExpenseTypeId: number,
+    handlingFeeExpenseTypeId?: number
+  ) => Promise<void>;
   onDelete: () => Promise<void>;
   onNext: () => void;
   onBack: () => void;
@@ -51,6 +56,7 @@ export default function ReviewStep({
   onClearSelection,
   onSetType,
   onSetCategoryType,
+  onSplitLoanPayment,
   onDelete,
   onNext,
   onBack,
@@ -123,6 +129,17 @@ export default function ReviewStep({
   ) => {
     setSaveResult(undefined);
     await onSetCategoryType(expenseTypeId, incomeTypeId);
+  };
+
+  const handleSplitLoanPayment = async (
+    principalExpenseTypeId: number,
+    interestExpenseTypeId: number,
+    handlingFeeExpenseTypeId?: number
+  ) => {
+    setSaveResult(undefined);
+    await onSplitLoanPayment(principalExpenseTypeId, interestExpenseTypeId, handlingFeeExpenseTypeId);
+    // Clear search to show remaining unknown rows
+    setSearchText("");
   };
 
   const handleCancel = () => {
@@ -212,7 +229,7 @@ export default function ReviewStep({
         onApprove={() => Promise.resolve()}
         onSetType={handleSetType}
         onSetCategoryType={handleSetCategoryType}
-        onSplitLoanPayment={() => Promise.resolve()}
+        onSplitLoanPayment={handleSplitLoanPayment}
         onCancel={handleCancel}
         onDelete={onDelete}
         saveResult={saveResult}
