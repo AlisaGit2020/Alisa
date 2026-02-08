@@ -169,3 +169,28 @@ See `frontend/docs/testing-guide.md` for detailed examples and patterns.
 - Use helper functions from `backend/test/helper-functions.ts`
 - Test full HTTP request/response cycle including authentication
 - Verify response status codes and body structure
+
+## CI/CD
+
+### GitHub Actions Workflows
+- **CI workflow** (`ci.yml`): Runs on all pushes and PRs - lints and tests both frontend and backend
+- **Deploy workflow** (`deploy.yml`): Runs after successful CI on master branch
+
+### Skipping Deployment
+When committing changes that don't require deployment (CI config, docs, refactoring, lint fixes), add `[skip deploy]` to the commit message:
+
+```bash
+git commit -m "ci: update workflow config [skip deploy]"
+```
+
+**Always use `[skip deploy]` for:**
+- CI/CD configuration changes
+- Documentation updates
+- Lint fixes and code style changes
+- Refactoring without functional changes
+- Test-only changes
+
+### Local Git Hooks
+The project uses Husky for git hooks:
+- **pre-commit**: Runs lint-staged on changed files
+- **pre-push**: Runs unit tests for backend and frontend
