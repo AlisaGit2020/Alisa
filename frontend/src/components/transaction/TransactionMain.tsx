@@ -27,15 +27,17 @@ const getDefaultFilter = (): TransactionFilterData => ({
 });
 
 function TransactionMain() {
+  // Always use the global property selection from AppBar
+  const globalPropertyId = getTransactionPropertyId();
+
   const [filter, setFilter] = useState<TransactionFilterData>(() => {
     const stored = getStoredFilter<TransactionFilterData>(
       View.TRANSACTION_APPROVED
     );
-    const storedPropertyId = getTransactionPropertyId();
     if (stored) {
-      return { ...stored, propertyId: storedPropertyId || stored.propertyId };
+      return { ...stored, propertyId: globalPropertyId };
     }
-    return { ...getDefaultFilter(), propertyId: storedPropertyId };
+    return { ...getDefaultFilter(), propertyId: globalPropertyId };
   });
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 

@@ -5,7 +5,7 @@ import { expenseContext } from "@alisa-lib/alisa-contexts";
 import { Expense } from "@alisa-types";
 import DataService from "@alisa-lib/data-service";
 import { TypeOrmFetchOptions } from "@alisa-lib/types";
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { ListPageTemplate } from "../../templates";
 import ExpenseForm from "./ExpenseForm";
 import AccountingFilter, { AccountingFilterData } from "../AccountingFilter";
@@ -16,6 +16,8 @@ import {
 } from "@alisa-lib/initial-data";
 import { View } from "@alisa-lib/views";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../../transaction/TransactionLeftMenuItems";
+import { usePropertyRequired } from "@alisa-lib/hooks/usePropertyRequired";
+import { PropertyRequiredSnackbar } from "../../alisa/PropertyRequiredSnackbar";
 
 const getDefaultFilter = (): AccountingFilterData => ({
   typeIds: [],
@@ -45,6 +47,9 @@ function Expenses({ t }: WithTranslation) {
   const [editId, setEditId] = useState<number | undefined>(undefined);
   const [addNew, setAddNew] = useState<boolean>(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const { requireProperty, popoverOpen, popoverAnchorEl, closePopover, openPropertySelector } =
+    usePropertyRequired(propertyId);
 
   // Listen for global property changes
   useEffect(() => {
@@ -138,7 +143,8 @@ function Expenses({ t }: WithTranslation) {
     setEditId(id);
   };
 
-  const handleAdd = () => {
+  const handleAdd = (event?: React.MouseEvent<HTMLButtonElement>) => {
+    if (!requireProperty(event)) return;
     setAddNew(true);
   };
 
@@ -225,6 +231,13 @@ function Expenses({ t }: WithTranslation) {
           onCancel={handleFormClose}
         />
       )}
+
+      <PropertyRequiredSnackbar
+        open={popoverOpen}
+        anchorEl={popoverAnchorEl}
+        onClose={closePopover}
+        onSelectProperty={openPropertySelector}
+      />
     </ListPageTemplate>
   );
 }

@@ -68,6 +68,8 @@ const en = {
     unknown: "Unknown",
     validationErrorTitle: "Please check following fields:",
     year: "Year",
+    propertyRequiredMessage: "Please select a property first",
+    selectProperty: "Select Property",
   },
 };
 

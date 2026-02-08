@@ -11,6 +11,8 @@ import TransactionImport from "./components/TransactionImport";
 import { TransactionFilterData } from "./components/TransactionFilter";
 import TransactionDetails from "./components/TransactionDetails";
 import TransactionForm from "./TransactionForm.tsx";
+import { usePropertyRequired } from "@alisa-lib/hooks/usePropertyRequired";
+import { PropertyRequiredSnackbar } from "../alisa/PropertyRequiredSnackbar";
 
 interface TransactionsProps extends WithTranslation {
   filter: TransactionFilterData;
@@ -28,9 +30,13 @@ function Transactions({ t, filter, refreshTrigger }: TransactionsProps) {
   );
   const [importOpen, setImportOpen] = React.useState<boolean>(false);
 
+  const { requireProperty, popoverOpen, popoverAnchorEl, closePopover, openPropertySelector } =
+    usePropertyRequired(filter.propertyId);
+
   const handleOpenAddMenu = (
     event?: React.MouseEvent<HTMLButtonElement>,
   ): void => {
+    if (!requireProperty(event)) return;
     if (event !== undefined) {
       setAnchorElAdd(event.currentTarget);
     }
@@ -174,6 +180,13 @@ function Transactions({ t, filter, refreshTrigger }: TransactionsProps) {
         onAddTransaction={handleAdd}
         onImport={handleOpenImport}
       ></TransactionAddMenu>
+
+      <PropertyRequiredSnackbar
+        open={popoverOpen}
+        anchorEl={popoverAnchorEl}
+        onClose={closePopover}
+        onSelectProperty={openPropertySelector}
+      />
     </Box>
   );
 }

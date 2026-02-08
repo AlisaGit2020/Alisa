@@ -34,6 +34,8 @@ import {
 import { View } from "@alisa-lib/views.ts";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../TransactionLeftMenuItems.tsx";
 import { ListPageTemplate } from "../../templates";
+import { usePropertyRequired } from "@alisa-lib/hooks/usePropertyRequired";
+import { PropertyRequiredSnackbar } from "../../alisa/PropertyRequiredSnackbar";
 
 const getDefaultFilter = (): TransactionFilterData => ({
   propertyId: 0,
@@ -45,13 +47,15 @@ const getDefaultFilter = (): TransactionFilterData => ({
 });
 
 function TransactionsPending({ t }: WithTranslation) {
+  // Always use the global property selection from AppBar
+  const globalPropertyId = getTransactionPropertyId();
+
   const [filter, setFilter] = React.useState<TransactionFilterData>(() => {
     const stored = getStoredFilter<TransactionFilterData>(View.TRANSACTION_PENDING);
-    const storedPropertyId = getTransactionPropertyId();
     if (stored) {
-      return { ...stored, propertyId: storedPropertyId || stored.propertyId };
+      return { ...stored, propertyId: globalPropertyId };
     }
-    return { ...getDefaultFilter(), propertyId: storedPropertyId };
+    return { ...getDefaultFilter(), propertyId: globalPropertyId };
   });
   const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
   const [selectedTransactionTypes, setSelectedTransactionTypes] = React.useState<
@@ -70,6 +74,9 @@ function TransactionsPending({ t }: WithTranslation) {
     DataSaveResult | undefined
   >(undefined);
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
+
+  const { requireProperty, popoverOpen, popoverAnchorEl, closePopover, openPropertySelector } =
+    usePropertyRequired(filter.propertyId);
 
   const updateFilter = (newFilter: TransactionFilterData) => {
     setFilter(newFilter);
@@ -101,6 +108,7 @@ function TransactionsPending({ t }: WithTranslation) {
   const handleOpenAddMenu = (
     event?: React.MouseEvent<HTMLButtonElement>,
   ): void => {
+    if (!requireProperty(event)) return;
     if (event !== undefined) {
       setAnchorElAdd(event.currentTarget);
     }
@@ -441,6 +449,13 @@ function TransactionsPending({ t }: WithTranslation) {
         onAddTransaction={handleAdd}
         onImport={handleOpenImport}
       ></TransactionAddMenu>
+
+      <PropertyRequiredSnackbar
+        open={popoverOpen}
+        anchorEl={popoverAnchorEl}
+        onClose={closePopover}
+        onSelectProperty={openPropertySelector}
+      />
     </ListPageTemplate>
   );
 }

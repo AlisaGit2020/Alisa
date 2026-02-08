@@ -68,6 +68,8 @@ const fi = {
     unknown: "Ei tiedossa",
     validationErrorTitle: "Tarkasta nämä kentät:",
     year: "Vuosi",
+    propertyRequiredMessage: "Valitse ensin kohde",
+    selectProperty: "Valitse kohde",
   },
 };
 

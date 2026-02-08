@@ -1,7 +1,7 @@
 import { Chip, Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
 import HomeWorkIcon from "@mui/icons-material/HomeWork";
 import CheckIcon from "@mui/icons-material/Check";
-import { useEffect, useState, MouseEvent } from "react";
+import { useEffect, useState, useRef, useCallback, MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getTransactionPropertyId,
@@ -12,12 +12,41 @@ import DataService from "@alisa-lib/data-service";
 import { Property } from "@alisa-types";
 import { propertyContext } from "@alisa-lib/alisa-contexts";
 
+// Event constants for property selection required
+export const PROPERTY_SELECTION_REQUIRED_EVENT = "propertySelectionRequired";
+export const OPEN_PROPERTY_SELECTOR_EVENT = "openPropertySelector";
+
 function PropertyBadge() {
   const { t } = useTranslation("dashboard");
   const [properties, setProperties] = useState<Property[]>([]);
   const [propertyId, setPropertyId] = useState<number>(getTransactionPropertyId());
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [isHighlighted, setIsHighlighted] = useState(false);
+  const chipRef = useRef<HTMLDivElement>(null);
   const open = Boolean(anchorEl);
+
+  // Handle highlight event - pulse animation when property is required
+  const handleHighlight = useCallback(() => {
+    setIsHighlighted(true);
+    setTimeout(() => setIsHighlighted(false), 2000);
+  }, []);
+
+  // Handle open selector event - open the property menu
+  const handleOpenSelector = useCallback(() => {
+    if (chipRef.current) {
+      setAnchorEl(chipRef.current);
+    }
+  }, []);
+
+  // Listen for property selection required and open selector events
+  useEffect(() => {
+    window.addEventListener(PROPERTY_SELECTION_REQUIRED_EVENT, handleHighlight);
+    window.addEventListener(OPEN_PROPERTY_SELECTOR_EVENT, handleOpenSelector);
+    return () => {
+      window.removeEventListener(PROPERTY_SELECTION_REQUIRED_EVENT, handleHighlight);
+      window.removeEventListener(OPEN_PROPERTY_SELECTOR_EVENT, handleOpenSelector);
+    };
+  }, [handleHighlight, handleOpenSelector]);
 
   // Fetch all properties
   useEffect(() => {
@@ -89,6 +118,8 @@ function PropertyBadge() {
   return (
     <>
       <Chip
+        ref={chipRef}
+        data-testid="property-badge"
         icon={<HomeWorkIcon />}
         label={getPropertyName()}
         variant="outlined"
@@ -110,6 +141,13 @@ function PropertyBadge() {
             color: "inherit",
             fontSize: "1.2rem",
           },
+          ...(isHighlighted && {
+            animation: "pulse 0.5s ease-in-out 3",
+            "@keyframes pulse": {
+              "0%, 100%": { boxShadow: "none" },
+              "50%": { boxShadow: "0 0 12px 4px rgba(255,193,7,0.8)" },
+            },
+          }),
         }}
       />
       <Menu

@@ -64,11 +64,23 @@ export function useImportWizard() {
   }));
 
   // Listen for property changes from navigation
+  // If property changes during an active import, reset the wizard
   useEffect(() => {
     const handlePropertyChange = (event: Event) => {
       const customEvent = event as CustomEvent<{ propertyId: number }>;
-      const propertyId = customEvent.detail.propertyId;
-      setState((prev) => ({ ...prev, propertyId }));
+      const newPropertyId = customEvent.detail.propertyId;
+
+      setState((prev) => {
+        // If there's an active import (transactions loaded) and property changes, reset
+        if (prev.transactions.length > 0 && prev.propertyId !== newPropertyId) {
+          clearSession();
+          return {
+            ...initialState,
+            propertyId: newPropertyId,
+          };
+        }
+        return { ...prev, propertyId: newPropertyId };
+      });
     };
 
     window.addEventListener(TRANSACTION_PROPERTY_CHANGE_EVENT, handlePropertyChange);
