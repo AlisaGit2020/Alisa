@@ -21,6 +21,7 @@ import { TFunction } from "i18next";
 import { Transaction, TransactionType, DataSaveResult } from "@alisa-types";
 import AlisaDataTable from "../../../alisa/datatable/AlisaDataTable";
 import TransactionsPendingActions from "../../pending/TransactionsPendingActions";
+import TransactionDetails from "../../components/TransactionDetails";
 import { useState, useMemo } from "react";
 
 interface ReviewStepProps {
@@ -60,6 +61,7 @@ export default function ReviewStep({
   const [searchText, setSearchText] = useState("");
   const [searchField, setSearchField] = useState<SearchField>("all");
   const [showOnlyUnknown, setShowOnlyUnknown] = useState(true);
+  const [detailId, setDetailId] = useState<number>(0);
 
   // Filter transactions based on unknown filter, search text, and selected field
   const filteredTransactions = useMemo(() => {
@@ -235,9 +237,17 @@ export default function ReviewStep({
           ]}
           onSelectChange={onSelectChange}
           onSelectAllChange={onSelectAllChange}
+          onOpen={setDetailId}
           selectedIds={selectedIds}
         />
       </Paper>
+
+      {detailId > 0 && (
+        <TransactionDetails
+          id={detailId}
+          onClose={() => setDetailId(0)}
+        />
+      )}
 
       {/* Navigation buttons */}
       <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ mt: 3 }}>
