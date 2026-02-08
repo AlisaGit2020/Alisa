@@ -121,3 +121,10 @@ export interface OpImportInput {
   fileName?: string;
   propertyId: number;
 }
+
+// S-Pankki import input
+export interface SPankkiImportInput {
+  file: string;
+  fileName?: string;
+  propertyId: number;
+}

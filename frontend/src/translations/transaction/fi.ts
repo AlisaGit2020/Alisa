@@ -69,6 +69,9 @@ const transaction = {
       done: "Valmis",
     },
     supportedBanks: "Tuetut pankit",
+    selectBank: "Valitse pankki",
+    selectBankDescription: "Valitse minkä pankin CSV-muotoa olet tuomassa",
+    selectBankWarning: "Valitse pankki",
     importingTo: "Tuodaan kohteeseen",
     loadingProperty: "Ladataan...",
     selectPropertyWarning:

@@ -69,6 +69,9 @@ const transaction = {
       done: "Done",
     },
     supportedBanks: "Supported Banks",
+    selectBank: "Select Bank",
+    selectBankDescription: "Choose which bank's CSV format you are importing",
+    selectBankWarning: "Please select a bank",
     importingTo: "Importing to",
     loadingProperty: "Loading...",
     selectPropertyWarning:

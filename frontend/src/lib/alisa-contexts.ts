@@ -60,6 +60,12 @@ export const opImportContext: AlisaContext = {
     routePath: '/app/accounting/transactions/import/op',
 }
 
+export const sPankkiImportContext: AlisaContext = {
+    name: 's-pankki-import',
+    apiPath: 'import/s-pankki',
+    routePath: '/app/accounting/transactions/import/s-pankki',
+}
+
 export const settingsContext: AlisaContext = {
     name: 'settings',
     apiPath: '',

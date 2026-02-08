@@ -1,8 +1,30 @@
 import { Transaction, TransactionType } from "@alisa-types";
 
+export type BankId = "op" | "s-pankki";
+
+export interface SupportedBank {
+  id: BankId;
+  name: string;
+  logo: string;
+}
+
+export const SUPPORTED_BANKS: SupportedBank[] = [
+  {
+    id: "op",
+    name: "Osuuspankki (OP)",
+    logo: "/assets/banks/op-logo.svg",
+  },
+  {
+    id: "s-pankki",
+    name: "S-Pankki",
+    logo: "/assets/banks/s-pankki-logo.svg",
+  },
+];
+
 export interface ImportWizardState {
   activeStep: number;
   propertyId: number;
+  selectedBank: BankId | null;
   files: File[];
   isUploading: boolean;
   uploadError: string | null;

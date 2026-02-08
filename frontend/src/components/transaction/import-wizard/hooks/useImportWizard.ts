@@ -8,9 +8,9 @@ import {
   TransactionSetCategoryTypeInput,
   SplitLoanPaymentBulkInput,
 } from "@alisa-types";
-import { ImportWizardState, ImportStats, ImportResponse } from "../types";
+import { ImportWizardState, ImportStats, ImportResponse, BankId } from "../types";
 import ApiClient from "@alisa-lib/api-client";
-import { transactionContext, opImportContext } from "@alisa-lib/alisa-contexts";
+import { transactionContext, opImportContext, sPankkiImportContext } from "@alisa-lib/alisa-contexts";
 import { getTransactionPropertyId } from "@alisa-lib/initial-data";
 import { TypeOrmFetchOptions } from "@alisa-lib/types";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../../TransactionLeftMenuItems";
@@ -21,6 +21,7 @@ const STORAGE_KEY = "importWizard:session";
 interface ImportSession {
   propertyId: number;
   transactionIds: number[];
+  selectedBank: BankId | null;
 }
 
 const saveSession = (session: ImportSession) => {
@@ -45,6 +46,7 @@ const createEmptyStats = (): ImportStats => ({
 const initialState: ImportWizardState = {
   activeStep: 0,
   propertyId: 0,
+  selectedBank: null,
   files: [],
   isUploading: false,
   uploadError: null,
@@ -134,11 +136,16 @@ export function useImportWizard() {
         // Use only the IDs of transactions that are still pending
         const pendingIds = transactions.map((t) => t.id);
         // Update session with current pending IDs
-        saveSession({ propertyId: session.propertyId, transactionIds: pendingIds });
+        saveSession({
+          propertyId: session.propertyId,
+          transactionIds: pendingIds,
+          selectedBank: session.selectedBank,
+        });
         setState((prev) => ({
           ...prev,
           activeStep: 1, // Review step
           propertyId: session.propertyId,
+          selectedBank: session.selectedBank,
           importedTransactionIds: pendingIds,
           transactions,
           hasUnknownTypes,
@@ -168,13 +175,28 @@ export function useImportWizard() {
     setState((prev) => ({ ...prev, files, uploadError: null }));
   }, []);
 
+  const setBank = useCallback((bank: BankId) => {
+    setState((prev) => ({ ...prev, selectedBank: bank }));
+  }, []);
+
+  const getImportApiPath = (bank: BankId): string => {
+    switch (bank) {
+      case "s-pankki":
+        return sPankkiImportContext.apiPath;
+      case "op":
+      default:
+        return opImportContext.apiPath;
+    }
+  };
+
   const uploadFiles = useCallback(async (): Promise<number[]> => {
-    if (state.files.length === 0 || state.propertyId <= 0) return [];
+    if (state.files.length === 0 || state.propertyId <= 0 || !state.selectedBank) return [];
 
     setState((prev) => ({ ...prev, isUploading: true, uploadError: null }));
 
     try {
       const allTransactionIds: number[] = [];
+      const apiPath = getImportApiPath(state.selectedBank);
 
       // Upload each file sequentially
       for (const file of state.files) {
@@ -183,7 +205,7 @@ export function useImportWizard() {
         formData.append("propertyId", state.propertyId.toString());
 
         const response = await ApiClient.upload<ImportResponse>(
-          opImportContext.apiPath,
+          apiPath,
           formData as unknown as ImportResponse
         );
 
@@ -193,7 +215,11 @@ export function useImportWizard() {
 
       // Save session for resumption if wizard is interrupted
       if (allTransactionIds.length > 0) {
-        saveSession({ propertyId: state.propertyId, transactionIds: allTransactionIds });
+        saveSession({
+          propertyId: state.propertyId,
+          transactionIds: allTransactionIds,
+          selectedBank: state.selectedBank,
+        });
       }
 
       setState((prev) => ({
@@ -213,7 +239,7 @@ export function useImportWizard() {
       }));
       return [];
     }
-  }, [state.files, state.propertyId]);
+  }, [state.files, state.propertyId, state.selectedBank]);
 
   const fetchTransactions = useCallback(async (ids: number[]) => {
     if (ids.length === 0) return;
@@ -386,7 +412,11 @@ export function useImportWizard() {
 
       // Update session with remaining IDs
       if (remainingIds.length > 0) {
-        saveSession({ propertyId: state.propertyId, transactionIds: remainingIds });
+        saveSession({
+          propertyId: state.propertyId,
+          transactionIds: remainingIds,
+          selectedBank: state.selectedBank,
+        });
       } else {
         clearSession();
       }
@@ -404,7 +434,7 @@ export function useImportWizard() {
 
       clearSelection();
     }
-  }, [state.selectedIds, state.importedTransactionIds, state.propertyId, clearSelection]);
+  }, [state.selectedIds, state.importedTransactionIds, state.propertyId, state.selectedBank, clearSelection]);
 
   const approveAll = useCallback(async (): Promise<boolean> => {
     if (state.importedTransactionIds.length === 0) return false;
@@ -473,6 +503,7 @@ export function useImportWizard() {
     nextStep,
     prevStep,
     setFiles,
+    setBank,
     uploadFiles,
     fetchTransactions,
     handleSelectChange,

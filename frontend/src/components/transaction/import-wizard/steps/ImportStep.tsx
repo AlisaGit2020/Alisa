@@ -1,32 +1,23 @@
 import { Box, Typography, Paper, Alert, CircularProgress, Button, Stack } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useDropzone } from "react-dropzone";
 import { TFunction } from "i18next";
 import { useCallback, useEffect, useState } from "react";
 import { Property } from "@alisa-types";
 import ApiClient from "@alisa-lib/api-client";
 import { propertyContext } from "@alisa-lib/alisa-contexts";
-interface SupportedBank {
-  id: string;
-  name: string;
-  logo: string;
-}
-
-const supportedBanks: SupportedBank[] = [
-  {
-    id: "op",
-    name: "Osuuspankki (OP)",
-    logo: "/assets/banks/op-logo.svg",
-  },
-];
+import { SUPPORTED_BANKS, BankId } from "../types";
 
 interface ImportStepProps {
   t: TFunction;
   propertyId: number;
+  selectedBank: BankId | null;
   files: File[];
   isUploading: boolean;
   uploadError: string | null;
   onFilesSelect: (files: File[]) => void;
+  onBankSelect: (bank: BankId) => void;
   onUpload: () => Promise<number[]>;
   onNext: () => void;
   onFetchTransactions: (ids: number[]) => Promise<void>;
@@ -35,10 +26,12 @@ interface ImportStepProps {
 export default function ImportStep({
   t,
   propertyId,
+  selectedBank,
   files,
   isUploading,
   uploadError,
   onFilesSelect,
+  onBankSelect,
   onUpload,
   onNext,
   onFetchTransactions,
@@ -73,13 +66,15 @@ export default function ImportStep({
     [onFilesSelect]
   );
 
+  const isBankSelected = selectedBank !== null;
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       "text/csv": [".csv"],
     },
     multiple: true,
-    disabled: propertyId <= 0 || isUploading,
+    disabled: propertyId <= 0 || !isBankSelected || isUploading,
   });
 
   const handleUpload = async () => {
@@ -94,29 +89,63 @@ export default function ImportStep({
 
   return (
     <Box sx={{ maxWidth: 600, mx: "auto" }}>
-      {/* Supported banks */}
+      {/* Bank selection */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-          {t("importWizard.supportedBanks")}
+          {t("importWizard.selectBank")}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          {t("importWizard.selectBankDescription")}
         </Typography>
         <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-          {supportedBanks.map((bank) => (
+          {SUPPORTED_BANKS.map((bank) => (
             <Box
               key={bank.id}
+              onClick={() => !isUploading && onBankSelect(bank.id)}
               sx={{
                 display: "flex",
                 alignItems: "center",
                 gap: 1.5,
                 p: 1.5,
                 borderRadius: 1,
-                bgcolor: "action.hover",
+                bgcolor: selectedBank === bank.id ? "primary.light" : "action.hover",
+                border: 2,
+                borderColor: selectedBank === bank.id ? "primary.main" : "transparent",
+                cursor: isUploading ? "not-allowed" : "pointer",
+                transition: "all 0.2s ease",
+                position: "relative",
+                "&:hover": {
+                  bgcolor: selectedBank === bank.id ? "primary.light" : "action.selected",
+                },
               }}
             >
               <img src={bank.logo} alt={bank.name} width={48} height={48} />
-              <Typography variant="body1">{bank.name}</Typography>
+              <Typography
+                variant="body1"
+                sx={{ color: selectedBank === bank.id ? "primary.contrastText" : "text.primary" }}
+              >
+                {bank.name}
+              </Typography>
+              {selectedBank === bank.id && (
+                <CheckCircleIcon
+                  sx={{
+                    position: "absolute",
+                    top: -8,
+                    right: -8,
+                    color: "primary.main",
+                    bgcolor: "background.paper",
+                    borderRadius: "50%",
+                  }}
+                />
+              )}
             </Box>
           ))}
         </Stack>
+        {!isBankSelected && (
+          <Alert severity="info" sx={{ mt: 2 }}>
+            {t("importWizard.selectBankWarning")}
+          </Alert>
+        )}
       </Paper>
 
       {/* Property display */}
@@ -143,18 +172,18 @@ export default function ImportStep({
           border: "2px dashed",
           borderColor: isDragActive
             ? "primary.main"
-            : isPropertySelected
+            : isPropertySelected && isBankSelected
             ? "grey.400"
             : "grey.300",
           bgcolor: isDragActive
             ? "action.hover"
-            : isPropertySelected
+            : isPropertySelected && isBankSelected
             ? "background.paper"
             : "action.disabledBackground",
-          cursor: isPropertySelected && !isUploading ? "pointer" : "not-allowed",
+          cursor: isPropertySelected && isBankSelected && !isUploading ? "pointer" : "not-allowed",
           textAlign: "center",
           transition: "all 0.2s ease",
-          opacity: isPropertySelected ? 1 : 0.6,
+          opacity: isPropertySelected && isBankSelected ? 1 : 0.6,
         }}
       >
         <input {...getInputProps()} />
@@ -204,7 +233,7 @@ export default function ImportStep({
         <Button
           variant="contained"
           onClick={handleUpload}
-          disabled={files.length === 0 || !isPropertySelected || isUploading}
+          disabled={files.length === 0 || !isPropertySelected || !isBankSelected || isUploading}
           startIcon={isUploading ? <CircularProgress size={20} /> : undefined}
         >
           {isUploading ? t("importWizard.uploading") : t("importWizard.uploadAndContinue")}
