@@ -14,6 +14,7 @@ import {
 import { JWTUser } from '@alisa-backend/auth/types';
 import * as http from 'http';
 import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { UserInputDto } from '@alisa-backend/people/user/dtos/user-input.dto';
 
 describe('Tier enforcement (e2e)', () => {
   let app: INestApplication;
@@ -54,7 +55,7 @@ describe('Tier enforcement (e2e)', () => {
       ownershipInProperties: [],
       isAdmin: false,
     };
-    await userService.add(jwtUser as Partial<User>);
+    await userService.add(jwtUser as unknown as UserInputDto);
     const users = await userService.search({ where: { email } });
     const user = users[0];
     jwtUser.id = user.id;

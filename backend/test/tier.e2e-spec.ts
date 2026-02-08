@@ -14,7 +14,7 @@ import {
 } from './helper-functions';
 import { TierService } from '@alisa-backend/admin/tier.service';
 import * as http from 'http';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { UserInputDto } from '@alisa-backend/people/user/dtos/user-input.dto';
 
 describe('Tier admin endpoints (e2e)', () => {
   let app: INestApplication;
@@ -47,7 +47,7 @@ describe('Tier admin endpoints (e2e)', () => {
     await userService.update(adminUser.user.id, {
       ...adminUser.jwtUser,
       isAdmin: true,
-    } as Partial<User>);
+    } as unknown as UserInputDto);
     adminToken = await getUserAccessToken2(authService, {
       ...adminUser.jwtUser,
       isAdmin: true,

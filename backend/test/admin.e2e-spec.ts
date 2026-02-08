@@ -11,7 +11,7 @@ import {
   prepareDatabase,
   TestUsersSetup,
 } from './helper-functions';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { UserInputDto } from '@alisa-backend/people/user/dtos/user-input.dto';
 import * as http from 'http';
 
 describe('Admin endpoints (e2e)', () => {
@@ -50,7 +50,7 @@ describe('Admin endpoints (e2e)', () => {
       await userService.update(adminUser.user.id, {
         ...adminUser.jwtUser,
         isAdmin: true,
-      } as Partial<User>);
+      } as unknown as UserInputDto);
 
       // Re-login to get updated JWT with isAdmin
       const token = await getUserAccessToken2(authService, {
