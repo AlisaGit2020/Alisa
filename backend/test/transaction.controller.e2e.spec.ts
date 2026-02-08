@@ -11,6 +11,7 @@ import { OpImportInput } from '@alisa-backend/import/op/dtos/op-import-input.dto
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
   addIncomeAndExpenseTypes,
+  closeAppGracefully,
   getBearerToken,
   getTestUsers,
   getUserAccessToken2,
@@ -56,8 +57,7 @@ describe('Transaction search', () => {
   });
 
   afterAll(async () => {
-    await app.close();
-    server.close();
+    await closeAppGracefully(app, server);
   });
 
   it(`returns all transactions`, async () => {

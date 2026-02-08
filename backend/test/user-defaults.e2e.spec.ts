@@ -8,7 +8,7 @@ import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-
 import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
 import { User } from '@alisa-backend/people/user/entities/user.entity';
 import { AuthService } from '@alisa-backend/auth/auth.service';
-import { emptyTables } from './helper-functions';
+import { closeAppGracefully, emptyTables } from './helper-functions';
 import * as http from 'http';
 
 describe('User defaults (e2e)', () => {
@@ -31,8 +31,7 @@ describe('User defaults (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
-    server.close();
+    await closeAppGracefully(app, server);
   });
 
   beforeEach(async () => {

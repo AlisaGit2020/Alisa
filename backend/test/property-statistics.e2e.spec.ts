@@ -12,6 +12,7 @@ import { TransactionService } from '@alisa-backend/accounting/transaction/transa
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
   addIncomeAndExpenseTypes,
+  closeAppGracefully,
   getBearerToken,
   getTestUsers,
   getUserAccessToken2,
@@ -19,6 +20,7 @@ import {
   TestUser,
   TestUsersSetup,
 } from './helper-functions';
+import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
 import { TransactionStatus, TransactionType, StatisticKey } from '@alisa-backend/common/types';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import {
@@ -36,6 +38,7 @@ describe('PropertyStatisticsService (e2e)', () => {
   let propertyStatisticsService: PropertyStatisticsService;
   let transactionService: TransactionService;
   let authService: AuthService;
+  let eventTracker: EventTrackerService;
   let testUsers: TestUsersSetup;
   let mainUser: TestUser;
 
@@ -51,6 +54,7 @@ describe('PropertyStatisticsService (e2e)', () => {
     propertyStatisticsService = app.get(PropertyStatisticsService);
     transactionService = app.get(TransactionService);
     authService = app.get(AuthService);
+    eventTracker = app.get(EventTrackerService);
 
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
@@ -61,10 +65,13 @@ describe('PropertyStatisticsService (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    const server = app.getHttpServer();
+    await closeAppGracefully(app, server);
   });
 
   beforeEach(async () => {
+    // Wait for any async event handlers from previous tests to complete
+    await eventTracker.waitForPending();
     // Clear property_statistics table before each test
     await dataSource.query('TRUNCATE TABLE "property_statistics" RESTART IDENTITY CASCADE;');
   });
@@ -255,8 +262,8 @@ describe('PropertyStatisticsService (e2e)', () => {
 
   describe('recalculate', () => {
     beforeEach(async () => {
-      // Wait a bit for any async event handlers from previous tests to complete
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      // Wait for any async event handlers from previous tests to complete
+      await eventTracker.waitForPending();
 
       // Clear all related tables for a clean slate
       // Order matters: delete child records first
@@ -268,7 +275,7 @@ describe('PropertyStatisticsService (e2e)', () => {
 
     afterEach(async () => {
       // Wait for async event handlers to complete
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await eventTracker.waitForPending();
     });
 
     it('recalculates income statistics from income table', async () => {
@@ -283,6 +290,9 @@ describe('PropertyStatisticsService (e2e)', () => {
       // getTransactionIncome2: 1090 (Mar 2023)
       await transactionService.add(mainUser.jwtUser, getTransactionIncome1(propertyId));
       await transactionService.add(mainUser.jwtUser, getTransactionIncome2(propertyId));
+
+      // Wait for async event handlers to complete before verifying/clearing
+      await eventTracker.waitForPending();
 
       // Verify income records were created
       const incomeRecords = await dataSource.query(
@@ -386,12 +396,12 @@ describe('PropertyStatisticsService (e2e)', () => {
       const property2Id = mainUser.properties[1].id;
 
       // Thorough cleanup at start of test to ensure isolation
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
       await dataSource.query('DELETE FROM income');
       await dataSource.query('DELETE FROM expense');
       await dataSource.query('DELETE FROM property_statistics');
       await dataSource.query('DELETE FROM transaction');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await eventTracker.waitForPending();
 
       // Verify income table is empty
       const incomeBefore = await dataSource.query('SELECT COUNT(*) as count FROM income');
@@ -401,7 +411,7 @@ describe('PropertyStatisticsService (e2e)', () => {
       await transactionService.add(mainUser.jwtUser, getTransactionIncome1(property1Id));
 
       // Wait for async event handlers to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
 
       // Verify income was created correctly
       const incomeSum = await dataSource.query(
@@ -437,19 +447,19 @@ describe('PropertyStatisticsService (e2e)', () => {
       const property2Id = mainUser.properties[1].id;
 
       // Thorough cleanup at start of test to ensure isolation
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
       await dataSource.query('DELETE FROM income');
       await dataSource.query('DELETE FROM expense');
       await dataSource.query('DELETE FROM property_statistics');
       await dataSource.query('DELETE FROM transaction');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await eventTracker.waitForPending();
 
       // Add transactions to both properties
       await transactionService.add(mainUser.jwtUser, getTransactionIncome1(property1Id));
       await transactionService.add(mainUser.jwtUser, getTransactionIncome2(property2Id));
 
       // Wait for async event handlers to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
 
       // Clear statistics only (keep income records for recalculation)
       await dataSource.query('TRUNCATE TABLE "property_statistics" RESTART IDENTITY CASCADE;');
@@ -502,18 +512,18 @@ describe('PropertyStatisticsService (e2e)', () => {
       const propertyId = mainUser.properties[0].id;
 
       // Thorough cleanup at start of test to ensure isolation
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
       await dataSource.query('DELETE FROM income');
       await dataSource.query('DELETE FROM expense');
       await dataSource.query('DELETE FROM property_statistics');
       await dataSource.query('DELETE FROM transaction');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await eventTracker.waitForPending();
 
       // Add a transaction (creates income data)
       await transactionService.add(mainUser.jwtUser, getTransactionIncome1(propertyId));
 
       // Wait for async event handlers to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
 
       // Delete only non-balance stats, then set balance to a specific value
       await dataSource.query(`
@@ -561,12 +571,12 @@ describe('PropertyStatisticsService (e2e)', () => {
       user2 = testUsers.user2WithProperties;
 
       // Clean up all tables
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
       await dataSource.query('DELETE FROM income');
       await dataSource.query('DELETE FROM expense');
       await dataSource.query('DELETE FROM property_statistics');
       await dataSource.query('DELETE FROM transaction');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await eventTracker.waitForPending();
     });
 
     it('only recalculates statistics for specified property IDs', async () => {
@@ -578,7 +588,7 @@ describe('PropertyStatisticsService (e2e)', () => {
       await transactionService.add(user2.jwtUser, getTransactionIncome2(user2Property));
 
       // Wait for event handlers
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
 
       // Verify both have statistics
       const user1StatsBefore = await dataSource.query(`
@@ -629,7 +639,7 @@ describe('PropertyStatisticsService (e2e)', () => {
       await transactionService.add(user2.jwtUser, getTransactionExpense2(user2Property));
 
       // Wait for event handlers
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
 
       // Record user2's statistics before
       const user2StatsBefore = await dataSource.query(`
@@ -670,12 +680,12 @@ describe('PropertyStatisticsService (e2e)', () => {
       user2 = testUsers.user2WithProperties;
 
       // Clean up all tables
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
       await dataSource.query('DELETE FROM income');
       await dataSource.query('DELETE FROM expense');
       await dataSource.query('DELETE FROM property_statistics');
       await dataSource.query('DELETE FROM transaction');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await eventTracker.waitForPending();
     });
 
     it('only recalculates statistics for the authenticated user\'s properties', async () => {
@@ -687,7 +697,7 @@ describe('PropertyStatisticsService (e2e)', () => {
       await transactionService.add(user2.jwtUser, getTransactionIncome2(user2Property));
 
       // Wait for event handlers
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
 
       // Corrupt user1's statistics
       await dataSource.query(`
@@ -731,7 +741,7 @@ describe('PropertyStatisticsService (e2e)', () => {
       await transactionService.add(user2.jwtUser, getTransactionIncome2(user2Property));
 
       // Wait for event handlers
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
 
       // Corrupt user2's statistics to a known bad value
       await dataSource.query(`
@@ -770,12 +780,12 @@ describe('PropertyStatisticsService (e2e)', () => {
       user2 = testUsers.user2WithProperties;
 
       // Clean up all tables
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
       await dataSource.query('DELETE FROM income');
       await dataSource.query('DELETE FROM expense');
       await dataSource.query('DELETE FROM property_statistics');
       await dataSource.query('DELETE FROM transaction');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await eventTracker.waitForPending();
     });
 
     it('user cannot see another user\'s property statistics via searchAll with explicit propertyId', async () => {
@@ -787,7 +797,7 @@ describe('PropertyStatisticsService (e2e)', () => {
       await transactionService.add(user2.jwtUser, getTransactionIncome2(user2Property));
 
       // Wait for event handlers
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
 
       // Verify user2 has statistics
       const user2Stats = await dataSource.query(`
@@ -820,7 +830,7 @@ describe('PropertyStatisticsService (e2e)', () => {
       await transactionService.add(user2.jwtUser, getTransactionIncome2(user2Property));
 
       // Wait for event handlers
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
 
       // Get auth token for user1
       const user1Token = await getUserAccessToken2(authService, mainUser.jwtUser);
@@ -845,7 +855,7 @@ describe('PropertyStatisticsService (e2e)', () => {
       await transactionService.add(user2.jwtUser, getTransactionIncome2(user2Property));
 
       // Wait for event handlers
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await eventTracker.waitForPending();
 
       // Get auth token for user1
       const user1Token = await getUserAccessToken2(authService, mainUser.jwtUser);

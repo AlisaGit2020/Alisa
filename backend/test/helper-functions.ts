@@ -17,6 +17,8 @@ import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/
 import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
 import { TierService } from '@alisa-backend/admin/tier.service';
 import { Tier } from '@alisa-backend/admin/entities/tier.entity';
+import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
+import * as http from 'http';
 import {
   expenseType1,
   expenseType2,
@@ -311,4 +313,20 @@ export const addTier = async (
     isDefault,
     sortOrder,
   });
+};
+
+/**
+ * Gracefully closes the NestJS application and HTTP server.
+ * Waits for pending async event handlers to complete before closing.
+ * Use this in afterAll() instead of direct app.close() to prevent
+ * "Connection terminated" errors from async operations.
+ */
+export const closeAppGracefully = async (
+  app: INestApplication,
+  server: http.Server,
+): Promise<void> => {
+  const eventTracker = app.get(EventTrackerService);
+  await eventTracker.waitForPending();
+  await app.close();
+  server.close();
 };

@@ -16,6 +16,7 @@ import {
 } from 'test/mocks';
 import { createTransaction, createProperty, createJWTUser } from 'test/factories';
 import { TransactionStatus } from '@alisa-backend/common/types';
+import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
 
 describe('BalanceService', () => {
   let service: BalanceService;
@@ -23,6 +24,7 @@ describe('BalanceService', () => {
   let mockAuthService: MockAuthService;
   let mockPropertyService: Partial<Record<keyof PropertyService, jest.Mock>>;
   let mockEventEmitter: MockEventEmitter;
+  let mockEventTracker: { increment: jest.Mock; decrement: jest.Mock };
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
   const userWithoutProperties = createJWTUser({
@@ -37,6 +39,10 @@ describe('BalanceService', () => {
       findOne: jest.fn(),
     };
     mockEventEmitter = createMockEventEmitter();
+    mockEventTracker = {
+      increment: jest.fn(),
+      decrement: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -45,6 +51,7 @@ describe('BalanceService', () => {
         { provide: AuthService, useValue: mockAuthService },
         { provide: PropertyService, useValue: mockPropertyService },
         { provide: EventEmitter2, useValue: mockEventEmitter },
+        { provide: EventTrackerService, useValue: mockEventTracker },
       ],
     }).compile();
 

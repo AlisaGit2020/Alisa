@@ -16,6 +16,7 @@ import {
   TransactionDeletedEvent,
 } from '@alisa-backend/common/events';
 import { TransactionStatus } from '@alisa-backend/common/types';
+import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
 
 @Injectable()
 export class BalanceService {
@@ -27,6 +28,7 @@ export class BalanceService {
     private propertyService: PropertyService,
 
     private eventEmitter: EventEmitter2,
+    private eventTracker: EventTrackerService,
   ) {}
 
   async getBalance(user: JWTUser, propertyId: number): Promise<number> {
@@ -59,14 +61,19 @@ export class BalanceService {
 
   @OnEvent(Events.Transaction.Accepted)
   async transactionAccepted(event: TransactionAcceptedEvent): Promise<void> {
-    const previousBalance = await this.getPreviousBalance(event.transaction);
-    event.transaction.balance = previousBalance + event.transaction.amount;
-    await this.repository.save(event.transaction);
+    this.eventTracker.increment();
+    try {
+      const previousBalance = await this.getPreviousBalance(event.transaction);
+      event.transaction.balance = previousBalance + event.transaction.amount;
+      await this.repository.save(event.transaction);
 
-    this.eventEmitter.emit(Events.Balance.Changed, {
-      propertyId: event.transaction.propertyId,
-      newBalance: event.transaction.balance,
-    });
+      this.eventEmitter.emit(Events.Balance.Changed, {
+        propertyId: event.transaction.propertyId,
+        newBalance: event.transaction.balance,
+      });
+    } finally {
+      this.eventTracker.decrement();
+    }
   }
 
   async recalculateBalancesAfter(transaction: Transaction): Promise<number> {
@@ -96,36 +103,41 @@ export class BalanceService {
 
   @OnEvent(Events.Transaction.Deleted)
   async handleTransactionDelete(event: TransactionDeletedEvent) {
-    const transaction = event.transaction;
+    this.eventTracker.increment();
+    try {
+      const transaction = event.transaction;
 
-    const transactions = await this.repository.find({
-      where: {
-        propertyId: transaction.propertyId,
-        status: TransactionStatus.ACCEPTED,
-        id: MoreThan(transaction.id),
-      },
-      order: { id: 'ASC' },
-      take: 1,
-    });
-    const nextTransaction = transactions[0];
+      const transactions = await this.repository.find({
+        where: {
+          propertyId: transaction.propertyId,
+          status: TransactionStatus.ACCEPTED,
+          id: MoreThan(transaction.id),
+        },
+        order: { id: 'ASC' },
+        take: 1,
+      });
+      const nextTransaction = transactions[0];
 
-    if (!nextTransaction) {
+      if (!nextTransaction) {
+        this.eventEmitter.emit(Events.Balance.Changed, {
+          propertyId: transaction.propertyId,
+          newBalance: await this.getPreviousBalance(transaction),
+        });
+        return;
+      }
+      //Fix next transaction balance
+      nextTransaction.balance = nextTransaction.balance - transaction.amount;
+      await this.repository.save(nextTransaction);
+
+      const newBalance = await this.recalculateBalancesAfter(nextTransaction);
+
       this.eventEmitter.emit(Events.Balance.Changed, {
         propertyId: transaction.propertyId,
-        newBalance: await this.getPreviousBalance(transaction),
+        newBalance: newBalance,
       });
-      return;
+    } finally {
+      this.eventTracker.decrement();
     }
-    //Fix next transaction balance
-    nextTransaction.balance = nextTransaction.balance - transaction.amount;
-    await this.repository.save(nextTransaction);
-
-    const newBalance = await this.recalculateBalancesAfter(nextTransaction);
-
-    this.eventEmitter.emit(Events.Balance.Changed, {
-      propertyId: transaction.propertyId,
-      newBalance: newBalance,
-    });
   }
 
   private async getPreviousBalance(transaction: Transaction): Promise<number> {

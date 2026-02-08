@@ -5,6 +5,7 @@ import { AppModule } from '../src/app.module';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { UserService } from '@alisa-backend/people/user/user.service';
 import {
+  closeAppGracefully,
   getBearerToken,
   getTestUsers,
   getUserAccessToken2,
@@ -38,8 +39,7 @@ describe('Admin endpoints (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
-    server.close();
+    await closeAppGracefully(app, server);
   });
 
   describe('GET /admin/users', () => {

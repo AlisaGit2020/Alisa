@@ -6,6 +6,7 @@ import { AuthService } from '@alisa-backend/auth/auth.service';
 import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
 import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
 import {
+  closeAppGracefully,
   getBearerToken,
   getTestUsers,
   getUserAccessToken2,
@@ -98,8 +99,7 @@ describe('Depreciation via Tax endpoints (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
-    server.close();
+    await closeAppGracefully(app, server);
   });
 
   describe('Depreciation calculation via tax endpoint', () => {

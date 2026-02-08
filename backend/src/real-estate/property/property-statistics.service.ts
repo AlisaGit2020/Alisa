@@ -11,6 +11,7 @@ import {PropertyStatisticsFilterDto} from '@alisa-backend/real-estate/property/d
 import {PropertyStatisticsSearchDto} from '@alisa-backend/real-estate/property/dtos/property-statistics-search.dto';
 import {PropertyService} from '@alisa-backend/real-estate/property/property.service';
 import {AuthService} from '@alisa-backend/auth/auth.service';
+import {EventTrackerService} from '@alisa-backend/common/event-tracker.service';
 
 @Injectable()
 export class PropertyStatisticsService {
@@ -21,6 +22,7 @@ export class PropertyStatisticsService {
     private propertyService: PropertyService,
     private dataSource: DataSource,
     private authService: AuthService,
+    private eventTracker: EventTrackerService,
   ) {}
   EventCases = {
     CREATED: 'CREATED',
@@ -156,11 +158,16 @@ export class PropertyStatisticsService {
   async handleTransactionCreated(
     event: TransactionCreatedEvent,
   ): Promise<void> {
-    const eCase = this.EventCases.CREATED;
-    for (const key of this.statisticTypes) {
-      await this.transactionAcceptedAllTime(eCase, key, event.transaction);
-      await this.transactionAcceptedYearly(eCase, key, event.transaction);
-      await this.transactionAcceptedMonthly(eCase, key, event.transaction);
+    this.eventTracker.increment();
+    try {
+      const eCase = this.EventCases.CREATED;
+      for (const key of this.statisticTypes) {
+        await this.transactionAcceptedAllTime(eCase, key, event.transaction);
+        await this.transactionAcceptedYearly(eCase, key, event.transaction);
+        await this.transactionAcceptedMonthly(eCase, key, event.transaction);
+      }
+    } finally {
+      this.eventTracker.decrement();
     }
   }
 
@@ -168,11 +175,16 @@ export class PropertyStatisticsService {
   async handleTransactionDeleted(
     event: TransactionDeletedEvent,
   ): Promise<void> {
-    const eCase = this.EventCases.DELETED;
-    for (const key of this.statisticTypes) {
-      await this.transactionAcceptedAllTime(eCase, key, event.transaction);
-      await this.transactionAcceptedYearly(eCase, key, event.transaction);
-      await this.transactionAcceptedMonthly(eCase, key, event.transaction);
+    this.eventTracker.increment();
+    try {
+      const eCase = this.EventCases.DELETED;
+      for (const key of this.statisticTypes) {
+        await this.transactionAcceptedAllTime(eCase, key, event.transaction);
+        await this.transactionAcceptedYearly(eCase, key, event.transaction);
+        await this.transactionAcceptedMonthly(eCase, key, event.transaction);
+      }
+    } finally {
+      this.eventTracker.decrement();
     }
   }
 

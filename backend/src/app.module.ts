@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { PeopleModule } from './people/people.module';
 import { DefaultsModule } from './defaults/defaults.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     }),
     ConfigModule.forRoot(),
     EventEmitterModule.forRoot(),
+    CommonModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,

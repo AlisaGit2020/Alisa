@@ -7,6 +7,7 @@ import { TransactionService } from '@alisa-backend/accounting/transaction/transa
 import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
 import { IncomeTypeService } from '@alisa-backend/accounting/income/income-type.service';
 import {
+  closeAppGracefully,
   getBearerToken,
   getTestUsers,
   getUserAccessToken2,
@@ -162,8 +163,7 @@ describe('Tax endpoints (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
-    server.close();
+    await closeAppGracefully(app, server);
   });
 
   describe('POST /real-estate/property/tax/calculate', () => {

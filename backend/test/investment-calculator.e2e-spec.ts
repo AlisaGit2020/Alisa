@@ -4,6 +4,7 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
+  closeAppGracefully,
   getBearerToken,
   getTestUsers,
   getUserAccessToken2,
@@ -35,8 +36,7 @@ describe('Investment Calculator endpoints (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
-    server.close();
+    await closeAppGracefully(app, server);
   });
 
   const validCalculationInput = {

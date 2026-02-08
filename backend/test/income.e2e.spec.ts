@@ -6,6 +6,7 @@ import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
   addIncomeAndExpenseTypes,
   addTransaction,
+  closeAppGracefully,
   getBearerToken,
   getTestUsers,
   getUserAccessToken2,
@@ -42,8 +43,7 @@ describe('Income with transaction status (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
-    server.close();
+    await closeAppGracefully(app, server);
   });
 
   describe('Income visibility based on transaction status', () => {

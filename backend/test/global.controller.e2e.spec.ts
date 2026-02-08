@@ -15,6 +15,7 @@ import { incomeTestData } from './data/accounting/income.test.data';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
   addTransactionsToTestUsers,
+  closeAppGracefully,
   getTestUsers,
   getUserAccessToken2,
   prepareDatabase,
@@ -60,8 +61,7 @@ describe('Global controller end-to-end test (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
-    server.close();
+    await closeAppGracefully(app, server);
   });
 
   describe.each([

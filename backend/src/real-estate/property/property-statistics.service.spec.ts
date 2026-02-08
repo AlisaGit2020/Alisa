@@ -12,6 +12,7 @@ import {
   TransactionType,
 } from '@alisa-backend/common/types';
 import { DataSource } from 'typeorm';
+import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
 
 describe('PropertyStatisticsService', () => {
   let service: PropertyStatisticsService;
@@ -19,6 +20,7 @@ describe('PropertyStatisticsService', () => {
   let mockDataSource: { query: jest.Mock };
   let mockPropertyService: { search: jest.Mock };
   let mockAuthService: { hasOwnership: jest.Mock };
+  let mockEventTracker: { increment: jest.Mock; decrement: jest.Mock };
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
 
@@ -32,6 +34,10 @@ describe('PropertyStatisticsService', () => {
     };
     mockAuthService = {
       hasOwnership: jest.fn().mockResolvedValue(true),
+    };
+    mockEventTracker = {
+      increment: jest.fn(),
+      decrement: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -52,6 +58,10 @@ describe('PropertyStatisticsService', () => {
         {
           provide: AuthService,
           useValue: mockAuthService,
+        },
+        {
+          provide: EventTrackerService,
+          useValue: mockEventTracker,
         },
       ],
     }).compile();

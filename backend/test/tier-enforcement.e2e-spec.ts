@@ -7,6 +7,7 @@ import { UserService } from '@alisa-backend/people/user/user.service';
 import { TierService } from '@alisa-backend/admin/tier.service';
 import {
   addTier,
+  closeAppGracefully,
   getBearerToken,
   getUserAccessToken2,
   prepareDatabase,
@@ -38,8 +39,7 @@ describe('Tier enforcement (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
-    server.close();
+    await closeAppGracefully(app, server);
   });
 
   const createUserWithTier = async (

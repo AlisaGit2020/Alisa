@@ -11,6 +11,7 @@ import { PeopleModule } from '@alisa-backend/people/people.module';
 import { AuthModule } from '@alisa-backend/auth/auth.module';
 import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
 import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
+import { PropertyStatisticsSchemaService } from '@alisa-backend/real-estate/property/property-statistics-schema.service';
 import { AccountingModule } from '@alisa-backend/accounting/accounting.module';
 import { TaxController } from './property/tax.controller';
 import { TaxService } from './property/tax.service';
@@ -18,7 +19,7 @@ import { TierModule } from '@alisa-backend/admin/tier.module';
 
 @Module({
   controllers: [InvestmentController, TaxController, PropertyController],
-  providers: [InvestmentService, PropertyService, PropertyStatisticsService, TaxService],
+  providers: [InvestmentService, PropertyService, PropertyStatisticsService, PropertyStatisticsSchemaService, TaxService],
   imports: [
     TypeOrmModule.forFeature([
       Investment,

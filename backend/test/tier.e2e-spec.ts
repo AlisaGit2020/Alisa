@@ -6,6 +6,7 @@ import { AuthService } from '@alisa-backend/auth/auth.service';
 import { UserService } from '@alisa-backend/people/user/user.service';
 import {
   addTier,
+  closeAppGracefully,
   getBearerToken,
   getTestUsers,
   getUserAccessToken2,
@@ -61,8 +62,7 @@ describe('Tier admin endpoints (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
-    server.close();
+    await closeAppGracefully(app, server);
   });
 
   describe('GET /admin/tiers', () => {
