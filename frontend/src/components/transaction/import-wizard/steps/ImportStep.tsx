@@ -16,9 +16,10 @@ interface ImportStepProps {
   files: File[];
   isUploading: boolean;
   uploadError: string | null;
+  skippedCount: number;
   onFilesSelect: (files: File[]) => void;
   onBankSelect: (bank: BankId) => void;
-  onUpload: () => Promise<number[]>;
+  onUpload: () => Promise<{ savedIds: number[]; skippedCount: number }>;
   onNext: () => void;
   onFetchTransactions: (ids: number[]) => Promise<void>;
 }
@@ -30,6 +31,7 @@ export default function ImportStep({
   files,
   isUploading,
   uploadError,
+  skippedCount,
   onFilesSelect,
   onBankSelect,
   onUpload,
@@ -78,10 +80,13 @@ export default function ImportStep({
   });
 
   const handleUpload = async () => {
-    const ids = await onUpload();
-    if (ids.length > 0) {
-      await onFetchTransactions(ids);
+    const result = await onUpload();
+    if (result.savedIds.length > 0) {
+      await onFetchTransactions(result.savedIds);
       onNext();
+    } else if (result.skippedCount > 0) {
+      // All rows were skipped - still show the info but don't proceed
+      // The skippedCount is now in state and can be shown in an alert
     }
   };
 
@@ -225,6 +230,13 @@ export default function ImportStep({
       {uploadError && (
         <Alert severity="error" sx={{ mt: 2 }}>
           {uploadError}
+        </Alert>
+      )}
+
+      {/* Skipped rows info */}
+      {skippedCount > 0 && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          {t("importWizard.skippedRows", { count: skippedCount })}
         </Alert>
       )}
 

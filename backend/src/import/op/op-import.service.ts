@@ -12,7 +12,8 @@ import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
 import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { TransactionType } from '@alisa-backend/common/types';
+import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
+import { ImportResultDto } from '../dtos/import-result.dto';
 
 @Injectable()
 export class OpImportService {
@@ -22,7 +23,10 @@ export class OpImportService {
     private authService: AuthService,
   ) {}
 
-  async importCsv(user: JWTUser, options: OpImportInput): Promise<number[]> {
+  async importCsv(
+    user: JWTUser,
+    options: OpImportInput,
+  ): Promise<ImportResultDto> {
     await this.validate(user, options);
     const rows: CSVRow[] = await this.readCsv(options);
     return await this.saveRows(user, rows, options);
@@ -83,42 +87,71 @@ export class OpImportService {
     user: JWTUser,
     rows: CSVRow[],
     options: OpImportInput,
-  ): Promise<number[]> {
-    const savedIds: number[] = [];
+  ): Promise<ImportResultDto> {
+    const result: ImportResultDto = {
+      savedIds: [],
+      skippedCount: 0,
+      totalRows: rows.length,
+    };
+
     for (const opCsvRow of rows) {
-      const transaction = await this.toTransaction(user, opCsvRow, options);
+      const externalId = this.getExternalId(opCsvRow);
+
+      // Check if transaction already exists and is accepted
+      const existingTransaction = await this.findExistingTransaction(
+        user,
+        externalId,
+      );
+
+      if (
+        existingTransaction &&
+        existingTransaction.status === TransactionStatus.ACCEPTED
+      ) {
+        // Skip already accepted transactions
+        result.skippedCount++;
+        continue;
+      }
+
+      const transaction = await this.toTransaction(
+        user,
+        opCsvRow,
+        options,
+        existingTransaction?.id,
+      );
       try {
         const saved = await this.transactionService.save(user, transaction);
         if (saved?.id) {
-          savedIds.push(saved.id);
+          result.savedIds.push(saved.id);
         }
       } catch (error: unknown) {
         this.handleError(error);
       }
     }
-    return savedIds;
+    return result;
   }
 
-  private async getTransactionId(
+  private async findExistingTransaction(
     user: JWTUser,
-    opCsvRow: CSVRow,
-  ): Promise<number | undefined> {
+    externalId: string,
+  ): Promise<{ id: number; status: TransactionStatus } | null> {
     const transactions = await this.transactionService.search(user, {
+      select: ['id', 'status'],
       where: {
-        externalId: this.getExternalId(opCsvRow),
+        externalId: externalId,
       },
     });
 
-    return transactions[0]?.id ?? undefined;
+    return transactions[0] ?? null;
   }
 
   private async toTransaction(
     user: JWTUser,
     opCsvRow: CSVRow,
     options: OpImportInput,
+    existingId?: number,
   ): Promise<TransactionInputDto> {
     const transaction = new TransactionInputDto();
-    transaction.id = await this.getTransactionId(user, opCsvRow);
+    transaction.id = existingId;
     transaction.type = TransactionType.UNKNOWN;
 
     if (this.isExpense(opCsvRow)) {

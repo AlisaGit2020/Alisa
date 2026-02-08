@@ -51,6 +51,7 @@ const initialState: ImportWizardState = {
   isUploading: false,
   uploadError: null,
   importedTransactionIds: [],
+  skippedCount: 0,
   transactions: [],
   selectedIds: [],
   selectedTransactionTypes: [],
@@ -189,13 +190,16 @@ export function useImportWizard() {
     }
   };
 
-  const uploadFiles = useCallback(async (): Promise<number[]> => {
-    if (state.files.length === 0 || state.propertyId <= 0 || !state.selectedBank) return [];
+  const uploadFiles = useCallback(async (): Promise<{ savedIds: number[]; skippedCount: number }> => {
+    if (state.files.length === 0 || state.propertyId <= 0 || !state.selectedBank) {
+      return { savedIds: [], skippedCount: 0 };
+    }
 
     setState((prev) => ({ ...prev, isUploading: true, uploadError: null }));
 
     try {
       const allTransactionIds: number[] = [];
+      let totalSkipped = 0;
       const apiPath = getImportApiPath(state.selectedBank);
 
       // Upload each file sequentially
@@ -209,8 +213,9 @@ export function useImportWizard() {
           formData as unknown as ImportResponse
         );
 
-        const transactionIds = response.data || [];
+        const transactionIds = response.savedIds || [];
         allTransactionIds.push(...transactionIds);
+        totalSkipped += response.skippedCount || 0;
       }
 
       // Save session for resumption if wizard is interrupted
@@ -226,9 +231,10 @@ export function useImportWizard() {
         ...prev,
         isUploading: false,
         importedTransactionIds: allTransactionIds,
+        skippedCount: totalSkipped,
       }));
 
-      return allTransactionIds;
+      return { savedIds: allTransactionIds, skippedCount: totalSkipped };
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Upload failed";
@@ -237,7 +243,7 @@ export function useImportWizard() {
         isUploading: false,
         uploadError: errorMessage,
       }));
-      return [];
+      return { savedIds: [], skippedCount: 0 };
     }
   }, [state.files, state.propertyId, state.selectedBank]);
 

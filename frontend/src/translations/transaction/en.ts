@@ -83,6 +83,8 @@ const transaction = {
     selectedFiles: "Selected files ({{count}})",
     uploading: "Uploading...",
     uploadAndContinue: "Upload and Continue",
+    skippedRows:
+      "{{count}} transactions were skipped because they have already been imported and approved.",
     unknownTypesWarning:
       "Some transactions have unknown types. Please categorize all transactions before proceeding.",
     back: "Back",

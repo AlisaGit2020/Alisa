@@ -30,6 +30,7 @@ interface ReviewStepProps {
   selectedIds: number[];
   selectedTransactionTypes: TransactionType[];
   hasUnknownTypes: boolean;
+  skippedCount: number;
   onSelectChange: (id: number, item?: Transaction) => void;
   onSelectAllChange: (ids: number[], items?: Transaction[]) => void;
   onClearSelection: () => void;
@@ -51,6 +52,7 @@ export default function ReviewStep({
   selectedIds,
   selectedTransactionTypes,
   hasUnknownTypes,
+  skippedCount,
   onSelectChange,
   onSelectAllChange,
   onClearSelection,
@@ -155,6 +157,13 @@ export default function ReviewStep({
 
   return (
     <Box>
+      {/* Info about skipped rows */}
+      {skippedCount > 0 && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          {t("importWizard.skippedRows", { count: skippedCount })}
+        </Alert>
+      )}
+
       {/* Warning for unknown types */}
       {hasUnknownTypes && (
         <Alert severity="warning" sx={{ mb: 2 }}>

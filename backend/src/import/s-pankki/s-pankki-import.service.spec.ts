@@ -7,6 +7,7 @@ import { AuthService } from '@alisa-backend/auth/auth.service';
 import { createJWTUser, createProperty } from 'test/factories';
 import { MOCKS_PATH } from '@alisa-backend/constants';
 import { SPankkiImportInput } from './dtos/s-pankki-import-input.dto';
+import { TransactionStatus } from '@alisa-backend/common/types';
 
 describe('SPankkiImportService', () => {
   let service: SPankkiImportService;
@@ -56,7 +57,9 @@ describe('SPankkiImportService', () => {
       const result = await service.importCsv(testUser, testInput);
 
       // The CSV file has 61 data rows (excluding header)
-      expect(result.length).toBe(61);
+      expect(result.savedIds.length).toBe(61);
+      expect(result.skippedCount).toBe(0);
+      expect(result.totalRows).toBe(61);
       expect(mockTransactionService.save).toHaveBeenCalledTimes(61);
     });
 
@@ -128,21 +131,49 @@ describe('SPankkiImportService', () => {
       expect(uniqueIds.size).toBe(externalIds.length);
     });
 
-    it('skips already imported transactions', async () => {
-      // Mock that first transaction already exists
+    it('skips already accepted transactions', async () => {
+      // Mock that first transaction already exists and is accepted
+      let callCount = 0;
       (mockTransactionService.search as jest.Mock).mockImplementation(
-        async (_, options) => {
-          if (options.where.externalId) {
-            // Return existing transaction for first call only
-            return [{ id: 999 }];
+        async () => {
+          callCount++;
+          if (callCount === 1) {
+            // First transaction is already accepted
+            return [{ id: 999, status: TransactionStatus.ACCEPTED }];
           }
           return [];
         },
       );
 
-      await service.importCsv(testUser, testInput);
+      const result = await service.importCsv(testUser, testInput);
 
-      // All transactions should still be processed but with existing IDs
+      // First transaction should be skipped
+      expect(result.skippedCount).toBe(1);
+      expect(result.savedIds.length).toBe(60);
+      expect(mockTransactionService.save).toHaveBeenCalledTimes(60);
+    });
+
+    it('updates pending transactions instead of skipping', async () => {
+      // Mock that first transaction exists but is pending
+      let callCount = 0;
+      (mockTransactionService.search as jest.Mock).mockImplementation(
+        async () => {
+          callCount++;
+          if (callCount === 1) {
+            // First transaction is pending
+            return [{ id: 999, status: TransactionStatus.PENDING }];
+          }
+          return [];
+        },
+      );
+
+      const result = await service.importCsv(testUser, testInput);
+
+      // All transactions should be processed, none skipped
+      expect(result.skippedCount).toBe(0);
+      expect(result.savedIds.length).toBe(61);
+
+      // Verify the first save was called with existing ID
       const saveCalls = (mockTransactionService.save as jest.Mock).mock.calls;
       const hasExistingId = saveCalls.some((call) => call[1].id === 999);
       expect(hasExistingId).toBe(true);

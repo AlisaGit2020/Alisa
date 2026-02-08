@@ -84,6 +84,8 @@ const transaction = {
     selectedFiles: "Valitut tiedostot ({{count}})",
     uploading: "Ladataan...",
     uploadAndContinue: "Lataa ja jatka",
+    skippedRows:
+      "{{count}} tapahtumaa ohitettiin, koska ne on jo tuotu ja hyväksytty aiemmin.",
     unknownTypesWarning:
       "Joidenkin tapahtumien tyyppi on tuntematon. Luokittele kaikki tapahtumat ennen jatkamista.",
     back: "Takaisin",

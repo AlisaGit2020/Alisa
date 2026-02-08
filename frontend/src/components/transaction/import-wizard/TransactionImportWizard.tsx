@@ -82,6 +82,7 @@ function TransactionImportWizard({ t }: WithTranslation) {
             files={state.files}
             isUploading={state.isUploading}
             uploadError={state.uploadError}
+            skippedCount={state.skippedCount}
             onFilesSelect={setFiles}
             onBankSelect={setBank}
             onUpload={uploadFiles}
@@ -97,6 +98,7 @@ function TransactionImportWizard({ t }: WithTranslation) {
             selectedIds={state.selectedIds}
             selectedTransactionTypes={state.selectedTransactionTypes}
             hasUnknownTypes={state.hasUnknownTypes}
+            skippedCount={state.skippedCount}
             onSelectChange={handleSelectChange}
             onSelectAllChange={handleSelectAllChange}
             onClearSelection={clearSelection}

@@ -29,6 +29,7 @@ export interface ImportWizardState {
   isUploading: boolean;
   uploadError: string | null;
   importedTransactionIds: number[];
+  skippedCount: number;
   transactions: Transaction[];
   selectedIds: number[];
   selectedTransactionTypes: TransactionType[];
@@ -62,5 +63,7 @@ export const getStepName = (index: number): WizardStep => {
 };
 
 export interface ImportResponse {
-  data: number[];
+  savedIds: number[];
+  skippedCount: number;
+  totalRows: number;
 }

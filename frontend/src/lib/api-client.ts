@@ -131,7 +131,8 @@ class ApiClient {
     const options = await ApiClient.getOptions({
       "Content-Type": "multipart/form-data",
     });
-    return axios.post(ApiClient.getApiUrl(path), data, options);
+    const response = await axios.post(ApiClient.getApiUrl(path), data, options);
+    return response.data;
   }
 
   public static async search<T>(
