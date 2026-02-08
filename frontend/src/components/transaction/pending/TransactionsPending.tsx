@@ -18,7 +18,6 @@ import { TypeOrmFetchOptions } from "@alisa-lib/types.ts";
 import React from "react";
 import TransactionDetails from "../components/TransactionDetails.tsx";
 import TransactionForm from "../TransactionForm.tsx";
-import TransactionImport from "../components/TransactionImport.tsx";
 import TransactionAddMenu from "../components/TransactionAddMenu.tsx";
 import TransactionsPendingActions from "./TransactionsPendingActions.tsx";
 import TransactionFilter, {
@@ -69,7 +68,6 @@ function TransactionsPending({ t }: WithTranslation) {
   const [anchorElAdd, setAnchorElAdd] = React.useState<null | HTMLElement>(
     null,
   );
-  const [importOpen, setImportOpen] = React.useState<boolean>(false);
   const [saveResult, setSaveResult] = React.useState<
     DataSaveResult | undefined
   >(undefined);
@@ -120,10 +118,6 @@ function TransactionsPending({ t }: WithTranslation) {
 
   const handleAdd = (type: TransactionType) => {
     setAddType(type);
-    handleCloseAddMenu();
-  };
-  const handleOpenImport = () => {
-    setImportOpen(true);
     handleCloseAddMenu();
   };
 
@@ -433,21 +427,11 @@ function TransactionsPending({ t }: WithTranslation) {
         ></TransactionForm>
       )}
 
-      {importOpen && (
-        <TransactionImport
-          open={importOpen}
-          propertyId={filter.propertyId}
-          onClose={() => setImportOpen(false)}
-          t={t}
-        ></TransactionImport>
-      )}
-
       <TransactionAddMenu
         t={t}
         anchorEl={anchorElAdd}
         onClose={handleCloseAddMenu}
         onAddTransaction={handleAdd}
-        onImport={handleOpenImport}
       ></TransactionAddMenu>
 
       <PropertyRequiredSnackbar

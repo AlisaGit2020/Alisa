@@ -7,7 +7,6 @@ import DataService from "@alisa-lib/data-service";
 import { TypeOrmFetchOptions } from "@alisa-lib/types";
 import React from "react";
 import TransactionAddMenu from "./components/TransactionAddMenu";
-import TransactionImport from "./components/TransactionImport";
 import { TransactionFilterData } from "./components/TransactionFilter";
 import TransactionDetails from "./components/TransactionDetails";
 import TransactionForm from "./TransactionForm.tsx";
@@ -28,7 +27,6 @@ function Transactions({ t, filter, refreshTrigger }: TransactionsProps) {
   const [addType, setAddType] = React.useState<TransactionType | undefined>(
     undefined,
   );
-  const [importOpen, setImportOpen] = React.useState<boolean>(false);
 
   const { requireProperty, popoverOpen, popoverAnchorEl, closePopover, openPropertySelector } =
     usePropertyRequired(filter.propertyId);
@@ -48,11 +46,6 @@ function Transactions({ t, filter, refreshTrigger }: TransactionsProps) {
 
   const handleAdd = (type: TransactionType) => {
     setAddType(type);
-    handleCloseAddMenu();
-  };
-
-  const handleOpenImport = () => {
-    setImportOpen(true);
     handleCloseAddMenu();
   };
 
@@ -164,21 +157,11 @@ function Transactions({ t, filter, refreshTrigger }: TransactionsProps) {
         ></TransactionForm>
       )}
 
-      {importOpen && (
-        <TransactionImport
-          open={importOpen}
-          propertyId={filter.propertyId}
-          onClose={() => setImportOpen(false)}
-          t={t}
-        ></TransactionImport>
-      )}
-
       <TransactionAddMenu
         t={t}
         anchorEl={anchorElAdd}
         onClose={handleCloseAddMenu}
         onAddTransaction={handleAdd}
-        onImport={handleOpenImport}
       ></TransactionAddMenu>
 
       <PropertyRequiredSnackbar

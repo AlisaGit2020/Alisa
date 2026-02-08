@@ -73,10 +73,11 @@ const transaction = {
     loadingProperty: "Loading...",
     selectPropertyWarning:
       "Please select a specific property from the navigation bar before importing.",
-    dropFileHere: "Drop file here",
-    dragDropOrClick: "Drag and drop a CSV file here, or click to select",
+    dropFileHere: "Drop files here",
+    dragDropOrClick: "Drag and drop CSV files here, or click to select",
     csvFilesOnly: "CSV files only (.csv)",
     selectedFile: "Selected file",
+    selectedFiles: "Selected files ({{count}})",
     uploading: "Uploading...",
     uploadAndContinue: "Upload and Continue",
     unknownTypesWarning:

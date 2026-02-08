@@ -73,11 +73,12 @@ const transaction = {
     loadingProperty: "Ladataan...",
     selectPropertyWarning:
       "Valitse tietty kohde navigointipalkista ennen tuontia.",
-    dropFileHere: "Pudota tiedosto tähän",
+    dropFileHere: "Pudota tiedostot tähän",
     dragDropOrClick:
-      "Vedä ja pudota CSV-tiedosto tähän tai napsauta valitaksesi",
+      "Vedä ja pudota CSV-tiedostot tähän tai napsauta valitaksesi",
     csvFilesOnly: "Vain CSV-tiedostot (.csv)",
     selectedFile: "Valittu tiedosto",
+    selectedFiles: "Valitut tiedostot ({{count}})",
     uploading: "Ladataan...",
     uploadAndContinue: "Lataa ja jatka",
     unknownTypesWarning:

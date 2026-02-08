@@ -20,8 +20,8 @@ function TransactionImportWizard({ t }: WithTranslation) {
     state,
     nextStep,
     prevStep,
-    setFile,
-    uploadFile,
+    setFiles,
+    uploadFiles,
     fetchTransactions,
     handleSelectChange,
     handleSelectAllChange,
@@ -76,11 +76,11 @@ function TransactionImportWizard({ t }: WithTranslation) {
           <ImportStep
             t={t}
             propertyId={state.propertyId}
-            file={state.file}
+            files={state.files}
             isUploading={state.isUploading}
             uploadError={state.uploadError}
-            onFileSelect={setFile}
-            onUpload={uploadFile}
+            onFilesSelect={setFiles}
+            onUpload={uploadFiles}
             onNext={nextStep}
             onFetchTransactions={fetchTransactions}
           />

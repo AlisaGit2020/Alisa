@@ -30,12 +30,12 @@ interface SubPageCard {
 
 const subPages: SubPageCard[] = [
   {
-    id: "accepted",
-    titleKey: "accepted",
-    descriptionKey: "acceptedDescription",
-    icon: <DoneIcon sx={{ fontSize: 48 }} />,
-    href: `${transactionContext.routePath}/accepted`,
-    color: "success.main",
+    id: "import",
+    titleKey: "import",
+    descriptionKey: "importDescription",
+    icon: <FileUploadIcon sx={{ fontSize: 48 }} />,
+    href: `${transactionContext.routePath}/import`,
+    color: "primary.main",
   },
   {
     id: "pending",
@@ -46,12 +46,12 @@ const subPages: SubPageCard[] = [
     color: "warning.main",
   },
   {
-    id: "import",
-    titleKey: "import",
-    descriptionKey: "importDescription",
-    icon: <FileUploadIcon sx={{ fontSize: 48 }} />,
-    href: `${transactionContext.routePath}/import`,
-    color: "primary.main",
+    id: "accepted",
+    titleKey: "accepted",
+    descriptionKey: "acceptedDescription",
+    icon: <DoneIcon sx={{ fontSize: 48 }} />,
+    href: `${transactionContext.routePath}/accepted`,
+    color: "success.main",
   },
 ];
 

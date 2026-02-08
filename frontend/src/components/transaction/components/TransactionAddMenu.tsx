@@ -13,7 +13,6 @@ import { TransactionType } from "@alisa-types";
 import {
   AlisaDepositIcon,
   AlisaExpenseIcon,
-  AlisaImportIcon,
   AlisaIncomeIcon,
   AlisaWithdrawIcon,
 } from "../../alisa/AlisaIcons.tsx";
@@ -22,7 +21,6 @@ function TransactionAddMenu(props: {
   t: TFunction;
   onClose: () => void;
   onAddTransaction: (type: TransactionType) => void;
-  onImport: () => void;
   anchorEl: null | HTMLElement;
 }) {
   return (
@@ -68,12 +66,6 @@ function TransactionAddMenu(props: {
               <AlisaWithdrawIcon size={"small"} />
             </ListItemIcon>
             <ListItemText>{props.t("withdraw")}</ListItemText>
-          </MenuItem>
-          <MenuItem onClick={props.onImport}>
-            <ListItemIcon>
-              <AlisaImportIcon size={"small"} />
-            </ListItemIcon>
-            <ListItemText>{props.t("import")}</ListItemText>
           </MenuItem>
         </MenuList>
       </Menu>

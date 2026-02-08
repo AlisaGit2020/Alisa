@@ -3,7 +3,7 @@ import { Transaction, TransactionType } from "@alisa-types";
 export interface ImportWizardState {
   activeStep: number;
   propertyId: number;
-  file: File | null;
+  files: File[];
   isUploading: boolean;
   uploadError: string | null;
   importedTransactionIds: number[];

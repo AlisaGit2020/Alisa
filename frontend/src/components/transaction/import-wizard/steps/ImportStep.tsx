@@ -23,10 +23,10 @@ const supportedBanks: SupportedBank[] = [
 interface ImportStepProps {
   t: TFunction;
   propertyId: number;
-  file: File | null;
+  files: File[];
   isUploading: boolean;
   uploadError: string | null;
-  onFileSelect: (file: File | null) => void;
+  onFilesSelect: (files: File[]) => void;
   onUpload: () => Promise<number[]>;
   onNext: () => void;
   onFetchTransactions: (ids: number[]) => Promise<void>;
@@ -35,10 +35,10 @@ interface ImportStepProps {
 export default function ImportStep({
   t,
   propertyId,
-  file,
+  files,
   isUploading,
   uploadError,
-  onFileSelect,
+  onFilesSelect,
   onUpload,
   onNext,
   onFetchTransactions,
@@ -67,10 +67,10 @@ export default function ImportStep({
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
-        onFileSelect(acceptedFiles[0]);
+        onFilesSelect(acceptedFiles);
       }
     },
-    [onFileSelect]
+    [onFilesSelect]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -78,7 +78,7 @@ export default function ImportStep({
     accept: {
       "text/csv": [".csv"],
     },
-    multiple: false,
+    multiple: true,
     disabled: propertyId <= 0 || isUploading,
   });
 
@@ -171,15 +171,24 @@ export default function ImportStep({
         </Typography>
       </Paper>
 
-      {/* Selected file display */}
-      {file && (
+      {/* Selected files display */}
+      {files.length > 0 && (
         <Paper sx={{ p: 2, mt: 2 }}>
-          <Typography variant="body1">
-            {t("importWizard.selectedFile")}: <strong>{file.name}</strong>
+          <Typography variant="body1" gutterBottom>
+            {t("importWizard.selectedFiles", { count: files.length })}:
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {(file.size / 1024).toFixed(1)} KB
-          </Typography>
+          <Stack spacing={1}>
+            {files.map((file, index) => (
+              <Box key={index} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Typography variant="body2">
+                  <strong>{file.name}</strong>
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {(file.size / 1024).toFixed(1)} KB
+                </Typography>
+              </Box>
+            ))}
+          </Stack>
         </Paper>
       )}
 
@@ -195,7 +204,7 @@ export default function ImportStep({
         <Button
           variant="contained"
           onClick={handleUpload}
-          disabled={!file || !isPropertySelected || isUploading}
+          disabled={files.length === 0 || !isPropertySelected || isUploading}
           startIcon={isUploading ? <CircularProgress size={20} /> : undefined}
         >
           {isUploading ? t("importWizard.uploading") : t("importWizard.uploadAndContinue")}

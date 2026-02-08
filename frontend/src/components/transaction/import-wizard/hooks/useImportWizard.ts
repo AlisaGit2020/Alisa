@@ -44,7 +44,7 @@ const createEmptyStats = (): ImportStats => ({
 const initialState: ImportWizardState = {
   activeStep: 0,
   propertyId: 0,
-  file: null,
+  files: [],
   isUploading: false,
   uploadError: null,
   importedTransactionIds: [],
@@ -163,39 +163,45 @@ export function useImportWizard() {
     setState((prev) => ({ ...prev, activeStep: Math.max(0, prev.activeStep - 1) }));
   }, []);
 
-  const setFile = useCallback((file: File | null) => {
-    setState((prev) => ({ ...prev, file, uploadError: null }));
+  const setFiles = useCallback((files: File[]) => {
+    setState((prev) => ({ ...prev, files, uploadError: null }));
   }, []);
 
-  const uploadFile = useCallback(async (): Promise<number[]> => {
-    if (!state.file || state.propertyId <= 0) return [];
+  const uploadFiles = useCallback(async (): Promise<number[]> => {
+    if (state.files.length === 0 || state.propertyId <= 0) return [];
 
     setState((prev) => ({ ...prev, isUploading: true, uploadError: null }));
 
     try {
-      const formData = new FormData();
-      formData.append("file", state.file);
-      formData.append("propertyId", state.propertyId.toString());
+      const allTransactionIds: number[] = [];
 
-      const response = await ApiClient.upload<ImportResponse>(
-        opImportContext.apiPath,
-        formData as unknown as ImportResponse
-      );
+      // Upload each file sequentially
+      for (const file of state.files) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("propertyId", state.propertyId.toString());
 
-      const transactionIds = response.data || [];
+        const response = await ApiClient.upload<ImportResponse>(
+          opImportContext.apiPath,
+          formData as unknown as ImportResponse
+        );
+
+        const transactionIds = response.data || [];
+        allTransactionIds.push(...transactionIds);
+      }
 
       // Save session for resumption if wizard is interrupted
-      if (transactionIds.length > 0) {
-        saveSession({ propertyId: state.propertyId, transactionIds });
+      if (allTransactionIds.length > 0) {
+        saveSession({ propertyId: state.propertyId, transactionIds: allTransactionIds });
       }
 
       setState((prev) => ({
         ...prev,
         isUploading: false,
-        importedTransactionIds: transactionIds,
+        importedTransactionIds: allTransactionIds,
       }));
 
-      return transactionIds;
+      return allTransactionIds;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Upload failed";
@@ -206,7 +212,7 @@ export function useImportWizard() {
       }));
       return [];
     }
-  }, [state.file, state.propertyId]);
+  }, [state.files, state.propertyId]);
 
   const fetchTransactions = useCallback(async (ids: number[]) => {
     if (ids.length === 0) return;
@@ -440,8 +446,8 @@ export function useImportWizard() {
     goToStep,
     nextStep,
     prevStep,
-    setFile,
-    uploadFile,
+    setFiles,
+    uploadFiles,
     fetchTransactions,
     handleSelectChange,
     handleSelectAllChange,
