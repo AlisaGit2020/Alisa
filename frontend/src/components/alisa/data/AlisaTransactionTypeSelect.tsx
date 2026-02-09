@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { TFunction } from "i18next";
 import AlisaSelectVariant from "../form/AlisaSelectVariant.tsx";
@@ -18,6 +19,7 @@ interface AlisaTransactionTypeSelectProps {
 }
 
 function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
+  const { t: tCommon } = useTranslation("common");
   const [transactionTypes, setTransactionTypes] = useState<
     AlisaSelectFieldItem[]
   >([]);
@@ -46,7 +48,7 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
   }, []);
 
   if (!ready) {
-    return <div>Loading...</div>;
+    return <div>{tCommon("loading")}</div>;
   }
 
   if (!visible) {

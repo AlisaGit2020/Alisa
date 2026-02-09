@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import DataService from "@alisa-lib/data-service.ts";
 import { Property } from "@alisa-types";
 import { propertyContext } from "@alisa-lib/alisa-contexts.ts";
@@ -18,6 +19,7 @@ interface AlisaPropertySelectProps {
 }
 
 function AlisaPropertySelect(props: AlisaPropertySelectProps) {
+  const { t: tCommon } = useTranslation("common");
   const [properties, setProperties] = useState<Property[]>([]);
   const [ready, setReady] = useState<boolean>(false);
 
@@ -55,7 +57,7 @@ function AlisaPropertySelect(props: AlisaPropertySelectProps) {
   }, []);
 
   if (!ready) {
-    return <div>Loading...</div>;
+    return <div>{tCommon("loading")}</div>;
   }
 
   return (
