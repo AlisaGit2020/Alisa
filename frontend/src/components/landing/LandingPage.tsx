@@ -1,6 +1,7 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Alert, Box, Button, Card, Container, Grid, Link, Typography } from "@mui/material";
+import { Alert, Box, Card, Container, Grid, Link, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
+import { AlisaButton } from "../alisa";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AssessmentIcon from "@mui/icons-material/Assessment";
@@ -150,7 +151,8 @@ function LandingPage({ t }: WithTranslation) {
             {t('landing:subtitle')}
           </Typography>
           <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button
+            <AlisaButton
+              label={t('landing:ctaLogin')}
               variant="contained"
               size="large"
               onClick={handleLogin}
@@ -163,10 +165,9 @@ function LandingPage({ t }: WithTranslation) {
                   bgcolor: 'grey.100',
                 },
               }}
-            >
-              {t('landing:ctaLogin')}
-            </Button>
-            <Button
+            />
+            <AlisaButton
+              label={t('landing:ctaCalculator')}
               variant="outlined"
               size="large"
               onClick={handleTryCalculator}
@@ -180,9 +181,7 @@ function LandingPage({ t }: WithTranslation) {
                   bgcolor: 'rgba(255, 255, 255, 0.1)',
                 },
               }}
-            >
-              {t('landing:ctaCalculator')}
-            </Button>
+            />
           </Box>
         </Container>
       </Box>

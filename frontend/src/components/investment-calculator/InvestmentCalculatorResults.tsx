@@ -1,5 +1,6 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Box, Button, Card, CardContent, Divider, Grid, Typography } from "@mui/material";
+import { Box, Card, CardContent, Divider, Grid, Typography } from "@mui/material";
+import { AlisaButton } from "../alisa";
 
 // Base calculation results without database fields
 export interface InvestmentResults {
@@ -162,13 +163,10 @@ function InvestmentCalculatorResults({ t, results, onSave, showSaveButton = true
 
           {showSaveButton && onSave && (
             <Box sx={{ mt: 3 }}>
-              <Button
-                variant="contained"
-                size="medium"
+              <AlisaButton
+                label={t('investment-calculator:save')}
                 onClick={onSave}
-              >
-                {t('investment-calculator:save')}
-              </Button>
+              />
             </Box>
           )}
         </CardContent>

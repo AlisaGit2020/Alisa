@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Button,
   Stack,
   Typography,
-  CircularProgress,
   Alert,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
+import { AlisaButton } from '../alisa';
 import axios from 'axios';
 import ApiClient from '@alisa-lib/api-client';
 import { VITE_API_URL } from '../../constants';
@@ -130,31 +129,29 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
 
         {/* Action Buttons */}
         <Stack direction="row" spacing={2}>
-          <Button
-            variant="contained"
+          <AlisaButton
+            label={t('uploadPhoto')}
             component="label"
-            disabled={uploading}
-            startIcon={uploading ? <CircularProgress size={20} /> : <CloudUploadIcon />}
+            loading={uploading}
+            startIcon={<CloudUploadIcon />}
           >
-            {t('uploadPhoto')}
             <input
               type="file"
               hidden
               accept="image/jpeg,image/jpg,image/png,image/webp"
               onChange={handleFileSelect}
             />
-          </Button>
+          </AlisaButton>
 
           {photoPath && (
-            <Button
+            <AlisaButton
+              label={t('deletePhoto')}
               variant="outlined"
               color="error"
               disabled={uploading}
               startIcon={<DeleteIcon />}
               onClick={handleDelete}
-            >
-              {t('deletePhoto')}
-            </Button>
+            />
           )}
         </Stack>
 

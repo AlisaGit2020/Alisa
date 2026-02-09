@@ -7,7 +7,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Button,
   Alert,
   CircularProgress,
   SelectChangeEvent,
@@ -15,6 +14,7 @@ import {
 } from "@mui/material";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import { useTranslation } from "react-i18next";
+import { AlisaButton } from "../alisa";
 import axios from "axios";
 import ApiClient from "@alisa-lib/api-client";
 import { VITE_API_URL } from "../../constants";
@@ -196,16 +196,12 @@ function TaxView() {
           <Typography color="text.secondary" variant="body2" sx={{ mb: 3 }}>
             {t("noDataHint")}
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={
-              calculating ? <CircularProgress size={20} /> : <CalculateIcon />
-            }
+          <AlisaButton
+            label={calculating ? t("calculating") : t("calculate")}
+            startIcon={<CalculateIcon />}
             onClick={calculateTaxData}
-            disabled={calculating}
-          >
-            {calculating ? t("calculating") : t("calculate")}
-          </Button>
+            loading={calculating}
+          />
         </Paper>
       )}
 
@@ -223,16 +219,13 @@ function TaxView() {
             </Alert>
           )}
           <Box sx={{ mt: 3, mb: 2 }}>
-            <Button
+            <AlisaButton
+              label={calculating ? t("calculating") : t("calculate")}
               variant="outlined"
-              startIcon={
-                calculating ? <CircularProgress size={20} /> : <CalculateIcon />
-              }
+              startIcon={<CalculateIcon />}
               onClick={calculateTaxData}
-              disabled={calculating}
-            >
-              {calculating ? t("calculating") : t("calculate")}
-            </Button>
+              loading={calculating}
+            />
           </Box>
           <TaxBreakdown
             grossIncome={taxData.grossIncome}

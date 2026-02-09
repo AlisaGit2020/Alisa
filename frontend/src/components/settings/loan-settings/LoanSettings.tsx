@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Stack, Typography } from "@mui/material";
+import { Box, Paper, Stack, Typography } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { expenseTypeContext, settingsContext } from "@alisa-lib/alisa-contexts";
 import React from "react";
@@ -7,6 +7,7 @@ import AlisaSelect from "../../alisa/data/AlisaSelect";
 import DataService from "@alisa-lib/data-service";
 import { ExpenseType } from "@alisa-types";
 import { AlisaApproveIcon } from "../../alisa/AlisaIcons";
+import { AlisaButton } from "../../alisa";
 
 interface LoanSettingsData {
   loanPrincipalExpenseTypeId: number;
@@ -109,14 +110,13 @@ function LoanSettings({ t }: WithTranslation) {
           onHandleChange={handleChange}
         />
         <Box>
-          <Button
+          <AlisaButton
+            label={t("save")}
             variant="contained"
             onClick={handleSave}
             disabled={saving}
             endIcon={<AlisaApproveIcon />}
-          >
-            {t("save")}
-          </Button>
+          />
         </Box>
       </Stack>
     </Paper>

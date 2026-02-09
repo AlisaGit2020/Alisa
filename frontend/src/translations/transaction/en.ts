@@ -19,6 +19,7 @@ const transaction = {
     "Import new bank transactions from CSV files exported from your bank.",
 
   accepted: "Accepted",
+  close: "Close",
   activeFilters: "Active filters",
   accountingDate: "Accounting date",
   add: "Add new transaction",

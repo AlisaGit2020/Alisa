@@ -4,24 +4,20 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import {
   Box,
   Chip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
   Divider,
   Grid,
-  IconButton,
   Paper,
   Stack,
   Typography,
 } from "@mui/material";
 import React from "react";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
-import CloseIcon from "@mui/icons-material/Close";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
 import DescriptionIcon from "@mui/icons-material/Description";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import ReceiptIcon from "@mui/icons-material/Receipt";
+import { AlisaButton, AlisaDialog } from "../../alisa";
 
 interface DetailRowProps {
   icon?: React.ReactNode;
@@ -117,143 +113,128 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
   }
 
   return (
-    <Dialog
+    <AlisaDialog
       open={Boolean(id)}
       onClose={onClose}
       fullWidth={true}
-      maxWidth={"sm"}
+      maxWidth="sm"
+      title={t("detailsTitle")}
+      actions={<AlisaButton label={t("close")} variant="text" onClick={onClose} />}
     >
-      <DialogTitle sx={{ pr: 6 }}>
-        <Stack direction="row" alignItems="center" spacing={2}>
-          <Typography variant="h6">{t("detailsTitle")}</Typography>
-          <Chip
-            label={getTransactionTypeName(data.type)}
-            color={getTransactionTypeColor(data.type)}
-            size="small"
-          />
-        </Stack>
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
+      <Stack spacing={3}>
+        {/* Amount Section */}
+        <Paper
+          elevation={0}
           sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
+            p: 3,
+            bgcolor: "action.hover",
+            textAlign: "center",
           }}
         >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent>
-        <Stack spacing={3}>
-          {/* Amount Section */}
-          <Paper
-            elevation={0}
-            sx={{
-              p: 3,
-              bgcolor: "action.hover",
-              textAlign: "center",
-            }}
-          >
+          <Stack direction="row" justifyContent="center" alignItems="center" spacing={2} sx={{ mb: 1 }}>
             <Typography variant="h4" fontWeight="bold">
               {getCurrency(data.amount)}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {t("totalAmount")}
+            <Chip
+              label={getTransactionTypeName(data.type)}
+              color={getTransactionTypeColor(data.type)}
+              size="small"
+            />
+          </Stack>
+          <Typography variant="body2" color="text.secondary">
+            {t("totalAmount")}
+          </Typography>
+        </Paper>
+
+        {/* Category Section */}
+        {((data.expenses && data.expenses.length > 0) ||
+          (data.incomes && data.incomes.length > 0)) && (
+          <Box>
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              gutterBottom
+            >
+              {t("category")}
             </Typography>
-          </Paper>
-
-          {/* Category Section */}
-          {((data.expenses && data.expenses.length > 0) ||
-            (data.incomes && data.incomes.length > 0)) && (
-            <Box>
-              <Typography
-                variant="subtitle2"
-                color="text.secondary"
-                gutterBottom
-              >
-                {t("category")}
-              </Typography>
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                {data.expenses?.map((expense, index) => (
-                  <Chip
-                    key={`expense-${index}`}
-                    label={expense.expenseType?.name}
-                    variant="outlined"
-                    color="error"
-                    size="small"
-                  />
-                ))}
-                {data.incomes?.map((income, index) => (
-                  <Chip
-                    key={`income-${index}`}
-                    label={income.incomeType?.name}
-                    variant="outlined"
-                    color="success"
-                    size="small"
-                  />
-                ))}
-              </Stack>
-            </Box>
-          )}
-
-          <Divider />
-
-          {/* Transaction Details */}
-          <Box>
-            <DetailRow
-              icon={<PersonIcon fontSize="small" />}
-              label={t("sender")}
-              value={data.sender || "-"}
-            />
-            <DetailRow
-              icon={<PersonIcon fontSize="small" />}
-              label={t("receiver")}
-              value={data.receiver || "-"}
-            />
-            <DetailRow
-              icon={<DescriptionIcon fontSize="small" />}
-              label={t("description")}
-              value={data.description || "-"}
-            />
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {data.expenses?.map((expense, index) => (
+                <Chip
+                  key={`expense-${index}`}
+                  label={expense.expenseType?.name}
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                />
+              ))}
+              {data.incomes?.map((income, index) => (
+                <Chip
+                  key={`income-${index}`}
+                  label={income.incomeType?.name}
+                  variant="outlined"
+                  color="success"
+                  size="small"
+                />
+              ))}
+            </Stack>
           </Box>
+        )}
 
-          <Divider />
+        <Divider />
 
-          {/* Dates */}
-          <Box>
-            <DetailRow
-              icon={<CalendarTodayIcon fontSize="small" />}
-              label={t("transactionDate")}
-              value={getFormatDate(data.transactionDate)}
-            />
-            <DetailRow
-              icon={<CalendarTodayIcon fontSize="small" />}
-              label={t("accountingDate")}
-              value={getFormatDate(data.accountingDate)}
-            />
-          </Box>
+        {/* Transaction Details */}
+        <Box>
+          <DetailRow
+            icon={<PersonIcon fontSize="small" />}
+            label={t("sender")}
+            value={data.sender || "-"}
+          />
+          <DetailRow
+            icon={<PersonIcon fontSize="small" />}
+            label={t("receiver")}
+            value={data.receiver || "-"}
+          />
+          <DetailRow
+            icon={<DescriptionIcon fontSize="small" />}
+            label={t("description")}
+            value={data.description || "-"}
+          />
+        </Box>
 
-          <Divider />
+        <Divider />
 
-          {/* Additional Info */}
-          <Box>
-            <DetailRow
-              icon={<AccountBalanceIcon fontSize="small" />}
-              label={t("balance")}
-              value={getCurrency(data.balance)}
-            />
-            <DetailRow
-              icon={<ReceiptIcon fontSize="small" />}
-              label={t("externalId")}
-              value={data.externalId || "-"}
-            />
-            <DetailRow label={t("id")} value={`#${data.id}`} />
-          </Box>
-        </Stack>
-      </DialogContent>
-    </Dialog>
+        {/* Dates */}
+        <Box>
+          <DetailRow
+            icon={<CalendarTodayIcon fontSize="small" />}
+            label={t("transactionDate")}
+            value={getFormatDate(data.transactionDate)}
+          />
+          <DetailRow
+            icon={<CalendarTodayIcon fontSize="small" />}
+            label={t("accountingDate")}
+            value={getFormatDate(data.accountingDate)}
+          />
+        </Box>
+
+        <Divider />
+
+        {/* Additional Info */}
+        <Box>
+          <DetailRow
+            icon={<AccountBalanceIcon fontSize="small" />}
+            label={t("balance")}
+            value={getCurrency(data.balance)}
+          />
+          <DetailRow
+            icon={<ReceiptIcon fontSize="small" />}
+            label={t("externalId")}
+            value={data.externalId || "-"}
+          />
+          <DetailRow label={t("id")} value={`#${data.id}`} />
+        </Box>
+      </Stack>
+    </AlisaDialog>
   );
 }
 

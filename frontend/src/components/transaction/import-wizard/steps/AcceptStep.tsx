@@ -3,15 +3,14 @@ import {
   Box,
   Paper,
   Typography,
-  Button,
   Stack,
   Alert,
-  CircularProgress,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
+import AlisaButton from "../../../alisa/form/AlisaButton";
 import { TFunction } from "i18next";
 import { Transaction, TransactionType, transactionTypeNames } from "@alisa-types";
 import { AlisaApproveIcon } from "../../../alisa/AlisaIcons";
@@ -146,26 +145,20 @@ export default function AcceptStep({
         justifyContent="space-between"
         sx={{ mt: 3 }}
       >
-        <Button onClick={onBack} disabled={isApproving}>
-          {t("importWizard.back")}
-        </Button>
-        <Button
+        <AlisaButton
+          label={t("importWizard.back")}
+          onClick={onBack}
+          disabled={isApproving}
+        />
+        <AlisaButton
+          label={isApproving ? t("importWizard.approving") : t("importWizard.approveAll")}
           variant="contained"
           color="success"
           onClick={handleApprove}
           disabled={isApproving}
-          startIcon={
-            isApproving ? (
-              <CircularProgress size={20} />
-            ) : (
-              <AlisaApproveIcon />
-            )
-          }
-        >
-          {isApproving
-            ? t("importWizard.approving")
-            : t("importWizard.approveAll")}
-        </Button>
+          loading={isApproving}
+          startIcon={!isApproving ? <AlisaApproveIcon /> : undefined}
+        />
       </Stack>
     </Box>
   );

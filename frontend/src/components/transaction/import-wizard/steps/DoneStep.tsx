@@ -1,4 +1,5 @@
-import { Box, Paper, Typography, Button, Stack } from "@mui/material";
+import { Box, Paper, Typography, Stack } from "@mui/material";
+import AlisaButton from "../../../alisa/form/AlisaButton";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { TFunction } from "i18next";
 import { ImportStats } from "../types";
@@ -76,12 +77,16 @@ export default function DoneStep({ t, stats, onReset }: DoneStepProps) {
           justifyContent="center"
           sx={{ mt: 4 }}
         >
-          <Button variant="outlined" onClick={onReset}>
-            {t("importWizard.importAnotherFile")}
-          </Button>
-          <Button variant="contained" onClick={handleViewTransactions}>
-            {t("importWizard.viewTransactions")}
-          </Button>
+          <AlisaButton
+            label={t("importWizard.importAnotherFile")}
+            variant="outlined"
+            onClick={onReset}
+          />
+          <AlisaButton
+            label={t("importWizard.viewTransactions")}
+            variant="contained"
+            onClick={handleViewTransactions}
+          />
         </Stack>
       </Paper>
     </Box>

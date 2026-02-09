@@ -109,7 +109,9 @@ describe('UserDetails Integration', () => {
       renderWithProviders(<UserDetails open={true} onClose={mockOnClose} />);
 
       await waitFor(() => {
-        expect(screen.getByText('John Doe')).toBeInTheDocument();
+        // Name appears in both dialog title and content
+        const nameElements = screen.getAllByText('John Doe');
+        expect(nameElements.length).toBeGreaterThanOrEqual(1);
       });
 
       // Check avatar alt text and src
@@ -182,7 +184,9 @@ describe('UserDetails Integration', () => {
       renderWithProviders(<UserDetails open={true} onClose={mockOnClose} />);
 
       await waitFor(() => {
-        expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+        // Name appears in both dialog title and content
+        const nameElements = screen.getAllByText('Jane Smith');
+        expect(nameElements.length).toBeGreaterThanOrEqual(1);
       });
 
       // Payment and Home icons should not be present (tier details)
@@ -265,7 +269,9 @@ describe('UserDetails Integration', () => {
       renderWithProviders(<UserDetails open={true} onClose={mockOnClose} />);
 
       await waitFor(() => {
-        expect(screen.getByText('John Doe')).toBeInTheDocument();
+        // Name appears in both dialog title and content
+        const nameElements = screen.getAllByText('John Doe');
+        expect(nameElements.length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('john.doe@example.com')).toBeInTheDocument();
         expect(screen.getByText('Premium')).toBeInTheDocument();
       });
@@ -279,7 +285,9 @@ describe('UserDetails Integration', () => {
       renderWithProviders(<UserDetails open={true} onClose={mockOnClose} />);
 
       await waitFor(() => {
-        expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+        // Name appears in both dialog title and content
+        const nameElements = screen.getAllByText('Jane Smith');
+        expect(nameElements.length).toBeGreaterThanOrEqual(1);
       });
 
       // Avatar should still be present

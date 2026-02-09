@@ -6,10 +6,11 @@ import ApiClient from '@alisa-lib/api-client';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import React from 'react';
 import useSignIn from 'react-auth-kit/hooks/useSignIn';
-import { Button, Card, CardActionArea, CardActions, CardContent, Stack } from '@mui/material';
+import { Card, CardActionArea, CardActions, CardContent, Stack } from '@mui/material';
 import Title from '../../Title';
 import { WithTranslation, useTranslation, withTranslation } from 'react-i18next';
 import { loginContext } from '@alisa-lib/alisa-contexts';
+import { AlisaButton } from '../alisa';
 
 
 function Login({t}: WithTranslation) {
@@ -95,12 +96,13 @@ function Login({t}: WithTranslation) {
                         </CardContent>
                     </CardActionArea>
                     <CardActions>
-                        <Button
+                        <AlisaButton
+                            label={t('signIn')}
                             fullWidth={true}
                             startIcon={<LockOutlinedIcon />}
                             variant='contained'
                             onClick={() => handleSubmit()}
-                        >{t('signIn')}</Button>
+                        />
                     </CardActions>
                 </Card>
             </Box>

@@ -1,5 +1,5 @@
-import { Button, CircularProgress } from "@mui/material";
-import { ReactNode } from "react";
+import { Button, CircularProgress, SxProps, Theme } from "@mui/material";
+import { ElementType, ReactNode } from "react";
 
 interface AlisaButtonProps {
   label: string;
@@ -12,7 +12,12 @@ interface AlisaButtonProps {
   endIcon?: ReactNode;
   fullWidth?: boolean;
   type?: "button" | "submit" | "reset";
+  href?: string;
+  sx?: SxProps<Theme>;
+  ariaLabel?: string;
   onClick?: () => void;
+  component?: ElementType;
+  children?: ReactNode;
 }
 
 function AlisaButton({
@@ -26,7 +31,12 @@ function AlisaButton({
   endIcon,
   fullWidth = false,
   type = "button",
+  href,
+  sx,
+  ariaLabel,
   onClick,
+  component,
+  children,
 }: AlisaButtonProps) {
   return (
     <Button
@@ -38,9 +48,14 @@ function AlisaButton({
       endIcon={endIcon}
       fullWidth={fullWidth}
       type={type}
+      sx={sx}
+      aria-label={ariaLabel}
       onClick={onClick}
+      {...(href && { href })}
+      {...(component && { component })}
     >
       {label}
+      {children}
     </Button>
   );
 }

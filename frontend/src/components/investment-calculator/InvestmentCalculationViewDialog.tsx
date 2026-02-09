@@ -1,9 +1,8 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import React from "react";
 import ApiClient from "@alisa-lib/api-client";
 import InvestmentCalculatorResults, { SavedInvestmentCalculation } from "./InvestmentCalculatorResults";
+import { AlisaDialog } from "../alisa";
 
 interface InvestmentCalculationViewDialogProps extends WithTranslation {
   calculationId: number;
@@ -43,37 +42,21 @@ function InvestmentCalculationViewDialog({
   };
 
   return (
-    <Dialog
+    <AlisaDialog
       open={open}
-      onClose={onClose}
+      title={calculation?.name || t('investment-calculator:calculation')}
       maxWidth="md"
-      fullWidth
+      onClose={onClose}
     >
-      <DialogTitle>
-        {calculation?.name || t('investment-calculator:calculation')}
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent>
-        {loading ? (
-          <div>{t('common:loading')}</div>
-        ) : (
-          <InvestmentCalculatorResults
-            results={calculation}
-            showSaveButton={false}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
+      {loading ? (
+        <div>{t('common:loading')}</div>
+      ) : (
+        <InvestmentCalculatorResults
+          results={calculation}
+          showSaveButton={false}
+        />
+      )}
+    </AlisaDialog>
   );
 }
 

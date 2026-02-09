@@ -1,12 +1,11 @@
 import { withTranslation, WithTranslation } from "react-i18next";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
 import { DataSaveResult } from "@alisa-types";
-import { Box, Button, CircularProgress, Paper, Stack } from "@mui/material";
+import { Box, Paper, Stack } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { AlisaCloseIcon } from "../../alisa/AlisaIcons";
 import Typography from "@mui/material/Typography";
-import AlisaDataSaveResult from "../../alisa/AlisaDataSaveResult";
-import AlisaConfirmDialog from "../../alisa/dialog/AlisaConfirmDialog";
+import { AlisaButton, AlisaConfirmDialog, AlisaDataSaveResult } from "../../alisa";
 import React from "react";
 
 interface TransactionsAcceptedActionsProps extends WithTranslation {
@@ -49,32 +48,25 @@ function TransactionsAcceptedActions(props: TransactionsAcceptedActionsProps) {
         </Box>
 
         <Stack direction="row" spacing={2}>
-          <Button
+          <AlisaButton
+            label={props.t("delete")}
             variant="text"
-            color={"error"}
+            color="error"
             onClick={handleDeleteClick}
             disabled={props.isDeleting}
-            aria-label={props.t("deleteAriaLabel", {
+            loading={props.isDeleting}
+            ariaLabel={props.t("deleteAriaLabel", {
               count: props.selectedIds.length,
             })}
-            endIcon={
-              props.isDeleting ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                <DeleteIcon />
-              )
-            }
-          >
-            {props.t("delete")}
-          </Button>
-          <Button
+            endIcon={<DeleteIcon />}
+          />
+          <AlisaButton
+            label={props.t("cancel")}
             variant="text"
             onClick={props.onCancel}
             disabled={props.isDeleting}
             endIcon={<AlisaCloseIcon />}
-          >
-            {props.t("cancel")}
-          </Button>
+          />
         </Stack>
       </Stack>
 

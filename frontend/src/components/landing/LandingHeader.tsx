@@ -1,9 +1,10 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Box, Button, Container, Toolbar, Typography } from "@mui/material";
+import { Box, Container, Toolbar, Typography } from "@mui/material";
 import MuiAppBar from "@mui/material/AppBar";
 import { useNavigate } from "react-router-dom";
 import LanguageSelector from "../layout/LanguageSelector";
 import SettingsMenu from "../layout/SettingsMenu";
+import { AlisaButton } from "../alisa";
 
 function LandingHeader({ t }: WithTranslation) {
   const navigate = useNavigate();
@@ -41,13 +42,12 @@ function LandingHeader({ t }: WithTranslation) {
           <Box flexGrow={1} />
           <LanguageSelector />
           <SettingsMenu />
-          <Button
+          <AlisaButton
+            label={t('landing:ctaLogin')}
             variant="contained"
             onClick={handleLogin}
             sx={{ ml: 2 }}
-          >
-            {t('landing:ctaLogin')}
-          </Button>
+          />
         </Toolbar>
       </Container>
     </MuiAppBar>

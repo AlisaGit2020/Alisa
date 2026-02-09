@@ -1,4 +1,5 @@
-import { Box, Stepper, Step, StepLabel, Typography, Paper, Alert, Button } from "@mui/material";
+import { Box, Stepper, Step, StepLabel, Typography, Paper, Alert } from "@mui/material";
+import AlisaButton from "../../alisa/form/AlisaButton";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
 import { useImportWizard } from "./hooks/useImportWizard";
@@ -140,9 +141,12 @@ function TransactionImportWizard({ t }: WithTranslation) {
         <Alert
           severity="warning"
           action={
-            <Button color="inherit" size="small" onClick={handleSelectProperty}>
-              {t("common:selectProperty")}
-            </Button>
+            <AlisaButton
+              label={t("common:selectProperty")}
+              variant="text"
+              size="small"
+              onClick={handleSelectProperty}
+            />
           }
         >
           {t("common:propertyRequiredMessage")}

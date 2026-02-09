@@ -19,6 +19,7 @@ const transaction = {
     "Tuo uusia tilitapahtumia pankistasi viedyistä CSV-tiedostoista.",
 
   accepted: "Hyväksytty",
+  close: "Sulje",
   activeFilters: "Aktiiviset suodattimet",
   accountingDate: "Kirjanpito pvm",
   add: "Uusi tilitapahtuma",

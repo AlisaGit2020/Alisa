@@ -1,7 +1,6 @@
 import {
   Box,
   Paper,
-  Button,
   Alert,
   Stack,
   TextField,
@@ -14,6 +13,7 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
+import AlisaButton from "../../../alisa/form/AlisaButton";
 import SearchIcon from "@mui/icons-material/Search";
 
 type SearchField = "all" | "sender" | "receiver" | "description" | "amount";
@@ -277,14 +277,13 @@ export default function ReviewStep({
 
       {/* Navigation buttons */}
       <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ mt: 3 }}>
-        <Button onClick={onBack}>{t("importWizard.back")}</Button>
-        <Button
+        <AlisaButton label={t("importWizard.back")} onClick={onBack} />
+        <AlisaButton
+          label={t("importWizard.next")}
           variant="contained"
           onClick={onNext}
           disabled={hasUnknownTypes}
-        >
-          {t("importWizard.next")}
-        </Button>
+        />
       </Stack>
     </Box>
   );

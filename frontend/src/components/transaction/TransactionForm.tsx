@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import React, { useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { expenseTypeContext, transactionContext } from "@alisa-lib/alisa-contexts";
@@ -16,15 +16,14 @@ import {
 } from "@alisa-types";
 import AlisaLoadingProgress from "../alisa/AlisaLoadingProgress";
 import TransactionFormFields from "./components/TransactionFormFields";
-import AlisaContent from "../alisa/AlisaContent";
 import EditableRows from "./components/EditableRows.tsx";
-import { getIcon } from "../alisa/AlisaIcons.tsx";
 import ApiClient from "@alisa-lib/api-client.ts";
 import {
   isLoanPaymentMessage,
   parseLoanPaymentMessage,
 } from "@alisa-lib/loan-message-parser.ts";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
+import { AlisaButton, AlisaDialog } from "../alisa";
 
 interface TransactionFormProps extends WithTranslation {
   id?: number;
@@ -292,13 +291,12 @@ function TransactionForm({
           onAmountChange={(value) => handleAmountChange(value)}
         ></TransactionFormFields>
         {canSplitLoanPayment() && (
-          <Button
+          <AlisaButton
+            label={t("splitLoanPayment")}
             variant="outlined"
             startIcon={<CallSplitIcon />}
             onClick={handleSplitLoanPayment}
-          >
-            {t("splitLoanPayment")}
-          </Button>
+          />
         )}
         {getDetailComponents()}
       </Stack>
@@ -332,30 +330,27 @@ function TransactionForm({
 
   if (ready) {
     return (
-      <Dialog open={open} onClose={onClose} fullWidth={true} maxWidth={"lg"}>
-        <DialogContent dividers>
-          <AlisaContent
-            headerText={`${t("transaction")}`}
-            chipText={t(getTypeName())}
-            icon={getIcon(getTypeName(), { size: "medium" })}
-          >
-            <AlisaFormHandler<TransactionInput>
-              id={id}
-              dataService={dataService}
-              data={data}
-              formComponents={formComponents()}
-              onSetData={setData}
-              translation={{
-                cancelButton: t("cancel"),
-                submitButton: t("save"),
-                validationMessageTitle: t("validationErrorTitle"),
-              }}
-              onCancel={onCancel}
-              onAfterSubmit={onAfterSubmit}
-            ></AlisaFormHandler>
-          </AlisaContent>
-        </DialogContent>
-      </Dialog>
+      <AlisaDialog
+        open={open}
+        title={`${t("transaction")} - ${t(getTypeName())}`}
+        maxWidth="lg"
+        onClose={onClose}
+      >
+        <AlisaFormHandler<TransactionInput>
+          id={id}
+          dataService={dataService}
+          data={data}
+          formComponents={formComponents()}
+          onSetData={setData}
+          translation={{
+            cancelButton: t("cancel"),
+            submitButton: t("save"),
+            validationMessageTitle: t("validationErrorTitle"),
+          }}
+          onCancel={onCancel}
+          onAfterSubmit={onAfterSubmit}
+        ></AlisaFormHandler>
+      </AlisaDialog>
     );
   } else {
     return <AlisaLoadingProgress></AlisaLoadingProgress>;

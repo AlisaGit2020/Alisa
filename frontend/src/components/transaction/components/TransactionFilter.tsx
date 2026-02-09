@@ -1,7 +1,6 @@
 import { withTranslation, WithTranslation } from "react-i18next";
 import { transactionContext } from "@alisa-lib/alisa-contexts.ts";
 import {
-  Button,
   Checkbox,
   Chip,
   FormControl,
@@ -22,6 +21,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import ClearIcon from "@mui/icons-material/Clear";
 import { TransactionType, transactionTypeNames } from "@alisa-types";
+import { AlisaButton } from "../../alisa";
 
 export type SearchField = "sender" | "receiver" | "description";
 
@@ -206,15 +206,14 @@ function TransactionFilter(props: TransactionFilterProps) {
             />
           </Stack>
 
-          <Button
+          <AlisaButton
+            label={props.t("reset")}
             variant="outlined"
             size="small"
             startIcon={<ClearIcon />}
             onClick={props.onReset}
             sx={{ height: 40 }}
-          >
-            {props.t("reset")}
-          </Button>
+          />
         </Stack>
 
         {filterSummary.length > 0 && (

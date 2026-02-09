@@ -1,7 +1,6 @@
 import { WithTranslation, withTranslation } from "react-i18next";
 import {
   Box,
-  Button,
   Card,
   CardContent,
   IconButton,
@@ -19,7 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import ApiClient from "@alisa-lib/api-client";
 import { useNavigate } from "react-router-dom";
-import AlisaConfirmDialog from "../alisa/dialog/AlisaConfirmDialog";
+import { AlisaButton, AlisaConfirmDialog } from "../alisa";
 import InvestmentCalculationViewDialog from "./InvestmentCalculationViewDialog";
 import InvestmentCalculationEditDialog from "./InvestmentCalculationEditDialog";
 
@@ -146,9 +145,10 @@ function SavedCalculations({ t, compact = false, onNewCalculation }: SavedCalcul
           {t('investment-calculator:savedCalculations')}
         </Typography>
         {!compact && (
-          <Button variant="contained" onClick={handleNewCalculation}>
-            {t('investment-calculator:newCalculation')}
-          </Button>
+          <AlisaButton
+            label={t('investment-calculator:newCalculation')}
+            onClick={handleNewCalculation}
+          />
         )}
       </Box>
 
@@ -160,9 +160,10 @@ function SavedCalculations({ t, compact = false, onNewCalculation }: SavedCalcul
             </Typography>
             {!compact && (
               <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                <Button variant="contained" onClick={handleNewCalculation}>
-                  {t('investment-calculator:newCalculation')}
-                </Button>
+                <AlisaButton
+                  label={t('investment-calculator:newCalculation')}
+                  onClick={handleNewCalculation}
+                />
               </Box>
             )}
           </CardContent>

@@ -1,4 +1,5 @@
-import { Box, Typography, Paper, Alert, CircularProgress, Button, Stack } from "@mui/material";
+import { Box, Typography, Paper, Alert, Stack } from "@mui/material";
+import AlisaButton from "../../../alisa/form/AlisaButton";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useDropzone } from "react-dropzone";
@@ -242,14 +243,13 @@ export default function ImportStep({
 
       {/* Upload button */}
       <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-        <Button
+        <AlisaButton
+          label={isUploading ? t("importWizard.uploading") : t("importWizard.uploadAndContinue")}
           variant="contained"
           onClick={handleUpload}
           disabled={files.length === 0 || !isPropertySelected || !isBankSelected || isUploading}
-          startIcon={isUploading ? <CircularProgress size={20} /> : undefined}
-        >
-          {isUploading ? t("importWizard.uploading") : t("importWizard.uploadAndContinue")}
-        </Button>
+          loading={isUploading}
+        />
       </Box>
     </Box>
   );

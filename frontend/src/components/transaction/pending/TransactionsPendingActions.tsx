@@ -5,7 +5,7 @@ import {
   transactionContext,
 } from "@alisa-lib/alisa-contexts.ts";
 import { TransactionType, DataSaveResult, ExpenseType, IncomeType } from "@alisa-types";
-import { Box, Button, Paper, Stack } from "@mui/material";
+import { Box, Paper, Stack } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import {
@@ -14,10 +14,13 @@ import {
   AlisaEditIcon,
 } from "../../alisa/AlisaIcons.tsx";
 import Typography from "@mui/material/Typography";
-import AlisaDataSaveResult from "../../alisa/AlisaDataSaveResult.tsx";
-import AlisaTransactionTypeSelect from "../../alisa/data/AlisaTransactionTypeSelect.tsx";
+import {
+  AlisaButton,
+  AlisaDataSaveResult,
+  AlisaTransactionTypeSelect,
+  AlisaSelect,
+} from "../../alisa";
 import React from "react";
-import AlisaSelect from "../../alisa/data/AlisaSelect.tsx";
 import DataService from "@alisa-lib/data-service.ts";
 import ApiClient from "@alisa-lib/api-client.ts";
 
@@ -183,46 +186,41 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
           sx={{ display: !editState && !loanSplitState ? "flex" : "none" }}
         >
           {!props.hideApprove && (
-            <Button
-              variant={"text"}
-              color={"success"}
+            <AlisaButton
+              label={props.t("approve")}
+              variant="text"
+              color="success"
               onClick={props.onApprove}
-              endIcon={<AlisaApproveIcon></AlisaApproveIcon>}
-            >
-              {props.t("approve")}
-            </Button>
+              endIcon={<AlisaApproveIcon />}
+            />
           )}
-          <Button
+          <AlisaButton
+            label={props.t("edit")}
             variant="text"
             onClick={handleEdit}
-            endIcon={<AlisaEditIcon></AlisaEditIcon>}
-          >
-            {props.t("edit")}
-          </Button>
+            endIcon={<AlisaEditIcon />}
+          />
           {!props.hideSplitLoanPayment && (
-            <Button
+            <AlisaButton
+              label={props.t("splitLoanPayment")}
               variant="text"
               onClick={handleLoanSplit}
-              endIcon={<CallSplitIcon></CallSplitIcon>}
-            >
-              {props.t("splitLoanPayment")}
-            </Button>
+              endIcon={<CallSplitIcon />}
+            />
           )}
-          <Button
+          <AlisaButton
+            label={props.t("delete")}
             variant="text"
-            color={"error"}
+            color="error"
             onClick={props.onDelete}
-            endIcon={<DeleteIcon></DeleteIcon>}
-          >
-            {props.t("delete")}
-          </Button>
-          <Button
+            endIcon={<DeleteIcon />}
+          />
+          <AlisaButton
+            label={props.t("cancel")}
             variant="text"
             onClick={() => handleCancel()}
-            endIcon={<AlisaCloseIcon></AlisaCloseIcon>}
-          >
-            {props.t("cancel")}
-          </Button>
+            endIcon={<AlisaCloseIcon />}
+          />
         </Stack>
 
         <Stack
@@ -230,22 +228,19 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
           spacing={2}
           sx={{ display: editState ? "flex" : "none" }}
         >
-          <Button
+          <AlisaButton
+            label={props.t("save")}
             variant="text"
-            color={"success"}
+            color="success"
             onClick={handleEdit}
-            endIcon={<AlisaApproveIcon></AlisaApproveIcon>}
-          >
-            {props.t("save")}
-          </Button>
-
-          <Button
+            endIcon={<AlisaApproveIcon />}
+          />
+          <AlisaButton
+            label={props.t("cancel")}
             variant="text"
             onClick={() => handleCancel()}
-            endIcon={<AlisaCloseIcon></AlisaCloseIcon>}
-          >
-            {props.t("cancel")}
-          </Button>
+            endIcon={<AlisaCloseIcon />}
+          />
         </Stack>
 
         <Stack
@@ -309,25 +304,23 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
           spacing={2}
           sx={{ display: loanSplitState ? "flex" : "none" }}
         >
-          <Button
+          <AlisaButton
+            label={props.t("save")}
             variant="text"
-            color={"success"}
+            color="success"
             onClick={handleLoanSplit}
             disabled={
               loanSplitData.principalExpenseTypeId === 0 ||
               loanSplitData.interestExpenseTypeId === 0
             }
-            endIcon={<AlisaApproveIcon></AlisaApproveIcon>}
-          >
-            {props.t("save")}
-          </Button>
-          <Button
+            endIcon={<AlisaApproveIcon />}
+          />
+          <AlisaButton
+            label={props.t("cancel")}
             variant="text"
             onClick={() => handleCancel()}
-            endIcon={<AlisaCloseIcon></AlisaCloseIcon>}
-          >
-            {props.t("cancel")}
-          </Button>
+            endIcon={<AlisaCloseIcon />}
+          />
         </Stack>
 
         <Stack

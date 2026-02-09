@@ -1,6 +1,5 @@
 import { withTranslation, WithTranslation } from "react-i18next";
 import {
-  Button,
   Checkbox,
   Chip,
   FormControl,
@@ -19,6 +18,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useEffect, useState } from "react";
+import { AlisaButton } from "../alisa";
 import DataService from "@alisa-lib/data-service";
 import { expenseTypeContext, incomeTypeContext } from "@alisa-lib/alisa-contexts";
 import { ExpenseType, IncomeType } from "@alisa-types";
@@ -201,15 +201,13 @@ function AccountingFilter({
             sx={{ width: 200 }}
           />
 
-          <Button
+          <AlisaButton
+            label={t("reset")}
             variant="outlined"
             size="small"
             startIcon={<ClearIcon />}
             onClick={onReset}
-            sx={{ height: 40 }}
-          >
-            {t("reset")}
-          </Button>
+          />
         </Stack>
 
         {filterSummary.length > 0 && (

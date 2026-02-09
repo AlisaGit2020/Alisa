@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, Stack, Button, Box } from "@mui/material";
+import { Stack, Box } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
@@ -10,8 +10,7 @@ import AlisaSelect from "../../alisa/data/AlisaSelect";
 import { incomeContext, incomeTypeContext } from "@alisa-lib/alisa-contexts";
 import DataService from "@alisa-lib/data-service";
 import AlisaFormHandler from "../../alisa/form/AlisaFormHandler";
-import AlisaContent from "../../alisa/AlisaContent";
-import AlisaConfirmDialog from "../../alisa/dialog/AlisaConfirmDialog";
+import { AlisaButton, AlisaDialog, AlisaConfirmDialog } from "../../alisa";
 import { getNumber } from "@alisa-lib/functions";
 
 interface IncomeFormProps extends WithTranslation {
@@ -134,14 +133,13 @@ function IncomeForm({
 
       {id && (
         <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: "divider" }}>
-          <Button
+          <AlisaButton
+            label={t("delete")}
             variant="outlined"
             color="error"
             startIcon={<DeleteIcon />}
             onClick={() => setDeleteDialogOpen(true)}
-          >
-            {t("delete")}
-          </Button>
+          />
         </Box>
       )}
     </Stack>
@@ -149,26 +147,27 @@ function IncomeForm({
 
   return (
     <>
-      <Dialog open={true} onClose={onClose} fullWidth={true} maxWidth="sm">
-        <DialogContent dividers>
-          <AlisaContent headerText={t(id ? "editIncome" : "addIncome")}>
-            <AlisaFormHandler<IncomeInput>
-              id={id}
-              dataService={dataService}
-              data={data}
-              formComponents={formComponents}
-              onSetData={setData}
-              translation={{
-                cancelButton: t("cancel"),
-                submitButton: t("save"),
-                validationMessageTitle: t("validationErrorTitle"),
-              }}
-              onCancel={onCancel}
-              onAfterSubmit={onAfterSubmit}
-            />
-          </AlisaContent>
-        </DialogContent>
-      </Dialog>
+      <AlisaDialog
+        open={true}
+        title={t(id ? "editIncome" : "addIncome")}
+        maxWidth="sm"
+        onClose={onClose}
+      >
+        <AlisaFormHandler<IncomeInput>
+          id={id}
+          dataService={dataService}
+          data={data}
+          formComponents={formComponents}
+          onSetData={setData}
+          translation={{
+            cancelButton: t("cancel"),
+            submitButton: t("save"),
+            validationMessageTitle: t("validationErrorTitle"),
+          }}
+          onCancel={onCancel}
+          onAfterSubmit={onAfterSubmit}
+        />
+      </AlisaDialog>
 
       <AlisaConfirmDialog
         title={t("confirm")}

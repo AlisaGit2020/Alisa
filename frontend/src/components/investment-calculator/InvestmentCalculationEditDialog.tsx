@@ -1,11 +1,11 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Dialog, DialogContent, DialogTitle, IconButton, Card, CardContent } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import { Card, CardContent } from "@mui/material";
 import React from "react";
 import { AxiosResponse } from "axios";
 import ApiClient from "@alisa-lib/api-client";
 import InvestmentCalculatorForm, { InvestmentInputData } from "./InvestmentCalculatorForm";
 import InvestmentCalculatorResults, { InvestmentResults, SavedInvestmentCalculation } from "./InvestmentCalculatorResults";
+import { AlisaDialog } from "../alisa";
 
 interface InvestmentCalculationEditDialogProps extends WithTranslation {
   calculationId: number;
@@ -78,46 +78,30 @@ function InvestmentCalculationEditDialog({
   };
 
   return (
-    <Dialog
+    <AlisaDialog
       open={open}
-      onClose={onClose}
+      title={calculation?.name || t('investment-calculator:calculation')}
       maxWidth="md"
-      fullWidth
+      onClose={onClose}
     >
-      <DialogTitle>
-        {calculation?.name || t('investment-calculator:calculation')}
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent>
-        {loading ? (
-          <div>{t('common:loading')}</div>
-        ) : (
-          <Card>
-            <CardContent>
-              <InvestmentCalculatorForm
-                onCalculate={handleCalculate}
-                initialValues={calculation || undefined}
-              />
-              <InvestmentCalculatorResults
-                results={results}
-                onSave={handleSave}
-                showSaveButton={true}
-              />
-            </CardContent>
-          </Card>
-        )}
-      </DialogContent>
-    </Dialog>
+      {loading ? (
+        <div>{t('common:loading')}</div>
+      ) : (
+        <Card>
+          <CardContent>
+            <InvestmentCalculatorForm
+              onCalculate={handleCalculate}
+              initialValues={calculation || undefined}
+            />
+            <InvestmentCalculatorResults
+              results={results}
+              onSave={handleSave}
+              showSaveButton={true}
+            />
+          </CardContent>
+        </Card>
+      )}
+    </AlisaDialog>
   );
 }
 

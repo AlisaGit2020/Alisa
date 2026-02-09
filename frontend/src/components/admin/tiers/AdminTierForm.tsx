@@ -1,18 +1,13 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Stack,
-} from "@mui/material";
+import { Stack } from "@mui/material";
 import { useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import { adminContext } from "@alisa-lib/alisa-contexts";
 import AlisaTextField from "../../alisa/form/AlisaTextField";
 import AlisaNumberField from "../../alisa/form/AlisaNumberField";
 import AlisaSwitch from "../../alisa/form/AlisaSwitch";
 import { getNumber } from "@alisa-lib/functions";
+import { AlisaButton, AlisaDialog } from "../../alisa";
 
 interface TierData {
   id?: number;
@@ -38,68 +33,84 @@ interface AdminTierFormProps extends WithTranslation {
   onSave: (tier: TierData) => void;
 }
 
+interface AdminTierFormContentProps {
+  t: TFunction;
+  tier: TierData | null;
+  onClose: () => void;
+  onSave: (tier: TierData) => void;
+}
+
 function AdminTierFormContent({
   t,
   tier,
   onClose,
   onSave,
-}: Omit<AdminTierFormProps, "open">) {
+}: AdminTierFormContentProps) {
   const [data, setData] = useState<TierData>(tier ?? defaultTierData);
 
   const handleSubmit = () => {
     onSave(data);
   };
 
-  return (
+  const dialogActions = (
     <>
-      <DialogTitle>{tier ? t("tierEdit") : t("tierAdd")}</DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1 }}>
-          <AlisaTextField
-            label={t("tierName")}
-            value={data.name}
-            autoFocus
-            onChange={(e) => setData({ ...data, name: e.target.value })}
-          />
-          <AlisaNumberField
-            label={t("tierPrice")}
-            value={data.price}
-            adornment="€"
-            onChange={(e) =>
-              setData({ ...data, price: getNumber(e.target.value, 2) })
-            }
-          />
-          <AlisaNumberField
-            label={t("tierMaxProperties")}
-            value={data.maxProperties}
-            onChange={(e) =>
-              setData({
-                ...data,
-                maxProperties: getNumber(e.target.value, 0),
-              })
-            }
-          />
-          <AlisaNumberField
-            label={t("tierSortOrder")}
-            value={data.sortOrder}
-            onChange={(e) =>
-              setData({ ...data, sortOrder: getNumber(e.target.value, 0) })
-            }
-          />
-          <AlisaSwitch
-            label={t("tierDefault")}
-            value={data.isDefault}
-            onChange={(e) => setData({ ...data, isDefault: e.target.checked })}
-          />
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{t("tierCancel")}</Button>
-        <Button onClick={handleSubmit} variant="contained">
-          {t("tierSave")}
-        </Button>
-      </DialogActions>
+      <AlisaButton label={t("tierCancel")} onClick={onClose} />
+      <AlisaButton
+        label={t("tierSave")}
+        onClick={handleSubmit}
+        variant="contained"
+      />
     </>
+  );
+
+  return (
+    <AlisaDialog
+      open={true}
+      title={tier ? t("tierEdit") : t("tierAdd")}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      actions={dialogActions}
+    >
+      <Stack spacing={2} sx={{ mt: 1 }}>
+        <AlisaTextField
+          label={t("tierName")}
+          value={data.name}
+          autoFocus
+          onChange={(e) => setData({ ...data, name: e.target.value })}
+        />
+        <AlisaNumberField
+          label={t("tierPrice")}
+          value={data.price}
+          adornment="€"
+          onChange={(e) =>
+            setData({ ...data, price: getNumber(e.target.value, 2) })
+          }
+        />
+        <AlisaNumberField
+          label={t("tierMaxProperties")}
+          value={data.maxProperties}
+          onChange={(e) =>
+            setData({
+              ...data,
+              maxProperties: getNumber(e.target.value, 0),
+            })
+          }
+        />
+        <AlisaNumberField
+          label={t("tierSortOrder")}
+          value={data.sortOrder}
+          onChange={(e) =>
+            setData({ ...data, sortOrder: getNumber(e.target.value, 0) })
+          }
+        />
+        <AlisaSwitch
+          label={t("tierDefault")}
+          value={data.isDefault}
+          onChange={(e) => setData({ ...data, isDefault: e.target.checked })}
+        />
+      </Stack>
+    </AlisaDialog>
   );
 }
 
@@ -113,18 +124,18 @@ function AdminTierForm({
   // Use key to reset form state when dialog opens with different tier or when reopened
   const formKey = `${open}-${tier?.id ?? "new"}`;
 
+  if (!open) {
+    return null;
+  }
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      {open && (
-        <AdminTierFormContent
-          key={formKey}
-          t={t}
-          tier={tier}
-          onClose={onClose}
-          onSave={onSave}
-        />
-      )}
-    </Dialog>
+    <AdminTierFormContent
+      key={formKey}
+      t={t}
+      tier={tier}
+      onClose={onClose}
+      onSave={onSave}
+    />
   );
 }
 

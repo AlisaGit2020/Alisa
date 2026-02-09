@@ -110,7 +110,7 @@ describe('TransactionForm', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('transaction')).toBeInTheDocument();
+        expect(screen.getByText('transaction - income')).toBeInTheDocument();
       });
     });
   });
@@ -192,7 +192,7 @@ describe('TransactionForm', () => {
   });
 
   describe('Transaction types', () => {
-    it('shows INCOME chip when type is INCOME', async () => {
+    it('shows INCOME in title when type is INCOME', async () => {
       renderWithProviders(
         <TransactionForm
           {...defaultProps}
@@ -202,11 +202,11 @@ describe('TransactionForm', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('income')).toBeInTheDocument();
+        expect(screen.getByText('transaction - income')).toBeInTheDocument();
       });
     });
 
-    it('shows EXPENSE chip when type is EXPENSE', async () => {
+    it('shows EXPENSE in title when type is EXPENSE', async () => {
       renderWithProviders(
         <TransactionForm
           {...defaultProps}
@@ -216,11 +216,11 @@ describe('TransactionForm', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('expense')).toBeInTheDocument();
+        expect(screen.getByText('transaction - expense')).toBeInTheDocument();
       });
     });
 
-    it('shows DEPOSIT chip when type is DEPOSIT', async () => {
+    it('shows DEPOSIT in title when type is DEPOSIT', async () => {
       renderWithProviders(
         <TransactionForm
           {...defaultProps}
@@ -230,11 +230,11 @@ describe('TransactionForm', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('deposit')).toBeInTheDocument();
+        expect(screen.getByText('transaction - deposit')).toBeInTheDocument();
       });
     });
 
-    it('shows WITHDRAW chip when type is WITHDRAW', async () => {
+    it('shows WITHDRAW in title when type is WITHDRAW', async () => {
       renderWithProviders(
         <TransactionForm
           {...defaultProps}
@@ -244,7 +244,7 @@ describe('TransactionForm', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('withdraw')).toBeInTheDocument();
+        expect(screen.getByText('transaction - withdraw')).toBeInTheDocument();
       });
     });
 
