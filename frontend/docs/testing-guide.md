@@ -370,12 +370,136 @@ await waitFor(() => {
 });
 ```
 
+## Logic-Based Testing Pattern
+
+Due to Jest ESM limitations with mock hoisting, some complex components are difficult to test with full rendering. In these cases, use the **logic-based testing pattern** where you test data transformation and business logic separately from React component rendering.
+
+### When to Use
+
+Use this pattern when:
+- Component uses `withTranslation` HOC with complex i18n setup
+- Component has circular imports that break mocking
+- Component relies on `import.meta.env` or Vite-specific features
+- Full rendering would require excessive mocking
+
+### Pattern Example
+
+```typescript
+// Instead of rendering the full component, test the logic directly
+
+describe('Transactions Component Logic', () => {
+  describe('getSearchFilter logic', () => {
+    it('returns undefined when searchText is empty', () => {
+      const filter = { searchText: '' };
+      const getSearchFilter = () => {
+        if (!filter.searchText) return undefined;
+        return { $ilike: `%${filter.searchText}%` };
+      };
+
+      expect(getSearchFilter()).toBeUndefined();
+    });
+
+    it('returns ilike filter when searchText is provided', () => {
+      const filter = { searchText: 'vuokra' };
+      const getSearchFilter = () => {
+        if (!filter.searchText) return undefined;
+        return { $ilike: `%${filter.searchText}%` };
+      };
+
+      expect(getSearchFilter()).toEqual({ $ilike: '%vuokra%' });
+    });
+  });
+
+  describe('fetchOptions construction', () => {
+    it('includes propertyId when greater than 0', () => {
+      const filter = { propertyId: 5 };
+      const where = {
+        propertyId: filter.propertyId > 0 ? filter.propertyId : undefined,
+      };
+
+      expect(where.propertyId).toBe(5);
+    });
+  });
+});
+```
+
+### Best Practices for Logic Tests
+
+1. **Extract and replicate logic** - Copy the exact logic from the component
+2. **Test all branches** - Cover all if/else conditions
+3. **Test edge cases** - Empty arrays, null values, boundary conditions
+4. **Keep tests focused** - One logical concept per test
+5. **Name tests clearly** - Describe input and expected output
+
+### Real Examples
+
+See these files for logic-based testing patterns:
+- `src/components/transaction/Transactions.test.tsx` - Filter and search logic
+- `src/components/accounting/expenses/Expenses.test.tsx` - Date filters and fetch options
+- `src/components/dashboard/Dashboard.test.tsx` - Widget state management
+- `src/components/property/PropertyForm.test.tsx` - Form data handling
+
 ## Examples
 
 See existing tests for examples:
 - Component: `src/components/alisa/form/AlisaTextField.test.tsx`
-- View: `test/views/PropertyView.test.tsx` (template)
+- View: `test/views/PropertyView.test.tsx`
+- Logic-based: `src/components/transaction/Transactions.test.tsx`
 - Translation: `test/translations.test.ts`
+
+## Coverage Thresholds
+
+The project enforces **50% minimum coverage** for branches, functions, lines, and statements. These thresholds are configured in `jest.config.js`:
+
+```javascript
+coverageThreshold: {
+  global: {
+    branches: 50,
+    functions: 50,
+    lines: 50,
+    statements: 50,
+  },
+},
+```
+
+To check coverage locally:
+
+```bash
+npm test -- --coverage
+```
+
+## API Mocking with jest.spyOn
+
+For components that use `ApiClient` directly, mock API calls using `jest.spyOn`:
+
+```typescript
+import ApiClient from '@alisa-lib/api-client';
+
+let mockSearch: jest.SpyInstance;
+let mockDelete: jest.SpyInstance;
+
+beforeEach(() => {
+  mockSearch = jest.spyOn(ApiClient, 'search');
+  mockDelete = jest.spyOn(ApiClient, 'delete');
+});
+
+afterEach(() => {
+  mockSearch.mockRestore();
+  mockDelete.mockRestore();
+});
+
+it('loads data from API', async () => {
+  mockSearch.mockResolvedValue([{ id: 1, name: 'Test' }]);
+
+  renderWithProviders(<MyComponent />);
+
+  await waitFor(() => {
+    expect(screen.getByText('Test')).toBeInTheDocument();
+  });
+
+  expect(mockSearch).toHaveBeenCalledWith('endpoint', expectedOptions);
+});
+```
 
 ## Resources
 
