@@ -97,7 +97,7 @@ function AlisaCardList<T extends { id: number }>({
             apartmentType?: string;
             ownerships?: { share: number }[];
           }) => (
-            <Grid key={item.name} size={{ md: 4 }}>
+            <Grid key={item.name} size={{ xs: 12, sm: 6, md: 4 }}>
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <CardMedia
                   component="img"
