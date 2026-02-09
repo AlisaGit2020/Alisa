@@ -57,9 +57,9 @@ describe('SPankkiImportService', () => {
       const result = await service.importCsv(testUser, testInput);
 
       // The CSV file has 61 data rows (excluding header)
-      expect(result.savedIds.length).toBe(61);
-      expect(result.skippedCount).toBe(0);
       expect(result.totalRows).toBe(61);
+      expect(result.skippedCount).toBe(0);
+      expect(result.savedIds.length).toBe(61);
       expect(mockTransactionService.save).toHaveBeenCalledTimes(61);
     });
 

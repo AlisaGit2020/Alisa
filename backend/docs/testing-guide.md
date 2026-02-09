@@ -127,14 +127,45 @@ describe('ExpenseService', () => {
 
 ## E2E Tests
 
-E2E tests live in the `test/` directory:
+E2E tests live in the `test/` directory with **controller-based** organization:
 
 ```
 test/
-├── ownership.e2e-spec.ts
-├── transaction.e2e-spec.ts
-└── helper-functions.ts
+├── transaction.controller.e2e-spec.ts      # All /accounting/transaction/* endpoints
+├── expense.controller.e2e-spec.ts          # All /accounting/expense/* endpoints
+├── expense-type.controller.e2e-spec.ts     # All /accounting/expense/type/* endpoints
+├── income.controller.e2e-spec.ts           # All /accounting/income/* endpoints
+├── income-type.controller.e2e-spec.ts      # All /accounting/income/type/* endpoints
+├── property.controller.e2e-spec.ts         # All /real-estate/property/* endpoints
+├── tax.controller.e2e-spec.ts              # All /real-estate/property/tax/* endpoints
+├── investment.controller.e2e-spec.ts       # All /real-estate/investment/* endpoints
+├── auth.controller.e2e-spec.ts             # All /auth/* endpoints
+├── admin.controller.e2e-spec.ts            # All /admin/* endpoints
+├── op-import.controller.e2e-spec.ts        # POST /import/op
+├── s-pankki-import.controller.e2e-spec.ts  # POST /import/s-pankki
+├── google.controller.e2e-spec.ts           # All /google/* endpoints
+├── helper-functions.ts                     # Helper functions
+└── jest-e2e.json                           # Jest configuration
 ```
+
+### E2E Test File Naming Convention
+
+Each controller has its own E2E test file that covers ALL endpoints:
+
+- **Pattern:** `<controller-name>.controller.e2e-spec.ts`
+- **Location:** `backend/test/`
+- **Coverage:** Every API endpoint in the controller must be tested
+
+Examples:
+- `transaction.controller.e2e-spec.ts` tests all `/accounting/transaction/*` endpoints
+- `property.controller.e2e-spec.ts` tests all `/real-estate/property/*` endpoints
+
+Every E2E test file must include tests for:
+- Authentication (valid token, invalid token, no token)
+- Authorization (own data vs. other users' data)
+- All CRUD operations
+- Response status codes (200, 201, 400, 401, 403, 404)
+- Response body structure validation
 
 ### Basic E2E Test Template
 
@@ -604,6 +635,6 @@ await eventTracker.waitForPending();
 
 See existing tests for reference:
 - Unit test: `src/accounting/expense/expense.service.spec.ts`
-- E2E test: `test/ownership.e2e-spec.ts`
+- E2E test: `test/transaction.controller.e2e-spec.ts`
 - Factories: `test/factories/transaction.factory.ts`
 - Mocks: `test/mocks/repository.mock.ts`
