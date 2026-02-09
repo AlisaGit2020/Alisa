@@ -28,7 +28,7 @@ describe('SPankkiImportService', () => {
     mockTransactionService = {
       search: jest.fn().mockResolvedValue([]),
       save: jest.fn().mockImplementation((_, transaction) =>
-        Promise.resolve({ ...transaction, id: Math.floor(Math.random() * 1000) }),
+        Promise.resolve({ ...transaction, id: Math.floor(Math.random() * 1000) + 1 }),
       ),
     };
 
