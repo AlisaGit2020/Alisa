@@ -27,6 +27,13 @@ const property = {
     photoDeleteError: 'Kuvan poisto epäonnistui. Yritä uudelleen.',
     savePropertyFirst: 'Tallenna kohde ensin lisätäksesi kuvan',
     ownershipShare: 'Omistusosuus',
+    viewPageTitle: 'Kohteen tiedot',
+    propertyInfo: 'Perustiedot',
+    locationInfo: 'Sijainti',
+    statisticsSection: 'Tilastot',
+    statisticsComingSoon: 'Taloudelliset tilastot tulossa pian',
+    editProperty: 'Muokkaa',
+    back: 'Takaisin',
 }
 
 export default property

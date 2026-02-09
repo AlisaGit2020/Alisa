@@ -9,7 +9,7 @@ import { propertyContext } from '../../lib/alisa-contexts';
 import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
 import { DTO } from '../../lib/types';
 import DataService from '../../lib/data-service';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PropertyPhotoUpload from './PropertyPhotoUpload';
 import AlisaContent from '../alisa/AlisaContent';
 
@@ -30,9 +30,20 @@ function PropertyForm({ t }: WithTranslation) {
     });
     const { idParam } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const handleNavigateBack = () => {
+        const returnTo = (location.state as { returnTo?: string })?.returnTo;
+        if (returnTo === 'view' && idParam) {
+            navigate(`${propertyContext.routePath}/${idParam}`);
+        } else {
+            navigate(propertyContext.routePath);
+        }
+    };
 
     const dataService = new DataService<DTO<PropertyInput>>({
         context: propertyContext,
+        relations: { ownerships: true },
     })
 
     const handleChange = (
@@ -147,8 +158,8 @@ function PropertyForm({ t }: WithTranslation) {
                     submitButton: t('save'),
                     validationMessageTitle: t('validationErrorTitle'),
                 }}
-                onCancel={() => navigate(propertyContext.routePath)}
-                onAfterSubmit={() => navigate(propertyContext.routePath)}
+                onCancel={handleNavigateBack}
+                onAfterSubmit={handleNavigateBack}
             >
             </AlisaFormHandler>
         </AlisaContent>

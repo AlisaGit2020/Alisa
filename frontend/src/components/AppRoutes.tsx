@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./dashboard/Dashboard";
 import Properties from "./property/Properties";
 import PropertyForm from "./property/PropertyForm";
+import PropertyView from "./property/PropertyView";
 import Settings from "./settings/Settings";
 import TaxView from "./tax/TaxView";
 import TransactionsOverview from "./transaction/TransactionsOverview";
@@ -45,6 +46,10 @@ export default function AppRoutes() {
             path="properties/add"
             element={<PropertyForm></PropertyForm>}
           ></Route>
+          <Route
+            path="properties/:idParam"
+            element={<PropertyView />}
+          />
           <Route
             path="properties"
             element={<Properties></Properties>}

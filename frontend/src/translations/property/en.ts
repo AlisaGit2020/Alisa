@@ -27,6 +27,13 @@ const property = {
     photoDeleteError: 'Failed to delete photo. Please try again.',
     savePropertyFirst: 'Save the property first to add a photo',
     ownershipShare: 'Ownership share',
+    viewPageTitle: 'Property Details',
+    propertyInfo: 'Property Information',
+    locationInfo: 'Location',
+    statisticsSection: 'Statistics',
+    statisticsComingSoon: 'Financial statistics coming soon',
+    editProperty: 'Edit',
+    back: 'Back',
 }
 
 export default property

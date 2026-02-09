@@ -10,6 +10,7 @@ import {
   Box,
   Button,
   Card,
+  CardActionArea,
   CardActions,
   CardContent,
   CardMedia,
@@ -98,66 +99,82 @@ function AlisaCardList<T extends { id: number }>({
             ownerships?: { share: number }[];
           }) => (
             <Grid key={item.name} size={{ xs: 12, sm: 6, md: 4 }}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <CardMedia
-                  component="img"
-                  alt={item.name}
-                  height="160"
-                  image={item.photo ? `${VITE_API_URL}/${item.photo}` : '/assets/properties/placeholder.svg'}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography gutterBottom variant="h6" component="div">
-                    {item.name}
-                    {item.apartmentType && (
-                      <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                        {item.apartmentType}
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: 6,
+                  },
+                }}
+              >
+                <CardActionArea
+                  onClick={() => navigate(`${alisaContext.routePath}/${item.id}`)}
+                  sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+                >
+                  <CardMedia
+                    component="img"
+                    alt={item.name}
+                    height="160"
+                    image={item.photo ? `${VITE_API_URL}/${item.photo}` : '/assets/properties/placeholder.svg'}
+                    sx={{ objectFit: 'cover' }}
+                  />
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Typography gutterBottom variant="h6" component="div">
+                      {item.name}
+                      {item.apartmentType && (
+                        <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                          {item.apartmentType}
+                        </Typography>
+                      )}
+                    </Typography>
+                    {(item.address || item.city) && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        {item.address}
+                        {item.address && item.city && ', '}
+                        {item.postalCode && `${item.postalCode} `}
+                        {item.city}
                       </Typography>
                     )}
-                  </Typography>
-                  {(item.address || item.city) && (
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      {item.address}
-                      {item.address && item.city && ', '}
-                      {item.postalCode && `${item.postalCode} `}
-                      {item.city}
+                    <Table size="small">
+                      <TableBody>
+                        <TableRow>
+                          <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("size")}</TableCell>
+                          <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.size} m²</TableCell>
+                        </TableRow>
+                        {item.buildYear && (
+                          <TableRow>
+                            <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("buildYear")}</TableCell>
+                            <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.buildYear}</TableCell>
+                          </TableRow>
+                        )}
+                        {item.ownerships?.[0]?.share !== undefined && item.ownerships[0].share < 100 && (
+                          <TableRow>
+                            <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("ownershipShare")}</TableCell>
+                            <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.ownerships[0].share} %</TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        mt: 1,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        fontStyle: item.description ? 'normal' : 'italic'
+                      }}
+                    >
+                      {item.description || t("noDescription")}
                     </Typography>
-                  )}
-                  <Table size="small">
-                    <TableBody>
-                      <TableRow>
-                        <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("size")}</TableCell>
-                        <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.size} m²</TableCell>
-                      </TableRow>
-                      {item.buildYear && (
-                        <TableRow>
-                          <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("buildYear")}</TableCell>
-                          <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.buildYear}</TableCell>
-                        </TableRow>
-                      )}
-                      {item.ownerships?.[0]?.share !== undefined && item.ownerships[0].share < 100 && (
-                        <TableRow>
-                          <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("ownershipShare")}</TableCell>
-                          <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.ownerships[0].share} %</TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      mt: 1,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      fontStyle: item.description ? 'normal' : 'italic'
-                    }}
-                  >
-                    {item.description || t("noDescription")}
-                  </Typography>
-                </CardContent>
+                  </CardContent>
+                </CardActionArea>
                 <CardActions>
                   <Button
                     size="small"
