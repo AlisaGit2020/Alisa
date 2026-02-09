@@ -1,7 +1,7 @@
 import { Stack } from "@mui/material";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
 import Transactions from "./Transactions";
-import { withTranslation } from "react-i18next";
+import { withTranslation, WithTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { ListPageTemplate } from "../templates";
 import TransactionFilter, {
@@ -28,7 +28,7 @@ const getDefaultFilter = (): TransactionFilterData => ({
   searchField: "sender",
 });
 
-function TransactionMain() {
+function TransactionMain({ t }: WithTranslation) {
   // Always use the global property selection from AppBar
   const globalPropertyId = getTransactionPropertyId();
 
@@ -137,7 +137,7 @@ function TransactionMain() {
     } catch {
       setSaveResult({
         allSuccess: false,
-        message: "Network error occurred",
+        message: t("networkError"),
         results: [],
       });
     } finally {

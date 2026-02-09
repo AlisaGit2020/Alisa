@@ -62,6 +62,8 @@ const transaction = {
   unknown: "Tuntematon",
   confirmDeleteTransactions:
     "Haluatko varmasti poistaa {{count}} valittua tapahtumaa?",
+  networkError: "Verkkovirhe",
+  deleteAriaLabel: "Poista {{count}} valittua tapahtumaa",
   importWizard: {
     title: "Tuo pankkitapahtumat",
     steps: {

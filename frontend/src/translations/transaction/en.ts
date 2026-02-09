@@ -62,6 +62,8 @@ const transaction = {
   unknown: "Unknown",
   confirmDeleteTransactions:
     "Are you sure you want to delete {{count}} selected transactions?",
+  networkError: "Network error occurred",
+  deleteAriaLabel: "Delete {{count}} selected transactions",
   importWizard: {
     title: "Import Bank Transactions",
     steps: {

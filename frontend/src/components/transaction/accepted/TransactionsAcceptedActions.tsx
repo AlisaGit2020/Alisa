@@ -54,6 +54,9 @@ function TransactionsAcceptedActions(props: TransactionsAcceptedActionsProps) {
             color={"error"}
             onClick={handleDeleteClick}
             disabled={props.isDeleting}
+            aria-label={props.t("deleteAriaLabel", {
+              count: props.selectedIds.length,
+            })}
             endIcon={
               props.isDeleting ? (
                 <CircularProgress size={20} color="inherit" />
