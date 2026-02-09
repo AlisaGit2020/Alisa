@@ -14,7 +14,7 @@ import {
 import * as http from 'http';
 import { Investment } from '@alisa-backend/real-estate/investment/entities/investment.entity';
 
-describe('Investment Calculator endpoints (e2e)', () => {
+describe('InvestmentController (e2e)', () => {
   let app: INestApplication;
   let server: http.Server;
   let authService: AuthService;

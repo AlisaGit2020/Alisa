@@ -5,6 +5,7 @@ import { AppModule } from '../src/app.module';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
   closeAppGracefully,
+  emptyTables,
   getBearerToken,
   getTestUsers,
   getUserAccessToken2,
@@ -12,11 +13,18 @@ import {
   TestUsersSetup,
 } from './helper-functions';
 import * as http from 'http';
+import { DataSource } from 'typeorm';
+import { ExpenseTypeDefault } from '@alisa-backend/defaults/entities/expense-type-default.entity';
+import { IncomeTypeDefault } from '@alisa-backend/defaults/entities/income-type-default.entity';
+import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
+import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
+import { User } from '@alisa-backend/people/user/entities/user.entity';
 
-describe('User endpoints (e2e)', () => {
+describe('AuthController (e2e)', () => {
   let app: INestApplication;
   let server: http.Server;
   let authService: AuthService;
+  let dataSource: DataSource;
   let testUsers: TestUsersSetup;
 
   beforeAll(async () => {
@@ -29,6 +37,7 @@ describe('User endpoints (e2e)', () => {
     server = app.getHttpServer();
 
     authService = app.get(AuthService);
+    dataSource = app.get(DataSource);
 
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
@@ -225,6 +234,218 @@ describe('User endpoints (e2e)', () => {
         .expect(200);
 
       expect(response2.body.loanPrincipalExpenseTypeId).not.toBe(99);
+    });
+  });
+
+  describe('OAuth endpoints', () => {
+    describe('GET /auth/logout', () => {
+      it('redirects when accessed without authentication', async () => {
+        // Logout endpoint redirects regardless of auth status
+        await request(server).get('/auth/logout').expect(302);
+      });
+    });
+
+    describe('GET /google/authenticate', () => {
+      // OAuth endpoints require external Google authentication flow
+      // which cannot be fully tested in e2e tests
+      it.skip('returns authentication url', async () => {
+        await request(server).get('/google/authenticate').expect(200);
+      });
+    });
+  });
+
+  describe('User defaults', () => {
+    beforeEach(async () => {
+      await emptyTables(dataSource, [
+        'expense',
+        'expense_type',
+        'income',
+        'income_type',
+        'transaction',
+        'ownership',
+        'user',
+        'property',
+        'property_statistics',
+      ]);
+    });
+
+    describe('Default templates seeding', () => {
+      it('seeds default expense types on app startup', async () => {
+        const repo = dataSource.getRepository(ExpenseTypeDefault);
+        const defaults = await repo.find();
+
+        expect(defaults.length).toBe(13);
+      });
+
+      it('seeds default income types on app startup', async () => {
+        const repo = dataSource.getRepository(IncomeTypeDefault);
+        const defaults = await repo.find();
+
+        expect(defaults.length).toBe(4);
+      });
+    });
+
+    describe('New user initialization', () => {
+      it('creates 13 expense types for a new user after first login', async () => {
+        await authService.login({
+          firstName: 'New',
+          lastName: 'User',
+          email: 'new@test.com',
+          language: 'fi',
+        });
+
+        const userRepo = dataSource.getRepository(User);
+        const user = await userRepo.findOne({
+          where: { email: 'new@test.com' },
+        });
+
+        const expenseTypeRepo = dataSource.getRepository(ExpenseType);
+        const expenseTypes = await expenseTypeRepo.find({
+          where: { userId: user.id },
+        });
+
+        expect(expenseTypes.length).toBe(13);
+      });
+
+      it('creates 4 income types for a new user after first login', async () => {
+        await authService.login({
+          firstName: 'New',
+          lastName: 'User',
+          email: 'new2@test.com',
+          language: 'fi',
+        });
+
+        const userRepo = dataSource.getRepository(User);
+        const user = await userRepo.findOne({
+          where: { email: 'new2@test.com' },
+        });
+
+        const incomeTypeRepo = dataSource.getRepository(IncomeType);
+        const incomeTypes = await incomeTypeRepo.find({
+          where: { userId: user.id },
+        });
+
+        expect(incomeTypes.length).toBe(4);
+      });
+
+      it('uses Finnish names when user language is fi', async () => {
+        await authService.login({
+          firstName: 'Finnish',
+          lastName: 'User',
+          email: 'fi@test.com',
+          language: 'fi',
+        });
+
+        const userRepo = dataSource.getRepository(User);
+        const user = await userRepo.findOne({
+          where: { email: 'fi@test.com' },
+        });
+
+        const expenseTypeRepo = dataSource.getRepository(ExpenseType);
+        const expenseTypes = await expenseTypeRepo.find({
+          where: { userId: user.id },
+        });
+
+        const names = expenseTypes.map((t) => t.name);
+        expect(names).toContain('Yhtiövastike');
+        expect(names).toContain('Lainan korko');
+      });
+
+      it('uses English names when user language is en', async () => {
+        await authService.login({
+          firstName: 'English',
+          lastName: 'User',
+          email: 'en@test.com',
+          language: 'en',
+        });
+
+        const userRepo = dataSource.getRepository(User);
+        const user = await userRepo.findOne({
+          where: { email: 'en@test.com' },
+        });
+
+        const expenseTypeRepo = dataSource.getRepository(ExpenseType);
+        const expenseTypes = await expenseTypeRepo.find({
+          where: { userId: user.id },
+        });
+
+        const names = expenseTypes.map((t) => t.name);
+        expect(names).toContain('Housing company charge');
+        expect(names).toContain('Loan interest');
+      });
+
+      it('maps loan settings on user entity', async () => {
+        await authService.login({
+          firstName: 'Loan',
+          lastName: 'User',
+          email: 'loan@test.com',
+          language: 'fi',
+        });
+
+        const userRepo = dataSource.getRepository(User);
+        const user = await userRepo.findOne({
+          where: { email: 'loan@test.com' },
+        });
+
+        expect(user.loanInterestExpenseTypeId).toBeDefined();
+        expect(user.loanPrincipalExpenseTypeId).toBeDefined();
+        expect(user.loanHandlingFeeExpenseTypeId).toBeDefined();
+
+        // Verify they point to actual expense types
+        const expenseTypeRepo = dataSource.getRepository(ExpenseType);
+
+        const interestType = await expenseTypeRepo.findOne({
+          where: { id: user.loanInterestExpenseTypeId },
+        });
+        expect(interestType).toBeDefined();
+        expect(interestType.name).toBe('Lainan korko');
+
+        const principalType = await expenseTypeRepo.findOne({
+          where: { id: user.loanPrincipalExpenseTypeId },
+        });
+        expect(principalType).toBeDefined();
+        expect(principalType.name).toBe('Lainan lyhennys');
+
+        const handlingFeeType = await expenseTypeRepo.findOne({
+          where: { id: user.loanHandlingFeeExpenseTypeId },
+        });
+        expect(handlingFeeType).toBeDefined();
+        expect(handlingFeeType.name).toBe('Lainan käsittelykulut');
+      });
+
+      it('does not duplicate types on re-login', async () => {
+        const userInput = {
+          firstName: 'Repeat',
+          lastName: 'User',
+          email: 'repeat@test.com',
+          language: 'fi',
+        };
+
+        // First login
+        await authService.login(userInput);
+
+        // Second login
+        await authService.login(userInput);
+
+        const userRepo = dataSource.getRepository(User);
+        const user = await userRepo.findOne({
+          where: { email: 'repeat@test.com' },
+        });
+
+        const expenseTypeRepo = dataSource.getRepository(ExpenseType);
+        const expenseTypes = await expenseTypeRepo.find({
+          where: { userId: user.id },
+        });
+
+        expect(expenseTypes.length).toBe(13);
+
+        const incomeTypeRepo = dataSource.getRepository(IncomeType);
+        const incomeTypes = await incomeTypeRepo.find({
+          where: { userId: user.id },
+        });
+
+        expect(incomeTypes.length).toBe(4);
+      });
     });
   });
 });
