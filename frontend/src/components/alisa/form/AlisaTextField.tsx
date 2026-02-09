@@ -11,6 +11,7 @@ function AlisaTextField(props: {
   fullWidth?: boolean;
   multiline?: boolean;
   rows?: number;
+  required?: boolean;
   onChange?:
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
     | undefined;
@@ -29,12 +30,15 @@ function AlisaTextField(props: {
       disabled={props.disabled !== undefined ? props.disabled : false}
       multiline={props.multiline}
       rows={props.rows}
+      required={props.required}
       onChange={props.onChange}
       onBlur={props.onBlur}
-      InputProps={{
-        endAdornment: props.adornment ? (
-          <InputAdornment position="end">{props.adornment}</InputAdornment>
-        ) : null,
+      slotProps={{
+        input: {
+          endAdornment: props.adornment ? (
+            <InputAdornment position="end">{props.adornment}</InputAdornment>
+          ) : null,
+        },
       }}
     />
   );

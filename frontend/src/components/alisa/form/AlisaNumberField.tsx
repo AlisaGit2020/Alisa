@@ -10,6 +10,8 @@ function AlisaNumberField(props: {
   disabled?: boolean;
   fullWidth?: boolean;
   width?: string;
+  required?: boolean;
+  step?: number;
   onChange?:
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
     | undefined;
@@ -26,13 +28,17 @@ function AlisaNumberField(props: {
         props.autoComplete !== undefined ? props.autoComplete : "off"
       }
       disabled={props.disabled !== undefined ? props.disabled : false}
+      required={props.required}
       onChange={props.onChange}
       onBlur={props.onBlur}
       onFocus={(e) => e.target.select()}
-      InputProps={{
-        endAdornment: props.adornment ? (
-          <InputAdornment position="end">{props.adornment}</InputAdornment>
-        ) : null,
+      slotProps={{
+        input: {
+          endAdornment: props.adornment ? (
+            <InputAdornment position="end">{props.adornment}</InputAdornment>
+          ) : null,
+        },
+        htmlInput: props.step !== undefined ? { step: props.step } : undefined,
       }}
     />
   );

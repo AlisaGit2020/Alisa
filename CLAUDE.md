@@ -69,6 +69,32 @@ When writing frontend code:
 - For custom colors, use theme palette colors that adapt to light/dark mode
 - Access current theme mode via `useThemeMode()` hook from `@alisa-lib/theme-context` if needed
 
+### Alisa Component Usage
+
+**Always use Alisa components instead of raw MUI components.**
+
+| Instead of (MUI) | Use (Alisa) |
+|------------------|-------------|
+| `Button` | `AlisaButton` |
+| `TextField` | `AlisaTextField` or `AlisaNumberField` |
+| `Dialog` | `AlisaDialog` or `AlisaConfirmDialog` |
+| `DatePicker` | `AlisaDatePicker` |
+| `Select` | `AlisaSelectField` or `AlisaSelectVariant` |
+| `Switch` | `AlisaSwitch` |
+| `RadioGroup` | `AlisaRadioGroup` |
+| `Table` | `AlisaDataTable` |
+| `Alert` | `AlisaAlert` |
+
+**Why:**
+- Consistent theming (light/dark mode works automatically)
+- Unified UX across the application
+- Single point of change for styling updates
+- Built-in accessibility and i18n support
+
+**Exception:** Layout components (Box, Stack, Grid, Paper) can be used directly from MUI.
+
+Alisa components are located in `frontend/src/components/alisa/`.
+
 ### Path Aliases
 Both projects use TypeScript path aliases:
 - `@alisa-backend/*` → Backend source (used by both frontend and backend)

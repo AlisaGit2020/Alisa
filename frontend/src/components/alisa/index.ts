@@ -1,4 +1,5 @@
 // Form components
+export { default as AlisaButton } from "./form/AlisaButton";
 export { default as AlisaTextField } from "./form/AlisaTextField";
 export { default as AlisaNumberField } from "./form/AlisaNumberField";
 export { default as AlisaDatePicker } from "./form/AlisaDatePicker";
@@ -23,6 +24,7 @@ export { default as AlisaDataTableActionButtons } from "./datatable/AlisaDataTab
 export { default as AlisaDataTableSelectRow } from "./datatable/AlisaDataTableSelectRow";
 
 // Dialog components
+export { default as AlisaDialog } from "./dialog/AlisaDialog";
 export { default as AlisaConfirmDialog } from "./dialog/AlisaConfirmDialog";
 export { default as AlisaAlert } from "./dialog/AlisaAlert";
 

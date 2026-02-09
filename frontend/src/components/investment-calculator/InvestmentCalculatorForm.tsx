@@ -1,6 +1,7 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Box, Button, Grid, TextField } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import React from "react";
+import { AlisaButton, AlisaNumberField, AlisaTextField } from "../alisa";
 
 export interface InvestmentInputData {
   deptFreePrice: number;
@@ -72,150 +73,124 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2, maxWidth: 800 }}>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12 }}>
-          <TextField
-            fullWidth
-            required
+          <AlisaTextField
             label={t('investment-calculator:name')}
             value={formData.name}
             onChange={handleNameChange}
+            required
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            required
-            type="number"
+          <AlisaNumberField
             label={t('investment-calculator:deptFreePrice')}
             value={formData.deptFreePrice}
             onChange={handleChange('deptFreePrice')}
-            inputProps={{ step: 1000 }}
+            step={1000}
+            required
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            required
-            type="number"
+          <AlisaNumberField
             label={t('investment-calculator:deptShare')}
             value={formData.deptShare}
             onChange={handleChange('deptShare')}
-            inputProps={{ step: 1000 }}
+            step={1000}
+            required
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            required
-            type="number"
+          <AlisaNumberField
             label={t('investment-calculator:transferTaxPercent')}
             value={formData.transferTaxPercent}
             onChange={handleChange('transferTaxPercent')}
-            inputProps={{ step: 0.1 }}
+            step={0.1}
+            required
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            required
-            type="number"
+          <AlisaNumberField
             label={t('investment-calculator:maintenanceFee')}
             value={formData.maintenanceFee}
             onChange={handleChange('maintenanceFee')}
-            inputProps={{ step: 10 }}
+            step={10}
+            required
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            required
-            type="number"
+          <AlisaNumberField
             label={t('investment-calculator:chargeForFinancialCosts')}
             value={formData.chargeForFinancialCosts}
             onChange={handleChange('chargeForFinancialCosts')}
-            inputProps={{ step: 10 }}
+            step={10}
+            required
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            required
-            type="number"
+          <AlisaNumberField
             label={t('investment-calculator:rentPerMonth')}
             value={formData.rentPerMonth}
             onChange={handleChange('rentPerMonth')}
-            inputProps={{ step: 50 }}
+            step={50}
+            required
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            type="number"
+          <AlisaNumberField
             label={t('investment-calculator:apartmentSize')}
-            value={formData.apartmentSize}
+            value={formData.apartmentSize ?? 0}
             onChange={handleChange('apartmentSize')}
-            inputProps={{ step: 1 }}
+            step={1}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            type="number"
+          <AlisaNumberField
             label={t('investment-calculator:waterCharge')}
-            value={formData.waterCharge}
+            value={formData.waterCharge ?? 0}
             onChange={handleChange('waterCharge')}
-            inputProps={{ step: 5 }}
+            step={5}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            type="number"
+          <AlisaNumberField
             label={t('investment-calculator:downPayment')}
-            value={formData.downPayment}
+            value={formData.downPayment ?? 0}
             onChange={handleChange('downPayment')}
-            inputProps={{ step: 1000 }}
+            step={1000}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            type="number"
+          <AlisaNumberField
             label={t('investment-calculator:loanInterestPercent')}
-            value={formData.loanInterestPercent}
+            value={formData.loanInterestPercent ?? 0}
             onChange={handleChange('loanInterestPercent')}
-            inputProps={{ step: 0.1 }}
+            step={0.1}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            type="number"
+          <AlisaNumberField
             label={t('investment-calculator:loanPeriod')}
-            value={formData.loanPeriod}
+            value={formData.loanPeriod ?? 0}
             onChange={handleChange('loanPeriod')}
-            inputProps={{ step: 1 }}
+            step={1}
           />
         </Grid>
 
         <Grid size={{ xs: 12 }}>
-          <Button
+          <AlisaButton
             type="submit"
-            variant="contained"
-            size="medium"
-          >
-            {t('investment-calculator:calculate')}
-          </Button>
+            label={t('investment-calculator:calculate')}
+          />
         </Grid>
       </Grid>
     </Box>
