@@ -8,7 +8,8 @@ describe("PageHeader", () => {
     renderWithProviders(<PageHeader translationPrefix="property" />);
 
     expect(screen.getByRole("heading", { level: 5 })).toBeInTheDocument();
-    expect(screen.getByText(/pageTitle/i)).toBeInTheDocument();
+    // The translation resolves to the actual text, not the key
+    expect(screen.getByText("Properties")).toBeInTheDocument();
   });
 
   it("renders within a Paper component", () => {
