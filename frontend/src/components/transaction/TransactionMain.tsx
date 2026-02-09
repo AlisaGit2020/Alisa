@@ -8,7 +8,9 @@ import TransactionFilter, {
   SearchField,
   TransactionFilterData,
 } from "./components/TransactionFilter";
-import { TransactionType } from "@alisa-types";
+import { DataSaveResult, TransactionAcceptInput, TransactionType } from "@alisa-types";
+import TransactionsAcceptedActions from "./accepted/TransactionsAcceptedActions";
+import ApiClient from "@alisa-lib/api-client";
 import {
   getStoredFilter,
   setStoredFilter,
@@ -40,6 +42,9 @@ function TransactionMain() {
     return { ...getDefaultFilter(), propertyId: globalPropertyId };
   });
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [saveResult, setSaveResult] = useState<DataSaveResult | undefined>();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const updateFilter = (newFilter: TransactionFilterData) => {
     setFilter(newFilter);
@@ -94,10 +99,57 @@ function TransactionMain() {
     updateFilter({ ...getDefaultFilter(), propertyId: filter.propertyId });
   };
 
+  const handleSelectChange = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllChange = (ids: number[]) => {
+    setSelectedIds(ids);
+  };
+
+  const handleCancelSelected = () => {
+    setSelectedIds([]);
+    setSaveResult(undefined);
+  };
+
+  const handleRowDeleted = (id: number) => {
+    setSelectedIds((prev) => prev.filter((i) => i !== id));
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0 || isDeleting) return;
+
+    setIsDeleting(true);
+    setSaveResult(undefined);
+
+    try {
+      const result = await ApiClient.postSaveTask<TransactionAcceptInput>(
+        transactionContext.apiPath + "/delete",
+        { ids: selectedIds }
+      );
+      setSaveResult(result);
+      if (result.allSuccess) {
+        setSelectedIds([]);
+        setRefreshTrigger((prev) => prev + 1);
+      }
+    } catch {
+      setSaveResult({
+        allSuccess: false,
+        message: "Network error occurred",
+        results: [],
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <ListPageTemplate translationPrefix="transaction">
       <Stack spacing={2}>
         <TransactionFilter
+          sx={{ display: selectedIds.length === 0 ? "block" : "none" }}
           marginTop={0}
           open={true}
           data={filter}
@@ -107,11 +159,23 @@ function TransactionMain() {
           onSearchTextChange={handleSearchTextChange}
           onSearchFieldChange={handleSearchFieldChange}
           onReset={handleReset}
-        ></TransactionFilter>
+        />
+        <TransactionsAcceptedActions
+          open={selectedIds.length > 0}
+          selectedIds={selectedIds}
+          onCancel={handleCancelSelected}
+          onDelete={handleDeleteSelected}
+          saveResult={saveResult}
+          isDeleting={isDeleting}
+        />
         <Transactions
           filter={filter}
           refreshTrigger={refreshTrigger}
-        ></Transactions>
+          selectedIds={selectedIds}
+          onSelectChange={handleSelectChange}
+          onSelectAllChange={handleSelectAllChange}
+          onRowDeleted={handleRowDeleted}
+        />
       </Stack>
     </ListPageTemplate>
   );

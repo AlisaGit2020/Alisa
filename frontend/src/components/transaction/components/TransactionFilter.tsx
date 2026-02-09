@@ -13,7 +13,9 @@ import {
   Select,
   SelectChangeEvent,
   Stack,
+  SxProps,
   TextField,
+  Theme,
   Typography,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -33,6 +35,7 @@ export interface TransactionFilterData {
 }
 
 interface TransactionFilterProps extends WithTranslation {
+  sx?: SxProps<Theme>;
   marginTop?: number;
   open: boolean;
   data: TransactionFilterData;
@@ -124,6 +127,7 @@ function TransactionFilter(props: TransactionFilterProps) {
         display: props.open ? "block" : "none",
         marginTop: props.marginTop,
         padding: 2,
+        ...props.sx,
       }}
     >
       <Stack spacing={3}>

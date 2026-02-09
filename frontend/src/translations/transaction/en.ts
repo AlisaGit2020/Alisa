@@ -60,6 +60,8 @@ const transaction = {
   transactions: "Transactions",
   withdraw: "Withdraw",
   unknown: "Unknown",
+  confirmDeleteTransactions:
+    "Are you sure you want to delete {{count}} selected transactions?",
   importWizard: {
     title: "Import Bank Transactions",
     steps: {

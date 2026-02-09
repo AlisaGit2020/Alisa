@@ -16,9 +16,21 @@ import { PropertyRequiredSnackbar } from "../alisa/PropertyRequiredSnackbar";
 interface TransactionsProps extends WithTranslation {
   filter: TransactionFilterData;
   refreshTrigger?: number;
+  selectedIds?: number[];
+  onSelectChange?: (id: number) => void;
+  onSelectAllChange?: (ids: number[]) => void;
+  onRowDeleted?: (id: number) => void;
 }
 
-function Transactions({ t, filter, refreshTrigger }: TransactionsProps) {
+function Transactions({
+  t,
+  filter,
+  refreshTrigger,
+  selectedIds,
+  onSelectChange,
+  onSelectAllChange,
+  onRowDeleted,
+}: TransactionsProps) {
   const [anchorElAdd, setAnchorElAdd] = React.useState<null | HTMLElement>(
     null,
   );
@@ -124,6 +136,10 @@ function Transactions({ t, filter, refreshTrigger }: TransactionsProps) {
           onNewRow={handleOpenAddMenu}
           onOpen={handleOpenDetails}
           refreshTrigger={refreshTrigger}
+          selectedIds={selectedIds}
+          onSelectChange={onSelectChange}
+          onSelectAllChange={onSelectAllChange}
+          onDelete={onRowDeleted}
         />
       </Paper>
 

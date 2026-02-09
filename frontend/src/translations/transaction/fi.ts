@@ -60,6 +60,8 @@ const transaction = {
   transactions: "Tilitapahtumat",
   withdraw: "Nosto",
   unknown: "Tuntematon",
+  confirmDeleteTransactions:
+    "Haluatko varmasti poistaa {{count}} valittua tapahtumaa?",
   importWizard: {
     title: "Tuo pankkitapahtumat",
     steps: {
