@@ -26,13 +26,7 @@ function InvestmentCalculationEditDialog({
   const [inputData, setInputData] = React.useState<InvestmentInputData | null>(null);
   const [loading, setLoading] = React.useState(true);
 
-  React.useEffect(() => {
-    if (open && calculationId > 0) {
-      loadCalculation();
-    }
-  }, [open, calculationId]);
-
-  const loadCalculation = async () => {
+  const loadCalculation = React.useCallback(async () => {
     try {
       setLoading(true);
       const data = await ApiClient.get<SavedInvestmentCalculation>(
@@ -47,7 +41,13 @@ function InvestmentCalculationEditDialog({
     } finally {
       setLoading(false);
     }
-  };
+  }, [calculationId]);
+
+  React.useEffect(() => {
+    if (open && calculationId > 0) {
+      loadCalculation();
+    }
+  }, [open, calculationId, loadCalculation]);
 
   const handleCalculate = async (data: InvestmentInputData) => {
     try {

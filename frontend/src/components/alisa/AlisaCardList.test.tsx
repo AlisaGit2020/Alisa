@@ -1,0 +1,305 @@
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { renderWithProviders } from '@test-utils/test-wrapper';
+import AlisaCardList from './AlisaCardList';
+import ApiClient from '@alisa-lib/api-client';
+import { propertyContext } from '@alisa-lib/alisa-contexts';
+
+// Mock ApiClient static methods
+jest.spyOn(ApiClient, 'search');
+jest.spyOn(ApiClient, 'delete');
+
+describe('AlisaCardList', () => {
+  const mockT = (key: string) => {
+    const translations: Record<string, string> = {
+      add: 'Add',
+      edit: 'Edit',
+      delete: 'Delete',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      confirmDelete: 'Are you sure you want to delete?',
+      noRowsFound: 'No rows found',
+      size: 'Size',
+      buildYear: 'Build year',
+      ownershipShare: 'Ownership share',
+      noDescription: 'No description',
+    };
+    return translations[key] || key;
+  };
+
+  const mockProperties = [
+    {
+      id: 1,
+      name: 'Test Property 1',
+      size: 75,
+      description: 'A test property',
+      address: 'Test Street 1',
+      city: 'Helsinki',
+      postalCode: '00100',
+      buildYear: 2020,
+      ownerships: [{ share: 100 }],
+    },
+    {
+      id: 2,
+      name: 'Test Property 2',
+      size: 100,
+      description: 'Another test property',
+      address: 'Test Street 2',
+      city: 'Espoo',
+      postalCode: '02100',
+      buildYear: 2015,
+      ownerships: [{ share: 50 }],
+    },
+  ];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('renders loading and then displays items', async () => {
+    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
+
+    renderWithProviders(
+      <AlisaCardList
+        t={mockT}
+        title="Properties"
+        alisaContext={propertyContext}
+        fields={[{ name: 'name' }, { name: 'size' }]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Property 1')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Test Property 2')).toBeInTheDocument();
+  });
+
+  it('displays property details correctly', async () => {
+    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
+
+    renderWithProviders(
+      <AlisaCardList
+        t={mockT}
+        title="Properties"
+        alisaContext={propertyContext}
+        fields={[{ name: 'name' }, { name: 'size' }]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Property 1')).toBeInTheDocument();
+    });
+
+    // Check size is displayed
+    expect(screen.getByText('75 m²')).toBeInTheDocument();
+    expect(screen.getByText('100 m²')).toBeInTheDocument();
+
+    // Check build year
+    expect(screen.getByText('2020')).toBeInTheDocument();
+    expect(screen.getByText('2015')).toBeInTheDocument();
+
+    // Check partial ownership is displayed (< 100%)
+    expect(screen.getByText('50 %')).toBeInTheDocument();
+  });
+
+  it('displays empty state when no items', async () => {
+    (ApiClient.search as jest.SpyInstance).mockResolvedValue([]);
+
+    renderWithProviders(
+      <AlisaCardList
+        t={mockT}
+        title="Properties"
+        alisaContext={propertyContext}
+        fields={[{ name: 'name' }]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('No rows found')).toBeInTheDocument();
+    });
+  });
+
+  it('opens delete confirmation dialog', async () => {
+    const user = userEvent.setup();
+    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
+
+    renderWithProviders(
+      <AlisaCardList
+        t={mockT}
+        title="Properties"
+        alisaContext={propertyContext}
+        fields={[{ name: 'name' }]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Property 1')).toBeInTheDocument();
+    });
+
+    const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
+    await user.click(deleteButtons[0]);
+
+    expect(screen.getByText('Are you sure you want to delete?')).toBeInTheDocument();
+  });
+
+  it('closes delete dialog on cancel', async () => {
+    const user = userEvent.setup();
+    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
+
+    renderWithProviders(
+      <AlisaCardList
+        t={mockT}
+        title="Properties"
+        alisaContext={propertyContext}
+        fields={[{ name: 'name' }]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Property 1')).toBeInTheDocument();
+    });
+
+    const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
+    await user.click(deleteButtons[0]);
+
+    const cancelButton = screen.getByRole('button', { name: /cancel/i });
+    await user.click(cancelButton);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Are you sure you want to delete?')).not.toBeInTheDocument();
+    });
+  });
+
+  it('deletes item when confirmed', async () => {
+    const user = userEvent.setup();
+    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
+    (ApiClient.delete as jest.SpyInstance).mockResolvedValue({});
+
+    renderWithProviders(
+      <AlisaCardList
+        t={mockT}
+        title="Properties"
+        alisaContext={propertyContext}
+        fields={[{ name: 'name' }]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Property 1')).toBeInTheDocument();
+    });
+
+    const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
+    await user.click(deleteButtons[0]);
+
+    // Update mock to return fewer items after delete
+    (ApiClient.search as jest.SpyInstance).mockResolvedValue([mockProperties[1]]);
+
+    // Click the delete button in the dialog
+    const allDeleteButtons = screen.getAllByRole('button', { name: /delete/i });
+    const confirmButton = allDeleteButtons[allDeleteButtons.length - 1];
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(ApiClient.delete).toHaveBeenCalledWith(propertyContext.apiPath, 1);
+    });
+  });
+
+  it('calls API with correct parameters', async () => {
+    const fetchOptions = { order: { name: 'ASC' } };
+    (ApiClient.search as jest.SpyInstance).mockResolvedValue([]);
+
+    renderWithProviders(
+      <AlisaCardList
+        t={mockT}
+        title="Properties"
+        alisaContext={propertyContext}
+        fields={[{ name: 'name' }]}
+        fetchOptions={fetchOptions}
+      />
+    );
+
+    await waitFor(() => {
+      expect(ApiClient.search).toHaveBeenCalledWith(
+        propertyContext.apiPath,
+        fetchOptions
+      );
+    });
+  });
+
+  it('refetches data after deletion', async () => {
+    const user = userEvent.setup();
+    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
+    (ApiClient.delete as jest.SpyInstance).mockResolvedValue({});
+
+    renderWithProviders(
+      <AlisaCardList
+        t={mockT}
+        title="Properties"
+        alisaContext={propertyContext}
+        fields={[{ name: 'name' }]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Property 1')).toBeInTheDocument();
+    });
+
+    // Initial fetch
+    expect(ApiClient.search).toHaveBeenCalledTimes(1);
+
+    const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
+    await user.click(deleteButtons[0]);
+
+    (ApiClient.search as jest.SpyInstance).mockResolvedValue([mockProperties[1]]);
+
+    const allDeleteButtons = screen.getAllByRole('button', { name: /delete/i });
+    const confirmButton = allDeleteButtons[allDeleteButtons.length - 1];
+    await user.click(confirmButton);
+
+    // Should refetch after delete
+    await waitFor(() => {
+      expect(ApiClient.search).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('displays add link', async () => {
+    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
+
+    renderWithProviders(
+      <AlisaCardList
+        t={mockT}
+        title="Properties"
+        alisaContext={propertyContext}
+        fields={[{ name: 'name' }]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Property 1')).toBeInTheDocument();
+    });
+
+    const addLink = screen.getByRole('link', { name: /add/i });
+    expect(addLink).toHaveAttribute('href', `${propertyContext.routePath}/add`);
+  });
+
+  it('displays title', async () => {
+    (ApiClient.search as jest.SpyInstance).mockResolvedValue([]);
+
+    renderWithProviders(
+      <AlisaCardList
+        t={mockT}
+        title="My Properties"
+        alisaContext={propertyContext}
+        fields={[{ name: 'name' }]}
+      />
+    );
+
+    expect(screen.getByText('My Properties')).toBeInTheDocument();
+  });
+});

@@ -19,6 +19,7 @@ interface AlisaTransactionTypeSelectProps {
 }
 
 function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
+  const { t } = props;
   const { t: tCommon } = useTranslation("common");
   const [transactionTypes, setTransactionTypes] = useState<
     AlisaSelectFieldItem[]
@@ -36,7 +37,7 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
       const data: AlisaSelectFieldItem[] = [];
       transactionTypeNames.forEach(
         (value: TransactionTypeName, key: number) => {
-          data.push({ id: key, name: props.t(value) });
+          data.push({ id: key, name: t(value) });
         },
       );
 
@@ -45,7 +46,7 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
     };
 
     fetchData().then(setTransactionTypes);
-  }, []);
+  }, [ready, t]);
 
   if (!ready) {
     return <div>{tCommon("loading")}</div>;

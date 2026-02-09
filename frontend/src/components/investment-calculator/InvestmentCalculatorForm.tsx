@@ -25,7 +25,7 @@ interface InvestmentCalculatorFormProps extends WithTranslation {
 }
 
 function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentCalculatorFormProps) {
-  const getDefaultFormData = () => ({
+  const getDefaultFormData = React.useCallback(() => ({
     deptFreePrice: initialValues?.deptFreePrice ?? 100000,
     deptShare: initialValues?.deptShare ?? 0,
     transferTaxPercent: initialValues?.transferTaxPercent ?? 2,
@@ -38,14 +38,14 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
     loanInterestPercent: initialValues?.loanInterestPercent ?? 0,
     loanPeriod: initialValues?.loanPeriod ?? 0,
     name: initialValues?.name ?? '',
-  });
+  }), [initialValues]);
 
   const [formData, setFormData] = React.useState<InvestmentInputData>(getDefaultFormData());
 
   // Reset form when initialValues change (e.g., when switching tabs or clearing)
   React.useEffect(() => {
     setFormData(getDefaultFormData());
-  }, [initialValues]);
+  }, [getDefaultFormData]);
 
   const handleChange = (field: keyof InvestmentInputData) => (
     event: React.ChangeEvent<HTMLInputElement>

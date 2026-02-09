@@ -32,25 +32,26 @@ interface EditableRowsProps extends WithTranslation {
   changedAmount: number;
 }
 function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
+  const { type: propsType, transaction, onHandleChange } = props;
   let initialData;
-  if (props.type === TransactionType.EXPENSE) {
-    initialData = props.transaction.expenses || [];
+  if (propsType === TransactionType.EXPENSE) {
+    initialData = transaction.expenses || [];
   } else {
-    initialData = props.transaction.incomes || [];
+    initialData = transaction.incomes || [];
   }
   const [data, setData] = React.useState<T[]>((initialData as T[]) || []);
   const hasRunInit = React.useRef(false);
-  const [type, setType] = React.useState<TransactionType>(props.type);
+  const [type, setType] = React.useState<TransactionType>(propsType);
 
-  const dataService = new DataService<T>({
+  const dataService = React.useMemo(() => new DataService<T>({
     context:
-      props.type === TransactionType.EXPENSE ? expenseContext : incomeContext,
-  });
+      propsType === TransactionType.EXPENSE ? expenseContext : incomeContext,
+  }), [propsType]);
 
   // Define helper functions before useEffect to avoid accessing before declaration
   const typeHasChanged = React.useCallback(() => {
-    return type !== props.type;
-  }, [type, props.type]);
+    return type !== propsType;
+  }, [type, propsType]);
 
   const addNewRow = React.useCallback(async () => {
     const defaults = await dataService.getDefaults();
@@ -60,13 +61,13 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
         .map((row) => row.totalAmount)
         .reduce((a, b) => Number(a) + Number(b), 0);
 
-      defaults.totalAmount = props.transaction.amount - rowsTotalAmount;
+      defaults.totalAmount = transaction.amount - rowsTotalAmount;
 
       const newData = [...prevData, defaults];
-      props.onHandleChange(newData);
+      onHandleChange(newData);
       return newData;
     });
-  }, [dataService, props.transaction.amount, props.onHandleChange]);
+  }, [dataService, transaction.amount, onHandleChange]);
 
   React.useEffect(() => {
     if (!hasRunInit.current) {
@@ -81,7 +82,7 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
     } else {
       if (typeHasChanged()) {
         const setNewType = async () => {
-          setType(props.type);
+          setType(propsType);
           setData([]);
           await addNewRow();
         };
@@ -89,8 +90,9 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
         setNewType().then();
       }
     }
+    // data.length is intentionally not in deps - we only check it during initialization
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.type]);
+  }, [propsType, typeHasChanged, addNewRow]);
 
   React.useEffect(() => {
     if (props.changedDescription !== "") {

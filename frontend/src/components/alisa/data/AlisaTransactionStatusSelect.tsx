@@ -19,6 +19,7 @@ interface AlisaTransactionStatusSelectProps {
 function AlisaTransactionStatusSelect(
   props: AlisaTransactionStatusSelectProps,
 ) {
+  const { t } = props;
   const [items, setItems] = useState<AlisaSelectFieldItem[]>([]);
   const [ready, setReady] = useState<boolean>(false);
   const showLabel = props.showLabel ? props.showLabel : false;
@@ -28,7 +29,7 @@ function AlisaTransactionStatusSelect(
       const data: AlisaSelectFieldItem[] = [];
       transactionStatusNames.forEach(
         (value: TransactionStatusName, key: number) => {
-          data.push({ id: key, name: props.t(value) });
+          data.push({ id: key, name: t(value) });
         },
       );
       setReady(true);
@@ -36,7 +37,7 @@ function AlisaTransactionStatusSelect(
     };
 
     fetchData().then(setItems);
-  }, [ready]);
+  }, [t]);
 
   if (!ready) {
     return <div>Loading...</div>;

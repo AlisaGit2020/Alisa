@@ -78,21 +78,21 @@ function Expenses({ t }: WithTranslation) {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  const getDateFilter = () => {
-    if (filter.startDate && filter.endDate) {
-      return { $between: [filter.startDate, filter.endDate] };
-    }
-    if (filter.startDate) {
-      return { $gte: filter.startDate };
-    }
-    if (filter.endDate) {
-      return { $lte: filter.endDate };
-    }
-    return undefined;
-  };
+  const fetchOptions: TypeOrmFetchOptions<Expense> = useMemo(() => {
+    const getDateFilter = () => {
+      if (filter.startDate && filter.endDate) {
+        return { $between: [filter.startDate, filter.endDate] };
+      }
+      if (filter.startDate) {
+        return { $gte: filter.startDate };
+      }
+      if (filter.endDate) {
+        return { $lte: filter.endDate };
+      }
+      return undefined;
+    };
 
-  const fetchOptions: TypeOrmFetchOptions<Expense> = useMemo(
-    () => ({
+    return {
       relations: {
         expenseType: true,
         property: true,
@@ -110,9 +110,8 @@ function Expenses({ t }: WithTranslation) {
           : undefined,
         accountingDate: getDateFilter(),
       },
-    }),
-    [propertyId, filter.typeIds, filter.searchText, filter.startDate, filter.endDate]
-  );
+    };
+  }, [propertyId, filter.typeIds, filter.searchText, filter.startDate, filter.endDate]);
 
   const dataService = useMemo(
     () => new DataService<Expense>({ context: expenseContext, fetchOptions }),

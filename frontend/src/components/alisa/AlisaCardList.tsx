@@ -61,7 +61,7 @@ function AlisaCardList<T extends { id: number }>({
     };
 
     fetchData();
-  }, [idDeleted]);
+  }, [idDeleted, alisaContext.apiPath, fetchOptions]);
 
   const handleClickOpen = (apartmentId: number) => {
     setIdToDelete(apartmentId);
