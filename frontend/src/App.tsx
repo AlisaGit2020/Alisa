@@ -7,6 +7,7 @@ import createStore from "react-auth-kit/createStore";
 import AuthProvider from "react-auth-kit";
 import { ThemeContextProvider, useThemeMode } from "@alisa-lib/theme-context";
 import { DashboardProvider } from "./components/dashboard/context/DashboardContext";
+import { AlisaToastProvider } from "./components/alisa";
 import { useMemo } from "react";
 import AppRoutes from "./components/AppRoutes";
 
@@ -36,11 +37,13 @@ function ThemedApp() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AuthProvider store={store}>
-        <DashboardProvider>
-          <AppRoutes />
-        </DashboardProvider>
-      </AuthProvider>
+      <AlisaToastProvider>
+        <AuthProvider store={store}>
+          <DashboardProvider>
+            <AppRoutes />
+          </DashboardProvider>
+        </AuthProvider>
+      </AlisaToastProvider>
     </ThemeProvider>
   );
 }
