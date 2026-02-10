@@ -141,7 +141,7 @@ export class ExpenseService {
     const expenseEntity = await this.getEntityOrThrow(user, id);
 
     this.mapData(user, expenseEntity, input);
-    if (expenseEntity.transaction !== undefined) {
+    if (expenseEntity.transaction) {
       expenseEntity.transaction.id = expenseEntity.transactionId;
     }
 
@@ -202,7 +202,7 @@ export class ExpenseService {
       }
     });
 
-    if (expense.transaction !== undefined) {
+    if (expense.transaction) {
       expense.transaction.propertyId = expense.propertyId;
       expense.transaction.property = expense.property;
       // Copy accountingDate from transaction if not explicitly set
@@ -210,7 +210,7 @@ export class ExpenseService {
         expense.accountingDate = expense.transaction.accountingDate;
       }
     }
-    if (expense.expenseType !== undefined) {
+    if (expense.expenseType) {
       expense.expenseType.userId = user.id;
     }
   }
