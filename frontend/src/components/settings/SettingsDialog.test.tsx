@@ -10,6 +10,7 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from '@test-utils/test-i18n';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeContextProvider } from '@alisa-lib/theme-context';
+import { AlisaToastProvider } from '../alisa';
 import SettingsDialog from './SettingsDialog';
 import ApiClient from '@alisa-lib/api-client';
 import DataService from '@alisa-lib/data-service';
@@ -27,7 +28,9 @@ function TestWrapper({ children }: { children: React.ReactNode }) {
       <ThemeProvider theme={theme}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <I18nextProvider i18n={i18n}>
-            <ThemeContextProvider>{children}</ThemeContextProvider>
+            <AlisaToastProvider>
+              <ThemeContextProvider>{children}</ThemeContextProvider>
+            </AlisaToastProvider>
           </I18nextProvider>
         </LocalizationProvider>
       </ThemeProvider>

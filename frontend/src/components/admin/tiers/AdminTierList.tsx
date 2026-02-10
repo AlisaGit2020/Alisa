@@ -19,7 +19,7 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import ApiClient from "@alisa-lib/api-client";
 import { adminContext } from "@alisa-lib/alisa-contexts";
 import AdminTierForm from "./AdminTierForm";
-import { AlisaButton } from "../../alisa";
+import { AlisaButton, useToast } from "../../alisa";
 
 interface Tier {
   id: number;
@@ -35,6 +35,7 @@ function AdminTierList({ t }: WithTranslation) {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editingTier, setEditingTier] = useState<Tier | null>(null);
+  const { showToast } = useToast();
 
   const fetchTiers = async () => {
     try {
@@ -80,6 +81,7 @@ function AdminTierList({ t }: WithTranslation) {
         headers: options.headers,
       },
     );
+    showToast({ message: t("common:toast.deleteSuccess"), severity: "success" });
     fetchTiers();
   };
 
@@ -99,6 +101,7 @@ function AdminTierList({ t }: WithTranslation) {
       body: JSON.stringify(tier),
     });
 
+    showToast({ message: t("common:toast.tierSaved"), severity: "success" });
     setFormOpen(false);
     fetchTiers();
   };

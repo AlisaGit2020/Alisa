@@ -70,6 +70,24 @@ const fi = {
     year: "Vuosi",
     propertyRequiredMessage: "Valitse ensin kohde",
     selectProperty: "Valitse kohde",
+
+    toast: {
+      saveSuccess: "Muutokset tallennettu",
+      saveError: "Tallennus epäonnistui",
+      deleteSuccess: "Poistettu onnistuneesti",
+      deleteSuccessCount: "{{count}} kohdetta poistettu",
+      deleteError: "Poistaminen epäonnistui",
+      approveSuccess: "{{count}} tapahtumaa hyväksytty",
+      typeUpdated: "Tyyppi päivitetty",
+      categoryUpdated: "Kategoria päivitetty",
+      loanSplit: "Lainanmaksu jaettu",
+      importSuccess: "{{count}} tapahtumaa tuotu",
+      settingsSaved: "Asetukset tallennettu",
+      photoUploaded: "Kuva ladattu",
+      photoDeleted: "Kuva poistettu",
+      calculationSaved: "Laskelma tallennettu",
+      tierSaved: "Taso tallennettu",
+    },
   },
 };
 

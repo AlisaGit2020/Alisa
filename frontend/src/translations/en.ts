@@ -70,6 +70,24 @@ const en = {
     year: "Year",
     propertyRequiredMessage: "Please select a property first",
     selectProperty: "Select Property",
+
+    toast: {
+      saveSuccess: "Changes saved successfully",
+      saveError: "Failed to save changes",
+      deleteSuccess: "Deleted successfully",
+      deleteSuccessCount: "{{count}} items deleted",
+      deleteError: "Failed to delete",
+      approveSuccess: "{{count}} transactions approved",
+      typeUpdated: "Type updated",
+      categoryUpdated: "Category updated",
+      loanSplit: "Loan payment split",
+      importSuccess: "{{count}} transactions imported",
+      settingsSaved: "Settings saved",
+      photoUploaded: "Photo uploaded",
+      photoDeleted: "Photo deleted",
+      calculationSaved: "Calculation saved",
+      tierSaved: "Tier saved",
+    },
   },
 };
 

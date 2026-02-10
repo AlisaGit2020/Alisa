@@ -9,6 +9,7 @@ import InvestmentCalculatorResults, { InvestmentResults } from "./InvestmentCalc
 import LoginDialog from "../login/LoginDialog";
 import ApiClient from "@alisa-lib/api-client";
 import { useTranslation } from "react-i18next";
+import { useToast } from "../alisa";
 
 function InvestmentCalculatorPublic({ t }: WithTranslation) {
   const [results, setResults] = React.useState<InvestmentResults | null>(null);
@@ -19,6 +20,7 @@ function InvestmentCalculatorPublic({ t }: WithTranslation) {
   const navigate = useNavigate();
   const { i18n } = useTranslation();
   const isAuthenticated = useIsAuthenticated();
+  const { showToast } = useToast();
 
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
@@ -69,6 +71,7 @@ function InvestmentCalculatorPublic({ t }: WithTranslation) {
       await ApiClient.post('real-estate/investment', inputData);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 5000);
+      showToast({ message: t("common:toast.calculationSaved"), severity: "success" });
     } catch (error) {
       console.error('Save error:', error);
     }

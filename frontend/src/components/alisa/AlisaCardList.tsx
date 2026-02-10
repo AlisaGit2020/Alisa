@@ -22,6 +22,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { TFunction } from "i18next";
 import AlisaConfirmDialog from "./dialog/AlisaConfirmDialog";
+import { useToast } from "./toast";
 import { TypeOrmFetchOptions } from "../../lib/types";
 import ApiClient from "../../lib/api-client";
 import AlisaContext from "@alisa-lib/alisa-contexts";
@@ -51,6 +52,7 @@ function AlisaCardList<T extends { id: number }>({
   const [idToDelete, setIdToDelete] = React.useState<number>(0);
   const [idDeleted, setIdDeleted] = React.useState<number>(0);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -78,6 +80,7 @@ function AlisaCardList<T extends { id: number }>({
     await ApiClient.delete(alisaContext.apiPath, idToDelete);
     setIdDeleted(idToDelete);
     handleClose();
+    showToast({ message: t("toast.deleteSuccess"), severity: "success" });
   };
 
   return (

@@ -11,6 +11,7 @@ import TransactionFilter, {
 import { DataSaveResult, TransactionAcceptInput, TransactionType } from "@alisa-types";
 import TransactionsAcceptedActions from "./accepted/TransactionsAcceptedActions";
 import ApiClient from "@alisa-lib/api-client";
+import { useToast } from "../alisa";
 import {
   getStoredFilter,
   setStoredFilter,
@@ -45,6 +46,7 @@ function TransactionMain({ t }: WithTranslation) {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [saveResult, setSaveResult] = useState<DataSaveResult | undefined>();
   const [isDeleting, setIsDeleting] = useState(false);
+  const { showToast } = useToast();
 
   const updateFilter = (newFilter: TransactionFilterData) => {
     setFilter(newFilter);
@@ -131,14 +133,15 @@ function TransactionMain({ t }: WithTranslation) {
       );
       setSaveResult(result);
       if (result.allSuccess) {
+        showToast({ message: t("common:toast.deleteSuccessCount", { count: selectedIds.length }), severity: "success" });
         setSelectedIds([]);
         setRefreshTrigger((prev) => prev + 1);
       }
     } catch {
       setSaveResult({
         allSuccess: false,
-        message: t("networkError"),
-        results: [],
+        rows: { total: selectedIds.length, success: 0, failed: selectedIds.length },
+        results: selectedIds.map((id) => ({ id, statusCode: 500, message: t("networkError") })),
       });
     } finally {
       setIsDeleting(false);

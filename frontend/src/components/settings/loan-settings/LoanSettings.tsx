@@ -7,7 +7,7 @@ import AlisaSelect from "../../alisa/data/AlisaSelect";
 import DataService from "@alisa-lib/data-service";
 import { ExpenseType } from "@alisa-types";
 import { AlisaApproveIcon } from "../../alisa/AlisaIcons";
-import { AlisaButton } from "../../alisa";
+import { AlisaButton, useToast } from "../../alisa";
 
 interface LoanSettingsData {
   loanPrincipalExpenseTypeId: number;
@@ -23,6 +23,7 @@ function LoanSettings({ t }: WithTranslation) {
   });
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
+  const { showToast } = useToast();
 
   React.useEffect(() => {
     const loadSettings = async () => {
@@ -58,6 +59,7 @@ function LoanSettings({ t }: WithTranslation) {
           : undefined,
     });
     setSaving(false);
+    showToast({ message: t("common:toast.settingsSaved"), severity: "success" });
   };
 
   if (loading) {

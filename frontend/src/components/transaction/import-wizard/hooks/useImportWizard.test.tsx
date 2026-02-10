@@ -1,8 +1,13 @@
 // frontend/src/components/transaction/import-wizard/hooks/useImportWizard.test.ts
 import { renderHook, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { ReactNode } from 'react';
+import { I18nextProvider } from 'react-i18next';
+import { BrowserRouter } from 'react-router-dom';
 import { useImportWizard } from './useImportWizard';
 import { TransactionType, TransactionStatus } from '@alisa-types';
+import { AlisaToastProvider } from '../../../alisa';
+import i18n from '../../../../../test/utils/test-i18n';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -28,6 +33,17 @@ jest.mock('@alisa-lib/initial-data', () => ({
   getTransactionPropertyId: () => 1,
 }));
 
+// Wrapper to provide necessary context for the hook
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <BrowserRouter>
+    <I18nextProvider i18n={i18n}>
+      <AlisaToastProvider>
+        {children}
+      </AlisaToastProvider>
+    </I18nextProvider>
+  </BrowserRouter>
+);
+
 describe('useImportWizard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -36,7 +52,7 @@ describe('useImportWizard', () => {
 
   describe('Initial state', () => {
     it('initializes with default step and bank values', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       expect(result.current.state.activeStep).toBe(0);
       expect(result.current.state.selectedBank).toBeNull();
@@ -51,7 +67,7 @@ describe('useImportWizard', () => {
 
   describe('Step navigation', () => {
     it('advances to next step with nextStep', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       act(() => {
         result.current.nextStep();
@@ -61,7 +77,7 @@ describe('useImportWizard', () => {
     });
 
     it('goes back to previous step with prevStep', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       act(() => {
         result.current.nextStep();
@@ -78,7 +94,7 @@ describe('useImportWizard', () => {
     });
 
     it('does not go below step 0', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       act(() => {
         result.current.prevStep();
@@ -88,7 +104,7 @@ describe('useImportWizard', () => {
     });
 
     it('goes to specific step with goToStep', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       act(() => {
         result.current.goToStep(2);
@@ -100,7 +116,7 @@ describe('useImportWizard', () => {
 
   describe('File management', () => {
     it('sets files with setFiles', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
       const files = [new File(['content'], 'test.csv', { type: 'text/csv' })];
 
       act(() => {
@@ -111,7 +127,7 @@ describe('useImportWizard', () => {
     });
 
     it('clears upload error when setting new files', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
       const files = [new File(['content'], 'test.csv', { type: 'text/csv' })];
 
       act(() => {
@@ -124,7 +140,7 @@ describe('useImportWizard', () => {
 
   describe('Bank selection', () => {
     it('sets bank with setBank', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       act(() => {
         result.current.setBank('op');
@@ -134,7 +150,7 @@ describe('useImportWizard', () => {
     });
 
     it('can change bank selection', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       act(() => {
         result.current.setBank('op');
@@ -152,7 +168,7 @@ describe('useImportWizard', () => {
 
   describe('File upload preconditions', () => {
     it('returns empty result when no files', async () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       let uploadResult: { savedIds: number[]; skippedCount: number };
 
@@ -164,7 +180,7 @@ describe('useImportWizard', () => {
     });
 
     it('returns empty result when no bank selected', async () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
       const files = [new File(['content'], 'test.csv', { type: 'text/csv' })];
 
       act(() => {
@@ -183,7 +199,7 @@ describe('useImportWizard', () => {
 
   describe('Selection management', () => {
     it('handles single item selection', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       act(() => {
         result.current.handleSelectChange(1, {
@@ -206,7 +222,7 @@ describe('useImportWizard', () => {
     });
 
     it('handles item deselection', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       // Select item
       act(() => {
@@ -236,7 +252,7 @@ describe('useImportWizard', () => {
     });
 
     it('handles select all', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
       const items = [
         {
           id: 1,
@@ -278,7 +294,7 @@ describe('useImportWizard', () => {
     });
 
     it('clears selection with clearSelection', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       act(() => {
         result.current.handleSelectChange(1, {
@@ -309,7 +325,7 @@ describe('useImportWizard', () => {
 
   describe('Reset', () => {
     it('resets step and selection state', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       // Make some changes
       act(() => {
@@ -333,7 +349,7 @@ describe('useImportWizard', () => {
     });
 
     it('clears session storage on reset', () => {
-      const { result } = renderHook(() => useImportWizard());
+      const { result } = renderHook(() => useImportWizard(), { wrapper });
 
       act(() => {
         result.current.reset();

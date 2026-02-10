@@ -1,4 +1,4 @@
-import { screen, act, waitFor } from "@testing-library/react";
+import { screen, act, waitFor, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { renderWithProviders } from "@test-utils/test-wrapper";
@@ -140,8 +140,9 @@ describe("AlisaToastProvider", () => {
       return null;
     }
 
+    // Use raw render instead of renderWithProviders since renderWithProviders includes AlisaToastProvider
     expect(() => {
-      renderWithProviders(<InvalidComponent />);
+      render(<InvalidComponent />);
     }).toThrow("useToast must be used within AlisaToastProvider");
 
     console.error = originalError;

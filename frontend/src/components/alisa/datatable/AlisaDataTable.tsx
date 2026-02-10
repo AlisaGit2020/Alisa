@@ -9,6 +9,7 @@ import { Box, Chip, TableContainer, Typography } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { TFunction } from "i18next";
 import AlisaConfirmDialog from "../dialog/AlisaConfirmDialog.tsx";
+import { useToast } from "../toast";
 import DataService from "@alisa-lib/data-service.ts";
 import AlisaDataTableActionButtons, {
   AlisaDataTableAddButton,
@@ -58,6 +59,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
   const [open, setOpen] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState<number>(0);
   const [idDeleted, setIdDeleted] = React.useState<number>(0);
+  const { showToast } = useToast();
 
   // Use static data if provided, otherwise fetch from dataService
   const data = props.data ?? fetchedData;
@@ -87,6 +89,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
     await props.dataService?.delete(idToDelete);
     setTimeout(() => setIdDeleted(idToDelete), 200);
     handleDeleteClose();
+    showToast({ message: props.t("toast.deleteSuccess"), severity: "success" });
     if (props.onDelete) {
       props.onDelete(idToDelete);
     }

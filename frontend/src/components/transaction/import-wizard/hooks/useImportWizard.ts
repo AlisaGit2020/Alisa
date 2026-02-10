@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Transaction,
   TransactionType,
@@ -14,6 +15,7 @@ import { transactionContext, opImportContext, sPankkiImportContext } from "@alis
 import { getTransactionPropertyId } from "@alisa-lib/initial-data";
 import { TypeOrmFetchOptions } from "@alisa-lib/types";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../../TransactionLeftMenuItems";
+import { useToast } from "../../../alisa";
 
 // Session persistence for resuming interrupted imports
 const STORAGE_KEY = "importWizard:session";
@@ -66,6 +68,8 @@ export function useImportWizard() {
     ...initialState,
     propertyId: getTransactionPropertyId(),
   }));
+  const { t } = useTranslation();
+  const { showToast } = useToast();
 
   // Listen for property changes from navigation
   // If property changes during an active import, reset the wizard
@@ -225,6 +229,7 @@ export function useImportWizard() {
           transactionIds: allTransactionIds,
           selectedBank: state.selectedBank,
         });
+        showToast({ message: t("common:toast.importSuccess", { count: allTransactionIds.length }), severity: "success" });
       }
 
       setState((prev) => ({
@@ -245,7 +250,7 @@ export function useImportWizard() {
       }));
       return { savedIds: [], skippedCount: 0 };
     }
-  }, [state.files, state.propertyId, state.selectedBank]);
+  }, [state.files, state.propertyId, state.selectedBank, showToast, t]);
 
   const fetchTransactions = useCallback(async (ids: number[]) => {
     if (ids.length === 0) return;
@@ -348,11 +353,12 @@ export function useImportWizard() {
         }
       );
 
+      showToast({ message: t("common:toast.typeUpdated"), severity: "success" });
       // Refetch transactions to update UI
       await fetchTransactions(state.importedTransactionIds);
       clearSelection();
     },
-    [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection]
+    [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection, showToast, t]
   );
 
   const setCategoryTypeForSelected = useCallback(
@@ -368,11 +374,12 @@ export function useImportWizard() {
         }
       );
 
+      showToast({ message: t("common:toast.categoryUpdated"), severity: "success" });
       // Refetch transactions to update UI
       await fetchTransactions(state.importedTransactionIds);
       clearSelection();
     },
-    [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection]
+    [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection, showToast, t]
   );
 
   const splitLoanPaymentForSelected = useCallback(
@@ -393,16 +400,18 @@ export function useImportWizard() {
         }
       );
 
+      showToast({ message: t("common:toast.loanSplit"), severity: "success" });
       // Refetch transactions to update UI
       await fetchTransactions(state.importedTransactionIds);
       clearSelection();
     },
-    [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection]
+    [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection, showToast, t]
   );
 
   const deleteSelected = useCallback(async () => {
     if (state.selectedIds.length === 0) return;
 
+    const deletedCount = state.selectedIds.length;
     const result = await ApiClient.postSaveTask<TransactionAcceptInput>(
       transactionContext.apiPath + "/delete",
       {
@@ -427,24 +436,27 @@ export function useImportWizard() {
         clearSession();
       }
 
+      showToast({ message: t("common:toast.deleteSuccessCount", { count: deletedCount }), severity: "success" });
+
       setState((prev) => ({
         ...prev,
         importedTransactionIds: remainingIds,
         transactions: prev.transactions.filter(
-          (t) => !state.selectedIds.includes(t.id)
+          (tx) => !state.selectedIds.includes(tx.id)
         ),
         hasUnknownTypes: prev.transactions
-          .filter((t) => !state.selectedIds.includes(t.id))
-          .some((t) => t.type === TransactionType.UNKNOWN),
+          .filter((tx) => !state.selectedIds.includes(tx.id))
+          .some((tx) => tx.type === TransactionType.UNKNOWN),
       }));
 
       clearSelection();
     }
-  }, [state.selectedIds, state.importedTransactionIds, state.propertyId, state.selectedBank, clearSelection]);
+  }, [state.selectedIds, state.importedTransactionIds, state.propertyId, state.selectedBank, clearSelection, showToast, t]);
 
   const approveAll = useCallback(async (): Promise<boolean> => {
     if (state.importedTransactionIds.length === 0) return false;
 
+    const approvedCount = state.importedTransactionIds.length;
     setState((prev) => ({ ...prev, isApproving: true, approveError: null }));
 
     try {
@@ -470,6 +482,8 @@ export function useImportWizard() {
       // Clear session since import is complete
       clearSession();
 
+      showToast({ message: t("common:toast.approveSuccess", { count: approvedCount }), severity: "success" });
+
       setState((prev) => ({
         ...prev,
         isApproving: false,
@@ -487,7 +501,7 @@ export function useImportWizard() {
       }));
       return false;
     }
-  }, [state.importedTransactionIds, state.transactions]);
+  }, [state.importedTransactionIds, state.transactions, showToast, t]);
 
   const reset = useCallback(() => {
     clearSession();

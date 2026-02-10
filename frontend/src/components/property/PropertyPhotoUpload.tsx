@@ -8,7 +8,7 @@ import {
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
-import { AlisaButton } from '../alisa';
+import { AlisaButton, useToast } from '../alisa';
 import axios from 'axios';
 import ApiClient from '@alisa-lib/api-client';
 import { VITE_API_URL } from '../../constants';
@@ -28,6 +28,7 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [photoPath, setPhotoPath] = useState<string | undefined>(currentPhoto);
+  const { showToast } = useToast();
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -68,6 +69,7 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
       const newPhotoPath = response.data.photo;
       setPhotoPath(newPhotoPath);
       onPhotoChange?.(newPhotoPath);
+      showToast({ message: t("common:toast.photoUploaded"), severity: "success" });
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { message?: string } } };
       setError(axiosError.response?.data?.message || t('photoUploadError'));
@@ -91,6 +93,7 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
 
       setPhotoPath(undefined);
       onPhotoChange?.(null);
+      showToast({ message: t("common:toast.photoDeleted"), severity: "success" });
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { message?: string } } };
       setError(axiosError.response?.data?.message || t('photoDeleteError'));

@@ -8,6 +8,7 @@ import InvestmentCalculatorResults, { InvestmentResults } from "./InvestmentCalc
 import SavedCalculations from "./SavedCalculations";
 import PageHeader from "../alisa/PageHeader";
 import ApiClient from "@alisa-lib/api-client";
+import { useToast } from "../alisa";
 
 const STORAGE_KEY = 'investmentCalculator_workInProgress';
 
@@ -18,6 +19,7 @@ function InvestmentCalculatorProtected({ t }: WithTranslation) {
   const [saveSuccess, setSaveSuccess] = React.useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [formKey, setFormKey] = React.useState(0);
+  const { showToast } = useToast();
 
   // Load saved work from sessionStorage on mount
   React.useEffect(() => {
@@ -75,6 +77,7 @@ function InvestmentCalculatorProtected({ t }: WithTranslation) {
       await ApiClient.post('real-estate/investment', inputData);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 5000);
+      showToast({ message: t("common:toast.calculationSaved"), severity: "success" });
       // Clear form, sessionStorage and switch to saved calculations tab
       setResults(null);
       setInputData(null);

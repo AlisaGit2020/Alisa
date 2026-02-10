@@ -34,7 +34,7 @@ import { View } from "@alisa-lib/views.ts";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../TransactionLeftMenuItems.tsx";
 import { ListPageTemplate } from "../../templates";
 import { usePropertyRequired } from "@alisa-lib/hooks/usePropertyRequired";
-import { PropertyRequiredSnackbar } from "../../alisa/PropertyRequiredSnackbar";
+import { PropertyRequiredSnackbar, useToast } from "../../alisa";
 
 const getDefaultFilter = (): TransactionFilterData => ({
   propertyId: 0,
@@ -75,6 +75,7 @@ function TransactionsPending({ t }: WithTranslation) {
 
   const { requireProperty, popoverOpen, popoverAnchorEl, closePopover, openPropertySelector } =
     usePropertyRequired(filter.propertyId);
+  const { showToast } = useToast();
 
   const updateFilter = (newFilter: TransactionFilterData) => {
     setFilter(newFilter);
@@ -139,6 +140,7 @@ function TransactionsPending({ t }: WithTranslation) {
         },
       );
       if (result.allSuccess) {
+        showToast({ message: t("common:toast.deleteSuccessCount", { count: selectedIds.length }), severity: "success" });
         setSelectedIds([]);
         setSelectedTransactionTypes([]);
         setRefreshTrigger((prev) => prev + 1);
@@ -161,6 +163,7 @@ function TransactionsPending({ t }: WithTranslation) {
       if (!result.allSuccess) {
         setSaveResult(result);
       } else {
+        showToast({ message: t("common:toast.typeUpdated"), severity: "success" });
         setRefreshTrigger((prev) => prev + 1);
       }
     }
@@ -173,6 +176,7 @@ function TransactionsPending({ t }: WithTranslation) {
       },
     );
     if (result.allSuccess) {
+      showToast({ message: t("common:toast.approveSuccess", { count: selectedIds.length }), severity: "success" });
       setSelectedIds([]);
       setSaveResult(undefined);
       setRefreshTrigger((prev) => prev + 1);
@@ -203,6 +207,7 @@ function TransactionsPending({ t }: WithTranslation) {
       if (!result.allSuccess) {
         setSaveResult(result);
       } else {
+        showToast({ message: t("common:toast.categoryUpdated"), severity: "success" });
         setRefreshTrigger((prev) => prev + 1);
       }
     }
@@ -228,6 +233,7 @@ function TransactionsPending({ t }: WithTranslation) {
       if (!result.allSuccess) {
         setSaveResult(result);
       } else {
+        showToast({ message: t("common:toast.loanSplit"), severity: "success" });
         setRefreshTrigger((prev) => prev + 1);
       }
     }

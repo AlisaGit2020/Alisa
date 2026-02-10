@@ -5,7 +5,7 @@ import { AxiosResponse } from "axios";
 import ApiClient from "@alisa-lib/api-client";
 import InvestmentCalculatorForm, { InvestmentInputData } from "./InvestmentCalculatorForm";
 import InvestmentCalculatorResults, { InvestmentResults, SavedInvestmentCalculation } from "./InvestmentCalculatorResults";
-import { AlisaDialog } from "../alisa";
+import { AlisaDialog, useToast } from "../alisa";
 
 interface InvestmentCalculationEditDialogProps extends WithTranslation {
   calculationId: number;
@@ -25,6 +25,7 @@ function InvestmentCalculationEditDialog({
   const [results, setResults] = React.useState<InvestmentResults | null>(null);
   const [inputData, setInputData] = React.useState<InvestmentInputData | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const { showToast } = useToast();
 
   const loadCalculation = React.useCallback(async () => {
     try {
@@ -67,6 +68,7 @@ function InvestmentCalculationEditDialog({
 
     try {
       await ApiClient.put('real-estate/investment', calculationId, inputData);
+      showToast({ message: t("common:toast.saveSuccess"), severity: "success" });
 
       if (onSaved) {
         onSaved();

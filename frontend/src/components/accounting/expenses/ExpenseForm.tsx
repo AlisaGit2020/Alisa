@@ -10,7 +10,7 @@ import AlisaSelect from "../../alisa/data/AlisaSelect";
 import { expenseContext, expenseTypeContext } from "@alisa-lib/alisa-contexts";
 import DataService from "@alisa-lib/data-service";
 import AlisaFormHandler from "../../alisa/form/AlisaFormHandler";
-import { AlisaButton, AlisaDialog, AlisaConfirmDialog } from "../../alisa";
+import { AlisaButton, AlisaDialog, AlisaConfirmDialog, useToast } from "../../alisa";
 import { getNumber } from "@alisa-lib/functions";
 
 interface ExpenseFormProps extends WithTranslation {
@@ -42,6 +42,7 @@ function ExpenseForm({
     transactionId: null,
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { showToast } = useToast();
 
   const dataService = new DataService<ExpenseInput>({
     context: expenseContext,
@@ -77,6 +78,7 @@ function ExpenseForm({
     if (id) {
       await dataService.delete(id);
       setDeleteDialogOpen(false);
+      showToast({ message: t("common:toast.deleteSuccess"), severity: "success" });
       onAfterSubmit();
     }
   };

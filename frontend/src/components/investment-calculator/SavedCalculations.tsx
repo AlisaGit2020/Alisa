@@ -18,7 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import ApiClient from "@alisa-lib/api-client";
 import { useNavigate } from "react-router-dom";
-import { AlisaButton, AlisaConfirmDialog } from "../alisa";
+import { AlisaButton, AlisaConfirmDialog, useToast } from "../alisa";
 import InvestmentCalculationViewDialog from "./InvestmentCalculationViewDialog";
 import InvestmentCalculationEditDialog from "./InvestmentCalculationEditDialog";
 
@@ -47,6 +47,7 @@ function SavedCalculations({ t, compact = false, onNewCalculation }: SavedCalcul
   const [viewDialogOpen, setViewDialogOpen] = React.useState(false);
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   React.useEffect(() => {
     loadCalculations();
@@ -77,6 +78,7 @@ function SavedCalculations({ t, compact = false, onNewCalculation }: SavedCalcul
     if (selectedCalculationId) {
       try {
         await ApiClient.delete('real-estate/investment', selectedCalculationId);
+        showToast({ message: t("common:toast.deleteSuccess"), severity: "success" });
         await loadCalculations();
       } catch (error) {
         console.error('Error deleting calculation:', error);
