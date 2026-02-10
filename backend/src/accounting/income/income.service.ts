@@ -138,7 +138,7 @@ export class IncomeService {
     const incomeEntity = await this.getEntityOrThrow(user, id);
 
     this.mapData(incomeEntity, input);
-    if (incomeEntity.transaction !== undefined) {
+    if (incomeEntity.transaction) {
       incomeEntity.transaction.id = incomeEntity.transactionId;
     }
 
@@ -166,7 +166,7 @@ export class IncomeService {
       }
     });
 
-    if (income.transaction !== undefined) {
+    if (income.transaction) {
       income.transaction.propertyId = income.propertyId;
       income.transaction.property = income.property;
       // Copy accountingDate from transaction if not explicitly set
