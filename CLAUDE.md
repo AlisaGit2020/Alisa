@@ -199,9 +199,30 @@ See `frontend/docs/testing-guide.md` for detailed examples and patterns.
 
 ## CI/CD
 
+### Workflow Principles
+
+#### Flexible Development Flow
+- **Direct pushes allowed** for quick fixes and small changes
+- **PRs encouraged** for larger features (optional, no approval required)
+- Feature branches named: `feat/description`, `fix/description`, `chore/description`
+- When using PRs: CI must pass before merge
+
+#### Conditional CI Execution
+Tests run only when relevant files change:
+- Backend changes → run backend tests
+- Frontend changes → run frontend tests
+- Docs/config only → skip tests (only the changes job runs)
+
+#### Parallel CI Jobs
+CI is split into independent jobs that run concurrently:
+- `lint-backend` - Backend ESLint
+- `lint-frontend` - Frontend ESLint
+- `test-backend` - Backend unit + e2e tests
+- `test-frontend` - Frontend Jest tests
+
 ### GitHub Actions Workflows
-- **CI workflow** (`ci.yml`): Runs on all pushes and PRs - lints and tests both frontend and backend
-- **Deploy workflow** (`deploy.yml`): Runs after successful CI on master branch
+- **CI workflow** (`ci.yml`): Runs on all pushes and PRs with path filtering and parallel jobs
+- **Deploy workflow** (`deploy.yml`): Runs after successful CI on master branch (excludes PR events)
 
 ### Skipping Deployment
 When committing changes that don't require deployment (CI config, docs, refactoring, lint fixes), add `[skip deploy]` to the commit message:
@@ -220,7 +241,16 @@ git commit -m "ci: update workflow config [skip deploy]"
 ### Local Git Hooks
 The project uses Husky for git hooks:
 - **pre-commit**: Runs lint-staged on changed files
-- **pre-push**: Runs unit tests for backend and frontend
+- **pre-push**: Smart detection - runs only relevant tests based on changed files
+  - Backend changes → runs backend tests
+  - Frontend changes → runs frontend tests + build
+  - Docs/config only → skips tests entirely
+
+### Branch Protection (GitHub Settings)
+The master branch has these protections configured:
+- Direct pushes allowed (for quick fixes)
+- Force pushes prevented (protects history)
+- Branch deletion prevented
 
 ## Backend DTOs and Input Types
 

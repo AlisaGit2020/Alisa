@@ -1,2 +1,22 @@
-cd backend && npm test
-cd ../frontend && npm test && npx vite build
+#!/bin/sh
+
+# Get list of files that will be pushed
+CHANGED=$(git diff --name-only origin/master...HEAD 2>/dev/null || git diff --name-only HEAD~1)
+
+# Check if backend files changed
+if echo "$CHANGED" | grep -q "^backend/"; then
+  echo "🔧 Backend changes detected - running backend tests..."
+  cd backend && npm test
+  cd ..
+fi
+
+# Check if frontend files changed
+if echo "$CHANGED" | grep -q "^frontend/"; then
+  echo "🎨 Frontend changes detected - running frontend tests..."
+  cd frontend && npm test && npx vite build
+fi
+
+# If only docs/config changed, skip tests
+if ! echo "$CHANGED" | grep -qE "^(backend|frontend)/"; then
+  echo "📝 No code changes - skipping tests"
+fi

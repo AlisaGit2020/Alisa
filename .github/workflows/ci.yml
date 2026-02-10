@@ -7,9 +7,58 @@ on:
     branches: [master]
 
 jobs:
-  test:
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
 
+  lint-backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+        working-directory: backend
+      - run: npm run lint
+        working-directory: backend
+
+  lint-frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run lint
+        working-directory: frontend
+
+  test-backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:16
@@ -24,30 +73,16 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: |
-            backend/package-lock.json
-            frontend/package-lock.json
-
-      # Backend
-      - name: Install backend dependencies
-        run: npm ci
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
         working-directory: backend
-
-      - name: Lint backend
-        run: npm run lint
-        working-directory: backend
-
-      - name: Run backend unit tests
-        run: npm run test
+      - run: npm run test
         working-directory: backend
         env:
           DB_HOST: localhost
@@ -55,12 +90,8 @@ jobs:
           DB_USERNAME: postgres
           DB_PASSWORD: mysecretpassword
           DB_DATABASE: postgres
-
-      - name: Create test database
-        run: PGPASSWORD=mysecretpassword psql -h localhost -U postgres -c "CREATE DATABASE alisa_test;"
-
-      - name: Run backend e2e tests
-        run: npm run test:e2e
+      - run: PGPASSWORD=mysecretpassword psql -h localhost -U postgres -c "CREATE DATABASE alisa_test;"
+      - run: npm run test:e2e
         working-directory: backend
         env:
           DB_HOST: localhost
@@ -69,15 +100,33 @@ jobs:
           DB_PASSWORD: mysecretpassword
           DB_DATABASE: alisa_test
 
-      # Frontend
-      - name: Install frontend dependencies
-        run: npm ci
+  test-frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm test
         working-directory: frontend
 
-      - name: Lint frontend
-        run: npm run lint
-        working-directory: frontend
-
-      - name: Run frontend tests
-        run: npm test
-        working-directory: frontend
+  # Always succeeds if no relevant changes, or waits for relevant tests
+  ci-success:
+    runs-on: ubuntu-latest
+    needs: [changes, lint-backend, lint-frontend, test-backend, test-frontend]
+    if: always()
+    steps:
+      - name: Check CI status
+        run: |
+          if [[ "${{ needs.lint-backend.result }}" == "failure" ]] || \
+             [[ "${{ needs.lint-frontend.result }}" == "failure" ]] || \
+             [[ "${{ needs.test-backend.result }}" == "failure" ]] || \
+             [[ "${{ needs.test-frontend.result }}" == "failure" ]]; then
+            exit 1
+          fi
