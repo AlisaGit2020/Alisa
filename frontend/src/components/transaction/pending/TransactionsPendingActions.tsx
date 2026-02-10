@@ -4,7 +4,7 @@ import {
   incomeTypeContext,
   transactionContext,
 } from "@alisa-lib/alisa-contexts.ts";
-import { TransactionType, DataSaveResult, ExpenseType, IncomeType } from "@alisa-types";
+import { TransactionType, ExpenseType, IncomeType } from "@alisa-types";
 import { Box, Paper, Stack } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
@@ -16,7 +16,7 @@ import {
 import Typography from "@mui/material/Typography";
 import {
   AlisaButton,
-  AlisaDataSaveResult,
+  AlisaConfirmDialog,
   AlisaTransactionTypeSelect,
   AlisaSelect,
 } from "../../alisa";
@@ -42,7 +42,6 @@ interface TransactionsPendingActionsProps extends WithTranslation {
     handlingFeeExpenseTypeId?: number,
   ) => Promise<void>;
   onDelete: () => void;
-  saveResult?: DataSaveResult;
 }
 
 interface CategoryTypeData {
@@ -59,6 +58,7 @@ interface LoanSplitData {
 function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
   const [editState, setEditState] = React.useState<boolean>(false);
   const [loanSplitState, setLoanSplitState] = React.useState<boolean>(false);
+  const [confirmOpen, setConfirmOpen] = React.useState<boolean>(false);
   const [transactionType, setTransactionType] = React.useState<number>(0);
   const [categoryTypeData, setCategoryTypeData] =
     React.useState<CategoryTypeData>({
@@ -164,6 +164,19 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
     });
   };
 
+  const handleDeleteClick = () => {
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setConfirmOpen(false);
+    props.onDelete();
+  };
+
+  const handleConfirmClose = () => {
+    setConfirmOpen(false);
+  };
+
   return (
     <Paper
       sx={{
@@ -212,7 +225,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
             label={props.t("delete")}
             variant="text"
             color="error"
-            onClick={props.onDelete}
+            onClick={handleDeleteClick}
             endIcon={<DeleteIcon />}
           />
           <AlisaButton
@@ -376,11 +389,17 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
           </Box>
         </Stack>
       </Stack>
-      <AlisaDataSaveResult
-        result={props.saveResult as DataSaveResult}
-        visible={props.saveResult !== undefined && !editState && !loanSplitState}
-        t={props.t}
-      ></AlisaDataSaveResult>
+      <AlisaConfirmDialog
+        title={props.t("confirm")}
+        contentText={props.t("confirmDeleteTransactions", {
+          count: props.selectedIds.length,
+        })}
+        buttonTextConfirm={props.t("delete")}
+        buttonTextCancel={props.t("cancel")}
+        open={confirmOpen}
+        onConfirm={handleConfirmDelete}
+        onClose={handleConfirmClose}
+      />
     </Paper>
   );
 }

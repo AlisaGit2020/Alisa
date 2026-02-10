@@ -8,7 +8,6 @@ import {
   TransactionStatus,
   TransactionType,
   TransactionAcceptInput,
-  DataSaveResult,
   TransactionSetTypeInput,
   TransactionSetCategoryTypeInput,
   SplitLoanPaymentBulkInput,
@@ -68,9 +67,6 @@ function TransactionsPending({ t }: WithTranslation) {
   const [anchorElAdd, setAnchorElAdd] = React.useState<null | HTMLElement>(
     null,
   );
-  const [saveResult, setSaveResult] = React.useState<
-    DataSaveResult | undefined
-  >(undefined);
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
 
   const { requireProperty, popoverOpen, popoverAnchorEl, closePopover, openPropertySelector } =
@@ -131,7 +127,6 @@ function TransactionsPending({ t }: WithTranslation) {
   };
 
   const handleDeleteSelected = async () => {
-    setSaveResult(undefined);
     if (selectedIds.length > 0) {
       const result = await ApiClient.postSaveTask<TransactionAcceptInput>(
         transactionContext.apiPath + "/delete",
@@ -145,13 +140,12 @@ function TransactionsPending({ t }: WithTranslation) {
         setSelectedTransactionTypes([]);
         setRefreshTrigger((prev) => prev + 1);
       } else {
-        setSaveResult(result);
+        showToast({ message: t("common:toast.deleteError"), severity: "error" });
       }
     }
   };
 
   const handleSetTypeForSelected = async (type: number) => {
-    setSaveResult(undefined);
     if (selectedIds.length > 0 && type > 0) {
       const result = await ApiClient.postSaveTask<TransactionSetTypeInput>(
         transactionContext.apiPath + "/type",
@@ -160,11 +154,11 @@ function TransactionsPending({ t }: WithTranslation) {
           type: type,
         },
       );
-      if (!result.allSuccess) {
-        setSaveResult(result);
-      } else {
+      if (result.allSuccess) {
         showToast({ message: t("common:toast.typeUpdated"), severity: "success" });
         setRefreshTrigger((prev) => prev + 1);
+      } else {
+        showToast({ message: t("common:toast.updateError"), severity: "error" });
       }
     }
   };
@@ -178,10 +172,9 @@ function TransactionsPending({ t }: WithTranslation) {
     if (result.allSuccess) {
       showToast({ message: t("common:toast.approveSuccess", { count: selectedIds.length }), severity: "success" });
       setSelectedIds([]);
-      setSaveResult(undefined);
       setRefreshTrigger((prev) => prev + 1);
     } else {
-      setSaveResult(result);
+      showToast({ message: t("common:toast.approveError"), severity: "error" });
     }
   };
   const handleCancelSelected = () => {
@@ -193,7 +186,6 @@ function TransactionsPending({ t }: WithTranslation) {
     expenseTypeId?: number,
     incomeTypeId?: number,
   ) => {
-    setSaveResult(undefined);
     if (selectedIds.length > 0) {
       const result =
         await ApiClient.postSaveTask<TransactionSetCategoryTypeInput>(
@@ -204,11 +196,11 @@ function TransactionsPending({ t }: WithTranslation) {
             incomeTypeId,
           },
         );
-      if (!result.allSuccess) {
-        setSaveResult(result);
-      } else {
+      if (result.allSuccess) {
         showToast({ message: t("common:toast.categoryUpdated"), severity: "success" });
         setRefreshTrigger((prev) => prev + 1);
+      } else {
+        showToast({ message: t("common:toast.updateError"), severity: "error" });
       }
     }
   };
@@ -218,7 +210,6 @@ function TransactionsPending({ t }: WithTranslation) {
     interestExpenseTypeId: number,
     handlingFeeExpenseTypeId?: number,
   ) => {
-    setSaveResult(undefined);
     if (selectedIds.length > 0) {
       const result =
         await ApiClient.postSaveTask<SplitLoanPaymentBulkInput>(
@@ -230,11 +221,11 @@ function TransactionsPending({ t }: WithTranslation) {
             handlingFeeExpenseTypeId,
           },
         );
-      if (!result.allSuccess) {
-        setSaveResult(result);
-      } else {
+      if (result.allSuccess) {
         showToast({ message: t("common:toast.loanSplit"), severity: "success" });
         setRefreshTrigger((prev) => prev + 1);
+      } else {
+        showToast({ message: t("common:toast.updateError"), severity: "error" });
       }
     }
   };
@@ -264,7 +255,6 @@ function TransactionsPending({ t }: WithTranslation) {
   };
 
   const handleSelectChange = (id: number, item?: Transaction) => {
-    setSaveResult(undefined);
     if (selectedIds.includes(id)) {
       setSelectedIds(selectedIds.filter((i) => i !== id));
       // Remove the type for this transaction
@@ -371,7 +361,6 @@ function TransactionsPending({ t }: WithTranslation) {
           onSplitLoanPayment={handleSplitLoanPaymentForSelected}
           onCancel={handleCancelSelected}
           onDelete={handleDeleteSelected}
-          saveResult={saveResult}
         ></TransactionsPendingActions>
 
         <Paper>
@@ -398,6 +387,7 @@ function TransactionsPending({ t }: WithTranslation) {
             selectedIds={selectedIds}
             onEdit={handleEdit}
             onOpen={handleOpenDetails}
+            onDelete={() => setRefreshTrigger((prev) => prev + 1)}
             refreshTrigger={refreshTrigger}
           />
         </Paper>

@@ -1,11 +1,10 @@
 import { withTranslation, WithTranslation } from "react-i18next";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
-import { DataSaveResult } from "@alisa-types";
 import { Box, Paper, Stack } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { AlisaCloseIcon } from "../../alisa/AlisaIcons";
 import Typography from "@mui/material/Typography";
-import { AlisaButton, AlisaConfirmDialog, AlisaDataSaveResult } from "../../alisa";
+import { AlisaButton, AlisaConfirmDialog } from "../../alisa";
 import React from "react";
 
 interface TransactionsAcceptedActionsProps extends WithTranslation {
@@ -13,7 +12,6 @@ interface TransactionsAcceptedActionsProps extends WithTranslation {
   selectedIds: number[];
   onCancel: () => void;
   onDelete: () => void;
-  saveResult?: DataSaveResult;
   isDeleting?: boolean;
 }
 
@@ -69,14 +67,6 @@ function TransactionsAcceptedActions(props: TransactionsAcceptedActionsProps) {
           />
         </Stack>
       </Stack>
-
-      {props.saveResult && (
-        <AlisaDataSaveResult
-          result={props.saveResult}
-          visible={true}
-          t={props.t}
-        />
-      )}
 
       <AlisaConfirmDialog
         title={props.t("confirm")}

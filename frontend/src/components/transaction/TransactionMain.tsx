@@ -8,7 +8,7 @@ import TransactionFilter, {
   SearchField,
   TransactionFilterData,
 } from "./components/TransactionFilter";
-import { DataSaveResult, TransactionAcceptInput, TransactionType } from "@alisa-types";
+import { TransactionAcceptInput, TransactionType } from "@alisa-types";
 import TransactionsAcceptedActions from "./accepted/TransactionsAcceptedActions";
 import ApiClient from "@alisa-lib/api-client";
 import { useToast } from "../alisa";
@@ -44,7 +44,6 @@ function TransactionMain({ t }: WithTranslation) {
   });
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [saveResult, setSaveResult] = useState<DataSaveResult | undefined>();
   const [isDeleting, setIsDeleting] = useState(false);
   const { showToast } = useToast();
 
@@ -113,7 +112,6 @@ function TransactionMain({ t }: WithTranslation) {
 
   const handleCancelSelected = () => {
     setSelectedIds([]);
-    setSaveResult(undefined);
   };
 
   const handleRowDeleted = (id: number) => {
@@ -124,25 +122,21 @@ function TransactionMain({ t }: WithTranslation) {
     if (selectedIds.length === 0 || isDeleting) return;
 
     setIsDeleting(true);
-    setSaveResult(undefined);
 
     try {
       const result = await ApiClient.postSaveTask<TransactionAcceptInput>(
         transactionContext.apiPath + "/delete",
         { ids: selectedIds }
       );
-      setSaveResult(result);
       if (result.allSuccess) {
         showToast({ message: t("common:toast.deleteSuccessCount", { count: selectedIds.length }), severity: "success" });
         setSelectedIds([]);
         setRefreshTrigger((prev) => prev + 1);
+      } else {
+        showToast({ message: t("common:toast.deleteError"), severity: "error" });
       }
     } catch {
-      setSaveResult({
-        allSuccess: false,
-        rows: { total: selectedIds.length, success: 0, failed: selectedIds.length },
-        results: selectedIds.map((id) => ({ id, statusCode: 500, message: t("networkError") })),
-      });
+      showToast({ message: t("common:toast.deleteError"), severity: "error" });
     } finally {
       setIsDeleting(false);
     }
@@ -168,7 +162,6 @@ function TransactionMain({ t }: WithTranslation) {
           selectedIds={selectedIds}
           onCancel={handleCancelSelected}
           onDelete={handleDeleteSelected}
-          saveResult={saveResult}
           isDeleting={isDeleting}
         />
         <Transactions
