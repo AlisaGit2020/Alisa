@@ -24,7 +24,10 @@ export class AuthService {
     let userEntity = await this.getUserByEmail(user.email);
 
     if (userEntity) {
-      await this.userService.update(userEntity.id, user);
+      // For existing users, exclude language to preserve their preference
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { language, ...userWithoutLanguage } = user;
+      await this.userService.update(userEntity.id, userWithoutLanguage);
     } else {
       await this.userService.add(user);
       userEntity = await this.getUserByEmail(user.email);
@@ -94,6 +97,9 @@ export class AuthService {
     }
     if (input.dashboardConfig !== undefined) {
       user.dashboardConfig = input.dashboardConfig;
+    }
+    if (input.language !== undefined) {
+      user.language = input.language;
     }
 
     return this.userService.save(user as UserInputDto);

@@ -2,6 +2,8 @@ import React from 'react';
 import { WithTranslation, useTranslation, withTranslation } from 'react-i18next';
 import { MenuItem, Box, Menu, Fade, IconButton, Tooltip, styled, Avatar, Stack } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
+import useIsAuthenticated from 'react-auth-kit/hooks/useIsAuthenticated';
+import ApiClient from '@alisa-lib/api-client';
 
 const SmallAvatar = styled(Avatar)(({ theme }) => ({
     width: 24,
@@ -20,6 +22,7 @@ const getFlag = (language: string) => {
 
 function LanguageSelector({ t }: WithTranslation) {
     const { i18n } = useTranslation();
+    const isAuthenticated = useIsAuthenticated();
 
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -31,9 +34,17 @@ function LanguageSelector({ t }: WithTranslation) {
         setAnchorEl(null);
     };
 
-    const changeLanguage = (language: string) => {
+    const changeLanguage = async (language: string) => {
         i18n.changeLanguage(language);
-        handleClose()
+        handleClose();
+
+        if (isAuthenticated) {
+            try {
+                await ApiClient.updateUserSettings({ language });
+            } catch (error) {
+                console.error('Failed to persist language preference:', error);
+            }
+        }
     };
 
     const getCheckIconVisibility = (language: string): string => {
