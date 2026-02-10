@@ -139,9 +139,7 @@ function Transactions({
           selectedIds={selectedIds}
           onSelectChange={onSelectChange}
           onSelectAllChange={onSelectAllChange}
-          onDelete={(id: number) => {
-            onRowDeleted?.(id);
-          }}
+          onDelete={onRowDeleted}
         />
       </Paper>
 
