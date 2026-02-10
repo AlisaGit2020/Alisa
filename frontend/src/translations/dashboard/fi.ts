@@ -24,6 +24,8 @@ const dashboard = {
   dragToReorder: "Vedä järjestääksesi",
   noWidgetsVisible: "Ei näkyviä widgettejä. Paina Muokkaa lisätäksesi widgettejä.",
   recalculate: "Laske tilastot uudelleen",
+  configSaved: "Dashboard-asettelu tallennettu",
+  configSaveError: "Dashboard-asettelun tallennus epäonnistui",
 };
 
 export default dashboard;

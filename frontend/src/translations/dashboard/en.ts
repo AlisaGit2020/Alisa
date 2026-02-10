@@ -24,6 +24,8 @@ const dashboard = {
   dragToReorder: "Drag to reorder",
   noWidgetsVisible: "No visible widgets. Click Edit to add widgets.",
   recalculate: "Recalculate statistics",
+  configSaved: "Dashboard layout saved",
+  configSaveError: "Failed to save dashboard layout",
 };
 
 export default dashboard;

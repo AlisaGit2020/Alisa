@@ -5,12 +5,14 @@ import CheckIcon from "@mui/icons-material/Check";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "../context/DashboardContext";
+import { useToast } from "../../alisa";
 import ApiClient from "@alisa-lib/api-client";
 import axios from "axios";
 import { VITE_API_URL } from "../../../constants";
 
 export function DashboardToolbar() {
   const { t } = useTranslation("dashboard");
+  const { showToast } = useToast();
   const { isEditMode, setIsEditMode, saveDashboardConfig, refreshData } = useDashboard();
   const [isRecalculating, setIsRecalculating] = useState(false);
 
@@ -19,7 +21,12 @@ export function DashboardToolbar() {
   };
 
   const handleDoneClick = async () => {
-    await saveDashboardConfig();
+    try {
+      await saveDashboardConfig();
+      showToast({ message: t("configSaved"), severity: "success" });
+    } catch {
+      showToast({ message: t("configSaveError"), severity: "error" });
+    }
     setIsEditMode(false);
   };
 

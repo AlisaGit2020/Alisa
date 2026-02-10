@@ -1,7 +1,9 @@
 import React, { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import AlisaForm from "./AlisaForm";
 import DataService from "../../../lib/data-service";
 import AlisaLoadingProgress from "../AlisaLoadingProgress";
+import { useToast } from "../toast";
 import { AxiosError } from "axios";
 
 function AlisaFormHandler<T extends object>(props: {
@@ -20,6 +22,8 @@ function AlisaFormHandler<T extends object>(props: {
   onAfterSubmit: () => void;
   onSetData: React.Dispatch<React.SetStateAction<T>>;
 }) {
+  const { t } = useTranslation();
+  const { showToast } = useToast();
   const [errorMessage, setErrorMessage] = React.useState<string>();
   const [validationMessage, setValidationMessage] = React.useState<string[]>(
     [],
@@ -53,6 +57,7 @@ function AlisaFormHandler<T extends object>(props: {
 
     try {
       await dataService.save(props.data, props.id);
+      showToast({ message: t("common:toast.saveSuccess"), severity: "success" });
       props.onAfterSubmit();
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
