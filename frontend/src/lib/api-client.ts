@@ -107,6 +107,7 @@ class ApiClient {
   }
 
   public static async updateUserSettings(settings: {
+    language?: string;
     loanPrincipalExpenseTypeId?: number;
     loanInterestExpenseTypeId?: number;
     loanHandlingFeeExpenseTypeId?: number;

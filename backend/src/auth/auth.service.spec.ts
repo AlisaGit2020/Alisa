@@ -28,6 +28,7 @@ describe('AuthService', () => {
       findOne: jest.fn(),
       search: jest.fn(),
       hasOwnership: jest.fn(),
+      save: jest.fn(),
     };
 
     mockUserDefaultsService = {
@@ -125,7 +126,7 @@ describe('AuthService', () => {
       ).not.toHaveBeenCalled();
     });
 
-    it('updates existing user on re-login', async () => {
+    it('updates existing user on re-login but excludes language', async () => {
       const userInput = {
         email: 'test@email.com',
         firstName: 'Updated',
@@ -134,7 +135,7 @@ describe('AuthService', () => {
         photo: 'http://localhost/photo2.png',
       };
 
-      const existingUser = createUser({ id: 1, email: userInput.email });
+      const existingUser = createUser({ id: 1, email: userInput.email, language: 'fi' });
       existingUser.ownerships = [];
 
       mockUserService.search.mockResolvedValue([existingUser]);
@@ -143,7 +144,13 @@ describe('AuthService', () => {
       const result = await service.login(userInput);
 
       expect(result).toBe('mock-jwt-token');
-      expect(mockUserService.update).toHaveBeenCalledWith(1, userInput);
+      // Language should NOT be in the update call - it should be excluded to preserve user preference
+      expect(mockUserService.update).toHaveBeenCalledWith(1, {
+        email: 'test@email.com',
+        firstName: 'Updated',
+        lastName: 'Name',
+        photo: 'http://localhost/photo2.png',
+      });
     });
 
     it('includes ownership in JWT token', async () => {
@@ -290,6 +297,30 @@ describe('AuthService', () => {
       const result = await service.getUserInfo('notfound@email.com');
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('updateUserSettings', () => {
+    it('updates user language', async () => {
+      const user = createUser({ id: 1, language: 'fi' });
+      mockUserService.findOne.mockResolvedValue(user);
+      mockUserService.save.mockResolvedValue({ ...user, language: 'en' });
+
+      const result = await service.updateUserSettings(1, { language: 'en' });
+
+      expect(result.language).toBe('en');
+      expect(mockUserService.save).toHaveBeenCalledWith(
+        expect.objectContaining({ language: 'en' }),
+      );
+    });
+
+    it('returns null when user not found', async () => {
+      mockUserService.findOne.mockResolvedValue(null);
+
+      const result = await service.updateUserSettings(999, { language: 'en' });
+
+      expect(result).toBeNull();
+      expect(mockUserService.save).not.toHaveBeenCalled();
     });
   });
 });

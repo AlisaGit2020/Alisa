@@ -34,6 +34,11 @@ class DashboardConfigDto {
 
 export class UserSettingsInputDto {
   @IsOptional()
+  @IsString()
+  @IsIn(['en', 'fi'])
+  language?: string;
+
+  @IsOptional()
   @IsNumber()
   loanPrincipalExpenseTypeId?: number;
 
