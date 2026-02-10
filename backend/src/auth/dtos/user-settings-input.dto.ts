@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { WidgetSize } from '@alisa-backend/common/dashboard-config';
+import { SUPPORTED_LANGUAGES } from '@alisa-backend/common/types';
 
 class WidgetConfigDto {
   @IsString()
@@ -35,7 +36,7 @@ class DashboardConfigDto {
 export class UserSettingsInputDto {
   @IsOptional()
   @IsString()
-  @IsIn(['en', 'fi'])
+  @IsIn(SUPPORTED_LANGUAGES)
   language?: string;
 
   @IsOptional()

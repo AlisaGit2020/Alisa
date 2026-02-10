@@ -1,5 +1,9 @@
 import { FindOptionsWhere } from 'typeorm';
 
+// Supported languages for the application
+export const SUPPORTED_LANGUAGES = ['en', 'fi'] as const;
+export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+
 export enum TransactionStatus {
   PENDING = 1,
   ACCEPTED = 2,
