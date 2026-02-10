@@ -17,7 +17,7 @@ export interface ToastOptions {
 }
 
 interface Toast extends ToastOptions {
-  id: number;
+  id: string;
 }
 
 interface ToastContextType {
@@ -34,11 +34,11 @@ export function AlisaToastProvider({ children }: AlisaToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const showToast = useCallback((options: ToastOptions) => {
-    const id = Date.now() + Math.random();
+    const id = crypto.randomUUID();
     setToasts((prev) => [...prev, { id, ...options }]);
   }, []);
 
-  const hideToast = useCallback((id: number) => {
+  const hideToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 

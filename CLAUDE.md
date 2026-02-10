@@ -84,6 +84,7 @@ When writing frontend code:
 | `RadioGroup` | `AlisaRadioGroup` |
 | `Table` | `AlisaDataTable` |
 | `Alert` | `AlisaAlert` |
+| `Snackbar` | `AlisaToast` + `useToast` |
 
 **Why:**
 - Consistent theming (light/dark mode works automatically)
