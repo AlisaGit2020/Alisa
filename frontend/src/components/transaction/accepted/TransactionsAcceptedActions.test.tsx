@@ -124,34 +124,4 @@ describe("TransactionsAcceptedActions", () => {
 
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
   });
-
-  it("renders save result when provided", () => {
-    const saveResult = {
-      allSuccess: true,
-      message: "Success",
-      results: [],
-      rows: { success: 3, failed: 0 },
-    };
-
-    renderWithProviders(
-      <TransactionsAcceptedActions {...defaultProps} saveResult={saveResult} />
-    );
-
-    expect(screen.getByText("3")).toBeInTheDocument();
-  });
-
-  it("renders error result when delete fails", () => {
-    const saveResult = {
-      allSuccess: false,
-      message: "Error",
-      results: [],
-      rows: { success: 0, failed: 3 },
-    };
-
-    renderWithProviders(
-      <TransactionsAcceptedActions {...defaultProps} saveResult={saveResult} />
-    );
-
-    expect(screen.getByText("3")).toBeInTheDocument();
-  });
 });

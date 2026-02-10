@@ -18,7 +18,7 @@ import SearchIcon from "@mui/icons-material/Search";
 
 type SearchField = "all" | "sender" | "receiver" | "description" | "amount";
 import { TFunction } from "i18next";
-import { Transaction, TransactionType, DataSaveResult } from "@alisa-types";
+import { Transaction, TransactionType } from "@alisa-types";
 import AlisaDataTable from "../../../alisa/datatable/AlisaDataTable";
 import TransactionsPendingActions from "../../pending/TransactionsPendingActions";
 import TransactionDetails from "../../components/TransactionDetails";
@@ -63,9 +63,6 @@ export default function ReviewStep({
   onNext,
   onBack,
 }: ReviewStepProps) {
-  const [saveResult, setSaveResult] = useState<DataSaveResult | undefined>(
-    undefined
-  );
   const [searchText, setSearchText] = useState("");
   const [searchField, setSearchField] = useState<SearchField>("all");
   const [showOnlyUnknown, setShowOnlyUnknown] = useState(true);
@@ -119,7 +116,6 @@ export default function ReviewStep({
   }, [transactions]);
 
   const handleSetType = async (type: number) => {
-    setSaveResult(undefined);
     await onSetType(type);
     // Clear search to show remaining unknown rows
     setSearchText("");
@@ -129,7 +125,6 @@ export default function ReviewStep({
     expenseTypeId?: number,
     incomeTypeId?: number
   ) => {
-    setSaveResult(undefined);
     await onSetCategoryType(expenseTypeId, incomeTypeId);
   };
 
@@ -138,7 +133,6 @@ export default function ReviewStep({
     interestExpenseTypeId: number,
     handlingFeeExpenseTypeId?: number
   ) => {
-    setSaveResult(undefined);
     await onSplitLoanPayment(principalExpenseTypeId, interestExpenseTypeId, handlingFeeExpenseTypeId);
     // Clear search to show remaining unknown rows
     setSearchText("");
@@ -241,7 +235,6 @@ export default function ReviewStep({
         onSplitLoanPayment={handleSplitLoanPayment}
         onCancel={handleCancel}
         onDelete={onDelete}
-        saveResult={saveResult}
       />
 
       {/* Transaction table */}
