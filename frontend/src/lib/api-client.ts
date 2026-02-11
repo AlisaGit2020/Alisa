@@ -54,6 +54,18 @@ class ApiClient {
     return result[0];
   }
 
+  /**
+   * Simple GET request to fetch data from a URL.
+   * Use this for endpoints that don't follow the entity/search pattern.
+   */
+  public static async fetch<T>(path: string): Promise<T> {
+    const response = await axios.get(
+      ApiClient.getApiUrl(path),
+      await ApiClient.getOptions(),
+    );
+    return response.data;
+  }
+
   public static async post<T>(path: string, data: T, skipAuth = false): Promise<T> {
     const options = skipAuth ? { withCredentials: true } : await ApiClient.getOptions();
     return axios.post(

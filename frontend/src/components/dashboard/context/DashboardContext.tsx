@@ -121,13 +121,17 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
   // Load available years from statistics when authenticated
   useEffect(() => {
+    console.log('[DashboardContext] loadAvailableYears effect running, isAuthenticated:', isAuthenticated);
     const loadAvailableYears = async () => {
       if (!isAuthenticated) {
+        console.log('[DashboardContext] Not authenticated, skipping years load');
         return;
       }
 
+      console.log('[DashboardContext] Fetching available years...');
       try {
-        const years = await ApiClient.get<number[]>("/real-estate/property/statistics/years");
+        const years = await ApiClient.fetch<number[]>("/real-estate/property/statistics/years");
+        console.log('[DashboardContext] Received years:', years);
         if (years.length > 0) {
           // Ensure current year is included
           const yearsSet = new Set<number>(years);
