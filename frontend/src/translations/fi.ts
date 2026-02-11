@@ -90,6 +90,19 @@ const fi = {
       calculationSaved: "Laskelma tallennettu",
       tierSaved: "Taso tallennettu",
     },
+
+    close: "Sulje",
+
+    dependencies: {
+      cannotDelete: "Tätä kohdetta ei voi poistaa, koska sillä on liittyviä tietoja.",
+      cannotDeleteTitle: "Ei voi poistaa",
+      transactions: "Tapahtumat",
+      expenses: "Kulut",
+      incomes: "Tulot",
+      statistics: "Tilastot",
+      depreciationAssets: "Poistettavat omaisuuserät",
+      andMore: "...ja {{count}} muuta",
+    },
   },
 };
 

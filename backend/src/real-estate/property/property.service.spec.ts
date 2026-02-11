@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
+  BadRequestException,
   ForbiddenException,
   NotFoundException,
   UnauthorizedException,
@@ -17,12 +18,28 @@ import {
   MockRepository,
   MockAuthService,
 } from 'test/mocks';
-import { createProperty, createJWTUser } from 'test/factories';
+import {
+  createProperty,
+  createJWTUser,
+  createTransaction,
+  createExpense,
+  createIncome,
+} from 'test/factories';
+import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
+import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
+import { PropertyStatistics } from './entities/property-statistics.entity';
+import { DepreciationAsset } from '@alisa-backend/accounting/depreciation/entities/depreciation-asset.entity';
 
 describe('PropertyService', () => {
   let service: PropertyService;
   let mockRepository: MockRepository<Property>;
   let mockOwnershipRepository: MockRepository<Ownership>;
+  let mockTransactionRepository: MockRepository<Transaction>;
+  let mockExpenseRepository: MockRepository<Expense>;
+  let mockIncomeRepository: MockRepository<Income>;
+  let mockStatisticsRepository: MockRepository<PropertyStatistics>;
+  let mockDepreciationAssetRepository: MockRepository<DepreciationAsset>;
   let mockAuthService: MockAuthService;
   let mockTierService: Partial<Record<keyof TierService, jest.Mock>>;
 
@@ -36,6 +53,11 @@ describe('PropertyService', () => {
   beforeEach(async () => {
     mockRepository = createMockRepository<Property>();
     mockOwnershipRepository = createMockRepository<Ownership>();
+    mockTransactionRepository = createMockRepository<Transaction>();
+    mockExpenseRepository = createMockRepository<Expense>();
+    mockIncomeRepository = createMockRepository<Income>();
+    mockStatisticsRepository = createMockRepository<PropertyStatistics>();
+    mockDepreciationAssetRepository = createMockRepository<DepreciationAsset>();
     mockAuthService = createMockAuthService();
     mockTierService = {
       canCreateProperty: jest.fn().mockResolvedValue(true),
@@ -48,6 +70,26 @@ describe('PropertyService', () => {
         {
           provide: getRepositoryToken(Ownership),
           useValue: mockOwnershipRepository,
+        },
+        {
+          provide: getRepositoryToken(Transaction),
+          useValue: mockTransactionRepository,
+        },
+        {
+          provide: getRepositoryToken(Expense),
+          useValue: mockExpenseRepository,
+        },
+        {
+          provide: getRepositoryToken(Income),
+          useValue: mockIncomeRepository,
+        },
+        {
+          provide: getRepositoryToken(PropertyStatistics),
+          useValue: mockStatisticsRepository,
+        },
+        {
+          provide: getRepositoryToken(DepreciationAsset),
+          useValue: mockDepreciationAssetRepository,
         },
         { provide: AuthService, useValue: mockAuthService },
         { provide: TierService, useValue: mockTierService },
@@ -308,6 +350,15 @@ describe('PropertyService', () => {
   });
 
   describe('delete', () => {
+    beforeEach(() => {
+      // Default: no dependencies
+      mockTransactionRepository.count.mockResolvedValue(0);
+      mockExpenseRepository.count.mockResolvedValue(0);
+      mockIncomeRepository.count.mockResolvedValue(0);
+      mockStatisticsRepository.count.mockResolvedValue(0);
+      mockDepreciationAssetRepository.count.mockResolvedValue(0);
+    });
+
     it('deletes property', async () => {
       const property = createProperty({ id: 1 });
       mockRepository.findOneBy.mockResolvedValue(property);
@@ -335,6 +386,150 @@ describe('PropertyService', () => {
       await expect(service.delete(userWithoutProperties, 1)).rejects.toThrow(
         UnauthorizedException,
       );
+    });
+
+    it('throws BadRequestException when dependencies exist', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTransactionRepository.count.mockResolvedValue(5);
+      mockTransactionRepository.find.mockResolvedValue([
+        createTransaction({ id: 1, propertyId: 1 }),
+      ]);
+
+      await expect(service.delete(testUser, 1)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockRepository.delete).not.toHaveBeenCalled();
+    });
+
+    it('does not call repository.delete when dependencies exist', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockExpenseRepository.count.mockResolvedValue(3);
+      mockExpenseRepository.find.mockResolvedValue([
+        createExpense({ id: 1, propertyId: 1 }),
+      ]);
+
+      try {
+        await service.delete(testUser, 1);
+      } catch {
+        // Expected
+      }
+
+      expect(mockRepository.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('validateDelete', () => {
+    beforeEach(() => {
+      // Default: no dependencies
+      mockTransactionRepository.count.mockResolvedValue(0);
+      mockExpenseRepository.count.mockResolvedValue(0);
+      mockIncomeRepository.count.mockResolvedValue(0);
+      mockStatisticsRepository.count.mockResolvedValue(0);
+      mockDepreciationAssetRepository.count.mockResolvedValue(0);
+    });
+
+    it('returns canDelete: true for property without dependencies', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const { validation, property: returnedProperty } =
+        await service.validateDelete(testUser, 1);
+
+      expect(validation.canDelete).toBe(true);
+      expect(validation.dependencies).toEqual([]);
+      expect(validation.message).toBeUndefined();
+      expect(returnedProperty).toEqual(property);
+    });
+
+    it('returns canDelete: false with transaction dependency', async () => {
+      const property = createProperty({ id: 1 });
+      const transactions = [
+        createTransaction({ id: 1, propertyId: 1, description: 'Trans 1' }),
+        createTransaction({ id: 2, propertyId: 1, description: 'Trans 2' }),
+      ];
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTransactionRepository.count.mockResolvedValue(2);
+      mockTransactionRepository.find.mockResolvedValue(transactions);
+
+      const { validation } = await service.validateDelete(testUser, 1);
+
+      expect(validation.canDelete).toBe(false);
+      expect(validation.dependencies).toHaveLength(1);
+      expect(validation.dependencies[0].type).toBe('transaction');
+      expect(validation.dependencies[0].count).toBe(2);
+      expect(validation.dependencies[0].samples).toHaveLength(2);
+      expect(validation.message).toBeDefined();
+    });
+
+    it('returns multiple dependency types', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      mockTransactionRepository.count.mockResolvedValue(5);
+      mockTransactionRepository.find.mockResolvedValue([
+        createTransaction({ id: 1, propertyId: 1 }),
+      ]);
+
+      mockExpenseRepository.count.mockResolvedValue(3);
+      mockExpenseRepository.find.mockResolvedValue([
+        createExpense({ id: 1, propertyId: 1 }),
+      ]);
+
+      mockIncomeRepository.count.mockResolvedValue(2);
+      mockIncomeRepository.find.mockResolvedValue([
+        createIncome({ id: 1, propertyId: 1 }),
+      ]);
+
+      const { validation } = await service.validateDelete(testUser, 1);
+
+      expect(validation.canDelete).toBe(false);
+      expect(validation.dependencies).toHaveLength(3);
+      expect(validation.dependencies.map((d) => d.type)).toContain('transaction');
+      expect(validation.dependencies.map((d) => d.type)).toContain('expense');
+      expect(validation.dependencies.map((d) => d.type)).toContain('income');
+    });
+
+    it('throws NotFoundException for missing property', async () => {
+      mockRepository.findOneBy.mockResolvedValue(null);
+
+      await expect(service.validateDelete(testUser, 999)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('throws UnauthorizedException for non-owner', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      await expect(service.validateDelete(otherUser, 1)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('limits samples to 5 items', async () => {
+      const property = createProperty({ id: 1 });
+      const manyTransactions = Array.from({ length: 10 }, (_, i) =>
+        createTransaction({ id: i + 1, propertyId: 1 }),
+      );
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTransactionRepository.count.mockResolvedValue(10);
+      mockTransactionRepository.find.mockResolvedValue(
+        manyTransactions.slice(0, 5),
+      );
+
+      const { validation } = await service.validateDelete(testUser, 1);
+
+      expect(validation.dependencies[0].count).toBe(10);
+      expect(validation.dependencies[0].samples).toHaveLength(5);
     });
   });
 

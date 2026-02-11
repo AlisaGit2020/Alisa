@@ -27,6 +27,7 @@ import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/p
 import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
 import { PropertyStatisticsFilterDto } from '@alisa-backend/real-estate/property/dtos/property-statistics-filter.dto';
 import { PropertyStatisticsSearchDto } from '@alisa-backend/real-estate/property/dtos/property-statistics-search.dto';
+import { PropertyDeleteValidationDto } from './dtos/property-delete-validation.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('real-estate/property')
@@ -52,6 +53,15 @@ export class PropertyController {
     @Body() filter: PropertyStatisticsSearchDto,
   ): Promise<PropertyStatistics[]> {
     return this.propertyStatisticsService.searchAll(jwtUser, filter);
+  }
+
+  @Get('/:id/can-delete')
+  async canDelete(
+    @User() user: JWTUser,
+    @Param('id') id: string,
+  ): Promise<PropertyDeleteValidationDto> {
+    const { validation } = await this.service.validateDelete(user, Number(id));
+    return validation;
   }
 
   @Get('/:id')

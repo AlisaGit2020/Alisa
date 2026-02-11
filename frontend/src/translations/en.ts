@@ -90,6 +90,19 @@ const en = {
       calculationSaved: "Calculation saved",
       tierSaved: "Tier saved",
     },
+
+    close: "Close",
+
+    dependencies: {
+      cannotDelete: "This item cannot be deleted because it has related data.",
+      cannotDeleteTitle: "Cannot Delete",
+      transactions: "Transactions",
+      expenses: "Expenses",
+      incomes: "Incomes",
+      statistics: "Statistics",
+      depreciationAssets: "Depreciation Assets",
+      andMore: "...and {{count}} more",
+    },
   },
 };
 

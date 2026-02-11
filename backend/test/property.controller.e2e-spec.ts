@@ -387,6 +387,185 @@ describe('PropertyController (e2e)', () => {
         .set('Authorization', getBearerToken(token1))
         .expect(401);
     });
+
+    it('returns 400 with dependency details when property has transactions', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create a property
+      const propertyInput = {
+        name: 'Property with Transactions',
+        size: 40,
+        ownerships: [{ share: 100 }],
+      };
+
+      const createResponse = await request(server)
+        .post('/real-estate/property')
+        .set('Authorization', getBearerToken(token))
+        .send(propertyInput)
+        .expect(201);
+
+      const propertyId = createResponse.body.id;
+
+      // Add a transaction to the property
+      await transactionService.add(user.jwtUser, {
+        propertyId,
+        status: TransactionStatus.ACCEPTED,
+        type: TransactionType.INCOME,
+        sender: 'Test Sender',
+        receiver: 'Test Receiver',
+        description: 'Test Transaction',
+        transactionDate: new Date('2023-01-15'),
+        accountingDate: new Date('2023-01-15'),
+        amount: 100,
+      });
+      await eventTracker.waitForPending();
+
+      // Try to delete the property - should fail
+      const deleteResponse = await request(server)
+        .delete(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(400);
+
+      expect(deleteResponse.body.canDelete).toBe(false);
+      expect(deleteResponse.body.dependencies).toBeDefined();
+      expect(deleteResponse.body.dependencies.length).toBeGreaterThan(0);
+
+      // Clean up - delete the transaction first
+      await dataSource.query('DELETE FROM transaction WHERE "propertyId" = $1', [propertyId]);
+      await dataSource.query('DELETE FROM property_statistics WHERE "propertyId" = $1', [propertyId]);
+
+      // Now deletion should succeed
+      await request(server)
+        .delete(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(200);
+    });
+  });
+
+  // =========================================================================
+  // 5.5. GET /real-estate/property/:id/can-delete
+  // =========================================================================
+  describe('GET /real-estate/property/:id/can-delete', () => {
+    it('requires authentication', async () => {
+      await request(server)
+        .get('/real-estate/property/1/can-delete')
+        .expect(401);
+    });
+
+    it('returns canDelete: true for empty property', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create a new empty property
+      const propertyInput = {
+        name: 'Empty Property',
+        size: 25,
+        ownerships: [{ share: 100 }],
+      };
+
+      const createResponse = await request(server)
+        .post('/real-estate/property')
+        .set('Authorization', getBearerToken(token))
+        .send(propertyInput)
+        .expect(201);
+
+      const propertyId = createResponse.body.id;
+
+      const response = await request(server)
+        .get(`/real-estate/property/${propertyId}/can-delete`)
+        .set('Authorization', getBearerToken(token))
+        .expect(200);
+
+      expect(response.body.canDelete).toBe(true);
+      expect(response.body.dependencies).toEqual([]);
+
+      // Clean up
+      await request(server)
+        .delete(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(200);
+    });
+
+    it('returns canDelete: false with dependency details', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create a property
+      const propertyInput = {
+        name: 'Property for can-delete test',
+        size: 35,
+        ownerships: [{ share: 100 }],
+      };
+
+      const createResponse = await request(server)
+        .post('/real-estate/property')
+        .set('Authorization', getBearerToken(token))
+        .send(propertyInput)
+        .expect(201);
+
+      const propertyId = createResponse.body.id;
+
+      // Add a transaction
+      await transactionService.add(user.jwtUser, {
+        propertyId,
+        status: TransactionStatus.ACCEPTED,
+        type: TransactionType.INCOME,
+        sender: 'Test Sender',
+        receiver: 'Test Receiver',
+        description: 'Dependency Test Transaction',
+        transactionDate: new Date('2023-02-15'),
+        accountingDate: new Date('2023-02-15'),
+        amount: 200,
+      });
+      await eventTracker.waitForPending();
+
+      const response = await request(server)
+        .get(`/real-estate/property/${propertyId}/can-delete`)
+        .set('Authorization', getBearerToken(token))
+        .expect(200);
+
+      expect(response.body.canDelete).toBe(false);
+      expect(response.body.dependencies).toBeDefined();
+      expect(response.body.dependencies.length).toBeGreaterThan(0);
+
+      // Check that at least one dependency has transaction type
+      const hasTransactionDep = response.body.dependencies.some(
+        (dep: { type: string }) => dep.type === 'transaction',
+      );
+      expect(hasTransactionDep).toBe(true);
+
+      // Clean up
+      await dataSource.query('DELETE FROM transaction WHERE "propertyId" = $1', [propertyId]);
+      await dataSource.query('DELETE FROM property_statistics WHERE "propertyId" = $1', [propertyId]);
+      await request(server)
+        .delete(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(200);
+    });
+
+    it('returns 401 for other user\'s property', async () => {
+      const user1 = testUsers.user1WithProperties;
+      const user2 = testUsers.user2WithProperties;
+      const token1 = await getUserAccessToken2(authService, user1.jwtUser);
+
+      const user2Property = user2.properties[0];
+
+      await request(server)
+        .get(`/real-estate/property/${user2Property.id}/can-delete`)
+        .set('Authorization', getBearerToken(token1))
+        .expect(401);
+    });
+
+    it('returns 404 for non-existent property', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      await request(server)
+        .get('/real-estate/property/99999/can-delete')
+        .set('Authorization', getBearerToken(token))
+        .expect(404);
+    });
   });
 
   // =========================================================================

@@ -16,6 +16,17 @@ import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownershi
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
 import { TierService } from '@alisa-backend/admin/tier.service';
+import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
+import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
+import { PropertyStatistics } from './entities/property-statistics.entity';
+import { DepreciationAsset } from '@alisa-backend/accounting/depreciation/entities/depreciation-asset.entity';
+import {
+  PropertyDeleteValidationDto,
+  DependencyGroup,
+  DependencyItem,
+  DependencyType,
+} from './dtos/property-delete-validation.dto';
 
 @Injectable()
 export class PropertyService {
@@ -24,6 +35,16 @@ export class PropertyService {
     private repository: Repository<Property>,
     @InjectRepository(Ownership)
     private ownershipRepository: Repository<Ownership>,
+    @InjectRepository(Transaction)
+    private transactionRepository: Repository<Transaction>,
+    @InjectRepository(Expense)
+    private expenseRepository: Repository<Expense>,
+    @InjectRepository(Income)
+    private incomeRepository: Repository<Income>,
+    @InjectRepository(PropertyStatistics)
+    private statisticsRepository: Repository<PropertyStatistics>,
+    @InjectRepository(DepreciationAsset)
+    private depreciationAssetRepository: Repository<DepreciationAsset>,
     private authService: AuthService,
     private tierService: TierService,
   ) {}
@@ -96,11 +117,119 @@ export class PropertyService {
   }
 
   async delete(user: JWTUser, id: number): Promise<void> {
-    const property = await this.getEntityOrThrow(user, id);
+    const { validation, property } = await this.validateDelete(user, id);
+    if (!validation.canDelete) {
+      throw new BadRequestException(validation);
+    }
+
     if (property.photo) {
       await this.deletePhotoFile(property.photo);
     }
     await this.repository.delete(id);
+  }
+
+  async validateDelete(
+    user: JWTUser,
+    id: number,
+  ): Promise<{ validation: PropertyDeleteValidationDto; property: Property }> {
+    const property = await this.getEntityOrThrow(user, id);
+
+    const sampleLimit = 5;
+
+    // Run all dependency checks in parallel
+    const [
+      transactionCount,
+      expenseCount,
+      incomeCount,
+      statisticsCount,
+      depreciationCount,
+    ] = await Promise.all([
+      this.transactionRepository.count({ where: { propertyId: id } }),
+      this.expenseRepository.count({ where: { propertyId: id } }),
+      this.incomeRepository.count({ where: { propertyId: id } }),
+      this.statisticsRepository.count({ where: { propertyId: id } }),
+      this.depreciationAssetRepository.count({ where: { propertyId: id } }),
+    ]);
+
+    // Fetch samples only for dependencies that exist (in parallel)
+    const samplePromises: Promise<DependencyGroup | null>[] = [];
+
+    if (transactionCount > 0) {
+      samplePromises.push(
+        this.transactionRepository
+          .find({ where: { propertyId: id }, take: sampleLimit, order: { id: 'DESC' } })
+          .then((samples): DependencyGroup => ({
+            type: 'transaction' as DependencyType,
+            count: transactionCount,
+            samples: samples.map((t): DependencyItem => ({ id: t.id, description: t.description })),
+          })),
+      );
+    }
+
+    if (expenseCount > 0) {
+      samplePromises.push(
+        this.expenseRepository
+          .find({ where: { propertyId: id }, take: sampleLimit, order: { id: 'DESC' } })
+          .then((samples): DependencyGroup => ({
+            type: 'expense' as DependencyType,
+            count: expenseCount,
+            samples: samples.map((e): DependencyItem => ({ id: e.id, description: e.description })),
+          })),
+      );
+    }
+
+    if (incomeCount > 0) {
+      samplePromises.push(
+        this.incomeRepository
+          .find({ where: { propertyId: id }, take: sampleLimit, order: { id: 'DESC' } })
+          .then((samples): DependencyGroup => ({
+            type: 'income' as DependencyType,
+            count: incomeCount,
+            samples: samples.map((i): DependencyItem => ({ id: i.id, description: i.description })),
+          })),
+      );
+    }
+
+    if (statisticsCount > 0) {
+      samplePromises.push(
+        this.statisticsRepository
+          .find({ where: { propertyId: id }, take: sampleLimit, order: { id: 'DESC' } })
+          .then((samples): DependencyGroup => ({
+            type: 'statistics' as DependencyType,
+            count: statisticsCount,
+            samples: samples.map((s): DependencyItem => ({
+              id: s.id,
+              description: `${s.key} (${s.year ?? 'all'}${s.month ? '-' + s.month : ''})`,
+            })),
+          })),
+      );
+    }
+
+    if (depreciationCount > 0) {
+      samplePromises.push(
+        this.depreciationAssetRepository
+          .find({ where: { propertyId: id }, take: sampleLimit, order: { id: 'DESC' } })
+          .then((samples): DependencyGroup => ({
+            type: 'depreciationAsset' as DependencyType,
+            count: depreciationCount,
+            samples: samples.map((d): DependencyItem => ({ id: d.id, description: d.description })),
+          })),
+      );
+    }
+
+    const dependencies = await Promise.all(samplePromises);
+    const canDelete = dependencies.length === 0;
+
+    return {
+      validation: {
+        canDelete,
+        dependencies,
+        message: canDelete
+          ? undefined
+          : 'Property has related data that must be deleted first',
+      },
+      property,
+    };
   }
 
   private mapData(user: JWTUser, property: Property, input: PropertyInputDto) {

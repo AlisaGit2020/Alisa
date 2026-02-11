@@ -16,6 +16,10 @@ import { AccountingModule } from '@alisa-backend/accounting/accounting.module';
 import { TaxController } from './property/tax.controller';
 import { TaxService } from './property/tax.service';
 import { TierModule } from '@alisa-backend/admin/tier.module';
+import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
+import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
+import { DepreciationAsset } from '@alisa-backend/accounting/depreciation/entities/depreciation-asset.entity';
 
 @Module({
   controllers: [InvestmentController, TaxController, PropertyController],
@@ -26,6 +30,10 @@ import { TierModule } from '@alisa-backend/admin/tier.module';
       Property,
       PropertyStatistics,
       Ownership,
+      Transaction,
+      Expense,
+      Income,
+      DepreciationAsset,
     ]),
     forwardRef(() => AccountingModule),
     AuthModule,
