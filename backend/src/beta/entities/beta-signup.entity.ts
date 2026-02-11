@@ -5,6 +5,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+export type BetaSignupStatus = 'pending' | 'invited' | 'active' | 'rejected';
+
 @Entity()
 export class BetaSignup {
   @PrimaryGeneratedColumn()
@@ -17,7 +19,7 @@ export class BetaSignup {
   signupDate: Date;
 
   @Column({ type: 'varchar', default: 'pending' })
-  status: string;
+  status: BetaSignupStatus;
 
   @Column({ type: 'timestamp', nullable: true })
   invitedAt: Date | null;
