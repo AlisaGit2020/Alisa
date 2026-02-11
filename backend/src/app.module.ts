@@ -11,6 +11,7 @@ import { AdminModule } from './admin/admin.module';
 import { GoogleModule } from './google/google.module';
 import { ImportModule } from './import/import.module';
 import { AuthModule } from './auth/auth.module';
+import { BetaModule } from './beta/beta.module';
 import { PeopleModule } from './people/people.module';
 import { DefaultsModule } from './defaults/defaults.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -38,6 +39,7 @@ import { CommonModule } from './common/common.module';
     AccountingModule,
     AdminModule,
     AuthModule,
+    BetaModule,
     DefaultsModule,
     GoogleModule,
     ImportModule,

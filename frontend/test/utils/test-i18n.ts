@@ -7,12 +7,13 @@ import expenseType from '../../src/translations/expense-type/en';
 import incomeType from '../../src/translations/income-type/en';
 import admin from '../../src/translations/admin/en';
 import investmentCalculator from '../../src/translations/investment-calculator/en';
+import landing from '../../src/translations/landing/en';
 
 // Create a simple i18n instance for testing
 i18n.use(initReactI18next).init({
   lng: 'en',
   fallbackLng: 'en',
-  ns: ['translation', 'property', 'settings', 'expense-type', 'income-type', 'admin', 'investment-calculator'],
+  ns: ['translation', 'property', 'settings', 'expense-type', 'income-type', 'admin', 'investment-calculator', 'landing'],
   defaultNS: 'translation',
   debug: false,
   interpolation: {
@@ -27,6 +28,7 @@ i18n.use(initReactI18next).init({
       'income-type': incomeType,
       admin,
       'investment-calculator': investmentCalculator,
+      landing,
     },
   },
 });
