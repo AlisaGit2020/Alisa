@@ -951,6 +951,126 @@ describe('PropertyController (e2e)', () => {
   });
 
   // =========================================================================
+  // 11. GET /real-estate/property/statistics/years
+  // =========================================================================
+  describe('GET /real-estate/property/statistics/years', () => {
+    beforeEach(async () => {
+      await eventTracker.waitForPending();
+      await dataSource.query('DELETE FROM income');
+      await dataSource.query('DELETE FROM expense');
+      await dataSource.query('DELETE FROM property_statistics');
+      await dataSource.query('DELETE FROM transaction');
+      await eventTracker.waitForPending();
+    });
+
+    it('requires authentication', async () => {
+      await request(server)
+        .get('/real-estate/property/statistics/years')
+        .expect(401);
+    });
+
+    it('returns years for user properties', async () => {
+      const user1Property = mainUser.properties[0].id;
+
+      // Add transaction to create statistics
+      await transactionService.add(mainUser.jwtUser, getTransactionIncome1(user1Property));
+      await eventTracker.waitForPending();
+
+      const user1Token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      const response = await request(server)
+        .get('/real-estate/property/statistics/years')
+        .set('Authorization', getBearerToken(user1Token))
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      // Should contain the year from the transaction (2023)
+      expect(response.body).toContain(2023);
+    });
+
+    it('user cannot see years from other users properties', async () => {
+      const user1Property = mainUser.properties[0].id;
+      const user2Property = testUsers.user2WithProperties.properties[0].id;
+
+      // Add transactions for both users with different years
+      await transactionService.add(mainUser.jwtUser, getTransactionIncome1(user1Property));
+      await transactionService.add(testUsers.user2WithProperties.jwtUser, {
+        ...getTransactionIncome2(user2Property),
+        transactionDate: new Date('2021-01-15'),
+        accountingDate: new Date('2021-01-15'),
+      });
+      await eventTracker.waitForPending();
+
+      const user1Token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      const response = await request(server)
+        .get('/real-estate/property/statistics/years')
+        .set('Authorization', getBearerToken(user1Token))
+        .expect(200);
+
+      // User1 should see 2023 from their transaction
+      expect(response.body).toContain(2023);
+      // User1 should NOT see 2021 from user2's transaction
+      expect(response.body).not.toContain(2021);
+    });
+
+    it('returns empty array for user without properties/statistics', async () => {
+      const user = testUsers.userWithoutProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // First, delete any properties created in earlier tests
+      const properties = await dataSource.query(`
+        SELECT p.id FROM property p
+        JOIN ownership o ON o."propertyId" = p.id
+        WHERE o."userId" = $1
+      `, [user.user.id]);
+
+      for (const prop of properties) {
+        await request(server)
+          .delete(`/real-estate/property/${prop.id}`)
+          .set('Authorization', getBearerToken(token));
+      }
+
+      const response = await request(server)
+        .get('/real-estate/property/statistics/years')
+        .set('Authorization', getBearerToken(token))
+        .expect(200);
+
+      expect(response.body).toEqual([]);
+    });
+
+    it('returns years in descending order', async () => {
+      const user1Property = mainUser.properties[0].id;
+
+      // Add transactions for different years
+      await transactionService.add(mainUser.jwtUser, {
+        ...getTransactionIncome1(user1Property),
+        transactionDate: new Date('2022-01-15'),
+        accountingDate: new Date('2022-01-15'),
+      });
+      await transactionService.add(mainUser.jwtUser, {
+        ...getTransactionIncome1(user1Property),
+        transactionDate: new Date('2024-06-15'),
+        accountingDate: new Date('2024-06-15'),
+      });
+      await transactionService.add(mainUser.jwtUser, getTransactionIncome1(user1Property)); // 2023
+      await eventTracker.waitForPending();
+
+      const user1Token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      const response = await request(server)
+        .get('/real-estate/property/statistics/years')
+        .set('Authorization', getBearerToken(user1Token))
+        .expect(200);
+
+      // Years should be in descending order
+      expect(response.body[0]).toBe(2024);
+      expect(response.body[1]).toBe(2023);
+      expect(response.body[2]).toBe(2022);
+    });
+  });
+
+  // =========================================================================
   // Property Statistics Concurrency Tests
   // =========================================================================
   describe('Property statistics concurrency handling', () => {

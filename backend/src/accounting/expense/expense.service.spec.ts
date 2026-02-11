@@ -15,6 +15,8 @@ import {
 } from 'test/mocks';
 import { createExpense, createJWTUser, createTransaction } from 'test/factories';
 import { TransactionStatus } from '@alisa-backend/common/types';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Events } from '@alisa-backend/common/events';
 
 describe('ExpenseService', () => {
   let service: ExpenseService;
@@ -28,6 +30,7 @@ describe('ExpenseService', () => {
     getByExpenseId: jest.Mock;
     updateFromExpense: jest.Mock;
   };
+  let mockEventEmitter: { emit: jest.Mock };
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
   const otherUser = createJWTUser({ id: 2, ownershipInProperties: [3, 4] });
@@ -47,6 +50,7 @@ describe('ExpenseService', () => {
       getByExpenseId: jest.fn().mockResolvedValue(null),
       updateFromExpense: jest.fn(),
     };
+    mockEventEmitter = { emit: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -62,6 +66,7 @@ describe('ExpenseService', () => {
         },
         { provide: AuthService, useValue: mockAuthService },
         { provide: DepreciationService, useValue: mockDepreciationService },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -178,6 +183,98 @@ describe('ExpenseService', () => {
           totalAmount: 100,
         }),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('emits event when accountingDate changes and transaction is accepted', async () => {
+      const acceptedTransaction = createTransaction({
+        id: 1,
+        status: TransactionStatus.ACCEPTED,
+      });
+      const existingExpense = createExpense({
+        id: 1,
+        propertyId: 1,
+        expenseTypeId: 1,
+        transactionId: 1,
+      });
+      existingExpense.accountingDate = new Date('2023-06-15');
+      existingExpense.transaction = acceptedTransaction;
+
+      mockRepository.findOne.mockResolvedValue(existingExpense);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue(existingExpense);
+      mockExpenseTypeRepository.findOne.mockResolvedValue({ id: 1, isCapitalImprovement: false });
+
+      await service.update(testUser, 1, {
+        description: 'Test expense',
+        accountingDate: new Date('2023-07-15'),
+        amount: 100,
+        quantity: 1,
+        totalAmount: 100,
+      });
+
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        Events.Expense.AccountingDateChanged,
+        expect.objectContaining({
+          expense: expect.objectContaining({ id: 1 }),
+          oldAccountingDate: new Date('2023-06-15'),
+        }),
+      );
+    });
+
+    it('does not emit event when accountingDate does not change', async () => {
+      const acceptedTransaction = createTransaction({
+        id: 1,
+        status: TransactionStatus.ACCEPTED,
+      });
+      const existingExpense = createExpense({
+        id: 1,
+        propertyId: 1,
+        expenseTypeId: 1,
+        transactionId: 1,
+      });
+      existingExpense.accountingDate = new Date('2023-06-15');
+      existingExpense.transaction = acceptedTransaction;
+
+      mockRepository.findOne.mockResolvedValue(existingExpense);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue(existingExpense);
+      mockExpenseTypeRepository.findOne.mockResolvedValue({ id: 1, isCapitalImprovement: false });
+
+      await service.update(testUser, 1, {
+        description: 'Test expense',
+        accountingDate: new Date('2023-06-15'),
+        amount: 100,
+        quantity: 1,
+        totalAmount: 100,
+      });
+
+      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+    });
+
+    it('does not emit event when expense has no transaction', async () => {
+      const existingExpense = createExpense({
+        id: 1,
+        propertyId: 1,
+        expenseTypeId: 1,
+        transactionId: null,
+      });
+      existingExpense.accountingDate = new Date('2023-06-15');
+      existingExpense.transaction = null;
+
+      mockRepository.findOne.mockResolvedValue(existingExpense);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue(existingExpense);
+      mockExpenseTypeRepository.findOne.mockResolvedValue({ id: 1, isCapitalImprovement: false });
+
+      await service.update(testUser, 1, {
+        description: 'Test expense',
+        accountingDate: new Date('2023-07-15'),
+        amount: 100,
+        quantity: 1,
+        totalAmount: 100,
+      });
+
+      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
     });
   });
 

@@ -1,4 +1,6 @@
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
+import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 
 export const Events = {
   Balance: {
@@ -9,6 +11,12 @@ export const Events = {
     Updated: 'transaction.updated',
     Accepted: 'transaction.accepted',
     Deleted: 'transaction.deleted',
+  },
+  Expense: {
+    AccountingDateChanged: 'expense.accountingDateChanged',
+  },
+  Income: {
+    AccountingDateChanged: 'income.accountingDateChanged',
   },
 };
 
@@ -48,5 +56,23 @@ export class TransactionDeletedEvent {
   public transaction: Transaction;
   constructor(transaction: Transaction) {
     this.transaction = transaction;
+  }
+}
+
+export class ExpenseAccountingDateChangedEvent {
+  public expense: Expense;
+  public oldAccountingDate: Date;
+  constructor(expense: Expense, oldAccountingDate: Date) {
+    this.expense = expense;
+    this.oldAccountingDate = oldAccountingDate;
+  }
+}
+
+export class IncomeAccountingDateChangedEvent {
+  public income: Income;
+  public oldAccountingDate: Date;
+  constructor(income: Income, oldAccountingDate: Date) {
+    this.income = income;
+    this.oldAccountingDate = oldAccountingDate;
   }
 }

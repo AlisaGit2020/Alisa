@@ -14,6 +14,8 @@ import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
 import { TransactionStatus } from '@alisa-backend/common/types';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Events, IncomeAccountingDateChangedEvent } from '@alisa-backend/common/events';
 
 @Injectable()
 export class IncomeService {
@@ -27,6 +29,7 @@ export class IncomeService {
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
     private authService: AuthService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async search(
@@ -136,6 +139,7 @@ export class IncomeService {
     input: IncomeInputDto,
   ): Promise<Income> {
     const incomeEntity = await this.getEntityOrThrow(user, id);
+    const oldAccountingDate = incomeEntity.accountingDate;
 
     this.mapData(incomeEntity, input);
     if (incomeEntity.transaction) {
@@ -143,7 +147,25 @@ export class IncomeService {
     }
 
     await this.repository.save(incomeEntity);
+
+    // Emit event if accountingDate changed and transaction is accepted
+    if (
+      this.hasAccountingDateChanged(oldAccountingDate, incomeEntity.accountingDate) &&
+      incomeEntity.transaction?.status === TransactionStatus.ACCEPTED
+    ) {
+      this.eventEmitter.emit(
+        Events.Income.AccountingDateChanged,
+        new IncomeAccountingDateChangedEvent(incomeEntity, oldAccountingDate),
+      );
+    }
+
     return incomeEntity;
+  }
+
+  private hasAccountingDateChanged(oldDate: Date, newDate: Date): boolean {
+    if (!oldDate && !newDate) return false;
+    if (!oldDate || !newDate) return true;
+    return new Date(oldDate).getTime() !== new Date(newDate).getTime();
   }
 
   async delete(user: JWTUser, id: number): Promise<void> {

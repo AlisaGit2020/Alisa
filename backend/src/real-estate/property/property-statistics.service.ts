@@ -3,7 +3,13 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {DataSource, FindManyOptions, In, IsNull, Not, Repository,} from 'typeorm';
 import {PropertyStatistics} from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
 import {OnEvent} from '@nestjs/event-emitter';
-import {Events, TransactionCreatedEvent, TransactionDeletedEvent,} from '@alisa-backend/common/events';
+import {
+  Events,
+  ExpenseAccountingDateChangedEvent,
+  IncomeAccountingDateChangedEvent,
+  TransactionCreatedEvent,
+  TransactionDeletedEvent,
+} from '@alisa-backend/common/events';
 import {StatisticKey, TransactionStatus, TransactionType,} from '@alisa-backend/common/types';
 import {Transaction} from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import {JWTUser} from '@alisa-backend/auth/types';
@@ -211,6 +217,30 @@ export class PropertyStatisticsService {
         await this.transactionAcceptedYearly(eCase, key, event.transaction);
         await this.transactionAcceptedMonthly(eCase, key, event.transaction);
       }
+    } finally {
+      this.eventTracker.decrement();
+    }
+  }
+
+  @OnEvent(Events.Expense.AccountingDateChanged)
+  async handleExpenseAccountingDateChanged(
+    event: ExpenseAccountingDateChangedEvent,
+  ): Promise<void> {
+    this.eventTracker.increment();
+    try {
+      await this.recalculate(event.expense.propertyId);
+    } finally {
+      this.eventTracker.decrement();
+    }
+  }
+
+  @OnEvent(Events.Income.AccountingDateChanged)
+  async handleIncomeAccountingDateChanged(
+    event: IncomeAccountingDateChangedEvent,
+  ): Promise<void> {
+    this.eventTracker.increment();
+    try {
+      await this.recalculate(event.income.propertyId);
     } finally {
       this.eventTracker.decrement();
     }

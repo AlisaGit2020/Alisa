@@ -5,7 +5,7 @@ import { PropertyStatistics } from './entities/property-statistics.entity';
 import { PropertyService } from './property.service';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { createMockRepository, MockRepository } from 'test/mocks';
-import { createTransaction, createJWTUser } from 'test/factories';
+import { createTransaction, createJWTUser, createExpense, createIncome } from 'test/factories';
 import {
   StatisticKey,
   TransactionStatus,
@@ -220,6 +220,59 @@ describe('PropertyStatisticsService', () => {
     });
   });
 
+  describe('getAvailableYears', () => {
+    it('returns years when statistics exist', async () => {
+      mockPropertyService.search.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+      mockDataSource.query.mockResolvedValue([
+        { year: 2024 },
+        { year: 2023 },
+        { year: 2022 },
+      ]);
+
+      const result = await service.getAvailableYears(testUser);
+
+      expect(result).toEqual([2024, 2023, 2022]);
+      expect(mockPropertyService.search).toHaveBeenCalledWith(testUser, {
+        select: ['id'],
+      });
+      expect(mockDataSource.query).toHaveBeenCalledWith(
+        expect.stringContaining('SELECT DISTINCT year'),
+        [[1, 2]],
+      );
+    });
+
+    it('returns empty array when user has no properties', async () => {
+      mockPropertyService.search.mockResolvedValue([]);
+
+      const result = await service.getAvailableYears(testUser);
+
+      expect(result).toEqual([]);
+      expect(mockDataSource.query).not.toHaveBeenCalled();
+    });
+
+    it('returns empty array when no statistics exist', async () => {
+      mockPropertyService.search.mockResolvedValue([{ id: 1 }]);
+      mockDataSource.query.mockResolvedValue([]);
+
+      const result = await service.getAvailableYears(testUser);
+
+      expect(result).toEqual([]);
+    });
+
+    it('only queries for user owned property ids', async () => {
+      const userProperties = [{ id: 5 }, { id: 10 }];
+      mockPropertyService.search.mockResolvedValue(userProperties);
+      mockDataSource.query.mockResolvedValue([{ year: 2024 }]);
+
+      await service.getAvailableYears(testUser);
+
+      expect(mockDataSource.query).toHaveBeenCalledWith(
+        expect.any(String),
+        [[5, 10]],
+      );
+    });
+  });
+
   describe('handleTransactionDeleted', () => {
     it('uses negative delta when deleting income transaction', async () => {
       const transaction = createTransaction({
@@ -280,6 +333,42 @@ describe('PropertyStatisticsService', () => {
       expect(expenseCalls.length).toBeGreaterThan(0);
       expect(expenseCalls[0][1][4]).toBe('-50.00');
       expect(expenseCalls[0][1][5]).toBe(-50);
+    });
+  });
+
+  describe('handleExpenseAccountingDateChanged', () => {
+    it('triggers recalculation for the expense property', async () => {
+      const expense = createExpense({ id: 1, propertyId: 1 });
+      mockRepository.delete.mockResolvedValue({ affected: 0 });
+      mockRepository.find.mockResolvedValue([]);
+
+      await service.handleExpenseAccountingDateChanged({
+        expense,
+        oldAccountingDate: new Date('2023-06-15'),
+      });
+
+      // Should call the recalculation queries
+      expect(mockDataSource.query).toHaveBeenCalled();
+      expect(mockEventTracker.increment).toHaveBeenCalled();
+      expect(mockEventTracker.decrement).toHaveBeenCalled();
+    });
+  });
+
+  describe('handleIncomeAccountingDateChanged', () => {
+    it('triggers recalculation for the income property', async () => {
+      const income = createIncome({ id: 1, propertyId: 1 });
+      mockRepository.delete.mockResolvedValue({ affected: 0 });
+      mockRepository.find.mockResolvedValue([]);
+
+      await service.handleIncomeAccountingDateChanged({
+        income,
+        oldAccountingDate: new Date('2023-06-15'),
+      });
+
+      // Should call the recalculation queries
+      expect(mockDataSource.query).toHaveBeenCalled();
+      expect(mockEventTracker.increment).toHaveBeenCalled();
+      expect(mockEventTracker.decrement).toHaveBeenCalled();
     });
   });
 });
