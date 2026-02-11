@@ -336,15 +336,41 @@ export class PropertyStatisticsService {
   }
 
   private getYear(key: string, transaction: Transaction): number {
-    return new Date(
-      transaction[this.relevanceDateField.get(key)],
-    ).getFullYear();
+    const date = this.getRelevanceDate(key, transaction);
+    return new Date(date).getFullYear();
   }
 
   private getMonth(key: string, transaction: Transaction): number {
-    return (
-      new Date(transaction[this.relevanceDateField.get(key)]).getMonth() + 1
-    );
+    const date = this.getRelevanceDate(key, transaction);
+    return new Date(date).getMonth() + 1;
+  }
+
+  /**
+   * Gets the relevant date for statistics based on the key.
+   * For INCOME/EXPENSE: uses the income/expense's accountingDate if available.
+   * For BALANCE/DEPOSIT/WITHDRAW: uses the transaction's date field.
+   */
+  private getRelevanceDate(key: string, transaction: Transaction): Date {
+    const dateField = this.relevanceDateField.get(key);
+
+    // For INCOME statistics, use the income's accountingDate
+    if (key === StatisticKey.INCOME && transaction.incomes?.length > 0) {
+      const incomeDate = transaction.incomes[0].accountingDate;
+      if (incomeDate) {
+        return incomeDate;
+      }
+    }
+
+    // For EXPENSE statistics, use the expense's accountingDate
+    if (key === StatisticKey.EXPENSE && transaction.expenses?.length > 0) {
+      const expenseDate = transaction.expenses[0].accountingDate;
+      if (expenseDate) {
+        return expenseDate;
+      }
+    }
+
+    // Fall back to transaction's date field
+    return transaction[dateField];
   }
 
   private getFormattedValue(value: number, key: string): string {

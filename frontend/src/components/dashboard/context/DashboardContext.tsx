@@ -11,7 +11,7 @@ import {
   DEFAULT_DASHBOARD_CONFIG,
 } from "../config/widget-registry";
 import ApiClient from "@alisa-lib/api-client";
-import Cookies from "js-cookie";
+import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 
 export type ViewMode = "monthly" | "yearly";
 
@@ -73,6 +73,7 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const storedFilters = getStoredFilters();
+  const isAuthenticated = useIsAuthenticated();
 
   // Get initial property ID from shared storage (0 means "all properties")
   const initialPropertyId = getTransactionPropertyId();
@@ -97,12 +98,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     Array.from({ length: 5 }, (_, i) => currentYear - i)
   );
 
-  // Load dashboard config from user settings on mount
+  // Load dashboard config from user settings when authenticated
   useEffect(() => {
     const loadDashboardConfig = async () => {
-      // Check if user is authenticated before making API call
-      const token = Cookies.get("_auth");
-      if (!token) {
+      if (!isAuthenticated) {
         setConfigLoaded(true);
         return;
       }
@@ -118,18 +117,17 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       }
     };
     loadDashboardConfig();
-  }, []);
+  }, [isAuthenticated]);
 
-  // Load available years from statistics
+  // Load available years from statistics when authenticated
   useEffect(() => {
     const loadAvailableYears = async () => {
-      const token = Cookies.get("_auth");
-      if (!token) {
+      if (!isAuthenticated) {
         return;
       }
 
       try {
-        const years = await ApiClient.get<number[]>("/real-estate/property/statistics/years");
+        const years = await ApiClient.fetch<number[]>("real-estate/property/statistics/years");
         if (years.length > 0) {
           // Ensure current year is included
           const yearsSet = new Set<number>(years);
@@ -142,7 +140,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       }
     };
     loadAvailableYears();
-  }, []);
+    // Re-fetch available years when authenticated or when statistics are refreshed
+  }, [isAuthenticated, refreshKey]);
 
   // Store dashboard-specific filters when they change
   useEffect(() => {
