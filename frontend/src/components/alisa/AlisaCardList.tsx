@@ -22,11 +22,14 @@ import {
 import { useNavigate } from "react-router-dom";
 import { TFunction } from "i18next";
 import AlisaConfirmDialog from "./dialog/AlisaConfirmDialog";
+import AlisaDependencyDialog from "./dialog/AlisaDependencyDialog";
 import { useToast } from "./toast";
 import { TypeOrmFetchOptions } from "../../lib/types";
 import ApiClient from "../../lib/api-client";
 import AlisaContext from "@alisa-lib/alisa-contexts";
 import { VITE_API_URL } from "../../constants";
+import { DeleteValidationResult } from "@alisa-types";
+import { AxiosError } from "axios";
 
 interface AlisCardListField<T> {
   name: keyof T;
@@ -51,6 +54,9 @@ function AlisaCardList<T extends { id: number }>({
   const [open, setOpen] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState<number>(0);
   const [idDeleted, setIdDeleted] = React.useState<number>(0);
+  const [dependencyDialogOpen, setDependencyDialogOpen] = React.useState(false);
+  const [validationResult, setValidationResult] =
+    React.useState<DeleteValidationResult | null>(null);
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -77,10 +83,28 @@ function AlisaCardList<T extends { id: number }>({
   };
 
   const handleDelete = async () => {
-    await ApiClient.delete(alisaContext.apiPath, idToDelete);
-    setIdDeleted(idToDelete);
-    handleClose();
-    showToast({ message: t("toast.deleteSuccess"), severity: "success" });
+    try {
+      await ApiClient.delete(alisaContext.apiPath, idToDelete);
+      setIdDeleted(idToDelete);
+      handleClose();
+      showToast({ message: t("toast.deleteSuccess"), severity: "success" });
+    } catch (error) {
+      handleClose();
+      if (error instanceof AxiosError && error.response?.status === 400) {
+        const responseData = error.response.data;
+        if (responseData?.dependencies) {
+          setValidationResult(responseData as DeleteValidationResult);
+          setDependencyDialogOpen(true);
+          return;
+        }
+      }
+      showToast({ message: t("toast.deleteError"), severity: "error" });
+    }
+  };
+
+  const handleDependencyDialogClose = () => {
+    setDependencyDialogOpen(false);
+    setValidationResult(null);
   };
 
   return (
@@ -215,6 +239,12 @@ function AlisaCardList<T extends { id: number }>({
         onConfirm={handleDelete}
         onClose={handleClose}
       ></AlisaConfirmDialog>
+
+      <AlisaDependencyDialog
+        open={dependencyDialogOpen}
+        validationResult={validationResult}
+        onClose={handleDependencyDialogClose}
+      />
     </Paper>
   );
 }

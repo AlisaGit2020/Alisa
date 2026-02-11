@@ -2,7 +2,7 @@ import axios from "axios";
 import { TypeOrmFetchOptions, TypeOrmRelationOption } from "./types";
 import Logger from "./logger";
 import { VITE_API_URL } from "../constants";
-import { User, DataSaveResult, SupportedLanguage } from "@alisa-types";
+import { User, DataSaveResult, SupportedLanguage, DeleteValidationResult } from "@alisa-types";
 import Cookies from "js-cookie";
 
 class ApiClient {
@@ -88,6 +88,17 @@ class ApiClient {
       ApiClient.getApiUrl(`${path}/${id}`),
       await ApiClient.getOptions(),
     );
+  }
+
+  public static async getDeleteValidation(
+    path: string,
+    id: number,
+  ): Promise<DeleteValidationResult> {
+    const response = await axios.get(
+      ApiClient.getApiUrl(`${path}/${id}/can-delete`),
+      await ApiClient.getOptions(),
+    );
+    return response.data;
   }
 
   public static async getDefault<T>(path: string): Promise<T> {
