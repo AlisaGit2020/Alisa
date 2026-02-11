@@ -21,6 +21,7 @@ function AlisaFormHandler<T extends object>(props: {
   onCancel: () => void;
   onAfterSubmit: () => void;
   onSetData: React.Dispatch<React.SetStateAction<T>>;
+  onSaveResult?: (result: T) => Promise<void>;
 }) {
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -56,8 +57,11 @@ function AlisaFormHandler<T extends object>(props: {
     }
 
     try {
-      await dataService.save(props.data, props.id);
+      const result = await dataService.save(props.data, props.id);
       showToast({ message: t("common:toast.saveSuccess"), severity: "success" });
+      if (props.onSaveResult) {
+        await props.onSaveResult(result);
+      }
       props.onAfterSubmit();
     } catch (error: unknown) {
       if (error instanceof AxiosError) {

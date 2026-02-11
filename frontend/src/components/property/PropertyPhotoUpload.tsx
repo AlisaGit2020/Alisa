@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Stack,
@@ -17,18 +17,36 @@ interface PropertyPhotoUploadProps {
   propertyId: number;
   currentPhoto?: string;
   onPhotoChange?: (photoPath: string | null) => void;
+  pendingMode?: boolean;
+  onFileSelected?: (file: File | null) => void;
+  pendingFile?: File | null;
 }
 
 const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
   propertyId,
   currentPhoto,
   onPhotoChange,
+  pendingMode = false,
+  onFileSelected,
+  pendingFile,
 }) => {
   const { t } = useTranslation('property');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [photoPath, setPhotoPath] = useState<string | undefined>(currentPhoto);
+  const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(null);
   const { showToast } = useToast();
+
+  // Handle pending file preview
+  useEffect(() => {
+    if (pendingFile) {
+      const url = URL.createObjectURL(pendingFile);
+      setPendingPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPendingPreviewUrl(null);
+    }
+  }, [pendingFile]);
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -50,6 +68,13 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
     }
 
     setError(null);
+
+    // In pending mode, just notify parent about the selected file
+    if (pendingMode) {
+      onFileSelected?.(file);
+      return;
+    }
+
     setUploading(true);
 
     try {
@@ -78,6 +103,10 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
     }
   };
 
+  const handleRemovePendingFile = () => {
+    onFileSelected?.(null);
+  };
+
   const handleDelete = async () => {
     if (!photoPath) return;
 
@@ -102,9 +131,14 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
     }
   };
 
-  const photoUrl = photoPath
-    ? `${VITE_API_URL}/${photoPath}`
-    : '/assets/properties/placeholder.svg';
+  // Determine which URL to show in the preview
+  const photoUrl = pendingPreviewUrl
+    ? pendingPreviewUrl
+    : photoPath
+      ? `${VITE_API_URL}/${photoPath}`
+      : '/assets/properties/placeholder.svg';
+
+  const hasPhoto = pendingMode ? !!pendingFile : !!photoPath;
 
   return (
     <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
@@ -146,14 +180,14 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
             />
           </AlisaButton>
 
-          {photoPath && (
+          {hasPhoto && (
             <AlisaButton
-              label={t('deletePhoto')}
+              label={pendingMode ? t('removePhoto') : t('deletePhoto')}
               variant="outlined"
               color="error"
               disabled={uploading}
               startIcon={<DeleteIcon />}
-              onClick={handleDelete}
+              onClick={pendingMode ? handleRemovePendingFile : handleDelete}
             />
           )}
         </Stack>

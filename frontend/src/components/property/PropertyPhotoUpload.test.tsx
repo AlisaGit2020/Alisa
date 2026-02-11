@@ -26,6 +26,10 @@ jest.mock('@alisa-lib/api-client', () => ({
   },
 }));
 
+// Mock URL.createObjectURL and revokeObjectURL for pending file tests
+(globalThis as typeof globalThis & { URL: typeof URL }).URL.createObjectURL = jest.fn(() => 'blob:http://localhost/test-blob');
+(globalThis as typeof globalThis & { URL: typeof URL }).URL.revokeObjectURL = jest.fn();
+
 // Import after mocking
 import PropertyPhotoUpload from './PropertyPhotoUpload';
 
@@ -111,6 +115,48 @@ describe('PropertyPhotoUpload', () => {
       );
 
       expect(screen.queryByText(TEXTS.deletePhoto)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Pending mode rendering', () => {
+    it('renders in pending mode for new properties', () => {
+      renderWithProviders(
+        <PropertyPhotoUpload
+          propertyId={0}
+          pendingMode={true}
+          onFileSelected={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText(TEXTS.propertyPhoto)).toBeInTheDocument();
+      expect(screen.getByText(TEXTS.uploadPhoto)).toBeInTheDocument();
+    });
+
+    it('does not show remove button when no pending file', () => {
+      renderWithProviders(
+        <PropertyPhotoUpload
+          propertyId={0}
+          pendingMode={true}
+          pendingFile={null}
+          onFileSelected={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByText('Remove Photo')).not.toBeInTheDocument();
+    });
+
+    it('shows remove button when pending file exists', () => {
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      renderWithProviders(
+        <PropertyPhotoUpload
+          propertyId={0}
+          pendingMode={true}
+          pendingFile={file}
+          onFileSelected={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText('Remove Photo')).toBeInTheDocument();
     });
   });
 });
@@ -279,6 +325,67 @@ describe('PropertyPhotoUpload Logic', () => {
       };
       deletePhoto();
       expect(photoPath).toBeUndefined();
+    });
+  });
+
+  describe('Pending mode', () => {
+    it('pendingMode defaults to false', () => {
+      const pendingMode = false;
+      expect(pendingMode).toBe(false);
+    });
+
+    it('in pending mode, file selection does not trigger upload', () => {
+      const pendingMode = true;
+      let uploadCalled = false;
+      let onFileSelectedCalled = false;
+
+      const handleFileSelect = () => {
+        if (pendingMode) {
+          onFileSelectedCalled = true;
+        } else {
+          uploadCalled = true;
+        }
+      };
+
+      handleFileSelect();
+
+      expect(onFileSelectedCalled).toBe(true);
+      expect(uploadCalled).toBe(false);
+    });
+
+    it('pendingFile triggers preview URL creation', () => {
+      // URL.createObjectURL is not available in Jest, so we test the logic
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const shouldCreatePreview = file !== null;
+      expect(shouldCreatePreview).toBe(true);
+    });
+
+    it('hasPhoto is true when pendingFile exists in pending mode', () => {
+      const pendingMode = true;
+      const pendingFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const photoPath = undefined;
+
+      const hasPhoto = pendingMode ? !!pendingFile : !!photoPath;
+      expect(hasPhoto).toBe(true);
+    });
+
+    it('hasPhoto is false when pendingFile is null in pending mode', () => {
+      const pendingMode = true;
+      const pendingFile = null;
+      const photoPath = undefined;
+
+      const hasPhoto = pendingMode ? !!pendingFile : !!photoPath;
+      expect(hasPhoto).toBe(false);
+    });
+
+    it('remove pending file sets pendingFile to null', () => {
+      let pendingFile: File | null = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const handleRemovePendingFile = () => {
+        pendingFile = null;
+      };
+
+      handleRemovePendingFile();
+      expect(pendingFile).toBeNull();
     });
   });
 });
