@@ -85,8 +85,7 @@ function PropertyForm({ t }: WithTranslation) {
                     formData,
                     options
                 );
-
-                showToast({ message: t("common:toast.photoUploaded"), severity: "success" });
+                // No separate toast - AlisaFormHandler already shows "save success"
             } catch {
                 showToast({ message: t('property:photoUploadError'), severity: "error" });
             }
