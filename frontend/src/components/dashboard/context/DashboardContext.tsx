@@ -92,9 +92,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [configLoaded, setConfigLoaded] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-
-  // Generate available years (last 5 years)
-  const availableYears = Array.from({ length: 5 }, (_, i) => currentYear - i);
+  const [availableYears, setAvailableYears] = useState<number[]>(
+    // Default to last 5 years until API loads
+    Array.from({ length: 5 }, (_, i) => currentYear - i)
+  );
 
   // Load dashboard config from user settings on mount
   useEffect(() => {
@@ -117,6 +118,30 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       }
     };
     loadDashboardConfig();
+  }, []);
+
+  // Load available years from statistics
+  useEffect(() => {
+    const loadAvailableYears = async () => {
+      const token = Cookies.get("_auth");
+      if (!token) {
+        return;
+      }
+
+      try {
+        const years = await ApiClient.get<number[]>("/real-estate/property/statistics/years");
+        if (years.length > 0) {
+          // Ensure current year is included
+          const yearsSet = new Set<number>(years);
+          yearsSet.add(currentYear);
+          const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
+          setAvailableYears(sortedYears);
+        }
+      } catch {
+        // Keep default years on error
+      }
+    };
+    loadAvailableYears();
   }, []);
 
   // Store dashboard-specific filters when they change

@@ -54,6 +54,34 @@ export class PropertyStatisticsService {
     [StatisticKey.WITHDRAW, 'accountingDate'],
   ]);
 
+  /**
+   * Gets available years that have statistics data for the user's properties.
+   * @param user The authenticated user
+   * @returns Array of years (descending order, most recent first)
+   */
+  async getAvailableYears(user: JWTUser): Promise<number[]> {
+    // Get all property IDs the user owns
+    const properties = await this.propertyService.search(user, {
+      select: ['id'],
+    });
+
+    if (properties.length === 0) {
+      return [];
+    }
+
+    const propertyIds = properties.map((p) => p.id);
+
+    // Query distinct years from property_statistics
+    const result = await this.dataSource.query(
+      `SELECT DISTINCT year FROM property_statistics
+       WHERE "propertyId" = ANY($1) AND year IS NOT NULL
+       ORDER BY year DESC`,
+      [propertyIds],
+    );
+
+    return result.map((row: { year: number }) => row.year);
+  }
+
   async search(
     user: JWTUser,
     filter: PropertyStatisticsFilterDto,
@@ -449,13 +477,13 @@ export class PropertyStatisticsService {
        SELECT
          i."propertyId",
          '${StatisticKey.INCOME}',
-         EXTRACT(YEAR FROM t."accountingDate")::SMALLINT,
+         EXTRACT(YEAR FROM i."accountingDate")::SMALLINT,
          NULL,
          ROUND(COALESCE(SUM(i."totalAmount"), 0), ${decimals})::TEXT
        FROM income i
        INNER JOIN transaction t ON t.id = i."transactionId"
        WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
-       GROUP BY i."propertyId", EXTRACT(YEAR FROM t."accountingDate")
+       GROUP BY i."propertyId", EXTRACT(YEAR FROM i."accountingDate")
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
       params,
@@ -467,13 +495,13 @@ export class PropertyStatisticsService {
        SELECT
          i."propertyId",
          '${StatisticKey.INCOME}',
-         EXTRACT(YEAR FROM t."accountingDate")::SMALLINT,
-         EXTRACT(MONTH FROM t."accountingDate")::SMALLINT,
+         EXTRACT(YEAR FROM i."accountingDate")::SMALLINT,
+         EXTRACT(MONTH FROM i."accountingDate")::SMALLINT,
          ROUND(COALESCE(SUM(i."totalAmount"), 0), ${decimals})::TEXT
        FROM income i
        INNER JOIN transaction t ON t.id = i."transactionId"
        WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
-       GROUP BY i."propertyId", EXTRACT(YEAR FROM t."accountingDate"), EXTRACT(MONTH FROM t."accountingDate")
+       GROUP BY i."propertyId", EXTRACT(YEAR FROM i."accountingDate"), EXTRACT(MONTH FROM i."accountingDate")
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
       params,
@@ -510,13 +538,13 @@ export class PropertyStatisticsService {
        SELECT
          e."propertyId",
          '${StatisticKey.EXPENSE}',
-         EXTRACT(YEAR FROM t."accountingDate")::SMALLINT,
+         EXTRACT(YEAR FROM e."accountingDate")::SMALLINT,
          NULL,
          ROUND(COALESCE(SUM(e."totalAmount"), 0), ${decimals})::TEXT
        FROM expense e
        INNER JOIN transaction t ON t.id = e."transactionId"
        WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
-       GROUP BY e."propertyId", EXTRACT(YEAR FROM t."accountingDate")
+       GROUP BY e."propertyId", EXTRACT(YEAR FROM e."accountingDate")
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
       params,
@@ -528,13 +556,13 @@ export class PropertyStatisticsService {
        SELECT
          e."propertyId",
          '${StatisticKey.EXPENSE}',
-         EXTRACT(YEAR FROM t."accountingDate")::SMALLINT,
-         EXTRACT(MONTH FROM t."accountingDate")::SMALLINT,
+         EXTRACT(YEAR FROM e."accountingDate")::SMALLINT,
+         EXTRACT(MONTH FROM e."accountingDate")::SMALLINT,
          ROUND(COALESCE(SUM(e."totalAmount"), 0), ${decimals})::TEXT
        FROM expense e
        INNER JOIN transaction t ON t.id = e."transactionId"
        WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
-       GROUP BY e."propertyId", EXTRACT(YEAR FROM t."accountingDate"), EXTRACT(MONTH FROM t."accountingDate")
+       GROUP BY e."propertyId", EXTRACT(YEAR FROM e."accountingDate"), EXTRACT(MONTH FROM e."accountingDate")
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
       params,
