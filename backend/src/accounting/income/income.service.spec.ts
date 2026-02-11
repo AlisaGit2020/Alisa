@@ -15,6 +15,8 @@ import {
 } from 'test/mocks';
 import { createIncome, createJWTUser, createTransaction } from 'test/factories';
 import { TransactionStatus } from '@alisa-backend/common/types';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Events } from '@alisa-backend/common/events';
 
 describe('IncomeService', () => {
   let service: IncomeService;
@@ -23,6 +25,7 @@ describe('IncomeService', () => {
   let mockIncomeTypeRepository: MockRepository<IncomeType>;
   let mockTransactionRepository: MockRepository<Transaction>;
   let mockAuthService: MockAuthService;
+  let mockEventEmitter: { emit: jest.Mock };
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
   const otherUser = createJWTUser({ id: 2, ownershipInProperties: [3, 4] });
@@ -37,6 +40,7 @@ describe('IncomeService', () => {
     mockIncomeTypeRepository = createMockRepository<IncomeType>();
     mockTransactionRepository = createMockRepository<Transaction>();
     mockAuthService = createMockAuthService();
+    mockEventEmitter = { emit: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -55,6 +59,7 @@ describe('IncomeService', () => {
           useValue: mockTransactionRepository,
         },
         { provide: AuthService, useValue: mockAuthService },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -174,6 +179,95 @@ describe('IncomeService', () => {
           totalAmount: 100,
         }),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('emits event when accountingDate changes and transaction is accepted', async () => {
+      const acceptedTransaction = createTransaction({
+        id: 1,
+        status: TransactionStatus.ACCEPTED,
+      });
+      const existingIncome = createIncome({
+        id: 1,
+        propertyId: 1,
+        incomeTypeId: 1,
+        transactionId: 1,
+      });
+      existingIncome.accountingDate = new Date('2023-06-15');
+      existingIncome.transaction = acceptedTransaction;
+
+      mockRepository.findOne.mockResolvedValue(existingIncome);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue(existingIncome);
+
+      await service.update(testUser, 1, {
+        description: 'Test income',
+        accountingDate: new Date('2023-07-15'),
+        amount: 100,
+        quantity: 1,
+        totalAmount: 100,
+      });
+
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        Events.Income.AccountingDateChanged,
+        expect.objectContaining({
+          income: expect.objectContaining({ id: 1 }),
+          oldAccountingDate: new Date('2023-06-15'),
+        }),
+      );
+    });
+
+    it('does not emit event when accountingDate does not change', async () => {
+      const acceptedTransaction = createTransaction({
+        id: 1,
+        status: TransactionStatus.ACCEPTED,
+      });
+      const existingIncome = createIncome({
+        id: 1,
+        propertyId: 1,
+        incomeTypeId: 1,
+        transactionId: 1,
+      });
+      existingIncome.accountingDate = new Date('2023-06-15');
+      existingIncome.transaction = acceptedTransaction;
+
+      mockRepository.findOne.mockResolvedValue(existingIncome);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue(existingIncome);
+
+      await service.update(testUser, 1, {
+        description: 'Test income',
+        accountingDate: new Date('2023-06-15'),
+        amount: 100,
+        quantity: 1,
+        totalAmount: 100,
+      });
+
+      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+    });
+
+    it('does not emit event when income has no transaction', async () => {
+      const existingIncome = createIncome({
+        id: 1,
+        propertyId: 1,
+        incomeTypeId: 1,
+        transactionId: null,
+      });
+      existingIncome.accountingDate = new Date('2023-06-15');
+      existingIncome.transaction = null;
+
+      mockRepository.findOne.mockResolvedValue(existingIncome);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue(existingIncome);
+
+      await service.update(testUser, 1, {
+        description: 'Test income',
+        accountingDate: new Date('2023-07-15'),
+        amount: 100,
+        quantity: 1,
+        totalAmount: 100,
+      });
+
+      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
     });
   });
 

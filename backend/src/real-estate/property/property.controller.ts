@@ -55,6 +55,11 @@ export class PropertyController {
     return this.propertyStatisticsService.searchAll(jwtUser, filter);
   }
 
+  @Get('/statistics/years')
+  async getStatisticsYears(@User() user: JWTUser): Promise<number[]> {
+    return this.propertyStatisticsService.getAvailableYears(user);
+  }
+
   @Get('/:id/can-delete')
   async canDelete(
     @User() user: JWTUser,

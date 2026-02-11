@@ -14,6 +14,8 @@ import { AuthService } from '@alisa-backend/auth/auth.service';
 import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
 import { DepreciationService } from '@alisa-backend/accounting/depreciation/depreciation.service';
 import { TransactionStatus } from '@alisa-backend/common/types';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Events, ExpenseAccountingDateChangedEvent } from '@alisa-backend/common/events';
 
 @Injectable()
 export class ExpenseService {
@@ -26,6 +28,7 @@ export class ExpenseService {
     private transactionRepository: Repository<Transaction>,
     private authService: AuthService,
     private depreciationService: DepreciationService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async search(
@@ -139,6 +142,7 @@ export class ExpenseService {
     input: ExpenseInputDto,
   ): Promise<Expense> {
     const expenseEntity = await this.getEntityOrThrow(user, id);
+    const oldAccountingDate = expenseEntity.accountingDate;
 
     this.mapData(user, expenseEntity, input);
     if (expenseEntity.transaction) {
@@ -147,10 +151,27 @@ export class ExpenseService {
 
     await this.repository.save(expenseEntity);
 
+    // Emit event if accountingDate changed and transaction is accepted
+    if (
+      this.hasAccountingDateChanged(oldAccountingDate, expenseEntity.accountingDate) &&
+      expenseEntity.transaction?.status === TransactionStatus.ACCEPTED
+    ) {
+      this.eventEmitter.emit(
+        Events.Expense.AccountingDateChanged,
+        new ExpenseAccountingDateChangedEvent(expenseEntity, oldAccountingDate),
+      );
+    }
+
     // Update or create depreciation asset if applicable
     await this.handleDepreciationAsset(expenseEntity);
 
     return expenseEntity;
+  }
+
+  private hasAccountingDateChanged(oldDate: Date, newDate: Date): boolean {
+    if (!oldDate && !newDate) return false;
+    if (!oldDate || !newDate) return true;
+    return new Date(oldDate).getTime() !== new Date(newDate).getTime();
   }
 
   async delete(user: JWTUser, id: number): Promise<void> {
