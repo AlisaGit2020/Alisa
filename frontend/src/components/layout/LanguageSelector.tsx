@@ -18,6 +18,9 @@ const getFlag = (language: string) => {
     if (language == 'en') {
         return '/assets/flags/great-britain-48.png'
     }
+    if (language == 'sv') {
+        return '/assets/flags/sweden-48.png'
+    }
 }
 
 function LanguageSelector({ t }: WithTranslation) {
@@ -90,6 +93,7 @@ function LanguageSelector({ t }: WithTranslation) {
             >
                 {getMenuItem('en', 'English')}
                 {getMenuItem('fi', 'Suomi')}
+                {getMenuItem('sv', 'Svenska')}
             </Menu>
         </Box>
     );

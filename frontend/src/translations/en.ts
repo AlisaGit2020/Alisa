@@ -22,6 +22,7 @@ const en = {
 
     fi: "Finnish",
     en: "English",
+    sv: "Swedish",
 
     january: "January",
     february: "February",

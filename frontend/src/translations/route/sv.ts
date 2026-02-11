@@ -1,0 +1,27 @@
+const route = {
+  accepted: "Godkända",
+  add: "Ny",
+  accounting: "Bokföring",
+  calculations: "Beräkningar",
+  calculator: "Kalkylator",
+  dashboard: "Översikt",
+  edit: "Redigera",
+  expense: "Utgift",
+  expenses: "Utgifter",
+  "expense-types": "Utgiftstyper",
+  import: "Import",
+  income: "Intäkt",
+  incomes: "Intäkter",
+  "income-types": "Intäktstyper",
+  investment: "Investering",
+  "investment-calculator": "Investeringskalkylator",
+  "investment-calculations": "Investeringsberäkningar",
+  login: "Logga in",
+  pending: "Väntande",
+  properties: "Fastigheter",
+  settings: "Inställningar",
+  tax: "Skatt",
+  transactions: "Banktransaktioner",
+};
+
+export default route;

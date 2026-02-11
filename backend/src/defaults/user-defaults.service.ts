@@ -54,7 +54,18 @@ export class UserDefaultsService {
       return 'fi';
     }
     const lang = language.split(/[-_]/)[0].toLowerCase();
-    return lang === 'fi' ? 'fi' : 'en';
+    if (lang === 'fi') return 'fi';
+    if (lang === 'sv') return 'sv';
+    return 'en';
+  }
+
+  private getLocalizedName(
+    template: ExpenseTypeDefault | IncomeTypeDefault,
+    lang: string,
+  ): string {
+    if (lang === 'fi') return template.nameFi;
+    if (lang === 'sv') return template.nameSv || template.nameEn;
+    return template.nameEn;
   }
 
   private async createExpenseTypes(
@@ -67,7 +78,7 @@ export class UserDefaultsService {
     for (const template of defaults) {
       const expenseType = new ExpenseType();
       expenseType.userId = userId;
-      expenseType.name = lang === 'fi' ? template.nameFi : template.nameEn;
+      expenseType.name = this.getLocalizedName(template, lang);
       expenseType.description = '';
       expenseType.isTaxDeductible = template.isTaxDeductible;
       expenseType.isCapitalImprovement = template.isCapitalImprovement;
@@ -91,7 +102,7 @@ export class UserDefaultsService {
     for (const template of defaults) {
       const incomeType = new IncomeType();
       incomeType.userId = userId;
-      incomeType.name = lang === 'fi' ? template.nameFi : template.nameEn;
+      incomeType.name = this.getLocalizedName(template, lang);
       incomeType.description = '';
       incomeType.isTaxable = template.isTaxable;
 
