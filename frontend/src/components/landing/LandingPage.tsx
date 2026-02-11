@@ -8,6 +8,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import { useTranslation } from "react-i18next";
 import React from "react";
 import LoginDialog from "../login/LoginDialog";
+import BetaSignupForm from "./BetaSignupForm";
 import InvestmentCalculatorForm, { InvestmentInputData } from "../investment-calculator/InvestmentCalculatorForm";
 import InvestmentCalculatorResults, { InvestmentResults } from "../investment-calculator/InvestmentCalculatorResults";
 import ApiClient from "@alisa-lib/api-client";
@@ -203,8 +204,15 @@ function LandingPage({ t }: WithTranslation) {
         </Container>
       </Box>
 
+      {/* Beta Signup Section */}
+      <Box sx={{ py: 8, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Container maxWidth="sm">
+          <BetaSignupForm />
+        </Container>
+      </Box>
+
       {/* Features Section */}
-      <Container maxWidth="lg" sx={{ mb: 12 }}>
+      <Container maxWidth="lg" sx={{ mt: 8, mb: 12 }}>
         <Grid container spacing={6}>
           <Grid size={{ xs: 12, md: 4 }}>
             <Card

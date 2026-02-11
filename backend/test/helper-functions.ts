@@ -57,6 +57,7 @@ export const getBearerToken = (token: string): string => {
 export const emptyTables = async (
   dataSource: DataSource,
   tables: string[] = [
+    'beta_signup',
     'expense',
     'expense_type',
     'income',

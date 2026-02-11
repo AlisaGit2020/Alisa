@@ -1,7 +1,7 @@
 import { InputAdornment, TextField } from "@mui/material";
 import { ChangeEventHandler } from "react";
 
-function AlisaTextField(props: {
+interface AlisaTextFieldProps {
   label: string;
   value?: string;
   adornment?: string;
@@ -12,17 +12,22 @@ function AlisaTextField(props: {
   multiline?: boolean;
   rows?: number;
   required?: boolean;
+  type?: "text" | "email" | "password" | "url" | "tel";
   onChange?:
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
     | undefined;
   onBlur?: () => void;
-}) {
+  sx?: object;
+}
+
+function AlisaTextField(props: AlisaTextFieldProps) {
   return (
     <TextField
       fullWidth={props.fullWidth !== undefined ? props.fullWidth : true}
-      type="text"
+      type={props.type ?? "text"}
       label={props.label}
       value={props.value}
+      sx={props.sx}
       autoFocus={props.autoFocus !== undefined ? props.autoFocus : false}
       autoComplete={
         props.autoComplete !== undefined ? props.autoComplete : "off"
