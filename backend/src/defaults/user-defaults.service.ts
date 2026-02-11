@@ -7,6 +7,7 @@ import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-
 import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
 import { UserService } from '@alisa-backend/people/user/user.service';
 import { UserInputDto } from '@alisa-backend/people/user/dtos/user-input.dto';
+import { SupportedLanguage } from '@alisa-backend/common/types';
 
 @Injectable()
 export class UserDefaultsService {
@@ -49,7 +50,7 @@ export class UserDefaultsService {
     }
   }
 
-  private normalizeLanguage(language: string): string {
+  private normalizeLanguage(language: string): SupportedLanguage {
     if (!language) {
       return 'fi';
     }
@@ -61,7 +62,7 @@ export class UserDefaultsService {
 
   private getLocalizedName(
     template: ExpenseTypeDefault | IncomeTypeDefault,
-    lang: string,
+    lang: SupportedLanguage,
   ): string {
     if (lang === 'fi') return template.nameFi;
     if (lang === 'sv') return template.nameSv || template.nameEn;
@@ -70,7 +71,7 @@ export class UserDefaultsService {
 
   private async createExpenseTypes(
     userId: number,
-    lang: string,
+    lang: SupportedLanguage,
   ): Promise<Record<string, number>> {
     const defaults = await this.expenseTypeDefaultRepository.find();
     const loanSettingMap: Record<string, number> = {};
@@ -95,7 +96,7 @@ export class UserDefaultsService {
 
   private async createIncomeTypes(
     userId: number,
-    lang: string,
+    lang: SupportedLanguage,
   ): Promise<void> {
     const defaults = await this.incomeTypeDefaultRepository.find();
 
