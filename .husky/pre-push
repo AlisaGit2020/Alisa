@@ -3,20 +3,21 @@
 # Get list of files that will be pushed
 CHANGED=$(git diff --name-only origin/master...HEAD 2>/dev/null || git diff --name-only HEAD~1)
 
-# Check if backend files changed
-if echo "$CHANGED" | grep -q "^backend/"; then
+# Determine which areas have changes
+HAS_BACKEND=$(echo "$CHANGED" | grep -c "^backend/" || true)
+HAS_FRONTEND=$(echo "$CHANGED" | grep -c "^frontend/" || true)
+
+# Run tests only for areas with changes
+if [ "$HAS_BACKEND" -gt 0 ] && [ "$HAS_FRONTEND" -gt 0 ]; then
+  echo "🔧 Backend and frontend changes detected - running all tests..."
+  cd backend && npm test && cd ..
+  cd frontend && npm test && npx vite build
+elif [ "$HAS_BACKEND" -gt 0 ]; then
   echo "🔧 Backend changes detected - running backend tests..."
   cd backend && npm test
-  cd ..
-fi
-
-# Check if frontend files changed
-if echo "$CHANGED" | grep -q "^frontend/"; then
+elif [ "$HAS_FRONTEND" -gt 0 ]; then
   echo "🎨 Frontend changes detected - running frontend tests..."
   cd frontend && npm test && npx vite build
-fi
-
-# If only docs/config changed, skip tests
-if ! echo "$CHANGED" | grep -qE "^(backend|frontend)/"; then
-  echo "📝 No code changes - skipping tests"
+else
+  echo "📝 No backend/frontend changes - skipping tests"
 fi
