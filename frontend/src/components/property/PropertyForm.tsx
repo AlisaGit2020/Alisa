@@ -88,7 +88,7 @@ function PropertyForm({ t }: WithTranslation) {
 
                 showToast({ message: t("common:toast.photoUploaded"), severity: "success" });
             } catch {
-                showToast({ message: t('photoUploadError'), severity: "error" });
+                showToast({ message: t('property:photoUploadError'), severity: "error" });
             }
         }
     }
