@@ -20,6 +20,7 @@ const property = {
     propertyPhoto: 'Property Photo',
     uploadPhoto: 'Upload Photo',
     deletePhoto: 'Delete Photo',
+    removePhoto: 'Remove Photo',
     photoHelpText: 'Maximum 5MB • JPEG, PNG, or WebP format',
     photoInvalidType: 'Invalid file type. Please upload JPEG, PNG, or WebP image.',
     photoTooLarge: 'File too large. Maximum size is 5MB.',

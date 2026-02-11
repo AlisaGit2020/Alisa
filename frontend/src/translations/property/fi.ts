@@ -20,6 +20,7 @@ const property = {
     propertyPhoto: 'Kohteen kuva',
     uploadPhoto: 'Lataa kuva',
     deletePhoto: 'Poista kuva',
+    removePhoto: 'Poista kuva',
     photoHelpText: 'Maksimi 5MB • JPEG, PNG tai WebP muodossa',
     photoInvalidType: 'Virheellinen tiedostotyyppi. Lataa JPEG, PNG tai WebP kuva.',
     photoTooLarge: 'Tiedosto on liian suuri. Maksimi koko on 5MB.',

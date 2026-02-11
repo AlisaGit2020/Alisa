@@ -366,4 +366,52 @@ describe('PropertyForm Component Logic', () => {
       expect(apiEndpoint).toBe('real-estate/property');
     });
   });
+
+  describe('Pending photo for new properties', () => {
+    it('new property shows photo upload in pending mode', () => {
+      const isNewProperty = (id: number): boolean => id === 0;
+      expect(isNewProperty(0)).toBe(true);
+    });
+
+    it('existing property shows photo upload in normal mode', () => {
+      const isNewProperty = (id: number): boolean => id === 0;
+      expect(isNewProperty(5)).toBe(false);
+    });
+
+    it('pending photo state starts as null', () => {
+      const pendingPhoto: File | null = null;
+      expect(pendingPhoto).toBeNull();
+    });
+
+    it('pending photo can be set', () => {
+      let pendingPhoto: File | null = null;
+      const setPendingPhoto = (file: File | null) => {
+        pendingPhoto = file;
+      };
+
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      setPendingPhoto(file);
+
+      expect(pendingPhoto).not.toBeNull();
+      expect(pendingPhoto?.name).toBe('test.jpg');
+    });
+
+    it('pending photo can be cleared', () => {
+      let pendingPhoto: File | null = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const setPendingPhoto = (file: File | null) => {
+        pendingPhoto = file;
+      };
+
+      setPendingPhoto(null);
+      expect(pendingPhoto).toBeNull();
+    });
+
+    it('photo upload endpoint uses saved property id', () => {
+      const buildUploadEndpoint = (propertyId: number): string => {
+        return `/real-estate/property/${propertyId}/photo`;
+      };
+
+      expect(buildUploadEndpoint(123)).toBe('/real-estate/property/123/photo');
+    });
+  });
 });

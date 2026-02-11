@@ -12,6 +12,10 @@ import DataService from '../../lib/data-service';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PropertyPhotoUpload from './PropertyPhotoUpload';
 import AlisaContent from '../alisa/AlisaContent';
+import { useToast } from '../alisa';
+import axios from 'axios';
+import ApiClient from '@alisa-lib/api-client';
+import { VITE_API_URL } from '../../constants';
 
 
 function PropertyForm({ t }: WithTranslation) {
@@ -28,9 +32,11 @@ function PropertyForm({ t }: WithTranslation) {
         apartmentType: '',
         ownerships: [{ userId: 0, share: 100 }]
     });
+    const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
     const { idParam } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+    const { showToast } = useToast();
 
     const handleNavigateBack = () => {
         const returnTo = (location.state as { returnTo?: string })?.returnTo;
@@ -57,6 +63,33 @@ function PropertyForm({ t }: WithTranslation) {
         const ownerships = data.ownerships ?? [{ userId: 0, share: 100 }];
         const updatedOwnerships = [{ ...ownerships[0], share }];
         setData({ ...data, ownerships: updatedOwnerships });
+    }
+
+    const handleSaveResult = async (result: DTO<PropertyInput>) => {
+        // Upload pending photo after property is saved
+        // Note: ApiClient.post returns AxiosResponse, so we need to handle both cases
+        const savedProperty = 'data' in result && result.data ? (result.data as DTO<PropertyInput>) : result;
+        const propertyId = savedProperty.id;
+
+        if (pendingPhoto && propertyId) {
+            try {
+                const formData = new FormData();
+                formData.append('photo', pendingPhoto);
+
+                const options = await ApiClient.getOptions({
+                    'Content-Type': 'multipart/form-data',
+                });
+
+                await axios.post(
+                    `${VITE_API_URL}/real-estate/property/${propertyId}/photo`,
+                    formData,
+                    options
+                );
+                // No separate toast - AlisaFormHandler already shows "save success"
+            } catch {
+                showToast({ message: t('property:photoUploadError'), severity: "error" });
+            }
+        }
     }
 
     const formComponents = (
@@ -132,7 +165,14 @@ function PropertyForm({ t }: WithTranslation) {
                         adornment='%'
                     />
                 </Box>
-                {data.id !== 0 && (
+                {data.id === 0 ? (
+                    <PropertyPhotoUpload
+                        propertyId={0}
+                        pendingMode={true}
+                        pendingFile={pendingPhoto}
+                        onFileSelected={setPendingPhoto}
+                    />
+                ) : (
                     <PropertyPhotoUpload
                         propertyId={data.id}
                         currentPhoto={data.photo}
@@ -160,6 +200,7 @@ function PropertyForm({ t }: WithTranslation) {
                 }}
                 onCancel={handleNavigateBack}
                 onAfterSubmit={handleNavigateBack}
+                onSaveResult={handleSaveResult}
             >
             </AlisaFormHandler>
         </AlisaContent>
