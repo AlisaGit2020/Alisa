@@ -60,7 +60,8 @@ export class PropertyController {
     @User() user: JWTUser,
     @Param('id') id: string,
   ): Promise<PropertyDeleteValidationDto> {
-    return this.service.validateDelete(user, Number(id));
+    const { validation } = await this.service.validateDelete(user, Number(id));
+    return validation;
   }
 
   @Get('/:id')

@@ -420,7 +420,7 @@ describe('PropertyService', () => {
 
       expect(mockRepository.delete).not.toHaveBeenCalled();
     });
-  })
+  });
 
   describe('validateDelete', () => {
     beforeEach(() => {
@@ -437,11 +437,13 @@ describe('PropertyService', () => {
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
 
-      const result = await service.validateDelete(testUser, 1);
+      const { validation, property: returnedProperty } =
+        await service.validateDelete(testUser, 1);
 
-      expect(result.canDelete).toBe(true);
-      expect(result.dependencies).toEqual([]);
-      expect(result.message).toBeUndefined();
+      expect(validation.canDelete).toBe(true);
+      expect(validation.dependencies).toEqual([]);
+      expect(validation.message).toBeUndefined();
+      expect(returnedProperty).toEqual(property);
     });
 
     it('returns canDelete: false with transaction dependency', async () => {
@@ -455,14 +457,14 @@ describe('PropertyService', () => {
       mockTransactionRepository.count.mockResolvedValue(2);
       mockTransactionRepository.find.mockResolvedValue(transactions);
 
-      const result = await service.validateDelete(testUser, 1);
+      const { validation } = await service.validateDelete(testUser, 1);
 
-      expect(result.canDelete).toBe(false);
-      expect(result.dependencies).toHaveLength(1);
-      expect(result.dependencies[0].type).toBe('transaction');
-      expect(result.dependencies[0].count).toBe(2);
-      expect(result.dependencies[0].samples).toHaveLength(2);
-      expect(result.message).toBeDefined();
+      expect(validation.canDelete).toBe(false);
+      expect(validation.dependencies).toHaveLength(1);
+      expect(validation.dependencies[0].type).toBe('transaction');
+      expect(validation.dependencies[0].count).toBe(2);
+      expect(validation.dependencies[0].samples).toHaveLength(2);
+      expect(validation.message).toBeDefined();
     });
 
     it('returns multiple dependency types', async () => {
@@ -485,13 +487,13 @@ describe('PropertyService', () => {
         createIncome({ id: 1, propertyId: 1 }),
       ]);
 
-      const result = await service.validateDelete(testUser, 1);
+      const { validation } = await service.validateDelete(testUser, 1);
 
-      expect(result.canDelete).toBe(false);
-      expect(result.dependencies).toHaveLength(3);
-      expect(result.dependencies.map((d) => d.type)).toContain('transaction');
-      expect(result.dependencies.map((d) => d.type)).toContain('expense');
-      expect(result.dependencies.map((d) => d.type)).toContain('income');
+      expect(validation.canDelete).toBe(false);
+      expect(validation.dependencies).toHaveLength(3);
+      expect(validation.dependencies.map((d) => d.type)).toContain('transaction');
+      expect(validation.dependencies.map((d) => d.type)).toContain('expense');
+      expect(validation.dependencies.map((d) => d.type)).toContain('income');
     });
 
     it('throws NotFoundException for missing property', async () => {
@@ -524,10 +526,10 @@ describe('PropertyService', () => {
         manyTransactions.slice(0, 5),
       );
 
-      const result = await service.validateDelete(testUser, 1);
+      const { validation } = await service.validateDelete(testUser, 1);
 
-      expect(result.dependencies[0].count).toBe(10);
-      expect(result.dependencies[0].samples).toHaveLength(5);
+      expect(validation.dependencies[0].count).toBe(10);
+      expect(validation.dependencies[0].samples).toHaveLength(5);
     });
   });
 
