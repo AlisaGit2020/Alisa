@@ -142,7 +142,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       }
     };
     loadAvailableYears();
-  }, []);
+    // Re-fetch available years when statistics are refreshed (e.g., after recalculation)
+  }, [refreshKey]);
 
   // Store dashboard-specific filters when they change
   useEffect(() => {
