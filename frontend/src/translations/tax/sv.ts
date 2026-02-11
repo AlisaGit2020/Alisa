@@ -1,0 +1,38 @@
+const tax = {
+  // Page template
+  pageTitle: 'Skatterapport',
+  pageDescription: 'Skapa skatterapporter för dina fastigheter.',
+
+  title: 'Skatt',
+  infoText: 'Denna information behövs för din deklaration. Kopiera siffrorna till blankett 7H (Bostadsaktier).',
+  year: 'Beskattningsår',
+  calculate: 'Beräkna skatteuppgifter',
+  calculating: 'Beräknar...',
+  calculateError: 'Kunde inte beräkna skatteuppgifter',
+  grossIncome: 'Hyresintäkter',
+  deductions: 'Avdrag',
+  depreciation: 'Avskrivningar',
+  netIncome: 'Beskattningsbar inkomst',
+  form7H: 'Blankett 7H: Hyresintäkter - Bostadsaktier',
+  totalIncome: 'Totala hyresintäkter',
+  deductionsSection: 'Avdrag',
+  deductionsTotal: 'Totala avdrag',
+  depreciationSection: 'Avskrivningar för grundförbättringar (10%)',
+  depreciationTotal: 'Totala avskrivningar',
+  taxableIncome: 'Beskattningsbar inkomst',
+  noData: 'Skatteuppgifter har inte beräknats för detta år ännu.',
+  noDataHint: 'Tryck på "Beräkna skatteuppgifter" för att börja.',
+  allProperties: 'Alla fastigheter',
+  yearsRemaining: '{{acquisitionYear}}, {{years}} år kvar',
+  fullyDepreciated: 'Helt avskriven',
+  depreciationInfoTitle: 'Avskrivningar för grundförbättringar',
+  depreciationInfoText1: 'Grundförbättringar är renoveringar som höjer fastighetens värde, såsom:',
+  depreciationInfoExample1: 'Badrum- eller köksrenoveringar',
+  depreciationInfoExample2: 'Inglasade balkonger',
+  depreciationInfoExample3: 'Förnyelse av värmesystem',
+  depreciationInfoText2: 'Avskrivningar beräknas med 10% per år av ursprungligt anskaffningsvärde. Avskrivning görs under högst 10 år tills hela beloppet är avdraget.',
+  depreciationInfoText3: 'Löpande reparationer (t.ex. byte av kran, målning) dras av helt samma år som kostnad, inte som avskrivning.',
+  ownershipShare: 'Din ägarandel',
+}
+
+export default tax

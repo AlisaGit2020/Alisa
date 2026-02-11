@@ -11,6 +11,9 @@ export class IncomeTypeDefault {
   @Column()
   nameEn: string;
 
+  @Column({ nullable: true })
+  nameSv: string;
+
   @Column({ default: false })
   isTaxable: boolean;
 }

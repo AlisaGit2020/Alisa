@@ -4,7 +4,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import { loadTranslations } from './translation-loader';
 
 
-const availableLanguages = ['en', 'fi'];
+const availableLanguages = ['en', 'fi', 'sv'];
 const namespaces = [
     'accounting',
     'admin',

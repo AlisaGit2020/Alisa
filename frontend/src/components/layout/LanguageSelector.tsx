@@ -11,13 +11,17 @@ const SmallAvatar = styled(Avatar)(({ theme }) => ({
     border: `1px solid ${theme.palette.background.paper}`,
 }));
 
-const getFlag = (language: string) => {
-    if (language == 'fi') {
+const getFlag = (language: string): string => {
+    if (language === 'fi') {
         return '/assets/flags/finland-48.png'
     }
-    if (language == 'en') {
+    if (language === 'en') {
         return '/assets/flags/great-britain-48.png'
     }
+    if (language === 'sv') {
+        return '/assets/flags/sweden-48.png'
+    }
+    return '/assets/flags/great-britain-48.png'
 }
 
 function LanguageSelector({ t }: WithTranslation) {
@@ -90,6 +94,7 @@ function LanguageSelector({ t }: WithTranslation) {
             >
                 {getMenuItem('en', 'English')}
                 {getMenuItem('fi', 'Suomi')}
+                {getMenuItem('sv', 'Svenska')}
             </Menu>
         </Box>
     );

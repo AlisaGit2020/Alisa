@@ -11,6 +11,9 @@ export class ExpenseTypeDefault {
   @Column()
   nameEn: string;
 
+  @Column({ nullable: true })
+  nameSv: string;
+
   @Column()
   isTaxDeductible: boolean;
 

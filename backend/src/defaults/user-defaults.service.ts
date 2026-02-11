@@ -7,6 +7,7 @@ import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-
 import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
 import { UserService } from '@alisa-backend/people/user/user.service';
 import { UserInputDto } from '@alisa-backend/people/user/dtos/user-input.dto';
+import { SupportedLanguage } from '@alisa-backend/common/types';
 
 @Injectable()
 export class UserDefaultsService {
@@ -49,17 +50,28 @@ export class UserDefaultsService {
     }
   }
 
-  private normalizeLanguage(language: string): string {
+  private normalizeLanguage(language: string): SupportedLanguage {
     if (!language) {
       return 'fi';
     }
     const lang = language.split(/[-_]/)[0].toLowerCase();
-    return lang === 'fi' ? 'fi' : 'en';
+    if (lang === 'fi') return 'fi';
+    if (lang === 'sv') return 'sv';
+    return 'en';
+  }
+
+  private getLocalizedName(
+    template: ExpenseTypeDefault | IncomeTypeDefault,
+    lang: SupportedLanguage,
+  ): string {
+    if (lang === 'fi') return template.nameFi;
+    if (lang === 'sv') return template.nameSv || template.nameEn;
+    return template.nameEn;
   }
 
   private async createExpenseTypes(
     userId: number,
-    lang: string,
+    lang: SupportedLanguage,
   ): Promise<Record<string, number>> {
     const defaults = await this.expenseTypeDefaultRepository.find();
     const loanSettingMap: Record<string, number> = {};
@@ -67,7 +79,7 @@ export class UserDefaultsService {
     for (const template of defaults) {
       const expenseType = new ExpenseType();
       expenseType.userId = userId;
-      expenseType.name = lang === 'fi' ? template.nameFi : template.nameEn;
+      expenseType.name = this.getLocalizedName(template, lang);
       expenseType.description = '';
       expenseType.isTaxDeductible = template.isTaxDeductible;
       expenseType.isCapitalImprovement = template.isCapitalImprovement;
@@ -84,14 +96,14 @@ export class UserDefaultsService {
 
   private async createIncomeTypes(
     userId: number,
-    lang: string,
+    lang: SupportedLanguage,
   ): Promise<void> {
     const defaults = await this.incomeTypeDefaultRepository.find();
 
     for (const template of defaults) {
       const incomeType = new IncomeType();
       incomeType.userId = userId;
-      incomeType.name = lang === 'fi' ? template.nameFi : template.nameEn;
+      incomeType.name = this.getLocalizedName(template, lang);
       incomeType.description = '';
       incomeType.isTaxable = template.isTaxable;
 

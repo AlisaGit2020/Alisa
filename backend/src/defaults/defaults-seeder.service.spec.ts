@@ -104,4 +104,34 @@ describe('DefaultsSeeder', () => {
     expect(keys).toContain('principal');
     expect(keys).toContain('handlingFee');
   });
+
+  it('seeds expense types with Swedish translations', async () => {
+    mockExpenseTypeDefaultRepo.count.mockResolvedValue(0);
+    mockIncomeTypeDefaultRepo.count.mockResolvedValue(0);
+    mockExpenseTypeDefaultRepo.save.mockResolvedValue([]);
+    mockIncomeTypeDefaultRepo.save.mockResolvedValue([]);
+
+    await seeder.onModuleInit();
+
+    const savedExpenseTypes = mockExpenseTypeDefaultRepo.save.mock.calls[0][0];
+    const allHaveSwedish = savedExpenseTypes.every(
+      (t: Partial<ExpenseTypeDefault>) => t.nameSv && t.nameSv.length > 0,
+    );
+    expect(allHaveSwedish).toBe(true);
+  });
+
+  it('seeds income types with Swedish translations', async () => {
+    mockExpenseTypeDefaultRepo.count.mockResolvedValue(0);
+    mockIncomeTypeDefaultRepo.count.mockResolvedValue(0);
+    mockExpenseTypeDefaultRepo.save.mockResolvedValue([]);
+    mockIncomeTypeDefaultRepo.save.mockResolvedValue([]);
+
+    await seeder.onModuleInit();
+
+    const savedIncomeTypes = mockIncomeTypeDefaultRepo.save.mock.calls[0][0];
+    const allHaveSwedish = savedIncomeTypes.every(
+      (t: Partial<IncomeTypeDefault>) => t.nameSv && t.nameSv.length > 0,
+    );
+    expect(allHaveSwedish).toBe(true);
+  });
 });

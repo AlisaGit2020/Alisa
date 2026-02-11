@@ -35,6 +35,7 @@ const fi = {
 
     fi: "Suomi",
     en: "Englanti",
+    sv: "Ruotsi",
 
     add: "Lisää",
     amount: "Määrä",
