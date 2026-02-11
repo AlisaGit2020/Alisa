@@ -106,6 +106,23 @@ function LandingPage({ t }: WithTranslation) {
         <Typography sx={{ color: 'white', opacity: 0.7 }}>|</Typography>
         <Link
           component="button"
+          onClick={() => changeLanguage('sv')}
+          sx={{
+            textDecoration: 'none',
+            color: 'white',
+            fontWeight: i18n.language === 'sv' ? 700 : 400,
+            opacity: i18n.language === 'sv' ? 1 : 0.7,
+            cursor: 'pointer',
+            '&:hover': {
+              opacity: 1,
+            },
+          }}
+        >
+          SV
+        </Link>
+        <Typography sx={{ color: 'white', opacity: 0.7 }}>|</Typography>
+        <Link
+          component="button"
           onClick={() => changeLanguage('en')}
           sx={{
             textDecoration: 'none',
