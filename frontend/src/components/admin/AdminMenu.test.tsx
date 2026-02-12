@@ -63,7 +63,7 @@ describe('AdminMenu', () => {
 
     it('does not render when isAdmin is undefined', async () => {
       const userWithoutAdmin = { ...mockNonAdminUser, isAdmin: undefined };
-      jest.spyOn(ApiClient, 'me').mockResolvedValue(userWithoutAdmin as ReturnType<typeof createMockUser>);
+      jest.spyOn(ApiClient, 'me').mockResolvedValue(userWithoutAdmin as unknown as ReturnType<typeof createMockUser>);
 
       const { container } = renderWithProviders(<AdminMenu />);
 

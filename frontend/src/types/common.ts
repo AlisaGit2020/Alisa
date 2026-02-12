@@ -1,7 +1,7 @@
 // Common enums and shared types
 
 // Supported languages for the application
-export const SUPPORTED_LANGUAGES = ['en', 'fi'] as const;
+export const SUPPORTED_LANGUAGES = ['en', 'fi', 'sv'] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 export enum TransactionStatus {

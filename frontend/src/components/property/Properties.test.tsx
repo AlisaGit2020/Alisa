@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { Property } from '@alisa-types';
+import { Ownership, Property } from '@alisa-types';
 
 // Since Jest mock hoisting causes issues with relative paths in ESM mode,
 // we test the data transformation logic separately from the React component
@@ -14,7 +14,7 @@ describe('Properties Component Logic', () => {
       city: 'Helsinki',
       postalCode: '00100',
       description: 'A nice apartment',
-      ownerships: [{ share: 100, userId: 1 }],
+      ownerships: [{ share: 100, userId: 1, propertyId: 1 }],
     },
     {
       id: 2,
@@ -22,7 +22,7 @@ describe('Properties Component Logic', () => {
       address: '456 Another Street',
       city: 'Espoo',
       postalCode: '02100',
-      ownerships: [{ share: 50, userId: 1 }],
+      ownerships: [{ share: 50, userId: 1, propertyId: 2 }],
     },
   ];
 
@@ -247,7 +247,7 @@ describe('Properties Component Logic', () => {
 
     it('returns undefined when no ownerships', () => {
       const property = {
-        ownerships: [],
+        ownerships: [] as Ownership[],
       };
 
       const getOwnershipShare = () => {

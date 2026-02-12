@@ -1,7 +1,5 @@
 // frontend/test/utils/test-data.ts
-import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { Property, Transaction, User, TransactionStatus, TransactionType } from '@alisa-types';
 
 /**
  * Creates a mock Property for testing
@@ -13,13 +11,8 @@ export const createMockProperty = (overrides?: Partial<Property>): Property => {
     address: '123 Test Street',
     postalCode: '00100',
     city: 'Helsinki',
-    country: 'Finland',
-    propertyType: 'APARTMENT',
-    purchasePrice: 250000,
-    purchaseDate: new Date('2020-01-01'),
-    currentValue: 275000,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    size: 50,
+    ownerships: [],
     ...overrides,
   } as Property;
 };
@@ -30,13 +23,17 @@ export const createMockProperty = (overrides?: Partial<Property>): Property => {
 export const createMockTransaction = (overrides?: Partial<Transaction>): Transaction => {
   return {
     id: 1,
-    amount: 1000,
-    date: new Date('2024-01-01'),
+    externalId: 'ext-001',
+    status: TransactionStatus.PENDING,
+    type: TransactionType.INCOME,
+    sender: 'Test Sender',
+    receiver: 'Test Receiver',
     description: 'Test Transaction',
-    type: 'INCOME',
-    category: 'RENT',
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    transactionDate: new Date('2024-01-01'),
+    accountingDate: new Date('2024-01-01'),
+    amount: 1000,
+    balance: 5000,
+    propertyId: 1,
     ...overrides,
   } as Transaction;
 };
@@ -50,8 +47,6 @@ export const createMockUser = (overrides?: Partial<User>): User => {
     email: 'test@example.com',
     firstName: 'Test',
     lastName: 'User',
-    createdAt: new Date(),
-    updatedAt: new Date(),
     ...overrides,
   } as User;
 };

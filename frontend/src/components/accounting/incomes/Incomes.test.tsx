@@ -147,7 +147,18 @@ describe('Incomes Component Logic', () => {
   });
 
   describe('rowDataService transformation', () => {
-    const mockIncome = {
+    interface MockIncome {
+      id: number;
+      accountingDate: Date | null;
+      incomeType?: { id: number; name: string };
+      description: string;
+      quantity: number;
+      amount: number;
+      totalAmount: number;
+      property: { id: number; name: string };
+    }
+
+    const mockIncome: MockIncome = {
       id: 1,
       accountingDate: new Date('2024-03-15'),
       incomeType: { id: 1, name: 'Rent' },
@@ -194,7 +205,7 @@ describe('Incomes Component Logic', () => {
     });
 
     it('handles missing incomeType', () => {
-      const income = { ...mockIncome, incomeType: undefined };
+      const income: MockIncome = { ...mockIncome, incomeType: undefined };
       const row: IncomeRow = {
         id: income.id,
         accountingDate: income.accountingDate || null,

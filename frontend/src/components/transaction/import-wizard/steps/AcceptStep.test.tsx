@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import AcceptStep from './AcceptStep';
 import { Transaction, TransactionType, TransactionStatus } from '@alisa-types';
+import { TFunction } from 'i18next';
 
 describe('AcceptStep', () => {
   const mockT = jest.fn((key: string, options?: Record<string, unknown>) => {
@@ -23,7 +24,7 @@ describe('AcceptStep', () => {
       'unknown': 'Unknown',
     };
     return translations[key] || key;
-  });
+  }) as unknown as TFunction;
 
   const mockOnApprove = jest.fn();
   const mockOnNext = jest.fn();

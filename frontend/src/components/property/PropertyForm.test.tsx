@@ -1,12 +1,17 @@
 import '@testing-library/jest-dom';
-import { PropertyInputDto } from '@alisa-types';
+import { PropertyInput } from '@alisa-types';
 
 // Since Jest mock hoisting causes issues with relative paths in ESM mode,
 // we test the data transformation logic separately from the React component
 // Following the same pattern as Transactions.test.tsx
 
+// Extended type for form that includes optional id (for edit mode)
+interface PropertyFormData extends PropertyInput {
+  id?: number;
+}
+
 describe('PropertyForm Component Logic', () => {
-  const defaultPropertyInput: PropertyInputDto = {
+  const defaultPropertyInput: PropertyFormData = {
     id: 0,
     name: '',
     size: 0,
@@ -45,10 +50,10 @@ describe('PropertyForm Component Logic', () => {
   describe('Form data update logic', () => {
     it('updates name field correctly', () => {
       const updateField = (
-        data: PropertyInputDto,
-        field: keyof PropertyInputDto,
+        data: PropertyFormData,
+        field: keyof PropertyFormData,
         value: unknown
-      ): PropertyInputDto => {
+      ): PropertyFormData => {
         return { ...data, [field]: value };
       };
 
@@ -58,10 +63,10 @@ describe('PropertyForm Component Logic', () => {
 
     it('updates size field correctly', () => {
       const updateField = (
-        data: PropertyInputDto,
-        field: keyof PropertyInputDto,
+        data: PropertyFormData,
+        field: keyof PropertyFormData,
         value: unknown
-      ): PropertyInputDto => {
+      ): PropertyFormData => {
         return { ...data, [field]: value };
       };
 
@@ -71,10 +76,10 @@ describe('PropertyForm Component Logic', () => {
 
     it('updates address field correctly', () => {
       const updateField = (
-        data: PropertyInputDto,
-        field: keyof PropertyInputDto,
+        data: PropertyFormData,
+        field: keyof PropertyFormData,
         value: unknown
-      ): PropertyInputDto => {
+      ): PropertyFormData => {
         return { ...data, [field]: value };
       };
 
@@ -88,10 +93,10 @@ describe('PropertyForm Component Logic', () => {
 
     it('updates city field correctly', () => {
       const updateField = (
-        data: PropertyInputDto,
-        field: keyof PropertyInputDto,
+        data: PropertyFormData,
+        field: keyof PropertyFormData,
         value: unknown
-      ): PropertyInputDto => {
+      ): PropertyFormData => {
         return { ...data, [field]: value };
       };
 
@@ -101,10 +106,10 @@ describe('PropertyForm Component Logic', () => {
 
     it('updates postal code field correctly', () => {
       const updateField = (
-        data: PropertyInputDto,
-        field: keyof PropertyInputDto,
+        data: PropertyFormData,
+        field: keyof PropertyFormData,
         value: unknown
-      ): PropertyInputDto => {
+      ): PropertyFormData => {
         return { ...data, [field]: value };
       };
 
@@ -114,10 +119,10 @@ describe('PropertyForm Component Logic', () => {
 
     it('updates build year field correctly', () => {
       const updateField = (
-        data: PropertyInputDto,
-        field: keyof PropertyInputDto,
+        data: PropertyFormData,
+        field: keyof PropertyFormData,
         value: unknown
-      ): PropertyInputDto => {
+      ): PropertyFormData => {
         return { ...data, [field]: value };
       };
 
@@ -127,10 +132,10 @@ describe('PropertyForm Component Logic', () => {
 
     it('updates apartment type field correctly', () => {
       const updateField = (
-        data: PropertyInputDto,
-        field: keyof PropertyInputDto,
+        data: PropertyFormData,
+        field: keyof PropertyFormData,
         value: unknown
-      ): PropertyInputDto => {
+      ): PropertyFormData => {
         return { ...data, [field]: value };
       };
 
@@ -140,10 +145,10 @@ describe('PropertyForm Component Logic', () => {
 
     it('updates description field correctly', () => {
       const updateField = (
-        data: PropertyInputDto,
-        field: keyof PropertyInputDto,
+        data: PropertyFormData,
+        field: keyof PropertyFormData,
         value: unknown
-      ): PropertyInputDto => {
+      ): PropertyFormData => {
         return { ...data, [field]: value };
       };
 
@@ -159,9 +164,9 @@ describe('PropertyForm Component Logic', () => {
   describe('Ownership share update logic', () => {
     it('updates ownership share correctly', () => {
       const updateOwnershipShare = (
-        data: PropertyInputDto,
+        data: PropertyFormData,
         newShare: number
-      ): PropertyInputDto => {
+      ): PropertyFormData => {
         if (!data.ownerships || data.ownerships.length === 0) {
           return data;
         }
@@ -176,15 +181,15 @@ describe('PropertyForm Component Logic', () => {
     });
 
     it('preserves userId when updating share', () => {
-      const inputWithUser: PropertyInputDto = {
+      const inputWithUser: PropertyFormData = {
         ...defaultPropertyInput,
         ownerships: [{ userId: 5, share: 100 }],
       };
 
       const updateOwnershipShare = (
-        data: PropertyInputDto,
+        data: PropertyFormData,
         newShare: number
-      ): PropertyInputDto => {
+      ): PropertyFormData => {
         if (!data.ownerships || data.ownerships.length === 0) {
           return data;
         }
@@ -203,9 +208,9 @@ describe('PropertyForm Component Logic', () => {
   describe('Photo update logic', () => {
     it('updates photo path correctly', () => {
       const updatePhoto = (
-        data: PropertyInputDto,
+        data: PropertyFormData,
         newPhoto: string | undefined
-      ): PropertyInputDto => {
+      ): PropertyFormData => {
         return { ...data, photo: newPhoto };
       };
 
@@ -217,15 +222,15 @@ describe('PropertyForm Component Logic', () => {
     });
 
     it('clears photo correctly', () => {
-      const inputWithPhoto: PropertyInputDto = {
+      const inputWithPhoto: PropertyFormData = {
         ...defaultPropertyInput,
         photo: 'uploads/photos/existing.jpg',
       };
 
       const updatePhoto = (
-        data: PropertyInputDto,
+        data: PropertyFormData,
         newPhoto: string | undefined
-      ): PropertyInputDto => {
+      ): PropertyFormData => {
         return { ...data, photo: newPhoto };
       };
 
@@ -278,7 +283,7 @@ describe('PropertyForm Component Logic', () => {
 
   describe('New vs existing property detection', () => {
     it('identifies new property when id is 0', () => {
-      const isNewProperty = (data: PropertyInputDto): boolean => {
+      const isNewProperty = (data: PropertyFormData): boolean => {
         return data.id === 0;
       };
 
@@ -286,12 +291,12 @@ describe('PropertyForm Component Logic', () => {
     });
 
     it('identifies existing property when id > 0', () => {
-      const existingProperty: PropertyInputDto = {
+      const existingProperty: PropertyFormData = {
         ...defaultPropertyInput,
         id: 5,
       };
 
-      const isNewProperty = (data: PropertyInputDto): boolean => {
+      const isNewProperty = (data: PropertyFormData): boolean => {
         return data.id === 0;
       };
 
@@ -393,7 +398,7 @@ describe('PropertyForm Component Logic', () => {
       setPendingPhoto(file);
 
       expect(pendingPhoto).not.toBeNull();
-      expect(pendingPhoto?.name).toBe('test.jpg');
+      expect((pendingPhoto as unknown as File).name).toBe('test.jpg');
     });
 
     it('pending photo can be cleared', () => {

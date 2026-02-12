@@ -3,16 +3,17 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import AlisaTransactionStatusSelect from './AlisaTransactionStatusSelect';
+import { TFunction } from 'i18next';
 
 describe('AlisaTransactionStatusSelect', () => {
-  const mockT = (key: string) => {
+  const mockT = ((key: string) => {
     const translations: Record<string, string> = {
       pending: 'Pending',
       accepted: 'Accepted',
       transactionStatus: 'Transaction Status',
     };
     return translations[key] || key;
-  };
+  }) as TFunction;
 
   it('renders and becomes ready', async () => {
     // Component may render loading briefly or skip it in test environment

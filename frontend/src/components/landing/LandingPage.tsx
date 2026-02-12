@@ -46,7 +46,8 @@ function LandingPage({ t }: WithTranslation) {
   const handleCalculate = async (data: InvestmentInputData) => {
     try {
       setInputData(data);
-      const response = await ApiClient.post<InvestmentResults | { data: InvestmentResults }>(
+      // Use 'unknown' as input type since the response type differs from input type
+      const response = await ApiClient.post<unknown>(
         'real-estate/investment/calculate',
         data,
         true

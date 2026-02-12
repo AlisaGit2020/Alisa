@@ -329,7 +329,7 @@ describe('Dashboard Component Logic', () => {
     });
 
     it('year selector hidden in yearly mode', () => {
-      const viewMode = 'yearly';
+      const viewMode = 'yearly' as 'monthly' | 'yearly';
       const visibility = viewMode === 'monthly' ? 'visible' : 'hidden';
 
       expect(visibility).toBe('hidden');

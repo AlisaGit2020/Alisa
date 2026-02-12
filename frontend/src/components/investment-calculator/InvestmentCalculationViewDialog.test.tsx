@@ -50,7 +50,7 @@ describe('InvestmentCalculationViewDialog', () => {
   });
 
   it('shows loading state initially', async () => {
-    (ApiClient.get as jest.SpyInstance).mockImplementation(() => new Promise(() => {}));
+    (ApiClient.get as unknown as jest.SpyInstance).mockImplementation(() => new Promise(() => {}));
 
     renderWithProviders(
       <InvestmentCalculationViewDialog
@@ -64,7 +64,7 @@ describe('InvestmentCalculationViewDialog', () => {
   });
 
   it('calls API with correct calculation ID', async () => {
-    (ApiClient.get as jest.SpyInstance).mockResolvedValue(mockCalculation);
+    (ApiClient.get as unknown as jest.SpyInstance).mockResolvedValue(mockCalculation);
 
     renderWithProviders(
       <InvestmentCalculationViewDialog
@@ -105,7 +105,7 @@ describe('InvestmentCalculationViewDialog', () => {
 
   it('calls onClose when dialog is closed via Escape', async () => {
     const mockOnClose = jest.fn();
-    (ApiClient.get as jest.SpyInstance).mockResolvedValue(mockCalculation);
+    (ApiClient.get as unknown as jest.SpyInstance).mockResolvedValue(mockCalculation);
 
     renderWithProviders(
       <InvestmentCalculationViewDialog
@@ -127,7 +127,7 @@ describe('InvestmentCalculationViewDialog', () => {
 
   it('handles API error gracefully', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    (ApiClient.get as jest.SpyInstance).mockRejectedValue(new Error('API Error'));
+    (ApiClient.get as unknown as jest.SpyInstance).mockRejectedValue(new Error('API Error'));
 
     renderWithProviders(
       <InvestmentCalculationViewDialog
@@ -145,7 +145,7 @@ describe('InvestmentCalculationViewDialog', () => {
   });
 
   it('renders dialog when open and loaded', async () => {
-    (ApiClient.get as jest.SpyInstance).mockResolvedValue(mockCalculation);
+    (ApiClient.get as unknown as jest.SpyInstance).mockResolvedValue(mockCalculation);
 
     renderWithProviders(
       <InvestmentCalculationViewDialog
@@ -161,7 +161,7 @@ describe('InvestmentCalculationViewDialog', () => {
   });
 
   it('displays calculation name in title after loading', async () => {
-    (ApiClient.get as jest.SpyInstance).mockResolvedValue(mockCalculation);
+    (ApiClient.get as unknown as jest.SpyInstance).mockResolvedValue(mockCalculation);
 
     renderWithProviders(
       <InvestmentCalculationViewDialog
@@ -179,7 +179,7 @@ describe('InvestmentCalculationViewDialog', () => {
   });
 
   it('does not show save button in view mode', async () => {
-    (ApiClient.get as jest.SpyInstance).mockResolvedValue(mockCalculation);
+    (ApiClient.get as unknown as jest.SpyInstance).mockResolvedValue(mockCalculation);
 
     renderWithProviders(
       <InvestmentCalculationViewDialog

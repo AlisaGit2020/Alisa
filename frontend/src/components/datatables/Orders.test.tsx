@@ -4,7 +4,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import ApiClient from '@alisa-lib/api-client';
-import { Expense } from '@alisa-types';
+import { Expense, TransactionStatus, TransactionType } from '@alisa-types';
 import Orders from './Orders';
 
 describe('Orders Component', () => {
@@ -30,8 +30,8 @@ describe('Orders Component', () => {
       transaction: {
         id: 1,
         externalId: 'ext-001',
-        status: 'ACCEPTED' as const,
-        type: 'EXPENSE' as const,
+        status: TransactionStatus.ACCEPTED,
+        type: TransactionType.EXPENSE,
         sender: 'Property Account',
         receiver: 'Electric Company',
         description: 'Monthly electricity',
@@ -63,8 +63,8 @@ describe('Orders Component', () => {
       transaction: {
         id: 2,
         externalId: 'ext-002',
-        status: 'ACCEPTED' as const,
-        type: 'EXPENSE' as const,
+        status: TransactionStatus.ACCEPTED,
+        type: TransactionType.EXPENSE,
         sender: 'Property Account',
         receiver: 'Water Company',
         description: 'Quarterly water',

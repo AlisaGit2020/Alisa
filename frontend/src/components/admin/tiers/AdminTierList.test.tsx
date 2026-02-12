@@ -305,7 +305,7 @@ describe('AdminTierList Logic', () => {
       let tiers = [{ id: 1, name: 'Original' }];
       const responseOk = false;
 
-      const handleResponse = (ok: boolean, data: unknown[]) => {
+      const handleResponse = (ok: boolean, data: { id: number; name: string }[]) => {
         if (ok) {
           tiers = data;
         }

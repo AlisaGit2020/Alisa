@@ -5,13 +5,26 @@ import { renderWithProviders } from '@test-utils/test-wrapper';
 import AlisaCardList from './AlisaCardList';
 import ApiClient from '@alisa-lib/api-client';
 import { propertyContext } from '@alisa-lib/alisa-contexts';
+import { TFunction } from 'i18next';
 
 // Mock ApiClient static methods
 jest.spyOn(ApiClient, 'search');
 jest.spyOn(ApiClient, 'delete');
 
+interface TestProperty {
+  id: number;
+  name: string;
+  size: number;
+  description: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  buildYear: number;
+  ownerships: { share: number }[];
+}
+
 describe('AlisaCardList', () => {
-  const mockT = (key: string) => {
+  const mockT = ((key: string) => {
     const translations: Record<string, string> = {
       add: 'Add',
       edit: 'Edit',
@@ -26,7 +39,7 @@ describe('AlisaCardList', () => {
       noDescription: 'No description',
     };
     return translations[key] || key;
-  };
+  }) as TFunction;
 
   const mockProperties = [
     {
@@ -62,14 +75,14 @@ describe('AlisaCardList', () => {
   });
 
   it('renders loading and then displays items', async () => {
-    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
 
     renderWithProviders(
       <AlisaCardList
         t={mockT}
         title="Properties"
         alisaContext={propertyContext}
-        fields={[{ name: 'name' }, { name: 'size' }]}
+        fields={[{ name: 'name' as keyof TestProperty }, { name: 'size' as keyof TestProperty }]}
       />
     );
 
@@ -81,14 +94,14 @@ describe('AlisaCardList', () => {
   });
 
   it('displays property details correctly', async () => {
-    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
 
     renderWithProviders(
       <AlisaCardList
         t={mockT}
         title="Properties"
         alisaContext={propertyContext}
-        fields={[{ name: 'name' }, { name: 'size' }]}
+        fields={[{ name: 'name' as keyof TestProperty }, { name: 'size' as keyof TestProperty }]}
       />
     );
 
@@ -109,14 +122,14 @@ describe('AlisaCardList', () => {
   });
 
   it('displays empty state when no items', async () => {
-    (ApiClient.search as jest.SpyInstance).mockResolvedValue([]);
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue([]);
 
     renderWithProviders(
       <AlisaCardList
         t={mockT}
         title="Properties"
         alisaContext={propertyContext}
-        fields={[{ name: 'name' }]}
+        fields={[{ name: 'name' as keyof TestProperty }]}
       />
     );
 
@@ -127,14 +140,14 @@ describe('AlisaCardList', () => {
 
   it('opens delete confirmation dialog', async () => {
     const user = userEvent.setup();
-    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
 
     renderWithProviders(
       <AlisaCardList
         t={mockT}
         title="Properties"
         alisaContext={propertyContext}
-        fields={[{ name: 'name' }]}
+        fields={[{ name: 'name' as keyof TestProperty }]}
       />
     );
 
@@ -150,14 +163,14 @@ describe('AlisaCardList', () => {
 
   it('closes delete dialog on cancel', async () => {
     const user = userEvent.setup();
-    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
 
     renderWithProviders(
       <AlisaCardList
         t={mockT}
         title="Properties"
         alisaContext={propertyContext}
-        fields={[{ name: 'name' }]}
+        fields={[{ name: 'name' as keyof TestProperty }]}
       />
     );
 
@@ -178,15 +191,15 @@ describe('AlisaCardList', () => {
 
   it('deletes item when confirmed', async () => {
     const user = userEvent.setup();
-    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
-    (ApiClient.delete as jest.SpyInstance).mockResolvedValue({});
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
+    (ApiClient.delete as unknown as jest.SpyInstance).mockResolvedValue({});
 
     renderWithProviders(
       <AlisaCardList
         t={mockT}
         title="Properties"
         alisaContext={propertyContext}
-        fields={[{ name: 'name' }]}
+        fields={[{ name: 'name' as keyof TestProperty }]}
       />
     );
 
@@ -198,7 +211,7 @@ describe('AlisaCardList', () => {
     await user.click(deleteButtons[0]);
 
     // Update mock to return fewer items after delete
-    (ApiClient.search as jest.SpyInstance).mockResolvedValue([mockProperties[1]]);
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue([mockProperties[1]]);
 
     // Click the delete button in the dialog
     const allDeleteButtons = screen.getAllByRole('button', { name: /delete/i });
@@ -211,15 +224,15 @@ describe('AlisaCardList', () => {
   });
 
   it('calls API with correct parameters', async () => {
-    const fetchOptions = { order: { name: 'ASC' } };
-    (ApiClient.search as jest.SpyInstance).mockResolvedValue([]);
+    const fetchOptions = { order: { name: 'ASC' as const } };
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue([]);
 
     renderWithProviders(
       <AlisaCardList
         t={mockT}
         title="Properties"
         alisaContext={propertyContext}
-        fields={[{ name: 'name' }]}
+        fields={[{ name: 'name' as keyof TestProperty }]}
         fetchOptions={fetchOptions}
       />
     );
@@ -234,15 +247,15 @@ describe('AlisaCardList', () => {
 
   it('refetches data after deletion', async () => {
     const user = userEvent.setup();
-    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
-    (ApiClient.delete as jest.SpyInstance).mockResolvedValue({});
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
+    (ApiClient.delete as unknown as jest.SpyInstance).mockResolvedValue({});
 
     renderWithProviders(
       <AlisaCardList
         t={mockT}
         title="Properties"
         alisaContext={propertyContext}
-        fields={[{ name: 'name' }]}
+        fields={[{ name: 'name' as keyof TestProperty }]}
       />
     );
 
@@ -256,7 +269,7 @@ describe('AlisaCardList', () => {
     const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
     await user.click(deleteButtons[0]);
 
-    (ApiClient.search as jest.SpyInstance).mockResolvedValue([mockProperties[1]]);
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue([mockProperties[1]]);
 
     const allDeleteButtons = screen.getAllByRole('button', { name: /delete/i });
     const confirmButton = allDeleteButtons[allDeleteButtons.length - 1];
@@ -269,14 +282,14 @@ describe('AlisaCardList', () => {
   });
 
   it('displays add link', async () => {
-    (ApiClient.search as jest.SpyInstance).mockResolvedValue(mockProperties);
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
 
     renderWithProviders(
       <AlisaCardList
         t={mockT}
         title="Properties"
         alisaContext={propertyContext}
-        fields={[{ name: 'name' }]}
+        fields={[{ name: 'name' as keyof TestProperty }]}
       />
     );
 
@@ -289,14 +302,14 @@ describe('AlisaCardList', () => {
   });
 
   it('displays title', async () => {
-    (ApiClient.search as jest.SpyInstance).mockResolvedValue([]);
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue([]);
 
     renderWithProviders(
       <AlisaCardList
         t={mockT}
         title="My Properties"
         alisaContext={propertyContext}
-        fields={[{ name: 'name' }]}
+        fields={[{ name: 'name' as keyof TestProperty }]}
       />
     );
 
