@@ -11,6 +11,8 @@ import { PropertyStatistics } from "@alisa-types";
 import ApiClient from "@alisa-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
 import axios from "axios";
+import { calculateSummaryData } from "./report-utils";
+import { useToast } from "../../alisa/toast";
 
 interface PropertyReportSectionProps {
   propertyId: number;
@@ -18,6 +20,7 @@ interface PropertyReportSectionProps {
 
 function PropertyReportSection({ propertyId }: PropertyReportSectionProps) {
   const { t } = useTranslation("property");
+  const { showToast } = useToast();
   const [expanded, setExpanded] = useState(false);
   const [statistics, setStatistics] = useState<PropertyStatistics[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +44,7 @@ function PropertyReportSection({ propertyId }: PropertyReportSectionProps) {
       } catch (error) {
         console.error("Failed to fetch statistics:", error);
         setStatistics([]);
+        showToast({ message: t("report.fetchError"), severity: "error" });
       } finally {
         setLoading(false);
       }
@@ -49,55 +53,13 @@ function PropertyReportSection({ propertyId }: PropertyReportSectionProps) {
     if (propertyId) {
       fetchStatistics();
     }
-  }, [propertyId]);
+  }, [propertyId, showToast, t]);
 
   // Calculate summary values
-  const summaryData = useMemo(() => {
-    let currentYearIncome = 0;
-    let currentYearExpenses = 0;
-    let allTimeIncome = 0;
-    let allTimeExpenses = 0;
-    let allTimeDeposit = 0;
-    let allTimeWithdraw = 0;
-
-    statistics.forEach((stat) => {
-      const value = parseFloat(stat.value) || 0;
-
-      // All-time totals (yearly stats without month)
-      if (stat.year && !stat.month) {
-        if (stat.key === "income") {
-          allTimeIncome += value;
-        } else if (stat.key === "expense") {
-          allTimeExpenses += value;
-        } else if (stat.key === "deposit") {
-          allTimeDeposit += value;
-        } else if (stat.key === "withdraw") {
-          allTimeWithdraw += value;
-        }
-
-        // Current year
-        if (stat.year === currentYear) {
-          if (stat.key === "income") {
-            currentYearIncome += value;
-          } else if (stat.key === "expense") {
-            currentYearExpenses += value;
-          }
-        }
-      }
-    });
-
-    // Balance = all income + deposits - expenses - withdrawals
-    const allTimeBalance =
-      allTimeIncome + allTimeDeposit - allTimeExpenses - allTimeWithdraw;
-    const allTimeNetIncome = allTimeIncome - allTimeExpenses;
-
-    return {
-      currentYearIncome,
-      currentYearExpenses,
-      allTimeBalance,
-      allTimeNetIncome,
-    };
-  }, [statistics, currentYear]);
+  const summaryData = useMemo(
+    () => calculateSummaryData(statistics, currentYear),
+    [statistics, currentYear]
+  );
 
   const handleToggle = () => {
     setExpanded((prev) => !prev);

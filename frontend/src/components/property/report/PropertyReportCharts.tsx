@@ -1,6 +1,6 @@
 import { Box, FormControl, InputLabel, MenuItem, Select, Stack } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { SelectChangeEvent } from "@mui/material/Select";
 import MonthlyBarChart, { MonthlyDataPoint } from "./MonthlyBarChart";
 import BalanceTrendChart from "./BalanceTrendChart";
@@ -10,6 +10,7 @@ import { PropertyStatistics, Transaction } from "@alisa-types";
 import ApiClient from "@alisa-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
 import axios from "axios";
+import { useToast } from "../../alisa/toast";
 
 interface PropertyReportChartsProps {
   propertyId: number;
@@ -22,6 +23,7 @@ const MONTH_LABELS = [
 
 function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
   const { t } = useTranslation("property");
+  const { showToast } = useToast();
   const currentYear = new Date().getFullYear();
 
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
@@ -30,6 +32,14 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingTransactions, setLoadingTransactions] = useState(true);
+
+  // Track if an error toast was already shown to avoid multiple toasts when API is down
+  const errorToastShownRef = useRef(false);
+
+  // Reset error toast flag when propertyId or year changes
+  useEffect(() => {
+    errorToastShownRef.current = false;
+  }, [propertyId, selectedYear]);
 
   // Fetch available years
   useEffect(() => {
@@ -52,11 +62,15 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
       } catch (error) {
         console.error("Failed to fetch years:", error);
         setAvailableYears([currentYear - 1, currentYear]);
+        if (!errorToastShownRef.current) {
+          errorToastShownRef.current = true;
+          showToast({ message: t("report.fetchError"), severity: "error" });
+        }
       }
     };
 
     fetchYears();
-  }, [currentYear]);
+  }, [currentYear, showToast, t]);
 
   // Fetch statistics for the selected year
   useEffect(() => {
@@ -74,6 +88,10 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
       } catch (error) {
         console.error("Failed to fetch statistics:", error);
         setStatistics([]);
+        if (!errorToastShownRef.current) {
+          errorToastShownRef.current = true;
+          showToast({ message: t("report.fetchError"), severity: "error" });
+        }
       } finally {
         setLoadingStats(false);
       }
@@ -82,7 +100,7 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
     if (propertyId) {
       fetchStatistics();
     }
-  }, [propertyId, selectedYear]);
+  }, [propertyId, selectedYear, showToast, t]);
 
   // Fetch transactions for the selected year (for pie charts)
   useEffect(() => {
@@ -100,6 +118,10 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
         setTransactions([]);
+        if (!errorToastShownRef.current) {
+          errorToastShownRef.current = true;
+          showToast({ message: t("report.fetchError"), severity: "error" });
+        }
       } finally {
         setLoadingTransactions(false);
       }
@@ -108,7 +130,7 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
     if (propertyId) {
       fetchTransactions();
     }
-  }, [propertyId, selectedYear]);
+  }, [propertyId, selectedYear, showToast, t]);
 
   const handleYearChange = useCallback((event: SelectChangeEvent<number>) => {
     setSelectedYear(event.target.value as number);
@@ -156,10 +178,10 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
       {/* Year selector */}
       <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
         <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>{t("report.month")}</InputLabel>
+          <InputLabel>{t("report.year")}</InputLabel>
           <Select
             value={selectedYear}
-            label={t("report.month")}
+            label={t("report.year")}
             onChange={handleYearChange}
           >
             {availableYears.map((year) => (

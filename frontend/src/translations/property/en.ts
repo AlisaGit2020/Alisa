@@ -51,6 +51,10 @@ const property = {
         incomeBreakdown: 'Income Breakdown',
         monthlySummary: 'Monthly Summary',
         month: 'Month',
+        year: 'Year',
+        date: 'Date',
+        description: 'Description',
+        amount: 'Amount',
         income: 'Income',
         expenses: 'Expenses',
         net: 'Net',
@@ -58,6 +62,7 @@ const property = {
         noDataForYear: 'No data for this year',
         selectProperty: 'Please select a property to view reports',
         backToProperty: 'Back to Property',
+        fetchError: 'Failed to load report data',
     },
 }
 

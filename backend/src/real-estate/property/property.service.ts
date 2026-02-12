@@ -6,7 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOptionsWhere, Repository } from 'typeorm';
+import { Between, FindManyOptions, FindOptionsWhere, Repository } from 'typeorm';
 import type { Express } from 'express';
 import * as fs from 'fs';
 import { Property } from './entities/property.entity';
@@ -27,6 +27,8 @@ import {
   DependencyItem,
   DependencyType,
 } from './dtos/property-delete-validation.dto';
+import { PropertyTransactionSearchDto } from './dtos/property-transaction-search.dto';
+import { TransactionStatus } from '@alisa-backend/common/types';
 
 @Injectable()
 export class PropertyService {
@@ -60,6 +62,47 @@ export class PropertyService {
     options = this.handleOptions(user, options);
 
     return this.repository.find(options);
+  }
+
+  async searchTransactions(
+    user: JWTUser,
+    propertyId: number,
+    filter: PropertyTransactionSearchDto,
+  ): Promise<Transaction[]> {
+    // Validate user ownership
+    await this.getEntityOrThrow(user, propertyId);
+
+    // Build where clause
+    const where: FindOptionsWhere<Transaction> = {
+      propertyId,
+      status: TransactionStatus.ACCEPTED,
+    };
+
+    // Filter by year and month using transactionDate
+    if (filter.year && filter.month) {
+      const startDate = new Date(filter.year, filter.month - 1, 1);
+      const endDate = new Date(filter.year, filter.month, 0, 23, 59, 59);
+      where.transactionDate = Between(startDate, endDate);
+    } else if (filter.year) {
+      const startDate = new Date(filter.year, 0, 1);
+      const endDate = new Date(filter.year, 11, 31, 23, 59, 59);
+      where.transactionDate = Between(startDate, endDate);
+    }
+
+    if (filter.type) {
+      where.type = filter.type;
+    }
+
+    return this.transactionRepository.find({
+      where,
+      relations: {
+        expenses: { expenseType: true },
+        incomes: { incomeType: true },
+      },
+      order: { transactionDate: 'DESC' },
+      skip: filter.skip,
+      take: filter.take,
+    });
   }
 
   async findOne(user: JWTUser, id: number): Promise<Property> {

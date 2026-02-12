@@ -51,6 +51,10 @@ const property = {
         incomeBreakdown: 'Intäktsfördelning',
         monthlySummary: 'Månatlig sammanfattning',
         month: 'Månad',
+        year: 'År',
+        date: 'Datum',
+        description: 'Beskrivning',
+        amount: 'Belopp',
         income: 'Intäkter',
         expenses: 'Utgifter',
         net: 'Netto',
@@ -58,6 +62,7 @@ const property = {
         noDataForYear: 'Ingen data för detta år',
         selectProperty: 'Välj en fastighet för att visa rapporter',
         backToProperty: 'Tillbaka till fastighet',
+        fetchError: 'Kunde inte ladda rapportdata',
     },
 }
 

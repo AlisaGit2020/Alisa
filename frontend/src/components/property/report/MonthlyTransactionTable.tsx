@@ -19,6 +19,7 @@ import { Transaction } from "@alisa-types";
 import ApiClient from "@alisa-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
 import axios from "axios";
+import { useToast } from "../../alisa/toast";
 
 interface MonthlySummary {
   month: number;
@@ -34,19 +35,19 @@ interface MonthlyTransactionTableProps {
   loading?: boolean;
 }
 
-const MONTH_NAMES = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+const MONTH_KEYS = [
+  "january",
+  "february",
+  "march",
+  "april",
+  "may",
+  "june",
+  "july",
+  "august",
+  "september",
+  "october",
+  "november",
+  "december",
 ];
 
 const MAX_VISIBLE_TRANSACTIONS = 10;
@@ -57,11 +58,19 @@ function MonthlyTransactionTable({
   loading = false,
 }: MonthlyTransactionTableProps) {
   const { t } = useTranslation("property");
+  const { t: tCommon } = useTranslation("common");
+  const { showToast } = useToast();
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
   const [monthTransactions, setMonthTransactions] = useState<
     Record<string, Transaction[]>
   >({});
   const [loadingMonths, setLoadingMonths] = useState<Set<string>>(new Set());
+  const [showAllMonths, setShowAllMonths] = useState<Set<string>>(new Set());
+
+  const getMonthName = useCallback((monthNumber: number) => {
+    const key = MONTH_KEYS[monthNumber - 1];
+    return key ? tCommon(key) : "";
+  }, [tCommon]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("fi-FI", {
@@ -100,6 +109,7 @@ function MonthlyTransactionTable({
         }));
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
+        showToast({ message: t("report.fetchError"), severity: "error" });
       } finally {
         setLoadingMonths((prev) => {
           const next = new Set(prev);
@@ -108,7 +118,7 @@ function MonthlyTransactionTable({
         });
       }
     },
-    [propertyId, monthTransactions]
+    [propertyId, monthTransactions, showToast, t]
   );
 
   const handleAccordionChange =
@@ -168,12 +178,12 @@ function MonthlyTransactionTable({
               const isExpanded = expandedMonths.has(key);
               const isLoading = loadingMonths.has(key);
               const transactions = monthTransactions[key] || [];
-              const visibleTransactions = transactions.slice(
-                0,
-                MAX_VISIBLE_TRANSACTIONS
-              );
+              const showAll = showAllMonths.has(key);
+              const visibleTransactions = showAll
+                ? transactions
+                : transactions.slice(0, MAX_VISIBLE_TRANSACTIONS);
               const hasMoreTransactions =
-                transactions.length > MAX_VISIBLE_TRANSACTIONS;
+                !showAll && transactions.length > MAX_VISIBLE_TRANSACTIONS;
 
               return (
                 <Accordion
@@ -201,7 +211,7 @@ function MonthlyTransactionTable({
                       }}
                     >
                       <Typography sx={{ minWidth: 150 }}>
-                        {MONTH_NAMES[summary.month - 1]} {summary.year}
+                        {getMonthName(summary.month)} {summary.year}
                       </Typography>
                       <Box sx={{ display: "flex", gap: 4 }}>
                         <Typography sx={{ color: "success.main" }}>
@@ -246,10 +256,12 @@ function MonthlyTransactionTable({
                           <TableHead>
                             <TableRow>
                               <TableCell sx={{ pl: 4 }}>
-                                {t("report.month")}
+                                {t("report.date")}
                               </TableCell>
-                              <TableCell>Description</TableCell>
-                              <TableCell align="right">Amount</TableCell>
+                              <TableCell>{t("report.description")}</TableCell>
+                              <TableCell align="right">
+                                {t("report.amount")}
+                              </TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -288,6 +300,11 @@ function MonthlyTransactionTable({
                               variant="body2"
                               color="primary"
                               sx={{ cursor: "pointer" }}
+                              onClick={() =>
+                                setShowAllMonths((prev) =>
+                                  new Set(prev).add(key)
+                                )
+                              }
                             >
                               {t("report.showAllTransactions", {
                                 count: transactions.length,
