@@ -35,6 +35,13 @@ interface EtuoviPropertyData {
 
 @Injectable()
 export class EtuoviImportService {
+  /**
+   * User-Agent header required for fetching etuovi.com pages.
+   * Etuovi.com blocks requests without a standard browser User-Agent,
+   * returning 403 Forbidden. This mimics a regular browser request.
+   * Note: This is a web scraping approach - etuovi.com may change their
+   * anti-bot measures at any time, which could break this feature.
+   */
   private readonly USER_AGENT =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
   private readonly TIMEOUT = 15000;

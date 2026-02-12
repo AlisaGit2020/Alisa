@@ -1,5 +1,5 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Box, CircularProgress, Divider, Grid, InputAdornment, TextField, Typography } from "@mui/material";
+import { Box, CircularProgress, Divider, Grid, InputAdornment, Typography } from "@mui/material";
 import React from "react";
 import axios from "axios";
 import { AlisaButton, AlisaNumberField, AlisaTextField, useToast } from "../alisa";
@@ -138,22 +138,17 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
             etuovi.com
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-            <TextField
-              fullWidth
+            <AlisaTextField
               label={t('investment-calculator:etuoviUrl')}
               value={etuoviUrl}
               onChange={(e) => setEtuoviUrl(e.target.value)}
               placeholder="https://www.etuovi.com/kohde/..."
               sx={{ flexGrow: 1 }}
-              slotProps={{
-                input: {
-                  endAdornment: isFetching ? (
-                    <InputAdornment position="end">
-                      <CircularProgress size={20} />
-                    </InputAdornment>
-                  ) : undefined,
-                }
-              }}
+              adornment={isFetching ? (
+                <InputAdornment position="end">
+                  <CircularProgress size={20} />
+                </InputAdornment>
+              ) : undefined}
             />
             <AlisaButton
               label={t('investment-calculator:fetchFromEtuovi')}
