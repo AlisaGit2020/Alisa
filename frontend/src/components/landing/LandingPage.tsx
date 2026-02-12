@@ -12,6 +12,8 @@ import BetaSignupForm from "./BetaSignupForm";
 import InvestmentCalculatorForm, { InvestmentInputData } from "../investment-calculator/InvestmentCalculatorForm";
 import InvestmentCalculatorResults, { InvestmentResults } from "../investment-calculator/InvestmentCalculatorResults";
 import ApiClient from "@alisa-lib/api-client";
+import opLogo from "../../../assets/banks/op-logo.png";
+import sPankkiLogo from "../../../assets/banks/s-pankki-logo.png";
 
 function LandingPage({ t }: WithTranslation) {
   const { i18n } = useTranslation();
@@ -212,6 +214,45 @@ function LandingPage({ t }: WithTranslation) {
                 },
               }}
             />
+          </Box>
+
+          {/* Supported Banks */}
+          <Box sx={{ mt: 6 }}>
+            <Typography
+              variant="body2"
+              sx={{ opacity: 0.8, mb: 2 }}
+            >
+              {t('landing:supportedBanks')}
+            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 3,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Box
+                component="img"
+                src={opLogo}
+                alt="OP"
+                sx={{
+                  height: 40,
+                  filter: 'brightness(0) invert(1)',
+                  opacity: 0.9,
+                }}
+              />
+              <Box
+                component="img"
+                src={sPankkiLogo}
+                alt="S-Pankki"
+                sx={{
+                  height: 40,
+                  filter: 'brightness(0) invert(1)',
+                  opacity: 0.9,
+                }}
+              />
+            </Box>
           </Box>
         </Container>
       </Box>
