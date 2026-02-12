@@ -95,6 +95,10 @@ export class PropertyService {
 
     return this.transactionRepository.find({
       where,
+      relations: {
+        expenses: { expenseType: true },
+        incomes: { incomeType: true },
+      },
       order: { transactionDate: 'DESC' },
       skip: filter.skip,
       take: filter.take,

@@ -65,6 +65,7 @@ function MonthlyTransactionTable({
     Record<string, Transaction[]>
   >({});
   const [loadingMonths, setLoadingMonths] = useState<Set<string>>(new Set());
+  const [showAllMonths, setShowAllMonths] = useState<Set<string>>(new Set());
 
   const getMonthName = useMemo(() => {
     return (monthNumber: number) => {
@@ -179,12 +180,12 @@ function MonthlyTransactionTable({
               const isExpanded = expandedMonths.has(key);
               const isLoading = loadingMonths.has(key);
               const transactions = monthTransactions[key] || [];
-              const visibleTransactions = transactions.slice(
-                0,
-                MAX_VISIBLE_TRANSACTIONS
-              );
+              const showAll = showAllMonths.has(key);
+              const visibleTransactions = showAll
+                ? transactions
+                : transactions.slice(0, MAX_VISIBLE_TRANSACTIONS);
               const hasMoreTransactions =
-                transactions.length > MAX_VISIBLE_TRANSACTIONS;
+                !showAll && transactions.length > MAX_VISIBLE_TRANSACTIONS;
 
               return (
                 <Accordion
@@ -301,6 +302,11 @@ function MonthlyTransactionTable({
                               variant="body2"
                               color="primary"
                               sx={{ cursor: "pointer" }}
+                              onClick={() =>
+                                setShowAllMonths((prev) =>
+                                  new Set(prev).add(key)
+                                )
+                              }
                             >
                               {t("report.showAllTransactions", {
                                 count: transactions.length,
