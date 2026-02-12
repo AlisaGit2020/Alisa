@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
-import { Box, Typography, Paper, Stack } from "@mui/material";
+import { Box, Typography, Paper, Stack, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import AssessmentIcon from "@mui/icons-material/Assessment";
 import PropertySummaryCards from "./PropertySummaryCards";
 import PropertyReportCharts from "./PropertyReportCharts";
 import AlisaButton from "../../alisa/form/AlisaButton";
-import AlisaPropertySelect from "../../alisa/data/AlisaPropertySelect";
-import { ListPageTemplate } from "../../templates";
+import PageHeader from "../../templates/PageHeader";
 import { Property, PropertyStatistics } from "@alisa-types";
 import ApiClient from "@alisa-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
@@ -27,54 +25,55 @@ function ReportPage() {
   const [propertyId, setPropertyId] = useState<number>(() =>
     getTransactionPropertyId()
   );
-  const [property, setProperty] = useState<Property | null>(null);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [statistics, setStatistics] = useState<PropertyStatistics[]>([]);
   const [loading, setLoading] = useState(true);
 
   const currentYear = new Date().getFullYear();
 
+  // Fetch properties list
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const url = `${VITE_API_URL}/real-estate/property/search`;
+        const options = await ApiClient.getOptions();
+        const response = await axios.post<Property[]>(
+          url,
+          { select: ["id", "name"], order: { name: "ASC" } },
+          options
+        );
+        setProperties(response.data);
+        // If no property selected, select the first one
+        if ((!propertyId || propertyId <= 0) && response.data.length > 0) {
+          handlePropertyChange(response.data[0].id);
+        }
+      } catch (error) {
+        console.error("Failed to fetch properties:", error);
+      }
+    };
+
+    fetchProperties();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Listen for global property changes
   useEffect(() => {
-    const handlePropertyChange = (event: Event) => {
+    const handlePropertyChangeEvent = (event: Event) => {
       const customEvent = event as CustomEvent<{ propertyId: number }>;
       setPropertyId(customEvent.detail.propertyId);
     };
 
     window.addEventListener(
       TRANSACTION_PROPERTY_CHANGE_EVENT,
-      handlePropertyChange
+      handlePropertyChangeEvent
     );
     return () => {
       window.removeEventListener(
         TRANSACTION_PROPERTY_CHANGE_EVENT,
-        handlePropertyChange
+        handlePropertyChangeEvent
       );
     };
   }, []);
-
-  // Fetch property details
-  useEffect(() => {
-    const fetchProperty = async () => {
-      if (!propertyId || propertyId <= 0) {
-        setProperty(null);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const data = await ApiClient.get<Property>(
-          propertyContext.apiPath,
-          propertyId
-        );
-        setProperty(data);
-      } catch (error) {
-        console.error("Failed to fetch property:", error);
-        setProperty(null);
-      }
-    };
-
-    fetchProperty();
-  }, [propertyId]);
 
   // Fetch statistics for summary cards
   useEffect(() => {
@@ -109,12 +108,15 @@ function ReportPage() {
   const handlePropertyChange = (newPropertyId: number) => {
     setPropertyId(newPropertyId);
     setTransactionPropertyId(newPropertyId);
-    // Dispatch event for other components
     window.dispatchEvent(
       new CustomEvent(TRANSACTION_PROPERTY_CHANGE_EVENT, {
         detail: { propertyId: newPropertyId },
       })
     );
+  };
+
+  const handleSelectChange = (event: SelectChangeEvent<number>) => {
+    handlePropertyChange(event.target.value as number);
   };
 
   const handleBackToProperty = () => {
@@ -170,31 +172,44 @@ function ReportPage() {
     };
   })();
 
-  const headerActions = (
-    <Stack direction="row" spacing={2} alignItems="center">
-      <AlisaPropertySelect
-        value={propertyId}
-        onChange={handlePropertyChange}
-        size="small"
-      />
-    </Stack>
-  );
+  const selectedProperty = properties.find((p) => p.id === propertyId);
 
   return (
-    <ListPageTemplate
-      title={t("report.advancedReports")}
-      description={property?.name}
-      icon={<AssessmentIcon />}
-      actions={headerActions}
-    >
-      <Box sx={{ mb: 2 }}>
+    <Box>
+      <PageHeader
+        translationPrefix="property"
+        titleKey="report.advancedReports"
+      />
+
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2, flexWrap: "wrap", gap: 2 }}>
         <AlisaButton
           label={t("report.backToProperty")}
           variant="text"
           startIcon={<ArrowBackIcon />}
           onClick={handleBackToProperty}
         />
+
+        <FormControl size="small" sx={{ minWidth: 200 }}>
+          <InputLabel>{t("properties")}</InputLabel>
+          <Select
+            value={propertyId || ""}
+            label={t("properties")}
+            onChange={handleSelectChange}
+          >
+            {properties.map((property) => (
+              <MenuItem key={property.id} value={property.id}>
+                {property.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Box>
+
+      {selectedProperty && (
+        <Typography variant="h6" gutterBottom>
+          {selectedProperty.name}
+        </Typography>
+      )}
 
       {!propertyId || propertyId <= 0 ? (
         <Paper sx={{ p: 4, textAlign: "center" }}>
@@ -204,7 +219,6 @@ function ReportPage() {
         </Paper>
       ) : (
         <Stack spacing={3}>
-          {/* Summary Cards */}
           <PropertySummaryCards
             currentYearIncome={summaryData.currentYearIncome}
             currentYearExpenses={summaryData.currentYearExpenses}
@@ -213,11 +227,10 @@ function ReportPage() {
             loading={loading}
           />
 
-          {/* Full Charts Section */}
           <PropertyReportCharts propertyId={propertyId} />
         </Stack>
       )}
-    </ListPageTemplate>
+    </Box>
   );
 }
 

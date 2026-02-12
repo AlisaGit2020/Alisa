@@ -71,12 +71,12 @@ function TypeBreakdownCharts({
     const incomeMap = new Map<string, number>();
 
     transactions.forEach((tx) => {
-      if (tx.type === TransactionType.EXPENSE && tx.expense?.expenseType) {
-        const typeName = tx.expense.expenseType.name;
+      if (tx.type === TransactionType.EXPENSE && tx.expenses?.[0]?.expenseType) {
+        const typeName = tx.expenses[0].expenseType.name;
         const current = expenseMap.get(typeName) || 0;
         expenseMap.set(typeName, current + Math.abs(tx.amount));
-      } else if (tx.type === TransactionType.INCOME && tx.income?.incomeType) {
-        const typeName = tx.income.incomeType.name;
+      } else if (tx.type === TransactionType.INCOME && tx.incomes?.[0]?.incomeType) {
+        const typeName = tx.incomes[0].incomeType.name;
         const current = incomeMap.get(typeName) || 0;
         incomeMap.set(typeName, current + Math.abs(tx.amount));
       }
