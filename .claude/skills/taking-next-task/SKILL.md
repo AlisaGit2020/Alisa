@@ -28,9 +28,12 @@ digraph workflow {
     read [label="3. Read issue details\ngh issue view <id>"];
     pull [label="4. git checkout master\ngit pull"];
     branch [label="5. Create branch\ngit checkout -b <type>/<description>"];
-    work [label="6. Start implementation"];
+    work [label="6. Implement"];
+    commit [label="7. Commit changes"];
+    push [label="8. Push branch"];
+    pr [label="9. Create PR"];
 
-    start -> fetch -> select -> read -> pull -> branch -> work;
+    start -> fetch -> select -> read -> pull -> branch -> work -> commit -> push -> pr;
 }
 ```
 
@@ -67,6 +70,28 @@ Example: Issue #12 "Add Swedish language support" → `feat/swedish-language-sup
 - Follow TDD for implementation
 - Reference the issue number in commits
 
+### 6. Complete the Task
+After implementation is done and all tests pass:
+
+```bash
+# Stage and commit changes
+git add <files>
+git commit -m "feat(<scope>): description
+
+Closes #<issue-number>"
+
+# Push branch
+git push -u origin <branch-name>
+
+# Create PR
+gh pr create --title "<title>" --body "<body with Closes #<issue-number>>"
+```
+
+The PR body should include:
+- Summary of changes
+- Test plan
+- `Closes #<issue-number>` to auto-close the issue when merged
+
 ## Quick Reference
 
 | Step | Command |
@@ -75,6 +100,9 @@ Example: Issue #12 "Add Swedish language support" → `feat/swedish-language-sup
 | View issue | `gh issue view <id>` |
 | Sync master | `git checkout master && git pull` |
 | Create branch | `git checkout -b feat/<name>` |
+| Commit | `git commit -m "feat(scope): description"` |
+| Push | `git push -u origin <branch>` |
+| Create PR | `gh pr create --title "..." --body "..."` |
 
 ## Branch Naming
 

@@ -208,20 +208,20 @@ See `frontend/docs/testing-guide.md` for detailed examples and patterns.
 - When using PRs: CI must pass before merge
 
 #### Conditional CI Execution
-Tests run only when relevant files change:
-- Backend changes → run backend tests
-- Frontend changes → run frontend tests
-- Docs/config only → skip tests (only the changes job runs)
+- **Pull requests**: Run lint + tests (validates code before merge)
+- **Push to master**: Run lint only (tests already passed in PR)
+- Path filtering: Only run jobs for changed areas (backend/frontend)
+- Docs/config only: Skip lint and tests
 
 #### Parallel CI Jobs
 CI is split into independent jobs that run concurrently:
-- `lint-backend` - Backend ESLint
-- `lint-frontend` - Frontend ESLint
-- `test-backend` - Backend unit + e2e tests
-- `test-frontend` - Frontend Jest tests
+- `lint-backend` - Backend ESLint (push + PR)
+- `lint-frontend` - Frontend ESLint (push + PR)
+- `test-backend` - Backend unit + e2e tests (PR only)
+- `test-frontend` - Frontend Jest tests (PR only)
 
 ### GitHub Actions Workflows
-- **CI workflow** (`ci.yml`): Runs on all pushes and PRs with path filtering and parallel jobs
+- **CI workflow** (`ci.yml`): Runs lint on all pushes, tests only on PRs
 - **Deploy workflow** (`deploy.yml`): Runs after successful CI on master branch (excludes PR events)
 
 ### Skipping Deployment
