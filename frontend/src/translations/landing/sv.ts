@@ -1,6 +1,6 @@
 const landing = {
   title: 'Hantera dina hyresfastighetsinvesteringar på ett ställe',
-  subtitle: 'Importera transaktioner från OP & S-Pankki • Enkel deklaration • Investeringsanalys',
+  subtitle: 'Följ hyresintäkter och utgifter • Enkel deklaration • Investeringsanalys',
   ctaLogin: 'Logga in',
   ctaCalculator: 'Prova kalkylatorn',
   feature1Title: 'Investeringskalkylator',

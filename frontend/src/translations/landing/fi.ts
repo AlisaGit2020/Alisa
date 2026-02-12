@@ -1,6 +1,6 @@
 const landing = {
   title: 'Hallitse vuokra-asuntosijoituksiasi yhdessä paikassa',
-  subtitle: 'Tuo tapahtumat automaattisesti OP:sta ja S-Pankista • Veroilmoitus helposti • Sijoitusanalytiikka',
+  subtitle: 'Seuraa vuokratuloja ja menoja • Veroilmoitus helposti • Sijoitusanalytiikka',
   ctaLogin: 'Kirjaudu sisään',
   ctaCalculator: 'Kokeile laskuria',
   feature1Title: 'Sijoitustuottolaskuri',

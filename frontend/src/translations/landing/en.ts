@@ -1,6 +1,6 @@
 const landing = {
   title: 'Manage your rental property investments in one place',
-  subtitle: 'Import transactions from OP & S-Pankki • Easy tax reporting • Investment analytics',
+  subtitle: 'Track rental income and expenses • Easy tax reporting • Investment analytics',
   ctaLogin: 'Log In',
   ctaCalculator: 'Try Calculator',
   feature1Title: 'Investment Calculator',
