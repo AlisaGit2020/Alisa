@@ -218,12 +218,6 @@ function LandingPage({ t }: WithTranslation) {
 
           {/* Supported Banks */}
           <Box sx={{ mt: 6 }}>
-            <Typography
-              variant="body2"
-              sx={{ opacity: 0.8, mb: 2 }}
-            >
-              {t('landing:supportedBanks')}
-            </Typography>
             <Box
               sx={{
                 display: 'flex',
