@@ -1,6 +1,6 @@
 const landing = {
-  title: 'Alisa - Fastighetsförvaltning',
-  subtitle: 'Hantera dina bostäder och investeringar enkelt',
+  title: 'Hantera dina hyresfastighetsinvesteringar på ett ställe',
+  subtitle: 'Importera transaktioner från OP & S-Pankki • Enkel deklaration • Investeringsanalys',
   ctaLogin: 'Logga in',
   ctaCalculator: 'Prova kalkylatorn',
   feature1Title: 'Investeringskalkylator',

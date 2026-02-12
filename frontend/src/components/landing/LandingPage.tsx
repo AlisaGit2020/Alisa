@@ -1,5 +1,5 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Alert, Box, Card, Container, Grid, Link, Typography } from "@mui/material";
+import { Alert, Box, Card, Chip, Container, Grid, Link, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { AlisaButton } from "../alisa";
 import CalculateIcon from "@mui/icons-material/Calculate";
@@ -153,6 +153,18 @@ function LandingPage({ t }: WithTranslation) {
         }}
       >
         <Container maxWidth="md" sx={{ textAlign: 'center' }}>
+          <Chip
+            label="BETA"
+            sx={{
+              mb: 2,
+              bgcolor: 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '0.875rem',
+              letterSpacing: '0.1em',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
+          />
           <Typography
             variant="h2"
             component="h1"
