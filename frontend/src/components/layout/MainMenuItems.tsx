@@ -27,7 +27,9 @@ import {
   expenseContext,
   incomeContext,
   taxContext,
+  reportContext,
 } from "@alisa-lib/alisa-contexts";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 
 interface MainMenuItemsProps {
   open: boolean;
@@ -133,6 +135,13 @@ function MainMenuItems({ open, isMobile = false }: MainMenuItemsProps) {
         t("investmentCalculator"),
         <TrendingUpIcon sx={{ color: "success.main" }} />,
         currentPath.startsWith("/app/investment-calculations")
+      )}
+      {menuItem(
+        "reports",
+        reportContext.routePath,
+        t("reports"),
+        <AssessmentIcon sx={{ color: "primary.main" }} />,
+        currentPath.startsWith(reportContext.routePath)
       )}
 
       {!isMobile && (

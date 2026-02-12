@@ -4,6 +4,7 @@ import Dashboard from "./dashboard/Dashboard";
 import Properties from "./property/Properties";
 import PropertyForm from "./property/PropertyForm";
 import PropertyView from "./property/PropertyView";
+import ReportPage from "./property/report/ReportPage";
 import Settings from "./settings/Settings";
 import TaxView from "./tax/TaxView";
 import TransactionsOverview from "./transaction/TransactionsOverview";
@@ -95,6 +96,11 @@ export default function AppRoutes() {
           <Route
             path="tax"
             element={<TaxView />}
+          ></Route>
+
+          <Route
+            path="report"
+            element={<ReportPage />}
           ></Route>
 
           {/* Backward compatibility redirect */}

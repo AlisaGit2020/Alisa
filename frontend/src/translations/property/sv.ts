@@ -35,6 +35,30 @@ const property = {
     statisticsComingSoon: 'Ekonomisk statistik kommer snart',
     editProperty: 'Redigera',
     back: 'Tillbaka',
+
+    // Report section
+    report: {
+        currentYearIncome: 'Årets intäkter',
+        currentYearExpenses: 'Årets utgifter',
+        allTimeBalance: 'Totalt saldo',
+        allTimeNetIncome: 'Total nettointäkt',
+        advancedReports: 'Detaljerade rapporter',
+        monthlyIncomeVsExpenses: 'Månatliga intäkter och utgifter',
+        balanceTrend: 'Saldoutveckling',
+        byType: 'Efter typ',
+        byTransactionType: 'Efter transaktionstyp',
+        expenseBreakdown: 'Utgiftsfördelning',
+        incomeBreakdown: 'Intäktsfördelning',
+        monthlySummary: 'Månatlig sammanfattning',
+        month: 'Månad',
+        income: 'Intäkter',
+        expenses: 'Utgifter',
+        net: 'Netto',
+        showAllTransactions: 'Visa alla {{count}} transaktioner',
+        noDataForYear: 'Ingen data för detta år',
+        selectProperty: 'Välj en fastighet för att visa rapporter',
+        backToProperty: 'Tillbaka till fastighet',
+    },
 }
 
 export default property

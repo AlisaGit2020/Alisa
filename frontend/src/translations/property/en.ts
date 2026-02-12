@@ -35,6 +35,30 @@ const property = {
     statisticsComingSoon: 'Financial statistics coming soon',
     editProperty: 'Edit',
     back: 'Back',
+
+    // Report section
+    report: {
+        currentYearIncome: 'Current Year Income',
+        currentYearExpenses: 'Current Year Expenses',
+        allTimeBalance: 'All-Time Balance',
+        allTimeNetIncome: 'All-Time Net Income',
+        advancedReports: 'Advanced Reports',
+        monthlyIncomeVsExpenses: 'Monthly Income vs Expenses',
+        balanceTrend: 'Balance Trend',
+        byType: 'By Type',
+        byTransactionType: 'By Transaction Type',
+        expenseBreakdown: 'Expense Breakdown',
+        incomeBreakdown: 'Income Breakdown',
+        monthlySummary: 'Monthly Summary',
+        month: 'Month',
+        income: 'Income',
+        expenses: 'Expenses',
+        net: 'Net',
+        showAllTransactions: 'Show all {{count}} transactions',
+        noDataForYear: 'No data for this year',
+        selectProperty: 'Please select a property to view reports',
+        backToProperty: 'Back to Property',
+    },
 }
 
 export default property

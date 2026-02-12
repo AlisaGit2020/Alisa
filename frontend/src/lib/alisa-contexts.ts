@@ -95,3 +95,9 @@ export const taxContext: AlisaContext = {
     apiPath: 'real-estate/property/tax',
     routePath: '/app/tax',
 }
+
+export const reportContext: AlisaContext = {
+    name: 'report',
+    apiPath: 'real-estate/property',
+    routePath: '/app/report',
+}
