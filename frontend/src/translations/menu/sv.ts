@@ -5,6 +5,8 @@ const menu = {
     accounting: 'Bokföring',
     transactions: 'Transaktioner',
     taxes: 'Skatter',
+    expandMenu: 'Expandera meny',
+    collapseMenu: 'Minimera meny',
 }
 
 export default menu

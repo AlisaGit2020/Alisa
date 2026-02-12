@@ -1,8 +1,10 @@
 import { styled } from "@mui/material/styles";
-import { Divider, IconButton, Toolbar } from "@mui/material";
+import { Divider, IconButton, Toolbar, Tooltip } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import MenuIcon from "@mui/icons-material/Menu";
 import MuiDrawer from "@mui/material/Drawer";
 import LeftMenuItems from "./LeftMenuItems";
+import { useTranslation } from "react-i18next";
 
 const drawerWidth: number = 240;
 const collapsedWidth: number = 72;
@@ -37,6 +39,8 @@ interface LeftMenuProps {
 }
 
 function LeftMenu({ open, onToggleDrawer, isMobile = false }: LeftMenuProps) {
+  const { t } = useTranslation("menu");
+
   if (isMobile) {
     // Mobile: Temporary drawer overlay, no permanent sidebar
     return (
@@ -60,9 +64,11 @@ function LeftMenu({ open, onToggleDrawer, isMobile = false }: LeftMenuProps) {
             px: [1],
           }}
         >
-          <IconButton onClick={onToggleDrawer}>
-            <ChevronLeftIcon />
-          </IconButton>
+          <Tooltip title={t("collapseMenu")}>
+            <IconButton onClick={onToggleDrawer}>
+              <ChevronLeftIcon />
+            </IconButton>
+          </Tooltip>
         </Toolbar>
         <Divider />
         <LeftMenuItems open={true} isMobile={true} />
@@ -81,9 +87,11 @@ function LeftMenu({ open, onToggleDrawer, isMobile = false }: LeftMenuProps) {
           px: [1],
         }}
       >
-        <IconButton onClick={onToggleDrawer}>
-          <ChevronLeftIcon />
-        </IconButton>
+        <Tooltip title={open ? t("collapseMenu") : t("expandMenu")}>
+          <IconButton onClick={onToggleDrawer}>
+            {open ? <ChevronLeftIcon /> : <MenuIcon />}
+          </IconButton>
+        </Tooltip>
       </Toolbar>
       <Divider />
       <LeftMenuItems open={open} isMobile={false} />
