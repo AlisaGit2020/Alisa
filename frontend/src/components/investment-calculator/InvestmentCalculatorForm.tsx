@@ -1,7 +1,9 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Box, Grid } from "@mui/material";
+import { Box, CircularProgress, Divider, Grid, InputAdornment, TextField, Typography } from "@mui/material";
 import React from "react";
-import { AlisaButton, AlisaNumberField, AlisaTextField } from "../alisa";
+import axios from "axios";
+import { AlisaButton, AlisaNumberField, AlisaTextField, useToast } from "../alisa";
+import { VITE_API_URL } from "../../constants";
 
 export interface InvestmentInputData {
   deptFreePrice: number;
@@ -19,12 +21,27 @@ export interface InvestmentInputData {
   name?: string;
 }
 
+interface EtuoviPropertyData {
+  url: string;
+  deptFreePrice: number;
+  deptShare?: number;
+  apartmentSize: number;
+  maintenanceFee: number;
+  waterCharge?: number;
+  chargeForFinancialCosts?: number;
+  address?: string;
+}
+
 interface InvestmentCalculatorFormProps extends WithTranslation {
   onCalculate: (data: InvestmentInputData) => void;
   initialValues?: Partial<InvestmentInputData>;
 }
 
 function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentCalculatorFormProps) {
+  const { showToast } = useToast();
+  const [etuoviUrl, setEtuoviUrl] = React.useState('');
+  const [isFetching, setIsFetching] = React.useState(false);
+
   const getDefaultFormData = React.useCallback(() => ({
     deptFreePrice: initialValues?.deptFreePrice ?? 100000,
     deptShare: initialValues?.deptShare ?? 0,
@@ -69,9 +86,88 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
     onCalculate(formData);
   };
 
+  const isValidEtuoviUrl = (url: string): boolean => {
+    const pattern = /^https?:\/\/(www\.)?etuovi\.com\/kohde\//;
+    return pattern.test(url);
+  };
+
+  const handleFetchFromEtuovi = async () => {
+    if (!etuoviUrl.trim()) {
+      return;
+    }
+
+    if (!isValidEtuoviUrl(etuoviUrl)) {
+      showToast({ message: t('investment-calculator:invalidUrl'), severity: 'error' });
+      return;
+    }
+
+    setIsFetching(true);
+    try {
+      const response = await axios.post<EtuoviPropertyData>(
+        `${VITE_API_URL}/import/etuovi/fetch`,
+        { url: etuoviUrl }
+      );
+
+      const data = response.data;
+      setFormData(prev => ({
+        ...prev,
+        deptFreePrice: data.deptFreePrice,
+        deptShare: data.deptShare ?? prev.deptShare,
+        apartmentSize: data.apartmentSize,
+        maintenanceFee: data.maintenanceFee,
+        waterCharge: data.waterCharge ?? prev.waterCharge,
+        chargeForFinancialCosts: data.chargeForFinancialCosts ?? prev.chargeForFinancialCosts,
+        name: data.address || prev.name,
+      }));
+
+      showToast({ message: t('investment-calculator:fetchSuccess'), severity: 'success' });
+    } catch (error) {
+      console.error('Etuovi fetch error:', error);
+      showToast({ message: t('investment-calculator:fetchError'), severity: 'error' });
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2, maxWidth: 800 }}>
       <Grid container spacing={2}>
+        {/* Etuovi URL fetch section */}
+        <Grid size={{ xs: 12 }}>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+            etuovi.com
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+            <TextField
+              fullWidth
+              label={t('investment-calculator:etuoviUrl')}
+              value={etuoviUrl}
+              onChange={(e) => setEtuoviUrl(e.target.value)}
+              placeholder="https://www.etuovi.com/kohde/..."
+              sx={{ flexGrow: 1 }}
+              slotProps={{
+                input: {
+                  endAdornment: isFetching ? (
+                    <InputAdornment position="end">
+                      <CircularProgress size={20} />
+                    </InputAdornment>
+                  ) : undefined,
+                }
+              }}
+            />
+            <AlisaButton
+              label={t('investment-calculator:fetchFromEtuovi')}
+              onClick={handleFetchFromEtuovi}
+              disabled={isFetching || !etuoviUrl.trim()}
+              sx={{ mt: 0, minWidth: 120 }}
+            />
+          </Box>
+        </Grid>
+
+        <Grid size={{ xs: 12 }}>
+          <Divider sx={{ my: 1 }} />
+        </Grid>
+
         <Grid size={{ xs: 12 }}>
           <AlisaTextField
             label={t('investment-calculator:name')}

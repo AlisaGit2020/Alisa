@@ -53,6 +53,13 @@ const investmentCalculator = {
   taxPerYear: 'Taxes/year',
   taxDeductibleExpensesPerYear: 'Deductible expenses/year',
 
+  // Etuovi import
+  etuoviUrl: 'Etuovi.com URL',
+  fetchFromEtuovi: 'Fetch data',
+  fetchSuccess: 'Property data loaded',
+  fetchError: 'Could not fetch property data',
+  invalidUrl: 'Invalid etuovi.com URL',
+
   // Saved calculations
   createdAt: 'Created',
   associatedProperty: 'Property',
