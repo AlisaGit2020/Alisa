@@ -25,7 +25,6 @@ import { User } from '@alisa-backend/common/decorators/user.decorator';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
 import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
-import { PropertyStatisticsFilterDto } from '@alisa-backend/real-estate/property/dtos/property-statistics-filter.dto';
 import { PropertyStatisticsSearchDto } from '@alisa-backend/real-estate/property/dtos/property-statistics-search.dto';
 import { PropertyDeleteValidationDto } from './dtos/property-delete-validation.dto';
 import { PropertyTransactionSearchDto } from './dtos/property-transaction-search.dto';
@@ -88,10 +87,10 @@ export class PropertyController {
   async statistics(
     @User() jwtUser: JWTUser,
     @Param('id') id: string,
-    @Body() filter: PropertyStatisticsFilterDto,
+    @Body() filter: PropertyStatisticsSearchDto,
   ): Promise<PropertyStatistics[]> {
     filter.propertyId = Number(id);
-    return this.propertyStatisticsService.search(jwtUser, filter);
+    return this.propertyStatisticsService.searchAll(jwtUser, filter);
   }
 
   @Post('/:id/transactions/search')
