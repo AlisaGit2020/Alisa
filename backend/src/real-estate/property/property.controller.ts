@@ -30,9 +30,6 @@ import { PropertyStatisticsSearchDto } from '@alisa-backend/real-estate/property
 import { PropertyDeleteValidationDto } from './dtos/property-delete-validation.dto';
 import { PropertyTransactionSearchDto } from './dtos/property-transaction-search.dto';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { TransactionStatus } from '@alisa-backend/common/types';
-import { Between, FindOptionsWhere } from 'typeorm';
 
 @UseGuards(JwtAuthGuard)
 @Controller('real-estate/property')
@@ -40,7 +37,6 @@ export class PropertyController {
   constructor(
     private service: PropertyService,
     private propertyStatisticsService: PropertyStatisticsService,
-    private transactionService: TransactionService,
   ) {}
 
   @Post('/search')
@@ -105,35 +101,7 @@ export class PropertyController {
     @Param('id') id: string,
     @Body() filter: PropertyTransactionSearchDto,
   ): Promise<Transaction[]> {
-    const propertyId = Number(id);
-
-    // Build where clause
-    const where: FindOptionsWhere<Transaction> = {
-      propertyId,
-      status: TransactionStatus.ACCEPTED,
-    };
-
-    // Filter by year and month using transactionDate
-    if (filter.year && filter.month) {
-      const startDate = new Date(filter.year, filter.month - 1, 1);
-      const endDate = new Date(filter.year, filter.month, 0, 23, 59, 59);
-      where.transactionDate = Between(startDate, endDate);
-    } else if (filter.year) {
-      const startDate = new Date(filter.year, 0, 1);
-      const endDate = new Date(filter.year, 11, 31, 23, 59, 59);
-      where.transactionDate = Between(startDate, endDate);
-    }
-
-    if (filter.type) {
-      where.type = filter.type;
-    }
-
-    return this.transactionService.search(user, {
-      where,
-      order: { transactionDate: 'DESC' },
-      skip: filter.skip,
-      take: filter.take,
-    });
+    return this.service.searchTransactions(user, Number(id), filter);
   }
 
   @Post('/')

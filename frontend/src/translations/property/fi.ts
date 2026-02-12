@@ -51,6 +51,10 @@ const property = {
         incomeBreakdown: 'Tulojen jakauma',
         monthlySummary: 'Kuukausittainen yhteenveto',
         month: 'Kuukausi',
+        year: 'Vuosi',
+        date: 'Päivämäärä',
+        description: 'Kuvaus',
+        amount: 'Summa',
         income: 'Tulot',
         expenses: 'Menot',
         net: 'Netto',
@@ -58,6 +62,7 @@ const property = {
         noDataForYear: 'Ei tietoja tälle vuodelle',
         selectProperty: 'Valitse kohde nähdäksesi raportit',
         backToProperty: 'Takaisin kohteeseen',
+        fetchError: 'Raporttitietojen lataus epäonnistui',
     },
 }
 

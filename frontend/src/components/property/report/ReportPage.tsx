@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Box, Typography, Paper, Stack, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -17,10 +17,13 @@ import {
 } from "@alisa-lib/initial-data";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../../transaction/TransactionLeftMenuItems";
 import { propertyContext } from "@alisa-lib/alisa-contexts";
+import { calculateSummaryData } from "./report-utils";
+import { useToast } from "../../alisa/toast";
 
 function ReportPage() {
   const { t } = useTranslation("property");
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [propertyId, setPropertyId] = useState<number>(() =>
     getTransactionPropertyId()
@@ -49,6 +52,7 @@ function ReportPage() {
         }
       } catch (error) {
         console.error("Failed to fetch properties:", error);
+        showToast({ message: t("report.fetchError"), severity: "error" });
       }
     };
 
@@ -97,13 +101,14 @@ function ReportPage() {
       } catch (error) {
         console.error("Failed to fetch statistics:", error);
         setStatistics([]);
+        showToast({ message: t("report.fetchError"), severity: "error" });
       } finally {
         setLoading(false);
       }
     };
 
     fetchStatistics();
-  }, [propertyId]);
+  }, [propertyId, showToast, t]);
 
   const handlePropertyChange = (newPropertyId: number) => {
     setPropertyId(newPropertyId);
@@ -128,49 +133,10 @@ function ReportPage() {
   };
 
   // Calculate summary values
-  const summaryData = (() => {
-    let currentYearIncome = 0;
-    let currentYearExpenses = 0;
-    let allTimeIncome = 0;
-    let allTimeExpenses = 0;
-    let allTimeDeposit = 0;
-    let allTimeWithdraw = 0;
-
-    statistics.forEach((stat) => {
-      const value = parseFloat(stat.value) || 0;
-
-      if (stat.year && !stat.month) {
-        if (stat.key === "income") {
-          allTimeIncome += value;
-        } else if (stat.key === "expense") {
-          allTimeExpenses += value;
-        } else if (stat.key === "deposit") {
-          allTimeDeposit += value;
-        } else if (stat.key === "withdraw") {
-          allTimeWithdraw += value;
-        }
-
-        if (stat.year === currentYear) {
-          if (stat.key === "income") {
-            currentYearIncome += value;
-          } else if (stat.key === "expense") {
-            currentYearExpenses += value;
-          }
-        }
-      }
-    });
-
-    const allTimeBalance =
-      allTimeIncome + allTimeDeposit - allTimeExpenses - allTimeWithdraw;
-    const allTimeNetIncome = allTimeIncome - allTimeExpenses;
-
-    return {
-      currentYearIncome,
-      currentYearExpenses,
-      allTimeBalance,
-      allTimeNetIncome,
-    };
-  })();
+  const summaryData = useMemo(
+    () => calculateSummaryData(statistics, currentYear),
+    [statistics, currentYear]
+  );
 
   const selectedProperty = properties.find((p) => p.id === propertyId);
 

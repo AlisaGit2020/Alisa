@@ -30,6 +30,7 @@ import { Expense } from '@alisa-backend/accounting/expense/entities/expense.enti
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { DepreciationAsset } from '@alisa-backend/accounting/depreciation/entities/depreciation-asset.entity';
+import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
 
 describe('PropertyService', () => {
   let service: PropertyService;
@@ -720,6 +721,140 @@ describe('PropertyService', () => {
 
       expect(result).toEqual(properties);
       expect(mockRepository.find).toHaveBeenCalled();
+    });
+  });
+
+  describe('searchTransactions', () => {
+    it('returns transactions for owned property', async () => {
+      const property = createProperty({ id: 1 });
+      const transactions = [
+        createTransaction({
+          id: 1,
+          propertyId: 1,
+          status: TransactionStatus.ACCEPTED,
+        }),
+        createTransaction({
+          id: 2,
+          propertyId: 1,
+          status: TransactionStatus.ACCEPTED,
+        }),
+      ];
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTransactionRepository.find.mockResolvedValue(transactions);
+
+      const result = await service.searchTransactions(testUser, 1, {});
+
+      expect(result).toEqual(transactions);
+      expect(mockTransactionRepository.find).toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException when property does not exist', async () => {
+      mockRepository.findOneBy.mockResolvedValue(null);
+
+      await expect(
+        service.searchTransactions(testUser, 999, {}),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws UnauthorizedException when user has no ownership', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      await expect(
+        service.searchTransactions(otherUser, 1, {}),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('filters by year when provided', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTransactionRepository.find.mockResolvedValue([]);
+
+      await service.searchTransactions(testUser, 1, { year: 2023 });
+
+      expect(mockTransactionRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            propertyId: 1,
+            status: TransactionStatus.ACCEPTED,
+            transactionDate: expect.any(Object),
+          }),
+        }),
+      );
+    });
+
+    it('filters by year and month when both provided', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTransactionRepository.find.mockResolvedValue([]);
+
+      await service.searchTransactions(testUser, 1, { year: 2023, month: 6 });
+
+      expect(mockTransactionRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            propertyId: 1,
+            status: TransactionStatus.ACCEPTED,
+            transactionDate: expect.any(Object),
+          }),
+        }),
+      );
+    });
+
+    it('filters by transaction type when provided', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTransactionRepository.find.mockResolvedValue([]);
+
+      await service.searchTransactions(testUser, 1, {
+        type: TransactionType.INCOME,
+      });
+
+      expect(mockTransactionRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            propertyId: 1,
+            status: TransactionStatus.ACCEPTED,
+            type: TransactionType.INCOME,
+          }),
+        }),
+      );
+    });
+
+    it('applies skip and take pagination', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTransactionRepository.find.mockResolvedValue([]);
+
+      await service.searchTransactions(testUser, 1, { skip: 10, take: 20 });
+
+      expect(mockTransactionRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 10,
+          take: 20,
+        }),
+      );
+    });
+
+    it('orders by transactionDate DESC', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTransactionRepository.find.mockResolvedValue([]);
+
+      await service.searchTransactions(testUser, 1, {});
+
+      expect(mockTransactionRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          order: { transactionDate: 'DESC' },
+        }),
+      );
     });
   });
 });

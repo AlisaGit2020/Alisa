@@ -10,6 +10,7 @@ import { PropertyStatistics, Transaction } from "@alisa-types";
 import ApiClient from "@alisa-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
 import axios from "axios";
+import { useToast } from "../../alisa/toast";
 
 interface PropertyReportChartsProps {
   propertyId: number;
@@ -22,6 +23,7 @@ const MONTH_LABELS = [
 
 function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
   const { t } = useTranslation("property");
+  const { showToast } = useToast();
   const currentYear = new Date().getFullYear();
 
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
@@ -52,11 +54,12 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
       } catch (error) {
         console.error("Failed to fetch years:", error);
         setAvailableYears([currentYear - 1, currentYear]);
+        showToast({ message: t("report.fetchError"), severity: "error" });
       }
     };
 
     fetchYears();
-  }, [currentYear]);
+  }, [currentYear, showToast, t]);
 
   // Fetch statistics for the selected year
   useEffect(() => {
@@ -74,6 +77,7 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
       } catch (error) {
         console.error("Failed to fetch statistics:", error);
         setStatistics([]);
+        showToast({ message: t("report.fetchError"), severity: "error" });
       } finally {
         setLoadingStats(false);
       }
@@ -82,7 +86,7 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
     if (propertyId) {
       fetchStatistics();
     }
-  }, [propertyId, selectedYear]);
+  }, [propertyId, selectedYear, showToast, t]);
 
   // Fetch transactions for the selected year (for pie charts)
   useEffect(() => {
@@ -100,6 +104,7 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
         setTransactions([]);
+        showToast({ message: t("report.fetchError"), severity: "error" });
       } finally {
         setLoadingTransactions(false);
       }
@@ -108,7 +113,7 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
     if (propertyId) {
       fetchTransactions();
     }
-  }, [propertyId, selectedYear]);
+  }, [propertyId, selectedYear, showToast, t]);
 
   const handleYearChange = useCallback((event: SelectChangeEvent<number>) => {
     setSelectedYear(event.target.value as number);
@@ -156,10 +161,10 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
       {/* Year selector */}
       <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
         <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>{t("report.month")}</InputLabel>
+          <InputLabel>{t("report.year")}</InputLabel>
           <Select
             value={selectedYear}
-            label={t("report.month")}
+            label={t("report.year")}
             onChange={handleYearChange}
           >
             {availableYears.map((year) => (

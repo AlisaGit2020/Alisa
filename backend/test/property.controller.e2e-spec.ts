@@ -569,7 +569,177 @@ describe('PropertyController (e2e)', () => {
   });
 
   // =========================================================================
-  // 6. POST /real-estate/property/statistics/search
+  // 6. POST /real-estate/property/:id/transactions/search
+  // =========================================================================
+  describe('POST /real-estate/property/:id/transactions/search', () => {
+    beforeEach(async () => {
+      await eventTracker.waitForPending();
+      await dataSource.query('DELETE FROM income');
+      await dataSource.query('DELETE FROM expense');
+      await dataSource.query('DELETE FROM property_statistics');
+      await dataSource.query('DELETE FROM transaction');
+      await eventTracker.waitForPending();
+    });
+
+    it('requires authentication', async () => {
+      await request(server)
+        .post('/real-estate/property/1/transactions/search')
+        .send({})
+        .expect(401);
+    });
+
+    it('returns transactions for owned property', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+      const propertyId = user.properties[0].id;
+
+      // Add a transaction
+      await transactionService.add(user.jwtUser, {
+        propertyId,
+        status: TransactionStatus.ACCEPTED,
+        type: TransactionType.INCOME,
+        sender: 'Test Sender',
+        receiver: 'Test Receiver',
+        description: 'Transaction search test',
+        transactionDate: new Date('2023-06-15'),
+        accountingDate: new Date('2023-06-15'),
+        amount: 500,
+      });
+      await eventTracker.waitForPending();
+
+      const response = await request(server)
+        .post(`/real-estate/property/${propertyId}/transactions/search`)
+        .set('Authorization', getBearerToken(token))
+        .send({ year: 2023 })
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBeGreaterThan(0);
+      expect(response.body[0].description).toBe('Transaction search test');
+    });
+
+    it('filters transactions by year and month', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+      const propertyId = user.properties[0].id;
+
+      // Add transactions in different months
+      await transactionService.add(user.jwtUser, {
+        propertyId,
+        status: TransactionStatus.ACCEPTED,
+        type: TransactionType.INCOME,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'June transaction',
+        transactionDate: new Date('2023-06-15'),
+        accountingDate: new Date('2023-06-15'),
+        amount: 100,
+      });
+      await transactionService.add(user.jwtUser, {
+        propertyId,
+        status: TransactionStatus.ACCEPTED,
+        type: TransactionType.INCOME,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'July transaction',
+        transactionDate: new Date('2023-07-15'),
+        accountingDate: new Date('2023-07-15'),
+        amount: 200,
+      });
+      await eventTracker.waitForPending();
+
+      const response = await request(server)
+        .post(`/real-estate/property/${propertyId}/transactions/search`)
+        .set('Authorization', getBearerToken(token))
+        .send({ year: 2023, month: 6 })
+        .expect(200);
+
+      expect(response.body.length).toBe(1);
+      expect(response.body[0].description).toBe('June transaction');
+    });
+
+    it('only returns ACCEPTED transactions', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+      const propertyId = user.properties[0].id;
+
+      // Add accepted and pending transactions
+      await transactionService.add(user.jwtUser, {
+        propertyId,
+        status: TransactionStatus.ACCEPTED,
+        type: TransactionType.INCOME,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Accepted transaction',
+        transactionDate: new Date('2023-08-15'),
+        accountingDate: new Date('2023-08-15'),
+        amount: 100,
+      });
+      await transactionService.add(user.jwtUser, {
+        propertyId,
+        status: TransactionStatus.PENDING,
+        type: TransactionType.INCOME,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Pending transaction',
+        transactionDate: new Date('2023-08-20'),
+        accountingDate: new Date('2023-08-20'),
+        amount: 200,
+      });
+      await eventTracker.waitForPending();
+
+      const response = await request(server)
+        .post(`/real-estate/property/${propertyId}/transactions/search`)
+        .set('Authorization', getBearerToken(token))
+        .send({ year: 2023, month: 8 })
+        .expect(200);
+
+      expect(response.body.length).toBe(1);
+      expect(response.body[0].description).toBe('Accepted transaction');
+    });
+
+    it('returns 401 when accessing transactions without property ownership', async () => {
+      const user1 = testUsers.user1WithProperties;
+      const user2 = testUsers.user2WithProperties;
+      const token1 = await getUserAccessToken2(authService, user1.jwtUser);
+
+      const user2PropertyId = user2.properties[0].id;
+
+      await request(server)
+        .post(`/real-estate/property/${user2PropertyId}/transactions/search`)
+        .set('Authorization', getBearerToken(token1))
+        .send({})
+        .expect(401);
+    });
+
+    it('returns 404 for non-existent property', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      await request(server)
+        .post('/real-estate/property/99999/transactions/search')
+        .set('Authorization', getBearerToken(token))
+        .send({})
+        .expect(404);
+    });
+
+    it('returns empty array when no transactions match filter', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+      const propertyId = user.properties[0].id;
+
+      const response = await request(server)
+        .post(`/real-estate/property/${propertyId}/transactions/search`)
+        .set('Authorization', getBearerToken(token))
+        .send({ year: 1999 })
+        .expect(200);
+
+      expect(response.body).toEqual([]);
+    });
+  });
+
+  // =========================================================================
+  // 7. POST /real-estate/property/statistics/search
   // =========================================================================
   describe('POST /real-estate/property/statistics/search', () => {
     beforeEach(async () => {

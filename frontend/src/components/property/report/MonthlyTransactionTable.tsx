@@ -14,11 +14,12 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Transaction } from "@alisa-types";
 import ApiClient from "@alisa-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
 import axios from "axios";
+import { useToast } from "../../alisa/toast";
 
 interface MonthlySummary {
   month: number;
@@ -34,19 +35,19 @@ interface MonthlyTransactionTableProps {
   loading?: boolean;
 }
 
-const MONTH_NAMES = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+const MONTH_KEYS = [
+  "january",
+  "february",
+  "march",
+  "april",
+  "may",
+  "june",
+  "july",
+  "august",
+  "september",
+  "october",
+  "november",
+  "december",
 ];
 
 const MAX_VISIBLE_TRANSACTIONS = 10;
@@ -57,11 +58,20 @@ function MonthlyTransactionTable({
   loading = false,
 }: MonthlyTransactionTableProps) {
   const { t } = useTranslation("property");
+  const { t: tCommon } = useTranslation("common");
+  const { showToast } = useToast();
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
   const [monthTransactions, setMonthTransactions] = useState<
     Record<string, Transaction[]>
   >({});
   const [loadingMonths, setLoadingMonths] = useState<Set<string>>(new Set());
+
+  const getMonthName = useMemo(() => {
+    return (monthNumber: number) => {
+      const key = MONTH_KEYS[monthNumber - 1];
+      return key ? tCommon(key) : "";
+    };
+  }, [tCommon]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("fi-FI", {
@@ -100,6 +110,7 @@ function MonthlyTransactionTable({
         }));
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
+        showToast({ message: t("report.fetchError"), severity: "error" });
       } finally {
         setLoadingMonths((prev) => {
           const next = new Set(prev);
@@ -108,7 +119,7 @@ function MonthlyTransactionTable({
         });
       }
     },
-    [propertyId, monthTransactions]
+    [propertyId, monthTransactions, showToast, t]
   );
 
   const handleAccordionChange =
@@ -201,7 +212,7 @@ function MonthlyTransactionTable({
                       }}
                     >
                       <Typography sx={{ minWidth: 150 }}>
-                        {MONTH_NAMES[summary.month - 1]} {summary.year}
+                        {getMonthName(summary.month)} {summary.year}
                       </Typography>
                       <Box sx={{ display: "flex", gap: 4 }}>
                         <Typography sx={{ color: "success.main" }}>
@@ -246,10 +257,12 @@ function MonthlyTransactionTable({
                           <TableHead>
                             <TableRow>
                               <TableCell sx={{ pl: 4 }}>
-                                {t("report.month")}
+                                {t("report.date")}
                               </TableCell>
-                              <TableCell>Description</TableCell>
-                              <TableCell align="right">Amount</TableCell>
+                              <TableCell>{t("report.description")}</TableCell>
+                              <TableCell align="right">
+                                {t("report.amount")}
+                              </TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
