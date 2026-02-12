@@ -51,6 +51,7 @@ describe('InvestmentCalculatorForm', () => {
       />
     );
 
+    // Name input is at index 1 (after etuovi URL input)
     const textboxes = screen.getAllByRole('textbox');
     const nameInput = textboxes.find(input => (input as HTMLInputElement).value === 'Test Calculation');
     expect(nameInput).toBeTruthy();
@@ -69,15 +70,16 @@ describe('InvestmentCalculatorForm', () => {
       <InvestmentCalculatorForm onCalculate={mockOnCalculate} />
     );
 
-    // Find and fill name field
+    // Find and fill name field (second textbox, after the etuovi URL input)
     const textboxes = screen.getAllByRole('textbox');
-    const nameInput = textboxes[0]; // First textbox is the name
+    const nameInput = textboxes[1]; // Second textbox is the name (first is etuovi URL)
     await user.clear(nameInput);
     await user.type(nameInput, 'My Investment');
 
-    // Submit form
-    const calculateButton = screen.getByRole('button');
-    await user.click(calculateButton);
+    // Submit form - find button with type="submit"
+    const buttons = screen.getAllByRole('button');
+    const calculateButton = buttons.find(btn => btn.getAttribute('type') === 'submit');
+    await user.click(calculateButton!);
 
     expect(mockOnCalculate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -114,13 +116,14 @@ describe('InvestmentCalculatorForm', () => {
       await user.type(rentInput, '1200');
     }
 
-    // Add name
+    // Add name (second textbox, after etuovi URL)
     const textboxes = screen.getAllByRole('textbox');
-    await user.type(textboxes[0], 'Test');
+    await user.type(textboxes[1], 'Test');
 
-    // Submit form
-    const calculateButton = screen.getByRole('button');
-    await user.click(calculateButton);
+    // Submit form - find button with type="submit"
+    const buttons = screen.getAllByRole('button');
+    const calculateButton = buttons.find(btn => btn.getAttribute('type') === 'submit');
+    await user.click(calculateButton!);
 
     expect(mockOnCalculate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -150,8 +153,9 @@ describe('InvestmentCalculatorForm', () => {
       />
     );
 
+    // Name input is at index 1 (after etuovi URL input)
     let textboxes = screen.getAllByRole('textbox');
-    expect((textboxes[0] as HTMLInputElement).value).toBe('First');
+    expect((textboxes[1] as HTMLInputElement).value).toBe('First');
 
     // Rerender with new initial values
     rerender(
@@ -164,7 +168,7 @@ describe('InvestmentCalculatorForm', () => {
     // Form should update with new values
     await waitFor(() => {
       textboxes = screen.getAllByRole('textbox');
-      expect((textboxes[0] as HTMLInputElement).value).toBe('Second');
+      expect((textboxes[1] as HTMLInputElement).value).toBe('Second');
     });
 
     const spinbuttons = screen.getAllByRole('spinbutton');
@@ -178,9 +182,10 @@ describe('InvestmentCalculatorForm', () => {
       <InvestmentCalculatorForm onCalculate={jest.fn()} />
     );
 
-    const button = screen.getByRole('button');
-    expect(button).toBeInTheDocument();
-    expect(button).toHaveAttribute('type', 'submit');
+    const buttons = screen.getAllByRole('button');
+    const submitButton = buttons.find(btn => btn.getAttribute('type') === 'submit');
+    expect(submitButton).toBeInTheDocument();
+    expect(submitButton).toHaveAttribute('type', 'submit');
   });
 
   it('renders multiple input fields for investment calculation', () => {

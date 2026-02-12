@@ -53,6 +53,13 @@ const investmentCalculator = {
   taxPerYear: 'Verot/vuosi',
   taxDeductibleExpensesPerYear: 'Vähennyskelpoiset kulut/vuosi',
 
+  // Etuovi import
+  etuoviUrl: 'Etuovi.com -linkki',
+  fetchFromEtuovi: 'Hae tiedot',
+  fetchSuccess: 'Asunnon tiedot ladattu',
+  fetchError: 'Tietojen haku epäonnistui',
+  invalidUrl: 'Virheellinen etuovi.com -osoite',
+
   // Saved calculations
   createdAt: 'Luotu',
   associatedProperty: 'Asunto',
