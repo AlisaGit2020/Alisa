@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import { Transaction } from "@alisa-types";
 import ApiClient from "@alisa-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
@@ -67,11 +67,9 @@ function MonthlyTransactionTable({
   const [loadingMonths, setLoadingMonths] = useState<Set<string>>(new Set());
   const [showAllMonths, setShowAllMonths] = useState<Set<string>>(new Set());
 
-  const getMonthName = useMemo(() => {
-    return (monthNumber: number) => {
-      const key = MONTH_KEYS[monthNumber - 1];
-      return key ? tCommon(key) : "";
-    };
+  const getMonthName = useCallback((monthNumber: number) => {
+    const key = MONTH_KEYS[monthNumber - 1];
+    return key ? tCommon(key) : "";
   }, [tCommon]);
 
   const formatCurrency = (value: number) => {

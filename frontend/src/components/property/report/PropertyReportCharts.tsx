@@ -1,6 +1,6 @@
 import { Box, FormControl, InputLabel, MenuItem, Select, Stack } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { SelectChangeEvent } from "@mui/material/Select";
 import MonthlyBarChart, { MonthlyDataPoint } from "./MonthlyBarChart";
 import BalanceTrendChart from "./BalanceTrendChart";
@@ -33,6 +33,14 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingTransactions, setLoadingTransactions] = useState(true);
 
+  // Track if an error toast was already shown to avoid multiple toasts when API is down
+  const errorToastShownRef = useRef(false);
+
+  // Reset error toast flag when propertyId or year changes
+  useEffect(() => {
+    errorToastShownRef.current = false;
+  }, [propertyId, selectedYear]);
+
   // Fetch available years
   useEffect(() => {
     const fetchYears = async () => {
@@ -54,7 +62,10 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
       } catch (error) {
         console.error("Failed to fetch years:", error);
         setAvailableYears([currentYear - 1, currentYear]);
-        showToast({ message: t("report.fetchError"), severity: "error" });
+        if (!errorToastShownRef.current) {
+          errorToastShownRef.current = true;
+          showToast({ message: t("report.fetchError"), severity: "error" });
+        }
       }
     };
 
@@ -77,7 +88,10 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
       } catch (error) {
         console.error("Failed to fetch statistics:", error);
         setStatistics([]);
-        showToast({ message: t("report.fetchError"), severity: "error" });
+        if (!errorToastShownRef.current) {
+          errorToastShownRef.current = true;
+          showToast({ message: t("report.fetchError"), severity: "error" });
+        }
       } finally {
         setLoadingStats(false);
       }
@@ -104,7 +118,10 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
         setTransactions([]);
-        showToast({ message: t("report.fetchError"), severity: "error" });
+        if (!errorToastShownRef.current) {
+          errorToastShownRef.current = true;
+          showToast({ message: t("report.fetchError"), severity: "error" });
+        }
       } finally {
         setLoadingTransactions(false);
       }
