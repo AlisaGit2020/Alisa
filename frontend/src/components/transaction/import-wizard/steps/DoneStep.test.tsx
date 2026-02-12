@@ -5,6 +5,7 @@ import '@testing-library/jest-dom';
 import DoneStep from './DoneStep';
 import { ImportStats } from '../types';
 import { TransactionType } from '@alisa-types';
+import { TFunction } from 'i18next';
 
 // Mock useNavigate - must be before importing DoneStep
 const mockNavigate = jest.fn();
@@ -27,7 +28,7 @@ describe('DoneStep', () => {
       'importWizard.viewTransactions': 'Go to Transactions',
     };
     return translations[key] || key;
-  });
+  }) as unknown as TFunction;
 
   const mockOnReset = jest.fn();
 

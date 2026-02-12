@@ -204,7 +204,7 @@ describe('widget-registry', () => {
 
     it('size is optional', () => {
       const configWithSize = { id: 'test', visible: true, order: 0, size: '1/2' as WidgetSize };
-      const configWithoutSize = { id: 'test', visible: true, order: 0 };
+      const configWithoutSize: { id: string; visible: boolean; order: number; size?: WidgetSize } = { id: 'test', visible: true, order: 0 };
 
       expect(configWithSize.size).toBe('1/2');
       expect(configWithoutSize.size).toBeUndefined();

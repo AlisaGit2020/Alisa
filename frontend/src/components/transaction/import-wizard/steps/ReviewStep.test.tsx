@@ -3,6 +3,7 @@ import { renderWithProviders, screen } from '@test-utils/test-wrapper';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { Transaction, TransactionType, TransactionStatus } from '@alisa-types';
+import { TFunction } from 'i18next';
 
 // Mock TransactionsPendingActions
 jest.mock(
@@ -59,7 +60,7 @@ describe('ReviewStep', () => {
       'search': 'Search',
     };
     return translations[key] || key;
-  });
+  }) as unknown as TFunction;
 
   const mockOnSelectChange = jest.fn();
   const mockOnSelectAllChange = jest.fn();

@@ -6,6 +6,7 @@ import ImportStep from './ImportStep';
 import { BankId } from '../types';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
+import { TFunction } from 'i18next';
 
 // Create a local server for this test file
 const localServer = setupServer();
@@ -34,7 +35,7 @@ describe('ImportStep', () => {
       'importWizard.skippedRows': `${options?.count ?? 0} transactions were skipped because they have already been imported and approved.`,
     };
     return translations[key] || key;
-  });
+  }) as unknown as TFunction;
 
   const mockOnFilesSelect = jest.fn();
   const mockOnBankSelect = jest.fn();

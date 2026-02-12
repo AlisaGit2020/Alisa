@@ -11,8 +11,8 @@ import { Routes, Route } from 'react-router-dom';
 // Mock the withTranslation HOC
 jest.mock('react-i18next', () => ({
   ...jest.requireActual('react-i18next'),
-  withTranslation: () => (Component: React.ComponentType) => {
-    const WrappedComponent = (props: object) => {
+  withTranslation: () => <P extends { t?: (key: string) => string }>(Component: React.ComponentType<P>) => {
+    const WrappedComponent = (props: Omit<P, 't'>) => {
       const translations: Record<string, string> = {
         viewPageTitle: 'Property Details',
         propertyInfo: 'Property Information',
@@ -32,7 +32,7 @@ jest.mock('react-i18next', () => ({
         ownershipShare: 'Ownership share',
       };
       const t = (key: string) => translations[key] || key;
-      return <Component {...props} t={t} />;
+      return <Component {...(props as P)} t={t} />;
     };
     WrappedComponent.displayName = `withTranslation(${Component.displayName || Component.name})`;
     return WrappedComponent;
@@ -68,7 +68,7 @@ describe('PropertyView', () => {
     apartmentType: '2h+k',
     description: 'A beautiful apartment in the city center.',
     photo: 'uploads/properties/photo1.jpg',
-    ownerships: [{ share: 100 }],
+    ownerships: [{ share: 100, userId: 1, propertyId: 1 }],
   });
 
   beforeEach(() => {
@@ -142,7 +142,7 @@ describe('PropertyView', () => {
     it('shows ownership share with circular badge', async () => {
       const partialOwnership = createMockProperty({
         ...mockProperty,
-        ownerships: [{ share: 75 }],
+        ownerships: [{ share: 75, userId: 1, propertyId: 1 }],
       });
       mockGet.mockResolvedValue(partialOwnership);
 

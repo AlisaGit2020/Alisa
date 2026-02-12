@@ -301,7 +301,7 @@ describe('AdminUserList Logic', () => {
     it('does not update on failed response', () => {
       let users = [{ id: 1, firstName: 'Original' }];
 
-      const handleResponse = (ok: boolean, data: unknown[]) => {
+      const handleResponse = (ok: boolean, data: { id: number; firstName: string }[]) => {
         if (ok) {
           users = data;
         }
@@ -328,7 +328,12 @@ describe('AdminUserList Logic', () => {
 
   describe('User tier update optimistic UI', () => {
     it('updates local state before waiting for API response', () => {
-      let users = [
+      interface UserWithTier {
+        id: number;
+        tierId: number;
+        tier: { id: number; name: string } | undefined;
+      }
+      let users: UserWithTier[] = [
         { id: 1, tierId: 1, tier: { id: 1, name: 'Free' } },
       ];
       const tiers = [

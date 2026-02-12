@@ -147,7 +147,18 @@ describe('Expenses Component Logic', () => {
   });
 
   describe('rowDataService transformation', () => {
-    const mockExpense = {
+    interface MockExpense {
+      id: number;
+      accountingDate: Date | null;
+      expenseType?: { id: number; name: string };
+      description: string;
+      quantity: number;
+      amount: number;
+      totalAmount: number;
+      property: { id: number; name: string };
+    }
+
+    const mockExpense: MockExpense = {
       id: 1,
       accountingDate: new Date('2024-03-15'),
       expenseType: { id: 1, name: 'Utilities' },
@@ -194,7 +205,7 @@ describe('Expenses Component Logic', () => {
     });
 
     it('handles missing expenseType', () => {
-      const expense = { ...mockExpense, expenseType: undefined };
+      const expense: MockExpense = { ...mockExpense, expenseType: undefined };
       const row: ExpenseRow = {
         id: expense.id,
         accountingDate: expense.accountingDate || null,

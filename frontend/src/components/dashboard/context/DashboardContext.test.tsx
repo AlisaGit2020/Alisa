@@ -46,7 +46,7 @@ describe('DashboardContext Logic', () => {
     });
 
     it('keeps non-zero property ID as is', () => {
-      const propertyId = 5;
+      const propertyId: number = 5;
       const selectedPropertyId = propertyId === 0 ? null : propertyId;
 
       expect(selectedPropertyId).toBe(5);

@@ -4,6 +4,7 @@ import { MenuItem, Box, Menu, Fade, IconButton, Tooltip, styled, Avatar, Stack }
 import CheckIcon from '@mui/icons-material/Check';
 import useIsAuthenticated from 'react-auth-kit/hooks/useIsAuthenticated';
 import ApiClient from '@alisa-lib/api-client';
+import { SupportedLanguage } from '@alisa-types';
 
 const SmallAvatar = styled(Avatar)(({ theme }) => ({
     width: 24,
@@ -38,7 +39,7 @@ function LanguageSelector({ t }: WithTranslation) {
         setAnchorEl(null);
     };
 
-    const changeLanguage = async (language: string) => {
+    const changeLanguage = async (language: SupportedLanguage) => {
         i18n.changeLanguage(language);
         handleClose();
 
@@ -55,7 +56,7 @@ function LanguageSelector({ t }: WithTranslation) {
         return language == i18n.language ? 'visible' : 'hidden'
     };
 
-    const getMenuItem = (language: string, languageText: string) => {
+    const getMenuItem = (language: SupportedLanguage, languageText: string) => {
         return (
             <MenuItem onClick={() => changeLanguage(language)}>
                 <Stack direction={'row'} spacing={2}>

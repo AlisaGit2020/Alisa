@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
-import { TransactionType } from '@alisa-types';
+import { TransactionInput, TransactionType } from '@alisa-types';
 import EditableRows from './EditableRows';
 import ApiClient from '@alisa-lib/api-client';
 
@@ -21,17 +21,21 @@ describe('EditableRows', () => {
     accountingDate: new Date().toISOString(),
   };
 
-  const mockTransaction = {
+  const mockTransaction: TransactionInput = {
     id: 1,
     amount: 1000,
     description: 'Test transaction',
+    sender: 'Test Sender',
+    receiver: 'Test Receiver',
+    transactionDate: new Date('2024-01-01'),
+    accountingDate: new Date('2024-01-01'),
     expenses: [],
     incomes: [],
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (ApiClient.getDefault as jest.SpyInstance).mockResolvedValue({ ...mockDefaultRow });
+    (ApiClient.getDefault as unknown as jest.SpyInstance).mockResolvedValue({ ...mockDefaultRow });
   });
 
   afterAll(() => {
