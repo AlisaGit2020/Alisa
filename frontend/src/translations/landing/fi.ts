@@ -1,6 +1,6 @@
 const landing = {
-  title: 'Alisa - Kiinteistönhallinta',
-  subtitle: 'Hallitse asuntojasi ja investointejasi helposti',
+  title: 'Hallitse vuokra-asuntosijoituksiasi yhdessä paikassa',
+  subtitle: 'Seuraa vuokratuloja ja menoja • Veroilmoitus helposti • Sijoitusanalytiikka',
   ctaLogin: 'Kirjaudu sisään',
   ctaCalculator: 'Kokeile laskuria',
   feature1Title: 'Sijoitustuottolaskuri',

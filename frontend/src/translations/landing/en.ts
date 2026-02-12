@@ -1,6 +1,6 @@
 const landing = {
-  title: 'Alisa - Property Management',
-  subtitle: 'Manage your properties and investments easily',
+  title: 'Manage your rental property investments in one place',
+  subtitle: 'Track rental income and expenses • Easy tax reporting • Investment analytics',
   ctaLogin: 'Log In',
   ctaCalculator: 'Try Calculator',
   feature1Title: 'Investment Calculator',
