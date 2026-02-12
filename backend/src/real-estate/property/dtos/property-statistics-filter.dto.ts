@@ -1,12 +1,14 @@
 import { StatisticKey } from '@alisa-backend/common/types';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNumber, IsOptional } from 'class-validator';
 
 export class PropertyStatisticsFilterDto {
   @IsNumber()
-  @IsNotEmpty()
-  propertyId: number;
+  @IsOptional()
+  propertyId?: number;
 
   key?: StatisticKey;
   year?: number;
   month?: number;
+  includeYearly?: boolean;
+  includeMonthly?: boolean;
 }
