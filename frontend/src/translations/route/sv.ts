@@ -19,6 +19,7 @@ const route = {
   login: "Logga in",
   pending: "Väntande",
   properties: "Fastigheter",
+  report: "Rapport",
   settings: "Inställningar",
   tax: "Skatt",
   transactions: "Banktransaktioner",

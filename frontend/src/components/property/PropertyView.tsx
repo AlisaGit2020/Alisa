@@ -14,6 +14,7 @@ import SquareFootIcon from '@mui/icons-material/SquareFoot';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
+import PropertyReportSection from './report/PropertyReportSection';
 
 interface DetailRowProps {
   icon: ReactNode;
@@ -270,14 +271,12 @@ function PropertyView({ t }: WithTranslation) {
         </>
       )}
 
-      {/* Statistics placeholder */}
+      {/* Financial Statistics Section */}
       <Box sx={{ p: 2 }}>
         <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
           {t('statisticsSection')}
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-          {t('statisticsComingSoon')}
-        </Typography>
+        <PropertyReportSection propertyId={property.id} />
       </Box>
     </Paper>
   );

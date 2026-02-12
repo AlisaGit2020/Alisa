@@ -35,6 +35,30 @@ const property = {
     statisticsComingSoon: 'Taloudelliset tilastot tulossa pian',
     editProperty: 'Muokkaa',
     back: 'Takaisin',
+
+    // Report section
+    report: {
+        currentYearIncome: 'Kuluvan vuoden tulot',
+        currentYearExpenses: 'Kuluvan vuoden menot',
+        allTimeBalance: 'Kokonaissaldo',
+        allTimeNetIncome: 'Kokonaisnettotulo',
+        advancedReports: 'Tarkemmat raportit',
+        monthlyIncomeVsExpenses: 'Kuukausittaiset tulot ja menot',
+        balanceTrend: 'Saldon kehitys',
+        byType: 'Tyypin mukaan',
+        byTransactionType: 'Tapahtumatyypin mukaan',
+        expenseBreakdown: 'Menojen jakauma',
+        incomeBreakdown: 'Tulojen jakauma',
+        monthlySummary: 'Kuukausittainen yhteenveto',
+        month: 'Kuukausi',
+        income: 'Tulot',
+        expenses: 'Menot',
+        net: 'Netto',
+        showAllTransactions: 'Näytä kaikki {{count}} tapahtumaa',
+        noDataForYear: 'Ei tietoja tälle vuodelle',
+        selectProperty: 'Valitse kohde nähdäksesi raportit',
+        backToProperty: 'Takaisin kohteeseen',
+    },
 }
 
 export default property

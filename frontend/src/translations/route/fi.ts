@@ -19,6 +19,7 @@ const route = {
   login: "Kirjaudu sisään",
   pending: "Odottaa",
   properties: "Asunnot",
+  report: "Raportti",
   settings: "Asetukset",
   tax: "Verotus",
   transactions: "Pankkitapahtumat",

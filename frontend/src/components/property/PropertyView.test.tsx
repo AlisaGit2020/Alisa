@@ -105,9 +105,6 @@ describe('PropertyView', () => {
       expect(screen.getByText('Property Information')).toBeInTheDocument();
       expect(screen.getByText('Location')).toBeInTheDocument();
       expect(screen.getByText('Statistics')).toBeInTheDocument();
-
-      // Verify statistics placeholder
-      expect(screen.getByText('Financial statistics coming soon')).toBeInTheDocument();
     });
 
     it('displays property image when available', async () => {

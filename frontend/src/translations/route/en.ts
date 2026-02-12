@@ -19,6 +19,7 @@ const route = {
   login: "Log in",
   pending: "Pending",
   properties: "Apartments",
+  report: "Report",
   settings: "Settings",
   tax: "Taxes",
   transactions: "Bank Transactions",
