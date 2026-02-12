@@ -15,6 +15,11 @@ describe('EtuoviImportController (e2e)', () => {
   let mockHtml: string;
 
   beforeAll(async () => {
+    // Ensure nock is active (may have been restored by other tests)
+    if (!nock.isActive()) {
+      nock.activate();
+    }
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -33,6 +38,7 @@ describe('EtuoviImportController (e2e)', () => {
 
   afterAll(async () => {
     nock.cleanAll();
+    nock.restore(); // Fully restore HTTP to prevent interference with other tests
     await closeAppGracefully(app, server);
   });
 
