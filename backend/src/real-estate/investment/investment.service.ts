@@ -1,13 +1,22 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InvestmentCalculator } from './classes/investment-calculator.class';
 import { InvestmentInputDto } from './dtos/investment-input.dto';
 import { Investment } from './entities/investment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Repository } from 'typeorm';
+import { FindManyOptions, In, Repository } from 'typeorm';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
 import { FindOptionsWhereWithUserId } from '@alisa-backend/common/types';
+import {
+  DataSaveResultDto,
+  DataSaveResultRowDto,
+} from '@alisa-backend/common/dtos/data-save-result.dto';
 
 @Injectable()
 export class InvestmentService {
@@ -120,5 +129,52 @@ export class InvestmentService {
   async delete(user: JWTUser, id: number): Promise<void> {
     await this.findOne(user, id);
     await this.repository.delete(id);
+  }
+
+  async deleteMany(user: JWTUser, ids: number[]): Promise<DataSaveResultDto> {
+    if (ids.length === 0) {
+      throw new BadRequestException('No ids provided');
+    }
+
+    const investments = await this.repository.find({
+      where: { id: In(ids) },
+    });
+
+    const deleteTask = investments.map(async (investment) => {
+      try {
+        // Check ownership - investment must belong to the user
+        if (investment.userId !== user.id) {
+          return {
+            id: investment.id,
+            statusCode: 403,
+            message: 'Forbidden',
+          } as DataSaveResultRowDto;
+        }
+
+        await this.repository.delete(investment.id);
+
+        return {
+          id: investment.id,
+          statusCode: 200,
+          message: 'OK',
+        } as DataSaveResultRowDto;
+      } catch (e) {
+        return {
+          id: investment.id,
+          statusCode: e.status || 500,
+          message: e.message,
+        } as DataSaveResultRowDto;
+      }
+    });
+
+    const results = await Promise.all(deleteTask);
+
+    const result = new DataSaveResultDto();
+    result.rows.total = investments.length;
+    result.rows.success = results.filter((r) => r.statusCode === 200).length;
+    result.rows.failed = results.filter((r) => r.statusCode !== 200).length;
+    result.allSuccess = result.rows.failed === 0;
+    result.results = results;
+    return result;
   }
 }

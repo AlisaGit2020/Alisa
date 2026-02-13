@@ -90,6 +90,8 @@ const en = {
       photoDeleted: "Photo deleted",
       calculationSaved: "Calculation saved",
       tierSaved: "Tier saved",
+      error: "An error occurred",
+      partialSuccess: "{{success}} succeeded, {{failed}} failed",
     },
 
     close: "Close",

@@ -1,12 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InvestmentService } from './investment.service';
 import { Investment } from './entities/investment.entity';
 import { InvestmentCalculator } from './classes/investment-calculator.class';
 import { InvestmentInputDto } from './dtos/investment-input.dto';
 import { AuthService } from '@alisa-backend/auth/auth.service';
-import { createMockRepository, createMockAuthService, MockRepository, MockAuthService } from 'test/mocks';
+import {
+  createMockRepository,
+  createMockAuthService,
+  MockRepository,
+  MockAuthService,
+} from 'test/mocks';
 import { createJWTUser } from 'test/factories';
 
 describe('InvestmentService', () => {
@@ -375,6 +384,60 @@ describe('InvestmentService', () => {
       await expect(service.delete(otherUser, 1)).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('deleteMany', () => {
+    it('throws BadRequestException when no ids provided', async () => {
+      await expect(service.deleteMany(testUser, [])).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('deletes multiple investments owned by user', async () => {
+      const investments = [
+        createInvestment({ id: 1, userId: testUser.id }),
+        createInvestment({ id: 2, userId: testUser.id }),
+      ];
+      mockRepository.find.mockResolvedValue(investments);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      expect(result.allSuccess).toBe(true);
+      expect(result.rows.total).toBe(2);
+      expect(result.rows.success).toBe(2);
+      expect(result.rows.failed).toBe(0);
+      expect(mockRepository.delete).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns forbidden for investments not owned by user', async () => {
+      const investments = [
+        createInvestment({ id: 1, userId: otherUser.id }),
+        createInvestment({ id: 2, userId: testUser.id }),
+      ];
+      mockRepository.find.mockResolvedValue(investments);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      expect(result.allSuccess).toBe(false);
+      expect(result.rows.total).toBe(2);
+      expect(result.rows.success).toBe(1);
+      expect(result.rows.failed).toBe(1);
+      expect(result.results.find((r) => r.id === 1)?.statusCode).toBe(403);
+      expect(result.results.find((r) => r.id === 2)?.statusCode).toBe(200);
+    });
+
+    it('handles empty result when no investments found', async () => {
+      mockRepository.find.mockResolvedValue([]);
+
+      const result = await service.deleteMany(testUser, [999]);
+
+      expect(result.allSuccess).toBe(true);
+      expect(result.rows.total).toBe(0);
+      expect(result.rows.success).toBe(0);
+      expect(result.rows.failed).toBe(0);
     });
   });
 

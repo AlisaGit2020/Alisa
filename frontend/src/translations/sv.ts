@@ -90,6 +90,8 @@ const sv = {
       photoDeleted: "Bild borttagen",
       calculationSaved: "Beräkning sparad",
       tierSaved: "Nivå sparad",
+      error: "Ett fel uppstod",
+      partialSuccess: "{{success}} lyckades, {{failed}} misslyckades",
     },
 
     close: "Stäng",

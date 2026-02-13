@@ -11,12 +11,14 @@ import {
 } from '@nestjs/common';
 import { InvestmentCalculator } from './classes/investment-calculator.class';
 import { InvestmentInputDto } from './dtos/investment-input.dto';
+import { InvestmentDeleteInputDto } from './dtos/investment-delete-input.dto';
 import { InvestmentService } from './investment.service';
 import { Investment } from './entities/investment.entity';
 import { FindManyOptions } from 'typeorm';
 import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { User } from '@alisa-backend/common/decorators/user.decorator';
+import { DataSaveResultDto } from '@alisa-backend/common/dtos/data-save-result.dto';
 
 @Controller('real-estate/investment')
 export class InvestmentController {
@@ -86,5 +88,15 @@ export class InvestmentController {
   ): Promise<boolean> {
     await this.service.delete(user, id);
     return true;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/delete')
+  @HttpCode(200)
+  async deleteMany(
+    @User() user: JWTUser,
+    @Body() input: InvestmentDeleteInputDto,
+  ): Promise<DataSaveResultDto> {
+    return this.service.deleteMany(user, input.ids);
   }
 }

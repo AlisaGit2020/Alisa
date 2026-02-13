@@ -383,4 +383,112 @@ describe('InvestmentController (e2e)', () => {
       expect(response.body.some((inv: Investment) => inv.name === 'User2 Investment B')).toBe(false);
     });
   });
+
+  describe('POST /real-estate/investment/delete', () => {
+    it('requires authentication', async () => {
+      await request(server)
+        .post('/real-estate/investment/delete')
+        .send({ ids: [1] })
+        .expect(401);
+    });
+
+    it('deletes multiple investments when user owns them', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create investments
+      const create1 = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token))
+        .send({ ...validCalculationInput, name: 'Bulk Delete 1' })
+        .expect(201);
+
+      const create2 = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token))
+        .send({ ...validCalculationInput, name: 'Bulk Delete 2' })
+        .expect(201);
+
+      const ids = [create1.body.id, create2.body.id];
+
+      // Bulk delete
+      const response = await request(server)
+        .post('/real-estate/investment/delete')
+        .set('Authorization', getBearerToken(token))
+        .send({ ids })
+        .expect(200);
+
+      expect(response.body.allSuccess).toBe(true);
+      expect(response.body.rows.total).toBe(2);
+      expect(response.body.rows.success).toBe(2);
+      expect(response.body.rows.failed).toBe(0);
+
+      // Verify they are deleted
+      await request(server)
+        .get(`/real-estate/investment/${ids[0]}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(404);
+
+      await request(server)
+        .get(`/real-estate/investment/${ids[1]}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(404);
+    });
+
+    it('returns unauthorized for investments not owned by user', async () => {
+      const user1 = testUsers.user1WithProperties;
+      const user2 = testUsers.user2WithProperties;
+      const token1 = await getUserAccessToken2(authService, user1.jwtUser);
+      const token2 = await getUserAccessToken2(authService, user2.jwtUser);
+
+      // Create investment for user1
+      const create1 = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token1))
+        .send({ ...validCalculationInput, name: 'User1 Investment' })
+        .expect(201);
+
+      // Create investment for user2
+      const create2 = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token2))
+        .send({ ...validCalculationInput, name: 'User2 Investment' })
+        .expect(201);
+
+      // Try to bulk delete both as user1
+      const response = await request(server)
+        .post('/real-estate/investment/delete')
+        .set('Authorization', getBearerToken(token1))
+        .send({ ids: [create1.body.id, create2.body.id] })
+        .expect(200);
+
+      expect(response.body.allSuccess).toBe(false);
+      expect(response.body.rows.total).toBe(2);
+      expect(response.body.rows.success).toBe(1);
+      expect(response.body.rows.failed).toBe(1);
+
+      // User1's investment should be deleted
+      await request(server)
+        .get(`/real-estate/investment/${create1.body.id}`)
+        .set('Authorization', getBearerToken(token1))
+        .expect(404);
+
+      // User2's investment should still exist
+      await request(server)
+        .get(`/real-estate/investment/${create2.body.id}`)
+        .set('Authorization', getBearerToken(token2))
+        .expect(200);
+    });
+
+    it('returns bad request when no ids provided', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      await request(server)
+        .post('/real-estate/investment/delete')
+        .set('Authorization', getBearerToken(token))
+        .send({ ids: [] })
+        .expect(400);
+    });
+  });
 });

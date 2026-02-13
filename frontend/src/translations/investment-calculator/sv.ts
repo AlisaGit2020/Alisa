@@ -10,6 +10,12 @@ const investmentCalculator = {
   saveSuccess: 'Beräkning sparad',
   mustLoginToSave: 'Logga in för att spara beräkningen',
 
+  // Form section headers
+  sectionPropertyDetails: 'Fastighetsdetaljer',
+  sectionMonthlyCosts: 'Månadskostnader',
+  sectionRentalIncome: 'Hyresintäkter',
+  sectionFinancing: 'Finansiering',
+
   // Input fields
   name: 'Beräkningens namn',
   deptFreePrice: 'Skuldfritt pris',
@@ -64,6 +70,14 @@ const investmentCalculator = {
   deleteConfirm: 'Vill du verkligen ta bort beräkningen?',
   noCalculations: 'Inga sparade beräkningar',
   calculation: 'Beräkning',
+
+  // Bulk actions
+  rowsSelected: '{{count}} beräkning vald',
+  rowsSelected_other: '{{count}} beräkningar valda',
+  confirmDeleteSelected: 'Vill du verkligen ta bort {{count}} beräkning?',
+  confirmDeleteSelected_other: 'Vill du verkligen ta bort {{count}} beräkningar?',
+  deleteAriaLabel: 'Ta bort {{count}} vald beräkning',
+  deleteAriaLabel_other: 'Ta bort {{count}} valda beräkningar',
 }
 
 export default investmentCalculator

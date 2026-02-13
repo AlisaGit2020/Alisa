@@ -10,6 +10,12 @@ const investmentCalculator = {
   saveSuccess: 'Calculation saved successfully',
   mustLoginToSave: 'Log in to save calculations',
 
+  // Form section headers
+  sectionPropertyDetails: 'Property Details',
+  sectionMonthlyCosts: 'Monthly Costs',
+  sectionRentalIncome: 'Rental Income',
+  sectionFinancing: 'Financing',
+
   // Input fields
   name: 'Calculation name',
   deptFreePrice: 'Debt-free price',
@@ -71,6 +77,14 @@ const investmentCalculator = {
   deleteConfirm: 'Are you sure you want to delete this calculation?',
   noCalculations: 'No saved calculations',
   calculation: 'Calculation',
+
+  // Bulk actions
+  rowsSelected: '{{count}} calculation selected',
+  rowsSelected_other: '{{count}} calculations selected',
+  confirmDeleteSelected: 'Are you sure you want to delete {{count}} calculation?',
+  confirmDeleteSelected_other: 'Are you sure you want to delete {{count}} calculations?',
+  deleteAriaLabel: 'Delete {{count}} selected calculation',
+  deleteAriaLabel_other: 'Delete {{count}} selected calculations',
 }
 
 export default investmentCalculator
