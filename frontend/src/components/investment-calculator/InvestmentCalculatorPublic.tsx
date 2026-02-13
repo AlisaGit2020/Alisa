@@ -1,5 +1,5 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Alert, Box, Container, Link, Typography } from "@mui/material";
+import { Box, Container, Link, Typography } from "@mui/material";
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
@@ -14,7 +14,6 @@ import { useToast } from "../alisa";
 function InvestmentCalculatorPublic({ t }: WithTranslation) {
   const [results, setResults] = React.useState<InvestmentResults | null>(null);
   const [inputData, setInputData] = React.useState<InvestmentInputData | null>(null);
-  const [saveSuccess, setSaveSuccess] = React.useState(false);
   const [loginDialogOpen, setLoginDialogOpen] = React.useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -33,13 +32,11 @@ function InvestmentCalculatorPublic({ t }: WithTranslation) {
   React.useEffect(() => {
     // Check if we just saved successfully (coming back from login)
     if (searchParams.get('saved') === 'true') {
-      setSaveSuccess(true);
+      showToast({ message: t("common:toast.calculationSaved"), severity: "success" });
       // Clear the URL parameter
       navigate('/investment-calculator', { replace: true });
-      // Auto-hide success message after 5 seconds
-      setTimeout(() => setSaveSuccess(false), 5000);
     }
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, showToast, t]);
 
   const handleCalculate = async (data: InvestmentInputData) => {
     try {
@@ -69,8 +66,6 @@ function InvestmentCalculatorPublic({ t }: WithTranslation) {
     // Authenticated user - save directly
     try {
       await ApiClient.post('real-estate/investment', inputData);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 5000);
       showToast({ message: t("common:toast.calculationSaved"), severity: "success" });
     } catch (error) {
       console.error('Save error:', error);
@@ -126,12 +121,6 @@ function InvestmentCalculatorPublic({ t }: WithTranslation) {
 
       <Box sx={{ py: 6, flexGrow: 1 }}>
         <Container maxWidth="md">
-          {saveSuccess && (
-            <Alert severity="success" sx={{ mb: 3 }}>
-              {t('investment-calculator:saveSuccess')}
-            </Alert>
-          )}
-
           <Box sx={{ mb: 4, textAlign: 'center' }}>
             <Typography variant="h3" component="h1" gutterBottom fontWeight={700}>
               {t('investment-calculator:title')}
