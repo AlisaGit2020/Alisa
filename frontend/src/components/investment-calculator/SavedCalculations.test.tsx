@@ -8,8 +8,10 @@ import ApiClient from "@alisa-lib/api-client";
 // Mock translations for investment-calculator namespace
 jest.mock("react-i18next", () => ({
   ...jest.requireActual("react-i18next"),
-  withTranslation: () => (Component: React.ComponentType) => {
-    const WrappedComponent = (props: object) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  withTranslation: () => (Component: React.ComponentType<any>) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const WrappedComponent = (props: any) => {
       const translations: Record<string, string> = {
         "investment-calculator:savedCalculations": "Saved Calculations",
         "investment-calculator:newCalculation": "New Calculation",
