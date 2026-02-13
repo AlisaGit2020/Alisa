@@ -1,5 +1,5 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Alert, Box, Card, CardContent, Tab, Tabs } from "@mui/material";
+import { Box, Card, CardContent, Tab, Tabs } from "@mui/material";
 import React from "react";
 import { useSearchParams } from "react-router-dom";
 import { AxiosResponse } from "axios";
@@ -16,7 +16,6 @@ function InvestmentCalculatorProtected({ t }: WithTranslation) {
   const [tabValue, setTabValue] = React.useState(0);
   const [results, setResults] = React.useState<InvestmentResults | null>(null);
   const [inputData, setInputData] = React.useState<InvestmentInputData | null>(null);
-  const [saveSuccess, setSaveSuccess] = React.useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [formKey, setFormKey] = React.useState(0);
   const { showToast } = useToast();
@@ -50,13 +49,11 @@ function InvestmentCalculatorProtected({ t }: WithTranslation) {
   React.useEffect(() => {
     // Check if we just saved successfully
     if (searchParams.get('saved') === 'true') {
-      setSaveSuccess(true);
+      showToast({ message: t("common:toast.calculationSaved"), severity: "success" });
       // Clear the URL parameter
       setSearchParams({}, { replace: true });
-      // Auto-hide success message after 5 seconds
-      setTimeout(() => setSaveSuccess(false), 5000);
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, showToast, t]);
 
   const handleCalculate = async (data: InvestmentInputData) => {
     try {
@@ -75,8 +72,6 @@ function InvestmentCalculatorProtected({ t }: WithTranslation) {
     }
     try {
       await ApiClient.post('real-estate/investment', inputData);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 5000);
       showToast({ message: t("common:toast.calculationSaved"), severity: "success" });
       // Clear form, sessionStorage and switch to saved calculations tab
       setResults(null);
@@ -109,12 +104,6 @@ function InvestmentCalculatorProtected({ t }: WithTranslation) {
         title={t('investment-calculator:pageTitle')}
         description={t('investment-calculator:pageDescription')}
       />
-
-      {saveSuccess && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          {t('investment-calculator:saveSuccess')}
-        </Alert>
-      )}
 
       <Tabs
         value={tabValue}

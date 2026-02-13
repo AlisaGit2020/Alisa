@@ -1,7 +1,7 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Alert, Box, Card, Chip, Container, Grid, Link, Typography } from "@mui/material";
+import { Box, Card, Chip, Container, Grid, Link, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
-import { AlisaButton } from "../alisa";
+import { AlisaButton, useToast } from "../alisa";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AssessmentIcon from "@mui/icons-material/Assessment";
@@ -18,18 +18,16 @@ function LandingPage({ t }: WithTranslation) {
   const [loginDialogOpen, setLoginDialogOpen] = React.useState(false);
   const [results, setResults] = React.useState<InvestmentResults | null>(null);
   const [inputData, setInputData] = React.useState<InvestmentInputData | null>(null);
-  const [saveSuccess, setSaveSuccess] = React.useState(false);
   const [searchParams] = useSearchParams();
   const calculatorRef = React.useRef<HTMLDivElement>(null);
+  const { showToast } = useToast();
 
   React.useEffect(() => {
     // Check if we just saved successfully (coming back from login)
     if (searchParams.get('saved') === 'true') {
-      setSaveSuccess(true);
-      // Auto-hide success message after 5 seconds
-      setTimeout(() => setSaveSuccess(false), 5000);
+      showToast({ message: t("common:toast.calculationSaved"), severity: "success" });
     }
-  }, [searchParams]);
+  }, [searchParams, showToast, t]);
 
   const handleLogin = () => {
     setLoginDialogOpen(true);
@@ -352,12 +350,6 @@ function LandingPage({ t }: WithTranslation) {
       {/* Investment Calculator Section */}
       <Box ref={calculatorRef} sx={{ bgcolor: 'background.paper', py: 8 }}>
         <Container maxWidth="md">
-          {saveSuccess && (
-            <Alert severity="success" sx={{ mb: 3 }}>
-              {t('investment-calculator:saveSuccess')}
-            </Alert>
-          )}
-
           <Box sx={{ mb: 4, textAlign: 'center' }}>
             <Typography variant="h3" component="h2" gutterBottom fontWeight={700}>
               {t('investment-calculator:title')}
