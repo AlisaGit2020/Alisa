@@ -159,8 +159,12 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
           </Box>
         </Grid>
 
+        {/* Property Details Section */}
         <Grid size={{ xs: 12 }}>
-          <Divider sx={{ my: 1 }} />
+          <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+            {t('investment-calculator:sectionPropertyDetails')}
+          </Typography>
+          <Divider />
         </Grid>
 
         <Grid size={{ xs: 12 }}>
@@ -204,6 +208,23 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
 
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
+            label={t('investment-calculator:apartmentSize')}
+            value={formData.apartmentSize ?? 0}
+            onChange={handleChange('apartmentSize')}
+            step={1}
+          />
+        </Grid>
+
+        {/* Monthly Costs Section */}
+        <Grid size={{ xs: 12 }}>
+          <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+            {t('investment-calculator:sectionMonthlyCosts')}
+          </Typography>
+          <Divider />
+        </Grid>
+
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <AlisaNumberField
             label={t('investment-calculator:maintenanceFee')}
             value={formData.maintenanceFee}
             onChange={handleChange('maintenanceFee')}
@@ -224,6 +245,23 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
 
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
+            label={t('investment-calculator:waterCharge')}
+            value={formData.waterCharge ?? 0}
+            onChange={handleChange('waterCharge')}
+            step={5}
+          />
+        </Grid>
+
+        {/* Rental Income Section */}
+        <Grid size={{ xs: 12 }}>
+          <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+            {t('investment-calculator:sectionRentalIncome')}
+          </Typography>
+          <Divider />
+        </Grid>
+
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <AlisaNumberField
             label={t('investment-calculator:rentPerMonth')}
             value={formData.rentPerMonth}
             onChange={handleChange('rentPerMonth')}
@@ -232,22 +270,12 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
           />
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
-            label={t('investment-calculator:apartmentSize')}
-            value={formData.apartmentSize ?? 0}
-            onChange={handleChange('apartmentSize')}
-            step={1}
-          />
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
-            label={t('investment-calculator:waterCharge')}
-            value={formData.waterCharge ?? 0}
-            onChange={handleChange('waterCharge')}
-            step={5}
-          />
+        {/* Financing Section */}
+        <Grid size={{ xs: 12 }}>
+          <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+            {t('investment-calculator:sectionFinancing')}
+          </Typography>
+          <Divider />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>

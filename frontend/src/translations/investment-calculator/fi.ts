@@ -10,6 +10,12 @@ const investmentCalculator = {
   saveSuccess: 'Laskenta tallennettu onnistuneesti',
   mustLoginToSave: 'Kirjaudu sisään tallentaaksesi laskelman',
 
+  // Form section headers
+  sectionPropertyDetails: 'Asunnon tiedot',
+  sectionMonthlyCosts: 'Kuukausikulut',
+  sectionRentalIncome: 'Vuokratuotto',
+  sectionFinancing: 'Rahoitus',
+
   // Input fields
   name: 'Laskelman nimi',
   deptFreePrice: 'Velaton hinta',
@@ -71,6 +77,14 @@ const investmentCalculator = {
   deleteConfirm: 'Haluatko varmasti poistaa laskelman?',
   noCalculations: 'Ei tallennettuja laskelmia',
   calculation: 'Laskelma',
+
+  // Bulk actions
+  rowsSelected: '{{count}} laskelma valittu',
+  rowsSelected_other: '{{count}} laskelmaa valittu',
+  confirmDeleteSelected: 'Haluatko varmasti poistaa {{count}} laskelman?',
+  confirmDeleteSelected_other: 'Haluatko varmasti poistaa {{count}} laskelmaa?',
+  deleteAriaLabel: 'Poista {{count}} valittu laskelma',
+  deleteAriaLabel_other: 'Poista {{count}} valittua laskelmaa',
 }
 
 export default investmentCalculator

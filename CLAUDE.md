@@ -96,6 +96,40 @@ When writing frontend code:
 
 Alisa components are located in `frontend/src/components/alisa/`.
 
+### Data Tables
+
+**Always use `AlisaDataTable` for displaying tabular data.**
+
+Never use raw MUI Table components (Table, TableRow, TableCell, TableHead, TableBody, etc.) directly. AlisaDataTable provides:
+- Consistent styling and theming (light/dark mode)
+- Built-in row selection (single and bulk)
+- Integrated delete confirmation dialogs
+- Currency/date/number formatting via field config
+- Sum calculations for numeric columns
+- i18n support through the `t` function
+- Action buttons (edit, delete, add)
+- Empty state handling
+
+Example usage:
+```tsx
+<AlisaDataTable<MyDataType>
+  t={t}
+  dataService={dataService}
+  fields={[
+    { name: "name" },
+    { name: "amount", format: "currency", sum: true },
+    { name: "date", format: "date" },
+  ]}
+  selectedIds={selectedIds}
+  onSelectChange={handleSelectChange}
+  onSelectAllChange={handleSelectAllChange}
+  onOpen={handleOpen}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+  onNewRow={handleNewRow}
+/>
+```
+
 ### Path Aliases
 Both projects use TypeScript path aliases:
 - `@alisa-backend/*` → Backend source (used by both frontend and backend)

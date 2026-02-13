@@ -90,6 +90,8 @@ const fi = {
       photoDeleted: "Kuva poistettu",
       calculationSaved: "Laskelma tallennettu",
       tierSaved: "Taso tallennettu",
+      error: "Tapahtui virhe",
+      partialSuccess: "{{success}} onnistui, {{failed}} epäonnistui",
     },
 
     close: "Sulje",

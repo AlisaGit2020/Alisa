@@ -1,26 +1,14 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import {
-  Box,
-  Card,
-  CardContent,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Box, Paper, Stack } from "@mui/material";
 import React from "react";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import ApiClient from "@alisa-lib/api-client";
 import { useNavigate } from "react-router-dom";
-import { AlisaButton, AlisaConfirmDialog, useToast } from "../alisa";
+import { useToast } from "../alisa";
+import AlisaDataTable from "../alisa/datatable/AlisaDataTable";
+import DataService from "@alisa-lib/data-service";
 import InvestmentCalculationViewDialog from "./InvestmentCalculationViewDialog";
 import InvestmentCalculationEditDialog from "./InvestmentCalculationEditDialog";
+import SavedCalculationsActions from "./SavedCalculationsActions";
 
 interface SavedCalculation {
   id: number;
@@ -39,52 +27,88 @@ interface SavedCalculationsProps extends WithTranslation {
   onNewCalculation?: () => void;
 }
 
-function SavedCalculations({ t, compact = false, onNewCalculation }: SavedCalculationsProps) {
-  const [calculations, setCalculations] = React.useState<SavedCalculation[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const [selectedCalculationId, setSelectedCalculationId] = React.useState<number | null>(null);
+function SavedCalculations({
+  t,
+  compact = false,
+  onNewCalculation,
+}: SavedCalculationsProps) {
+  const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
   const [viewDialogOpen, setViewDialogOpen] = React.useState(false);
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
+  const [selectedCalculationId, setSelectedCalculationId] = React.useState<
+    number | null
+  >(null);
+  const [refreshTrigger, setRefreshTrigger] = React.useState(0);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  React.useEffect(() => {
-    loadCalculations();
+  const dataService = React.useMemo(() => {
+    const service = {
+      search: async () => {
+        const data = await ApiClient.search<SavedCalculation>(
+          "real-estate/investment",
+          {}
+        );
+        return data.map((calc) => ({
+          ...calc,
+          name: calc.name || `#${calc.id}`,
+        }));
+      },
+      delete: async (id: number) => {
+        await ApiClient.delete("real-estate/investment", id);
+      },
+    } as DataService<SavedCalculation>;
+    return service;
   }, []);
 
-  const loadCalculations = async () => {
+  const handleSelectChange = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllChange = (ids: number[]) => {
+    setSelectedIds(ids);
+  };
+
+  const handleCancelSelection = () => {
+    setSelectedIds([]);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+
+    setIsDeleting(true);
     try {
-      const data = await ApiClient.search<SavedCalculation>('real-estate/investment', {});
-      setCalculations(data);
-    } catch (error) {
-      console.error('Error loading calculations:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteOpen = (id: number) => {
-    setSelectedCalculationId(id);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteClose = () => {
-    setSelectedCalculationId(null);
-    setDeleteDialogOpen(false);
-  };
-
-  const handleDelete = async () => {
-    if (selectedCalculationId) {
-      try {
-        await ApiClient.delete('real-estate/investment', selectedCalculationId);
-        showToast({ message: t("common:toast.deleteSuccess"), severity: "success" });
-        await loadCalculations();
-      } catch (error) {
-        console.error('Error deleting calculation:', error);
+      const result = await ApiClient.postSaveTask("real-estate/investment/delete", {
+        ids: selectedIds,
+      });
+      if (result.allSuccess) {
+        showToast({
+          message: t("common:toast.deleteSuccess"),
+          severity: "success",
+        });
+      } else {
+        showToast({
+          message: t("common:toast.partialSuccess", {
+            success: result.rows.success,
+            failed: result.rows.failed,
+          }),
+          severity: "warning",
+        });
       }
+      setSelectedIds([]);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error deleting calculations:", error);
+      showToast({
+        message: t("common:toast.error"),
+        severity: "error",
+      });
+    } finally {
+      setIsDeleting(false);
     }
-    handleDeleteClose();
   };
 
   const handleViewOpen = (id: number) => {
@@ -107,151 +131,91 @@ function SavedCalculations({ t, compact = false, onNewCalculation }: SavedCalcul
     setEditDialogOpen(false);
   };
 
-  const handleRowClick = (id: number) => {
-    handleViewOpen(id);
-  };
-
   const handleNewCalculation = () => {
     if (onNewCalculation) {
       onNewCalculation();
     } else {
-      navigate('/investment-calculator');
+      navigate("/investment-calculator");
     }
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('fi-FI', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
+  const handleDelete = () => {
+    setRefreshTrigger((prev) => prev + 1);
   };
 
-  const formatPercent = (value: number) => {
-    return `${value.toFixed(2)} %`;
+  const handleSaved = () => {
+    setRefreshTrigger((prev) => prev + 1);
   };
-
-  if (loading) {
-    return (
-      <Box>
-        <Typography>Loading...</Typography>
-      </Box>
-    );
-  }
 
   return (
     <Box>
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant={compact ? "h6" : "h4"} component={compact ? "h2" : "h1"}>
-          {t('investment-calculator:savedCalculations')}
-        </Typography>
-        {!compact && (
-          <AlisaButton
-            label={t('investment-calculator:newCalculation')}
-            onClick={handleNewCalculation}
+      <Stack spacing={2}>
+        <SavedCalculationsActions
+          open={selectedIds.length > 0}
+          selectedIds={selectedIds}
+          onCancel={handleCancelSelection}
+          onDelete={handleBulkDelete}
+          isDeleting={isDeleting}
+        />
+
+        <Paper>
+          <AlisaDataTable<SavedCalculation>
+            t={t}
+            dataService={dataService}
+            fields={[
+              { name: "name", label: t("investment-calculator:name") },
+              {
+                name: "deptFreePrice",
+                label: t("investment-calculator:deptFreePrice"),
+                format: "currency",
+              },
+              {
+                name: "rentPerMonth",
+                label: t("investment-calculator:rentPerMonth"),
+                format: "currency",
+              },
+              {
+                name: "cashFlowPerMonth",
+                label: t("investment-calculator:cashFlowPerMonth"),
+                format: "currency",
+              },
+              {
+                name: "rentalYieldPercent",
+                label: t("investment-calculator:rentalYieldPercent"),
+                format: "number",
+              },
+            ]}
+            selectedIds={selectedIds}
+            onSelectChange={handleSelectChange}
+            onSelectAllChange={handleSelectAllChange}
+            onOpen={handleViewOpen}
+            onEdit={handleEditOpen}
+            onDelete={handleDelete}
+            onNewRow={!compact ? handleNewCalculation : undefined}
+            refreshTrigger={refreshTrigger}
           />
-        )}
-      </Box>
+        </Paper>
 
-      {calculations.length === 0 ? (
-        <Card>
-          <CardContent>
-            <Typography color="text.secondary" align="center">
-              {t('investment-calculator:noCalculations')}
-            </Typography>
-            {!compact && (
-              <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                <AlisaButton
-                  label={t('investment-calculator:newCalculation')}
-                  onClick={handleNewCalculation}
-                />
-              </Box>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>{t('investment-calculator:name')}</TableCell>
-                <TableCell align="right">{t('investment-calculator:deptFreePrice')}</TableCell>
-                <TableCell align="right">{t('investment-calculator:rentPerMonth')}</TableCell>
-                <TableCell align="right">{t('investment-calculator:cashFlowPerMonth')}</TableCell>
-                <TableCell align="right">{t('investment-calculator:rentalYieldPercent')}</TableCell>
-                <TableCell align="right">{t('investment-calculator:actions')}</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {calculations.map((calc) => (
-                <TableRow
-                  key={calc.id}
-                  hover
-                  onClick={() => handleRowClick(calc.id)}
-                  sx={{ cursor: 'pointer' }}
-                >
-                  <TableCell>{calc.name || `#${calc.id}`}</TableCell>
-                  <TableCell align="right">{formatCurrency(calc.deptFreePrice)}</TableCell>
-                  <TableCell align="right">{formatCurrency(calc.rentPerMonth)}</TableCell>
-                  <TableCell
-                    align="right"
-                    sx={{
-                      color: calc.cashFlowPerMonth > 0 ? 'success.main' :
-                             calc.cashFlowPerMonth < 0 ? 'error.main' : 'text.primary'
-                    }}
-                  >
-                    {formatCurrency(calc.cashFlowPerMonth)}
-                  </TableCell>
-                  <TableCell align="right">{formatPercent(calc.rentalYieldPercent)}</TableCell>
-                  <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditOpen(calc.id)}
-                      title={t('investment-calculator:edit')}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteOpen(calc.id)}
-                      title={t('investment-calculator:delete')}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
-
-      <AlisaConfirmDialog
-        title={t('common:confirm')}
-        contentText={t('investment-calculator:deleteConfirm')}
-        buttonTextConfirm={t('common:delete')}
-        buttonTextCancel={t('common:cancel')}
-        open={deleteDialogOpen}
-        onConfirm={handleDelete}
-        onClose={handleDeleteClose}
-      />
+        {/* Empty state - only shows when not using data table's built-in empty state */}
+      </Stack>
 
       <InvestmentCalculationViewDialog
         calculationId={selectedCalculationId || 0}
         open={viewDialogOpen}
         onClose={handleViewClose}
-        onSaved={loadCalculations}
+        onSaved={handleSaved}
       />
 
       <InvestmentCalculationEditDialog
         calculationId={selectedCalculationId || 0}
         open={editDialogOpen}
         onClose={handleEditClose}
-        onSaved={loadCalculations}
+        onSaved={handleSaved}
       />
     </Box>
   );
 }
 
-export default withTranslation(['investment-calculator'])(SavedCalculations);
+export default withTranslation(["investment-calculator", "common"])(
+  SavedCalculations
+);
