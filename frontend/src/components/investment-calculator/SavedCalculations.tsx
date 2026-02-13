@@ -23,13 +23,11 @@ interface SavedCalculation {
 }
 
 interface SavedCalculationsProps extends WithTranslation {
-  compact?: boolean;
   onNewCalculation?: () => void;
 }
 
 function SavedCalculations({
   t,
-  compact = false,
   onNewCalculation,
 }: SavedCalculationsProps) {
   const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
@@ -191,12 +189,10 @@ function SavedCalculations({
             onOpen={handleViewOpen}
             onEdit={handleEditOpen}
             onDelete={handleDelete}
-            onNewRow={!compact ? handleNewCalculation : undefined}
+            onNewRow={handleNewCalculation}
             refreshTrigger={refreshTrigger}
           />
         </Paper>
-
-        {/* Empty state - only shows when not using data table's built-in empty state */}
       </Stack>
 
       <InvestmentCalculationViewDialog

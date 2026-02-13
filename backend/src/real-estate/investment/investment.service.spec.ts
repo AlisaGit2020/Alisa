@@ -411,7 +411,7 @@ describe('InvestmentService', () => {
       expect(mockRepository.delete).toHaveBeenCalledTimes(2);
     });
 
-    it('returns unauthorized for investments not owned by user', async () => {
+    it('returns forbidden for investments not owned by user', async () => {
       const investments = [
         createInvestment({ id: 1, userId: otherUser.id }),
         createInvestment({ id: 2, userId: testUser.id }),
@@ -425,7 +425,7 @@ describe('InvestmentService', () => {
       expect(result.rows.total).toBe(2);
       expect(result.rows.success).toBe(1);
       expect(result.rows.failed).toBe(1);
-      expect(result.results.find((r) => r.id === 1)?.statusCode).toBe(401);
+      expect(result.results.find((r) => r.id === 1)?.statusCode).toBe(403);
       expect(result.results.find((r) => r.id === 2)?.statusCode).toBe(200);
     });
 

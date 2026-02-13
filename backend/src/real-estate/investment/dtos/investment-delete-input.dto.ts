@@ -1,7 +1,9 @@
-import { IsArray, IsNotEmpty } from 'class-validator';
+import { ArrayMaxSize, ArrayNotEmpty, ArrayUnique, IsArray } from 'class-validator';
 
 export class InvestmentDeleteInputDto {
   @IsArray()
-  @IsNotEmpty()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @ArrayMaxSize(100)
   ids: number[];
 }

@@ -146,8 +146,8 @@ export class InvestmentService {
         if (investment.userId !== user.id) {
           return {
             id: investment.id,
-            statusCode: 401,
-            message: 'Unauthorized',
+            statusCode: 403,
+            message: 'Forbidden',
           } as DataSaveResultRowDto;
         }
 

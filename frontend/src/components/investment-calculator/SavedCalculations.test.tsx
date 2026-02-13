@@ -371,27 +371,6 @@ describe("SavedCalculations", () => {
   });
 
   describe("Navigation", () => {
-    // Note: Navigation test is skipped because the test wrapper provides BrowserRouter
-    // which doesn't work well with mocked useNavigate. The callback behavior is tested
-    // in "calls onNewCalculation callback when provided" which proves the click handler works.
-    it.skip("navigates to calculator when add button is clicked", async () => {
-      const user = userEvent.setup();
-      mockSearch.mockResolvedValue(mockCalculations);
-
-      renderWithProviders(<SavedCalculations />);
-
-      // Wait for data to load
-      await waitFor(() => {
-        expect(screen.getByText("Investment A")).toBeInTheDocument();
-      });
-
-      // Find the add button in the data table
-      const addButton = screen.getByRole("button", { name: /add/i });
-      await user.click(addButton);
-
-      expect(mockNavigate).toHaveBeenCalledWith("/investment-calculator");
-    });
-
     it("calls onNewCalculation callback when add button is clicked", async () => {
       const user = userEvent.setup();
       const mockOnNewCalculation = jest.fn();
