@@ -94,8 +94,10 @@ function AlisaDataTable<T extends { id: number }>(props: {
         let comparison = 0;
 
         if (field?.format === "date") {
-          const aDate = aValue ? new Date(aValue as string).getTime() : 0;
-          const bDate = bValue ? new Date(bValue as string).getTime() : 0;
+          // Null/undefined dates sort to the end regardless of sort direction
+          const nullValue = sortDirection === "asc" ? Infinity : -Infinity;
+          const aDate = aValue ? new Date(aValue as string).getTime() : nullValue;
+          const bDate = bValue ? new Date(bValue as string).getTime() : nullValue;
           comparison = aDate - bDate;
         } else if (typeof aValue === "number" && typeof bValue === "number") {
           comparison = aValue - bValue;
@@ -111,7 +113,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
     [props.sortable, props.fields, sortColumn, sortDirection],
   );
 
-  const data = sortData(rawData);
+  const data = React.useMemo(() => sortData(rawData), [rawData, sortData]);
 
   React.useEffect(() => {
     if (props.dataService) {

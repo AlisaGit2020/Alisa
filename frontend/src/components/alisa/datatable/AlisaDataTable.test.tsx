@@ -490,6 +490,7 @@ describe('AlisaDataTable', () => {
       await user.click(screen.getByText('date'));
 
       // After sorting ascending, the first date should be January (earliest)
+      // Note: Date format '1/10/2024' is locale-dependent (en-US format from renderWithProviders)
       const cells = screen.getAllByRole('cell');
       const firstDateCell = cells[0];
       expect(firstDateCell.textContent).toContain('1/10/2024');
