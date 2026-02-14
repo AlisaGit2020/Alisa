@@ -11,13 +11,13 @@ HAS_FRONTEND=$(echo "$CHANGED" | grep -c "^frontend/" || true)
 if [ "$HAS_BACKEND" -gt 0 ] && [ "$HAS_FRONTEND" -gt 0 ]; then
   echo "🔧 Backend and frontend changes detected - running all tests..."
   cd backend && npm test && cd ..
-  cd frontend && npm test && npx vite build
+  cd frontend && npm test && npm run build
 elif [ "$HAS_BACKEND" -gt 0 ]; then
   echo "🔧 Backend changes detected - running backend tests..."
   cd backend && npm test
 elif [ "$HAS_FRONTEND" -gt 0 ]; then
-  echo "🎨 Frontend changes detected - running frontend tests..."
-  cd frontend && npm test && npx vite build
+  echo "🎨 Frontend changes detected - running frontend tests and build..."
+  cd frontend && npm test && npm run build
 else
   echo "📝 No backend/frontend changes - skipping tests"
 fi
