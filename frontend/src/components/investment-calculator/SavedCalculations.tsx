@@ -191,6 +191,7 @@ function SavedCalculations({
             onDelete={handleDelete}
             onNewRow={handleNewCalculation}
             refreshTrigger={refreshTrigger}
+            sortable
           />
         </Paper>
       </Stack>
