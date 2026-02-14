@@ -21,9 +21,7 @@ export interface CreatePropertyOptions {
 
 export const createAddress = (options: CreateAddressOptions = {}): Address => {
   const address = new Address();
-  if (options.id !== undefined) {
-    address.id = options.id;
-  }
+  address.id = options.id ?? 1;
   address.street = options.street;
   address.city = options.city;
   address.postalCode = options.postalCode;

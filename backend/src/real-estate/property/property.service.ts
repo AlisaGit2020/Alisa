@@ -306,7 +306,7 @@ export class PropertyService {
         property.address = address;
       } else {
         // All address fields are empty, remove the address
-        property.address = null;
+        property.address = undefined;
       }
     }
 
