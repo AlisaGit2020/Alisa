@@ -342,4 +342,157 @@ describe('AlisaDataTable', () => {
     await user.click(checkboxes[0]); // Header checkbox
     expect(mockOnSelectAllChange).toHaveBeenCalledWith([], []);
   });
+
+  describe('sorting', () => {
+    it('does not show sort controls when sortable is false (default)', () => {
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={defaultFields}
+          data={mockData}
+        />
+      );
+
+      // No sort buttons should be present
+      const sortButtons = screen.queryAllByRole('button', { name: /sort/i });
+      expect(sortButtons.length).toBe(0);
+    });
+
+    it('shows sort controls when sortable is true', () => {
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={defaultFields}
+          data={mockData}
+          sortable
+        />
+      );
+
+      // Column headers should be clickable (TableSortLabel renders as button)
+      expect(screen.getByText('name').closest('span')).toHaveClass('MuiTableSortLabel-root');
+      expect(screen.getByText('amount').closest('span')).toHaveClass('MuiTableSortLabel-root');
+    });
+
+    it('sorts string data ascending when column header is clicked', async () => {
+      const user = userEvent.setup();
+      const unsortedData: TestData[] = [
+        { id: 1, name: 'Charlie', amount: 100 },
+        { id: 2, name: 'Alice', amount: 200 },
+        { id: 3, name: 'Bob', amount: 300 },
+      ];
+
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={defaultFields}
+          data={unsortedData}
+          sortable
+        />
+      );
+
+      // Click the name column header to sort
+      await user.click(screen.getByText('name'));
+
+      // Get all cells and check order
+      const cells = screen.getAllByRole('cell');
+      const nameValues = cells
+        .map(cell => cell.textContent)
+        .filter(text => ['Alice', 'Bob', 'Charlie'].includes(text || ''));
+
+      expect(nameValues).toEqual(['Alice', 'Bob', 'Charlie']);
+    });
+
+    it('sorts string data descending when column header is clicked twice', async () => {
+      const user = userEvent.setup();
+      const unsortedData: TestData[] = [
+        { id: 1, name: 'Charlie', amount: 100 },
+        { id: 2, name: 'Alice', amount: 200 },
+        { id: 3, name: 'Bob', amount: 300 },
+      ];
+
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={defaultFields}
+          data={unsortedData}
+          sortable
+        />
+      );
+
+      // Click the name column header twice to sort descending
+      await user.click(screen.getByText('name'));
+      await user.click(screen.getByText('name'));
+
+      const cells = screen.getAllByRole('cell');
+      const nameValues = cells
+        .map(cell => cell.textContent)
+        .filter(text => ['Alice', 'Bob', 'Charlie'].includes(text || ''));
+
+      expect(nameValues).toEqual(['Charlie', 'Bob', 'Alice']);
+    });
+
+    it('sorts numeric data correctly', async () => {
+      const user = userEvent.setup();
+      const unsortedData: TestData[] = [
+        { id: 1, name: 'Item 1', amount: 300 },
+        { id: 2, name: 'Item 2', amount: 100 },
+        { id: 3, name: 'Item 3', amount: 200 },
+      ];
+
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={defaultFields}
+          data={unsortedData}
+          sortable
+        />
+      );
+
+      // Click the amount column header to sort
+      await user.click(screen.getByText('amount'));
+
+      const cells = screen.getAllByRole('cell');
+      const amountValues = cells
+        .map(cell => cell.textContent)
+        .filter(text => text?.startsWith('€'));
+
+      expect(amountValues).toEqual(['€100', '€200', '€300']);
+    });
+
+    it('sorts date data correctly', async () => {
+      const user = userEvent.setup();
+
+      interface DateTestData {
+        id: number;
+        date: string;
+      }
+
+      const dateData: DateTestData[] = [
+        { id: 1, date: '2024-03-15' },
+        { id: 2, date: '2024-01-10' },
+        { id: 3, date: '2024-02-20' },
+      ];
+
+      const dateFields = [
+        { name: 'date' as keyof DateTestData, format: 'date' as const },
+      ];
+
+      renderWithProviders(
+        <AlisaDataTable<DateTestData>
+          t={mockT}
+          fields={dateFields}
+          data={dateData}
+          sortable
+        />
+      );
+
+      // Click the date column header to sort ascending
+      await user.click(screen.getByText('date'));
+
+      // After sorting ascending, the first date should be January (earliest)
+      const cells = screen.getAllByRole('cell');
+      const firstDateCell = cells[0];
+      expect(firstDateCell.textContent).toContain('1/10/2024');
+    });
+  });
 });

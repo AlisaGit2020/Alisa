@@ -5,6 +5,7 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import TableSortLabel from "@mui/material/TableSortLabel";
 import { Box, Chip, TableContainer, Typography } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { TFunction } from "i18next";
@@ -41,6 +42,8 @@ interface AlisaDataTableField<T> {
   sum?: boolean;
 }
 
+type SortDirection = "asc" | "desc";
+
 function AlisaDataTable<T extends { id: number }>(props: {
   t: TFunction;
   fields: AlisaDataTableField<T>[];
@@ -54,15 +57,61 @@ function AlisaDataTable<T extends { id: number }>(props: {
   onOpen?: (id: number) => void;
   onDelete?: (id: number) => void;
   refreshTrigger?: number;
+  sortable?: boolean;
 }) {
   const [fetchedData, setFetchedData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState<number>(0);
   const [idDeleted, setIdDeleted] = React.useState<number>(0);
+  const [sortColumn, setSortColumn] = React.useState<keyof T | null>(null);
+  const [sortDirection, setSortDirection] = React.useState<SortDirection>("asc");
   const { showToast } = useToast();
 
   // Use static data if provided, otherwise fetch from dataService
-  const data = props.data ?? fetchedData;
+  const rawData = props.data ?? fetchedData;
+
+  const handleSort = (column: keyof T) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const sortData = React.useCallback(
+    (dataToSort: T[]): T[] => {
+      if (!props.sortable || !sortColumn) {
+        return dataToSort;
+      }
+
+      const field = props.fields.find((f) => f.name === sortColumn);
+
+      return [...dataToSort].sort((a, b) => {
+        const aValue = a[sortColumn];
+        const bValue = b[sortColumn];
+
+        let comparison = 0;
+
+        if (field?.format === "date") {
+          const aDate = aValue ? new Date(aValue as string).getTime() : 0;
+          const bDate = bValue ? new Date(bValue as string).getTime() : 0;
+          comparison = aDate - bDate;
+        } else if (typeof aValue === "number" && typeof bValue === "number") {
+          comparison = aValue - bValue;
+        } else {
+          const aString = String(aValue ?? "").toLowerCase();
+          const bString = String(bValue ?? "").toLowerCase();
+          comparison = aString.localeCompare(bString);
+        }
+
+        return sortDirection === "asc" ? comparison : -comparison;
+      });
+    },
+    [props.sortable, props.fields, sortColumn, sortDirection],
+  );
+
+  const data = sortData(rawData);
 
   React.useEffect(() => {
     if (props.dataService) {
@@ -240,12 +289,41 @@ function AlisaDataTable<T extends { id: number }>(props: {
                   key={field.name as string}
                   align={field.format === "currency" ? "right" : "left"}
                   sx={{ whiteSpace: "nowrap" }}
+                  sortDirection={sortColumn === field.name ? sortDirection : false}
                 >
-                  <Typography fontWeight={"bold"}>
-                    {field.label !== undefined
-                      ? field.label
-                      : props.t(field.name as string)}
-                  </Typography>
+                  {props.sortable ? (
+                    <TableSortLabel
+                      active={sortColumn === field.name}
+                      direction={sortColumn === field.name ? sortDirection : "asc"}
+                      onClick={() => handleSort(field.name)}
+                      sx={{
+                        "&:hover": {
+                          color: "primary.main",
+                        },
+                        "&.Mui-active": {
+                          color: "primary.main",
+                          "& .MuiTableSortLabel-icon": {
+                            color: "primary.main",
+                          },
+                        },
+                        "& .MuiTableSortLabel-icon": {
+                          opacity: sortColumn === field.name ? 1 : 0,
+                        },
+                      }}
+                    >
+                      <Typography fontWeight={"bold"}>
+                        {field.label !== undefined
+                          ? field.label
+                          : props.t(field.name as string)}
+                      </Typography>
+                    </TableSortLabel>
+                  ) : (
+                    <Typography fontWeight={"bold"}>
+                      {field.label !== undefined
+                        ? field.label
+                        : props.t(field.name as string)}
+                    </Typography>
+                  )}
                 </TableCell>
               ))}
               {props.onNewRow && (
