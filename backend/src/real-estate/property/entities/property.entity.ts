@@ -3,10 +3,18 @@
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 import { columnOptionOneDecimal } from '@alisa-backend/common/typeorm.column.definitions';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
+import { Address } from '@alisa-backend/real-estate/address/entities/address.entity';
 
 @Entity()
 export class Property {
@@ -50,14 +58,17 @@ export class Property {
   @Column({ nullable: true, type: 'text' })
   public description?: string;
 
-  @Column({ nullable: true })
-  public address?: string;
+  @OneToOne(() => Address, {
+    cascade: true,
+    eager: true,
+    orphanedRowAction: 'delete',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'addressId' })
+  public address?: Address;
 
   @Column({ nullable: true })
-  public city?: string;
-
-  @Column({ nullable: true })
-  public postalCode?: string;
+  public addressId?: number;
 
   @Column({ nullable: true })
   public buildYear?: number;

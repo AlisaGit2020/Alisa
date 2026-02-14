@@ -25,9 +25,11 @@ function PropertyForm({ t }: WithTranslation) {
         size: 0,
         photo: undefined,
         description: '',
-        address: '',
-        city: '',
-        postalCode: '',
+        address: {
+            street: '',
+            city: '',
+            postalCode: '',
+        },
         buildYear: undefined,
         apartmentType: '',
         ownerships: [{ userId: 0, share: 100 }]
@@ -63,6 +65,19 @@ function PropertyForm({ t }: WithTranslation) {
         const ownerships = data.ownerships ?? [{ userId: 0, share: 100 }];
         const updatedOwnerships = [{ ...ownerships[0], share }];
         setData({ ...data, ownerships: updatedOwnerships });
+    }
+
+    const handleAddressChange = (
+        field: 'street' | 'city' | 'postalCode',
+        value: string
+    ) => {
+        setData({
+            ...data,
+            address: {
+                ...data.address,
+                [field]: value,
+            },
+        });
     }
 
     const handleSaveResult = async (result: DTO<PropertyInput>) => {
@@ -114,22 +129,22 @@ function PropertyForm({ t }: WithTranslation) {
                 </Stack>
                 <AlisaTextField
                     label={t('address')}
-                    value={data.address || ''}
-                    onChange={(e) => handleChange('address', e.target.value)}
+                    value={data.address?.street || ''}
+                    onChange={(e) => handleAddressChange('street', e.target.value)}
                 />
                 <Stack direction="row" spacing={2}>
                     <Box sx={{ flex: 1 }}>
                         <AlisaTextField
                             label={t('postalCode')}
-                            value={data.postalCode || ''}
-                            onChange={(e) => handleChange('postalCode', e.target.value)}
+                            value={data.address?.postalCode || ''}
+                            onChange={(e) => handleAddressChange('postalCode', e.target.value)}
                         />
                     </Box>
                     <Box sx={{ flex: 2 }}>
                         <AlisaTextField
                             label={t('city')}
-                            value={data.city || ''}
-                            onChange={(e) => handleChange('city', e.target.value)}
+                            value={data.address?.city || ''}
+                            onChange={(e) => handleAddressChange('city', e.target.value)}
                         />
                     </Box>
                 </Stack>

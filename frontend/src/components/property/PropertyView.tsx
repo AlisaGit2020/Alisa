@@ -230,23 +230,23 @@ function PropertyView({ t }: WithTranslation) {
           </Grid>
 
           {/* Location */}
-          {(property.address || property.city) && (
+          {(property.address?.street || property.address?.city) && (
             <Grid size={{ xs: 12, md: 6 }}>
               <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
                 {t('locationInfo')}
               </Typography>
-              {property.address && (
+              {property.address?.street && (
                 <DetailRow
                   icon={<LocationOnIcon fontSize="small" />}
                   label={t('address')}
-                  value={property.address}
+                  value={property.address.street}
                 />
               )}
-              {property.city && (
+              {property.address?.city && (
                 <DetailRow
                   icon={<LocationCityIcon fontSize="small" />}
                   label={t('city')}
-                  value={`${property.postalCode ? property.postalCode + ' ' : ''}${property.city}`}
+                  value={`${property.address.postalCode ? property.address.postalCode + ' ' : ''}${property.address.city}`}
                 />
               )}
             </Grid>

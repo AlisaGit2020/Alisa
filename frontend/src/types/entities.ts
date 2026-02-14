@@ -2,6 +2,14 @@
 
 import { TransactionStatus, TransactionType, DashboardConfig } from './common';
 
+// Address
+export interface Address {
+  id: number;
+  street?: string;
+  city?: string;
+  postalCode?: string;
+}
+
 // Tier
 export interface Tier {
   id: number;
@@ -53,9 +61,7 @@ export interface Property {
   statistics?: PropertyStatistics[];
   photo?: string;
   description?: string;
-  address?: string;
-  city?: string;
-  postalCode?: string;
+  address?: Address;
   buildYear?: number;
   apartmentType?: string;
 }

@@ -60,9 +60,12 @@ describe('PropertyView', () => {
   const mockProperty = createMockProperty({
     id: 1,
     name: 'Helsinki Apartment',
-    address: 'Mannerheimintie 1',
-    city: 'Helsinki',
-    postalCode: '00100',
+    address: {
+      id: 1,
+      street: 'Mannerheimintie 1',
+      city: 'Helsinki',
+      postalCode: '00100',
+    },
     size: 75,
     buildYear: 2010,
     apartmentType: '2h+k',
@@ -172,8 +175,6 @@ describe('PropertyView', () => {
       const propertyNoLocation = createMockProperty({
         ...mockProperty,
         address: undefined,
-        city: undefined,
-        postalCode: undefined,
       });
       mockGet.mockResolvedValue(propertyNoLocation);
 

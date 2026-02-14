@@ -17,9 +17,11 @@ describe('PropertyForm Component Logic', () => {
     size: 0,
     photo: undefined,
     description: '',
-    address: '',
-    city: '',
-    postalCode: '',
+    address: {
+      street: '',
+      city: '',
+      postalCode: '',
+    },
     buildYear: undefined,
     apartmentType: '',
     ownerships: [{ userId: 0, share: 100 }],
@@ -74,47 +76,65 @@ describe('PropertyForm Component Logic', () => {
       expect(result.size).toBe(75);
     });
 
-    it('updates address field correctly', () => {
-      const updateField = (
+    it('updates address street field correctly', () => {
+      const updateAddressField = (
         data: PropertyFormData,
-        field: keyof PropertyFormData,
-        value: unknown
+        field: 'street' | 'city' | 'postalCode',
+        value: string
       ): PropertyFormData => {
-        return { ...data, [field]: value };
+        return {
+          ...data,
+          address: {
+            ...data.address,
+            [field]: value,
+          },
+        };
       };
 
-      const result = updateField(
+      const result = updateAddressField(
         defaultPropertyInput,
-        'address',
+        'street',
         '123 Test Street'
       );
-      expect(result.address).toBe('123 Test Street');
+      expect(result.address?.street).toBe('123 Test Street');
     });
 
-    it('updates city field correctly', () => {
-      const updateField = (
+    it('updates address city field correctly', () => {
+      const updateAddressField = (
         data: PropertyFormData,
-        field: keyof PropertyFormData,
-        value: unknown
+        field: 'street' | 'city' | 'postalCode',
+        value: string
       ): PropertyFormData => {
-        return { ...data, [field]: value };
+        return {
+          ...data,
+          address: {
+            ...data.address,
+            [field]: value,
+          },
+        };
       };
 
-      const result = updateField(defaultPropertyInput, 'city', 'Helsinki');
-      expect(result.city).toBe('Helsinki');
+      const result = updateAddressField(defaultPropertyInput, 'city', 'Helsinki');
+      expect(result.address?.city).toBe('Helsinki');
     });
 
-    it('updates postal code field correctly', () => {
-      const updateField = (
+    it('updates address postal code field correctly', () => {
+      const updateAddressField = (
         data: PropertyFormData,
-        field: keyof PropertyFormData,
-        value: unknown
+        field: 'street' | 'city' | 'postalCode',
+        value: string
       ): PropertyFormData => {
-        return { ...data, [field]: value };
+        return {
+          ...data,
+          address: {
+            ...data.address,
+            [field]: value,
+          },
+        };
       };
 
-      const result = updateField(defaultPropertyInput, 'postalCode', '00100');
-      expect(result.postalCode).toBe('00100');
+      const result = updateAddressField(defaultPropertyInput, 'postalCode', '00100');
+      expect(result.address?.postalCode).toBe('00100');
     });
 
     it('updates build year field correctly', () => {

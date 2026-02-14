@@ -42,18 +42,24 @@ describe('Properties Integration', () => {
     createMockProperty({
       id: 1,
       name: 'Helsinki Apartment',
-      address: 'Mannerheimintie 1',
-      city: 'Helsinki',
-      postalCode: '00100',
+      address: {
+        id: 1,
+        street: 'Mannerheimintie 1',
+        city: 'Helsinki',
+        postalCode: '00100',
+      },
       size: 75,
       ownerships: [{ share: 100 }],
     }),
     createMockProperty({
       id: 2,
       name: 'Tampere House',
-      address: 'Hämeenkatu 10',
-      city: 'Tampere',
-      postalCode: '33100',
+      address: {
+        id: 2,
+        street: 'Hämeenkatu 10',
+        city: 'Tampere',
+        postalCode: '33100',
+      },
       size: 120,
       ownerships: [{ share: 50 }],
     }),
@@ -390,9 +396,12 @@ describe('Properties Integration', () => {
       const propertyWithFullAddress = createMockProperty({
         id: 1,
         name: 'Full Address Property',
-        address: 'Testikatu 123',
-        postalCode: '00100',
-        city: 'Helsinki',
+        address: {
+          id: 1,
+          street: 'Testikatu 123',
+          postalCode: '00100',
+          city: 'Helsinki',
+        },
         size: 70,
         ownerships: [{ share: 100 }],
       });

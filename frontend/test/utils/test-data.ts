@@ -8,9 +8,12 @@ export const createMockProperty = (overrides?: Partial<Property>): Property => {
   return {
     id: 1,
     name: 'Test Property',
-    address: '123 Test Street',
-    postalCode: '00100',
-    city: 'Helsinki',
+    address: {
+      id: 1,
+      street: '123 Test Street',
+      postalCode: '00100',
+      city: 'Helsinki',
+    },
     size: 50,
     ownerships: [],
     ...overrides,

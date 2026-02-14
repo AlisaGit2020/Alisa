@@ -28,7 +28,7 @@ import { TypeOrmFetchOptions } from "../../lib/types";
 import ApiClient from "../../lib/api-client";
 import AlisaContext from "@alisa-lib/alisa-contexts";
 import { VITE_API_URL } from "../../constants";
-import { DeleteValidationResult } from "@alisa-types";
+import { Address, DeleteValidationResult } from "@alisa-types";
 import { AxiosError } from "axios";
 
 interface AlisCardListField<T> {
@@ -118,9 +118,7 @@ function AlisaCardList<T extends { id: number }>({
             size?: number;
             photo?: string;
             description?: string;
-            address?: string;
-            city?: string;
-            postalCode?: string;
+            address?: Address;
             buildYear?: number;
             apartmentType?: string;
             ownerships?: { share: number }[];
@@ -158,12 +156,12 @@ function AlisaCardList<T extends { id: number }>({
                         </Typography>
                       )}
                     </Typography>
-                    {(item.address || item.city) && (
+                    {(item.address?.street || item.address?.city) && (
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {item.address}
-                        {item.address && item.city && ', '}
-                        {item.postalCode && `${item.postalCode} `}
-                        {item.city}
+                        {item.address.street}
+                        {item.address.street && item.address.city && ', '}
+                        {item.address.postalCode && `${item.address.postalCode} `}
+                        {item.address.city}
                       </Typography>
                     )}
                     <Table size="small">

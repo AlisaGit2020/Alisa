@@ -20,12 +20,14 @@ import { Transaction } from '@alisa-backend/accounting/transaction/entities/tran
 import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { DepreciationAsset } from '@alisa-backend/accounting/depreciation/entities/depreciation-asset.entity';
+import { Address } from './address/entities/address.entity';
 
 @Module({
   controllers: [InvestmentController, TaxController, PropertyController],
   providers: [InvestmentService, PropertyService, PropertyStatisticsService, PropertyStatisticsSchemaService, TaxService],
   imports: [
     TypeOrmModule.forFeature([
+      Address,
       Investment,
       Property,
       PropertyStatistics,

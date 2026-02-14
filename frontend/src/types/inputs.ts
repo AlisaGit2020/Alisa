@@ -9,15 +9,21 @@ export interface OwnershipInput {
   share: number;
 }
 
+// Address input
+export interface AddressInput {
+  id?: number;
+  street?: string;
+  city?: string;
+  postalCode?: string;
+}
+
 // Property input
 export interface PropertyInput {
   name: string;
   size: number;
   photo?: string;
   description?: string;
-  address?: string;
-  city?: string;
-  postalCode?: string;
+  address?: AddressInput;
   buildYear?: number;
   apartmentType?: string;
   ownerships?: OwnershipInput[];
