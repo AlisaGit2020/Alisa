@@ -1,16 +1,16 @@
 import React from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { MenuItem, Box, Menu, Fade, IconButton, Tooltip, Avatar, ListItemIcon } from '@mui/material';
-import useSignOut from 'react-auth-kit/hooks/useSignOut';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { User } from '@alisa-types';
 import ApiClient from '@alisa-lib/api-client';
 import { emptyUser } from '@alisa-lib/initial-data';
 import UserDetails from '../user/UserDetails';
+import { useSignOutWithCleanup } from '@alisa-lib/use-sign-out-with-cleanup';
 
 function UserMenu({ t }: WithTranslation) {
-    const signOut = useSignOut()
+    const signOut = useSignOutWithCleanup()
 
     const [data, setData] = React.useState<User>(emptyUser);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -41,7 +41,6 @@ function UserMenu({ t }: WithTranslation) {
 
     const handleSignOut = () => {
         signOut()
-        window.location.href = '/'
     };
 
     const getFullName = (user: User) => {

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import UserStorage from "@alisa-lib/user-storage";
 
 type ThemeMode = "light" | "dark";
 
@@ -14,7 +15,7 @@ const THEME_STORAGE_KEY = "alisa-theme-mode";
 
 export function ThemeContextProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>(() => {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    const stored = UserStorage.getItem<ThemeMode>(THEME_STORAGE_KEY);
     if (stored === "light" || stored === "dark") {
       return stored;
     }
@@ -22,7 +23,7 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    localStorage.setItem(THEME_STORAGE_KEY, mode);
+    UserStorage.setItem(THEME_STORAGE_KEY, mode);
   }, [mode]);
 
   const toggleTheme = () => {

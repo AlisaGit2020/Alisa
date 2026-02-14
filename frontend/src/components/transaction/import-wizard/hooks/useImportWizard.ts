@@ -16,8 +16,8 @@ import { getTransactionPropertyId } from "@alisa-lib/initial-data";
 import { TypeOrmFetchOptions } from "@alisa-lib/types";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../../TransactionLeftMenuItems";
 import { useToast } from "../../../alisa";
+import UserStorage from "@alisa-lib/user-storage";
 
-// Session persistence for resuming interrupted imports
 const STORAGE_KEY = "importWizard:session";
 
 interface ImportSession {
@@ -27,16 +27,15 @@ interface ImportSession {
 }
 
 const saveSession = (session: ImportSession) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  UserStorage.setItem(STORAGE_KEY, session);
 };
 
 const loadSession = (): ImportSession | null => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : null;
+  return UserStorage.getItem<ImportSession>(STORAGE_KEY);
 };
 
 const clearSession = () => {
-  localStorage.removeItem(STORAGE_KEY);
+  UserStorage.removeItem(STORAGE_KEY);
 };
 
 const createEmptyStats = (): ImportStats => ({

@@ -11,6 +11,7 @@ import Title from '../../Title';
 import { WithTranslation, useTranslation, withTranslation } from 'react-i18next';
 import { loginContext } from '@alisa-lib/alisa-contexts';
 import { AlisaButton } from '../alisa';
+import { setCurrentUserId } from '@alisa-lib/user-storage';
 
 
 function Login({t}: WithTranslation) {
@@ -31,6 +32,7 @@ function Login({t}: WithTranslation) {
                     }
                 })) {
                     const user = await ApiClient.me()
+                    setCurrentUserId(user.id ?? null)
                     i18n.changeLanguage(user.language)
 
                     // Check for pending investment calculation (from anonymous save)

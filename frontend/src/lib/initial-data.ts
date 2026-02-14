@@ -1,6 +1,7 @@
 import { User } from "@alisa-types";
 import { DataKey, View } from "@alisa-lib/views.ts";
 import { DATA_NOT_SELECTED_ID } from "@alisa-lib/constants.ts";
+import UserStorage from "@alisa-lib/user-storage";
 
 export const emptyUser: User = {
   firstName: "",
@@ -13,11 +14,10 @@ export const emptyUser: User = {
 };
 
 export const getInitialId = (view: View, dataKey: DataKey): number => {
-  //Look if localstorage contains property id for view
   const key = `view[${view}]:${dataKey}`;
-  const propertyId = localStorage.getItem(key);
-  if (propertyId) {
-    return parseInt(propertyId);
+  const propertyId = UserStorage.getItem<number>(key);
+  if (propertyId !== null) {
+    return propertyId;
   }
   return DATA_NOT_SELECTED_ID;
 };
@@ -28,33 +28,29 @@ export const setInitialPropertyId = (
   id: number,
 ): void => {
   const key = `view[${view}]:${dataKey}`;
-  localStorage.setItem(key, id.toString());
+  UserStorage.setItem(key, id);
 };
 
 export const getStoredFilter = <T>(view: View): T | null => {
   const key = `view[${view}]:${DataKey.FILTER}`;
-  const stored = localStorage.getItem(key);
+  const stored = UserStorage.getItem<T>(key);
   if (stored) {
-    try {
-      const parsed = JSON.parse(stored);
-      // Convert date strings back to Date objects
-      if (parsed.startDate) {
-        parsed.startDate = new Date(parsed.startDate);
-      }
-      if (parsed.endDate) {
-        parsed.endDate = new Date(parsed.endDate);
-      }
-      return parsed as T;
-    } catch {
-      return null;
+    // Convert date strings back to Date objects
+    const parsed = stored as Record<string, unknown>;
+    if (parsed.startDate) {
+      parsed.startDate = new Date(parsed.startDate as string);
     }
+    if (parsed.endDate) {
+      parsed.endDate = new Date(parsed.endDate as string);
+    }
+    return parsed as T;
   }
   return null;
 };
 
 export const setStoredFilter = <T>(view: View, filter: T): void => {
   const key = `view[${view}]:${DataKey.FILTER}`;
-  localStorage.setItem(key, JSON.stringify(filter));
+  UserStorage.setItem(key, filter);
 };
 
 export const getTransactionPropertyId = (): number => {
