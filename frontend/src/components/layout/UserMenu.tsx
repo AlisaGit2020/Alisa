@@ -8,6 +8,7 @@ import { User } from '@alisa-types';
 import ApiClient from '@alisa-lib/api-client';
 import { emptyUser } from '@alisa-lib/initial-data';
 import UserDetails from '../user/UserDetails';
+import { setCurrentUserId } from '@alisa-lib/user-storage';
 
 function UserMenu({ t }: WithTranslation) {
     const signOut = useSignOut()
@@ -40,6 +41,7 @@ function UserMenu({ t }: WithTranslation) {
     };
 
     const handleSignOut = () => {
+        setCurrentUserId(null)
         signOut()
         window.location.href = '/'
     };

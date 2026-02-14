@@ -18,6 +18,7 @@ import AdminMenu from "../admin/AdminMenu";
 import AppName from "./AppName.tsx";
 import PropertyBadge from "./PropertyBadge.tsx";
 import MobileMoreMenu from "./MobileMoreMenu";
+import UserStorage from "@alisa-lib/user-storage";
 
 const drawerWidth: number = 240;
 const collapsedWidth: number = 72;
@@ -53,13 +54,15 @@ const StyledAppBar = styled(MuiAppBar, {
   }),
 }));
 
+const DRAWER_STORAGE_KEY = "drawer-open";
+
 function getInitialOpenState() {
-  const storedOpen = localStorage.getItem("open");
-  return storedOpen !== null ? JSON.parse(storedOpen) : true;
+  const storedOpen = UserStorage.getItem<boolean>(DRAWER_STORAGE_KEY);
+  return storedOpen !== null ? storedOpen : true;
 }
 
 function setOpenState(open: boolean) {
-  localStorage.setItem("open", JSON.stringify(open));
+  UserStorage.setItem(DRAWER_STORAGE_KEY, open);
 }
 
 function AppBar({ t }: WithTranslation) {

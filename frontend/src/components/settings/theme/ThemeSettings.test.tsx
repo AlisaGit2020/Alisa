@@ -11,6 +11,7 @@ import i18n from '@test-utils/test-i18n';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeContextProvider, useThemeMode } from '@alisa-lib/theme-context';
 import ThemeSettings from './ThemeSettings';
+import UserStorage, { setCurrentUserId } from '@alisa-lib/user-storage';
 
 // Custom wrapper that includes ThemeContextProvider
 function TestWrapper({ children }: { children: React.ReactNode }) {
@@ -41,8 +42,9 @@ function ThemeModeInspector() {
 
 describe('ThemeSettings', () => {
   beforeEach(() => {
-    // Clear localStorage before each test
+    // Clear localStorage and reset user ID before each test
     localStorage.clear();
+    setCurrentUserId(null);
   });
 
   describe('Rendering', () => {
@@ -155,12 +157,12 @@ describe('ThemeSettings', () => {
       await user.click(darkRadio);
 
       await waitFor(() => {
-        expect(localStorage.getItem('alisa-theme-mode')).toBe('dark');
+        expect(UserStorage.getItem('alisa-theme-mode')).toBe('dark');
       });
     });
 
     it('loads saved theme from localStorage', () => {
-      localStorage.setItem('alisa-theme-mode', 'dark');
+      UserStorage.setItem('alisa-theme-mode', 'dark');
 
       renderWithThemeContext(
         <>
@@ -174,7 +176,7 @@ describe('ThemeSettings', () => {
     });
 
     it('defaults to light when localStorage has invalid value', () => {
-      localStorage.setItem('alisa-theme-mode', 'invalid');
+      UserStorage.setItem('alisa-theme-mode', 'invalid');
 
       renderWithThemeContext(
         <>

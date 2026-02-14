@@ -27,6 +27,7 @@ import { emptyUser } from "@alisa-lib/initial-data";
 import SettingsDialog from "../settings/SettingsDialog";
 import AdminDialog from "../admin/AdminDialog";
 import UserDetails from "../user/UserDetails";
+import { setCurrentUserId } from "@alisa-lib/user-storage";
 
 const SmallAvatar = styled(Avatar)(({ theme }) => ({
   width: 24,
@@ -111,6 +112,7 @@ function MobileMoreMenu() {
   };
 
   const handleSignOut = () => {
+    setCurrentUserId(null);
     signOut();
     window.location.href = "/";
   };

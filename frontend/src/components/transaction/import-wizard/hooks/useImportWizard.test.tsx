@@ -355,7 +355,8 @@ describe('useImportWizard', () => {
         result.current.reset();
       });
 
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('importWizard:session');
+      // With user-scoped storage, the key includes the user prefix (anonymous when not logged in)
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith('anonymous:importWizard:session');
     });
   });
 });

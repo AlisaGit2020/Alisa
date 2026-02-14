@@ -12,6 +12,7 @@ import {
 } from "../config/widget-registry";
 import ApiClient from "@alisa-lib/api-client";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
+import UserStorage from "@alisa-lib/user-storage";
 
 export type ViewMode = "monthly" | "yearly";
 
@@ -44,23 +45,12 @@ interface DashboardContextType {
 const STORAGE_KEY = "dashboard_filters";
 
 const getStoredFilters = (): Partial<DashboardFilters> => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch {
-    // Ignore parsing errors
-  }
-  return {};
+  const stored = UserStorage.getItem<DashboardFilters>(STORAGE_KEY);
+  return stored ?? {};
 };
 
 const storeFilters = (filters: DashboardFilters) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
-  } catch {
-    // Ignore storage errors
-  }
+  UserStorage.setItem(STORAGE_KEY, filters);
 };
 
 const currentYear = new Date().getFullYear();
