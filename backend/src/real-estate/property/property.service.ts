@@ -11,6 +11,7 @@ import type { Express } from 'express';
 import * as fs from 'fs';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
+import { Address } from '@alisa-backend/real-estate/address/entities/address.entity';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownership-input.dto';
 import { AuthService } from '@alisa-backend/auth/auth.service';
@@ -287,8 +288,30 @@ export class PropertyService {
         }
       });
     }
+
+    // Handle nested address object
+    if (input.address !== undefined) {
+      if (
+        input.address.street ||
+        input.address.city ||
+        input.address.postalCode
+      ) {
+        const address = new Address();
+        if (property.address?.id) {
+          address.id = property.address.id;
+        }
+        address.street = input.address.street;
+        address.city = input.address.city;
+        address.postalCode = input.address.postalCode;
+        property.address = address;
+      } else {
+        // All address fields are empty, remove the address
+        property.address = null;
+      }
+    }
+
     Object.entries(input).forEach(([key, value]) => {
-      if (value !== undefined) {
+      if (value !== undefined && key !== 'address') {
         property[key] = value;
       }
     });

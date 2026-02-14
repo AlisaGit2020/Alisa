@@ -118,9 +118,11 @@ function AlisaCardList<T extends { id: number }>({
             size?: number;
             photo?: string;
             description?: string;
-            address?: string;
-            city?: string;
-            postalCode?: string;
+            address?: {
+              street?: string;
+              city?: string;
+              postalCode?: string;
+            };
             buildYear?: number;
             apartmentType?: string;
             ownerships?: { share: number }[];
@@ -158,12 +160,12 @@ function AlisaCardList<T extends { id: number }>({
                         </Typography>
                       )}
                     </Typography>
-                    {(item.address || item.city) && (
+                    {(item.address?.street || item.address?.city) && (
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {item.address}
-                        {item.address && item.city && ', '}
-                        {item.postalCode && `${item.postalCode} `}
-                        {item.city}
+                        {item.address.street}
+                        {item.address.street && item.address.city && ', '}
+                        {item.address.postalCode && `${item.address.postalCode} `}
+                        {item.address.city}
                       </Typography>
                     )}
                     <Table size="small">

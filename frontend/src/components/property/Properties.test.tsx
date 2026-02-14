@@ -10,18 +10,24 @@ describe('Properties Component Logic', () => {
     {
       id: 1,
       name: 'Test Property 1',
-      address: '123 Test Street',
-      city: 'Helsinki',
-      postalCode: '00100',
+      address: {
+        id: 1,
+        street: '123 Test Street',
+        city: 'Helsinki',
+        postalCode: '00100',
+      },
       description: 'A nice apartment',
       ownerships: [{ share: 100, userId: 1, propertyId: 1 }],
     },
     {
       id: 2,
       name: 'Test Property 2',
-      address: '456 Another Street',
-      city: 'Espoo',
-      postalCode: '02100',
+      address: {
+        id: 2,
+        street: '456 Another Street',
+        city: 'Espoo',
+        postalCode: '02100',
+      },
       ownerships: [{ share: 50, userId: 1, propertyId: 2 }],
     },
   ];
@@ -119,18 +125,20 @@ describe('Properties Component Logic', () => {
   describe('Address display construction', () => {
     it('combines address, postal code and city', () => {
       const property = {
-        address: '123 Test Street',
-        postalCode: '00100',
-        city: 'Helsinki',
+        address: {
+          street: '123 Test Street',
+          postalCode: '00100',
+          city: 'Helsinki',
+        },
       };
 
       const buildAddress = () => {
         const lines = [];
-        if (property.address) {
-          lines.push(property.address);
+        if (property.address?.street) {
+          lines.push(property.address.street);
         }
-        if (property.postalCode || property.city) {
-          lines.push(`${property.postalCode || ''} ${property.city || ''}`);
+        if (property.address?.postalCode || property.address?.city) {
+          lines.push(`${property.address?.postalCode || ''} ${property.address?.city || ''}`);
         }
         return lines;
       };
@@ -141,20 +149,22 @@ describe('Properties Component Logic', () => {
       ]);
     });
 
-    it('handles missing address', () => {
+    it('handles missing street', () => {
       const property = {
-        address: undefined,
-        postalCode: '00100',
-        city: 'Helsinki',
+        address: {
+          street: undefined,
+          postalCode: '00100',
+          city: 'Helsinki',
+        },
       };
 
       const buildAddress = () => {
         const lines = [];
-        if (property.address) {
-          lines.push(property.address);
+        if (property.address?.street) {
+          lines.push(property.address.street);
         }
-        if (property.postalCode || property.city) {
-          lines.push(`${property.postalCode || ''} ${property.city || ''}`);
+        if (property.address?.postalCode || property.address?.city) {
+          lines.push(`${property.address?.postalCode || ''} ${property.address?.city || ''}`);
         }
         return lines;
       };
@@ -164,18 +174,20 @@ describe('Properties Component Logic', () => {
 
     it('handles missing city', () => {
       const property = {
-        address: '123 Test Street',
-        postalCode: '00100',
-        city: undefined,
+        address: {
+          street: '123 Test Street',
+          postalCode: '00100',
+          city: undefined,
+        },
       };
 
       const buildAddress = () => {
         const lines = [];
-        if (property.address) {
-          lines.push(property.address);
+        if (property.address?.street) {
+          lines.push(property.address.street);
         }
-        if (property.postalCode || property.city) {
-          lines.push(`${property.postalCode || ''} ${property.city || ''}`);
+        if (property.address?.postalCode || property.address?.city) {
+          lines.push(`${property.address?.postalCode || ''} ${property.address?.city || ''}`);
         }
         return lines;
       };
@@ -187,19 +199,17 @@ describe('Properties Component Logic', () => {
     });
 
     it('handles all address fields missing', () => {
-      const property = {
+      const property: { address?: { street?: string; postalCode?: string; city?: string } } = {
         address: undefined,
-        postalCode: undefined,
-        city: undefined,
       };
 
       const buildAddress = () => {
-        const lines = [];
-        if (property.address) {
-          lines.push(property.address);
+        const lines: string[] = [];
+        if (property.address?.street) {
+          lines.push(property.address.street);
         }
-        if (property.postalCode || property.city) {
-          lines.push(`${property.postalCode || ''} ${property.city || ''}`);
+        if (property.address?.postalCode || property.address?.city) {
+          lines.push(`${property.address?.postalCode || ''} ${property.address?.city || ''}`);
         }
         return lines;
       };

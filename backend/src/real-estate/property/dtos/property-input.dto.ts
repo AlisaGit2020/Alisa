@@ -1,5 +1,16 @@
 import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownership-input.dto';
-import { IsNotEmpty, IsNumber, Max, Min, IsOptional, IsString, IsInt } from 'class-validator';
+import { AddressInputDto } from '@alisa-backend/real-estate/address/dtos/address-input.dto';
+import {
+  IsNotEmpty,
+  IsNumber,
+  Max,
+  Min,
+  IsOptional,
+  IsString,
+  IsInt,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class PropertyInputDto {
   @IsNotEmpty()
@@ -19,16 +30,9 @@ export class PropertyInputDto {
   description?: string;
 
   @IsOptional()
-  @IsString()
-  address?: string;
-
-  @IsOptional()
-  @IsString()
-  city?: string;
-
-  @IsOptional()
-  @IsString()
-  postalCode?: string;
+  @ValidateNested()
+  @Type(() => AddressInputDto)
+  address?: AddressInputDto;
 
   @IsOptional()
   @IsInt()
