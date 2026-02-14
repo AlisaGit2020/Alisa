@@ -1,7 +1,7 @@
 import { useEffect, useState, ReactNode } from "react";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 import ApiClient from "@alisa-lib/api-client";
-import { setCurrentUserId, getCurrentUserId } from "@alisa-lib/user-storage";
+import { setCurrentUserId } from "@alisa-lib/user-storage";
 
 interface AuthInitializerProps {
   children: ReactNode;
@@ -14,14 +14,12 @@ function AuthInitializer({ children }: AuthInitializerProps) {
   useEffect(() => {
     const initializeUserId = async () => {
       if (isAuthenticated) {
-        const existingUserId = getCurrentUserId();
-        if (existingUserId === null) {
-          try {
-            const user = await ApiClient.me();
-            setCurrentUserId(user.id ?? null);
-          } catch {
-            setCurrentUserId(null);
-          }
+        // Always fetch user to ensure correct userId after login/logout cycles
+        try {
+          const user = await ApiClient.me();
+          setCurrentUserId(user.id ?? null);
+        } catch {
+          setCurrentUserId(null);
         }
       } else {
         setCurrentUserId(null);

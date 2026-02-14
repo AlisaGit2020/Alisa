@@ -20,14 +20,13 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LanguageIcon from "@mui/icons-material/Language";
 import CheckIcon from "@mui/icons-material/Check";
-import useSignOut from "react-auth-kit/hooks/useSignOut";
 import ApiClient from "@alisa-lib/api-client";
 import { User } from "@alisa-types";
 import { emptyUser } from "@alisa-lib/initial-data";
 import SettingsDialog from "../settings/SettingsDialog";
 import AdminDialog from "../admin/AdminDialog";
 import UserDetails from "../user/UserDetails";
-import { setCurrentUserId } from "@alisa-lib/user-storage";
+import { useSignOutWithCleanup } from "@alisa-lib/use-sign-out-with-cleanup";
 
 const SmallAvatar = styled(Avatar)(({ theme }) => ({
   width: 24,
@@ -46,7 +45,7 @@ const getFlag = (language: string) => {
 
 function MobileMoreMenu() {
   const { t, i18n } = useTranslation("appBar");
-  const signOut = useSignOut();
+  const signOut = useSignOutWithCleanup();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [languageAnchorEl, setLanguageAnchorEl] =
@@ -112,9 +111,7 @@ function MobileMoreMenu() {
   };
 
   const handleSignOut = () => {
-    setCurrentUserId(null);
     signOut();
-    window.location.href = "/";
   };
 
   const getCheckIconVisibility = (language: string): "visible" | "hidden" => {
