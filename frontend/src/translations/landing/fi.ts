@@ -3,6 +3,8 @@ const landing = {
   subtitle: 'Aloita ilmaiseksi ja näe vuokratuottosi selkeästi. Helppokäyttöinen työkalu niin ensimmäiseen sijoitusasuntoon kuin laajempaan portfolioon.',
   ctaLogin: 'Aloita ilmaiseksi',
   ctaCalculator: 'Kokeile laskuria',
+  featuresTitle: 'Ominaisuudet',
+  featuresSubtitle: 'Kaikki mitä tarvitset asuntosijoittamiseen',
   feature1Title: 'Sijoitustuottolaskuri',
   feature1Description: 'Laske sijoituksesi tuotto ilmaiseksi',
   feature2Title: 'Taloushallinta',

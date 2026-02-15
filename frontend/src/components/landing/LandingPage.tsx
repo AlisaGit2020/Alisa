@@ -83,11 +83,11 @@ function LandingPage({ t }: WithTranslation) {
               ? 'linear-gradient(135deg, #1a2744 0%, #2d3d5c 100%)'
               : 'linear-gradient(135deg, #0f1a2e 0%, #1a2744 100%)',
           color: 'white',
-          pt: 8,
-          pb: 12,
+          pt: { xs: 10, md: 8 },
+          pb: { xs: 6, md: 12 },
         }}
       >
-        <Container maxWidth="md" sx={{ textAlign: 'center', pt: 8 }}>
+        <Container maxWidth="md" sx={{ textAlign: 'center', pt: { xs: 4, md: 8 }, px: { xs: 2, md: 3 } }}>
           <Typography
             variant="h2"
             component="h1"
@@ -103,7 +103,7 @@ function LandingPage({ t }: WithTranslation) {
           >
             {t('landing:subtitle')}
           </Typography>
-          <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', px: { xs: 2, sm: 0 } }}>
             <AlisaButton
               label={t('landing:ctaLogin')}
               variant="contained"
@@ -114,6 +114,7 @@ function LandingPage({ t }: WithTranslation) {
                 color: 'primary.main',
                 px: 4,
                 py: 1.5,
+                width: { xs: '100%', sm: 'auto' },
                 '&:hover': {
                   bgcolor: 'grey.100',
                 },
@@ -129,6 +130,7 @@ function LandingPage({ t }: WithTranslation) {
                 color: 'white',
                 px: 4,
                 py: 1.5,
+                width: { xs: '100%', sm: 'auto' },
                 '&:hover': {
                   borderColor: 'white',
                   bgcolor: 'rgba(255, 255, 255, 0.1)',
@@ -140,8 +142,22 @@ function LandingPage({ t }: WithTranslation) {
       </Box>
 
       {/* Features Section */}
-      <Container id="features" maxWidth="lg" sx={{ mt: 8, mb: 12, scrollMarginTop: '80px' }}>
-        <Grid container spacing={6}>
+      <Container id="features" maxWidth="lg" sx={{ mt: { xs: 4, md: 8 }, mb: { xs: 6, md: 12 }, scrollMarginTop: '80px', px: { xs: 2, md: 3 } }}>
+        <Box sx={{ mb: { xs: 3, md: 6 }, textAlign: 'center' }}>
+          <Typography
+            variant="h3"
+            component="h2"
+            gutterBottom
+            fontWeight={700}
+            sx={{ fontSize: { xs: '1.75rem', md: '3rem' } }}
+          >
+            {t('landing:featuresTitle')}
+          </Typography>
+          <Typography variant="h6" color="text.secondary" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>
+            {t('landing:featuresSubtitle')}
+          </Typography>
+        </Box>
+        <Grid container spacing={{ xs: 3, md: 6 }}>
           <Grid size={{ xs: 12, md: 4 }}>
             <Card
               elevation={0}
@@ -268,10 +284,16 @@ function LandingPage({ t }: WithTranslation) {
       <PricingSection onLoginClick={handleLogin} />
 
       {/* Investment Calculator Section */}
-      <Box id="calculator" sx={{ bgcolor: 'background.paper', py: 8, scrollMarginTop: '80px' }}>
+      <Box id="calculator" sx={{ bgcolor: 'background.paper', py: { xs: 4, md: 8 }, scrollMarginTop: '80px' }}>
         <Container maxWidth="md">
-          <Box sx={{ mb: 4, textAlign: 'center' }}>
-            <Typography variant="h3" component="h2" gutterBottom fontWeight={700}>
+          <Box sx={{ mb: { xs: 2, md: 4 }, textAlign: 'center', px: { xs: 1, md: 0 } }}>
+            <Typography
+              variant="h3"
+              component="h2"
+              gutterBottom
+              fontWeight={700}
+              sx={{ fontSize: { xs: '1.75rem', md: '3rem' } }}
+            >
               {t('investment-calculator:title')}
             </Typography>
             <Typography variant="subtitle1" color="text.secondary">
@@ -279,7 +301,7 @@ function LandingPage({ t }: WithTranslation) {
             </Typography>
           </Box>
 
-          <Card sx={{ p: 4 }}>
+          <Card sx={{ p: { xs: 2, md: 4 } }}>
             <InvestmentCalculatorForm onCalculate={handleCalculate} />
             <InvestmentCalculatorResults
               results={results}

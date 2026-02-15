@@ -63,18 +63,24 @@ function PricingSection({ t, onLoginClick }: PricingSectionProps) {
   }
 
   return (
-    <Box id="pricing" sx={{ py: 8, bgcolor: 'action.hover', scrollMarginTop: '80px' }}>
-      <Container maxWidth="lg">
-        <Box sx={{ mb: 6, textAlign: 'center' }}>
-          <Typography variant="h3" component="h2" gutterBottom fontWeight={700}>
+    <Box id="pricing" sx={{ py: { xs: 4, md: 8 }, bgcolor: 'action.hover', scrollMarginTop: '80px' }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 2, md: 3 } }}>
+        <Box sx={{ mb: { xs: 3, md: 6 }, textAlign: 'center' }}>
+          <Typography
+            variant="h3"
+            component="h2"
+            gutterBottom
+            fontWeight={700}
+            sx={{ fontSize: { xs: '1.75rem', md: '3rem' } }}
+          >
             {t('landing:pricing.title')}
           </Typography>
-          <Typography variant="h6" color="text.secondary">
+          <Typography variant="h6" color="text.secondary" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>
             {t('landing:pricing.subtitle')}
           </Typography>
         </Box>
 
-        <Grid container spacing={4} justifyContent="center">
+        <Grid container spacing={{ xs: 3, md: 4 }} justifyContent="center">
           {tiers.map((tier) => {
             const isFree = tier.price === 0;
 
@@ -86,7 +92,7 @@ function PricingSection({ t, onLoginClick }: PricingSectionProps) {
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
-                    p: 4,
+                    p: { xs: 3, md: 4 },
                     border: isFree ? '2px solid' : '1px solid',
                     borderColor: isFree ? 'primary.main' : 'divider',
                     position: 'relative',
@@ -132,7 +138,7 @@ function PricingSection({ t, onLoginClick }: PricingSectionProps) {
                     component="div"
                     fontWeight={700}
                     color={isFree ? 'primary.main' : 'text.primary'}
-                    sx={{ mb: 3 }}
+                    sx={{ mb: 3, fontSize: { xs: '1.5rem', md: '3rem' } }}
                   >
                     {formatPrice(tier.price)}
                   </Typography>

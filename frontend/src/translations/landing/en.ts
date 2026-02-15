@@ -3,6 +3,8 @@ const landing = {
   subtitle: 'Start for free and see your rental returns clearly. Easy-to-use tool for your first investment property or growing portfolio.',
   ctaLogin: 'Start for free',
   ctaCalculator: 'Try Calculator',
+  featuresTitle: 'Features',
+  featuresSubtitle: 'Everything you need for property investing',
   feature1Title: 'Investment Calculator',
   feature1Description: 'Calculate your investment return for free',
   feature2Title: 'Financial Management',

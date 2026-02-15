@@ -3,6 +3,8 @@ const landing = {
   subtitle: 'Börja gratis och se din hyresavkastning tydligt. Lättanvänt verktyg för din första investeringsfastighet eller växande portfölj.',
   ctaLogin: 'Börja gratis',
   ctaCalculator: 'Prova kalkylatorn',
+  featuresTitle: 'Funktioner',
+  featuresSubtitle: 'Allt du behöver för fastighetsinvestering',
   feature1Title: 'Investeringskalkylator',
   feature1Description: 'Beräkna din investeringsavkastning gratis',
   feature2Title: 'Ekonomihantering',
