@@ -18,7 +18,7 @@ export default function FeedbackButton() {
           sx={{
             position: 'fixed',
             bottom: 24,
-            left: 24,
+            left: 88, // 72px collapsed drawer + 16px margin
             zIndex: (theme) => theme.zIndex.speedDial,
           }}
         >
