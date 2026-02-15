@@ -8,6 +8,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
 
+  app.setGlobalPrefix('api');
+
   app.use(
     cors({
       origin: allowedOrigin,
