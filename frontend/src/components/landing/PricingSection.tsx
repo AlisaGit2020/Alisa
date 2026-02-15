@@ -2,7 +2,7 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import { Box, Card, Container, Grid, Typography, CircularProgress } from "@mui/material";
 import { AlisaButton } from "../alisa";
 import React from "react";
-import axios from "axios";
+import ApiClient from "@alisa-lib/api-client";
 
 interface Tier {
   id: number;
@@ -24,8 +24,7 @@ function PricingSection({ t, onLoginClick }: PricingSectionProps) {
   React.useEffect(() => {
     const fetchTiers = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/pricing/tiers`);
-        const data = response.data as Tier[];
+        const data = await ApiClient.fetchPublic<Tier[]>('pricing/tiers');
         setTiers(data);
       } catch (error) {
         console.error('Failed to fetch pricing tiers:', error);
@@ -63,7 +62,7 @@ function PricingSection({ t, onLoginClick }: PricingSectionProps) {
   }
 
   return (
-    <Box id="pricing" sx={{ py: 8, bgcolor: 'grey.50', scrollMarginTop: '80px' }}>
+    <Box id="pricing" sx={{ py: 8, bgcolor: 'action.hover', scrollMarginTop: '80px' }}>
       <Container maxWidth="lg">
         <Box sx={{ mb: 6, textAlign: 'center' }}>
           <Typography variant="h3" component="h2" gutterBottom fontWeight={700}>

@@ -58,7 +58,7 @@ function LandingHeader({ t, onLoginClick }: LandingHeaderProps) {
 
   return (
     <MuiAppBar
-      position="sticky"
+      position="fixed"
       elevation={scrolled ? 2 : 0}
       sx={{
         backgroundColor: scrolled

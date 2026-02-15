@@ -72,7 +72,10 @@ function LandingPage({ t }: WithTranslation) {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Hero Section with Header */}
+      {/* Fixed Header */}
+      <LandingHeader onLoginClick={handleLogin} />
+
+      {/* Hero Section */}
       <Box
         sx={{
           background: (theme) =>
@@ -80,11 +83,10 @@ function LandingPage({ t }: WithTranslation) {
               ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
               : 'linear-gradient(135deg, #434343 0%, #000000 100%)',
           color: 'white',
+          pt: 8,
           pb: 12,
         }}
       >
-        <LandingHeader onLoginClick={handleLogin} />
-
         <Container maxWidth="md" sx={{ textAlign: 'center', pt: 8 }}>
           <Typography
             variant="h2"

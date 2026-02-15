@@ -70,6 +70,15 @@ class ApiClient {
     return response.data;
   }
 
+  /**
+   * Public GET request without authentication.
+   * Use for public endpoints like pricing tiers.
+   */
+  public static async fetchPublic<T>(path: string): Promise<T> {
+    const response = await axios.get(ApiClient.getApiUrl(path));
+    return response.data;
+  }
+
   public static async post<T>(path: string, data: T, skipAuth = false): Promise<T> {
     const options = skipAuth ? { withCredentials: true } : await ApiClient.getOptions();
     return axios.post(

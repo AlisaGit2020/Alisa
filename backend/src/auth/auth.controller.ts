@@ -5,10 +5,19 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt.auth.guard';
 import { User } from '../people/user/entities/user.entity';
 import { UserSettingsInputDto } from './dtos/user-settings-input.dto';
+import { facebookConstants } from './constants';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Get('providers')
+  getProviders(): { google: boolean; facebook: boolean } {
+    return {
+      google: true,
+      facebook: !!facebookConstants.clientID,
+    };
+  }
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
