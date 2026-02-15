@@ -7,7 +7,7 @@ export const googleConstants = {
   clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
   callbackURL:
     process.env.GOOGLE_CALLBACK_URL ||
-    'http://localhost:3000/auth/google/callback',
+    'http://localhost:3000/api/auth/google/callback',
 };
 
 export const facebookConstants = {
@@ -15,5 +15,5 @@ export const facebookConstants = {
   clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '',
   callbackURL:
     process.env.FACEBOOK_CALLBACK_URL ||
-    'http://localhost:3000/auth/facebook/callback',
+    'http://localhost:3000/api/auth/facebook/callback',
 };
