@@ -12,7 +12,7 @@ const landing = {
   nav: {
     features: 'Funktioner',
     pricing: 'Prissättning',
-    calculator: 'Investeringsavkastningskalkylator',
+    calculator: 'Investeringskalkylator',
     login: 'Logga in',
   },
   pricing: {
