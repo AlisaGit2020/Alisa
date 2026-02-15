@@ -1,7 +1,7 @@
-import { Stack, MenuItem, TextField } from "@mui/material";
+import { Stack } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { AlisaButton, AlisaDialog, AlisaTextField, useToast } from "../alisa";
+import { AlisaButton, AlisaDialog, AlisaSelectField, AlisaTextField, useToast } from "../alisa";
 import ApiClient from "@alisa-lib/api-client";
 
 interface FeedbackDialogProps {
@@ -17,17 +17,23 @@ interface FeedbackInput {
   page?: string;
 }
 
+const FEEDBACK_TYPE_MAP: Record<number, FeedbackType> = {
+  1: 'general',
+  2: 'bug',
+  3: 'feature',
+};
+
 export default function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
   const { t } = useTranslation();
   const { showToast } = useToast();
-  const [type, setType] = React.useState<FeedbackType>('general');
+  const [typeId, setTypeId] = React.useState<number>(1);
   const [message, setMessage] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const feedbackTypes: { value: FeedbackType; label: string }[] = [
-    { value: 'general', label: t('common:feedback.typeGeneral') },
-    { value: 'bug', label: t('common:feedback.typeBug') },
-    { value: 'feature', label: t('common:feedback.typeFeature') },
+  const feedbackTypes = [
+    { id: 1, name: t('common:feedback.typeGeneral') },
+    { id: 2, name: t('common:feedback.typeBug') },
+    { id: 3, name: t('common:feedback.typeFeature') },
   ];
 
   const handleSubmit = async () => {
@@ -39,13 +45,13 @@ export default function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
     try {
       const input: FeedbackInput = {
         message: message.trim(),
-        type,
+        type: FEEDBACK_TYPE_MAP[typeId],
         page: window.location.pathname,
       };
       await ApiClient.post('feedback', input);
       showToast({ message: t('common:feedback.thankYou'), severity: 'success' });
       setMessage('');
-      setType('general');
+      setTypeId(1);
       onClose();
     } catch (error) {
       console.error('Failed to submit feedback:', error);
@@ -88,20 +94,14 @@ export default function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
       actions={actions}
     >
       <Stack spacing={3} sx={{ py: 1 }}>
-        <TextField
-          select
-          fullWidth
+        <AlisaSelectField
           label={t('common:feedback.typeLabel')}
-          value={type}
-          onChange={(e) => setType(e.target.value as FeedbackType)}
+          value={typeId}
+          items={feedbackTypes}
+          onChange={(e) => setTypeId(Number(e.target.value))}
           disabled={isSubmitting}
-        >
-          {feedbackTypes.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </TextField>
+          fullWidth
+        />
         <AlisaTextField
           label={t('common:feedback.messagePlaceholder')}
           value={message}
