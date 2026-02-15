@@ -46,6 +46,16 @@ The backend uses NestJS feature modules located in `backend/src/`:
 - `real-estate/` - Property and investment management
 - `google/` - Google service integrations
 - `import/` - Data import utilities (e.g., OP bank imports)
+- `pricing/` - Public pricing tiers endpoint
+- `feedback/` - User feedback
+
+### API Prefix
+All backend endpoints use the global `/api` prefix (configured in `backend/src/main.ts`). For example:
+- `/api/auth/user`
+- `/api/pricing/tiers`
+- `/api/real-estate/property/search`
+
+The nginx configuration has a single `/api/` location block that proxies all API requests to the backend. **No nginx changes are needed when adding new backend endpoints.**
 
 ### Frontend Structure
 Components in `frontend/src/components/` are organized by domain:
