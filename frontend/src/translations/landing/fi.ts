@@ -12,7 +12,7 @@ const landing = {
   nav: {
     features: 'Ominaisuudet',
     pricing: 'Hinnoittelu',
-    calculator: 'Laskuri',
+    calculator: 'Sijoitustuottolaskuri',
     login: 'Kirjaudu',
   },
   pricing: {
