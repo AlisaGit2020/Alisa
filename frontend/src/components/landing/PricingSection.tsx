@@ -25,9 +25,10 @@ function PricingSection({ t, onLoginClick }: PricingSectionProps) {
     const fetchTiers = async () => {
       try {
         const data = await ApiClient.fetchPublic<Tier[]>('pricing/tiers');
-        setTiers(data);
+        setTiers(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to fetch pricing tiers:', error);
+        setTiers([]);
       } finally {
         setLoading(false);
       }
