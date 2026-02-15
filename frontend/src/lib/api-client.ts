@@ -35,6 +35,10 @@ class ApiClient {
     return ApiClient.getApiUrl("auth/google");
   }
 
+  public static async authFacebook(): Promise<string> {
+    return ApiClient.getApiUrl("auth/facebook");
+  }
+
   public static async get<T extends { id: number }>(
     path: string,
     id: number,
@@ -63,6 +67,15 @@ class ApiClient {
       ApiClient.getApiUrl(path),
       await ApiClient.getOptions(),
     );
+    return response.data;
+  }
+
+  /**
+   * Public GET request without authentication.
+   * Use for public endpoints like pricing tiers.
+   */
+  public static async fetchPublic<T>(path: string): Promise<T> {
+    const response = await axios.get(ApiClient.getApiUrl(path));
     return response.data;
   }
 

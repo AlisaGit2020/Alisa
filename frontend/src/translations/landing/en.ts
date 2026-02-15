@@ -1,7 +1,7 @@
 const landing = {
-  title: 'Manage your rental property investments in one place',
-  subtitle: 'Track rental income and expenses • Easy tax reporting • Investment analytics',
-  ctaLogin: 'Log In',
+  title: 'The best tool for property investors',
+  subtitle: 'Start for free and see your rental returns clearly. Easy-to-use tool for your first investment property or growing portfolio.',
+  ctaLogin: 'Start for free',
   ctaCalculator: 'Try Calculator',
   feature1Title: 'Investment Calculator',
   feature1Description: 'Calculate your investment return for free',
@@ -9,16 +9,23 @@ const landing = {
   feature2Description: 'Track income and expenses in one place',
   feature3Title: 'Comprehensive Reports',
   feature3Description: 'File your tax return easily',
-  betaTitle: 'Join the Beta',
-  betaSubtitle: 'Be among the first to try Alisa. Sign up for early access.',
-  betaEmailPlaceholder: 'Enter your email',
-  betaSubmitButton: 'Sign Up for Beta',
-  betaSuccessMessage:
-    'Thanks for signing up! We will notify you when beta access is available.',
-  betaErrorDuplicate: 'This email is already registered.',
-  betaErrorGeneric: 'Something went wrong. Please try again.',
-  betaPrivacyNote:
-    'We respect your privacy. Your email will only be used for beta notifications.',
+  nav: {
+    features: 'Features',
+    pricing: 'Pricing',
+    calculator: 'Investment Calculator',
+    login: 'Log In',
+  },
+  pricing: {
+    title: 'Pricing',
+    subtitle: 'Choose the plan that fits you',
+    free: 'Free',
+    perMonth: '€/month',
+    properties: 'properties',
+    property: 'property',
+    unlimited: 'Unlimited',
+    startFree: 'Start for free',
+    getStarted: 'Get started',
+  },
 }
 
 export default landing

@@ -1,7 +1,7 @@
 const landing = {
-  title: 'Hantera dina hyresfastighetsinvesteringar på ett ställe',
-  subtitle: 'Följ hyresintäkter och utgifter • Enkel deklaration • Investeringsanalys',
-  ctaLogin: 'Logga in',
+  title: 'Det bästa verktyget för fastighetsinvesterare',
+  subtitle: 'Börja gratis och se din hyresavkastning tydligt. Lättanvänt verktyg för din första investeringsfastighet eller växande portfölj.',
+  ctaLogin: 'Börja gratis',
   ctaCalculator: 'Prova kalkylatorn',
   feature1Title: 'Investeringskalkylator',
   feature1Description: 'Beräkna din investeringsavkastning gratis',
@@ -9,17 +9,23 @@ const landing = {
   feature2Description: 'Följ intäkter och utgifter på ett ställe',
   feature3Title: 'Mångsidiga rapporter',
   feature3Description: 'Gör deklarationen enkelt',
-  betaTitle: 'Gå med i beta',
-  betaSubtitle:
-    'Var bland de första att prova Alisa. Anmäl dig för tidig tillgång.',
-  betaEmailPlaceholder: 'Ange din e-postadress',
-  betaSubmitButton: 'Anmäl dig till beta',
-  betaSuccessMessage:
-    'Tack för din anmälan! Vi meddelar dig när beta-åtkomst är tillgänglig.',
-  betaErrorDuplicate: 'Denna e-postadress är redan registrerad.',
-  betaErrorGeneric: 'Något gick fel. Försök igen.',
-  betaPrivacyNote:
-    'Vi respekterar din integritet. Din e-post kommer endast att användas för beta-meddelanden.',
+  nav: {
+    features: 'Funktioner',
+    pricing: 'Prissättning',
+    calculator: 'Investeringskalkylator',
+    login: 'Logga in',
+  },
+  pricing: {
+    title: 'Prissättning',
+    subtitle: 'Välj den plan som passar dig',
+    free: 'Gratis',
+    perMonth: '€/månad',
+    properties: 'fastigheter',
+    property: 'fastighet',
+    unlimited: 'Obegränsad',
+    startFree: 'Börja gratis',
+    getStarted: 'Kom igång',
+  },
 }
 
 export default landing

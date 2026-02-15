@@ -5,8 +5,8 @@ const sv = {
     more: "Mer",
     profile: "Profil",
     settings: "Inställningar",
-    title: "Alisa",
-    slogan: "Alisa, investeringens superhjälte krossar siffror!",
+    title: "Asset",
+    slogan: "Asset - hantera dina investeringar enkelt",
     selectLanguage: "Välj språk",
     signOut: "Logga ut",
   },
@@ -105,6 +105,17 @@ const sv = {
       statistics: "Statistik",
       depreciationAssets: "Avskrivningstillgångar",
       andMore: "...och {{count}} till",
+    },
+
+    feedback: {
+      title: "Ge feedback",
+      typeBug: "Felrapport",
+      typeFeature: "Funktionsförfrågan",
+      typeGeneral: "Allmän feedback",
+      typeLabel: "Feedbacktyp",
+      messagePlaceholder: "Berätta vad du tycker...",
+      submit: "Skicka",
+      thankYou: "Tack för din feedback!",
     },
   },
 };

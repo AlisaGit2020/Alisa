@@ -5,8 +5,8 @@ const fi = {
     more: "Lisää",
     profile: "Käyttäjätiedot",
     settings: "Asetukset",
-    title: "Alisa",
-    slogan: "Alisa, sijoittamisen supersankari kyykyttää numeroita!",
+    title: "Asset",
+    slogan: "Asset - sijoituskohteidesi hallinta helposti",
     selectLanguage: "Valitse kieli",
     signOut: "Kirjaudu ulos",
   },
@@ -105,6 +105,17 @@ const fi = {
       statistics: "Tilastot",
       depreciationAssets: "Poistettavat omaisuuserät",
       andMore: "...ja {{count}} muuta",
+    },
+
+    feedback: {
+      title: "Anna palautetta",
+      typeBug: "Virheraportti",
+      typeFeature: "Ominaisuuspyyntö",
+      typeGeneral: "Yleinen palaute",
+      typeLabel: "Palautteen tyyppi",
+      messagePlaceholder: "Kerro meille ajatuksesi...",
+      submit: "Lähetä",
+      thankYou: "Kiitos palautteestasi!",
     },
   },
 };
