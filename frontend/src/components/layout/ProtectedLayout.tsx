@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import AppBar from "./AppBar";
 import Breadcrumbs from "./Breadcrumbs";
 import AuthInitializer from "./AuthInitializer";
+import FeedbackButton from "../feedback/FeedbackButton";
 
 /**
  * Layout for protected pages (dashboard, properties, etc.)
@@ -32,6 +33,7 @@ function ProtectedLayout() {
             <Outlet />
           </Container>
         </Box>
+        <FeedbackButton />
       </Box>
     </AuthInitializer>
   );

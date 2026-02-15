@@ -35,6 +35,10 @@ class ApiClient {
     return ApiClient.getApiUrl("auth/google");
   }
 
+  public static async authFacebook(): Promise<string> {
+    return ApiClient.getApiUrl("auth/facebook");
+  }
+
   public static async get<T extends { id: number }>(
     path: string,
     id: number,

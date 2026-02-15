@@ -1,7 +1,7 @@
 const landing = {
-  title: 'Hallitse vuokra-asuntosijoituksiasi yhdessä paikassa',
-  subtitle: 'Seuraa vuokratuloja ja menoja • Veroilmoitus helposti • Sijoitusanalytiikka',
-  ctaLogin: 'Kirjaudu sisään',
+  title: 'Asuntosijoittajan paras työkalu',
+  subtitle: 'Aloita ilmaiseksi ja näe vuokratuottosi selkeästi. Helppokäyttöinen työkalu niin ensimmäiseen sijoitusasuntoon kuin laajempaan portfolioon.',
+  ctaLogin: 'Aloita ilmaiseksi',
   ctaCalculator: 'Kokeile laskuria',
   feature1Title: 'Sijoitustuottolaskuri',
   feature1Description: 'Laske sijoituksesi tuotto ilmaiseksi',
@@ -9,17 +9,23 @@ const landing = {
   feature2Description: 'Seuraa tuloja ja menoja yhdessä paikassa',
   feature3Title: 'Monipuoliset raportit',
   feature3Description: 'Tee veroilmoitus helposti',
-  betaTitle: 'Liity betaan',
-  betaSubtitle:
-    'Ole ensimmäisten joukossa kokeilemassa Alisaa. Ilmoittaudu saadaksesi varhainen pääsy.',
-  betaEmailPlaceholder: 'Syötä sähköpostiosoitteesi',
-  betaSubmitButton: 'Ilmoittaudu betaan',
-  betaSuccessMessage:
-    'Kiitos ilmoittautumisesta! Ilmoitamme sinulle, kun beta on saatavilla.',
-  betaErrorDuplicate: 'Tämä sähköposti on jo rekisteröity.',
-  betaErrorGeneric: 'Jokin meni pieleen. Yritä uudelleen.',
-  betaPrivacyNote:
-    'Kunnioitamme yksityisyyttäsi. Sähköpostiasi käytetään vain beta-ilmoituksiin.',
+  nav: {
+    features: 'Ominaisuudet',
+    pricing: 'Hinnoittelu',
+    calculator: 'Laskuri',
+    login: 'Kirjaudu',
+  },
+  pricing: {
+    title: 'Hinnoittelu',
+    subtitle: 'Valitse sinulle sopiva suunnitelma',
+    free: 'Ilmainen',
+    perMonth: '€/kk',
+    properties: 'kohdetta',
+    property: 'kohde',
+    unlimited: 'Rajaton',
+    startFree: 'Aloita ilmaiseksi',
+    getStarted: 'Aloita nyt',
+  },
 }
 
 export default landing

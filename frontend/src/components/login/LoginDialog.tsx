@@ -1,5 +1,6 @@
 import { Typography, Stack } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
+import FacebookIcon from "@mui/icons-material/Facebook";
 import ApiClient from "@alisa-lib/api-client";
 import { useTranslation } from "react-i18next";
 import { AlisaButton, AlisaDialog } from "../alisa";
@@ -17,6 +18,11 @@ function LoginDialog({ open, onClose }: LoginDialogProps) {
     window.location.href = redirectUrl;
   };
 
+  const handleFacebookLogin = async () => {
+    const redirectUrl = await ApiClient.authFacebook();
+    window.location.href = redirectUrl;
+  };
+
   return (
     <AlisaDialog
       open={open}
@@ -25,7 +31,7 @@ function LoginDialog({ open, onClose }: LoginDialogProps) {
       maxWidth="xs"
       fullWidth
     >
-      <Stack spacing={3} sx={{ py: 2 }}>
+      <Stack spacing={2} sx={{ py: 2 }}>
         <Typography variant="body1" color="text.secondary" align="center">
           {t("login:loginWith")}
         </Typography>
@@ -37,6 +43,21 @@ function LoginDialog({ open, onClose }: LoginDialogProps) {
           onClick={handleGoogleLogin}
           fullWidth
           sx={{ py: 1.5 }}
+        />
+        <AlisaButton
+          label={t("login:continueWithFacebook")}
+          variant="contained"
+          size="large"
+          startIcon={<FacebookIcon />}
+          onClick={handleFacebookLogin}
+          fullWidth
+          sx={{
+            py: 1.5,
+            bgcolor: '#1877F2',
+            '&:hover': {
+              bgcolor: '#166FE5',
+            },
+          }}
         />
       </Stack>
     </AlisaDialog>

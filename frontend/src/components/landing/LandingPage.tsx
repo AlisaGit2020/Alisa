@@ -1,25 +1,23 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Box, Card, Chip, Container, Grid, Link, Typography } from "@mui/material";
+import { Box, Card, Container, Grid, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { AlisaButton, useToast } from "../alisa";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AssessmentIcon from "@mui/icons-material/Assessment";
-import { useTranslation } from "react-i18next";
 import React from "react";
 import LoginDialog from "../login/LoginDialog";
-import BetaSignupForm from "./BetaSignupForm";
+import LandingHeader from "./LandingHeader";
+import PricingSection from "./PricingSection";
 import InvestmentCalculatorForm, { InvestmentInputData } from "../investment-calculator/InvestmentCalculatorForm";
 import InvestmentCalculatorResults, { InvestmentResults } from "../investment-calculator/InvestmentCalculatorResults";
 import ApiClient from "@alisa-lib/api-client";
 
 function LandingPage({ t }: WithTranslation) {
-  const { i18n } = useTranslation();
   const [loginDialogOpen, setLoginDialogOpen] = React.useState(false);
   const [results, setResults] = React.useState<InvestmentResults | null>(null);
   const [inputData, setInputData] = React.useState<InvestmentInputData | null>(null);
   const [searchParams] = useSearchParams();
-  const calculatorRef = React.useRef<HTMLDivElement>(null);
   const { showToast } = useToast();
 
   React.useEffect(() => {
@@ -38,7 +36,10 @@ function LandingPage({ t }: WithTranslation) {
   };
 
   const handleTryCalculator = () => {
-    calculatorRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const element = document.getElementById('calculator');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const handleCalculate = async (data: InvestmentInputData) => {
@@ -69,77 +70,9 @@ function LandingPage({ t }: WithTranslation) {
     }
   };
 
-  const changeLanguage = (lang: string) => {
-    i18n.changeLanguage(lang);
-  };
-
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Simple language selector at the top */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 20,
-          right: 24,
-          display: 'flex',
-          gap: 1,
-          fontSize: '0.875rem',
-          zIndex: 10,
-        }}
-      >
-        <Link
-          component="button"
-          onClick={() => changeLanguage('fi')}
-          sx={{
-            textDecoration: 'none',
-            color: 'white',
-            fontWeight: i18n.language === 'fi' ? 700 : 400,
-            opacity: i18n.language === 'fi' ? 1 : 0.7,
-            cursor: 'pointer',
-            '&:hover': {
-              opacity: 1,
-            },
-          }}
-        >
-          FI
-        </Link>
-        <Typography sx={{ color: 'white', opacity: 0.7 }}>|</Typography>
-        <Link
-          component="button"
-          onClick={() => changeLanguage('sv')}
-          sx={{
-            textDecoration: 'none',
-            color: 'white',
-            fontWeight: i18n.language === 'sv' ? 700 : 400,
-            opacity: i18n.language === 'sv' ? 1 : 0.7,
-            cursor: 'pointer',
-            '&:hover': {
-              opacity: 1,
-            },
-          }}
-        >
-          SV
-        </Link>
-        <Typography sx={{ color: 'white', opacity: 0.7 }}>|</Typography>
-        <Link
-          component="button"
-          onClick={() => changeLanguage('en')}
-          sx={{
-            textDecoration: 'none',
-            color: 'white',
-            fontWeight: i18n.language === 'en' ? 700 : 400,
-            opacity: i18n.language === 'en' ? 1 : 0.7,
-            cursor: 'pointer',
-            '&:hover': {
-              opacity: 1,
-            },
-          }}
-        >
-          EN
-        </Link>
-      </Box>
-
-      {/* Hero Section */}
+      {/* Hero Section with Header */}
       <Box
         sx={{
           background: (theme) =>
@@ -147,23 +80,12 @@ function LandingPage({ t }: WithTranslation) {
               ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
               : 'linear-gradient(135deg, #434343 0%, #000000 100%)',
           color: 'white',
-          py: 12,
-          mb: 8,
+          pb: 12,
         }}
       >
-        <Container maxWidth="md" sx={{ textAlign: 'center' }}>
-          <Chip
-            label="BETA"
-            sx={{
-              mb: 2,
-              bgcolor: 'rgba(255, 255, 255, 0.2)',
-              color: 'white',
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              letterSpacing: '0.1em',
-              border: '1px solid rgba(255, 255, 255, 0.4)',
-            }}
-          />
+        <LandingHeader onLoginClick={handleLogin} />
+
+        <Container maxWidth="md" sx={{ textAlign: 'center', pt: 8 }}>
           <Typography
             variant="h2"
             component="h1"
@@ -215,15 +137,8 @@ function LandingPage({ t }: WithTranslation) {
         </Container>
       </Box>
 
-      {/* Beta Signup Section */}
-      <Box sx={{ py: 8, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider' }}>
-        <Container maxWidth="sm">
-          <BetaSignupForm />
-        </Container>
-      </Box>
-
       {/* Features Section */}
-      <Container maxWidth="lg" sx={{ mt: 8, mb: 12 }}>
+      <Container id="features" maxWidth="lg" sx={{ mt: 8, mb: 12, scrollMarginTop: '80px' }}>
         <Grid container spacing={6}>
           <Grid size={{ xs: 12, md: 4 }}>
             <Card
@@ -347,8 +262,11 @@ function LandingPage({ t }: WithTranslation) {
         </Grid>
       </Container>
 
+      {/* Pricing Section */}
+      <PricingSection onLoginClick={handleLogin} />
+
       {/* Investment Calculator Section */}
-      <Box ref={calculatorRef} sx={{ bgcolor: 'background.paper', py: 8 }}>
+      <Box id="calculator" sx={{ bgcolor: 'background.paper', py: 8, scrollMarginTop: '80px' }}>
         <Container maxWidth="md">
           <Box sx={{ mb: 4, textAlign: 'center' }}>
             <Typography variant="h3" component="h2" gutterBottom fontWeight={700}>

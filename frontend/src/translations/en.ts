@@ -5,8 +5,8 @@ const en = {
     more: "More",
     profile: "Profile",
     settings: "Settings",
-    title: "Alisa",
-    slogan: "Alisa, the superhero of investment is shaking numbers!",
+    title: "Asset",
+    slogan: "Asset - manage your investments easily",
     selectLanguage: "Select language",
     signOut: "Sign out",
   },
@@ -105,6 +105,17 @@ const en = {
       statistics: "Statistics",
       depreciationAssets: "Depreciation Assets",
       andMore: "...and {{count}} more",
+    },
+
+    feedback: {
+      title: "Give Feedback",
+      typeBug: "Bug Report",
+      typeFeature: "Feature Request",
+      typeGeneral: "General Feedback",
+      typeLabel: "Feedback type",
+      messagePlaceholder: "Tell us what you think...",
+      submit: "Submit",
+      thankYou: "Thank you for your feedback!",
     },
   },
 };
