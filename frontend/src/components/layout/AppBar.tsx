@@ -1,4 +1,3 @@
-import { WithTranslation, withTranslation } from "react-i18next";
 import { styled, useTheme } from "@mui/material/styles";
 import {
   Box,
@@ -65,7 +64,7 @@ function setOpenState(open: boolean) {
   UserStorage.setItem(DRAWER_STORAGE_KEY, open);
 }
 
-function AppBar({ t }: WithTranslation) {
+function AppBar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -109,7 +108,7 @@ function AppBar({ t }: WithTranslation) {
             </IconButton>
           )}
           <Box display="flex" flexGrow={0} alignItems="center" gap={2}>
-            <AppName t={t} />
+            <AppName />
             <PropertyBadge />
           </Box>
           <Box flexGrow={1} />
@@ -134,4 +133,4 @@ function AppBar({ t }: WithTranslation) {
   );
 }
 
-export default withTranslation("appBar")(AppBar);
+export default AppBar;
