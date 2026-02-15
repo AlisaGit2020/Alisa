@@ -10,7 +10,7 @@ export default function FeedbackButton() {
 
   return (
     <>
-      <Tooltip title={t('common:feedback.title')} placement="left">
+      <Tooltip title={t('common:feedback.title')} placement="right">
         <Fab
           color="primary"
           aria-label={t('common:feedback.title')}
@@ -18,7 +18,7 @@ export default function FeedbackButton() {
           sx={{
             position: 'fixed',
             bottom: 24,
-            right: 24,
+            left: 24,
             zIndex: (theme) => theme.zIndex.speedDial,
           }}
         >
