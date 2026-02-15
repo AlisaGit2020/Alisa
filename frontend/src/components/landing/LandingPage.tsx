@@ -80,8 +80,8 @@ function LandingPage({ t }: WithTranslation) {
         sx={{
           background: (theme) =>
             theme.palette.mode === 'light'
-              ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-              : 'linear-gradient(135deg, #434343 0%, #000000 100%)',
+              ? 'linear-gradient(135deg, #1a2744 0%, #2d3d5c 100%)'
+              : 'linear-gradient(135deg, #0f1a2e 0%, #1a2744 100%)',
           color: 'white',
           pt: 8,
           pb: 12,
@@ -163,7 +163,7 @@ function LandingPage({ t }: WithTranslation) {
                   width: 80,
                   height: 80,
                   borderRadius: '50%',
-                  bgcolor: 'primary.main',
+                  bgcolor: 'secondary.main',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -171,7 +171,7 @@ function LandingPage({ t }: WithTranslation) {
                   mb: 3,
                 }}
               >
-                <CalculateIcon sx={{ fontSize: 40, color: 'white' }} />
+                <CalculateIcon sx={{ fontSize: 40, color: 'primary.main' }} />
               </Box>
               <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
                 {t('landing:feature1Title')}
@@ -203,7 +203,7 @@ function LandingPage({ t }: WithTranslation) {
                   width: 80,
                   height: 80,
                   borderRadius: '50%',
-                  bgcolor: 'success.main',
+                  bgcolor: 'primary.main',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -243,7 +243,7 @@ function LandingPage({ t }: WithTranslation) {
                   width: 80,
                   height: 80,
                   borderRadius: '50%',
-                  bgcolor: 'info.main',
+                  bgcolor: 'secondary.main',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -251,7 +251,7 @@ function LandingPage({ t }: WithTranslation) {
                   mb: 3,
                 }}
               >
-                <AssessmentIcon sx={{ fontSize: 40, color: 'white' }} />
+                <AssessmentIcon sx={{ fontSize: 40, color: 'primary.main' }} />
               </Box>
               <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
                 {t('landing:feature3Title')}

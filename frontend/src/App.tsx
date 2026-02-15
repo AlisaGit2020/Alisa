@@ -26,6 +26,23 @@ function ThemedApp() {
       createTheme({
         palette: {
           mode,
+          primary: {
+            main: "#1a2744", // Dark navy from logo
+            light: "#2d3d5c",
+            dark: "#0f1a2e",
+            contrastText: "#ffffff",
+          },
+          secondary: {
+            main: "#d4a84b", // Gold from logo
+            light: "#e0be74",
+            dark: "#b8923d",
+            contrastText: "#1a2744",
+          },
+          // Semantic colors for transactions
+          success: { main: "#4caf50" }, // Income (green)
+          error: { main: "#f44336" }, // Expense (red)
+          warning: { main: "#ff9800" }, // Pending (orange)
+          info: { main: "#2196f3" }, // Info (blue)
         },
         typography: {
           fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
