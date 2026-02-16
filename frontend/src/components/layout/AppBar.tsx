@@ -14,6 +14,7 @@ import SettingsMenu from "./SettingsMenu";
 import AdminMenu from "../admin/AdminMenu";
 import PropertyBadge from "./PropertyBadge.tsx";
 import MobileMoreMenu from "./MobileMoreMenu";
+import { LOGO_WHITE } from "@alisa-lib/constants";
 
 const drawerWidth: number = 240;
 
@@ -64,7 +65,7 @@ function AppBar() {
           {isMobile && (
             <Box
               component="img"
-              src="/assets/asset-logo-white.png"
+              src={LOGO_WHITE}
               alt="Asset"
               onClick={toggleMobileDrawer}
               sx={{
@@ -89,7 +90,7 @@ function AppBar() {
               >
                 <Box
                   component="img"
-                  src="/assets/asset-logo-white.png"
+                  src={LOGO_WHITE}
                   alt="Asset"
                   sx={{
                     height: 40,

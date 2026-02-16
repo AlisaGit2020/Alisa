@@ -4,6 +4,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import MuiDrawer from "@mui/material/Drawer";
 import LeftMenuItems from "./LeftMenuItems";
 import { useTranslation } from "react-i18next";
+import { LOGO_DARK } from "@alisa-lib/constants";
 
 const drawerWidth: number = 240;
 
@@ -65,7 +66,7 @@ function LeftMenu({ open, onToggleDrawer, isMobile = false }: LeftMenuProps) {
           >
             <Box
               component="img"
-              src="/assets/asset-logo.png"
+              src={LOGO_DARK}
               alt="Asset"
               sx={{
                 height: 32,
@@ -80,7 +81,7 @@ function LeftMenu({ open, onToggleDrawer, isMobile = false }: LeftMenuProps) {
           </Tooltip>
         </Toolbar>
         <Divider />
-        <LeftMenuItems open={true} isMobile={true} />
+        <LeftMenuItems open={true} />
       </MuiDrawer>
     );
   }
@@ -89,7 +90,7 @@ function LeftMenu({ open, onToggleDrawer, isMobile = false }: LeftMenuProps) {
   return (
     <StyledDrawer variant="permanent" open={true}>
       <Toolbar />
-      <LeftMenuItems open={true} isMobile={false} />
+      <LeftMenuItems open={true} />
     </StyledDrawer>
   );
 }

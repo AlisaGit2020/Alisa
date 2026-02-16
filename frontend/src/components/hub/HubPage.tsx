@@ -20,6 +20,9 @@ function HubPage({ menuId, translationNamespace }: HubPageProps) {
   const menuItem = getMenuItemById(menuId);
 
   if (!menuItem || !menuItem.subPages) {
+    console.warn(
+      `HubPage: No menu item or subPages found for menuId "${menuId}"`
+    );
     return null;
   }
 

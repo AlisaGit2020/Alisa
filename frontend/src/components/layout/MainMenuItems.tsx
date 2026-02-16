@@ -14,7 +14,6 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 
 interface MainMenuItemsProps {
   open: boolean;
-  isMobile?: boolean;
 }
 
 function MainMenuItems({ open }: MainMenuItemsProps) {
