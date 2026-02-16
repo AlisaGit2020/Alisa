@@ -1,8 +1,9 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Box, Card, Container, Grid, Typography } from "@mui/material";
+import { Box, Card, Container, Grid, SvgIconProps, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { AlisaButton, useToast } from "../alisa";
-import CalculateIcon from "@mui/icons-material/Calculate";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import WorkIcon from "@mui/icons-material/Work";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import React from "react";
@@ -12,6 +13,20 @@ import PricingSection from "./PricingSection";
 import InvestmentCalculatorForm, { InvestmentInputData } from "../investment-calculator/InvestmentCalculatorForm";
 import InvestmentCalculatorResults, { InvestmentResults } from "../investment-calculator/InvestmentCalculatorResults";
 import ApiClient from "@alisa-lib/api-client";
+
+interface FeatureConfig {
+  icon: React.ComponentType<SvgIconProps>;
+  bgcolor: string;
+  titleKey: string;
+  descriptionKey: string;
+}
+
+const features: FeatureConfig[] = [
+  { icon: WorkIcon, bgcolor: 'secondary.main', titleKey: 'landing:feature1Title', descriptionKey: 'landing:feature1Description' },
+  { icon: DashboardIcon, bgcolor: 'info.main', titleKey: 'landing:feature2Title', descriptionKey: 'landing:feature2Description' },
+  { icon: AccountBalanceIcon, bgcolor: 'primary.main', titleKey: 'landing:feature3Title', descriptionKey: 'landing:feature3Description' },
+  { icon: AssessmentIcon, bgcolor: 'warning.main', titleKey: 'landing:feature4Title', descriptionKey: 'landing:feature4Description' },
+];
 
 function LandingPage({ t }: WithTranslation) {
   const [loginDialogOpen, setLoginDialogOpen] = React.useState(false);
@@ -157,126 +172,51 @@ function LandingPage({ t }: WithTranslation) {
             {t('landing:featuresSubtitle')}
           </Typography>
         </Box>
-        <Grid container spacing={{ xs: 3, md: 6 }}>
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Card
-              elevation={0}
-              sx={{
-                height: '100%',
-                textAlign: 'center',
-                p: 3,
-                border: '1px solid',
-                borderColor: 'divider',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: 3,
-                },
-              }}
-            >
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  bgcolor: 'secondary.main',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 3,
-                }}
-              >
-                <CalculateIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-              </Box>
-              <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
-                {t('landing:feature1Title')}
-              </Typography>
-              <Typography color="text.secondary">
-                {t('landing:feature1Description')}
-              </Typography>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Card
-              elevation={0}
-              sx={{
-                height: '100%',
-                textAlign: 'center',
-                p: 3,
-                border: '1px solid',
-                borderColor: 'divider',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: 3,
-                },
-              }}
-            >
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  bgcolor: 'primary.main',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 3,
-                }}
-              >
-                <AccountBalanceIcon sx={{ fontSize: 40, color: 'white' }} />
-              </Box>
-              <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
-                {t('landing:feature2Title')}
-              </Typography>
-              <Typography color="text.secondary">
-                {t('landing:feature2Description')}
-              </Typography>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Card
-              elevation={0}
-              sx={{
-                height: '100%',
-                textAlign: 'center',
-                p: 3,
-                border: '1px solid',
-                borderColor: 'divider',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: 3,
-                },
-              }}
-            >
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  bgcolor: 'secondary.main',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 3,
-                }}
-              >
-                <AssessmentIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-              </Box>
-              <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
-                {t('landing:feature3Title')}
-              </Typography>
-              <Typography color="text.secondary">
-                {t('landing:feature3Description')}
-              </Typography>
-            </Card>
-          </Grid>
+        <Grid container spacing={{ xs: 3, md: 4 }}>
+          {features.map((feature, index) => {
+            const Icon = feature.icon;
+            return (
+              <Grid key={index} size={{ xs: 12, sm: 6, md: 3 }}>
+                <Card
+                  elevation={0}
+                  sx={{
+                    height: '100%',
+                    textAlign: 'center',
+                    p: 3,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: 3,
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: '50%',
+                      bgcolor: feature.bgcolor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mx: 'auto',
+                      mb: 3,
+                    }}
+                  >
+                    <Icon sx={{ fontSize: 40, color: 'white' }} />
+                  </Box>
+                  <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
+                    {t(feature.titleKey)}
+                  </Typography>
+                  <Typography color="text.secondary">
+                    {t(feature.descriptionKey)}
+                  </Typography>
+                </Card>
+              </Grid>
+            );
+          })}
         </Grid>
       </Container>
 
