@@ -8,3 +8,10 @@ node_modules/
 .env.production
 backend/.env
 backups/
+
+# Persistent data (uploads, etc.) - keep structure, ignore contents
+data/**
+!data/
+!data/uploads/
+!data/uploads/properties/
+!data/uploads/properties/.gitkeep
