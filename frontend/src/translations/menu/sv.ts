@@ -1,11 +1,18 @@
 const menu = {
-    dashboard: 'Översikt',
+    // Main menu items
+    overview: 'Översikt',
+    portfolio: 'Portfölj',
     properties: 'Fastigheter',
     investmentCalculator: 'Investeringskalkylator',
+    finance: 'Ekonomi',
+    bankTransactions: 'Banktransaktioner',
+    incomes: 'Inkomster',
+    expenses: 'Utgifter',
     reports: 'Rapporter',
-    accounting: 'Bokföring',
-    transactions: 'Transaktioner',
-    taxes: 'Skatter',
+    propertyReports: 'Fastighetsrapporter',
+    taxCalculations: 'Skatteberäkningar',
+
+    // Menu controls
     expandMenu: 'Expandera meny',
     collapseMenu: 'Minimera meny',
 }

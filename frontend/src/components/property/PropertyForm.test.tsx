@@ -375,13 +375,13 @@ describe('PropertyForm Component Logic', () => {
 
   describe('Navigation paths', () => {
     it('returns to properties list after save', () => {
-      const getNavigationPath = (): string => '/app/properties';
-      expect(getNavigationPath()).toBe('/app/properties');
+      const getNavigationPath = (): string => '/app/portfolio/properties';
+      expect(getNavigationPath()).toBe('/app/portfolio/properties');
     });
 
     it('returns to properties list after cancel', () => {
-      const getNavigationPath = (): string => '/app/properties';
-      expect(getNavigationPath()).toBe('/app/properties');
+      const getNavigationPath = (): string => '/app/portfolio/properties';
+      expect(getNavigationPath()).toBe('/app/portfolio/properties');
     });
   });
 

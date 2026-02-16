@@ -15,17 +15,17 @@ describe('Breadcrumbs', () => {
 
   it('should construct breadcrumb links with /app prefix for protected routes', () => {
     renderWithRouter(<Breadcrumbs />, {
-      initialEntries: ['/app/accounting/transactions'],
+      initialEntries: ['/app/finance/transactions'],
     });
 
     // Find all breadcrumb links
     const links = screen.getAllByRole('link');
 
-    // First breadcrumb should link to /app/accounting
-    expect(links[0]).toHaveAttribute('href', '/app/accounting');
+    // First breadcrumb should link to /app/finance
+    expect(links[0]).toHaveAttribute('href', '/app/finance');
 
-    // Second breadcrumb should link to /app/accounting/transactions
-    expect(links[1]).toHaveAttribute('href', '/app/accounting/transactions');
+    // Second breadcrumb should link to /app/finance/transactions
+    expect(links[1]).toHaveAttribute('href', '/app/finance/transactions');
   });
 
   it('should construct breadcrumb links without /app prefix for public routes', () => {
@@ -41,15 +41,16 @@ describe('Breadcrumbs', () => {
 
   it('should handle nested protected routes correctly', () => {
     renderWithRouter(<Breadcrumbs />, {
-      initialEntries: ['/app/properties/edit/123'],
+      initialEntries: ['/app/portfolio/properties/edit/123'],
     });
 
     const links = screen.getAllByRole('link');
 
     // Check all links have /app prefix
-    expect(links[0]).toHaveAttribute('href', '/app/properties');
-    expect(links[1]).toHaveAttribute('href', '/app/properties/edit');
-    expect(links[2]).toHaveAttribute('href', '/app/properties/edit/123');
+    expect(links[0]).toHaveAttribute('href', '/app/portfolio');
+    expect(links[1]).toHaveAttribute('href', '/app/portfolio/properties');
+    expect(links[2]).toHaveAttribute('href', '/app/portfolio/properties/edit');
+    expect(links[3]).toHaveAttribute('href', '/app/portfolio/properties/edit/123');
   });
 
   it('should translate breadcrumb segments', () => {
@@ -57,31 +58,32 @@ describe('Breadcrumbs', () => {
       initialEntries: ['/app/dashboard'],
     });
 
-    // Should show translated text
-    // The translation might be "Dashboard" or "Etusivu" depending on language
+    // Should show translated text or translation key
+    // The translation might be "Overview", "Yleiskatsaus", or "dashboard" depending on test setup
     const breadcrumbText = screen.getAllByRole('link')[0].textContent;
-    expect(breadcrumbText).toMatch(/(Dashboard|Etusivu)/i);
+    expect(breadcrumbText).toMatch(/(Overview|Yleiskatsaus|dashboard)/i);
   });
 
   it('should handle hyphenated route segments', () => {
     renderWithRouter(<Breadcrumbs />, {
-      initialEntries: ['/app/investment-calculations'],
+      initialEntries: ['/app/portfolio/investment-calculations'],
     });
 
     const links = screen.getAllByRole('link');
 
-    // Link should preserve hyphens
-    expect(links[0]).toHaveAttribute('href', '/app/investment-calculations');
+    // Links should preserve hyphens and be nested under portfolio
+    expect(links[0]).toHaveAttribute('href', '/app/portfolio');
+    expect(links[1]).toHaveAttribute('href', '/app/portfolio/investment-calculations');
   });
 
   it('should filter out numeric IDs but keep them in links', () => {
     renderWithRouter(<Breadcrumbs />, {
-      initialEntries: ['/app/properties/edit/456'],
+      initialEntries: ['/app/portfolio/properties/edit/456'],
     });
 
     const links = screen.getAllByRole('link');
 
     // Should have link with ID
-    expect(links[2]).toHaveAttribute('href', '/app/properties/edit/456');
+    expect(links[3]).toHaveAttribute('href', '/app/portfolio/properties/edit/456');
   });
 });

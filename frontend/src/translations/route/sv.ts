@@ -9,6 +9,7 @@ const route = {
   expense: "Utgift",
   expenses: "Utgifter",
   "expense-types": "Utgiftstyper",
+  finance: "Ekonomi",
   import: "Import",
   income: "Intäkt",
   incomes: "Intäkter",
@@ -18,10 +19,13 @@ const route = {
   "investment-calculations": "Investeringsberäkningar",
   login: "Logga in",
   pending: "Väntande",
+  portfolio: "Portfölj",
   properties: "Fastigheter",
-  report: "Rapport",
+  property: "Fastighetsrapporter",
+  report: "Rapporter",
+  reports: "Rapporter",
   settings: "Inställningar",
-  tax: "Skatt",
+  tax: "Skatteberäkningar",
   transactions: "Banktransaktioner",
 };
 

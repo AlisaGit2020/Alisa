@@ -1,11 +1,18 @@
 const menu = {
-  dashboard: "Dashboard",
+  // Main menu items
+  overview: "Overview",
+  portfolio: "Portfolio",
   properties: "Properties",
   investmentCalculator: "Investment Calculator",
+  finance: "Finance",
+  bankTransactions: "Bank Transactions",
+  incomes: "Incomes",
+  expenses: "Expenses",
   reports: "Reports",
-  accounting: "Accounting",
-  transactions: "Transactions",
-  taxes: "Taxes",
+  propertyReports: "Property Reports",
+  taxCalculations: "Tax Calculations",
+
+  // Menu controls
   expandMenu: "Expand menu",
   collapseMenu: "Collapse menu",
 };

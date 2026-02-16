@@ -46,11 +46,11 @@ import PropertyView from './PropertyView';
 function renderPropertyView(propertyId: string = '1') {
   return renderWithRouter(
     <Routes>
-      <Route path="/app/properties/:idParam" element={<PropertyView />} />
-      <Route path="/app/properties/edit/:idParam" element={<div>Edit Page</div>} />
-      <Route path="/app/properties" element={<div>Properties List</div>} />
+      <Route path="/app/portfolio/properties/:idParam" element={<PropertyView />} />
+      <Route path="/app/portfolio/properties/edit/:idParam" element={<div>Edit Page</div>} />
+      <Route path="/app/portfolio/properties" element={<div>Properties List</div>} />
     </Routes>,
-    { initialEntries: [`/app/properties/${propertyId}`] }
+    { initialEntries: [`/app/portfolio/properties/${propertyId}`] }
   );
 }
 

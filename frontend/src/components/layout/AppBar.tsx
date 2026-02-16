@@ -2,11 +2,9 @@ import { styled, useTheme } from "@mui/material/styles";
 import {
   Box,
   CssBaseline,
-  IconButton,
   Toolbar,
   useMediaQuery,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import React from "react";
 import LanguageSelector from "./LanguageSelector";
@@ -14,22 +12,19 @@ import LeftMenu from "./LeftMenu";
 import UserMenu from "./UserMenu";
 import SettingsMenu from "./SettingsMenu";
 import AdminMenu from "../admin/AdminMenu";
-import AppName from "./AppName.tsx";
 import PropertyBadge from "./PropertyBadge.tsx";
 import MobileMoreMenu from "./MobileMoreMenu";
-import UserStorage from "@alisa-lib/user-storage";
+import { LOGO_WHITE } from "@alisa-lib/constants";
 
 const drawerWidth: number = 240;
-const collapsedWidth: number = 72;
 
 interface StyledAppBarProps extends MuiAppBarProps {
-  open?: boolean;
   isMobile?: boolean;
 }
 
 const StyledAppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== "open" && prop !== "isMobile",
-})<StyledAppBarProps>(({ theme, open, isMobile }) => ({
+  shouldForwardProp: (prop) => prop !== "isMobile",
+})<StyledAppBarProps>(({ theme, isMobile }) => ({
   zIndex: theme.zIndex.drawer + 1,
   transition: theme.transitions.create(["width", "margin"], {
     easing: theme.transitions.easing.sharp,
@@ -40,75 +35,70 @@ const StyledAppBar = styled(MuiAppBar, {
     marginLeft: 0,
     width: "100%",
   }),
-  // Desktop: Offset by full width when open, collapsed width when closed
+  // Desktop: Always offset by full drawer width (menu always open)
   ...(!isMobile && {
-    marginLeft: open ? drawerWidth : collapsedWidth,
-    width: `calc(100% - ${open ? drawerWidth : collapsedWidth}px)`,
-    transition: theme.transitions.create(["width", "margin"], {
-      easing: theme.transitions.easing.sharp,
-      duration: open
-        ? theme.transitions.duration.enteringScreen
-        : theme.transitions.duration.leavingScreen,
-    }),
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
   }),
 }));
-
-const DRAWER_STORAGE_KEY = "drawer-open";
-
-function getInitialOpenState() {
-  const storedOpen = UserStorage.getItem<boolean>(DRAWER_STORAGE_KEY);
-  return storedOpen !== null ? storedOpen : true;
-}
-
-function setOpenState(open: boolean) {
-  UserStorage.setItem(DRAWER_STORAGE_KEY, open);
-}
 
 function AppBar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const [desktopOpen, setDesktopOpen] = React.useState(getInitialOpenState());
   const [mobileOpen, setMobileOpen] = React.useState(false);
-
-  const toggleDesktopDrawer = () => {
-    const newOpenState = !desktopOpen;
-    setDesktopOpen(newOpenState);
-    setOpenState(newOpenState);
-  };
 
   const toggleMobileDrawer = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const drawerOpen = isMobile ? mobileOpen : desktopOpen;
-  const toggleDrawer = isMobile ? toggleMobileDrawer : toggleDesktopDrawer;
-
   return (
     <>
       <CssBaseline />
-      <StyledAppBar position="absolute" open={drawerOpen} isMobile={isMobile}>
+      <StyledAppBar position="absolute" isMobile={isMobile}>
         <Toolbar
           sx={{
             pr: "24px",
           }}
         >
-          {/* Hamburger only on mobile */}
+          {/* Mobile: Logo that opens drawer */}
           {isMobile && (
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={toggleDrawer}
+            <Box
+              component="img"
+              src={LOGO_WHITE}
+              alt="Asset"
+              onClick={toggleMobileDrawer}
               sx={{
+                height: 32,
+                width: "auto",
                 marginRight: "8px",
+                cursor: "pointer",
               }}
-            >
-              <MenuIcon />
-            </IconButton>
+            />
           )}
           <Box display="flex" flexGrow={0} alignItems="center" gap={2}>
-            <AppName />
+            {/* Desktop: Show logo in AppBar */}
+            {!isMobile && (
+              <Box
+                component="a"
+                href="/"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  textDecoration: "none",
+                }}
+              >
+                <Box
+                  component="img"
+                  src={LOGO_WHITE}
+                  alt="Asset"
+                  sx={{
+                    height: 40,
+                    width: "auto",
+                  }}
+                />
+              </Box>
+            )}
             <PropertyBadge />
           </Box>
           <Box flexGrow={1} />
@@ -125,8 +115,8 @@ function AppBar() {
         </Toolbar>
       </StyledAppBar>
       <LeftMenu
-        open={drawerOpen}
-        onToggleDrawer={toggleDrawer}
+        open={isMobile ? mobileOpen : true}
+        onToggleDrawer={toggleMobileDrawer}
         isMobile={isMobile}
       />
     </>

@@ -15,14 +15,17 @@ export const adminContext: AlisaContext = {
 export const propertyContext: AlisaContext = {
     name: 'property',
     apiPath: 'real-estate/property',
-    routePath: '/app/properties',
+    routePath: '/app/portfolio/properties',
 }
 
-export const accountingContext: AlisaContext = {
-    name: 'accounting',
+export const financeContext: AlisaContext = {
+    name: 'finance',
     apiPath: 'accounting',
-    routePath: '/app/accounting',
+    routePath: '/app/finance',
 }
+
+// Backward compatibility alias
+export const accountingContext = financeContext
 
 export const expenseTypeContext: AlisaContext = {
     name: 'expense-type',
@@ -33,7 +36,7 @@ export const expenseTypeContext: AlisaContext = {
 export const expenseContext: AlisaContext = {
     name: 'expense',
     apiPath: 'accounting/expense',
-    routePath: '/app/accounting/expenses',
+    routePath: '/app/finance/expenses',
 }
 
 export const incomeTypeContext: AlisaContext = {
@@ -45,7 +48,7 @@ export const incomeTypeContext: AlisaContext = {
 export const incomeContext: AlisaContext = {
     name: 'income',
     apiPath: 'accounting/income',
-    routePath: '/app/accounting/incomes',
+    routePath: '/app/finance/incomes',
 }
 
 export const loginContext: AlisaContext = {
@@ -57,13 +60,13 @@ export const loginContext: AlisaContext = {
 export const opImportContext: AlisaContext = {
     name: 'op-import',
     apiPath: 'import/op',
-    routePath: '/app/accounting/transactions/import/op',
+    routePath: '/app/finance/transactions/import/op',
 }
 
 export const sPankkiImportContext: AlisaContext = {
     name: 's-pankki-import',
     apiPath: 'import/s-pankki',
-    routePath: '/app/accounting/transactions/import/s-pankki',
+    routePath: '/app/finance/transactions/import/s-pankki',
 }
 
 export const settingsContext: AlisaContext = {
@@ -75,7 +78,7 @@ export const settingsContext: AlisaContext = {
 export const transactionContext: AlisaContext = {
     name: 'transaction',
     apiPath: 'accounting/transaction',
-    routePath: '/app/accounting/transactions',
+    routePath: '/app/finance/transactions',
 }
 
 export const userContext: AlisaContext = {
@@ -90,14 +93,26 @@ export const dashboardContext: AlisaContext = {
     routePath: '/app/dashboard',
 }
 
+export const portfolioContext: AlisaContext = {
+    name: 'portfolio',
+    apiPath: 'real-estate/property',
+    routePath: '/app/portfolio',
+}
+
+export const reportsContext: AlisaContext = {
+    name: 'reports',
+    apiPath: 'real-estate/property',
+    routePath: '/app/reports',
+}
+
 export const taxContext: AlisaContext = {
     name: 'tax',
     apiPath: 'real-estate/property/tax',
-    routePath: '/app/tax',
+    routePath: '/app/reports/tax',
 }
 
 export const reportContext: AlisaContext = {
     name: 'report',
     apiPath: 'real-estate/property',
-    routePath: '/app/report',
+    routePath: '/app/reports/property',
 }

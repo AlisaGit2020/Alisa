@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import {
   Card,
   CardActionArea,
@@ -8,60 +7,29 @@ import {
   Typography,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import PaymentsIcon from "@mui/icons-material/Payments";
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import {
-  transactionContext,
-  expenseContext,
-  incomeContext,
-} from "@alisa-lib/alisa-contexts";
+import { getMenuItemById, SubPageConfig } from "@alisa-lib/menu-config";
 import { HubPageTemplate } from "../templates";
 
-interface SubPageCard {
-  id: string;
-  titleKey: string;
-  descriptionKey: string;
-  icon: ReactNode;
-  href: string;
-  color: string;
+interface HubPageProps {
+  menuId: string;
+  translationNamespace: string;
 }
 
-const subPages: SubPageCard[] = [
-  {
-    id: "expenses",
-    titleKey: "expenses",
-    descriptionKey: "expensesDescription",
-    icon: <ReceiptIcon sx={{ fontSize: 48 }} />,
-    href: expenseContext.routePath,
-    color: "error.main",
-  },
-  {
-    id: "incomes",
-    titleKey: "incomes",
-    descriptionKey: "incomesDescription",
-    icon: <PaymentsIcon sx={{ fontSize: 48 }} />,
-    href: incomeContext.routePath,
-    color: "success.main",
-  },
-  {
-    id: "bankTransactions",
-    titleKey: "bankTransactions",
-    descriptionKey: "bankTransactionsDescription",
-    icon: <AccountBalanceWalletIcon sx={{ fontSize: 48 }} />,
-    href: transactionContext.routePath,
-    color: "primary.main",
-  },
-];
+function HubPage({ menuId, translationNamespace }: HubPageProps) {
+  const { t } = useTranslation(translationNamespace);
+  const menuItem = getMenuItemById(menuId);
 
-function AccountingOverview() {
-  const { t } = useTranslation("accounting");
+  if (!menuItem || !menuItem.subPages) {
+    console.warn(
+      `HubPage: No menu item or subPages found for menuId "${menuId}"`
+    );
+    return null;
+  }
 
   return (
-    <HubPageTemplate translationPrefix="accounting">
-
+    <HubPageTemplate translationPrefix={translationNamespace}>
       <Grid container spacing={3}>
-        {subPages.map((page) => (
+        {menuItem.subPages.map((page: SubPageConfig) => (
           <Grid key={page.id} size={{ xs: 12, sm: 6, md: 4 }}>
             <Card
               elevation={3}
@@ -75,7 +43,7 @@ function AccountingOverview() {
               }}
             >
               <CardActionArea
-                href={page.href}
+                href={page.routePath}
                 sx={{
                   height: "100%",
                   display: "flex",
@@ -116,4 +84,4 @@ function AccountingOverview() {
   );
 }
 
-export default AccountingOverview;
+export default HubPage;

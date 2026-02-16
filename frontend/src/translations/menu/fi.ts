@@ -1,11 +1,18 @@
 const menu = {
-    dashboard: 'Etusivu',
+    // Main menu items
+    overview: 'Yleiskatsaus',
+    portfolio: 'Salkku',
     properties: 'Asunnot',
-    investmentCalculator: 'Sijoitustuottolaskuri',
+    investmentCalculator: 'Sijoituslaskuri',
+    finance: 'Talous',
+    bankTransactions: 'Tilitapahtumat',
+    incomes: 'Tulot',
+    expenses: 'Menot',
     reports: 'Raportit',
-    accounting: 'Kirjanpito',
-    transactions: 'Tilitapahtumat',
-    taxes: 'Verot',
+    propertyReports: 'Asuntoraportit',
+    taxCalculations: 'Verolaskelmat',
+
+    // Menu controls
     expandMenu: 'Laajenna valikko',
     collapseMenu: 'Pienennä valikko',
 }
