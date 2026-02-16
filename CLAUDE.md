@@ -155,25 +155,49 @@ Always store images and other static assets in the `frontend/assets/` folder, or
 Import assets in components using relative paths from the assets folder.
 
 ### Persistent Storage
-User-uploaded files (property images) are stored in `data/uploads/` which is bind-mounted into Docker containers. This directory:
+All persistent data is stored in `data/` directory which is bind-mounted into Docker containers. This directory:
 - Persists across container restarts and deletions
 - Survives `docker-compose down -v` and `docker volume prune`
 - Should be backed up regularly in production
 
 **Directory structure:**
+- `data/postgres/` - PostgreSQL database files
 - `data/uploads/properties/` - Property images
 
-**Migration from named Docker volumes:**
+**Backup:** Ensure your production backup strategy includes the entire `data/` directory.
 
-> **IMPORTANT:** Run this migration BEFORE deploying this change to production!
+#### Migration: PostgreSQL from named volume to bind mount
+
+> **⚠️ CRITICAL:** Run this migration BEFORE deploying the docker-compose.prod.yml change!
+> Deploying without migration will result in an empty database.
 
 ```bash
-# On production server, while old containers are still running:
+# 1. Create backup first (recommended)
+docker exec alisa-postgres pg_dump -U $DB_USERNAME $DB_DATABASE > backup_$(date +%Y%m%d).sql
+
+# 2. Create target directory
+mkdir -p ./data/postgres
+
+# 3. Copy data from named volume (container must be running)
+docker cp alisa-postgres:/var/lib/postgresql/data/. ./data/postgres/
+
+# 4. Fix permissions (postgres user UID is 999)
+sudo chown -R 999:999 ./data/postgres
+
+# 5. Now deploy the new docker-compose.prod.yml
+docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml up -d
+
+# 6. Verify database works
+docker exec alisa-postgres psql -U $DB_USERNAME -d $DB_DATABASE -c "SELECT COUNT(*) FROM property;"
+```
+
+#### Migration: Uploads from named volume (if not already done)
+
+```bash
 mkdir -p ./data/uploads
 docker cp alisa-backend:/app/uploads/. ./data/uploads/
 ```
-
-**Backup:** Ensure your production backup strategy includes the `data/` directory.
 
 ### Environment Variables
 Backend requires in `.env`:
