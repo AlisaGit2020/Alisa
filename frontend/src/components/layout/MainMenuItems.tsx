@@ -5,7 +5,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Tooltip,
+  Typography,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
@@ -27,8 +27,54 @@ function MainMenuItems({ open }: MainMenuItemsProps) {
     icon: ReactNode,
     selected: boolean
   ) => {
-    const button = (
+    if (!open) {
+      // Collapsed: Show icon centered with small text below
+      return (
+        <ListItemButton
+          key={id}
+          component="a"
+          href={href}
+          selected={selected}
+          sx={{
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            py: 1.5,
+            px: 0.5,
+            minHeight: 64,
+          }}
+        >
+          <ListItemIcon
+            sx={{
+              minWidth: "auto",
+              justifyContent: "center",
+            }}
+          >
+            {icon}
+          </ListItemIcon>
+          <Typography
+            variant="caption"
+            sx={{
+              mt: 0.5,
+              fontSize: "0.65rem",
+              textAlign: "center",
+              lineHeight: 1.2,
+              maxWidth: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {label}
+          </Typography>
+        </ListItemButton>
+      );
+    }
+
+    // Expanded: Normal horizontal layout
+    return (
       <ListItemButton
+        key={id}
         component="a"
         href={href}
         selected={selected}
@@ -38,16 +84,6 @@ function MainMenuItems({ open }: MainMenuItemsProps) {
         <ListItemText primary={label} />
       </ListItemButton>
     );
-
-    if (!open) {
-      return (
-        <Tooltip title={label} placement="right" key={id}>
-          {button}
-        </Tooltip>
-      );
-    }
-
-    return <span key={id}>{button}</span>;
   };
 
   // Check if current path is under a menu section

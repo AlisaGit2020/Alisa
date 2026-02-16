@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SettingsIcon from "@mui/icons-material/Settings";
+import FeedbackIcon from "@mui/icons-material/Feedback";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -26,6 +27,7 @@ import { emptyUser } from "@alisa-lib/initial-data";
 import SettingsDialog from "../settings/SettingsDialog";
 import AdminDialog from "../admin/AdminDialog";
 import UserDetails from "../user/UserDetails";
+import FeedbackDialog from "../feedback/FeedbackDialog";
 import { useSignOutWithCleanup } from "@alisa-lib/use-sign-out-with-cleanup";
 
 const SmallAvatar = styled(Avatar)(({ theme }) => ({
@@ -55,6 +57,7 @@ function MobileMoreMenu() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [userDetailsOpen, setUserDetailsOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const menuOpen = Boolean(anchorEl);
   const languageMenuOpen = Boolean(languageAnchorEl);
@@ -97,6 +100,11 @@ function MobileMoreMenu() {
 
   const handleSettingsClick = () => {
     setSettingsOpen(true);
+    handleMenuClose();
+  };
+
+  const handleFeedbackClick = () => {
+    setFeedbackOpen(true);
     handleMenuClose();
   };
 
@@ -143,6 +151,13 @@ function MobileMoreMenu() {
             <LanguageIcon />
           </ListItemIcon>
           <ListItemText primary={t("language")} />
+        </MenuItem>
+
+        <MenuItem onClick={handleFeedbackClick}>
+          <ListItemIcon>
+            <FeedbackIcon />
+          </ListItemIcon>
+          <ListItemText primary={t("common:feedback.title")} />
         </MenuItem>
 
         <MenuItem onClick={handleSettingsClick}>
@@ -204,6 +219,7 @@ function MobileMoreMenu() {
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <AdminDialog open={adminOpen} onClose={() => setAdminOpen(false)} />
       <UserDetails open={userDetailsOpen} onClose={() => setUserDetailsOpen(false)} />
+      <FeedbackDialog open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
     </Box>
   );
 }
