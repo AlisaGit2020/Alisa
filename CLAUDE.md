@@ -154,6 +154,27 @@ Always store images and other static assets in the `frontend/assets/` folder, or
 
 Import assets in components using relative paths from the assets folder.
 
+### Persistent Storage
+User-uploaded files (property images) are stored in `data/uploads/` which is bind-mounted into Docker containers. This directory:
+- Persists across container restarts and deletions
+- Survives `docker-compose down -v` and `docker volume prune`
+- Should be backed up regularly in production
+
+**Directory structure:**
+- `data/uploads/properties/` - Property images
+
+**Migration from named Docker volumes:**
+
+> **IMPORTANT:** Run this migration BEFORE deploying this change to production!
+
+```bash
+# On production server, while old containers are still running:
+mkdir -p ./data/uploads
+docker cp alisa-backend:/app/uploads/. ./data/uploads/
+```
+
+**Backup:** Ensure your production backup strategy includes the `data/` directory.
+
 ### Environment Variables
 Backend requires in `.env`:
 - `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE` - PostgreSQL connection
