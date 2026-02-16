@@ -1,5 +1,6 @@
-import { InputAdornment, TextField } from "@mui/material";
-import { ChangeEventHandler, ReactNode } from "react";
+import ClearIcon from "@mui/icons-material/Clear";
+import { IconButton, InputAdornment, TextField } from "@mui/material";
+import React, { ChangeEventHandler, ReactNode } from "react";
 
 interface AlisaTextFieldProps {
   label: string;
@@ -7,6 +8,7 @@ interface AlisaTextFieldProps {
   adornment?: string | ReactNode;
   autoComplete?: string;
   autoFocus?: boolean;
+  clearable?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
   multiline?: boolean;
@@ -17,16 +19,54 @@ interface AlisaTextFieldProps {
   onChange?:
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
     | undefined;
+  onClear?: () => void;
   onBlur?: () => void;
   sx?: object;
 }
 
 function AlisaTextField(props: AlisaTextFieldProps) {
-  const adornmentContent = props.adornment
-    ? typeof props.adornment === "string"
-      ? <InputAdornment position="end">{props.adornment}</InputAdornment>
-      : props.adornment
-    : null;
+  const showClearButton =
+    props.clearable !== false && props.value && !props.disabled;
+
+  const handleClear = () => {
+    if (props.onClear) {
+      props.onClear();
+    } else if (props.onChange) {
+      const syntheticEvent = {
+        target: { value: "" },
+      } as React.ChangeEvent<HTMLInputElement>;
+      props.onChange(syntheticEvent);
+    }
+  };
+
+  const clearButton = showClearButton ? (
+    <IconButton
+      size="small"
+      onClick={handleClear}
+      edge="end"
+      aria-label="clear"
+      tabIndex={-1}
+      sx={{
+        padding: 0.25,
+        color: "action.disabled",
+        "&:hover": { color: "action.active" },
+      }}
+    >
+      <ClearIcon sx={{ fontSize: 16 }} />
+    </IconButton>
+  ) : null;
+
+  const adornmentContent =
+    clearButton || props.adornment ? (
+      <InputAdornment
+        position="end"
+        sx={props.multiline ? { mt: 0 } : undefined}
+      >
+        {clearButton}
+        {typeof props.adornment === "string" ? props.adornment : null}
+        {typeof props.adornment !== "string" ? props.adornment : null}
+      </InputAdornment>
+    ) : null;
 
   return (
     <TextField
@@ -49,6 +89,9 @@ function AlisaTextField(props: AlisaTextFieldProps) {
       slotProps={{
         input: {
           endAdornment: adornmentContent,
+          ...(props.multiline && {
+            sx: { alignItems: "flex-start" },
+          }),
         },
       }}
     />
