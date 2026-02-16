@@ -51,6 +51,9 @@ function LandingHeader({ t, onLoginClick }: LandingHeaderProps) {
     fontWeight: 500,
     cursor: 'pointer',
     transition: 'opacity 0.2s',
+    px: 1,
+    py: 0.5,
+    borderRadius: 1,
     '&:hover': {
       opacity: 0.8,
     },
@@ -63,6 +66,9 @@ function LandingHeader({ t, onLoginClick }: LandingHeaderProps) {
     opacity: isActive ? 1 : 0.7,
     cursor: 'pointer',
     fontSize: '0.875rem',
+    px: 0.5,
+    py: 0.25,
+    borderRadius: 0.5,
     '&:hover': {
       opacity: 1,
     },

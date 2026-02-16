@@ -2,7 +2,8 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import { Box, Card, Container, Grid, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { AlisaButton, useToast } from "../alisa";
-import CalculateIcon from "@mui/icons-material/Calculate";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import WorkIcon from "@mui/icons-material/Work";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import React from "react";
@@ -157,8 +158,9 @@ function LandingPage({ t }: WithTranslation) {
             {t('landing:featuresSubtitle')}
           </Typography>
         </Box>
-        <Grid container spacing={{ xs: 3, md: 6 }}>
-          <Grid size={{ xs: 12, md: 4 }}>
+        <Grid container spacing={{ xs: 3, md: 4 }}>
+          {/* 1. Sijoitussalkku */}
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               elevation={0}
               sx={{
@@ -187,7 +189,7 @@ function LandingPage({ t }: WithTranslation) {
                   mb: 3,
                 }}
               >
-                <CalculateIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                <WorkIcon sx={{ fontSize: 40, color: 'white' }} />
               </Box>
               <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
                 {t('landing:feature1Title')}
@@ -198,7 +200,49 @@ function LandingPage({ t }: WithTranslation) {
             </Card>
           </Grid>
 
-          <Grid size={{ xs: 12, md: 4 }}>
+          {/* 2. Yleisnäkymä */}
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Card
+              elevation={0}
+              sx={{
+                height: '100%',
+                textAlign: 'center',
+                p: 3,
+                border: '1px solid',
+                borderColor: 'divider',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: 3,
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: '50%',
+                  bgcolor: 'info.main',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto',
+                  mb: 3,
+                }}
+              >
+                <DashboardIcon sx={{ fontSize: 40, color: 'white' }} />
+              </Box>
+              <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
+                {t('landing:feature2Title')}
+              </Typography>
+              <Typography color="text.secondary">
+                {t('landing:feature2Description')}
+              </Typography>
+            </Card>
+          </Grid>
+
+          {/* 3. Taloushallinta */}
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               elevation={0}
               sx={{
@@ -230,15 +274,16 @@ function LandingPage({ t }: WithTranslation) {
                 <AccountBalanceIcon sx={{ fontSize: 40, color: 'white' }} />
               </Box>
               <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
-                {t('landing:feature2Title')}
+                {t('landing:feature3Title')}
               </Typography>
               <Typography color="text.secondary">
-                {t('landing:feature2Description')}
+                {t('landing:feature3Description')}
               </Typography>
             </Card>
           </Grid>
 
-          <Grid size={{ xs: 12, md: 4 }}>
+          {/* 4. Raportointi */}
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               elevation={0}
               sx={{
@@ -259,7 +304,7 @@ function LandingPage({ t }: WithTranslation) {
                   width: 80,
                   height: 80,
                   borderRadius: '50%',
-                  bgcolor: 'secondary.main',
+                  bgcolor: 'warning.main',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -267,13 +312,13 @@ function LandingPage({ t }: WithTranslation) {
                   mb: 3,
                 }}
               >
-                <AssessmentIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                <AssessmentIcon sx={{ fontSize: 40, color: 'white' }} />
               </Box>
               <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
-                {t('landing:feature3Title')}
+                {t('landing:feature4Title')}
               </Typography>
               <Typography color="text.secondary">
-                {t('landing:feature3Description')}
+                {t('landing:feature4Description')}
               </Typography>
             </Card>
           </Grid>
