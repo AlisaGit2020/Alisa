@@ -289,8 +289,8 @@ export class PropertyService {
       });
     }
 
-    // Handle nested address object
-    if (input.address !== undefined) {
+    // Handle nested address object (check both undefined and null)
+    if (input.address !== undefined && input.address !== null) {
       if (
         input.address.street ||
         input.address.city ||

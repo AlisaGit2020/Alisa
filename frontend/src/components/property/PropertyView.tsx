@@ -7,7 +7,7 @@ import { Property } from '@alisa-types';
 import ApiClient from '../../lib/api-client';
 import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
 import AlisaButton from '../alisa/form/AlisaButton';
-import { VITE_API_URL } from '../../constants';
+import { VITE_BASE_URL } from '../../constants';
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SquareFootIcon from '@mui/icons-material/SquareFoot';
@@ -138,7 +138,7 @@ function PropertyView({ t }: WithTranslation) {
   }
 
   const imageUrl = property.photo
-    ? `${VITE_API_URL}/${property.photo}`
+    ? `${VITE_BASE_URL}/${property.photo}`
     : '/assets/properties/placeholder.svg';
 
   const ownershipShare = property.ownerships?.[0]?.share ?? 100;

@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { AlisaButton, useToast } from '../alisa';
 import axios from 'axios';
 import ApiClient from '@alisa-lib/api-client';
-import { VITE_API_URL } from '../../constants';
+import { VITE_API_URL, VITE_BASE_URL } from '../../constants';
 
 interface PropertyPhotoUploadProps {
   propertyId: number;
@@ -135,7 +135,7 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
   const photoUrl = pendingPreviewUrl
     ? pendingPreviewUrl
     : photoPath
-      ? `${VITE_API_URL}/${photoPath}`
+      ? `${VITE_BASE_URL}/${photoPath}`
       : '/assets/properties/placeholder.svg';
 
   const hasPhoto = pendingMode ? !!pendingFile : !!photoPath;
