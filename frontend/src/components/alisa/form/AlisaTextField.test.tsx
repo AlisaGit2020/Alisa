@@ -87,4 +87,93 @@ describe('AlisaTextField', () => {
     const textField = container.querySelector('.MuiTextField-root');
     expect(textField).toHaveClass('MuiFormControl-fullWidth');
   });
+
+  describe('clearable', () => {
+    it('shows clear button by default when has value', () => {
+      renderWithProviders(
+        <AlisaTextField
+          label="Test Label"
+          value="Some text"
+          onChange={jest.fn()}
+        />
+      );
+
+      expect(screen.getByRole('button', { name: 'clear' })).toBeInTheDocument();
+    });
+
+    it('does not show clear button when value is empty', () => {
+      renderWithProviders(
+        <AlisaTextField
+          label="Test Label"
+          value=""
+          onChange={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByRole('button', { name: 'clear' })).not.toBeInTheDocument();
+    });
+
+    it('does not show clear button when clearable is false', () => {
+      renderWithProviders(
+        <AlisaTextField
+          label="Test Label"
+          value="Some text"
+          clearable={false}
+          onChange={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByRole('button', { name: 'clear' })).not.toBeInTheDocument();
+    });
+
+    it('does not show clear button when disabled', () => {
+      renderWithProviders(
+        <AlisaTextField
+          label="Test Label"
+          value="Some text"
+          disabled
+          onChange={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByRole('button', { name: 'clear' })).not.toBeInTheDocument();
+    });
+
+    it('calls onClear when clear button is clicked', async () => {
+      const user = userEvent.setup();
+      const mockOnClear = jest.fn();
+
+      renderWithProviders(
+        <AlisaTextField
+          label="Test Label"
+          value="Some text"
+          onClear={mockOnClear}
+          onChange={jest.fn()}
+        />
+      );
+
+      await user.click(screen.getByRole('button', { name: 'clear' }));
+
+      expect(mockOnClear).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls onChange with empty value when clear is clicked and no onClear provided', async () => {
+      const user = userEvent.setup();
+      const mockOnChange = jest.fn();
+
+      renderWithProviders(
+        <AlisaTextField
+          label="Test Label"
+          value="Some text"
+          onChange={mockOnChange}
+        />
+      );
+
+      await user.click(screen.getByRole('button', { name: 'clear' }));
+
+      expect(mockOnChange).toHaveBeenCalledWith(
+        expect.objectContaining({ target: { value: '' } })
+      );
+    });
+  });
 });
