@@ -15,10 +15,7 @@ import FeedbackMenuButton from "./FeedbackMenuButton";
 import AdminMenu from "../admin/AdminMenu";
 import PropertyBadge from "./PropertyBadge.tsx";
 import MobileMoreMenu from "./MobileMoreMenu";
-import { LOGO_WHITE } from "@alisa-lib/constants";
-
-const drawerWidth: number = 240;
-const collapsedDrawerWidth: number = 72;
+import { LOGO_WHITE, DRAWER_WIDTH, COLLAPSED_DRAWER_WIDTH } from "@alisa-lib/constants";
 
 interface StyledAppBarProps extends MuiAppBarProps {
   isMobile?: boolean;
@@ -40,8 +37,8 @@ const StyledAppBar = styled(MuiAppBar, {
   }),
   // Desktop: Offset based on drawer state
   ...(!isMobile && {
-    marginLeft: drawerOpen ? drawerWidth : collapsedDrawerWidth,
-    width: `calc(100% - ${drawerOpen ? drawerWidth : collapsedDrawerWidth}px)`,
+    marginLeft: drawerOpen ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
+    width: `calc(100% - ${drawerOpen ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH}px)`,
   }),
 }));
 
@@ -74,53 +71,51 @@ function AppBar() {
             pr: "24px",
           }}
         >
-          {/* Mobile: Logo that opens drawer */}
-          {isMobile && (
-            <Box
-              component="img"
-              src={LOGO_WHITE}
-              alt="Asset"
-              onClick={toggleMobileDrawer}
-              sx={{
-                height: 32,
-                width: "auto",
-                cursor: "pointer",
-              }}
-            />
-          )}
-          {/* Desktop: Logo and PropertyBadge on left */}
-          {!isMobile && (
-            <Box display="flex" flexGrow={0} alignItems="center" gap={2}>
-              <Box
-                component="a"
-                href="/"
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  textDecoration: "none",
-                }}
-              >
-                <Box
-                  component="img"
-                  src={LOGO_WHITE}
-                  alt="Asset"
-                  sx={{
-                    height: 40,
-                    width: "auto",
-                  }}
-                />
-              </Box>
-              <PropertyBadge />
-            </Box>
-          )}
-          <Box flexGrow={1} />
-          {/* Mobile: PropertyBadge centered */}
-          {isMobile && <PropertyBadge />}
-          <Box flexGrow={1} sx={{ display: isMobile ? "flex" : "none" }} />
           {isMobile ? (
-            <MobileMoreMenu />
+            <>
+              {/* Mobile: Logo left, PropertyBadge centered, Menu right */}
+              <Box
+                component="img"
+                src={LOGO_WHITE}
+                alt="Asset"
+                onClick={toggleMobileDrawer}
+                sx={{
+                  height: 32,
+                  width: "auto",
+                  cursor: "pointer",
+                }}
+              />
+              <Box flexGrow={1} />
+              <PropertyBadge />
+              <Box flexGrow={1} />
+              <MobileMoreMenu />
+            </>
           ) : (
             <>
+              {/* Desktop: Logo and PropertyBadge on left, menus on right */}
+              <Box display="flex" flexGrow={0} alignItems="center" gap={2}>
+                <Box
+                  component="a"
+                  href="/"
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    textDecoration: "none",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={LOGO_WHITE}
+                    alt="Asset"
+                    sx={{
+                      height: 40,
+                      width: "auto",
+                    }}
+                  />
+                </Box>
+                <PropertyBadge />
+              </Box>
+              <Box flexGrow={1} />
               <LanguageSelector />
               <FeedbackMenuButton />
               <AdminMenu />

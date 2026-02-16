@@ -5,13 +5,10 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MuiDrawer from "@mui/material/Drawer";
 import LeftMenuItems from "./LeftMenuItems";
 import { useTranslation } from "react-i18next";
-import { LOGO_DARK } from "@alisa-lib/constants";
-
-const drawerWidth: number = 240;
-const collapsedDrawerWidth: number = 72;
+import { LOGO_DARK, DRAWER_WIDTH, COLLAPSED_DRAWER_WIDTH } from "@alisa-lib/constants";
 
 const openedMixin = (theme: Theme): CSSObject => ({
-  width: drawerWidth,
+  width: DRAWER_WIDTH,
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,
@@ -20,7 +17,7 @@ const openedMixin = (theme: Theme): CSSObject => ({
 });
 
 const closedMixin = (theme: Theme): CSSObject => ({
-  width: collapsedDrawerWidth,
+  width: COLLAPSED_DRAWER_WIDTH,
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -35,7 +32,7 @@ interface StyledDrawerProps {
 const StyledDrawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
 })<StyledDrawerProps>(({ theme, open }) => ({
-  width: drawerWidth,
+  width: DRAWER_WIDTH,
   flexShrink: 0,
   whiteSpace: "nowrap",
   boxSizing: "border-box",
@@ -74,7 +71,7 @@ function LeftMenu({ open, onToggleDrawer, isMobile = false }: LeftMenuProps) {
         ModalProps={{ keepMounted: true }}
         sx={{
           "& .MuiDrawer-paper": {
-            width: drawerWidth,
+            width: DRAWER_WIDTH,
             boxSizing: "border-box",
           },
         }}
@@ -131,7 +128,12 @@ function LeftMenu({ open, onToggleDrawer, isMobile = false }: LeftMenuProps) {
         }}
       >
         <Tooltip title={open ? t("collapseMenu") : t("expandMenu")}>
-          <IconButton onClick={onToggleDrawer} size="small">
+          <IconButton
+            onClick={onToggleDrawer}
+            size="small"
+            aria-expanded={open}
+            aria-label={open ? t("collapseMenu") : t("expandMenu")}
+          >
             {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
         </Tooltip>
