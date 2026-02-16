@@ -39,7 +39,7 @@ services:
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
       ALLOWED_ORIGIN: ${ALLOWED_ORIGIN}
     volumes:
-      - uploads:/app/uploads
+      - ./data/uploads:/app/uploads
 
   nginx:
     build:
@@ -57,7 +57,7 @@ services:
     environment:
       DOMAIN: ${DOMAIN}
     volumes:
-      - uploads:/app/uploads:ro
+      - ./data/uploads:/app/uploads:ro
       - certbot-conf:/etc/letsencrypt
       - certbot-www:/var/www/certbot
 
@@ -71,6 +71,5 @@ services:
 
 volumes:
   postgres-data:
-  uploads:
   certbot-conf:
   certbot-www:
