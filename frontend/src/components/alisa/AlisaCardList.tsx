@@ -27,7 +27,7 @@ import { useToast } from "./toast";
 import { TypeOrmFetchOptions } from "../../lib/types";
 import ApiClient from "../../lib/api-client";
 import AlisaContext from "@alisa-lib/alisa-contexts";
-import { VITE_API_URL } from "../../constants";
+import { VITE_BASE_URL } from "../../constants";
 import { Address, DeleteValidationResult } from "@alisa-types";
 import { AxiosError } from "axios";
 
@@ -144,7 +144,7 @@ function AlisaCardList<T extends { id: number }>({
                     component="img"
                     alt={item.name}
                     height="160"
-                    image={item.photo ? `${VITE_API_URL}/${item.photo}` : '/assets/properties/placeholder.svg'}
+                    image={item.photo ? `${VITE_BASE_URL}/${item.photo}` : '/assets/properties/placeholder.svg'}
                     sx={{ objectFit: 'cover' }}
                   />
                   <CardContent sx={{ flexGrow: 1 }}>

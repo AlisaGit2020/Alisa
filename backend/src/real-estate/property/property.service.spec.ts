@@ -357,6 +357,30 @@ describe('PropertyService', () => {
       expect(result.ownerships[0].userId).toBe(testUser.id);
       expect(result.ownerships[0].share).toBe(75);
     });
+
+    it('handles null address without throwing error', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Test Property',
+      });
+      // Input with address: null (as returned by TypeORM when no address exists)
+      const input = {
+        name: 'Updated Name',
+        size: 50,
+        address: null as unknown as undefined,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve(entity),
+      );
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.name).toBe('Updated Name');
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
   });
 
   describe('delete', () => {
