@@ -199,6 +199,20 @@ mkdir -p ./data/uploads
 docker cp alisa-backend:/app/uploads/. ./data/uploads/
 ```
 
+#### Local development migration
+
+Developers with existing local setups need to migrate before pulling this change:
+
+```bash
+# If you have data in the old named volume, migrate it:
+mkdir -p ./data/postgres
+docker cp alisa-postgres:/var/lib/postgresql/data/. ./data/postgres/
+sudo chown -R 999:999 ./data/postgres
+docker-compose down && docker-compose up -d
+```
+
+If starting fresh, just `docker-compose up -d` will create a new database.
+
 ### Environment Variables
 Backend requires in `.env`:
 - `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE` - PostgreSQL connection
