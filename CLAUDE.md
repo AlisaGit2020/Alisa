@@ -163,10 +163,17 @@ User-uploaded files (property images) are stored in `data/uploads/` which is bin
 **Directory structure:**
 - `data/uploads/properties/` - Property images
 
-**Migration:** If upgrading from named Docker volumes, copy existing images:
+**Migration from named Docker volumes:**
+
+> **IMPORTANT:** Run this migration BEFORE deploying this change to production!
+
 ```bash
-docker cp alisa-backend:/app/uploads ./data/
+# On production server, while old containers are still running:
+mkdir -p ./data/uploads
+docker cp alisa-backend:/app/uploads/. ./data/uploads/
 ```
+
+**Backup:** Ensure your production backup strategy includes the `data/` directory.
 
 ### Environment Variables
 Backend requires in `.env`:
