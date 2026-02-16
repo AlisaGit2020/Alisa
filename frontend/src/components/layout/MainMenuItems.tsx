@@ -1,34 +1,15 @@
-import React, { useState } from "react";
+import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Box,
-  IconButton,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Collapse,
   Tooltip,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import ApartmentIcon from "@mui/icons-material/Apartment";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import CalculateIcon from "@mui/icons-material/Calculate";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import PaymentsIcon from "@mui/icons-material/Payments";
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import {
-  propertyContext,
-  accountingContext,
-  transactionContext,
-  expenseContext,
-  incomeContext,
-  taxContext,
-  reportContext,
-} from "@alisa-lib/alisa-contexts";
+import WorkIcon from "@mui/icons-material/Work";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 
 interface MainMenuItemsProps {
@@ -36,45 +17,23 @@ interface MainMenuItemsProps {
   isMobile?: boolean;
 }
 
-function MainMenuItems({ open, isMobile = false }: MainMenuItemsProps) {
+function MainMenuItems({ open }: MainMenuItemsProps) {
   const { t } = useTranslation("menu");
-  const { t: tAccounting } = useTranslation("accounting");
   const currentPath = window.location.pathname;
-
-  const isAccountingRoute = currentPath.startsWith(accountingContext.routePath);
-  const [accountingOpen, setAccountingOpen] = useState(isAccountingRoute);
-
-  // Initialize accounting menu state based on current route
-  const [accountingInitialized, setAccountingInitialized] = useState(false);
-
-  React.useLayoutEffect(() => {
-    if (!accountingInitialized && isAccountingRoute) {
-      setAccountingOpen(true);
-      setAccountingInitialized(true);
-    }
-  }, [isAccountingRoute, accountingInitialized]);
-
-  const handleExpandClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setAccountingOpen(!accountingOpen);
-  };
 
   const menuItem = (
     id: string,
     href: string,
     label: string,
-    icon: React.ReactNode,
-    selected: boolean,
-    indent: number = 0
+    icon: ReactNode,
+    selected: boolean
   ) => {
-    const paddingLeft = 2 + indent * 2;
     const button = (
       <ListItemButton
         component="a"
         href={href}
         selected={selected}
-        sx={{ pl: paddingLeft }}
+        sx={{ pl: 2 }}
       >
         <ListItemIcon>{icon}</ListItemIcon>
         <ListItemText primary={label} />
@@ -92,105 +51,47 @@ function MainMenuItems({ open, isMobile = false }: MainMenuItemsProps) {
     return <span key={id}>{button}</span>;
   };
 
-  const accountingButton = (
-    <Box sx={{ display: "flex", alignItems: "center" }}>
-      <ListItemButton
-        component="a"
-        href={accountingContext.routePath}
-        selected={currentPath === accountingContext.routePath}
-        sx={{ flexGrow: 1 }}
-      >
-        <ListItemIcon>
-          <AccountBalanceIcon sx={{ color: "primary.main" }} />
-        </ListItemIcon>
-        <ListItemText primary={t("accounting")} />
-      </ListItemButton>
-      {open && (
-        <IconButton size="small" onClick={handleExpandClick} sx={{ mr: 1 }}>
-          {accountingOpen ? <ExpandLess /> : <ExpandMore />}
-        </IconButton>
-      )}
-    </Box>
-  );
+  // Check if current path is under a menu section
+  const isPortfolioSection = currentPath.startsWith("/app/portfolio");
+  const isFinanceSection = currentPath.startsWith("/app/finance");
+  const isReportsSection = currentPath.startsWith("/app/reports");
 
   return (
     <List component="nav">
+      {/* 1. Overview */}
       {menuItem(
-        "dashboard",
+        "overview",
         "/app/dashboard",
-        t("dashboard"),
+        t("overview"),
         <DashboardIcon sx={{ color: "info.main" }} />,
         currentPath === "/app/dashboard"
       )}
+
+      {/* 2. Portfolio */}
       {menuItem(
-        "properties",
-        propertyContext.routePath,
-        t("properties"),
-        <ApartmentIcon sx={{ color: "secondary.main" }} />,
-        currentPath.startsWith(propertyContext.routePath)
+        "portfolio",
+        "/app/portfolio",
+        t("portfolio"),
+        <WorkIcon sx={{ color: "secondary.main" }} />,
+        isPortfolioSection
       )}
+
+      {/* 3. Finance */}
       {menuItem(
-        "investmentCalculator",
-        "/app/investment-calculations",
-        t("investmentCalculator"),
-        <TrendingUpIcon sx={{ color: "success.main" }} />,
-        currentPath.startsWith("/app/investment-calculations")
+        "finance",
+        "/app/finance",
+        t("finance"),
+        <AccountBalanceIcon sx={{ color: "primary.main" }} />,
+        isFinanceSection
       )}
+
+      {/* 4. Reports */}
       {menuItem(
         "reports",
-        reportContext.routePath,
+        "/app/reports",
         t("reports"),
-        <AssessmentIcon sx={{ color: "primary.main" }} />,
-        currentPath.startsWith(reportContext.routePath)
-      )}
-
-      {!isMobile && (
-        <>
-          {open ? (
-            accountingButton
-          ) : (
-            <Tooltip title={t("accounting")} placement="right">
-              {accountingButton}
-            </Tooltip>
-          )}
-
-          <Collapse in={open && accountingOpen} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {menuItem(
-                "expenses",
-                expenseContext.routePath,
-                tAccounting("expenses"),
-                <ReceiptIcon sx={{ color: "error.main" }} />,
-                currentPath.startsWith(expenseContext.routePath),
-                1
-              )}
-              {menuItem(
-                "incomes",
-                incomeContext.routePath,
-                tAccounting("incomes"),
-                <PaymentsIcon sx={{ color: "success.main" }} />,
-                currentPath.startsWith(incomeContext.routePath),
-                1
-              )}
-              {menuItem(
-                "bank-transactions",
-                transactionContext.routePath,
-                tAccounting("bankTransactions"),
-                <AccountBalanceWalletIcon sx={{ color: "primary.main" }} />,
-                currentPath.startsWith(transactionContext.routePath),
-                1
-              )}
-            </List>
-          </Collapse>
-        </>
-      )}
-
-      {menuItem(
-        "taxes",
-        taxContext.routePath,
-        t("taxes"),
-        <CalculateIcon sx={{ color: "warning.main" }} />,
-        currentPath.startsWith(taxContext.routePath)
+        <AssessmentIcon sx={{ color: "warning.main" }} />,
+        isReportsSection
       )}
     </List>
   );

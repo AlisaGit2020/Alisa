@@ -1,33 +1,21 @@
 import { styled } from "@mui/material/styles";
-import { Divider, IconButton, Toolbar, Tooltip } from "@mui/material";
+import { Box, Divider, IconButton, Toolbar, Tooltip } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import MenuIcon from "@mui/icons-material/Menu";
 import MuiDrawer from "@mui/material/Drawer";
 import LeftMenuItems from "./LeftMenuItems";
 import { useTranslation } from "react-i18next";
 
 const drawerWidth: number = 240;
-const collapsedWidth: number = 72;
 
-const StyledDrawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
+const StyledDrawer = styled(MuiDrawer)(({ theme }) => ({
   "& .MuiDrawer-paper": {
     position: "relative",
     whiteSpace: "nowrap",
     width: drawerWidth,
+    boxSizing: "border-box",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
-    }),
-    boxSizing: "border-box",
-    ...(!open && {
-      overflowX: "hidden",
-      transition: theme.transitions.create("width", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      width: collapsedWidth,
     }),
   },
 }));
@@ -42,7 +30,7 @@ function LeftMenu({ open, onToggleDrawer, isMobile = false }: LeftMenuProps) {
   const { t } = useTranslation("menu");
 
   if (isMobile) {
-    // Mobile: Temporary drawer overlay, no permanent sidebar
+    // Mobile: Temporary drawer overlay
     return (
       <MuiDrawer
         variant="temporary"
@@ -60,10 +48,31 @@ function LeftMenu({ open, onToggleDrawer, isMobile = false }: LeftMenuProps) {
           sx={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-end",
+            justifyContent: "space-between",
             px: [1],
           }}
         >
+          {/* Logo in mobile drawer */}
+          <Box
+            component="a"
+            href="/"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              textDecoration: "none",
+              pl: 1,
+            }}
+          >
+            <Box
+              component="img"
+              src="/assets/asset-logo.png"
+              alt="Asset"
+              sx={{
+                height: 32,
+                width: "auto",
+              }}
+            />
+          </Box>
           <Tooltip title={t("collapseMenu")}>
             <IconButton onClick={onToggleDrawer}>
               <ChevronLeftIcon />
@@ -76,25 +85,11 @@ function LeftMenu({ open, onToggleDrawer, isMobile = false }: LeftMenuProps) {
     );
   }
 
-  // Desktop: Collapsible permanent drawer
+  // Desktop: Permanent drawer, always open, no toggle button
   return (
-    <StyledDrawer variant="permanent" open={open}>
-      <Toolbar
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          px: [1],
-        }}
-      >
-        <Tooltip title={open ? t("collapseMenu") : t("expandMenu")}>
-          <IconButton onClick={onToggleDrawer}>
-            {open ? <ChevronLeftIcon /> : <MenuIcon />}
-          </IconButton>
-        </Tooltip>
-      </Toolbar>
-      <Divider />
-      <LeftMenuItems open={open} isMobile={false} />
+    <StyledDrawer variant="permanent" open={true}>
+      <Toolbar />
+      <LeftMenuItems open={true} isMobile={false} />
     </StyledDrawer>
   );
 }

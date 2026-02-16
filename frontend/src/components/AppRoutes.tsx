@@ -13,7 +13,6 @@ import TransactionsPending from "./transaction/pending/TransactionsPending";
 import TransactionImportWizard from "./transaction/import-wizard/TransactionImportWizard";
 
 import SignIn from "./login/Login";
-import AccountingOverview from "./accounting/AccountingOverview.tsx";
 import Expenses from "./accounting/expenses/Expenses.tsx";
 import Incomes from "./accounting/incomes/Incomes.tsx";
 import LandingPageRouter from "./landing/LandingPageRouter";
@@ -21,6 +20,7 @@ import InvestmentCalculatorPublic from "./investment-calculator/InvestmentCalcul
 import InvestmentCalculatorProtected from "./investment-calculator/InvestmentCalculatorProtected";
 import PublicLayout from "./layout/PublicLayout";
 import ProtectedLayout from "./layout/ProtectedLayout";
+import { PortfolioHub, FinanceHub, ReportsHub } from "./hub";
 
 export default function AppRoutes() {
   return (
@@ -37,82 +37,40 @@ export default function AppRoutes() {
         <Route path="/app" element={<ProtectedLayout />}>
           <Route element={<AuthOutlet fallbackPath="/login" />}>
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="investment-calculations" element={<InvestmentCalculatorProtected />} />
 
-          <Route
-            path="properties/edit/:idParam"
-            element={<PropertyForm></PropertyForm>}
-          ></Route>
-          <Route
-            path="properties/add"
-            element={<PropertyForm></PropertyForm>}
-          ></Route>
-          <Route
-            path="properties/:idParam"
-            element={<PropertyView />}
-          />
-          <Route
-            path="properties"
-            element={<Properties></Properties>}
-          ></Route>
+            {/* Portfolio routes - nested under /app/portfolio */}
+            <Route path="portfolio" element={<PortfolioHub />} />
+            <Route path="portfolio/properties" element={<Properties />} />
+            <Route path="portfolio/properties/add" element={<PropertyForm />} />
+            <Route path="portfolio/properties/edit/:idParam" element={<PropertyForm />} />
+            <Route path="portfolio/properties/:idParam" element={<PropertyView />} />
+            <Route path="portfolio/investment-calculations" element={<InvestmentCalculatorProtected />} />
 
-          {/* Accounting routes */}
-          <Route
-            path="accounting"
-            element={<AccountingOverview></AccountingOverview>}
-          ></Route>
+            {/* Finance routes - nested under /app/finance */}
+            <Route path="finance" element={<FinanceHub />} />
+            <Route path="finance/transactions" element={<TransactionsOverview />} />
+            <Route path="finance/transactions/accepted" element={<TransactionMain />} />
+            <Route path="finance/transactions/pending" element={<TransactionsPending />} />
+            <Route path="finance/transactions/import" element={<TransactionImportWizard />} />
+            <Route path="finance/expenses" element={<Expenses />} />
+            <Route path="finance/incomes" element={<Incomes />} />
 
-          {/* Transaction routes */}
-          <Route
-            path="accounting/transactions"
-            element={<TransactionsOverview />}
-          ></Route>
+            {/* Reports routes - nested under /app/reports */}
+            <Route path="reports" element={<ReportsHub />} />
+            <Route path="reports/property" element={<ReportPage />} />
+            <Route path="reports/tax" element={<TaxView />} />
 
-          <Route
-            path="accounting/transactions/accepted"
-            element={<TransactionMain />}
-          ></Route>
+            {/* Backward compatibility redirects */}
+            <Route path="accounting" element={<Navigate to="/app/finance" replace />} />
+            <Route path="accounting/*" element={<Navigate to="/app/finance" replace />} />
+            <Route path="transactions/*" element={<Navigate to="/app/finance/transactions" replace />} />
+            <Route path="properties" element={<Navigate to="/app/portfolio/properties" replace />} />
+            <Route path="properties/*" element={<Navigate to="/app/portfolio/properties" replace />} />
+            <Route path="investment-calculations" element={<Navigate to="/app/portfolio/investment-calculations" replace />} />
+            <Route path="report" element={<Navigate to="/app/reports/property" replace />} />
+            <Route path="tax" element={<Navigate to="/app/reports/tax" replace />} />
 
-          <Route
-            path="accounting/transactions/pending"
-            element={<TransactionsPending />}
-          ></Route>
-
-          <Route
-            path="accounting/transactions/import"
-            element={<TransactionImportWizard />}
-          ></Route>
-
-          <Route
-            path="accounting/expenses"
-            element={<Expenses></Expenses>}
-          ></Route>
-
-          <Route
-            path="accounting/incomes"
-            element={<Incomes></Incomes>}
-          ></Route>
-
-          <Route
-            path="tax"
-            element={<TaxView />}
-          ></Route>
-
-          <Route
-            path="report"
-            element={<ReportPage />}
-          ></Route>
-
-          {/* Backward compatibility redirect */}
-          <Route
-            path="transactions/*"
-            element={<Navigate to="/app/accounting/transactions" replace />}
-          ></Route>
-
-          <Route
-            path="settings/:page?/:action?/:idParam?"
-            element={<Settings></Settings>}
-          ></Route>
+            <Route path="settings/:page?/:action?/:idParam?" element={<Settings />} />
           </Route>
         </Route>
       </Routes>
