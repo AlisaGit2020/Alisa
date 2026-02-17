@@ -165,10 +165,7 @@ export class PropertyService {
   }
 
   async delete(user: JWTUser, id: number): Promise<void> {
-    const { validation, property } = await this.validateDelete(user, id);
-    if (!validation.canDelete) {
-      throw new BadRequestException(validation);
-    }
+    const property = await this.getEntityOrThrow(user, id);
 
     if (property.photo) {
       await this.deletePhotoFile(property.photo);

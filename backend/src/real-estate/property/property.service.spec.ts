@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
-  BadRequestException,
   ForbiddenException,
   NotFoundException,
   UnauthorizedException,
@@ -623,37 +622,21 @@ describe('PropertyService', () => {
       );
     });
 
-    it('throws BadRequestException when dependencies exist', async () => {
+    it('deletes property even when dependencies exist (cascade handles them)', async () => {
       const property = createProperty({ id: 1 });
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+      // Set up dependencies - should NOT block deletion anymore
       mockTransactionRepository.count.mockResolvedValue(5);
-      mockTransactionRepository.find.mockResolvedValue([
-        createTransaction({ id: 1, propertyId: 1 }),
-      ]);
-
-      await expect(service.delete(testUser, 1)).rejects.toThrow(
-        BadRequestException,
-      );
-      expect(mockRepository.delete).not.toHaveBeenCalled();
-    });
-
-    it('does not call repository.delete when dependencies exist', async () => {
-      const property = createProperty({ id: 1 });
-      mockRepository.findOneBy.mockResolvedValue(property);
-      mockAuthService.hasOwnership.mockResolvedValue(true);
       mockExpenseRepository.count.mockResolvedValue(3);
-      mockExpenseRepository.find.mockResolvedValue([
-        createExpense({ id: 1, propertyId: 1 }),
-      ]);
+      mockIncomeRepository.count.mockResolvedValue(2);
+      mockStatisticsRepository.count.mockResolvedValue(10);
+      mockDepreciationAssetRepository.count.mockResolvedValue(1);
 
-      try {
-        await service.delete(testUser, 1);
-      } catch {
-        // Expected
-      }
+      await service.delete(testUser, 1);
 
-      expect(mockRepository.delete).not.toHaveBeenCalled();
+      expect(mockRepository.delete).toHaveBeenCalledWith(1);
     });
   });
 
