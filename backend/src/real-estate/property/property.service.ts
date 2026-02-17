@@ -263,15 +263,15 @@ export class PropertyService {
     }
 
     const dependencies = await Promise.all(samplePromises);
-    const canDelete = dependencies.length === 0;
+    const hasDependencies = dependencies.length > 0;
 
     return {
       validation: {
-        canDelete,
+        canDelete: true, // Always allow - cascade handles deletion
         dependencies,
-        message: canDelete
-          ? undefined
-          : 'Property has related data that must be deleted first',
+        message: hasDependencies
+          ? 'The following related data will be deleted with the property'
+          : undefined,
       },
       property,
     };

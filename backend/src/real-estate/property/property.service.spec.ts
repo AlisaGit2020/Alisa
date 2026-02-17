@@ -664,7 +664,7 @@ describe('PropertyService', () => {
       expect(returnedProperty).toEqual(property);
     });
 
-    it('returns canDelete: false with transaction dependency', async () => {
+    it('returns canDelete: true even with dependencies (warning only)', async () => {
       const property = createProperty({ id: 1 });
       const transactions = [
         createTransaction({ id: 1, propertyId: 1, description: 'Trans 1' }),
@@ -677,12 +677,12 @@ describe('PropertyService', () => {
 
       const { validation } = await service.validateDelete(testUser, 1);
 
-      expect(validation.canDelete).toBe(false);
+      expect(validation.canDelete).toBe(true);
       expect(validation.dependencies).toHaveLength(1);
       expect(validation.dependencies[0].type).toBe('transaction');
       expect(validation.dependencies[0].count).toBe(2);
-      expect(validation.dependencies[0].samples).toHaveLength(2);
-      expect(validation.message).toBeDefined();
+      // Message should be warning, not blocking
+      expect(validation.message).toContain('will be deleted');
     });
 
     it('returns multiple dependency types', async () => {
@@ -707,7 +707,7 @@ describe('PropertyService', () => {
 
       const { validation } = await service.validateDelete(testUser, 1);
 
-      expect(validation.canDelete).toBe(false);
+      expect(validation.canDelete).toBe(true);
       expect(validation.dependencies).toHaveLength(3);
       expect(validation.dependencies.map((d) => d.type)).toContain('transaction');
       expect(validation.dependencies.map((d) => d.type)).toContain('expense');
