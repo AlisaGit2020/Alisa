@@ -556,18 +556,19 @@ describe('PropertyService', () => {
       expect(result.externalSourceId).toBe('OT-123456');
     });
 
-    it('clears external source fields', async () => {
+    it('clears external source fields when set to null', async () => {
       const existingProperty = createProperty({
         id: 1,
         name: 'Test Property',
         externalSource: PropertyExternalSource.OIKOTIE,
         externalSourceId: 'OT-123456',
       });
+      // Simulates frontend sending null to clear fields
       const input = {
         name: 'Test Property',
         size: 50,
-        externalSource: null as unknown as undefined,
-        externalSourceId: null as unknown as undefined,
+        externalSource: null,
+        externalSourceId: null,
       };
 
       mockRepository.findOneBy.mockResolvedValue(existingProperty);
