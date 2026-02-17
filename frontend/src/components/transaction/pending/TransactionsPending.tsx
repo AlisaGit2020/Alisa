@@ -369,6 +369,7 @@ function TransactionsPending({ t }: WithTranslation) {
             dataService={
               new DataService({ context: transactionContext, fetchOptions })
             }
+            sortable
             fields={[
               {
                 name: "type",
