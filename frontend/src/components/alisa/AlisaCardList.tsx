@@ -77,7 +77,7 @@ function AlisaCardList<T extends { id: number }>({
 
     // Pre-fetch dependencies to show in confirmation
     try {
-      const validation = await ApiClient.get<DeleteValidationResult>(
+      const validation = await ApiClient.fetch<DeleteValidationResult>(
         `${alisaContext.apiPath}/${apartmentId}/can-delete`
       );
 
