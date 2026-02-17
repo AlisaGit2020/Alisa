@@ -29,7 +29,6 @@ import ApiClient from "../../lib/api-client";
 import AlisaContext from "@alisa-lib/alisa-contexts";
 import { VITE_BASE_URL } from "../../constants";
 import { Address, DeleteValidationResult } from "@alisa-types";
-import { AxiosError } from "axios";
 
 interface AlisCardListField<T> {
   name: keyof T;
@@ -57,6 +56,7 @@ function AlisaCardList<T extends { id: number }>({
   const [dependencyDialogOpen, setDependencyDialogOpen] = React.useState(false);
   const [validationResult, setValidationResult] =
     React.useState<DeleteValidationResult | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = React.useState<number>(0);
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -72,9 +72,27 @@ function AlisaCardList<T extends { id: number }>({
     fetchData();
   }, [idDeleted, alisaContext.apiPath, fetchOptions]);
 
-  const handleClickOpen = (apartmentId: number) => {
+  const handleClickOpen = async (apartmentId: number) => {
     setIdToDelete(apartmentId);
-    setOpen(true);
+
+    // Pre-fetch dependencies to show in confirmation
+    try {
+      const validation = await ApiClient.get<DeleteValidationResult>(
+        `${alisaContext.apiPath}/${apartmentId}/can-delete`
+      );
+
+      if (validation.dependencies && validation.dependencies.length > 0) {
+        setValidationResult(validation);
+        setPendingDeleteId(apartmentId);
+        setDependencyDialogOpen(true);
+      } else {
+        // No dependencies, show simple confirm
+        setOpen(true);
+      }
+    } catch {
+      // Fallback to simple confirm if check fails
+      setOpen(true);
+    }
   };
 
   const handleClose = () => {
@@ -88,16 +106,21 @@ function AlisaCardList<T extends { id: number }>({
       setIdDeleted(idToDelete);
       handleClose();
       showToast({ message: t("toast.deleteSuccess"), severity: "success" });
-    } catch (error) {
+    } catch {
       handleClose();
-      if (error instanceof AxiosError && error.response?.status === 400) {
-        const responseData = error.response.data;
-        if (responseData?.dependencies) {
-          setValidationResult(responseData as DeleteValidationResult);
-          setDependencyDialogOpen(true);
-          return;
-        }
-      }
+      showToast({ message: t("toast.deleteError"), severity: "error" });
+    }
+  };
+
+  const handleConfirmDeleteWithDependencies = async () => {
+    try {
+      await ApiClient.delete(alisaContext.apiPath, pendingDeleteId);
+      setIdDeleted(pendingDeleteId);
+      setPendingDeleteId(0);
+      setValidationResult(null);
+      setDependencyDialogOpen(false);
+      showToast({ message: t("toast.deleteSuccess"), severity: "success" });
+    } catch {
       showToast({ message: t("toast.deleteError"), severity: "error" });
     }
   };
@@ -105,6 +128,7 @@ function AlisaCardList<T extends { id: number }>({
   const handleDependencyDialogClose = () => {
     setDependencyDialogOpen(false);
     setValidationResult(null);
+    setPendingDeleteId(0);
   };
 
   return (
@@ -242,6 +266,7 @@ function AlisaCardList<T extends { id: number }>({
         open={dependencyDialogOpen}
         validationResult={validationResult}
         onClose={handleDependencyDialogClose}
+        onConfirmDelete={handleConfirmDeleteWithDependencies}
       />
     </Paper>
   );
