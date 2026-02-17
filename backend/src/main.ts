@@ -19,7 +19,11 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // Security headers middleware
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow images to load from different origin
+    }),
+  );
 
   app.use(
     cors({
