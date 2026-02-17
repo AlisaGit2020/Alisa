@@ -203,6 +203,7 @@ function Expenses({ t }: WithTranslation) {
           <AlisaDataTable<ExpenseRow>
             t={t}
             dataService={rowDataService}
+            sortable
             fields={[
               { name: "accountingDate", format: "date" },
               { name: "expenseTypeName", label: t("expenseType") },

@@ -242,6 +242,7 @@ export default function ReviewStep({
         <AlisaDataTable<Transaction>
           t={t}
           data={filteredTransactions}
+          sortable
           fields={[
             {
               name: "type",

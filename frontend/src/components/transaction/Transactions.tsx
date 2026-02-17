@@ -121,6 +121,7 @@ function Transactions({
           dataService={
             new DataService({ context: transactionContext, fetchOptions })
           }
+          sortable
           fields={[
             {
               name: "type",
