@@ -1,5 +1,9 @@
 import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 import { Address } from '@alisa-backend/real-estate/address/entities/address.entity';
+import {
+  PropertyExternalSource,
+  PropertyStatus,
+} from '@alisa-backend/common/types';
 
 export interface CreateAddressOptions {
   id?: number;
@@ -17,6 +21,9 @@ export interface CreatePropertyOptions {
   address?: CreateAddressOptions;
   buildYear?: number;
   apartmentType?: string;
+  status?: PropertyStatus;
+  externalSource?: PropertyExternalSource;
+  externalSourceId?: string;
 }
 
 export const createAddress = (options: CreateAddressOptions = {}): Address => {
@@ -40,5 +47,8 @@ export const createProperty = (options: CreatePropertyOptions = {}): Property =>
   }
   property.buildYear = options.buildYear;
   property.apartmentType = options.apartmentType;
+  property.status = options.status ?? PropertyStatus.OWN;
+  property.externalSource = options.externalSource;
+  property.externalSourceId = options.externalSourceId;
   return property;
 };

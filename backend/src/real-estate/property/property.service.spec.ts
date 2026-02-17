@@ -30,7 +30,12 @@ import { Expense } from '@alisa-backend/accounting/expense/entities/expense.enti
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { DepreciationAsset } from '@alisa-backend/accounting/depreciation/entities/depreciation-asset.entity';
-import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
+import {
+  PropertyExternalSource,
+  PropertyStatus,
+  TransactionStatus,
+  TransactionType,
+} from '@alisa-backend/common/types';
 
 describe('PropertyService', () => {
   let service: PropertyService;
@@ -273,6 +278,111 @@ describe('PropertyService', () => {
 
       expect(result).toEqual(savedProperty);
     });
+
+    it('creates property with PROSPECT status', async () => {
+      const input = {
+        name: 'Prospect Property',
+        size: 60,
+        status: PropertyStatus.PROSPECT,
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({
+        id: 1,
+        name: input.name,
+        size: input.size,
+        status: PropertyStatus.PROSPECT,
+      });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result.status).toBe(PropertyStatus.PROSPECT);
+    });
+
+    it('creates property with SOLD status', async () => {
+      const input = {
+        name: 'Sold Property',
+        size: 55,
+        status: PropertyStatus.SOLD,
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({
+        id: 1,
+        name: input.name,
+        size: input.size,
+        status: PropertyStatus.SOLD,
+      });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result.status).toBe(PropertyStatus.SOLD);
+    });
+
+    it('creates property with external source fields', async () => {
+      const input = {
+        name: 'Oikotie Property',
+        size: 70,
+        externalSource: PropertyExternalSource.OIKOTIE,
+        externalSourceId: '12345678',
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({
+        id: 1,
+        name: input.name,
+        size: input.size,
+        externalSource: PropertyExternalSource.OIKOTIE,
+        externalSourceId: '12345678',
+      });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result.externalSource).toBe(PropertyExternalSource.OIKOTIE);
+      expect(result.externalSourceId).toBe('12345678');
+    });
+
+    it('creates property with Etuovi external source', async () => {
+      const input = {
+        name: 'Etuovi Property',
+        size: 65,
+        externalSource: PropertyExternalSource.ETUOVI,
+        externalSourceId: 'ET-987654',
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({
+        id: 1,
+        name: input.name,
+        size: input.size,
+        externalSource: PropertyExternalSource.ETUOVI,
+        externalSourceId: 'ET-987654',
+      });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result.externalSource).toBe(PropertyExternalSource.ETUOVI);
+      expect(result.externalSourceId).toBe('ET-987654');
+    });
+
+    it('defaults status to OWN when not provided', async () => {
+      const input = {
+        name: 'Default Status Property',
+        size: 50,
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({
+        id: 1,
+        name: input.name,
+        size: input.size,
+        status: PropertyStatus.OWN,
+      });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result.status).toBe(PropertyStatus.OWN);
+    });
   });
 
   describe('update', () => {
@@ -380,6 +490,97 @@ describe('PropertyService', () => {
 
       expect(result.name).toBe('Updated Name');
       expect(mockRepository.save).toHaveBeenCalled();
+    });
+
+    it('updates property status from PROSPECT to OWN', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Test Property',
+        status: PropertyStatus.PROSPECT,
+      });
+      const input = {
+        name: 'Test Property',
+        size: 50,
+        status: PropertyStatus.OWN,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...existingProperty, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.status).toBe(PropertyStatus.OWN);
+    });
+
+    it('updates property status from OWN to SOLD', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Test Property',
+        status: PropertyStatus.OWN,
+      });
+      const input = {
+        name: 'Test Property',
+        size: 50,
+        status: PropertyStatus.SOLD,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...existingProperty, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.status).toBe(PropertyStatus.SOLD);
+    });
+
+    it('updates external source fields', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Test Property',
+      });
+      const input = {
+        name: 'Test Property',
+        size: 50,
+        externalSource: PropertyExternalSource.OIKOTIE,
+        externalSourceId: 'OT-123456',
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...existingProperty, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.externalSource).toBe(PropertyExternalSource.OIKOTIE);
+      expect(result.externalSourceId).toBe('OT-123456');
+    });
+
+    it('clears external source fields when set to null', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Test Property',
+        externalSource: PropertyExternalSource.OIKOTIE,
+        externalSourceId: 'OT-123456',
+      });
+      // Simulates frontend sending null to clear fields
+      const input = {
+        name: 'Test Property',
+        size: 50,
+        externalSource: null,
+        externalSourceId: null,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve(entity),
+      );
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.externalSource).toBeNull();
+      expect(result.externalSourceId).toBeNull();
     });
   });
 

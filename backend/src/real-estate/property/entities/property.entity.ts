@@ -4,6 +4,10 @@ import { Income } from '@alisa-backend/accounting/income/entities/income.entity'
 import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 import { columnOptionOneDecimal } from '@alisa-backend/common/typeorm.column.definitions';
 import {
+  PropertyExternalSource,
+  PropertyStatus,
+} from '@alisa-backend/common/types';
+import {
   Column,
   Entity,
   JoinColumn,
@@ -75,4 +79,13 @@ export class Property {
 
   @Column({ nullable: true })
   public apartmentType?: string;
+
+  @Column({ type: 'int', default: PropertyStatus.OWN })
+  public status: PropertyStatus = PropertyStatus.OWN;
+
+  @Column({ type: 'int', nullable: true })
+  public externalSource?: PropertyExternalSource;
+
+  @Column({ nullable: true })
+  public externalSourceId?: string;
 }

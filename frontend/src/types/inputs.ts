@@ -1,6 +1,11 @@
 // Input DTO interfaces - for form submissions
 
-import { TransactionStatus, TransactionType } from './common';
+import {
+  PropertyExternalSource,
+  PropertyStatus,
+  TransactionStatus,
+  TransactionType,
+} from './common';
 
 // Ownership input
 export interface OwnershipInput {
@@ -26,6 +31,9 @@ export interface PropertyInput {
   address?: AddressInput;
   buildYear?: number;
   apartmentType?: string;
+  status?: PropertyStatus;
+  externalSource?: PropertyExternalSource;
+  externalSourceId?: string;
   ownerships?: OwnershipInput[];
 }
 

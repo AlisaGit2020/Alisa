@@ -1,7 +1,7 @@
 import { Box, Stack } from '@mui/material';
 import { useState } from 'react';
 import { getNumber } from '../../lib/functions';
-import { PropertyInput } from '@alisa-types'
+import { PropertyInput, PropertyStatus } from '@alisa-types'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AlisaNumberField from '../alisa/form/AlisaNumberField';
 import AlisaTextField from '../alisa/form/AlisaTextField';
@@ -32,6 +32,7 @@ function PropertyForm({ t }: WithTranslation) {
         },
         buildYear: undefined,
         apartmentType: '',
+        status: PropertyStatus.OWN,
         ownerships: [{ userId: 0, share: 100 }]
     });
     const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);

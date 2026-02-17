@@ -10,7 +10,13 @@ import { TierService } from '@alisa-backend/admin/tier.service';
 import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
 import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
 import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { StatisticKey, TransactionStatus, TransactionType } from '@alisa-backend/common/types';
+import {
+  PropertyExternalSource,
+  PropertyStatus,
+  StatisticKey,
+  TransactionStatus,
+  TransactionType,
+} from '@alisa-backend/common/types';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
 import { JWTUser } from '@alisa-backend/auth/types';
@@ -267,6 +273,67 @@ describe('PropertyController (e2e)', () => {
 
       expect(response.body.ownerships[0].share).toBe(50);
     });
+
+    it('creates property with default OWN status', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      const propertyInput = {
+        name: 'Property with Default Status',
+        size: 55,
+        ownerships: [{ share: 100 }],
+      };
+
+      const response = await request(server)
+        .post('/real-estate/property')
+        .set('Authorization', getBearerToken(token))
+        .send(propertyInput)
+        .expect(201);
+
+      expect(response.body.status).toBe(PropertyStatus.OWN);
+    });
+
+    it('creates property with PROSPECT status', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      const propertyInput = {
+        name: 'Prospect Property',
+        size: 60,
+        status: PropertyStatus.PROSPECT,
+        ownerships: [{ share: 100 }],
+      };
+
+      const response = await request(server)
+        .post('/real-estate/property')
+        .set('Authorization', getBearerToken(token))
+        .send(propertyInput)
+        .expect(201);
+
+      expect(response.body.status).toBe(PropertyStatus.PROSPECT);
+    });
+
+    it('creates property with external source fields', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      const propertyInput = {
+        name: 'Oikotie Property',
+        size: 70,
+        externalSource: PropertyExternalSource.OIKOTIE,
+        externalSourceId: 'OT-12345678',
+        ownerships: [{ share: 100 }],
+      };
+
+      const response = await request(server)
+        .post('/real-estate/property')
+        .set('Authorization', getBearerToken(token))
+        .send(propertyInput)
+        .expect(201);
+
+      expect(response.body.externalSource).toBe(PropertyExternalSource.OIKOTIE);
+      expect(response.body.externalSourceId).toBe('OT-12345678');
+    });
   });
 
   // =========================================================================
@@ -333,6 +400,117 @@ describe('PropertyController (e2e)', () => {
         .set('Authorization', getBearerToken(token1))
         .send({ name: 'Hacked Property', size: 100, ownerships: [{ share: 100 }] })
         .expect(401);
+    });
+
+    it('updates property status from PROSPECT to OWN', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create a PROSPECT property first
+      const createResponse = await request(server)
+        .post('/real-estate/property')
+        .set('Authorization', getBearerToken(token))
+        .send({
+          name: 'Status Update Test',
+          size: 45,
+          status: PropertyStatus.PROSPECT,
+          ownerships: [{ share: 100 }],
+        })
+        .expect(201);
+
+      const propertyId = createResponse.body.id;
+
+      // Update status to OWN
+      const updateResponse = await request(server)
+        .put(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .send({
+          name: 'Status Update Test',
+          size: 45,
+          status: PropertyStatus.OWN,
+        })
+        .expect(200);
+
+      expect(updateResponse.body.status).toBe(PropertyStatus.OWN);
+
+      // Clean up
+      await request(server)
+        .delete(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token));
+    });
+
+    it('updates property status to SOLD', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create property
+      const createResponse = await request(server)
+        .post('/real-estate/property')
+        .set('Authorization', getBearerToken(token))
+        .send({
+          name: 'Sold Property Test',
+          size: 50,
+          ownerships: [{ share: 100 }],
+        })
+        .expect(201);
+
+      const propertyId = createResponse.body.id;
+
+      // Update status to SOLD
+      const updateResponse = await request(server)
+        .put(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .send({
+          name: 'Sold Property Test',
+          size: 50,
+          status: PropertyStatus.SOLD,
+        })
+        .expect(200);
+
+      expect(updateResponse.body.status).toBe(PropertyStatus.SOLD);
+
+      // Clean up
+      await request(server)
+        .delete(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token));
+    });
+
+    it('updates external source fields', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create property without external source
+      const createResponse = await request(server)
+        .post('/real-estate/property')
+        .set('Authorization', getBearerToken(token))
+        .send({
+          name: 'External Source Test',
+          size: 55,
+          ownerships: [{ share: 100 }],
+        })
+        .expect(201);
+
+      const propertyId = createResponse.body.id;
+
+      // Update with external source
+      const updateResponse = await request(server)
+        .put(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .send({
+          name: 'External Source Test',
+          size: 55,
+          externalSource: PropertyExternalSource.ETUOVI,
+          externalSourceId: 'ET-987654',
+        })
+        .expect(200);
+
+      expect(updateResponse.body.externalSource).toBe(PropertyExternalSource.ETUOVI);
+      expect(updateResponse.body.externalSourceId).toBe('ET-987654');
+
+      // Clean up
+      await request(server)
+        .delete(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token));
     });
   });
 
