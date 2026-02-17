@@ -10,6 +10,7 @@ import { TFunction } from 'i18next';
 // Mock ApiClient static methods
 jest.spyOn(ApiClient, 'search');
 jest.spyOn(ApiClient, 'delete');
+jest.spyOn(ApiClient, 'fetch');
 
 interface TestProperty {
   id: number;
@@ -68,6 +69,8 @@ describe('AlisaCardList', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Default: no dependencies, show simple confirm dialog
+    (ApiClient.fetch as unknown as jest.SpyInstance).mockResolvedValue({ canDelete: true, dependencies: [] });
   });
 
   afterAll(() => {

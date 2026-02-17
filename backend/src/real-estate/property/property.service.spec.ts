@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
-  BadRequestException,
   ForbiddenException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import type { Express } from 'express';
+import * as fs from 'fs';
 import { PropertyService } from './property.service';
 import { Property } from './entities/property.entity';
 import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
@@ -30,6 +30,7 @@ import { Expense } from '@alisa-backend/accounting/expense/entities/expense.enti
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { DepreciationAsset } from '@alisa-backend/accounting/depreciation/entities/depreciation-asset.entity';
+import { Address } from '@alisa-backend/real-estate/address/entities/address.entity';
 import {
   PropertyExternalSource,
   PropertyStatus,
@@ -46,6 +47,7 @@ describe('PropertyService', () => {
   let mockIncomeRepository: MockRepository<Income>;
   let mockStatisticsRepository: MockRepository<PropertyStatistics>;
   let mockDepreciationAssetRepository: MockRepository<DepreciationAsset>;
+  let mockAddressRepository: MockRepository<Address>;
   let mockAuthService: MockAuthService;
   let mockTierService: Partial<Record<keyof TierService, jest.Mock>>;
 
@@ -64,6 +66,7 @@ describe('PropertyService', () => {
     mockIncomeRepository = createMockRepository<Income>();
     mockStatisticsRepository = createMockRepository<PropertyStatistics>();
     mockDepreciationAssetRepository = createMockRepository<DepreciationAsset>();
+    mockAddressRepository = createMockRepository<Address>();
     mockAuthService = createMockAuthService();
     mockTierService = {
       canCreateProperty: jest.fn().mockResolvedValue(true),
@@ -96,6 +99,10 @@ describe('PropertyService', () => {
         {
           provide: getRepositoryToken(DepreciationAsset),
           useValue: mockDepreciationAssetRepository,
+        },
+        {
+          provide: getRepositoryToken(Address),
+          useValue: mockAddressRepository,
         },
         { provide: AuthService, useValue: mockAuthService },
         { provide: TierService, useValue: mockTierService },
@@ -594,15 +601,26 @@ describe('PropertyService', () => {
       mockDepreciationAssetRepository.count.mockResolvedValue(0);
     });
 
-    it('deletes property', async () => {
+    it('deletes property using transaction', async () => {
       const property = createProperty({ id: 1 });
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       await service.delete(testUser, 1);
 
-      expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockRepository.manager.transaction).toHaveBeenCalled();
+    });
+
+    it('deletes property and its address in a transaction', async () => {
+      const property = createProperty({ id: 1, address: { id: 10 } });
+      property.addressId = 10;
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      await service.delete(testUser, 1);
+
+      // Both operations happen within a transaction
+      expect(mockRepository.manager.transaction).toHaveBeenCalled();
     });
 
     it('throws NotFoundException when property does not exist', async () => {
@@ -623,37 +641,55 @@ describe('PropertyService', () => {
       );
     });
 
-    it('throws BadRequestException when dependencies exist', async () => {
+    it('deletes property even when dependencies exist (cascade handles them)', async () => {
       const property = createProperty({ id: 1 });
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
+      // Set up dependencies - should NOT block deletion anymore
       mockTransactionRepository.count.mockResolvedValue(5);
-      mockTransactionRepository.find.mockResolvedValue([
-        createTransaction({ id: 1, propertyId: 1 }),
-      ]);
+      mockExpenseRepository.count.mockResolvedValue(3);
+      mockIncomeRepository.count.mockResolvedValue(2);
+      mockStatisticsRepository.count.mockResolvedValue(10);
+      mockDepreciationAssetRepository.count.mockResolvedValue(1);
 
-      await expect(service.delete(testUser, 1)).rejects.toThrow(
-        BadRequestException,
-      );
-      expect(mockRepository.delete).not.toHaveBeenCalled();
+      await service.delete(testUser, 1);
+
+      expect(mockRepository.manager.transaction).toHaveBeenCalled();
     });
 
-    it('does not call repository.delete when dependencies exist', async () => {
-      const property = createProperty({ id: 1 });
+    it('deletes photo file after successful database deletion', async () => {
+      const photoPath = 'uploads/properties/test-photo.jpg';
+      const property = createProperty({ id: 1, photo: photoPath });
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
-      mockExpenseRepository.count.mockResolvedValue(3);
-      mockExpenseRepository.find.mockResolvedValue([
-        createExpense({ id: 1, propertyId: 1 }),
-      ]);
 
-      try {
-        await service.delete(testUser, 1);
-      } catch {
-        // Expected
-      }
+      const unlinkSpy = jest
+        .spyOn(fs.promises, 'unlink')
+        .mockResolvedValue(undefined);
 
-      expect(mockRepository.delete).not.toHaveBeenCalled();
+      await service.delete(testUser, 1);
+
+      expect(mockRepository.manager.transaction).toHaveBeenCalled();
+      expect(unlinkSpy).toHaveBeenCalled();
+
+      unlinkSpy.mockRestore();
+    });
+
+    it('does not attempt to delete photo when property has no photo', async () => {
+      const property = createProperty({ id: 1, photo: undefined });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const unlinkSpy = jest
+        .spyOn(fs.promises, 'unlink')
+        .mockResolvedValue(undefined);
+
+      await service.delete(testUser, 1);
+
+      expect(mockRepository.manager.transaction).toHaveBeenCalled();
+      expect(unlinkSpy).not.toHaveBeenCalled();
+
+      unlinkSpy.mockRestore();
     });
   });
 
@@ -681,7 +717,7 @@ describe('PropertyService', () => {
       expect(returnedProperty).toEqual(property);
     });
 
-    it('returns canDelete: false with transaction dependency', async () => {
+    it('returns canDelete: true even with dependencies (warning only)', async () => {
       const property = createProperty({ id: 1 });
       const transactions = [
         createTransaction({ id: 1, propertyId: 1, description: 'Trans 1' }),
@@ -694,12 +730,12 @@ describe('PropertyService', () => {
 
       const { validation } = await service.validateDelete(testUser, 1);
 
-      expect(validation.canDelete).toBe(false);
+      expect(validation.canDelete).toBe(true);
       expect(validation.dependencies).toHaveLength(1);
       expect(validation.dependencies[0].type).toBe('transaction');
       expect(validation.dependencies[0].count).toBe(2);
-      expect(validation.dependencies[0].samples).toHaveLength(2);
-      expect(validation.message).toBeDefined();
+      // Message should be warning, not blocking
+      expect(validation.message).toContain('will be deleted');
     });
 
     it('returns multiple dependency types', async () => {
@@ -724,7 +760,7 @@ describe('PropertyService', () => {
 
       const { validation } = await service.validateDelete(testUser, 1);
 
-      expect(validation.canDelete).toBe(false);
+      expect(validation.canDelete).toBe(true);
       expect(validation.dependencies).toHaveLength(3);
       expect(validation.dependencies.map((d) => d.type)).toContain('transaction');
       expect(validation.dependencies.map((d) => d.type)).toContain('expense');

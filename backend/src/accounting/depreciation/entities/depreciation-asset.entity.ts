@@ -26,7 +26,7 @@ export class DepreciationAsset {
   expenseId: number;
 
   // Property
-  @ManyToOne(() => Property, { eager: false })
+  @ManyToOne(() => Property, { eager: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'propertyId' })
   property: Property;
 

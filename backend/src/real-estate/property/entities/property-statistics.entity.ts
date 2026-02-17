@@ -20,7 +20,9 @@ export class PropertyStatistics {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @ManyToOne(() => Property, (property) => property.statistics, {})
+  @ManyToOne(() => Property, (property) => property.statistics, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'propertyId' })
   property: Property;
   @Column({ nullable: false })

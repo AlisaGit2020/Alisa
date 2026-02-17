@@ -52,6 +52,8 @@ export class PropertyService {
     private statisticsRepository: Repository<PropertyStatistics>,
     @InjectRepository(DepreciationAsset)
     private depreciationAssetRepository: Repository<DepreciationAsset>,
+    @InjectRepository(Address)
+    private addressRepository: Repository<Address>,
     private authService: AuthService,
     private tierService: TierService,
   ) {}
@@ -165,15 +167,22 @@ export class PropertyService {
   }
 
   async delete(user: JWTUser, id: number): Promise<void> {
-    const { validation, property } = await this.validateDelete(user, id);
-    if (!validation.canDelete) {
-      throw new BadRequestException(validation);
-    }
+    const property = await this.getEntityOrThrow(user, id);
+    const addressId = property.addressId;
+    const photoPath = property.photo;
 
-    if (property.photo) {
-      await this.deletePhotoFile(property.photo);
+    // Use a transaction to ensure property and address are deleted atomically
+    await this.repository.manager.transaction(async (transactionalEntityManager) => {
+      await transactionalEntityManager.remove(property);
+      if (addressId) {
+        await transactionalEntityManager.delete(Address, addressId);
+      }
+    });
+
+    // Delete photo file after successful database deletion
+    if (photoPath) {
+      await this.deletePhotoFile(photoPath);
     }
-    await this.repository.delete(id);
   }
 
   async validateDelete(
@@ -266,15 +275,15 @@ export class PropertyService {
     }
 
     const dependencies = await Promise.all(samplePromises);
-    const canDelete = dependencies.length === 0;
+    const hasDependencies = dependencies.length > 0;
 
     return {
       validation: {
-        canDelete,
+        canDelete: true, // Always allow - cascade handles deletion
         dependencies,
-        message: canDelete
-          ? undefined
-          : 'Property has related data that must be deleted first',
+        message: hasDependencies
+          ? 'The following related data will be deleted with the property'
+          : undefined,
       },
       property,
     };

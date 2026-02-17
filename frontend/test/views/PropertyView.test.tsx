@@ -67,15 +67,20 @@ describe('Properties Integration', () => {
 
   let mockSearch: jest.SpyInstance;
   let mockDelete: jest.SpyInstance;
+  let mockFetch: jest.SpyInstance;
 
   beforeEach(() => {
     mockSearch = jest.spyOn(ApiClient, 'search');
     mockDelete = jest.spyOn(ApiClient, 'delete');
+    mockFetch = jest.spyOn(ApiClient, 'fetch');
+    // Default: no dependencies, show simple confirm dialog
+    mockFetch.mockResolvedValue({ canDelete: true, dependencies: [] });
   });
 
   afterEach(() => {
     mockSearch.mockRestore();
     mockDelete.mockRestore();
+    mockFetch.mockRestore();
   });
 
   describe('Happy path', () => {

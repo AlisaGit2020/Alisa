@@ -36,11 +36,12 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={mockValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
-    expect(screen.getByText('dependencies.cannotDeleteTitle')).toBeInTheDocument();
-    expect(screen.getByText('dependencies.cannotDelete')).toBeInTheDocument();
+    expect(screen.getByText('dependencies.deleteWarningTitle')).toBeInTheDocument();
+    expect(screen.getByText('dependencies.deleteWarning')).toBeInTheDocument();
     expect(screen.getByText('dependencies.transactions')).toBeInTheDocument();
     expect(screen.getByText('dependencies.expenses')).toBeInTheDocument();
   });
@@ -51,6 +52,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={mockValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
@@ -69,6 +71,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={mockValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
@@ -90,6 +93,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={mockValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
@@ -109,6 +113,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={mockValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
@@ -129,7 +134,7 @@ describe('AlisaDependencyDialog', () => {
     }
   });
 
-  it('calls onClose when close button is clicked', async () => {
+  it('calls onClose when cancel button is clicked', async () => {
     const user = userEvent.setup();
     const mockOnClose = jest.fn();
 
@@ -138,13 +143,35 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={mockValidationResult}
         onClose={mockOnClose}
+        onConfirmDelete={jest.fn()}
       />
     );
 
-    const closeButton = screen.getByRole('button', { name: 'close' });
-    await user.click(closeButton);
+    const cancelButton = screen.getByRole('button', { name: 'cancel' });
+    await user.click(cancelButton);
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onConfirmDelete when delete all button is clicked', async () => {
+    const user = userEvent.setup();
+    const mockOnClose = jest.fn();
+    const mockOnConfirmDelete = jest.fn();
+
+    renderWithProviders(
+      <AlisaDependencyDialog
+        open={true}
+        validationResult={mockValidationResult}
+        onClose={mockOnClose}
+        onConfirmDelete={mockOnConfirmDelete}
+      />
+    );
+
+    const deleteButton = screen.getByRole('button', { name: 'dependencies.deleteConfirm' });
+    await user.click(deleteButton);
+
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+    expect(mockOnConfirmDelete).toHaveBeenCalledTimes(1);
   });
 
   it('does not render when open is false', () => {
@@ -153,10 +180,11 @@ describe('AlisaDependencyDialog', () => {
         open={false}
         validationResult={mockValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
-    expect(screen.queryByText('dependencies.cannotDeleteTitle')).not.toBeInTheDocument();
+    expect(screen.queryByText('dependencies.deleteWarningTitle')).not.toBeInTheDocument();
   });
 
   it('does not render when validationResult is null', () => {
@@ -165,10 +193,11 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={null}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
-    expect(screen.queryByText('dependencies.cannotDeleteTitle')).not.toBeInTheDocument();
+    expect(screen.queryByText('dependencies.deleteWarningTitle')).not.toBeInTheDocument();
   });
 
   it('renders all dependency types correctly', () => {
@@ -188,6 +217,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={fullValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 

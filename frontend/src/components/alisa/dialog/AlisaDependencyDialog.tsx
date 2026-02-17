@@ -15,6 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { useTranslation } from "react-i18next";
 import { DeleteValidationResult, DependencyType } from "@alisa-types";
 
@@ -22,12 +23,14 @@ interface AlisaDependencyDialogProps {
   open: boolean;
   validationResult: DeleteValidationResult | null;
   onClose: () => void;
+  onConfirmDelete: () => void;
 }
 
 function AlisaDependencyDialog({
   open,
   validationResult,
   onClose,
+  onConfirmDelete,
 }: AlisaDependencyDialogProps) {
   const { t } = useTranslation();
 
@@ -46,12 +49,20 @@ function AlisaDependencyDialog({
     return null;
   }
 
+  const handleConfirmDelete = () => {
+    onClose();
+    onConfirmDelete();
+  };
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{t("common:dependencies.cannotDeleteTitle")}</DialogTitle>
+      <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <WarningAmberIcon color="warning" />
+        {t("common:dependencies.deleteWarningTitle")}
+      </DialogTitle>
       <DialogContent dividers>
         <Typography variant="body1" sx={{ mb: 2 }}>
-          {t("common:dependencies.cannotDelete")}
+          {t("common:dependencies.deleteWarning")}
         </Typography>
         {validationResult.dependencies.map((group) => (
           <Accordion key={group.type} defaultExpanded={false}>
@@ -72,7 +83,7 @@ function AlisaDependencyDialog({
                 <Chip
                   label={group.count}
                   size="small"
-                  color="primary"
+                  color="warning"
                   data-testid={`${group.type}-count`}
                 />
               </Box>
@@ -106,8 +117,15 @@ function AlisaDependencyDialog({
         ))}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant="contained" color="primary">
-          {t("common:close")}
+        <Button onClick={onClose} variant="outlined">
+          {t("common:cancel")}
+        </Button>
+        <Button
+          onClick={handleConfirmDelete}
+          variant="contained"
+          color="error"
+        >
+          {t("common:dependencies.deleteConfirm")}
         </Button>
       </DialogActions>
     </Dialog>

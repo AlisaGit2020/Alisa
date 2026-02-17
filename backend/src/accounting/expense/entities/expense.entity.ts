@@ -45,6 +45,7 @@ export class Expense {
   @ManyToOne(() => Property, (property) => property.expenses, {
     eager: false,
     cascade: ['insert', 'update'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'propertyId' })
   property: Property;

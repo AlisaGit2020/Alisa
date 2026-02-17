@@ -55,6 +55,7 @@ export class Transaction {
   @ManyToOne(() => Property, (property) => property.transactions, {
     eager: false,
     cascade: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'propertyId' })
   property: Property;

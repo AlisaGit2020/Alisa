@@ -99,6 +99,9 @@ const en = {
     dependencies: {
       cannotDelete: "This item cannot be deleted because it has related data.",
       cannotDeleteTitle: "Cannot Delete",
+      deleteWarningTitle: "Confirm Delete",
+      deleteWarning: "The following related data will also be deleted:",
+      deleteConfirm: "Delete All",
       transactions: "Transactions",
       expenses: "Expenses",
       incomes: "Incomes",
