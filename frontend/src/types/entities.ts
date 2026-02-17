@@ -1,6 +1,12 @@
 // Entity interfaces - pure TypeScript types without decorators
 
-import { TransactionStatus, TransactionType, DashboardConfig } from './common';
+import {
+  DashboardConfig,
+  PropertyExternalSource,
+  PropertyStatus,
+  TransactionStatus,
+  TransactionType,
+} from './common';
 
 // Address
 export interface Address {
@@ -64,6 +70,9 @@ export interface Property {
   address?: Address;
   buildYear?: number;
   apartmentType?: string;
+  status: PropertyStatus;
+  externalSource?: PropertyExternalSource;
+  externalSourceId?: string;
 }
 
 // PropertyStatistics

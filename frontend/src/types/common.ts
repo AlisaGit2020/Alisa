@@ -52,6 +52,39 @@ export enum StatisticKey {
   TAX_NET_INCOME = 'tax_net_income',
 }
 
+export enum PropertyStatus {
+  PROSPECT = 1,
+  OWN = 2,
+  SOLD = 3,
+}
+
+export enum PropertyStatusName {
+  PROSPECT = 'prospect',
+  OWN = 'own',
+  SOLD = 'sold',
+}
+
+export const propertyStatusNames = new Map<PropertyStatus, PropertyStatusName>([
+  [PropertyStatus.PROSPECT, PropertyStatusName.PROSPECT],
+  [PropertyStatus.OWN, PropertyStatusName.OWN],
+  [PropertyStatus.SOLD, PropertyStatusName.SOLD],
+]);
+
+export enum PropertyExternalSource {
+  OIKOTIE = 1,
+  ETUOVI = 2,
+}
+
+export enum PropertyExternalSourceName {
+  OIKOTIE = 'oikotie',
+  ETUOVI = 'etuovi',
+}
+
+export const propertyExternalSourceNames = new Map<PropertyExternalSource, PropertyExternalSourceName>([
+  [PropertyExternalSource.OIKOTIE, PropertyExternalSourceName.OIKOTIE],
+  [PropertyExternalSource.ETUOVI, PropertyExternalSourceName.ETUOVI],
+]);
+
 // Dashboard config types
 export type WidgetSize = '1/1' | '1/2' | '1/3' | '1/4';
 
