@@ -97,13 +97,16 @@ const fi = {
     close: "Sulje",
 
     dependencies: {
-      cannotDelete: "Tätä kohdetta ei voi poistaa, koska sillä on liittyviä tietoja.",
+      cannotDelete: "Tätä ei voi poistaa, koska sillä on liittyviä tietoja.",
       cannotDeleteTitle: "Ei voi poistaa",
+      deleteWarningTitle: "Vahvista poisto",
+      deleteWarning: "Seuraavat liittyvät tiedot poistetaan myös:",
+      deleteConfirm: "Poista kaikki",
       transactions: "Tapahtumat",
       expenses: "Kulut",
       incomes: "Tulot",
       statistics: "Tilastot",
-      depreciationAssets: "Poistettavat omaisuuserät",
+      depreciationAssets: "Poistot",
       andMore: "...ja {{count}} muuta",
     },
 

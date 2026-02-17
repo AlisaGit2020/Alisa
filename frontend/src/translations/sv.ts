@@ -97,14 +97,17 @@ const sv = {
     close: "Stäng",
 
     dependencies: {
-      cannotDelete: "Detta objekt kan inte tas bort eftersom det har relaterad data.",
-      cannotDeleteTitle: "Kan inte ta bort",
+      cannotDelete: "Detta kan inte raderas eftersom det har relaterade data.",
+      cannotDeleteTitle: "Kan inte radera",
+      deleteWarningTitle: "Bekräfta radering",
+      deleteWarning: "Följande relaterade data kommer också att raderas:",
+      deleteConfirm: "Radera allt",
       transactions: "Transaktioner",
       expenses: "Utgifter",
-      incomes: "Intäkter",
+      incomes: "Inkomster",
       statistics: "Statistik",
       depreciationAssets: "Avskrivningstillgångar",
-      andMore: "...och {{count}} till",
+      andMore: "...och {{count}} fler",
     },
 
     feedback: {
