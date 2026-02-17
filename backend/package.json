@@ -22,7 +22,9 @@
     "seed": "ts-node -r tsconfig-paths/register scripts/seed.ts",
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/data-source.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/data-source.ts",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/data-source.ts"
+    "migration:run:prod": "typeorm migration:run -d dist/data-source.prod.js",
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/data-source.ts",
+    "migration:revert:prod": "typeorm migration:revert -d dist/data-source.prod.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.12",

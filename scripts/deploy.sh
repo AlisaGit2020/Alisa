@@ -12,6 +12,9 @@ docker compose -f docker-compose.prod.yml --env-file .env.production build
 echo "Starting services..."
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d
 
+echo "Running database migrations..."
+docker compose -f docker-compose.prod.yml --env-file .env.production exec -T backend npm run migration:run:prod
+
 echo "Cleaning up old images..."
 docker image prune -f
 
