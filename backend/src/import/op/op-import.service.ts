@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -14,9 +15,12 @@ import { PropertyService } from '@alisa-backend/real-estate/property/property.se
 import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
 import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
 import { ImportResultDto } from '../dtos/import-result.dto';
+import { sanitizeCsvField } from '@alisa-backend/common/utils/csv-sanitizer';
 
 @Injectable()
 export class OpImportService {
+  private readonly logger = new Logger(OpImportService.name);
+
   constructor(
     private transactionService: TransactionService,
     private propertyService: PropertyService,
@@ -157,16 +161,16 @@ export class OpImportService {
     if (this.isExpense(opCsvRow)) {
       //Expense
       transaction.sender = 'Juha Koivisto';
-      transaction.receiver = opCsvRow.payerPayee;
+      transaction.receiver = sanitizeCsvField(opCsvRow.payerPayee);
     } else {
       //Income
-      transaction.sender = opCsvRow.payerPayee;
+      transaction.sender = sanitizeCsvField(opCsvRow.payerPayee);
       transaction.receiver = 'Juha Koivisto';
     }
 
     transaction.propertyId = options.propertyId;
     transaction.externalId = this.getExternalId(opCsvRow);
-    transaction.description = this.getMessagePart(opCsvRow.message);
+    transaction.description = sanitizeCsvField(this.getMessagePart(opCsvRow.message));
     transaction.transactionDate = new Date(opCsvRow.datePosted);
     transaction.accountingDate = new Date(opCsvRow.datePosted);
     transaction.amount = this.getAmount(opCsvRow);
@@ -196,7 +200,7 @@ export class OpImportService {
   }
 
   private handleError(error: unknown) {
-    console.log(error);
+    this.logger.error('Failed to save transaction', error);
   }
 }
 

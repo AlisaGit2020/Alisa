@@ -613,11 +613,24 @@ export class TransactionService {
   }
 
   private mapData(transaction: Transaction, input: TransactionInputDto) {
-    Object.entries(input).forEach(([key, value]) => {
-      if (value !== undefined) {
-        transaction[key] = value;
-      }
-    });
+    // Explicit property mapping to prevent mass assignment vulnerabilities
+    if (input.externalId !== undefined) transaction.externalId = input.externalId;
+    if (input.status !== undefined) transaction.status = input.status;
+    if (input.type !== undefined) transaction.type = input.type;
+    if (input.sender !== undefined) transaction.sender = input.sender;
+    if (input.receiver !== undefined) transaction.receiver = input.receiver;
+    if (input.description !== undefined)
+      transaction.description = input.description;
+    if (input.transactionDate !== undefined)
+      transaction.transactionDate = input.transactionDate;
+    if (input.accountingDate !== undefined)
+      transaction.accountingDate = input.accountingDate;
+    if (input.amount !== undefined) transaction.amount = input.amount;
+    if (input.propertyId !== undefined) transaction.propertyId = input.propertyId;
+    if (input.expenses !== undefined)
+      transaction.expenses = input.expenses as unknown as Expense[];
+    if (input.incomes !== undefined)
+      transaction.incomes = input.incomes as unknown as Income[];
 
     if (
       input.type === TransactionType.EXPENSE ||

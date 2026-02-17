@@ -5,7 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { RealEstateModule } from './real-estate/real-estate.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config'; //d
+import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AccountingModule } from './accounting/accounting.module';
 import { AdminModule } from './admin/admin.module';
 import { GoogleModule } from './google/google.module';
@@ -26,6 +27,28 @@ import { CommonModule } from './common/common.module';
     }),
     ConfigModule.forRoot(),
     EventEmitterModule.forRoot(),
+    // Rate limiting configuration - skip in test environment
+    ThrottlerModule.forRoot(
+      process.env.NODE_ENV === 'test'
+        ? [{ name: 'default', ttl: 1000, limit: 10000 }]
+        : [
+            {
+              name: 'short',
+              ttl: 1000, // 1 second
+              limit: 3, // 3 requests per second
+            },
+            {
+              name: 'medium',
+              ttl: 10000, // 10 seconds
+              limit: 20, // 20 requests per 10 seconds
+            },
+            {
+              name: 'long',
+              ttl: 60000, // 1 minute
+              limit: 100, // 100 requests per minute
+            },
+          ],
+    ),
     CommonModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -34,7 +57,8 @@ import { CommonModule } from './common/common.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      synchronize: true,
+      // Disable synchronize in production to prevent schema changes without migrations
+      synchronize: process.env.NODE_ENV !== 'production',
       autoLoadEntities: true,
     }),
     AccountingModule,

@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
   BadRequestException,
@@ -9,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindManyOptions, FindOptionsWhere, Repository } from 'typeorm';
 import type { Express } from 'express';
 import * as fs from 'fs';
+import * as path from 'path';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
 import { Address } from '@alisa-backend/real-estate/address/entities/address.entity';
@@ -33,6 +35,8 @@ import { TransactionStatus } from '@alisa-backend/common/types';
 
 @Injectable()
 export class PropertyService {
+  private readonly logger = new Logger(PropertyService.name);
+
   constructor(
     @InjectRepository(Property)
     private repository: Repository<Property>,
@@ -310,11 +314,21 @@ export class PropertyService {
       }
     }
 
-    Object.entries(input).forEach(([key, value]) => {
-      if (value !== undefined && key !== 'address') {
-        property[key] = value;
-      }
-    });
+    // Explicit property mapping to prevent mass assignment vulnerabilities
+    if (input.name !== undefined) property.name = input.name;
+    if (input.size !== undefined) property.size = input.size;
+    if (input.photo !== undefined) property.photo = input.photo;
+    if (input.description !== undefined) property.description = input.description;
+    if (input.buildYear !== undefined) property.buildYear = input.buildYear;
+    if (input.apartmentType !== undefined)
+      property.apartmentType = input.apartmentType;
+    if (input.status !== undefined) property.status = input.status;
+    if (input.externalSource !== undefined)
+      property.externalSource = input.externalSource;
+    if (input.externalSourceId !== undefined)
+      property.externalSourceId = input.externalSourceId;
+    if (input.ownerships !== undefined)
+      property.ownerships = input.ownerships as unknown as Ownership[];
   }
 
   private async validate(
@@ -403,10 +417,27 @@ export class PropertyService {
 
   private async deletePhotoFile(photoPath: string): Promise<void> {
     try {
-      await fs.promises.unlink(photoPath);
+      // Validate path to prevent path traversal attacks
+      const normalizedPath = path.resolve(photoPath);
+      const uploadDir = path.resolve('./uploads/properties');
+
+      if (!normalizedPath.startsWith(uploadDir)) {
+        this.logger.warn(
+          `Attempted path traversal attack detected: ${photoPath}`,
+        );
+        throw new BadRequestException('Invalid file path');
+      }
+
+      await fs.promises.unlink(normalizedPath);
     } catch (error) {
       // Log but don't throw - file may have been deleted already
-      console.log(`Failed to delete photo file: ${photoPath}`, error.message);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      this.logger.warn(
+        `Failed to delete photo file: ${photoPath}`,
+        error.message,
+      );
     }
   }
 

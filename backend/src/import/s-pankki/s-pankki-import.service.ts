@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -14,9 +15,12 @@ import { PropertyService } from '@alisa-backend/real-estate/property/property.se
 import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
 import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
 import { ImportResultDto } from '../dtos/import-result.dto';
+import { sanitizeCsvField } from '@alisa-backend/common/utils/csv-sanitizer';
 
 @Injectable()
 export class SPankkiImportService {
+  private readonly logger = new Logger(SPankkiImportService.name);
+
   constructor(
     private transactionService: TransactionService,
     private propertyService: PropertyService,
@@ -157,17 +161,17 @@ export class SPankkiImportService {
 
     if (this.isExpense(csvRow)) {
       // Expense - payer is the user, payee receives money
-      transaction.sender = csvRow.payer;
-      transaction.receiver = csvRow.payeeName;
+      transaction.sender = sanitizeCsvField(csvRow.payer);
+      transaction.receiver = sanitizeCsvField(csvRow.payeeName);
     } else {
       // Income - payer sends money, payee is the user
-      transaction.sender = csvRow.payer;
-      transaction.receiver = csvRow.payeeName;
+      transaction.sender = sanitizeCsvField(csvRow.payer);
+      transaction.receiver = sanitizeCsvField(csvRow.payeeName);
     }
 
     transaction.propertyId = options.propertyId;
     transaction.externalId = this.getExternalId(csvRow);
-    transaction.description = this.getMessagePart(csvRow.message);
+    transaction.description = sanitizeCsvField(this.getMessagePart(csvRow.message));
     transaction.transactionDate = this.parseDate(csvRow.datePosted);
     transaction.accountingDate = this.parseDate(csvRow.datePosted);
     transaction.amount = this.getAmount(csvRow);
@@ -210,7 +214,7 @@ export class SPankkiImportService {
   }
 
   private handleError(error: unknown) {
-    console.log(error);
+    this.logger.error('Failed to save transaction', error);
   }
 }
 

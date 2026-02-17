@@ -53,6 +53,15 @@ export class UserService {
     await this.repository.delete(id);
   }
 
+  /**
+   * Set admin status for a user. This method is intentionally separate from
+   * the regular update to prevent mass assignment vulnerabilities.
+   * Should only be called by admin-level operations.
+   */
+  async setAdminStatus(userId: number, isAdmin: boolean): Promise<void> {
+    await this.repository.update(userId, { isAdmin });
+  }
+
   async hasOwnership(userId: number, propertyId: number): Promise<boolean> {
     const user = await this.findOne(userId, { relations: ['ownerships'] });
     if (!user) {
@@ -67,10 +76,19 @@ export class UserService {
   }
 
   private mapData(user: User, input: UserInputDto) {
-    Object.entries(input).forEach(([key, value]) => {
-      if (value !== undefined) {
-        user[key] = value;
-      }
-    });
+    // Explicit property mapping to prevent mass assignment vulnerabilities
+    if (input.firstName !== undefined) user.firstName = input.firstName;
+    if (input.lastName !== undefined) user.lastName = input.lastName;
+    if (input.email !== undefined) user.email = input.email;
+    if (input.language !== undefined) user.language = input.language;
+    if (input.photo !== undefined) user.photo = input.photo;
+    if (input.loanPrincipalExpenseTypeId !== undefined)
+      user.loanPrincipalExpenseTypeId = input.loanPrincipalExpenseTypeId;
+    if (input.loanInterestExpenseTypeId !== undefined)
+      user.loanInterestExpenseTypeId = input.loanInterestExpenseTypeId;
+    if (input.loanHandlingFeeExpenseTypeId !== undefined)
+      user.loanHandlingFeeExpenseTypeId = input.loanHandlingFeeExpenseTypeId;
+    if (input.dashboardConfig !== undefined)
+      user.dashboardConfig = input.dashboardConfig;
   }
 }
