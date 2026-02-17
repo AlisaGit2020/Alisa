@@ -52,6 +52,8 @@ export class PropertyService {
     private statisticsRepository: Repository<PropertyStatistics>,
     @InjectRepository(DepreciationAsset)
     private depreciationAssetRepository: Repository<DepreciationAsset>,
+    @InjectRepository(Address)
+    private addressRepository: Repository<Address>,
     private authService: AuthService,
     private tierService: TierService,
   ) {}
@@ -166,12 +168,18 @@ export class PropertyService {
 
   async delete(user: JWTUser, id: number): Promise<void> {
     const property = await this.getEntityOrThrow(user, id);
+    const addressId = property.addressId;
 
     if (property.photo) {
       await this.deletePhotoFile(property.photo);
     }
-    // Use remove() instead of delete() to trigger orphanedRowAction for Address
-    await this.repository.remove(property);
+
+    await this.repository.delete(id);
+
+    // Delete the address after property is deleted (not shown as dependency to user)
+    if (addressId) {
+      await this.addressRepository.delete(addressId);
+    }
   }
 
   async validateDelete(

@@ -29,6 +29,7 @@ import { Expense } from '@alisa-backend/accounting/expense/entities/expense.enti
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { DepreciationAsset } from '@alisa-backend/accounting/depreciation/entities/depreciation-asset.entity';
+import { Address } from '@alisa-backend/real-estate/address/entities/address.entity';
 import {
   PropertyExternalSource,
   PropertyStatus,
@@ -45,6 +46,7 @@ describe('PropertyService', () => {
   let mockIncomeRepository: MockRepository<Income>;
   let mockStatisticsRepository: MockRepository<PropertyStatistics>;
   let mockDepreciationAssetRepository: MockRepository<DepreciationAsset>;
+  let mockAddressRepository: MockRepository<Address>;
   let mockAuthService: MockAuthService;
   let mockTierService: Partial<Record<keyof TierService, jest.Mock>>;
 
@@ -63,6 +65,7 @@ describe('PropertyService', () => {
     mockIncomeRepository = createMockRepository<Income>();
     mockStatisticsRepository = createMockRepository<PropertyStatistics>();
     mockDepreciationAssetRepository = createMockRepository<DepreciationAsset>();
+    mockAddressRepository = createMockRepository<Address>();
     mockAuthService = createMockAuthService();
     mockTierService = {
       canCreateProperty: jest.fn().mockResolvedValue(true),
@@ -95,6 +98,10 @@ describe('PropertyService', () => {
         {
           provide: getRepositoryToken(DepreciationAsset),
           useValue: mockDepreciationAssetRepository,
+        },
+        {
+          provide: getRepositoryToken(Address),
+          useValue: mockAddressRepository,
         },
         { provide: AuthService, useValue: mockAuthService },
         { provide: TierService, useValue: mockTierService },
@@ -597,11 +604,25 @@ describe('PropertyService', () => {
       const property = createProperty({ id: 1 });
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
-      mockRepository.remove.mockResolvedValue(property);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       await service.delete(testUser, 1);
 
-      expect(mockRepository.remove).toHaveBeenCalledWith(property);
+      expect(mockRepository.delete).toHaveBeenCalledWith(1);
+    });
+
+    it('deletes property and its address', async () => {
+      const property = createProperty({ id: 1, address: { id: 10 } });
+      property.addressId = 10;
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+      mockAddressRepository.delete.mockResolvedValue({ affected: 1 });
+
+      await service.delete(testUser, 1);
+
+      expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockAddressRepository.delete).toHaveBeenCalledWith(10);
     });
 
     it('throws NotFoundException when property does not exist', async () => {
@@ -626,7 +647,7 @@ describe('PropertyService', () => {
       const property = createProperty({ id: 1 });
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
-      mockRepository.remove.mockResolvedValue(property);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
       // Set up dependencies - should NOT block deletion anymore
       mockTransactionRepository.count.mockResolvedValue(5);
       mockExpenseRepository.count.mockResolvedValue(3);
@@ -636,7 +657,7 @@ describe('PropertyService', () => {
 
       await service.delete(testUser, 1);
 
-      expect(mockRepository.remove).toHaveBeenCalledWith(property);
+      expect(mockRepository.delete).toHaveBeenCalledWith(1);
     });
   });
 

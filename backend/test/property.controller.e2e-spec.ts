@@ -695,6 +695,58 @@ describe('PropertyController (e2e)', () => {
       );
       expect(parseInt(statisticsAfter[0].count)).toBe(0);
     });
+
+    it('deletes address when property is deleted', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create a property with an address
+      const propertyInput = {
+        name: 'Property with Address',
+        size: 60,
+        ownerships: [{ share: 100 }],
+        address: {
+          street: 'Test Street 123',
+          city: 'Test City',
+          postalCode: '12345',
+        },
+      };
+
+      const createResponse = await request(server)
+        .post('/real-estate/property')
+        .set('Authorization', getBearerToken(token))
+        .send(propertyInput)
+        .expect(201);
+
+      const propertyId = createResponse.body.id;
+      const addressId = createResponse.body.addressId;
+
+      // Verify address exists
+      const addressBefore = await dataSource.query(
+        'SELECT COUNT(*) FROM address WHERE id = $1',
+        [addressId],
+      );
+      expect(parseInt(addressBefore[0].count)).toBe(1);
+
+      // Delete the property
+      await request(server)
+        .delete(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(200);
+
+      // Verify property is deleted
+      await request(server)
+        .get(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(404);
+
+      // Verify address is also deleted
+      const addressAfter = await dataSource.query(
+        'SELECT COUNT(*) FROM address WHERE id = $1',
+        [addressId],
+      );
+      expect(parseInt(addressAfter[0].count)).toBe(0);
+    });
   });
 
   // =========================================================================
