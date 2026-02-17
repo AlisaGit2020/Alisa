@@ -174,12 +174,13 @@ export class PropertyService {
       await this.deletePhotoFile(property.photo);
     }
 
-    await this.repository.delete(id);
-
-    // Delete the address after property is deleted (not shown as dependency to user)
-    if (addressId) {
-      await this.addressRepository.delete(addressId);
-    }
+    // Use a transaction to ensure property and address are deleted atomically
+    await this.repository.manager.transaction(async (transactionalEntityManager) => {
+      await transactionalEntityManager.remove(property);
+      if (addressId) {
+        await transactionalEntityManager.delete(Address, addressId);
+      }
+    });
   }
 
   async validateDelete(

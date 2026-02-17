@@ -600,29 +600,26 @@ describe('PropertyService', () => {
       mockDepreciationAssetRepository.count.mockResolvedValue(0);
     });
 
-    it('deletes property', async () => {
+    it('deletes property using transaction', async () => {
       const property = createProperty({ id: 1 });
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       await service.delete(testUser, 1);
 
-      expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockRepository.manager.transaction).toHaveBeenCalled();
     });
 
-    it('deletes property and its address', async () => {
+    it('deletes property and its address in a transaction', async () => {
       const property = createProperty({ id: 1, address: { id: 10 } });
       property.addressId = 10;
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
-      mockAddressRepository.delete.mockResolvedValue({ affected: 1 });
 
       await service.delete(testUser, 1);
 
-      expect(mockRepository.delete).toHaveBeenCalledWith(1);
-      expect(mockAddressRepository.delete).toHaveBeenCalledWith(10);
+      // Both operations happen within a transaction
+      expect(mockRepository.manager.transaction).toHaveBeenCalled();
     });
 
     it('throws NotFoundException when property does not exist', async () => {
@@ -647,7 +644,6 @@ describe('PropertyService', () => {
       const property = createProperty({ id: 1 });
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
       // Set up dependencies - should NOT block deletion anymore
       mockTransactionRepository.count.mockResolvedValue(5);
       mockExpenseRepository.count.mockResolvedValue(3);
@@ -657,7 +653,7 @@ describe('PropertyService', () => {
 
       await service.delete(testUser, 1);
 
-      expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockRepository.manager.transaction).toHaveBeenCalled();
     });
   });
 

@@ -36,6 +36,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={mockValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
@@ -51,6 +52,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={mockValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
@@ -69,6 +71,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={mockValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
@@ -90,6 +93,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={mockValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
@@ -109,6 +113,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={mockValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
@@ -138,6 +143,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={mockValidationResult}
         onClose={mockOnClose}
+        onConfirmDelete={jest.fn()}
       />
     );
 
@@ -174,6 +180,7 @@ describe('AlisaDependencyDialog', () => {
         open={false}
         validationResult={mockValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
@@ -186,6 +193,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={null}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 
@@ -209,6 +217,7 @@ describe('AlisaDependencyDialog', () => {
         open={true}
         validationResult={fullValidationResult}
         onClose={jest.fn()}
+        onConfirmDelete={jest.fn()}
       />
     );
 

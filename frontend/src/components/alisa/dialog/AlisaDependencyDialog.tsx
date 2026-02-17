@@ -23,7 +23,7 @@ interface AlisaDependencyDialogProps {
   open: boolean;
   validationResult: DeleteValidationResult | null;
   onClose: () => void;
-  onConfirmDelete?: () => void;
+  onConfirmDelete: () => void;
 }
 
 function AlisaDependencyDialog({
@@ -51,7 +51,7 @@ function AlisaDependencyDialog({
 
   const handleConfirmDelete = () => {
     onClose();
-    onConfirmDelete?.();
+    onConfirmDelete();
   };
 
   return (

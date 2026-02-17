@@ -1,9 +1,19 @@
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
-export type MockRepository<T> = Partial<
-  Record<keyof Repository<T>, jest.Mock>
+export type MockEntityManager = {
+  remove: jest.Mock;
+  delete: jest.Mock;
+  save: jest.Mock;
+};
+
+export type MockRepository<T> = Omit<
+  Partial<Record<keyof Repository<T>, jest.Mock>>,
+  'manager' | 'createQueryBuilder'
 > & {
   createQueryBuilder: jest.Mock;
+  manager: {
+    transaction: jest.Mock;
+  };
 };
 
 export const createMockQueryBuilder = <T>(): Partial<
@@ -27,8 +37,15 @@ export const createMockQueryBuilder = <T>(): Partial<
   execute: jest.fn(),
 });
 
+export const createMockEntityManager = (): MockEntityManager => ({
+  remove: jest.fn(),
+  delete: jest.fn(),
+  save: jest.fn(),
+});
+
 export const createMockRepository = <T>(): MockRepository<T> => {
   const mockQueryBuilder = createMockQueryBuilder<T>();
+  const mockEntityManager = createMockEntityManager();
 
   return {
     find: jest.fn(),
@@ -42,5 +59,8 @@ export const createMockRepository = <T>(): MockRepository<T> => {
     count: jest.fn(),
     exist: jest.fn(),
     createQueryBuilder: jest.fn(() => mockQueryBuilder),
+    manager: {
+      transaction: jest.fn((callback) => callback(mockEntityManager)),
+    },
   };
 };

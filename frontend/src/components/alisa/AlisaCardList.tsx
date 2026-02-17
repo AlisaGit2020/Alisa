@@ -121,6 +121,7 @@ function AlisaCardList<T extends { id: number }>({
       setDependencyDialogOpen(false);
       showToast({ message: t("toast.deleteSuccess"), severity: "success" });
     } catch {
+      setDependencyDialogOpen(false);
       showToast({ message: t("toast.deleteError"), severity: "error" });
     }
   };
