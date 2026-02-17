@@ -49,7 +49,13 @@ export class TierService {
     if (input.isDefault) {
       await this.clearDefaultFlag(id);
     }
-    Object.assign(tier, input);
+    // Explicit property mapping to prevent mass assignment vulnerabilities
+    if (input.name !== undefined) tier.name = input.name;
+    if (input.price !== undefined) tier.price = input.price;
+    if (input.maxProperties !== undefined)
+      tier.maxProperties = input.maxProperties;
+    if (input.sortOrder !== undefined) tier.sortOrder = input.sortOrder;
+    if (input.isDefault !== undefined) tier.isDefault = input.isDefault;
     return this.repository.save(tier);
   }
 

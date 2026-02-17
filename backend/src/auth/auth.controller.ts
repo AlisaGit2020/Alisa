@@ -1,6 +1,7 @@
 // auth/auth.controller.ts
 import { Body, Controller, Get, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt.auth.guard';
 import { User } from '../people/user/entities/user.entity';
@@ -8,6 +9,7 @@ import { UserSettingsInputDto } from './dtos/user-settings-input.dto';
 import { facebookConstants } from './constants';
 
 @Controller('auth')
+@UseGuards(ThrottlerGuard)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

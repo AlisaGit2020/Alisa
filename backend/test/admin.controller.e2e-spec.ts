@@ -47,10 +47,7 @@ describe('AdminController (e2e)', () => {
 
     // Set up admin user
     const adminUser = testUsers.user1WithProperties;
-    await userService.update(adminUser.user.id, {
-      ...adminUser.jwtUser,
-      isAdmin: true,
-    } as unknown as UserInputDto);
+    await userService.setAdminStatus(adminUser.user.id, true);
     adminToken = await getUserAccessToken2(authService, {
       ...adminUser.jwtUser,
       isAdmin: true,

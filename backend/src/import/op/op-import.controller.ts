@@ -9,38 +9,22 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import * as fs from 'fs';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { OpImportService } from './op-import.service';
 import { validate } from 'class-validator';
 import { OpImportInput } from './dtos/op-import-input.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { User } from '@alisa-backend/common/decorators/user.decorator';
 import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
+import { csvUploadConfig } from '@alisa-backend/common/multer/csv-upload.config';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ThrottlerGuard)
 @Controller('import/op')
 export class OpImportController {
   constructor(private service: OpImportService) {}
 
   @Post()
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: function (req, file, cb) {
-          const dir = './storage';
-
-          if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir);
-          }
-          cb(null, dir);
-        },
-        filename: function (req, file, cb) {
-          cb(null, Date.now() + '-' + file.originalname);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('file', csvUploadConfig))
   async uploadFile(
     @User() user: JWTUser,
     @UploadedFile() file,

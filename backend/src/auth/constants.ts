@@ -1,5 +1,16 @@
+// Require JWT_SECRET in production to prevent using weak default secret
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required in production');
+}
+
 export const jwtConstants = {
-  secret: process.env.JWT_SECRET || 'dev-jwt-secret-do-not-use-in-production',
+  secret:
+    process.env.JWT_SECRET ||
+    (process.env.NODE_ENV === 'production'
+      ? (() => {
+          throw new Error('JWT_SECRET is required');
+        })()
+      : 'dev-jwt-secret-do-not-use-in-production'),
 };
 
 export const googleConstants = {
