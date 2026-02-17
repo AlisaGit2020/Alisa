@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import type { Express } from 'express';
+import * as fs from 'fs';
 import { PropertyService } from './property.service';
 import { Property } from './entities/property.entity';
 import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
@@ -654,6 +655,41 @@ describe('PropertyService', () => {
       await service.delete(testUser, 1);
 
       expect(mockRepository.manager.transaction).toHaveBeenCalled();
+    });
+
+    it('deletes photo file after successful database deletion', async () => {
+      const photoPath = 'uploads/properties/test-photo.jpg';
+      const property = createProperty({ id: 1, photo: photoPath });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const unlinkSpy = jest
+        .spyOn(fs.promises, 'unlink')
+        .mockResolvedValue(undefined);
+
+      await service.delete(testUser, 1);
+
+      expect(mockRepository.manager.transaction).toHaveBeenCalled();
+      expect(unlinkSpy).toHaveBeenCalled();
+
+      unlinkSpy.mockRestore();
+    });
+
+    it('does not attempt to delete photo when property has no photo', async () => {
+      const property = createProperty({ id: 1, photo: undefined });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const unlinkSpy = jest
+        .spyOn(fs.promises, 'unlink')
+        .mockResolvedValue(undefined);
+
+      await service.delete(testUser, 1);
+
+      expect(mockRepository.manager.transaction).toHaveBeenCalled();
+      expect(unlinkSpy).not.toHaveBeenCalled();
+
+      unlinkSpy.mockRestore();
     });
   });
 
