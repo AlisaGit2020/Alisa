@@ -566,7 +566,7 @@ describe('PropertyController (e2e)', () => {
         .expect(401);
     });
 
-    it('returns 400 with dependency details when property has transactions', async () => {
+    it('successfully deletes property with transactions via cascade', async () => {
       const user = testUsers.user1WithProperties;
       const token = await getUserAccessToken2(authService, user.jwtUser);
 
@@ -599,25 +599,101 @@ describe('PropertyController (e2e)', () => {
       });
       await eventTracker.waitForPending();
 
-      // Try to delete the property - should fail
-      const deleteResponse = await request(server)
-        .delete(`/real-estate/property/${propertyId}`)
-        .set('Authorization', getBearerToken(token))
-        .expect(400);
-
-      expect(deleteResponse.body.canDelete).toBe(false);
-      expect(deleteResponse.body.dependencies).toBeDefined();
-      expect(deleteResponse.body.dependencies.length).toBeGreaterThan(0);
-
-      // Clean up - delete the transaction first
-      await dataSource.query('DELETE FROM transaction WHERE "propertyId" = $1', [propertyId]);
-      await dataSource.query('DELETE FROM property_statistics WHERE "propertyId" = $1', [propertyId]);
-
-      // Now deletion should succeed
+      // Delete should now succeed (cascade handles dependencies)
       await request(server)
         .delete(`/real-estate/property/${propertyId}`)
         .set('Authorization', getBearerToken(token))
         .expect(200);
+
+      // Verify property is gone
+      await request(server)
+        .get(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(404);
+    });
+
+    it('cascade deletes all dependencies when property is deleted', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Create a property
+      const propertyInput = {
+        name: 'Property with All Dependencies',
+        size: 50,
+        ownerships: [{ share: 100 }],
+      };
+
+      const createResponse = await request(server)
+        .post('/real-estate/property')
+        .set('Authorization', getBearerToken(token))
+        .send(propertyInput)
+        .expect(201);
+
+      const propertyId = createResponse.body.id;
+
+      // Add a transaction (which creates statistics automatically)
+      await transactionService.add(user.jwtUser, {
+        propertyId,
+        status: TransactionStatus.ACCEPTED,
+        type: TransactionType.INCOME,
+        sender: 'Test Sender',
+        receiver: 'Test Receiver',
+        description: 'Cascade Test Transaction',
+        transactionDate: new Date('2023-05-15'),
+        accountingDate: new Date('2023-05-15'),
+        amount: 500,
+      });
+      await eventTracker.waitForPending();
+
+      // Verify dependencies exist
+      const transactionsBefore = await dataSource.query(
+        'SELECT COUNT(*) FROM transaction WHERE "propertyId" = $1',
+        [propertyId],
+      );
+      expect(parseInt(transactionsBefore[0].count)).toBeGreaterThan(0);
+
+      const statisticsBefore = await dataSource.query(
+        'SELECT COUNT(*) FROM property_statistics WHERE "propertyId" = $1',
+        [propertyId],
+      );
+      expect(parseInt(statisticsBefore[0].count)).toBeGreaterThan(0);
+
+      // Delete the property - should succeed now
+      await request(server)
+        .delete(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(200);
+
+      // Verify property is deleted
+      await request(server)
+        .get(`/real-estate/property/${propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(404);
+
+      // Verify all dependencies are deleted
+      const transactionsAfter = await dataSource.query(
+        'SELECT COUNT(*) FROM transaction WHERE "propertyId" = $1',
+        [propertyId],
+      );
+      expect(parseInt(transactionsAfter[0].count)).toBe(0);
+
+      const expensesAfter = await dataSource.query(
+        'SELECT COUNT(*) FROM expense WHERE "propertyId" = $1',
+        [propertyId],
+      );
+      expect(parseInt(expensesAfter[0].count)).toBe(0);
+
+      const incomesAfter = await dataSource.query(
+        'SELECT COUNT(*) FROM income WHERE "propertyId" = $1',
+        [propertyId],
+      );
+      expect(parseInt(incomesAfter[0].count)).toBe(0);
+
+      const statisticsAfter = await dataSource.query(
+        'SELECT COUNT(*) FROM property_statistics WHERE "propertyId" = $1',
+        [propertyId],
+      );
+      expect(parseInt(statisticsAfter[0].count)).toBe(0);
     });
   });
 
@@ -665,7 +741,7 @@ describe('PropertyController (e2e)', () => {
         .expect(200);
     });
 
-    it('returns canDelete: false with dependency details', async () => {
+    it('returns canDelete: true with cascade warning when dependencies exist', async () => {
       const user = testUsers.user1WithProperties;
       const token = await getUserAccessToken2(authService, user.jwtUser);
 
@@ -703,7 +779,9 @@ describe('PropertyController (e2e)', () => {
         .set('Authorization', getBearerToken(token))
         .expect(200);
 
-      expect(response.body.canDelete).toBe(false);
+      // With cascade delete, canDelete is always true
+      expect(response.body.canDelete).toBe(true);
+      // Dependencies are still listed as warnings (to inform user what will be deleted)
       expect(response.body.dependencies).toBeDefined();
       expect(response.body.dependencies.length).toBeGreaterThan(0);
 
@@ -713,9 +791,10 @@ describe('PropertyController (e2e)', () => {
       );
       expect(hasTransactionDep).toBe(true);
 
-      // Clean up
-      await dataSource.query('DELETE FROM transaction WHERE "propertyId" = $1', [propertyId]);
-      await dataSource.query('DELETE FROM property_statistics WHERE "propertyId" = $1', [propertyId]);
+      // Message should indicate cascade deletion
+      expect(response.body.message).toContain('will be deleted');
+
+      // Clean up - no need for manual cleanup, cascade delete handles it
       await request(server)
         .delete(`/real-estate/property/${propertyId}`)
         .set('Authorization', getBearerToken(token))
