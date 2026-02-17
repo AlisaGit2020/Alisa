@@ -169,10 +169,7 @@ export class PropertyService {
   async delete(user: JWTUser, id: number): Promise<void> {
     const property = await this.getEntityOrThrow(user, id);
     const addressId = property.addressId;
-
-    if (property.photo) {
-      await this.deletePhotoFile(property.photo);
-    }
+    const photoPath = property.photo;
 
     // Use a transaction to ensure property and address are deleted atomically
     await this.repository.manager.transaction(async (transactionalEntityManager) => {
@@ -181,6 +178,11 @@ export class PropertyService {
         await transactionalEntityManager.delete(Address, addressId);
       }
     });
+
+    // Delete photo file after successful database deletion
+    if (photoPath) {
+      await this.deletePhotoFile(photoPath);
+    }
   }
 
   async validateDelete(
