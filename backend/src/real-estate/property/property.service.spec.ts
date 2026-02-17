@@ -597,11 +597,11 @@ describe('PropertyService', () => {
       const property = createProperty({ id: 1 });
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
+      mockRepository.remove.mockResolvedValue(property);
 
       await service.delete(testUser, 1);
 
-      expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockRepository.remove).toHaveBeenCalledWith(property);
     });
 
     it('throws NotFoundException when property does not exist', async () => {
@@ -626,7 +626,7 @@ describe('PropertyService', () => {
       const property = createProperty({ id: 1 });
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
+      mockRepository.remove.mockResolvedValue(property);
       // Set up dependencies - should NOT block deletion anymore
       mockTransactionRepository.count.mockResolvedValue(5);
       mockExpenseRepository.count.mockResolvedValue(3);
@@ -636,7 +636,7 @@ describe('PropertyService', () => {
 
       await service.delete(testUser, 1);
 
-      expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockRepository.remove).toHaveBeenCalledWith(property);
     });
   });
 

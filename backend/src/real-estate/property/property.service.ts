@@ -170,7 +170,8 @@ export class PropertyService {
     if (property.photo) {
       await this.deletePhotoFile(property.photo);
     }
-    await this.repository.delete(id);
+    // Use remove() instead of delete() to trigger orphanedRowAction for Address
+    await this.repository.remove(property);
   }
 
   async validateDelete(
