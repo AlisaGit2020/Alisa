@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   HttpException,
@@ -11,14 +10,13 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { diskStorage } from 'multer';
-import * as fs from 'fs';
 import { OpImportService } from './op-import.service';
 import { validate } from 'class-validator';
 import { OpImportInput } from './dtos/op-import-input.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { User } from '@alisa-backend/common/decorators/user.decorator';
 import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
+import { csvUploadConfig } from '@alisa-backend/common/multer/csv-upload.config';
 
 @UseGuards(JwtAuthGuard, ThrottlerGuard)
 @Controller('import/op')
@@ -26,38 +24,7 @@ export class OpImportController {
   constructor(private service: OpImportService) {}
 
   @Post()
-  @UseInterceptors(
-    FileInterceptor('file', {
-      limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB max file size
-      },
-      fileFilter: (req, file, cb) => {
-        // Only allow CSV files
-        if (!file.originalname.toLowerCase().endsWith('.csv')) {
-          return cb(
-            new BadRequestException('Only CSV files are allowed'),
-            false,
-          );
-        }
-        cb(null, true);
-      },
-      storage: diskStorage({
-        destination: function (req, file, cb) {
-          const dir = './storage';
-
-          if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir);
-          }
-          cb(null, dir);
-        },
-        filename: function (req, file, cb) {
-          // Sanitize filename to prevent path traversal
-          const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-          cb(null, Date.now() + '-' + sanitizedName);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('file', csvUploadConfig))
   async uploadFile(
     @User() user: JWTUser,
     @UploadedFile() file,
