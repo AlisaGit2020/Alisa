@@ -3,7 +3,7 @@ import { ChangeEventHandler } from "react";
 
 function AlisaNumberField(props: {
   label: string;
-  value: number;
+  value: number | '';
   adornment?: string;
   autoComplete?: string;
   autoFocus?: boolean;

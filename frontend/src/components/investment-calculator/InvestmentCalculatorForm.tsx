@@ -61,7 +61,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
     waterCharge: initialValues?.waterCharge ?? 20,
     downPayment: initialValues?.downPayment ?? 0,
     loanInterestPercent: initialValues?.loanInterestPercent ?? 0,
-    loanPeriod: initialValues?.loanPeriod ?? 0,
+    loanPeriod: initialValues?.loanPeriod,
     name: initialValues?.name ?? '',
   });
 
@@ -285,8 +285,8 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
             label={t('investment-calculator:loanPeriod')}
-            value={data.loanPeriod ?? 0}
-            onChange={(e) => handleChange('loanPeriod', Number(e.target.value) || 0)}
+            value={data.loanPeriod ?? ''}
+            onChange={(e) => handleChange('loanPeriod', e.target.value === '' ? undefined : Number(e.target.value))}
             step={1}
             {...getFieldErrorProps<InvestmentInputData>(fieldErrors, 'loanPeriod')}
           />
@@ -307,6 +307,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         deptFreePrice: { required: true, min: 1 },
         maintenanceFee: { min: 0 },
         rentPerMonth: { required: true, min: 1 },
+        loanPeriod: { min: 1, max: 50 },
       }}
       translation={{
         cancelButton: t('common:cancel'),
