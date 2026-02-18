@@ -8,17 +8,23 @@ import AlisaTextField from "../../alisa/form/AlisaTextField";
 import AlisaTransactionStatusSelect from "../../alisa/data/AlisaTransactionStatusSelect.tsx";
 import AlisaTransactionTypeSelect from "../../alisa/data/AlisaTransactionTypeSelect.tsx";
 
-interface ExpenseFormProps extends WithTranslation {
+interface TransactionFormFieldsProps extends WithTranslation {
   data: TransactionInput;
+  fieldErrors?: Partial<Record<keyof TransactionInput, string>>;
   onHandleChange: (name: string, value: unknown) => void;
   onDescriptionChange: (value: string) => void;
   onAmountChange: (value: number) => void;
 }
 
-function TransactionFormFields(props: ExpenseFormProps) {
+function TransactionFormFields(props: TransactionFormFieldsProps) {
   const handleChange = (name: keyof TransactionInput, value: unknown) => {
     props.onHandleChange(name, value);
   };
+
+  const getFieldErrorProps = (field: keyof TransactionInput) => ({
+    error: !!props.fieldErrors?.[field],
+    helperText: props.fieldErrors?.[field],
+  });
 
   const handleStatusChange = (value: number) => {
     props.onHandleChange("status", value);
@@ -71,6 +77,7 @@ function TransactionFormFields(props: ExpenseFormProps) {
         autoComplete="off"
         onChange={(e) => handleChange("description", e.target.value)}
         onBlur={() => props.onDescriptionChange(props.data.description)}
+        {...getFieldErrorProps("description")}
       />
 
       <Stack direction={"row"} spacing={2}>

@@ -281,11 +281,12 @@ function TransactionForm({
     return typeName;
   };
 
-  const formComponents = () => {
+  const renderFormContent = (fieldErrors: Partial<Record<keyof TransactionInput, string>>) => {
     return (
       <Stack spacing={2} marginBottom={2}>
         <TransactionFormFields
           data={data}
+          fieldErrors={fieldErrors}
           onHandleChange={handleChange}
           onDescriptionChange={(value) => handleDescriptionChange(value)}
           onAmountChange={(value) => handleAmountChange(value)}
@@ -340,8 +341,11 @@ function TransactionForm({
           id={id}
           dataService={dataService}
           data={data}
-          formComponents={formComponents()}
+          renderForm={renderFormContent}
           onSetData={setData}
+          validationRules={{
+            description: { required: true },
+          }}
           translation={{
             cancelButton: t("cancel"),
             submitButton: t("save"),
@@ -349,7 +353,7 @@ function TransactionForm({
           }}
           onCancel={onCancel}
           onAfterSubmit={onAfterSubmit}
-        ></AlisaFormHandler>
+        />
       </AlisaDialog>
     );
   } else {
