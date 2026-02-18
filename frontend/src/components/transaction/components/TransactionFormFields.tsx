@@ -68,6 +68,7 @@ function TransactionFormFields(props: TransactionFormFieldsProps) {
           value={props.data.receiver}
           autoComplete="off"
           onChange={(e) => handleChange("receiver", e.target.value)}
+          {...getFieldErrorProps("receiver")}
         />
       </Stack>
 

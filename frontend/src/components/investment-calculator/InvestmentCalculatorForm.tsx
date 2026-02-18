@@ -292,6 +292,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
             value={data.loanPeriod ?? 0}
             onChange={(e) => handleChange('loanPeriod', Number(e.target.value) || 0)}
             step={1}
+            {...getFieldErrorProps(fieldErrors, 'loanPeriod')}
           />
         </Grid>
       </Grid>
