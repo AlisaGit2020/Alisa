@@ -15,10 +15,12 @@ import { propertyContext } from "@alisa-lib/alisa-contexts";
 // Event constants for property selection required
 export const PROPERTY_SELECTION_REQUIRED_EVENT = "propertySelectionRequired";
 export const OPEN_PROPERTY_SELECTOR_EVENT = "openPropertySelector";
+export const PROPERTY_LIST_CHANGE_EVENT = "propertyListChange";
 
 function PropertyBadge() {
   const { t } = useTranslation("dashboard");
   const [properties, setProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [propertyId, setPropertyId] = useState<number>(getTransactionPropertyId());
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isHighlighted, setIsHighlighted] = useState(false);
@@ -49,25 +51,39 @@ function PropertyBadge() {
   }, [handleHighlight, handleOpenSelector]);
 
   // Fetch all properties
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const dataService = new DataService<Property>({
-          context: propertyContext,
-          fetchOptions: {
-            select: ["id", "name"],
-            order: { name: "ASC" },
-          },
-        });
-        const result = await dataService.search();
-        setProperties(result);
-      } catch {
-        setProperties([]);
-      }
-    };
-
-    fetchProperties();
+  const fetchProperties = useCallback(async () => {
+    try {
+      const dataService = new DataService<Property>({
+        context: propertyContext,
+        fetchOptions: {
+          select: ["id", "name"],
+          order: { name: "ASC" },
+        },
+      });
+      const result = await dataService.search();
+      setProperties(result);
+    } catch {
+      setProperties([]);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchProperties();
+  }, [fetchProperties]);
+
+  // Listen for property list changes
+  useEffect(() => {
+    const handleListChange = () => {
+      fetchProperties();
+    };
+    window.addEventListener(PROPERTY_LIST_CHANGE_EVENT, handleListChange);
+    return () => {
+      window.removeEventListener(PROPERTY_LIST_CHANGE_EVENT, handleListChange);
+    };
+  }, [fetchProperties]);
 
   // Listen for property changes
   useEffect(() => {
@@ -110,6 +126,9 @@ function PropertyBadge() {
   const getPropertyName = () => {
     if (propertyId === 0) {
       return t("allProperties");
+    }
+    if (isLoading) {
+      return "";
     }
     const property = properties.find((p) => p.id === propertyId);
     return property?.name || t("allProperties");
