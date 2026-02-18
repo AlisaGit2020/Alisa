@@ -10,7 +10,9 @@ interface AlisaTextFieldProps {
   autoFocus?: boolean;
   clearable?: boolean;
   disabled?: boolean;
+  error?: boolean;
   fullWidth?: boolean;
+  helperText?: string;
   multiline?: boolean;
   placeholder?: string;
   rows?: number;
@@ -84,6 +86,8 @@ function AlisaTextField(props: AlisaTextFieldProps) {
       multiline={props.multiline}
       rows={props.rows}
       required={props.required}
+      error={props.error}
+      helperText={props.helperText}
       onChange={props.onChange}
       onBlur={props.onBlur}
       slotProps={{

@@ -5,9 +5,11 @@ import DataService from "../../../lib/data-service";
 import AlisaLoadingProgress from "../AlisaLoadingProgress";
 import { useToast } from "../toast";
 import { AxiosError } from "axios";
+import { useFormValidation, FieldRules } from "../../../lib/useFormValidation";
 
-function AlisaFormHandler<T extends object>(props: {
-  formComponents: React.JSX.Element;
+interface AlisaFormHandlerProps<T extends object> {
+  formComponents?: React.JSX.Element;
+  renderForm?: (fieldErrors: Partial<Record<keyof T, string>>) => React.JSX.Element;
   id?: number;
   data?: T;
   dataService: DataService<T>;
@@ -17,20 +19,57 @@ function AlisaFormHandler<T extends object>(props: {
     errorMessageTitle?: string;
     validationMessageTitle?: string;
   };
+  validationRules?: Partial<Record<keyof T, FieldRules>>;
   submitButtonIcon?: ReactNode;
   onCancel: () => void;
   onAfterSubmit: () => void;
   onSetData: React.Dispatch<React.SetStateAction<T>>;
   onSaveResult?: (result: T) => Promise<void>;
-}) {
+}
+
+// Parse server validation messages to extract field names
+// Class-validator messages typically start with the field name: "receiver should not be empty"
+function parseServerErrors<T extends object>(
+  messages: string[]
+): Partial<Record<keyof T, string>> {
+  const errors: Partial<Record<keyof T, string>> = {};
+
+  for (const message of messages) {
+    // Extract field name from the beginning of the message
+    const match = message.match(/^(\w+)\s/);
+    if (match) {
+      const fieldName = match[1] as keyof T;
+      // Only set the first error for each field
+      if (!errors[fieldName]) {
+        errors[fieldName] = message;
+      }
+    }
+  }
+
+  return errors;
+}
+
+function AlisaFormHandler<T extends object>(props: AlisaFormHandlerProps<T>) {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const [errorMessage, setErrorMessage] = React.useState<string>();
   const [validationMessage, setValidationMessage] = React.useState<string[]>(
     [],
   );
+  const [serverFieldErrors, setServerFieldErrors] = React.useState<Partial<Record<keyof T, string>>>({});
   const [dataService] = React.useState<DataService<T>>(props.dataService);
   const [ready, setReady] = React.useState<boolean>(false);
+
+  const { fieldErrors, validate, clearErrors } = useFormValidation<T>(
+    props.validationRules ?? {},
+    t
+  );
+
+  // Merge frontend and server field errors
+  const allFieldErrors: Partial<Record<keyof T, string>> = {
+    ...serverFieldErrors,
+    ...fieldErrors, // Frontend errors take precedence
+  };
 
   React.useEffect(() => {
     const fetchData = async (id: number) => {
@@ -50,9 +89,17 @@ function AlisaFormHandler<T extends object>(props: {
 
   const handleSubmit = async () => {
     resetErrorMessages();
+    clearErrors();
+    setServerFieldErrors({});
 
     if (props.data === undefined) {
       setErrorMessage("Cannot save when data is missing");
+      return;
+    }
+
+    // Frontend validation
+    if (props.validationRules && !validate(props.data)) {
+      showToast({ message: t("common:validation.checkFields"), severity: "warning" });
       return;
     }
 
@@ -68,10 +115,25 @@ function AlisaFormHandler<T extends object>(props: {
         if (error.response?.status === 400) {
           // Backend validation errors
           const message = error.response.data.message;
-          if (Array.isArray(message)) {
-            setValidationMessage(message);
-          } else {
-            setValidationMessage([message]);
+          const messages = Array.isArray(message) ? message : [message];
+
+          // Parse server errors to field-level errors
+          const parsedErrors = parseServerErrors<T>(messages);
+          setServerFieldErrors(parsedErrors);
+
+          // Keep messages that couldn't be mapped to fields
+          const unmappedMessages = messages.filter((msg: string) => {
+            const match = msg.match(/^(\w+)\s/);
+            return !match || !parsedErrors[match[1] as keyof T];
+          });
+
+          if (unmappedMessages.length > 0) {
+            setValidationMessage(unmappedMessages);
+          }
+
+          // Show toast if any field errors were found
+          if (Object.keys(parsedErrors).length > 0) {
+            showToast({ message: t("common:validation.checkFields"), severity: "warning" });
           }
           return;
         }
@@ -90,6 +152,11 @@ function AlisaFormHandler<T extends object>(props: {
     setErrorMessage("");
   };
 
+  // Determine which form components to render
+  const formContent = props.renderForm
+    ? props.renderForm(allFieldErrors)
+    : props.formComponents;
+
   if (ready) {
     return (
       <AlisaForm
@@ -98,7 +165,7 @@ function AlisaFormHandler<T extends object>(props: {
         cancelButtonText={props.translation.cancelButton}
         errorMessageTitle={props.translation.errorMessageTitle}
         validationMessageTitle={props.translation.validationMessageTitle}
-        formComponents={props.formComponents}
+        formComponents={formContent!}
         errorMessage={errorMessage}
         validationMessage={validationMessage}
         onSubmit={handleSubmit}

@@ -116,3 +116,9 @@ export const reportContext: AlisaContext = {
     apiPath: 'real-estate/property',
     routePath: '/app/reports/property',
 }
+
+export const investmentCalculationContext: AlisaContext = {
+    name: 'investment-calculator',
+    apiPath: 'real-estate/investment',
+    routePath: '/app/investment-calculator',
+}

@@ -3,12 +3,14 @@ import { ChangeEventHandler } from "react";
 
 function AlisaNumberField(props: {
   label: string;
-  value: number;
+  value: number | '';
   adornment?: string;
   autoComplete?: string;
   autoFocus?: boolean;
   disabled?: boolean;
+  error?: boolean;
   fullWidth?: boolean;
+  helperText?: string;
   width?: string;
   required?: boolean;
   step?: number;
@@ -29,6 +31,8 @@ function AlisaNumberField(props: {
       }
       disabled={props.disabled !== undefined ? props.disabled : false}
       required={props.required}
+      error={props.error}
+      helperText={props.helperText}
       onChange={props.onChange}
       onBlur={props.onBlur}
       onFocus={(e) => e.target.select()}

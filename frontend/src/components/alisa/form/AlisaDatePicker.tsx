@@ -6,7 +6,9 @@ function AlisaDatePicker(props: {
     value: Date | null,
     autoFocus?: boolean,
     disabled?: boolean,
+    error?: boolean,
     fullWidth?: boolean,
+    helperText?: string,
     onChange?: ((value: dayjs.Dayjs | null, context: PickerChangeHandlerContext<DateValidationError>) => void) | undefined
 }) {
 
@@ -20,6 +22,12 @@ function AlisaDatePicker(props: {
             autoFocus={props.autoFocus !== undefined ? props.autoFocus : false}
             disabled={props.disabled !== undefined ? props.disabled : false}
             onChange={props.onChange}
+            slotProps={{
+                textField: {
+                    error: props.error,
+                    helperText: props.helperText,
+                },
+            }}
         />
     )
 }

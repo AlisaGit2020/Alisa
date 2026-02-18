@@ -12,6 +12,7 @@ import DataService from "@alisa-lib/data-service";
 import AlisaFormHandler from "../../alisa/form/AlisaFormHandler";
 import { AlisaButton, AlisaDialog, AlisaConfirmDialog, useToast } from "../../alisa";
 import { getNumber } from "@alisa-lib/functions";
+import { getFieldErrorProps } from "@alisa-lib/form-utils";
 
 interface IncomeFormProps extends WithTranslation {
   id?: number;
@@ -83,7 +84,7 @@ function IncomeForm({
     }
   };
 
-  const formComponents = (
+  const renderFormContent = (fieldErrors: Partial<Record<keyof IncomeInput, string>>) => (
     <Stack spacing={2} marginBottom={2}>
       <AlisaDatePicker
         label={t("accountingDate")}
@@ -111,6 +112,7 @@ function IncomeForm({
         value={data.description}
         autoComplete="off"
         onChange={(e) => handleChange("description", e.target.value)}
+        {...getFieldErrorProps<IncomeInput>(fieldErrors, "description")}
       />
 
       <Stack direction="row" spacing={2}>
@@ -118,6 +120,7 @@ function IncomeForm({
           label={t("quantity")}
           value={data.quantity}
           onChange={(e) => handleChange("quantity", getNumber(e.target.value, 0))}
+          {...getFieldErrorProps<IncomeInput>(fieldErrors, "quantity")}
         />
         <AlisaNumberField
           label={t("amount")}
@@ -130,6 +133,7 @@ function IncomeForm({
           value={data.totalAmount}
           onChange={(e) => handleChange("totalAmount", getNumber(e.target.value, 2))}
           adornment="€"
+          {...getFieldErrorProps<IncomeInput>(fieldErrors, "totalAmount")}
         />
       </Stack>
 
@@ -159,8 +163,13 @@ function IncomeForm({
           id={id}
           dataService={dataService}
           data={data}
-          formComponents={formComponents}
+          renderForm={renderFormContent}
           onSetData={setData}
+          validationRules={{
+            description: { required: true },
+            quantity: { min: 1 },
+            totalAmount: { min: 0.01 },
+          }}
           translation={{
             cancelButton: t("cancel"),
             submitButton: t("save"),

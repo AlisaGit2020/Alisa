@@ -72,6 +72,15 @@ const sv = {
     propertyRequiredMessage: "Välj en fastighet först",
     selectProperty: "Välj fastighet",
 
+    validation: {
+      checkFields: "Kontrollera de markerade fälten",
+      required: "Detta fält är obligatoriskt",
+      min: "Värdet måste vara minst {{min}}",
+      max: "Värdet får vara högst {{max}}",
+      minLength: "Minst {{min}} tecken",
+      maxLength: "Högst {{max}} tecken",
+    },
+
     toast: {
       saveSuccess: "Ändringar sparade",
       saveError: "Kunde inte spara ändringar",

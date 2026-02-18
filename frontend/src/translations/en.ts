@@ -72,6 +72,15 @@ const en = {
     propertyRequiredMessage: "Please select a property first",
     selectProperty: "Select Property",
 
+    validation: {
+      checkFields: "Please check the highlighted fields",
+      required: "This field is required",
+      min: "Value must be at least {{min}}",
+      max: "Value must be at most {{max}}",
+      minLength: "Must be at least {{min}} characters",
+      maxLength: "Must be at most {{max}} characters",
+    },
+
     toast: {
       saveSuccess: "Changes saved successfully",
       saveError: "Failed to save changes",

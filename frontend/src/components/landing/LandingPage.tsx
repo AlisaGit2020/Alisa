@@ -10,9 +10,7 @@ import React from "react";
 import LoginDialog from "../login/LoginDialog";
 import LandingHeader from "./LandingHeader";
 import PricingSection from "./PricingSection";
-import InvestmentCalculatorForm, { InvestmentInputData } from "../investment-calculator/InvestmentCalculatorForm";
-import InvestmentCalculatorResults, { InvestmentResults } from "../investment-calculator/InvestmentCalculatorResults";
-import ApiClient from "@alisa-lib/api-client";
+import InvestmentCalculatorForm from "../investment-calculator/InvestmentCalculatorForm";
 
 interface FeatureConfig {
   icon: React.ComponentType<SvgIconProps>;
@@ -30,8 +28,7 @@ const features: FeatureConfig[] = [
 
 function LandingPage({ t }: WithTranslation) {
   const [loginDialogOpen, setLoginDialogOpen] = React.useState(false);
-  const [results, setResults] = React.useState<InvestmentResults | null>(null);
-  const [inputData, setInputData] = React.useState<InvestmentInputData | null>(null);
+  const [formKey, setFormKey] = React.useState(0);
   const [searchParams] = useSearchParams();
   const { showToast } = useToast();
 
@@ -57,32 +54,13 @@ function LandingPage({ t }: WithTranslation) {
     }
   };
 
-  const handleCalculate = async (data: InvestmentInputData) => {
-    try {
-      setInputData(data);
-      // Use 'unknown' as input type since the response type differs from input type
-      const response = await ApiClient.post<unknown>(
-        'real-estate/investment/calculate',
-        data,
-        true
-      );
-      const responseData = response as InvestmentResults | { data: InvestmentResults };
-      if ('data' in responseData) {
-        setResults(responseData.data);
-      } else {
-        setResults(responseData);
-      }
-    } catch (error) {
-      console.error('Calculation error:', error);
-    }
+  const handleAfterSubmit = () => {
+    // Show login dialog after save attempt (for anonymous users, they need to log in)
+    setLoginDialogOpen(true);
   };
 
-  const handleSave = async () => {
-    if (inputData) {
-      sessionStorage.setItem('pendingInvestmentCalculation', JSON.stringify(inputData));
-      sessionStorage.setItem('returnUrl', '/');
-      setLoginDialogOpen(true);
-    }
+  const handleCancel = () => {
+    setFormKey(prev => prev + 1);
   };
 
   return (
@@ -242,11 +220,10 @@ function LandingPage({ t }: WithTranslation) {
           </Box>
 
           <Card sx={{ p: { xs: 2, md: 4 } }}>
-            <InvestmentCalculatorForm onCalculate={handleCalculate} />
-            <InvestmentCalculatorResults
-              results={results}
-              onSave={handleSave}
-              showSaveButton={true}
+            <InvestmentCalculatorForm
+              key={formKey}
+              onCancel={handleCancel}
+              onAfterSubmit={handleAfterSubmit}
             />
           </Card>
         </Container>

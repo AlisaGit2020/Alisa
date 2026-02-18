@@ -3,18 +3,14 @@ import { Box, Container, Link, Typography } from "@mui/material";
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
-import { AxiosResponse } from "axios";
-import InvestmentCalculatorForm, { InvestmentInputData } from "./InvestmentCalculatorForm";
-import InvestmentCalculatorResults, { InvestmentResults } from "./InvestmentCalculatorResults";
+import InvestmentCalculatorForm from "./InvestmentCalculatorForm";
 import LoginDialog from "../login/LoginDialog";
-import ApiClient from "@alisa-lib/api-client";
 import { useTranslation } from "react-i18next";
 import { useToast } from "../alisa";
 
 function InvestmentCalculatorPublic({ t }: WithTranslation) {
-  const [results, setResults] = React.useState<InvestmentResults | null>(null);
-  const [inputData, setInputData] = React.useState<InvestmentInputData | null>(null);
   const [loginDialogOpen, setLoginDialogOpen] = React.useState(false);
+  const [formKey, setFormKey] = React.useState(0);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { i18n } = useTranslation();
@@ -38,38 +34,19 @@ function InvestmentCalculatorPublic({ t }: WithTranslation) {
     }
   }, [searchParams, navigate, showToast, t]);
 
-  const handleCalculate = async (data: InvestmentInputData) => {
-    try {
-      setInputData(data);
-      // Call the public calculate endpoint (no auth required)
-      const response = await ApiClient.post('real-estate/investment/calculate', data, true) as unknown as AxiosResponse<InvestmentResults>;
-      setResults(response.data);
-    } catch (error) {
-      console.error('Calculation error:', error);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!inputData) {
-      console.error('No input data to save');
-      return;
-    }
-
+  const handleAfterSubmit = () => {
     if (!isAuthenticated) {
-      // Anonymous user trying to save - store in sessionStorage and show login dialog
-      sessionStorage.setItem('pendingInvestmentCalculation', JSON.stringify(inputData));
-      sessionStorage.setItem('returnUrl', '/investment-calculator');
+      // Show login dialog if not authenticated
       setLoginDialogOpen(true);
       return;
     }
+    // Reset form after save
+    setFormKey(prev => prev + 1);
+    showToast({ message: t("common:toast.calculationSaved"), severity: "success" });
+  };
 
-    // Authenticated user - save directly
-    try {
-      await ApiClient.post('real-estate/investment', inputData);
-      showToast({ message: t("common:toast.calculationSaved"), severity: "success" });
-    } catch (error) {
-      console.error('Save error:', error);
-    }
+  const handleCancel = () => {
+    setFormKey(prev => prev + 1);
   };
 
   return (
@@ -138,11 +115,10 @@ function InvestmentCalculatorPublic({ t }: WithTranslation) {
               boxShadow: 1,
             }}
           >
-            <InvestmentCalculatorForm onCalculate={handleCalculate} />
-            <InvestmentCalculatorResults
-              results={results}
-              onSave={handleSave}
-              showSaveButton={true}
+            <InvestmentCalculatorForm
+              key={formKey}
+              onCancel={handleCancel}
+              onAfterSubmit={handleAfterSubmit}
             />
           </Box>
         </Container>

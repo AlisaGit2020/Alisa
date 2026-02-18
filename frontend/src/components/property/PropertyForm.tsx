@@ -9,6 +9,7 @@ import { propertyContext } from '../../lib/alisa-contexts';
 import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
 import { DTO } from '../../lib/types';
 import DataService from '../../lib/data-service';
+import { getFieldErrorProps } from '@alisa-lib/form-utils';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PropertyPhotoUpload from './PropertyPhotoUpload';
 import AlisaContent from '../alisa/AlisaContent';
@@ -122,7 +123,7 @@ function PropertyForm({ t }: WithTranslation) {
         }
     }
 
-    const formComponents = (
+    const renderFormContent = (fieldErrors: Partial<Record<keyof PropertyInput, string>>) => (
         <Box sx={{ maxWidth: 600 }}>
             <Stack spacing={2} marginBottom={2}>
                 <Stack direction="row" spacing={2}>
@@ -132,6 +133,7 @@ function PropertyForm({ t }: WithTranslation) {
                             value={data.name}
                             autoFocus={true}
                             onChange={(e) => handleChange('name', e.target.value)}
+                            {...getFieldErrorProps<PropertyInput>(fieldErrors, 'name')}
                         />
                     </Box>
                     <Box sx={{ flex: 1, minWidth: 120 }}>
@@ -170,6 +172,7 @@ function PropertyForm({ t }: WithTranslation) {
                             value={data.size}
                             onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
                             adornment='m2'
+                            {...getFieldErrorProps<PropertyInput>(fieldErrors, 'size')}
                         />
                     </Box>
                     <Box sx={{ flex: 1 }}>
@@ -177,6 +180,7 @@ function PropertyForm({ t }: WithTranslation) {
                             label={t('buildYear')}
                             value={data.buildYear || 0}
                             onChange={(e) => handleChange('buildYear', getNumber(e.target.value, 0) || undefined)}
+                            {...getFieldErrorProps<PropertyInput>(fieldErrors, 'buildYear')}
                         />
                     </Box>
                 </Stack>
@@ -221,8 +225,13 @@ function PropertyForm({ t }: WithTranslation) {
                 id={Number(idParam)}
                 dataService={dataService}
                 data={data}
-                formComponents={formComponents}
+                renderForm={renderFormContent}
                 onSetData={setData}
+                validationRules={{
+                    name: { required: true },
+                    size: { required: true, min: 1, max: 1000 },
+                    buildYear: { min: 1800, max: 2100 },
+                }}
                 translation={{
                     cancelButton: t('cancel'),
                     submitButton: t('save'),
@@ -231,8 +240,7 @@ function PropertyForm({ t }: WithTranslation) {
                 onCancel={handleNavigateBack}
                 onAfterSubmit={handleNavigateBack}
                 onSaveResult={handleSaveResult}
-            >
-            </AlisaFormHandler>
+            />
         </AlisaContent>
     );
 }
