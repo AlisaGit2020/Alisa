@@ -41,6 +41,7 @@ interface AlisaCardListInputProps<T> {
   alisaContext: AlisaContext;
   fields: AlisCardListField<T>[];
   fetchOptions?: TypeOrmFetchOptions<T>;
+  onAfterDelete?: () => void;
 }
 
 function AlisaCardList<T extends { id: number }>({
@@ -48,6 +49,7 @@ function AlisaCardList<T extends { id: number }>({
   title,
   alisaContext,
   fetchOptions,
+  onAfterDelete,
 }: AlisaCardListInputProps<T>) {
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -106,6 +108,7 @@ function AlisaCardList<T extends { id: number }>({
       setIdDeleted(idToDelete);
       handleClose();
       showToast({ message: t("toast.deleteSuccess"), severity: "success" });
+      onAfterDelete?.();
     } catch {
       handleClose();
       showToast({ message: t("toast.deleteError"), severity: "error" });
@@ -120,6 +123,7 @@ function AlisaCardList<T extends { id: number }>({
       setValidationResult(null);
       setDependencyDialogOpen(false);
       showToast({ message: t("toast.deleteSuccess"), severity: "success" });
+      onAfterDelete?.();
     } catch {
       setDependencyDialogOpen(false);
       showToast({ message: t("toast.deleteError"), severity: "error" });
