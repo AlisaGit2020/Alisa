@@ -74,6 +74,11 @@ function ExpenseForm({
     setData(newData);
   };
 
+  const getFieldErrorProps = (fieldErrors: Partial<Record<keyof ExpenseInput, string>>, field: keyof ExpenseInput) => ({
+    error: !!fieldErrors[field],
+    helperText: fieldErrors[field],
+  });
+
   const handleDelete = async () => {
     if (id) {
       await dataService.delete(id);
@@ -83,7 +88,7 @@ function ExpenseForm({
     }
   };
 
-  const formComponents = (
+  const renderFormContent = (fieldErrors: Partial<Record<keyof ExpenseInput, string>>) => (
     <Stack spacing={2} marginBottom={2}>
       <AlisaDatePicker
         label={t("accountingDate")}
@@ -111,6 +116,7 @@ function ExpenseForm({
         value={data.description}
         autoComplete="off"
         onChange={(e) => handleChange("description", e.target.value)}
+        {...getFieldErrorProps(fieldErrors, "description")}
       />
 
       <Stack direction="row" spacing={2}>
@@ -118,6 +124,7 @@ function ExpenseForm({
           label={t("quantity")}
           value={data.quantity}
           onChange={(e) => handleChange("quantity", getNumber(e.target.value, 0))}
+          {...getFieldErrorProps(fieldErrors, "quantity")}
         />
         <AlisaNumberField
           label={t("amount")}
@@ -130,6 +137,7 @@ function ExpenseForm({
           value={data.totalAmount}
           onChange={(e) => handleChange("totalAmount", getNumber(e.target.value, 2))}
           adornment="€"
+          {...getFieldErrorProps(fieldErrors, "totalAmount")}
         />
       </Stack>
 
@@ -159,8 +167,13 @@ function ExpenseForm({
           id={id}
           dataService={dataService}
           data={data}
-          formComponents={formComponents}
+          renderForm={renderFormContent}
           onSetData={setData}
+          validationRules={{
+            description: { required: true },
+            quantity: { min: 1 },
+            totalAmount: { min: 0.01 },
+          }}
           translation={{
             cancelButton: t("cancel"),
             submitButton: t("save"),

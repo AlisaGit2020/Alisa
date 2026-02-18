@@ -84,6 +84,11 @@ function PropertyForm({ t }: WithTranslation) {
         });
     }
 
+    const getFieldErrorProps = (fieldErrors: Partial<Record<keyof PropertyInput, string>>, field: keyof PropertyInput) => ({
+        error: !!fieldErrors[field],
+        helperText: fieldErrors[field],
+    });
+
     const handleSaveResult = async (result: DTO<PropertyInput>) => {
         // Upload pending photo after property is saved
         // Note: ApiClient.post returns AxiosResponse, so we need to handle both cases
@@ -122,7 +127,7 @@ function PropertyForm({ t }: WithTranslation) {
         }
     }
 
-    const formComponents = (
+    const renderFormContent = (fieldErrors: Partial<Record<keyof PropertyInput, string>>) => (
         <Box sx={{ maxWidth: 600 }}>
             <Stack spacing={2} marginBottom={2}>
                 <Stack direction="row" spacing={2}>
@@ -132,6 +137,7 @@ function PropertyForm({ t }: WithTranslation) {
                             value={data.name}
                             autoFocus={true}
                             onChange={(e) => handleChange('name', e.target.value)}
+                            {...getFieldErrorProps(fieldErrors, 'name')}
                         />
                     </Box>
                     <Box sx={{ flex: 1, minWidth: 120 }}>
@@ -170,6 +176,7 @@ function PropertyForm({ t }: WithTranslation) {
                             value={data.size}
                             onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
                             adornment='m2'
+                            {...getFieldErrorProps(fieldErrors, 'size')}
                         />
                     </Box>
                     <Box sx={{ flex: 1 }}>
@@ -177,6 +184,7 @@ function PropertyForm({ t }: WithTranslation) {
                             label={t('buildYear')}
                             value={data.buildYear || 0}
                             onChange={(e) => handleChange('buildYear', getNumber(e.target.value, 0) || undefined)}
+                            {...getFieldErrorProps(fieldErrors, 'buildYear')}
                         />
                     </Box>
                 </Stack>
@@ -221,8 +229,13 @@ function PropertyForm({ t }: WithTranslation) {
                 id={Number(idParam)}
                 dataService={dataService}
                 data={data}
-                formComponents={formComponents}
+                renderForm={renderFormContent}
                 onSetData={setData}
+                validationRules={{
+                    name: { required: true },
+                    size: { required: true, min: 1, max: 1000 },
+                    buildYear: { min: 1800, max: 2100 },
+                }}
                 translation={{
                     cancelButton: t('cancel'),
                     submitButton: t('save'),
@@ -231,8 +244,7 @@ function PropertyForm({ t }: WithTranslation) {
                 onCancel={handleNavigateBack}
                 onAfterSubmit={handleNavigateBack}
                 onSaveResult={handleSaveResult}
-            >
-            </AlisaFormHandler>
+            />
         </AlisaContent>
     );
 }
