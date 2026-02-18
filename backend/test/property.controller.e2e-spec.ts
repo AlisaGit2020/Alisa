@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -59,6 +59,7 @@ describe('PropertyController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ transform: true }));
     await app.init();
     server = app.getHttpServer();
 
@@ -1197,6 +1198,65 @@ describe('PropertyController (e2e)', () => {
 
       // User1 should NOT see user2's statistics - should return empty array
       expect(response.body).toEqual([]);
+    });
+
+    it('correctly groups 01.01.2025 transaction in January 2025 (not December 2024)', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+      const propertyId = user.properties[0].id;
+
+      // Simulate what frontend sends: Jan 1, 2025 midnight in UTC+2 timezone
+      // This becomes 2024-12-31T22:00:00.000Z when serialized
+      const frontendDate = '2024-12-31T22:00:00.000Z';
+
+      // Use HTTP endpoint so DTO transformation is applied
+      await request(server)
+        .post('/accounting/transaction')
+        .set('Authorization', getBearerToken(token))
+        .send({
+          propertyId,
+          status: TransactionStatus.ACCEPTED,
+          type: TransactionType.INCOME,
+          sender: 'Test Sender',
+          receiver: 'Test Receiver',
+          description: 'January 1st income',
+          transactionDate: frontendDate,
+          accountingDate: frontendDate,
+          amount: 500,
+          incomes: [
+            {
+              incomeTypeId: 1,
+              description: 'January 1st test',
+              amount: 500,
+              quantity: 1,
+              totalAmount: 500,
+              accountingDate: frontendDate,
+            },
+          ],
+        })
+        .expect(201);
+      await eventTracker.waitForPending();
+
+      // Should appear in January 2025, not December 2024
+      const janResponse = await request(server)
+        .post(`/real-estate/property/${propertyId}/statistics/search`)
+        .set('Authorization', getBearerToken(token))
+        .send({ key: StatisticKey.INCOME, year: 2025, month: 1 })
+        .expect(200);
+
+      expect(janResponse.body.length).toBeGreaterThan(0);
+      expect(parseFloat(janResponse.body[0].value)).toBeCloseTo(500, 2);
+
+      // Should NOT appear in December 2024
+      const decResponse = await request(server)
+        .post(`/real-estate/property/${propertyId}/statistics/search`)
+        .set('Authorization', getBearerToken(token))
+        .send({ key: StatisticKey.INCOME, year: 2024, month: 12 })
+        .expect(200);
+
+      const decValue =
+        decResponse.body.length > 0 ? parseFloat(decResponse.body[0].value) : 0;
+      expect(decValue).toBe(0);
     });
   });
 
