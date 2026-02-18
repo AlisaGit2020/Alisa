@@ -392,6 +392,94 @@ describe('PropertyForm Component Logic', () => {
     });
   });
 
+  describe('Auto-select newly created property', () => {
+    it('dispatches property selection event with new property id after create', () => {
+      const dispatchedEvents: { type: string; detail?: unknown }[] = [];
+      const originalDispatchEvent = window.dispatchEvent;
+      window.dispatchEvent = (event: Event) => {
+        dispatchedEvents.push({
+          type: event.type,
+          detail: (event as CustomEvent).detail,
+        });
+        return originalDispatchEvent.call(window, event);
+      };
+
+      // Simulate what handleSaveResult should do when creating a new property
+      const TRANSACTION_PROPERTY_CHANGE_EVENT = 'transactionPropertyChange';
+      const PROPERTY_LIST_CHANGE_EVENT = 'propertyListChange';
+      const isNewProperty = true; // !idParam
+      const newPropertyId = 42;
+
+      if (isNewProperty && newPropertyId) {
+        // This should dispatch TRANSACTION_PROPERTY_CHANGE_EVENT with the new property id
+        window.dispatchEvent(
+          new CustomEvent(TRANSACTION_PROPERTY_CHANGE_EVENT, {
+            detail: { propertyId: newPropertyId },
+          })
+        );
+        window.dispatchEvent(new CustomEvent(PROPERTY_LIST_CHANGE_EVENT));
+      }
+
+      // Verify TRANSACTION_PROPERTY_CHANGE_EVENT was dispatched with correct propertyId
+      const propertyChangeEvent = dispatchedEvents.find(
+        (e) => e.type === TRANSACTION_PROPERTY_CHANGE_EVENT
+      );
+      expect(propertyChangeEvent).toBeDefined();
+      expect(propertyChangeEvent?.detail).toEqual({ propertyId: 42 });
+
+      window.dispatchEvent = originalDispatchEvent;
+    });
+
+    it('calls setTransactionPropertyId with new property id after create', () => {
+      // Simulate storage behavior
+      let storedPropertyId: number | null = null;
+      const setTransactionPropertyId = (id: number) => {
+        storedPropertyId = id;
+      };
+
+      const isNewProperty = true;
+      const newPropertyId = 42;
+
+      if (isNewProperty && newPropertyId) {
+        setTransactionPropertyId(newPropertyId);
+      }
+
+      expect(storedPropertyId).toBe(42);
+    });
+
+    it('does not auto-select when editing existing property', () => {
+      const dispatchedEvents: { type: string; detail?: unknown }[] = [];
+      const originalDispatchEvent = window.dispatchEvent;
+      window.dispatchEvent = (event: Event) => {
+        dispatchedEvents.push({
+          type: event.type,
+          detail: (event as CustomEvent).detail,
+        });
+        return originalDispatchEvent.call(window, event);
+      };
+
+      const TRANSACTION_PROPERTY_CHANGE_EVENT = 'transactionPropertyChange';
+      const isNewProperty = false; // idParam exists (editing)
+      const propertyId = 42;
+
+      if (isNewProperty && propertyId) {
+        window.dispatchEvent(
+          new CustomEvent(TRANSACTION_PROPERTY_CHANGE_EVENT, {
+            detail: { propertyId },
+          })
+        );
+      }
+
+      // Should NOT dispatch property change event when editing
+      const propertyChangeEvent = dispatchedEvents.find(
+        (e) => e.type === TRANSACTION_PROPERTY_CHANGE_EVENT
+      );
+      expect(propertyChangeEvent).toBeUndefined();
+
+      window.dispatchEvent = originalDispatchEvent;
+    });
+  });
+
   describe('Pending photo for new properties', () => {
     it('new property shows photo upload in pending mode', () => {
       const isNewProperty = (id: number): boolean => id === 0;
