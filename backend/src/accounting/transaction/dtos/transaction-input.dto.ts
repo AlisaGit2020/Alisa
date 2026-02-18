@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-input.dto';
 import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
 import {
@@ -35,6 +35,9 @@ export class TransactionInputDto {
 
   propertyId?: number;
 
+  @Type(() => ExpenseInputDto)
   expenses?: ExpenseInputDto[];
+
+  @Type(() => IncomeInputDto)
   incomes?: IncomeInputDto[];
 }
