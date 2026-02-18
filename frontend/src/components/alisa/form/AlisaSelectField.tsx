@@ -13,7 +13,9 @@ function AlisaSelectField(props: {
     autoComplete?: string,
     autoFocus?: boolean,
     disabled?: boolean,
+    error?: boolean,
     fullWidth?: boolean,
+    helperText?: string,
     size?: "small" | "medium",
     items: AlisaSelectFieldItem[],
     onChange?: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> | undefined
@@ -32,6 +34,8 @@ function AlisaSelectField(props: {
             autoFocus={props.autoFocus !== undefined ? props.autoFocus : false}
             autoComplete={props.autoComplete !== undefined ? props.autoComplete : 'off'}
             disabled={props.disabled !== undefined ? props.disabled : false}
+            error={props.error}
+            helperText={props.helperText}
             onChange={props.onChange}
             InputProps={{
                 endAdornment: props.adornment ? (
