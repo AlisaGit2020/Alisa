@@ -1,5 +1,6 @@
 import { TransactionInput, TransactionStatus } from "@alisa-types";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
+import { getFieldErrorProps } from "@alisa-lib/form-utils";
 import { Stack } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import AlisaDatePicker from "../../alisa/form/AlisaDatePicker";
@@ -21,10 +22,8 @@ function TransactionFormFields(props: TransactionFormFieldsProps) {
     props.onHandleChange(name, value);
   };
 
-  const getFieldErrorProps = (field: keyof TransactionInput) => ({
-    error: !!props.fieldErrors?.[field],
-    helperText: props.fieldErrors?.[field],
-  });
+  const getErrorProps = (field: keyof TransactionInput) =>
+    getFieldErrorProps<TransactionInput>(props.fieldErrors ?? {}, field);
 
   const handleStatusChange = (value: number) => {
     props.onHandleChange("status", value);
@@ -68,7 +67,7 @@ function TransactionFormFields(props: TransactionFormFieldsProps) {
           value={props.data.receiver}
           autoComplete="off"
           onChange={(e) => handleChange("receiver", e.target.value)}
-          {...getFieldErrorProps("receiver")}
+          {...getErrorProps("receiver")}
         />
       </Stack>
 
@@ -78,7 +77,7 @@ function TransactionFormFields(props: TransactionFormFieldsProps) {
         autoComplete="off"
         onChange={(e) => handleChange("description", e.target.value)}
         onBlur={() => props.onDescriptionChange(props.data.description)}
-        {...getFieldErrorProps("description")}
+        {...getErrorProps("description")}
       />
 
       <Stack direction={"row"} spacing={2}>

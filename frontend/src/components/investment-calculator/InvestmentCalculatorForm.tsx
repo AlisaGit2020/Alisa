@@ -7,6 +7,7 @@ import { VITE_API_URL } from "../../constants";
 import AlisaFormHandler from "../alisa/form/AlisaFormHandler";
 import DataService from "@alisa-lib/data-service";
 import { investmentCalculationContext } from "@alisa-lib/alisa-contexts";
+import { getFieldErrorProps } from "@alisa-lib/form-utils";
 
 export interface InvestmentInputData {
   id?: number;
@@ -117,11 +118,6 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
     }
   };
 
-  const getFieldErrorProps = (fieldErrors: Partial<Record<keyof InvestmentInputData, string>>, field: keyof InvestmentInputData) => ({
-    error: !!fieldErrors[field],
-    helperText: fieldErrors[field],
-  });
-
   const renderFormContent = (fieldErrors: Partial<Record<keyof InvestmentInputData, string>>) => (
     <Box sx={{ mt: 2, maxWidth: 800 }}>
       <Grid container spacing={2}>
@@ -165,7 +161,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
             label={t('investment-calculator:name')}
             value={data.name || ''}
             onChange={(e) => handleChange('name', e.target.value)}
-            {...getFieldErrorProps(fieldErrors, 'name')}
+            {...getFieldErrorProps<InvestmentInputData>(fieldErrors, 'name')}
           />
         </Grid>
 
@@ -175,7 +171,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
             value={data.deptFreePrice}
             onChange={(e) => handleChange('deptFreePrice', Number(e.target.value) || 0)}
             step={1000}
-            {...getFieldErrorProps(fieldErrors, 'deptFreePrice')}
+            {...getFieldErrorProps<InvestmentInputData>(fieldErrors, 'deptFreePrice')}
           />
         </Grid>
 
@@ -220,7 +216,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
             value={data.maintenanceFee}
             onChange={(e) => handleChange('maintenanceFee', Number(e.target.value) || 0)}
             step={10}
-            {...getFieldErrorProps(fieldErrors, 'maintenanceFee')}
+            {...getFieldErrorProps<InvestmentInputData>(fieldErrors, 'maintenanceFee')}
           />
         </Grid>
 
@@ -256,7 +252,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
             value={data.rentPerMonth}
             onChange={(e) => handleChange('rentPerMonth', Number(e.target.value) || 0)}
             step={50}
-            {...getFieldErrorProps(fieldErrors, 'rentPerMonth')}
+            {...getFieldErrorProps<InvestmentInputData>(fieldErrors, 'rentPerMonth')}
           />
         </Grid>
 
@@ -292,7 +288,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
             value={data.loanPeriod ?? 0}
             onChange={(e) => handleChange('loanPeriod', Number(e.target.value) || 0)}
             step={1}
-            {...getFieldErrorProps(fieldErrors, 'loanPeriod')}
+            {...getFieldErrorProps<InvestmentInputData>(fieldErrors, 'loanPeriod')}
           />
         </Grid>
       </Grid>

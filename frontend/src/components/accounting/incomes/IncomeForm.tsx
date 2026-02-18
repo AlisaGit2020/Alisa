@@ -12,6 +12,7 @@ import DataService from "@alisa-lib/data-service";
 import AlisaFormHandler from "../../alisa/form/AlisaFormHandler";
 import { AlisaButton, AlisaDialog, AlisaConfirmDialog, useToast } from "../../alisa";
 import { getNumber } from "@alisa-lib/functions";
+import { getFieldErrorProps } from "@alisa-lib/form-utils";
 
 interface IncomeFormProps extends WithTranslation {
   id?: number;
@@ -74,11 +75,6 @@ function IncomeForm({
     setData(newData);
   };
 
-  const getFieldErrorProps = (fieldErrors: Partial<Record<keyof IncomeInput, string>>, field: keyof IncomeInput) => ({
-    error: !!fieldErrors[field],
-    helperText: fieldErrors[field],
-  });
-
   const handleDelete = async () => {
     if (id) {
       await dataService.delete(id);
@@ -116,7 +112,7 @@ function IncomeForm({
         value={data.description}
         autoComplete="off"
         onChange={(e) => handleChange("description", e.target.value)}
-        {...getFieldErrorProps(fieldErrors, "description")}
+        {...getFieldErrorProps<IncomeInput>(fieldErrors, "description")}
       />
 
       <Stack direction="row" spacing={2}>
@@ -124,7 +120,7 @@ function IncomeForm({
           label={t("quantity")}
           value={data.quantity}
           onChange={(e) => handleChange("quantity", getNumber(e.target.value, 0))}
-          {...getFieldErrorProps(fieldErrors, "quantity")}
+          {...getFieldErrorProps<IncomeInput>(fieldErrors, "quantity")}
         />
         <AlisaNumberField
           label={t("amount")}
@@ -137,7 +133,7 @@ function IncomeForm({
           value={data.totalAmount}
           onChange={(e) => handleChange("totalAmount", getNumber(e.target.value, 2))}
           adornment="€"
-          {...getFieldErrorProps(fieldErrors, "totalAmount")}
+          {...getFieldErrorProps<IncomeInput>(fieldErrors, "totalAmount")}
         />
       </Stack>
 

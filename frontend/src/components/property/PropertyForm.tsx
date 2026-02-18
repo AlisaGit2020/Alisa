@@ -9,6 +9,7 @@ import { propertyContext } from '../../lib/alisa-contexts';
 import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
 import { DTO } from '../../lib/types';
 import DataService from '../../lib/data-service';
+import { getFieldErrorProps } from '@alisa-lib/form-utils';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PropertyPhotoUpload from './PropertyPhotoUpload';
 import AlisaContent from '../alisa/AlisaContent';
@@ -84,11 +85,6 @@ function PropertyForm({ t }: WithTranslation) {
         });
     }
 
-    const getFieldErrorProps = (fieldErrors: Partial<Record<keyof PropertyInput, string>>, field: keyof PropertyInput) => ({
-        error: !!fieldErrors[field],
-        helperText: fieldErrors[field],
-    });
-
     const handleSaveResult = async (result: DTO<PropertyInput>) => {
         // Upload pending photo after property is saved
         // Note: ApiClient.post returns AxiosResponse, so we need to handle both cases
@@ -137,7 +133,7 @@ function PropertyForm({ t }: WithTranslation) {
                             value={data.name}
                             autoFocus={true}
                             onChange={(e) => handleChange('name', e.target.value)}
-                            {...getFieldErrorProps(fieldErrors, 'name')}
+                            {...getFieldErrorProps<PropertyInput>(fieldErrors, 'name')}
                         />
                     </Box>
                     <Box sx={{ flex: 1, minWidth: 120 }}>
@@ -176,7 +172,7 @@ function PropertyForm({ t }: WithTranslation) {
                             value={data.size}
                             onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
                             adornment='m2'
-                            {...getFieldErrorProps(fieldErrors, 'size')}
+                            {...getFieldErrorProps<PropertyInput>(fieldErrors, 'size')}
                         />
                     </Box>
                     <Box sx={{ flex: 1 }}>
@@ -184,7 +180,7 @@ function PropertyForm({ t }: WithTranslation) {
                             label={t('buildYear')}
                             value={data.buildYear || 0}
                             onChange={(e) => handleChange('buildYear', getNumber(e.target.value, 0) || undefined)}
-                            {...getFieldErrorProps(fieldErrors, 'buildYear')}
+                            {...getFieldErrorProps<PropertyInput>(fieldErrors, 'buildYear')}
                         />
                     </Box>
                 </Stack>
