@@ -1,5 +1,7 @@
 import { useState, useCallback } from "react";
-import { TFunction } from "i18next";
+
+// Simple translation function type that works with both real TFunction and test mocks
+type TranslationFn = (key: string, params?: Record<string, unknown>) => string;
 
 export interface FieldRules {
   required?: boolean;
@@ -18,7 +20,7 @@ export interface UseFormValidationResult<T> {
 
 export function useFormValidation<T extends object>(
   rules: Partial<Record<keyof T, FieldRules>>,
-  t: TFunction
+  t: TranslationFn
 ): UseFormValidationResult<T> {
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof T, string>>>({});
 
