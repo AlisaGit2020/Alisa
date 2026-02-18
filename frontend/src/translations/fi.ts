@@ -72,6 +72,15 @@ const fi = {
     propertyRequiredMessage: "Valitse ensin kohde",
     selectProperty: "Valitse kohde",
 
+    validation: {
+      checkFields: "Tarkista korostetut kentät",
+      required: "Tämä kenttä on pakollinen",
+      min: "Arvon tulee olla vähintään {{min}}",
+      max: "Arvon tulee olla enintään {{max}}",
+      minLength: "Vähintään {{min}} merkkiä",
+      maxLength: "Enintään {{max}} merkkiä",
+    },
+
     toast: {
       saveSuccess: "Muutokset tallennettu",
       saveError: "Tallennus epäonnistui",
