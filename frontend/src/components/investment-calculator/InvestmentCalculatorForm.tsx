@@ -1,11 +1,15 @@
 import { WithTranslation, withTranslation } from "react-i18next";
 import { Box, CircularProgress, Divider, Grid, InputAdornment, Typography } from "@mui/material";
-import React from "react";
+import { useState } from "react";
 import axios from "axios";
 import { AlisaButton, AlisaNumberField, AlisaTextField, useToast } from "../alisa";
 import { VITE_API_URL } from "../../constants";
+import AlisaFormHandler from "../alisa/form/AlisaFormHandler";
+import DataService from "@alisa-lib/data-service";
+import { investmentCalculationContext } from "@alisa-lib/alisa-contexts";
 
 export interface InvestmentInputData {
+  id?: number;
   deptFreePrice: number;
   deptShare: number;
   transferTaxPercent: number;
@@ -33,16 +37,19 @@ interface EtuoviPropertyData {
 }
 
 interface InvestmentCalculatorFormProps extends WithTranslation {
-  onCalculate: (data: InvestmentInputData) => void;
+  id?: number;
   initialValues?: Partial<InvestmentInputData>;
+  onCancel: () => void;
+  onAfterSubmit: () => void;
 }
 
-function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentCalculatorFormProps) {
+function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmit }: InvestmentCalculatorFormProps) {
   const { showToast } = useToast();
-  const [etuoviUrl, setEtuoviUrl] = React.useState('');
-  const [isFetching, setIsFetching] = React.useState(false);
+  const [etuoviUrl, setEtuoviUrl] = useState('');
+  const [isFetching, setIsFetching] = useState(false);
 
-  const getDefaultFormData = React.useCallback(() => ({
+  const getDefaultFormData = (): InvestmentInputData => ({
+    id: initialValues?.id,
     deptFreePrice: initialValues?.deptFreePrice ?? 100000,
     deptShare: initialValues?.deptShare ?? 0,
     transferTaxPercent: initialValues?.transferTaxPercent ?? 2,
@@ -55,35 +62,16 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
     loanInterestPercent: initialValues?.loanInterestPercent ?? 0,
     loanPeriod: initialValues?.loanPeriod ?? 0,
     name: initialValues?.name ?? '',
-  }), [initialValues]);
+  });
 
-  const [formData, setFormData] = React.useState<InvestmentInputData>(getDefaultFormData());
+  const [data, setData] = useState<InvestmentInputData>(getDefaultFormData());
 
-  // Reset form when initialValues change (e.g., when switching tabs or clearing)
-  React.useEffect(() => {
-    setFormData(getDefaultFormData());
-  }, [getDefaultFormData]);
+  const dataService = new DataService<InvestmentInputData>({
+    context: investmentCalculationContext,
+  });
 
-  const handleChange = (field: keyof InvestmentInputData) => (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = event.target.value === '' ? 0 : Number(event.target.value);
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      name: event.target.value,
-    }));
-  };
-
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    onCalculate(formData);
+  const handleChange = (field: keyof InvestmentInputData, value: unknown) => {
+    setData(dataService.updateNestedData(data, field, value));
   };
 
   const isValidEtuoviUrl = (url: string): boolean => {
@@ -108,16 +96,16 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
         { url: etuoviUrl }
       );
 
-      const data = response.data;
-      setFormData(prev => ({
+      const fetchedData = response.data;
+      setData(prev => ({
         ...prev,
-        deptFreePrice: data.deptFreePrice,
-        deptShare: data.deptShare ?? prev.deptShare,
-        apartmentSize: data.apartmentSize,
-        maintenanceFee: data.maintenanceFee,
-        waterCharge: data.waterCharge ?? prev.waterCharge,
-        chargeForFinancialCosts: data.chargeForFinancialCosts ?? prev.chargeForFinancialCosts,
-        name: data.address || prev.name,
+        deptFreePrice: fetchedData.deptFreePrice,
+        deptShare: fetchedData.deptShare ?? prev.deptShare,
+        apartmentSize: fetchedData.apartmentSize,
+        maintenanceFee: fetchedData.maintenanceFee,
+        waterCharge: fetchedData.waterCharge ?? prev.waterCharge,
+        chargeForFinancialCosts: fetchedData.chargeForFinancialCosts ?? prev.chargeForFinancialCosts,
+        name: fetchedData.address || prev.name,
       }));
 
       showToast({ message: t('investment-calculator:fetchSuccess'), severity: 'success' });
@@ -129,8 +117,13 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
     }
   };
 
-  return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2, maxWidth: 800 }}>
+  const getFieldErrorProps = (fieldErrors: Partial<Record<keyof InvestmentInputData, string>>, field: keyof InvestmentInputData) => ({
+    error: !!fieldErrors[field],
+    helperText: fieldErrors[field],
+  });
+
+  const renderFormContent = (fieldErrors: Partial<Record<keyof InvestmentInputData, string>>) => (
+    <Box sx={{ mt: 2, maxWidth: 800 }}>
       <Grid container spacing={2}>
         {/* Etuovi URL fetch section */}
         <Grid size={{ xs: 12 }}>
@@ -170,47 +163,45 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
         <Grid size={{ xs: 12 }}>
           <AlisaTextField
             label={t('investment-calculator:name')}
-            value={formData.name}
-            onChange={handleNameChange}
-            required
+            value={data.name || ''}
+            onChange={(e) => handleChange('name', e.target.value)}
+            {...getFieldErrorProps(fieldErrors, 'name')}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
             label={t('investment-calculator:deptFreePrice')}
-            value={formData.deptFreePrice}
-            onChange={handleChange('deptFreePrice')}
+            value={data.deptFreePrice}
+            onChange={(e) => handleChange('deptFreePrice', Number(e.target.value) || 0)}
             step={1000}
-            required
+            {...getFieldErrorProps(fieldErrors, 'deptFreePrice')}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
             label={t('investment-calculator:deptShare')}
-            value={formData.deptShare}
-            onChange={handleChange('deptShare')}
+            value={data.deptShare}
+            onChange={(e) => handleChange('deptShare', Number(e.target.value) || 0)}
             step={1000}
-            required
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
             label={t('investment-calculator:transferTaxPercent')}
-            value={formData.transferTaxPercent}
-            onChange={handleChange('transferTaxPercent')}
+            value={data.transferTaxPercent}
+            onChange={(e) => handleChange('transferTaxPercent', Number(e.target.value) || 0)}
             step={0.1}
-            required
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
             label={t('investment-calculator:apartmentSize')}
-            value={formData.apartmentSize ?? 0}
-            onChange={handleChange('apartmentSize')}
+            value={data.apartmentSize ?? 0}
+            onChange={(e) => handleChange('apartmentSize', Number(e.target.value) || 0)}
             step={1}
           />
         </Grid>
@@ -226,28 +217,27 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
             label={t('investment-calculator:maintenanceFee')}
-            value={formData.maintenanceFee}
-            onChange={handleChange('maintenanceFee')}
+            value={data.maintenanceFee}
+            onChange={(e) => handleChange('maintenanceFee', Number(e.target.value) || 0)}
             step={10}
-            required
+            {...getFieldErrorProps(fieldErrors, 'maintenanceFee')}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
             label={t('investment-calculator:chargeForFinancialCosts')}
-            value={formData.chargeForFinancialCosts}
-            onChange={handleChange('chargeForFinancialCosts')}
+            value={data.chargeForFinancialCosts}
+            onChange={(e) => handleChange('chargeForFinancialCosts', Number(e.target.value) || 0)}
             step={10}
-            required
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
             label={t('investment-calculator:waterCharge')}
-            value={formData.waterCharge ?? 0}
-            onChange={handleChange('waterCharge')}
+            value={data.waterCharge ?? 0}
+            onChange={(e) => handleChange('waterCharge', Number(e.target.value) || 0)}
             step={5}
           />
         </Grid>
@@ -263,10 +253,10 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
             label={t('investment-calculator:rentPerMonth')}
-            value={formData.rentPerMonth}
-            onChange={handleChange('rentPerMonth')}
+            value={data.rentPerMonth}
+            onChange={(e) => handleChange('rentPerMonth', Number(e.target.value) || 0)}
             step={50}
-            required
+            {...getFieldErrorProps(fieldErrors, 'rentPerMonth')}
           />
         </Grid>
 
@@ -281,8 +271,8 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
             label={t('investment-calculator:downPayment')}
-            value={formData.downPayment ?? 0}
-            onChange={handleChange('downPayment')}
+            value={data.downPayment ?? 0}
+            onChange={(e) => handleChange('downPayment', Number(e.target.value) || 0)}
             step={1000}
           />
         </Grid>
@@ -290,8 +280,8 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
             label={t('investment-calculator:loanInterestPercent')}
-            value={formData.loanInterestPercent ?? 0}
-            onChange={handleChange('loanInterestPercent')}
+            value={data.loanInterestPercent ?? 0}
+            onChange={(e) => handleChange('loanInterestPercent', Number(e.target.value) || 0)}
             step={0.1}
           />
         </Grid>
@@ -299,21 +289,37 @@ function InvestmentCalculatorForm({ t, onCalculate, initialValues }: InvestmentC
         <Grid size={{ xs: 12, sm: 6 }}>
           <AlisaNumberField
             label={t('investment-calculator:loanPeriod')}
-            value={formData.loanPeriod ?? 0}
-            onChange={handleChange('loanPeriod')}
+            value={data.loanPeriod ?? 0}
+            onChange={(e) => handleChange('loanPeriod', Number(e.target.value) || 0)}
             step={1}
-          />
-        </Grid>
-
-        <Grid size={{ xs: 12 }}>
-          <AlisaButton
-            type="submit"
-            label={t('investment-calculator:calculate')}
           />
         </Grid>
       </Grid>
     </Box>
   );
+
+  return (
+    <AlisaFormHandler<InvestmentInputData>
+      id={id}
+      dataService={dataService}
+      data={data}
+      renderForm={renderFormContent}
+      onSetData={setData}
+      validationRules={{
+        name: { required: true },
+        deptFreePrice: { required: true, min: 1 },
+        maintenanceFee: { min: 0 },
+        rentPerMonth: { required: true, min: 1 },
+      }}
+      translation={{
+        cancelButton: t('common:cancel'),
+        submitButton: t('common:save'),
+        validationMessageTitle: t('common:validationErrorTitle'),
+      }}
+      onCancel={onCancel}
+      onAfterSubmit={onAfterSubmit}
+    />
+  );
 }
 
-export default withTranslation(['investment-calculator'])(InvestmentCalculatorForm);
+export default withTranslation(['investment-calculator', 'common'])(InvestmentCalculatorForm);

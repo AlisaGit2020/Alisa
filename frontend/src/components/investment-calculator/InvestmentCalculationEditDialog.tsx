@@ -1,11 +1,9 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Card, CardContent } from "@mui/material";
 import React from "react";
-import { AxiosResponse } from "axios";
 import ApiClient from "@alisa-lib/api-client";
 import InvestmentCalculatorForm, { InvestmentInputData } from "./InvestmentCalculatorForm";
-import InvestmentCalculatorResults, { InvestmentResults, SavedInvestmentCalculation } from "./InvestmentCalculatorResults";
-import { AlisaDialog, useToast } from "../alisa";
+import { SavedInvestmentCalculation } from "./InvestmentCalculatorResults";
+import { AlisaDialog } from "../alisa";
 
 interface InvestmentCalculationEditDialogProps extends WithTranslation {
   calculationId: number;
@@ -22,10 +20,7 @@ function InvestmentCalculationEditDialog({
   onSaved,
 }: InvestmentCalculationEditDialogProps) {
   const [calculation, setCalculation] = React.useState<SavedInvestmentCalculation | null>(null);
-  const [results, setResults] = React.useState<InvestmentResults | null>(null);
-  const [inputData, setInputData] = React.useState<InvestmentInputData | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const { showToast } = useToast();
 
   const loadCalculation = React.useCallback(async () => {
     try {
@@ -35,8 +30,6 @@ function InvestmentCalculationEditDialog({
         calculationId
       );
       setCalculation(data);
-      setResults(data); // Set initial results from saved calculation
-      setInputData(data); // Set initial input data
     } catch (error) {
       console.error('Error loading calculation:', error);
     } finally {
@@ -50,34 +43,28 @@ function InvestmentCalculationEditDialog({
     }
   }, [open, calculationId, loadCalculation]);
 
-  const handleCalculate = async (data: InvestmentInputData) => {
-    try {
-      setInputData(data); // Store input data for saving
-      const response = await ApiClient.post('real-estate/investment/calculate', data, true) as unknown as AxiosResponse<InvestmentResults>;
-      setResults(response.data);
-    } catch (error) {
-      console.error('Calculation error:', error);
+  const handleAfterSubmit = () => {
+    if (onSaved) {
+      onSaved();
     }
+    onClose();
   };
 
-  const handleSave = async () => {
-    if (!inputData) {
-      console.error('No input data to save');
-      return;
-    }
-
-    try {
-      await ApiClient.put('real-estate/investment', calculationId, inputData);
-      showToast({ message: t("common:toast.saveSuccess"), severity: "success" });
-
-      if (onSaved) {
-        onSaved();
-      }
-      onClose();
-    } catch (error) {
-      console.error('Save error:', error);
-    }
-  };
+  const convertToInputData = (calc: SavedInvestmentCalculation): Partial<InvestmentInputData> => ({
+    id: calc.id,
+    deptFreePrice: calc.deptFreePrice,
+    deptShare: calc.deptShare,
+    transferTaxPercent: calc.transferTaxPercent,
+    maintenanceFee: calc.maintenanceFee,
+    chargeForFinancialCosts: calc.chargeForFinancialCosts,
+    rentPerMonth: calc.rentPerMonth,
+    apartmentSize: calc.apartmentSize,
+    waterCharge: calc.waterCharge,
+    downPayment: calc.downPayment,
+    loanInterestPercent: calc.loanInterestPercent,
+    loanPeriod: calc.loanPeriod,
+    name: calc.name,
+  });
 
   return (
     <AlisaDialog
@@ -89,19 +76,12 @@ function InvestmentCalculationEditDialog({
       {loading ? (
         <div>{t('common:loading')}</div>
       ) : (
-        <Card>
-          <CardContent>
-            <InvestmentCalculatorForm
-              onCalculate={handleCalculate}
-              initialValues={calculation || undefined}
-            />
-            <InvestmentCalculatorResults
-              results={results}
-              onSave={handleSave}
-              showSaveButton={true}
-            />
-          </CardContent>
-        </Card>
+        <InvestmentCalculatorForm
+          id={calculationId}
+          initialValues={calculation ? convertToInputData(calculation) : undefined}
+          onCancel={onClose}
+          onAfterSubmit={handleAfterSubmit}
+        />
       )}
     </AlisaDialog>
   );

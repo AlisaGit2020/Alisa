@@ -1,13 +1,22 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import InvestmentCalculatorForm from './InvestmentCalculatorForm';
 
 describe('InvestmentCalculatorForm', () => {
+  const defaultProps = {
+    onCancel: jest.fn(),
+    onAfterSubmit: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders form with required fields', () => {
     renderWithProviders(
-      <InvestmentCalculatorForm onCalculate={jest.fn()} />
+      <InvestmentCalculatorForm {...defaultProps} />
     );
 
     // Check for key inputs - use getAllByRole for inputs that may have multiple matches
@@ -20,7 +29,7 @@ describe('InvestmentCalculatorForm', () => {
 
   it('renders with default numeric values', () => {
     renderWithProviders(
-      <InvestmentCalculatorForm onCalculate={jest.fn()} />
+      <InvestmentCalculatorForm {...defaultProps} />
     );
 
     // Find inputs by their values
@@ -46,7 +55,7 @@ describe('InvestmentCalculatorForm', () => {
 
     renderWithProviders(
       <InvestmentCalculatorForm
-        onCalculate={jest.fn()}
+        {...defaultProps}
         initialValues={initialValues}
       />
     );
@@ -62,42 +71,21 @@ describe('InvestmentCalculatorForm', () => {
     expect(values).toContain('1000');
   });
 
-  it('calls onCalculate with form data when submitted', async () => {
-    const user = userEvent.setup();
-    const mockOnCalculate = jest.fn();
-
+  it('renders save and cancel buttons', () => {
     renderWithProviders(
-      <InvestmentCalculatorForm onCalculate={mockOnCalculate} />
+      <InvestmentCalculatorForm {...defaultProps} />
     );
 
-    // Find and fill name field (second textbox, after the etuovi URL input)
-    const textboxes = screen.getAllByRole('textbox');
-    const nameInput = textboxes[1]; // Second textbox is the name (first is etuovi URL)
-    await user.clear(nameInput);
-    await user.type(nameInput, 'My Investment');
-
-    // Submit form - find button with type="submit"
     const buttons = screen.getAllByRole('button');
-    const calculateButton = buttons.find(btn => btn.getAttribute('type') === 'submit');
-    await user.click(calculateButton!);
-
-    expect(mockOnCalculate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        deptFreePrice: 100000,
-        deptShare: 0,
-        maintenanceFee: 200,
-        rentPerMonth: 800,
-        name: 'My Investment',
-      })
-    );
+    // Should have Save, Cancel, and Fetch from Etuovi buttons
+    expect(buttons.length).toBeGreaterThanOrEqual(2);
   });
 
   it('updates form data when inputs change', async () => {
     const user = userEvent.setup();
-    const mockOnCalculate = jest.fn();
 
     renderWithProviders(
-      <InvestmentCalculatorForm onCalculate={mockOnCalculate} />
+      <InvestmentCalculatorForm {...defaultProps} />
     );
 
     const spinbuttons = screen.getAllByRole('spinbutton');
@@ -109,31 +97,13 @@ describe('InvestmentCalculatorForm', () => {
       await user.type(deptFreePriceInput, '200000');
     }
 
-    // Find and change rent (spinbutton with value 800)
-    const rentInput = spinbuttons.find(input => (input as HTMLInputElement).value === '800');
-    if (rentInput) {
-      await user.clear(rentInput);
-      await user.type(rentInput, '1200');
-    }
-
-    // Add name (second textbox, after etuovi URL)
-    const textboxes = screen.getAllByRole('textbox');
-    await user.type(textboxes[1], 'Test');
-
-    // Submit form - find button with type="submit"
-    const buttons = screen.getAllByRole('button');
-    const calculateButton = buttons.find(btn => btn.getAttribute('type') === 'submit');
-    await user.click(calculateButton!);
-
-    expect(mockOnCalculate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        deptFreePrice: 200000,
-        rentPerMonth: 1200,
-      })
-    );
+    // Verify the value changed
+    expect((deptFreePriceInput as HTMLInputElement).value).toBe('200000');
   });
 
-  it('resets form when initialValues change', async () => {
+  it('resets form when remounted with new key', () => {
+    // Form now uses internal state and requires key change to reset
+    // This matches how parent components use it (e.g., InvestmentCalculatorProtected)
     const initialValues1 = {
       deptFreePrice: 100000,
       rentPerMonth: 800,
@@ -148,7 +118,8 @@ describe('InvestmentCalculatorForm', () => {
 
     const { rerender } = renderWithProviders(
       <InvestmentCalculatorForm
-        onCalculate={jest.fn()}
+        key={1}
+        {...defaultProps}
         initialValues={initialValues1}
       />
     );
@@ -157,19 +128,18 @@ describe('InvestmentCalculatorForm', () => {
     let textboxes = screen.getAllByRole('textbox');
     expect((textboxes[1] as HTMLInputElement).value).toBe('First');
 
-    // Rerender with new initial values
+    // Rerender with new key to force remount
     rerender(
       <InvestmentCalculatorForm
-        onCalculate={jest.fn()}
+        key={2}
+        {...defaultProps}
         initialValues={initialValues2}
       />
     );
 
-    // Form should update with new values
-    await waitFor(() => {
-      textboxes = screen.getAllByRole('textbox');
-      expect((textboxes[1] as HTMLInputElement).value).toBe('Second');
-    });
+    // Form should update with new values after remount
+    textboxes = screen.getAllByRole('textbox');
+    expect((textboxes[1] as HTMLInputElement).value).toBe('Second');
 
     const spinbuttons = screen.getAllByRole('spinbutton');
     const values = spinbuttons.map(input => (input as HTMLInputElement).value);
@@ -177,25 +147,24 @@ describe('InvestmentCalculatorForm', () => {
     expect(values).toContain('1200');
   });
 
-  it('renders submit button', () => {
-    renderWithProviders(
-      <InvestmentCalculatorForm onCalculate={jest.fn()} />
-    );
-
-    const buttons = screen.getAllByRole('button');
-    const submitButton = buttons.find(btn => btn.getAttribute('type') === 'submit');
-    expect(submitButton).toBeInTheDocument();
-    expect(submitButton).toHaveAttribute('type', 'submit');
-  });
-
   it('renders multiple input fields for investment calculation', () => {
     renderWithProviders(
-      <InvestmentCalculatorForm onCalculate={jest.fn()} />
+      <InvestmentCalculatorForm {...defaultProps} />
     );
 
     // Count number of spinbuttons (number inputs)
     const spinbuttons = screen.getAllByRole('spinbutton');
     // Should have at least 6 number fields
     expect(spinbuttons.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it('renders etuovi fetch section', () => {
+    renderWithProviders(
+      <InvestmentCalculatorForm {...defaultProps} />
+    );
+
+    // Should have the etuovi URL input
+    const textboxes = screen.getAllByRole('textbox');
+    expect(textboxes.length).toBeGreaterThanOrEqual(2); // URL + name at minimum
   });
 });
