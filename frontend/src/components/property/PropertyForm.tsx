@@ -16,6 +16,7 @@ import { useToast } from '../alisa';
 import axios from 'axios';
 import ApiClient from '@alisa-lib/api-client';
 import { VITE_API_URL } from '../../constants';
+import { PROPERTY_LIST_CHANGE_EVENT } from '../layout/PropertyBadge';
 
 
 function PropertyForm({ t }: WithTranslation) {
@@ -86,6 +87,11 @@ function PropertyForm({ t }: WithTranslation) {
         // Note: ApiClient.post returns AxiosResponse, so we need to handle both cases
         const savedProperty = 'data' in result && result.data ? (result.data as DTO<PropertyInput>) : result;
         const propertyId = savedProperty.id;
+
+        // Notify PropertyBadge when a new property is created
+        if (!idParam && propertyId) {
+            window.dispatchEvent(new CustomEvent(PROPERTY_LIST_CHANGE_EVENT));
+        }
 
         if (pendingPhoto && propertyId) {
             try {
