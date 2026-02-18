@@ -345,6 +345,7 @@ function TransactionForm({
           onSetData={setData}
           validationRules={{
             description: { required: true },
+            receiver: { required: true },
           }}
           translation={{
             cancelButton: t("cancel"),
