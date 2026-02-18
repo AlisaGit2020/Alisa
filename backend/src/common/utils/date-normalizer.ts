@@ -1,4 +1,16 @@
 /**
+ * Detects if a timezone rollover is needed and returns the corrected date.
+ * When UTC hour >= 22, the user's local date is likely the next day.
+ */
+function applyTimezoneRollover(date: Date): Date {
+  const hours = date.getUTCHours();
+  if (hours >= 22) {
+    date.setUTCDate(date.getUTCDate() + 1);
+  }
+  return date;
+}
+
+/**
  * Normalizes a date to midnight UTC of the user's intended calendar date.
  *
  * When users enter a date like "01.01.2025", the frontend sends it as
@@ -19,16 +31,44 @@ export function normalizeAccountingDate(
   const date = new Date(value);
   if (isNaN(date.getTime())) return undefined;
 
-  const hours = date.getUTCHours();
-
-  // If time is 22:00-23:59 UTC, the user's local date is likely the next day
-  // (covers timezones up to UTC+2, which includes Finland)
-  if (hours >= 22) {
-    date.setUTCDate(date.getUTCDate() + 1);
-  }
+  applyTimezoneRollover(date);
 
   // Set to midnight UTC
   date.setUTCHours(0, 0, 0, 0);
+
+  return date;
+}
+
+/**
+ * Normalizes a filter start date to midnight UTC of the user's intended date.
+ * Used for $gte and $between start date filters.
+ *
+ * @param value - ISO date string or Date object
+ * @returns Date at midnight UTC of the intended calendar date
+ */
+export function normalizeFilterStartDate(value: string | Date): Date {
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return date;
+
+  applyTimezoneRollover(date);
+  date.setUTCHours(0, 0, 0, 0);
+
+  return date;
+}
+
+/**
+ * Normalizes a filter end date to end of day (23:59:59.999) UTC.
+ * Used for $lte and $between end date filters.
+ *
+ * @param value - ISO date string or Date object
+ * @returns Date at end of day UTC of the intended calendar date
+ */
+export function normalizeFilterEndDate(value: string | Date): Date {
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return date;
+
+  applyTimezoneRollover(date);
+  date.setUTCHours(23, 59, 59, 999);
 
   return date;
 }
