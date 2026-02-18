@@ -3,22 +3,24 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 /**
  * Migration to fix dates that were incorrectly stored due to timezone shift.
  *
- * Problem: When users in UTC+2 (Finland) selected a date like 01.01.2025,
- * the frontend sent it as 2024-12-31T22:00:00Z, which was stored as-is.
- * This caused transactions to appear in December 2024 instead of January 2025.
+ * Problem: When users in UTC+2/UTC+3 (Finland) selected a date like 01.01.2025,
+ * the frontend sent it as 2024-12-31T22:00:00Z (winter) or 2024-12-31T21:00:00Z
+ * (summer), which was stored as-is. This caused transactions to appear in
+ * December 2024 instead of January 2025.
  *
- * Solution: For any date with UTC hour >= 22, round up to the next day at midnight.
+ * Solution: For any date with UTC hour >= 21, round up to the next day at midnight.
+ * Threshold of 21 covers both UTC+2 (winter) and UTC+3 (summer) timezones.
  *
  * After running this migration, use the /statistics/recalculate endpoint
  * to recalculate all property statistics.
  */
-export class FixTimezoneShiftedDates1708200000000 implements MigrationInterface {
+export class FixTimezoneShiftedDates1739864400000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Fix transaction.transactionDate
     const transactionDateResult = await queryRunner.query(`
       UPDATE transaction
       SET "transactionDate" = date_trunc('day', "transactionDate" + interval '1 day')
-      WHERE EXTRACT(HOUR FROM "transactionDate") >= 22
+      WHERE EXTRACT(HOUR FROM "transactionDate") >= 21
       RETURNING id
     `);
     console.log(
@@ -29,7 +31,7 @@ export class FixTimezoneShiftedDates1708200000000 implements MigrationInterface 
     const transactionAccountingResult = await queryRunner.query(`
       UPDATE transaction
       SET "accountingDate" = date_trunc('day', "accountingDate" + interval '1 day')
-      WHERE EXTRACT(HOUR FROM "accountingDate") >= 22
+      WHERE EXTRACT(HOUR FROM "accountingDate") >= 21
       RETURNING id
     `);
     console.log(
@@ -41,7 +43,7 @@ export class FixTimezoneShiftedDates1708200000000 implements MigrationInterface 
       UPDATE income
       SET "accountingDate" = date_trunc('day', "accountingDate" + interval '1 day')
       WHERE "accountingDate" IS NOT NULL
-        AND EXTRACT(HOUR FROM "accountingDate") >= 22
+        AND EXTRACT(HOUR FROM "accountingDate") >= 21
       RETURNING id
     `);
     console.log(`Fixed ${incomeResult.length} income.accountingDate records`);
@@ -51,7 +53,7 @@ export class FixTimezoneShiftedDates1708200000000 implements MigrationInterface 
       UPDATE expense
       SET "accountingDate" = date_trunc('day', "accountingDate" + interval '1 day')
       WHERE "accountingDate" IS NOT NULL
-        AND EXTRACT(HOUR FROM "accountingDate") >= 22
+        AND EXTRACT(HOUR FROM "accountingDate") >= 21
       RETURNING id
     `);
     console.log(`Fixed ${expenseResult.length} expense.accountingDate records`);

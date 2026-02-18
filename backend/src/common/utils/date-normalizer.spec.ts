@@ -66,8 +66,8 @@ describe('normalizeAccountingDate', () => {
   });
 
   // Additional edge cases
-  it('handles Dec 31 at 21:59 UTC (no rollover needed)', () => {
-    const input = '2024-12-31T21:59:00.000Z';
+  it('handles Dec 31 at 20:59 UTC (no rollover needed)', () => {
+    const input = '2024-12-31T20:59:00.000Z';
     const result = normalizeAccountingDate(input);
 
     expect(result.getUTCFullYear()).toBe(2024);
@@ -76,17 +76,16 @@ describe('normalizeAccountingDate', () => {
     expect(result.getUTCHours()).toBe(0);
   });
 
-  it('handles summer time (UTC+3 in Finland)', () => {
+  it('rounds up dates at 21:00 UTC for summer time (UTC+3 in Finland)', () => {
     // User in UTC+3 (Finland summer) enters June 15, 2025 at midnight local time
     // This becomes 2025-06-14T21:00:00Z
     const input = '2025-06-14T21:00:00.000Z';
     const result = normalizeAccountingDate(input);
 
-    // 21:00 UTC is NOT >= 22, so no rollover - this is the expected behavior
-    // For UTC+3, users would need to select dates carefully or use afternoon times
+    // 21:00 UTC >= 21, so it rolls over to June 15 (the user's intended date)
     expect(result.getUTCFullYear()).toBe(2025);
     expect(result.getUTCMonth()).toBe(5); // June
-    expect(result.getUTCDate()).toBe(14);
+    expect(result.getUTCDate()).toBe(15);
     expect(result.getUTCHours()).toBe(0);
   });
 

@@ -1,10 +1,14 @@
 /**
  * Detects if a timezone rollover is needed and returns the corrected date.
- * When UTC hour >= 22, the user's local date is likely the next day.
+ * When UTC hour >= 21, the user's local date is likely the next day.
+ *
+ * Threshold of 21 covers:
+ * - UTC+2 (Finland winter): midnight local = 22:00 UTC
+ * - UTC+3 (Finland summer): midnight local = 21:00 UTC
  */
 function applyTimezoneRollover(date: Date): Date {
   const hours = date.getUTCHours();
-  if (hours >= 22) {
+  if (hours >= 21) {
     date.setUTCDate(date.getUTCDate() + 1);
   }
   return date;
