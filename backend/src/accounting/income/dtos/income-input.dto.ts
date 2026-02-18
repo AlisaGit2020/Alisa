@@ -3,6 +3,7 @@ import { Transform } from 'class-transformer';
 import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
 import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/property-input.dto';
 import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
+import { normalizeAccountingDate } from '@alisa-backend/common/utils/date-normalizer';
 
 export class IncomeInputDto {
   id?: number;
@@ -19,7 +20,7 @@ export class IncomeInputDto {
   totalAmount: number = 0;
 
   @IsOptional()
-  @Transform(({ value }) => (value ? new Date(value) : undefined))
+  @Transform(({ value }) => normalizeAccountingDate(value))
   accountingDate?: Date;
 
   incomeType?: IncomeTypeInputDto;
