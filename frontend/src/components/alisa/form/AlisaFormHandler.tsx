@@ -5,9 +5,11 @@ import DataService from "../../../lib/data-service";
 import AlisaLoadingProgress from "../AlisaLoadingProgress";
 import { useToast } from "../toast";
 import { AxiosError } from "axios";
+import { useFormValidation, FieldRules } from "../../../lib/useFormValidation";
 
-function AlisaFormHandler<T extends object>(props: {
-  formComponents: React.JSX.Element;
+interface AlisaFormHandlerProps<T extends object> {
+  formComponents?: React.JSX.Element;
+  renderForm?: (fieldErrors: Partial<Record<keyof T, string>>) => React.JSX.Element;
   id?: number;
   data?: T;
   dataService: DataService<T>;
@@ -17,12 +19,15 @@ function AlisaFormHandler<T extends object>(props: {
     errorMessageTitle?: string;
     validationMessageTitle?: string;
   };
+  validationRules?: Partial<Record<keyof T, FieldRules>>;
   submitButtonIcon?: ReactNode;
   onCancel: () => void;
   onAfterSubmit: () => void;
   onSetData: React.Dispatch<React.SetStateAction<T>>;
   onSaveResult?: (result: T) => Promise<void>;
-}) {
+}
+
+function AlisaFormHandler<T extends object>(props: AlisaFormHandlerProps<T>) {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const [errorMessage, setErrorMessage] = React.useState<string>();
@@ -31,6 +36,11 @@ function AlisaFormHandler<T extends object>(props: {
   );
   const [dataService] = React.useState<DataService<T>>(props.dataService);
   const [ready, setReady] = React.useState<boolean>(false);
+
+  const { fieldErrors, validate, clearErrors } = useFormValidation<T>(
+    props.validationRules ?? {},
+    t
+  );
 
   React.useEffect(() => {
     const fetchData = async (id: number) => {
@@ -50,9 +60,16 @@ function AlisaFormHandler<T extends object>(props: {
 
   const handleSubmit = async () => {
     resetErrorMessages();
+    clearErrors();
 
     if (props.data === undefined) {
       setErrorMessage("Cannot save when data is missing");
+      return;
+    }
+
+    // Frontend validation
+    if (props.validationRules && !validate(props.data)) {
+      showToast({ message: t("common:validation.checkFields"), severity: "warning" });
       return;
     }
 
@@ -90,6 +107,11 @@ function AlisaFormHandler<T extends object>(props: {
     setErrorMessage("");
   };
 
+  // Determine which form components to render
+  const formContent = props.renderForm
+    ? props.renderForm(fieldErrors)
+    : props.formComponents;
+
   if (ready) {
     return (
       <AlisaForm
@@ -98,7 +120,7 @@ function AlisaFormHandler<T extends object>(props: {
         cancelButtonText={props.translation.cancelButton}
         errorMessageTitle={props.translation.errorMessageTitle}
         validationMessageTitle={props.translation.validationMessageTitle}
-        formComponents={props.formComponents}
+        formComponents={formContent!}
         errorMessage={errorMessage}
         validationMessage={validationMessage}
         onSubmit={handleSubmit}
