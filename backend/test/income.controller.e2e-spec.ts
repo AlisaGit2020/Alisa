@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { AuthService } from '@alisa-backend/auth/auth.service';
@@ -44,6 +44,7 @@ const getIncomeInputPost = (propertyId: number): IncomeInputDto => ({
 });
 
 const getIncomeInputPut = (propertyId: number): IncomeInputDto => ({
+  incomeTypeId: 1,
   description: 'Yhtiövastike',
   amount: 94,
   quantity: 2,
@@ -78,6 +79,7 @@ describe('IncomeController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ transform: true }));
     await app.init();
     server = app.getHttpServer();
 
@@ -280,6 +282,23 @@ describe('IncomeController (e2e)', () => {
       createdIncomeId = response.body.id;
       expect(createdIncomeId).toBeGreaterThan(0);
       expect(response.body.description).toBe(inputPost.description);
+    });
+
+    it('returns 400 when accountingDate is invalid', async () => {
+      const inputPost = {
+        ...getIncomeInputPost(mainUser.properties[0].id),
+        accountingDate: 'Invalid Date',
+      };
+
+      const response = await request(server)
+        .post('/accounting/income')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send(inputPost)
+        .expect(400);
+
+      expect(response.body.message).toEqual(
+        expect.arrayContaining([expect.stringContaining('accountingDate')]),
+      );
     });
   });
 

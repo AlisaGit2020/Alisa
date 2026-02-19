@@ -79,6 +79,7 @@ const fi = {
       max: "Arvon tulee olla enintään {{max}}",
       minLength: "Vähintään {{min}} merkkiä",
       maxLength: "Enintään {{max}} merkkiä",
+      invalidDate: "Syötä kelvollinen päivämäärä",
     },
 
     toast: {

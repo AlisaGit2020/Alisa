@@ -4,6 +4,7 @@ import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/
 import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/property-input.dto';
 import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
 import { normalizeAccountingDate } from '@alisa-backend/common/utils/date-normalizer';
+import { IsValidDate } from '@alisa-backend/common/validators/is-valid-date.validator';
 
 export class IncomeInputDto {
   id?: number;
@@ -21,6 +22,7 @@ export class IncomeInputDto {
 
   @IsOptional()
   @Transform(({ value }) => normalizeAccountingDate(value))
+  @IsValidDate()
   accountingDate?: Date;
 
   incomeType?: IncomeTypeInputDto;

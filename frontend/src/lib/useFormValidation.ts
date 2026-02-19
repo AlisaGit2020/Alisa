@@ -9,6 +9,7 @@ export interface FieldRules {
   max?: number;
   minLength?: number;
   maxLength?: number;
+  validDate?: boolean;
 }
 
 export interface UseFormValidationResult<T> {
@@ -74,6 +75,14 @@ export function useFormValidation<T extends object>(
         if (fieldRules.maxLength !== undefined && typeof value === "string") {
           if (value.length > fieldRules.maxLength) {
             errors[field] = t("common:validation.maxLength", { max: fieldRules.maxLength });
+            continue;
+          }
+        }
+
+        // Valid date check
+        if (fieldRules.validDate && value instanceof Date) {
+          if (isNaN(value.getTime())) {
+            errors[field] = t("common:validation.invalidDate");
             continue;
           }
         }
