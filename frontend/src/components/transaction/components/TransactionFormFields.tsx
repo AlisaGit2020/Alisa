@@ -60,6 +60,7 @@ function TransactionFormFields(props: TransactionFormFieldsProps) {
           autoComplete="off"
           autoFocus={true}
           onChange={(e) => handleChange("sender", e.target.value)}
+          {...getErrorProps("sender")}
         />
 
         <AlisaTextField
@@ -92,11 +93,13 @@ function TransactionFormFields(props: TransactionFormFieldsProps) {
           label={props.t("transactionDate")}
           value={props.data.transactionDate}
           onChange={(newValue) => handleChange("transactionDate", newValue)}
+          {...getErrorProps("transactionDate")}
         />
         <AlisaDatePicker
           label={props.t("accountingDate")}
           value={props.data.accountingDate}
           onChange={(newValue) => handleChange("accountingDate", newValue)}
+          {...getErrorProps("accountingDate")}
         />
       </Stack>
     </>

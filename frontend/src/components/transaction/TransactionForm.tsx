@@ -344,8 +344,11 @@ function TransactionForm({
           renderForm={renderFormContent}
           onSetData={setData}
           validationRules={{
-            description: { required: true },
+            sender: { required: true },
             receiver: { required: true },
+            description: { required: true },
+            transactionDate: { required: true },
+            accountingDate: { required: true },
           }}
           translation={{
             cancelButton: t("cancel"),
