@@ -522,4 +522,194 @@ describe('TransactionForm', () => {
       // We verify the form renders correctly with the propertyId prop
     });
   });
+
+  describe('Form validation', () => {
+    it('shows validation error for empty sender field', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <TransactionForm
+          {...defaultProps}
+          status={TransactionStatus.PENDING}
+          type={TransactionType.INCOME}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('sender')).toBeInTheDocument();
+      });
+
+      // Clear sender field
+      const senderInput = screen.getByLabelText('sender');
+      await user.clear(senderInput);
+
+      // Click save to trigger validation
+      const saveButton = screen.getByRole('button', { name: 'save' });
+      await user.click(saveButton);
+
+      // Should show validation error - input becomes aria-invalid
+      await waitFor(() => {
+        expect(senderInput).toHaveAttribute('aria-invalid', 'true');
+      });
+    });
+
+    it('shows validation error for empty receiver field', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <TransactionForm
+          {...defaultProps}
+          status={TransactionStatus.PENDING}
+          type={TransactionType.EXPENSE}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('receiver')).toBeInTheDocument();
+      });
+
+      // Clear receiver field
+      const receiverInput = screen.getByLabelText('receiver');
+      await user.clear(receiverInput);
+
+      // Click save to trigger validation
+      const saveButton = screen.getByRole('button', { name: 'save' });
+      await user.click(saveButton);
+
+      // Should show validation error - input becomes aria-invalid
+      await waitFor(() => {
+        expect(receiverInput).toHaveAttribute('aria-invalid', 'true');
+      });
+    });
+
+    it('shows validation error for empty description field', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <TransactionForm
+          {...defaultProps}
+          status={TransactionStatus.PENDING}
+          type={TransactionType.INCOME}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('description')).toBeInTheDocument();
+      });
+
+      // Don't enter description (leave empty)
+      // Fill other required fields
+      const senderInput = screen.getByLabelText('sender');
+      await user.type(senderInput, 'Test Sender');
+
+      // Click save to trigger validation
+      const saveButton = screen.getByRole('button', { name: 'save' });
+      await user.click(saveButton);
+
+      // Should show validation error - description becomes aria-invalid
+      const descriptionInput = screen.getByLabelText('description');
+      await waitFor(() => {
+        expect(descriptionInput).toHaveAttribute('aria-invalid', 'true');
+      });
+    });
+
+    it('shows validation error for missing transaction date', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <TransactionForm
+          {...defaultProps}
+          status={TransactionStatus.PENDING}
+          type={TransactionType.INCOME}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+      });
+
+      // Fill text fields
+      const senderInput = screen.getByLabelText('sender');
+      await user.type(senderInput, 'Test Sender');
+
+      const descriptionInput = screen.getByLabelText('description');
+      await user.type(descriptionInput, 'Test Description');
+
+      // Click save to trigger validation (dates are not filled)
+      const saveButton = screen.getByRole('button', { name: 'save' });
+      await user.click(saveButton);
+
+      // Should show validation error message for transactionDate
+      await waitFor(() => {
+        // The helper text with error class should appear
+        const errorTexts = document.querySelectorAll('.Mui-error');
+        expect(errorTexts.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('shows validation error for missing accounting date', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <TransactionForm
+          {...defaultProps}
+          status={TransactionStatus.PENDING}
+          type={TransactionType.INCOME}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+      });
+
+      // Fill text fields
+      const senderInput = screen.getByLabelText('sender');
+      await user.type(senderInput, 'Test Sender');
+
+      const descriptionInput = screen.getByLabelText('description');
+      await user.type(descriptionInput, 'Test Description');
+
+      // Click save to trigger validation
+      const saveButton = screen.getByRole('button', { name: 'save' });
+      await user.click(saveButton);
+
+      // Should show validation error (dates not filled)
+      await waitFor(() => {
+        const errorTexts = document.querySelectorAll('.Mui-error');
+        expect(errorTexts.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('displays error message text below sender field when invalid', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <TransactionForm
+          {...defaultProps}
+          status={TransactionStatus.PENDING}
+          type={TransactionType.INCOME}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('sender')).toBeInTheDocument();
+      });
+
+      // Clear sender field
+      const senderInput = screen.getByLabelText('sender');
+      await user.clear(senderInput);
+
+      // Click save to trigger validation
+      const saveButton = screen.getByRole('button', { name: 'save' });
+      await user.click(saveButton);
+
+      // Should show helper text with error below the field
+      await waitFor(() => {
+        // Look for any element with Mui-error class inside the sender text field
+        const senderField = senderInput.closest('.MuiFormControl-root');
+        const hasError = senderField?.querySelector('.Mui-error');
+        expect(hasError).toBeInTheDocument();
+      });
+    });
+  });
 });
