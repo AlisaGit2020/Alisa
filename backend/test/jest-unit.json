@@ -3,7 +3,7 @@
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": "../",
   "testEnvironment": "node",
-  "testRegex": "\\.service\\.spec\\.ts$",
+  "testRegex": "\\.(service|dto|transformer)\\.spec\\.ts$",
   "testPathIgnorePatterns": [
     "op-import\\.service-spec\\.ts$"
   ],

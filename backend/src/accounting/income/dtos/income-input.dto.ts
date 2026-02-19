@@ -5,6 +5,7 @@ import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/prope
 import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
 import { normalizeAccountingDate } from '@alisa-backend/common/utils/date-normalizer';
 import { IsValidDate } from '@alisa-backend/common/validators/is-valid-date.validator';
+import { toNumber } from '@alisa-backend/common/transformer/to-number.transformer';
 
 export class IncomeInputDto {
   id?: number;
@@ -12,11 +13,14 @@ export class IncomeInputDto {
   @IsNotEmpty()
   description: string = '';
 
+  @Transform(toNumber(0))
   amount: number = 0;
 
+  @Transform(toNumber(1))
   @Min(1)
   quantity: number = 1;
 
+  @Transform(toNumber(0))
   @Min(0.01)
   totalAmount: number = 0;
 

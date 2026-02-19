@@ -281,4 +281,171 @@ describe('EditableRows', () => {
       expect(mockOnHandleChange).toHaveBeenCalled();
     });
   });
+
+  it('calculates amount (unitPrice) when changedAmount updates and quantity is 1', async () => {
+    const mockOnHandleChange = jest.fn();
+
+    const { rerender } = renderWithProviders(
+      <EditableRows
+        transaction={mockTransaction}
+        type={TransactionType.EXPENSE}
+        onHandleChange={mockOnHandleChange}
+        changedDescription=""
+        changedAmount={0}
+      />
+    );
+
+    // Wait for initial row to be created
+    await waitFor(() => {
+      expect(mockOnHandleChange).toHaveBeenCalled();
+    });
+
+    mockOnHandleChange.mockClear();
+
+    // Simulate user entering amount in transaction form which triggers changedAmount
+    rerender(
+      <EditableRows
+        transaction={mockTransaction}
+        type={TransactionType.EXPENSE}
+        onHandleChange={mockOnHandleChange}
+        changedDescription=""
+        changedAmount={100}
+      />
+    );
+
+    // Wait for the effect to run
+    await waitFor(() => {
+      expect(mockOnHandleChange).toHaveBeenCalled();
+    });
+
+    // Get the last call arguments - the expense row should have amount calculated
+    const lastCall = mockOnHandleChange.mock.calls[mockOnHandleChange.mock.calls.length - 1];
+    const expenseRows = lastCall[0];
+
+    // With quantity=1 and totalAmount=100, amount should be 100 (not 0)
+    expect(expenseRows[0].totalAmount).toBe(100);
+    expect(expenseRows[0].amount).toBe(100); // This is the bug - amount stays 0
+  });
+
+  it('calculates amount (unitPrice) correctly when quantity is greater than 1', async () => {
+    const mockOnHandleChange = jest.fn();
+
+    // Start with a row that has quantity = 2
+    const transactionWithExpense = {
+      ...mockTransaction,
+      expenses: [
+        {
+          id: 0,
+          description: '',
+          quantity: 2,
+          amount: 0,
+          totalAmount: 0,
+          expenseTypeId: 1,
+        },
+      ],
+    };
+
+    const { rerender } = renderWithProviders(
+      <EditableRows
+        transaction={transactionWithExpense}
+        type={TransactionType.EXPENSE}
+        onHandleChange={mockOnHandleChange}
+        changedDescription=""
+        changedAmount={0}
+      />
+    );
+
+    // Wait for initial render
+    await waitFor(() => {
+      expect(screen.getByText(/rows/i)).toBeInTheDocument();
+    });
+
+    mockOnHandleChange.mockClear();
+
+    // Simulate changedAmount update
+    rerender(
+      <EditableRows
+        transaction={transactionWithExpense}
+        type={TransactionType.EXPENSE}
+        onHandleChange={mockOnHandleChange}
+        changedDescription=""
+        changedAmount={200}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockOnHandleChange).toHaveBeenCalled();
+    });
+
+    const lastCall = mockOnHandleChange.mock.calls[mockOnHandleChange.mock.calls.length - 1];
+    const expenseRows = lastCall[0];
+
+    // With quantity=2 and totalAmount=200, amount should be 100
+    expect(expenseRows[0].totalAmount).toBe(200);
+    expect(expenseRows[0].amount).toBe(100);
+  });
+
+  it('syncs data when transaction expenses are loaded (edit mode)', async () => {
+    const mockOnHandleChange = jest.fn();
+
+    // Start with transaction that has an ID but no expenses loaded yet
+    const initialTransaction = {
+      ...mockTransaction,
+      id: 123,
+      expenses: undefined,
+    };
+
+    const { rerender } = renderWithProviders(
+      <EditableRows
+        transaction={initialTransaction}
+        type={TransactionType.EXPENSE}
+        onHandleChange={mockOnHandleChange}
+        changedDescription=""
+        changedAmount={0}
+      />
+    );
+
+    // Wait for initial render
+    await waitFor(() => {
+      expect(screen.getByText(/rows/i)).toBeInTheDocument();
+    });
+
+    mockOnHandleChange.mockClear();
+
+    // Now simulate expenses being loaded (like when AlisaFormHandler fetches data)
+    const loadedExpenses = [
+      {
+        id: 1,
+        description: 'Loaded expense',
+        quantity: 1,
+        amount: 75.50,
+        totalAmount: 75.50,
+        expenseTypeId: 1,
+      },
+    ];
+
+    const updatedTransaction = {
+      ...mockTransaction,
+      id: 123,
+      expenses: loadedExpenses,
+    };
+
+    rerender(
+      <EditableRows
+        transaction={updatedTransaction}
+        type={TransactionType.EXPENSE}
+        onHandleChange={mockOnHandleChange}
+        changedDescription=""
+        changedAmount={0}
+      />
+    );
+
+    // Wait for the sync effect to run
+    await waitFor(() => {
+      // The data should be synced with the loaded expenses
+      // We can verify by checking that the description is rendered
+      const descriptionInput = screen.getByDisplayValue('Loaded expense');
+      expect(descriptionInput).toBeInTheDocument();
+    });
+  });
 });

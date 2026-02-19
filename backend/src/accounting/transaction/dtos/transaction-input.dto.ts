@@ -8,6 +8,7 @@ import {
 } from '@alisa-backend/common/types';
 import { normalizeAccountingDate } from '@alisa-backend/common/utils/date-normalizer';
 import { IsValidDate } from '@alisa-backend/common/validators/is-valid-date.validator';
+import { toNumber } from '@alisa-backend/common/transformer/to-number.transformer';
 
 export class TransactionInputDto {
   id?: number;
@@ -34,6 +35,7 @@ export class TransactionInputDto {
   @IsValidDate()
   accountingDate: Date = new Date();
 
+  @Transform(toNumber(0))
   amount: number = 0;
 
   propertyId?: number;
