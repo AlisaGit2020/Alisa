@@ -11,6 +11,7 @@ function AlisaNumberField(props: {
   error?: boolean;
   fullWidth?: boolean;
   helperText?: string;
+  placeholder?: string;
   width?: string;
   required?: boolean;
   step?: number;
@@ -19,12 +20,16 @@ function AlisaNumberField(props: {
     | undefined;
   onBlur?: () => void;
 }) {
+  // Shrink label when value is a number (including 0) to prevent label overlap
+  const hasValue = typeof props.value === 'number';
+
   return (
     <TextField
       fullWidth={props.fullWidth !== undefined ? props.fullWidth : true}
       type="number"
       label={props.label}
       value={props.value}
+      placeholder={props.placeholder}
       autoFocus={props.autoFocus !== undefined ? props.autoFocus : false}
       autoComplete={
         props.autoComplete !== undefined ? props.autoComplete : "off"
@@ -42,6 +47,7 @@ function AlisaNumberField(props: {
             <InputAdornment position="end">{props.adornment}</InputAdornment>
           ) : null,
         },
+        inputLabel: hasValue ? { shrink: true } : undefined,
         htmlInput: props.step !== undefined ? { step: props.step } : undefined,
       }}
     />
