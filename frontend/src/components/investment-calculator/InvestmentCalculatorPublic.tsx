@@ -7,6 +7,7 @@ import InvestmentCalculatorForm from "./InvestmentCalculatorForm";
 import LoginDialog from "../login/LoginDialog";
 import { useTranslation } from "react-i18next";
 import { useToast } from "../alisa";
+import { PageMeta } from "../seo/PageMeta";
 
 function InvestmentCalculatorPublic({ t }: WithTranslation) {
   const [loginDialogOpen, setLoginDialogOpen] = React.useState(false);
@@ -51,6 +52,11 @@ function InvestmentCalculatorPublic({ t }: WithTranslation) {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <PageMeta
+        titleKey="calculator.title"
+        descriptionKey="calculator.description"
+        path="/investment-calculator"
+      />
       {/* Simple language selector at the top */}
       <Box
         sx={{

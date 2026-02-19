@@ -11,6 +11,7 @@ import LoginDialog from "../login/LoginDialog";
 import LandingHeader from "./LandingHeader";
 import PricingSection from "./PricingSection";
 import InvestmentCalculatorForm from "../investment-calculator/InvestmentCalculatorForm";
+import { PageMeta } from "../seo/PageMeta";
 
 interface FeatureConfig {
   icon: React.ComponentType<SvgIconProps>;
@@ -65,6 +66,11 @@ function LandingPage({ t }: WithTranslation) {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <PageMeta
+        titleKey="landing.title"
+        descriptionKey="landing.description"
+        path="/"
+      />
       {/* Fixed Header */}
       <LandingHeader onLoginClick={handleLogin} />
 

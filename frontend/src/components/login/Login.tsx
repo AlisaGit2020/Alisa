@@ -12,6 +12,7 @@ import { WithTranslation, useTranslation, withTranslation } from 'react-i18next'
 import { loginContext } from '@alisa-lib/alisa-contexts';
 import { AlisaButton } from '../alisa';
 import { setCurrentUserId } from '@alisa-lib/user-storage';
+import { PageMeta } from '../seo/PageMeta';
 
 
 function Login({t}: WithTranslation) {
@@ -72,6 +73,11 @@ function Login({t}: WithTranslation) {
     return (
 
         <Container component="main" maxWidth="xs">
+            <PageMeta
+                titleKey="login.title"
+                descriptionKey="login.description"
+                path="/login"
+            />
 
             <Box
                 sx={{
