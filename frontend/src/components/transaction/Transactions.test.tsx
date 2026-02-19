@@ -1,6 +1,21 @@
 import '@testing-library/jest-dom';
 import { TransactionStatus, TransactionType } from '@alisa-types';
 import { TransactionFilterData } from './components/TransactionFilter';
+import transactionEn from '../../translations/transaction/en';
+
+// Test that transaction translations use correct semantics
+describe('Transaction List Amount Column', () => {
+  // This test verifies that the translation file has the correct value for transactions
+  // The "amount" key in transaction namespace should mean "Amount" (the total), not "Unit price"
+  // because transaction.amount IS the total amount, unlike expense.amount which is a unit price
+  it('should have translation "Amount" not "Unit price" for the amount field', () => {
+    // In transaction context, "amount" represents the total transaction amount
+    // It should NOT be translated as "Unit price" because that's only appropriate
+    // for expense/income rows where amount × quantity = totalAmount
+    expect(transactionEn.amount).not.toBe('Unit price');
+    expect(transactionEn.amount).toBe('Amount');
+  });
+});
 
 // Since Jest mock hoisting causes issues with relative paths in ESM mode,
 // we test the data transformation logic separately from the React component

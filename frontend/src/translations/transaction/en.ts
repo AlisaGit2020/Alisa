@@ -23,7 +23,7 @@ const transaction = {
   activeFilters: "Active filters",
   accountingDate: "Accounting date",
   add: "Add new transaction",
-  amount: "Unit price",
+  amount: "Amount",
   balance: "Balance",
   chooseTransactionType: "Choose transaction type",
   dateRange: "Date range",
