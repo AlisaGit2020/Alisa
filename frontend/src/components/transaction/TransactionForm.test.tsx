@@ -524,7 +524,7 @@ describe('TransactionForm', () => {
   });
 
   describe('Form validation', () => {
-    it('shows validation error for empty sender field', async () => {
+    it('shows validation error when saving with empty sender', async () => {
       const user = userEvent.setup();
 
       renderWithProviders(
@@ -553,7 +553,7 @@ describe('TransactionForm', () => {
       });
     });
 
-    it('shows validation error for empty receiver field', async () => {
+    it('shows validation error when saving with empty receiver', async () => {
       const user = userEvent.setup();
 
       renderWithProviders(
@@ -582,7 +582,7 @@ describe('TransactionForm', () => {
       });
     });
 
-    it('shows validation error for empty description field', async () => {
+    it('shows validation error when saving with empty description', async () => {
       const user = userEvent.setup();
 
       renderWithProviders(
@@ -613,7 +613,7 @@ describe('TransactionForm', () => {
       });
     });
 
-    it('shows validation error for missing transaction date', async () => {
+    it('shows validation error when saving with missing transaction date', async () => {
       const user = userEvent.setup();
 
       renderWithProviders(
@@ -639,15 +639,16 @@ describe('TransactionForm', () => {
       const saveButton = screen.getByRole('button', { name: 'save' });
       await user.click(saveButton);
 
-      // Should show validation error message for transactionDate
+      // Should show validation error on the transactionDate field
       await waitFor(() => {
-        // The helper text with error class should appear
-        const errorTexts = document.querySelectorAll('.Mui-error');
-        expect(errorTexts.length).toBeGreaterThan(0);
+        const transactionDateLabels = screen.getAllByText('transactionDate');
+        const transactionDateField = transactionDateLabels[0].closest('.MuiFormControl-root');
+        const hasError = transactionDateField?.querySelector('.Mui-error');
+        expect(hasError).toBeInTheDocument();
       });
     });
 
-    it('shows validation error for missing accounting date', async () => {
+    it('shows validation error when saving with missing accounting date', async () => {
       const user = userEvent.setup();
 
       renderWithProviders(
@@ -673,14 +674,16 @@ describe('TransactionForm', () => {
       const saveButton = screen.getByRole('button', { name: 'save' });
       await user.click(saveButton);
 
-      // Should show validation error (dates not filled)
+      // Should show validation error on the accountingDate field
       await waitFor(() => {
-        const errorTexts = document.querySelectorAll('.Mui-error');
-        expect(errorTexts.length).toBeGreaterThan(0);
+        const accountingDateLabels = screen.getAllByText('accountingDate');
+        const accountingDateField = accountingDateLabels[0].closest('.MuiFormControl-root');
+        const hasError = accountingDateField?.querySelector('.Mui-error');
+        expect(hasError).toBeInTheDocument();
       });
     });
 
-    it('displays error message text below sender field when invalid', async () => {
+    it('displays error helper text below sender field when saving empty', async () => {
       const user = userEvent.setup();
 
       renderWithProviders(
