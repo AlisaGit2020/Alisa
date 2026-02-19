@@ -22,6 +22,7 @@ const namespaces = [
     'property',
     'reports',
     'route',
+    'seo',
     'settings',
     'tax',
     'transaction',
