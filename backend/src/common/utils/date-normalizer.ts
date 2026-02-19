@@ -33,7 +33,9 @@ export function normalizeAccountingDate(
   if (!value) return undefined;
 
   const date = new Date(value);
-  if (isNaN(date.getTime())) return undefined;
+
+  // Return invalid date as-is so validation can catch it
+  if (isNaN(date.getTime())) return date;
 
   applyTimezoneRollover(date);
 

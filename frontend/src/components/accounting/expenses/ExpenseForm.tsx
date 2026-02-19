@@ -92,6 +92,7 @@ function ExpenseForm({
         onChange={(value) =>
           handleChange("accountingDate", value?.toDate() || new Date())
         }
+        {...getFieldErrorProps<ExpenseInput>(fieldErrors, "accountingDate")}
       />
 
       <AlisaSelect<ExpenseInput, ExpenseType>
@@ -105,6 +106,7 @@ function ExpenseForm({
         fieldName="expenseTypeId"
         value={data.expenseTypeId}
         onHandleChange={handleChange}
+        {...getFieldErrorProps<ExpenseInput>(fieldErrors, "expenseTypeId")}
       />
 
       <AlisaTextField
@@ -127,6 +129,7 @@ function ExpenseForm({
           value={data.amount}
           onChange={(e) => handleChange("amount", getNumber(e.target.value, 2))}
           adornment="€"
+          {...getFieldErrorProps<ExpenseInput>(fieldErrors, "amount")}
         />
         <AlisaNumberField
           label={t("totalAmount")}
@@ -167,6 +170,8 @@ function ExpenseForm({
           onSetData={setData}
           validationRules={{
             description: { required: true },
+            expenseTypeId: { required: true },
+            accountingDate: { validDate: true },
             quantity: { min: 1 },
             totalAmount: { min: 0.01 },
           }}

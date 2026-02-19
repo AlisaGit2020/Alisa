@@ -79,6 +79,7 @@ const sv = {
       max: "Värdet får vara högst {{max}}",
       minLength: "Minst {{min}} tecken",
       maxLength: "Högst {{max}} tecken",
+      invalidDate: "Ange ett giltigt datum",
     },
 
     toast: {

@@ -92,6 +92,7 @@ function IncomeForm({
         onChange={(value) =>
           handleChange("accountingDate", value?.toDate() || new Date())
         }
+        {...getFieldErrorProps<IncomeInput>(fieldErrors, "accountingDate")}
       />
 
       <AlisaSelect<IncomeInput, IncomeType>
@@ -105,6 +106,7 @@ function IncomeForm({
         fieldName="incomeTypeId"
         value={data.incomeTypeId}
         onHandleChange={handleChange}
+        {...getFieldErrorProps<IncomeInput>(fieldErrors, "incomeTypeId")}
       />
 
       <AlisaTextField
@@ -127,6 +129,7 @@ function IncomeForm({
           value={data.amount}
           onChange={(e) => handleChange("amount", getNumber(e.target.value, 2))}
           adornment="€"
+          {...getFieldErrorProps<IncomeInput>(fieldErrors, "amount")}
         />
         <AlisaNumberField
           label={t("totalAmount")}
@@ -167,6 +170,8 @@ function IncomeForm({
           onSetData={setData}
           validationRules={{
             description: { required: true },
+            incomeTypeId: { required: true },
+            accountingDate: { validDate: true },
             quantity: { min: 1 },
             totalAmount: { min: 0.01 },
           }}

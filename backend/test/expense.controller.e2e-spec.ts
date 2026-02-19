@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { AuthService } from '@alisa-backend/auth/auth.service';
@@ -60,6 +60,7 @@ describe('ExpenseController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ transform: true }));
     await app.init();
     server = app.getHttpServer();
 
@@ -304,6 +305,23 @@ describe('ExpenseController (e2e)', () => {
         .set('Authorization', getBearerToken(mainUserToken))
         .send(input)
         .expect(401);
+    });
+
+    it('returns 400 when accountingDate is invalid', async () => {
+      const input = {
+        ...getValidExpenseInput(mainUser.properties[0].id),
+        accountingDate: 'Invalid Date',
+      };
+
+      const response = await request(server)
+        .post(baseUrl)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send(input)
+        .expect(400);
+
+      expect(response.body.message).toEqual(
+        expect.arrayContaining([expect.stringContaining('accountingDate')]),
+      );
     });
   });
 
