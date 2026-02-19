@@ -3,25 +3,12 @@ import '@testing-library/jest-dom';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@test-utils/test-wrapper';
+import { createAxiosError } from '@test-utils/test-data';
 import IncomeForm from './IncomeForm';
 import DataService from '@alisa-lib/data-service';
 import { IncomeType } from '@alisa-types';
-import { AxiosError, AxiosHeaders } from 'axios';
 
 jest.mock('@alisa-lib/data-service');
-
-// Helper to create AxiosError for testing
-function createAxiosError(status: number, messages: string[]): AxiosError {
-  const error = new AxiosError('Request failed');
-  error.response = {
-    status,
-    data: { message: messages },
-    statusText: 'Bad Request',
-    headers: {},
-    config: { headers: new AxiosHeaders() },
-  };
-  return error;
-}
 
 describe('IncomeForm field error handling', () => {
   const defaultProps = {

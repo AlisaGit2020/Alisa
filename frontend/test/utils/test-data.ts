@@ -1,5 +1,6 @@
 // frontend/test/utils/test-data.ts
 import { Property, Transaction, User, TransactionStatus, TransactionType } from '@alisa-types';
+import { AxiosError, AxiosHeaders } from 'axios';
 
 /**
  * Creates a mock Property for testing
@@ -52,4 +53,19 @@ export const createMockUser = (overrides?: Partial<User>): User => {
     lastName: 'User',
     ...overrides,
   } as User;
+};
+
+/**
+ * Creates a mock AxiosError for testing server-side validation errors
+ */
+export const createAxiosError = (status: number, messages: string[]): AxiosError => {
+  const error = new AxiosError('Request failed');
+  error.response = {
+    status,
+    data: { message: messages },
+    statusText: 'Bad Request',
+    headers: {},
+    config: { headers: new AxiosHeaders() },
+  };
+  return error;
 };

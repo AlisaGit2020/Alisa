@@ -7,6 +7,7 @@ import {
   TransactionType,
 } from '@alisa-backend/common/types';
 import { normalizeAccountingDate } from '@alisa-backend/common/utils/date-normalizer';
+import { IsValidDate } from '@alisa-backend/common/validators/is-valid-date.validator';
 
 export class TransactionInputDto {
   id?: number;
@@ -25,10 +26,12 @@ export class TransactionInputDto {
 
   @IsNotEmpty()
   @Transform(({ value }) => normalizeAccountingDate(value))
+  @IsValidDate()
   transactionDate: Date = new Date();
 
   @IsNotEmpty()
   @Transform(({ value }) => normalizeAccountingDate(value))
+  @IsValidDate()
   accountingDate: Date = new Date();
 
   amount: number = 0;
