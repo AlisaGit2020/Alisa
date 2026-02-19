@@ -61,7 +61,16 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
         .map((row) => row.totalAmount)
         .reduce((a, b) => Number(a) + Number(b), 0);
 
-      defaults.totalAmount = transaction.amount - rowsTotalAmount;
+      // Use absolute value because expense/income rows always have positive amounts
+      // (the transaction amount is negative for expenses, but individual rows are positive)
+      const transactionAmount = Math.abs(Number(transaction.amount) || 0);
+
+      // Only set amounts for additional rows (not the first one)
+      // The first row will be populated by the changedAmount effect
+      if (prevData.length > 0) {
+        defaults.totalAmount = transactionAmount - rowsTotalAmount;
+        defaults.amount = defaults.totalAmount / (defaults.quantity || 1);
+      }
 
       const newData = [...prevData, defaults];
       onHandleChange(newData);

@@ -274,6 +274,34 @@ function TransactionForm({
 
   const handleAmountChange = (value: number) => {
     setAmount(value);
+
+    // Sync the first expense/income row amount with transaction amount
+    // This ensures the data is consistent when saved, without waiting for effects
+    const transactionType = getType();
+    const absValue = Math.abs(Number(value) || 0);
+
+    if (transactionType === TransactionType.EXPENSE && data.expenses?.length) {
+      // Only update if the first row appears to be in default state (amount === 0)
+      if (data.expenses[0].amount === 0) {
+        const updatedExpenses = [...data.expenses];
+        updatedExpenses[0] = {
+          ...updatedExpenses[0],
+          totalAmount: absValue,
+          amount: absValue / (updatedExpenses[0].quantity || 1),
+        };
+        setData(prev => ({ ...prev, expenses: updatedExpenses }));
+      }
+    } else if (transactionType === TransactionType.INCOME && data.incomes?.length) {
+      if (data.incomes[0].amount === 0) {
+        const updatedIncomes = [...data.incomes];
+        updatedIncomes[0] = {
+          ...updatedIncomes[0],
+          totalAmount: absValue,
+          amount: absValue / (updatedIncomes[0].quantity || 1),
+        };
+        setData(prev => ({ ...prev, incomes: updatedIncomes }));
+      }
+    }
   };
 
   const getType = (): TransactionType | undefined => {
