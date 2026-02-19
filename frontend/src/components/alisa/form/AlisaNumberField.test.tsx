@@ -130,4 +130,27 @@ describe('AlisaNumberField', () => {
     const numberField = screen.getByLabelText('Amount');
     expect(numberField).toHaveAttribute('autocomplete', 'off');
   });
+
+  it('shrinks label when value is zero', () => {
+    const { container } = renderWithProviders(
+      <AlisaNumberField label="Amount" value={0} onChange={jest.fn()} />
+    );
+
+    const label = container.querySelector('.MuiInputLabel-root');
+    expect(label).toHaveAttribute('data-shrink', 'true');
+  });
+
+  it('renders placeholder when provided', () => {
+    renderWithProviders(
+      <AlisaNumberField
+        label="Amount"
+        value={''}
+        placeholder="0.00"
+        onChange={jest.fn()}
+      />
+    );
+
+    const numberField = screen.getByLabelText('Amount');
+    expect(numberField).toHaveAttribute('placeholder', '0.00');
+  });
 });
