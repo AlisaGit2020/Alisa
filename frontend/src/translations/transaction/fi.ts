@@ -23,7 +23,7 @@ const transaction = {
   activeFilters: "Aktiiviset suodattimet",
   accountingDate: "Kirjanpito pvm",
   add: "Uusi tilitapahtuma",
-  amount: "Yksikköhinta",
+  amount: "Summa",
   balance: "Saldo",
   chooseTransactionType: "Valitse tapahtumatyyppi",
   dateRange: "Aikaväli",

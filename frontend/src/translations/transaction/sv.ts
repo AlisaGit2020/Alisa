@@ -23,7 +23,7 @@ const transaction = {
   activeFilters: "Aktiva filter",
   accountingDate: "Bokföringsdatum",
   add: "Ny transaktion",
-  amount: "Enhetspris",
+  amount: "Belopp",
   balance: "Saldo",
   chooseTransactionType: "Välj transaktionstyp",
   dateRange: "Datumintervall",
