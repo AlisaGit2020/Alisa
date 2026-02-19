@@ -246,10 +246,25 @@ function TransactionForm({
   const handleRowChange = async (
     rows: ExpenseInput[] | IncomeInput[],
   ) => {
-    if (getType() === TransactionType.EXPENSE) {
+    const transactionType = getType();
+
+    // Calculate total from rows
+    const rowsTotal = rows.reduce((sum, row) => sum + Number(row.totalAmount || 0), 0);
+
+    // For EXPENSE/WITHDRAW, amount should be negative
+    const transactionAmount = (transactionType === TransactionType.EXPENSE || transactionType === TransactionType.WITHDRAW)
+      ? -Math.abs(rowsTotal)
+      : Math.abs(rowsTotal);
+
+    if (transactionType === TransactionType.EXPENSE) {
       await handleChange("expenses", rows);
     } else {
       await handleChange("incomes", rows);
+    }
+
+    // Update transaction amount to match rows total
+    if (rowsTotal !== 0) {
+      await handleChange("amount", transactionAmount);
     }
   };
 
@@ -347,6 +362,7 @@ function TransactionForm({
             sender: { required: true },
             receiver: { required: true },
             description: { required: true },
+            amount: { required: true },
             transactionDate: { required: true },
             accountingDate: { required: true },
           }}

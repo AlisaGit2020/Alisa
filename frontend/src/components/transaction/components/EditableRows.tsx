@@ -69,6 +69,19 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
     });
   }, [dataService, transaction.amount, onHandleChange]);
 
+  // Sync data state when transaction expenses/incomes are loaded (edit mode)
+  React.useEffect(() => {
+    const rows = propsType === TransactionType.EXPENSE
+      ? transaction.expenses
+      : transaction.incomes;
+
+    // Only sync if transaction has an ID (edit mode) and rows are loaded
+    if (transaction.id && rows && rows.length > 0) {
+      setData(rows as T[]);
+      hasRunInit.current = true;
+    }
+  }, [transaction.id, transaction.expenses, transaction.incomes, propsType]);
+
   React.useEffect(() => {
     if (!hasRunInit.current) {
       const addRowIfEmpty = async () => {
@@ -114,7 +127,10 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
       setData((prevData) => {
         if (prevData.length > 0 && prevData[0].amount === 0) {
           const newData = [...prevData];
-          newData[0] = { ...newData[0], totalAmount: props.changedAmount };
+          const totalAmount = props.changedAmount;
+          const quantity = prevData[0].quantity || 1;
+          const amount = quantity > 0 ? totalAmount / quantity : 0;
+          newData[0] = { ...newData[0], totalAmount, amount };
           props.onHandleChange(newData);
           return newData;
         }

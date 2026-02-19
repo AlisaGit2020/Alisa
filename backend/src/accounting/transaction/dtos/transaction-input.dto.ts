@@ -9,6 +9,15 @@ import {
 import { normalizeAccountingDate } from '@alisa-backend/common/utils/date-normalizer';
 import { IsValidDate } from '@alisa-backend/common/validators/is-valid-date.validator';
 
+// Helper to transform empty strings to numbers
+const toNumber = (defaultValue: number) => ({ value }: { value: unknown }) => {
+  if (value === '' || value === null || value === undefined) {
+    return defaultValue;
+  }
+  const num = Number(value);
+  return isNaN(num) ? defaultValue : num;
+};
+
 export class TransactionInputDto {
   id?: number;
   externalId?: string;
@@ -34,6 +43,7 @@ export class TransactionInputDto {
   @IsValidDate()
   accountingDate: Date = new Date();
 
+  @Transform(toNumber(0))
   amount: number = 0;
 
   propertyId?: number;

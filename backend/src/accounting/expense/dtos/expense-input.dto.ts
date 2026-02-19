@@ -6,17 +6,29 @@ import { ExpenseTypeInputDto } from '@alisa-backend/accounting/expense/dtos/expe
 import { normalizeAccountingDate } from '@alisa-backend/common/utils/date-normalizer';
 import { IsValidDate } from '@alisa-backend/common/validators/is-valid-date.validator';
 
+// Helper to transform empty strings to numbers
+const toNumber = (defaultValue: number) => ({ value }: { value: unknown }) => {
+  if (value === '' || value === null || value === undefined) {
+    return defaultValue;
+  }
+  const num = Number(value);
+  return isNaN(num) ? defaultValue : num;
+};
+
 export class ExpenseInputDto {
   id?: number;
 
   @IsNotEmpty()
   description: string = '';
 
+  @Transform(toNumber(0))
   amount: number = 0;
 
+  @Transform(toNumber(1))
   @Min(1)
   quantity: number = 1;
 
+  @Transform(toNumber(0))
   @Min(0.01)
   totalAmount: number = 0;
 

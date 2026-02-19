@@ -88,6 +88,7 @@ function TransactionFormFields(props: TransactionFormFieldsProps) {
           onChange={(e) => handleChange("amount", e.target.value)}
           onBlur={() => props.onAmountChange(props.data.amount)}
           adornment="€"
+          {...getErrorProps("amount")}
         />
         <AlisaDatePicker
           label={props.t("transactionDate")}
