@@ -267,6 +267,56 @@ describe('TransactionController (e2e)', () => {
         .send({})
         .expect(401);
     });
+
+    it('saves expense rows with correct expenseTypeId and description', async () => {
+      const customExpenseTypeId = 2; // Using second expense type
+      const customDescription = 'Custom expense description';
+
+      const transactionInput: TransactionInputDto = {
+        sender: 'Expense Row Test Sender',
+        receiver: 'Expense Row Test Receiver',
+        description: 'Transaction with custom expense row',
+        transactionDate: new Date('2024-02-15'),
+        accountingDate: new Date('2024-02-15'),
+        amount: -100,
+        propertyId: mainUser.properties[0].id,
+        status: TransactionStatus.PENDING,
+        type: TransactionType.EXPENSE,
+        expenses: [
+          {
+            expenseTypeId: customExpenseTypeId,
+            description: customDescription,
+            amount: 100,
+            quantity: 1,
+            totalAmount: 100,
+          },
+        ],
+      };
+
+      const createResponse = await request(server)
+        .post('/accounting/transaction')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send(transactionInput)
+        .expect(201);
+
+      expect(createResponse.body).toHaveProperty('id');
+      const transactionId = createResponse.body.id;
+
+      // Fetch the transaction with expenses relation using search endpoint
+      const searchResponse = await request(server)
+        .post('/accounting/transaction/search')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          where: { id: transactionId },
+          relations: { expenses: true },
+        })
+        .expect(200);
+
+      expect(searchResponse.body).toHaveLength(1);
+      expect(searchResponse.body[0].expenses).toHaveLength(1);
+      expect(searchResponse.body[0].expenses[0].expenseTypeId).toBe(customExpenseTypeId);
+      expect(searchResponse.body[0].expenses[0].description).toBe(customDescription);
+    });
   });
 
   // ==========================================
