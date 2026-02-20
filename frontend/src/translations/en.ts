@@ -62,6 +62,7 @@ const en = {
     rowsSelected: "{{count}} rows selected",
     rowsSucceeded: "Rows succeeded",
     save: "Save",
+    search: "Search",
     selectAll: "Select all",
     settings: "Settings",
     totalAmount: "Total",

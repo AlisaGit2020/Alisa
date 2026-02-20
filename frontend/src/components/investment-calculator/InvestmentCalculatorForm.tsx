@@ -1,8 +1,8 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Box, CircularProgress, Divider, Grid, InputAdornment, Typography } from "@mui/material";
+import { Box, Divider, Grid, Typography } from "@mui/material";
 import { useState } from "react";
 import axios from "axios";
-import { AlisaButton, AlisaNumberField, AlisaTextField, useToast } from "../alisa";
+import { AlisaNumberField, AlisaTextField, AlisaTextButton, useToast } from "../alisa";
 import { VITE_API_URL } from "../../constants";
 import AlisaFormHandler from "../alisa/form/AlisaFormHandler";
 import DataService from "@alisa-lib/data-service";
@@ -126,26 +126,15 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
           <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
             etuovi.com
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-            <AlisaTextField
-              label={t('investment-calculator:etuoviUrl')}
-              value={etuoviUrl}
-              onChange={(e) => setEtuoviUrl(e.target.value)}
-              placeholder="https://www.etuovi.com/kohde/..."
-              sx={{ flexGrow: 1 }}
-              adornment={isFetching ? (
-                <InputAdornment position="end">
-                  <CircularProgress size={20} />
-                </InputAdornment>
-              ) : undefined}
-            />
-            <AlisaButton
-              label={t('investment-calculator:fetchFromEtuovi')}
-              onClick={handleFetchFromEtuovi}
-              disabled={isFetching || !etuoviUrl.trim()}
-              sx={{ mt: 0, minWidth: 120 }}
-            />
-          </Box>
+          <AlisaTextButton
+            label={t('investment-calculator:etuoviUrl')}
+            buttonLabel={t('common:search')}
+            value={etuoviUrl}
+            onChange={(e) => setEtuoviUrl(e.target.value)}
+            onButtonClick={handleFetchFromEtuovi}
+            placeholder="https://www.etuovi.com/kohde/..."
+            loading={isFetching}
+          />
         </Grid>
 
         {/* Property Details Section */}
