@@ -87,6 +87,7 @@ When writing frontend code:
 |------------------|-------------|
 | `Button` | `AlisaButton` |
 | `TextField` | `AlisaTextField` or `AlisaNumberField` |
+| `TextField` + `Button` | `AlisaTextButton` (combined input with action button) |
 | `Dialog` | `AlisaDialog` or `AlisaConfirmDialog` |
 | `DatePicker` | `AlisaDatePicker` |
 | `Select` | `AlisaSelectField` or `AlisaSelectVariant` |

@@ -1,13 +1,15 @@
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, CircularProgress, IconButton, TextField } from "@mui/material";
-import React, { ChangeEventHandler } from "react";
+import { Box, Button, CircularProgress, IconButton, SxProps, TextField, Theme } from "@mui/material";
+import React, { ChangeEventHandler, KeyboardEvent, ReactNode } from "react";
 
 interface AlisaTextButtonProps {
   label: string;
   buttonLabel: string;
   value?: string;
   placeholder?: string;
+  type?: "text" | "email" | "url" | "tel";
+  buttonIcon?: ReactNode;
   clearable?: boolean;
   disabled?: boolean;
   loading?: boolean;
@@ -17,7 +19,7 @@ interface AlisaTextButtonProps {
   onChange?: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
   onClear?: () => void;
   onButtonClick?: () => void;
-  sx?: object;
+  sx?: SxProps<Theme>;
 }
 
 function AlisaTextButton({
@@ -25,6 +27,8 @@ function AlisaTextButton({
   buttonLabel,
   value = "",
   placeholder,
+  type = "text",
+  buttonIcon,
   clearable = true,
   disabled = false,
   loading = false,
@@ -50,9 +54,19 @@ function AlisaTextButton({
     }
   };
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !isButtonDisabled && onButtonClick) {
+      e.preventDefault();
+      onButtonClick();
+    }
+  };
+
+  const defaultIcon = <SearchIcon sx={{ fontSize: 18 }} />;
+
   return (
     <TextField
       fullWidth={fullWidth}
+      type={type}
       label={label}
       value={value}
       placeholder={placeholder}
@@ -60,6 +74,7 @@ function AlisaTextButton({
       error={error}
       helperText={helperText}
       onChange={onChange}
+      onKeyDown={handleKeyDown}
       autoComplete="off"
       sx={sx}
       slotProps={{
@@ -91,7 +106,7 @@ function AlisaTextButton({
                   loading ? (
                     <CircularProgress size={16} color="inherit" />
                   ) : (
-                    <SearchIcon sx={{ fontSize: 18 }} />
+                    buttonIcon ?? defaultIcon
                   )
                 }
                 sx={{

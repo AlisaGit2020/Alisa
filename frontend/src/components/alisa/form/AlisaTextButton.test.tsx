@@ -213,4 +213,72 @@ describe("AlisaTextButton", () => {
 
     expect(screen.queryByRole("button", { name: "clear" })).not.toBeInTheDocument();
   });
+
+  it("triggers onButtonClick when Enter is pressed", async () => {
+    const user = userEvent.setup();
+    const handleClick = jest.fn();
+
+    renderWithProviders(
+      <AlisaTextButton
+        label="URL"
+        buttonLabel="Fetch"
+        value="https://example.com"
+        onChange={() => {}}
+        onButtonClick={handleClick}
+      />
+    );
+
+    const input = screen.getByLabelText("URL");
+    await user.click(input);
+    await user.keyboard("{Enter}");
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not trigger onButtonClick when Enter is pressed and button is disabled", async () => {
+    const user = userEvent.setup();
+    const handleClick = jest.fn();
+
+    renderWithProviders(
+      <AlisaTextButton
+        label="URL"
+        buttonLabel="Fetch"
+        value=""
+        onChange={() => {}}
+        onButtonClick={handleClick}
+      />
+    );
+
+    const input = screen.getByLabelText("URL");
+    await user.click(input);
+    await user.keyboard("{Enter}");
+    expect(handleClick).not.toHaveBeenCalled();
+  });
+
+  it("renders with custom button icon", () => {
+    renderWithProviders(
+      <AlisaTextButton
+        label="URL"
+        buttonLabel="Go"
+        value="https://example.com"
+        buttonIcon={<span data-testid="custom-icon">*</span>}
+        onChange={() => {}}
+      />
+    );
+
+    expect(screen.getByTestId("custom-icon")).toBeInTheDocument();
+  });
+
+  it("renders with url type", () => {
+    renderWithProviders(
+      <AlisaTextButton
+        label="URL"
+        buttonLabel="Fetch"
+        value=""
+        type="url"
+        onChange={() => {}}
+      />
+    );
+
+    expect(screen.getByLabelText("URL")).toHaveAttribute("type", "url");
+  });
 });
