@@ -377,4 +377,85 @@ describe('IncomeController (e2e)', () => {
         .expect(404);
     });
   });
+
+  describe('POST /accounting/income/delete (bulk delete)', () => {
+    it('deletes multiple incomes when user owns them', async () => {
+      // Create incomes to delete
+      const transaction1 = await addTransaction(
+        app,
+        mainUser.jwtUser,
+        getTransactionIncome1(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
+      );
+      const transaction2 = await addTransaction(
+        app,
+        mainUser.jwtUser,
+        getTransactionIncome1(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
+      );
+      const ids = [transaction1.incomes[0].id, transaction2.incomes[0].id];
+
+      const response = await request(server)
+        .post('/accounting/income/delete')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({ ids })
+        .expect(201);
+
+      expect(response.body.allSuccess).toBe(true);
+      expect(response.body.rows.total).toBe(2);
+      expect(response.body.rows.success).toBe(2);
+      expect(response.body.rows.failed).toBe(0);
+
+      // Verify incomes are deleted
+      await request(server)
+        .get(`/accounting/income/${ids[0]}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(404);
+      await request(server)
+        .get(`/accounting/income/${ids[1]}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(404);
+    });
+
+    it('returns 401 when not authenticated', () => {
+      return request(server)
+        .post('/accounting/income/delete')
+        .send({ ids: [1, 2] })
+        .expect(401);
+    });
+
+    it('returns 400 when ids array is empty', async () => {
+      return request(server)
+        .post('/accounting/income/delete')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({ ids: [] })
+        .expect(400);
+    });
+
+    it('returns partial success when some incomes belong to other user', async () => {
+      // Create income for main user
+      const mainUserTransaction = await addTransaction(
+        app,
+        mainUser.jwtUser,
+        getTransactionIncome1(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
+      );
+      // Create income for user2
+      const user2 = testUsers.user2WithProperties;
+      const user2Transaction = await addTransaction(
+        app,
+        user2.jwtUser,
+        getTransactionIncome1(user2.properties[0].id, TransactionStatus.ACCEPTED),
+      );
+
+      const ids = [mainUserTransaction.incomes[0].id, user2Transaction.incomes[0].id];
+
+      const response = await request(server)
+        .post('/accounting/income/delete')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({ ids })
+        .expect(201);
+
+      expect(response.body.allSuccess).toBe(false);
+      expect(response.body.rows.success).toBe(1);
+      expect(response.body.rows.failed).toBe(1);
+    });
+  });
 });

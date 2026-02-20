@@ -17,10 +17,13 @@ import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeo
 import { TransactionStatus } from '@alisa-backend/common/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Events, IncomeAccountingDateChangedEvent } from '@alisa-backend/common/events';
+import { DataSaveResultDto } from '@alisa-backend/common/dtos/data-save-result.dto';
 import {
-  DataSaveResultDto,
-  DataSaveResultRowDto,
-} from '@alisa-backend/common/dtos/data-save-result.dto';
+  buildBulkOperationResult,
+  createSuccessResult,
+  createUnauthorizedResult,
+  createErrorResult,
+} from '@alisa-backend/common/utils/bulk-operation.util';
 
 @Injectable()
 export class IncomeService {
@@ -198,11 +201,7 @@ export class IncomeService {
     const deleteTask = incomes.map(async (income) => {
       try {
         if (!(await this.authService.hasOwnership(user, income.propertyId))) {
-          return {
-            id: income.id,
-            statusCode: 401,
-            message: 'Unauthorized',
-          } as DataSaveResultRowDto;
+          return createUnauthorizedResult(income.id);
         }
 
         // Delete the income
@@ -213,40 +212,13 @@ export class IncomeService {
           await this.transactionRepository.delete(income.transactionId);
         }
 
-        return {
-          id: income.id,
-          statusCode: 200,
-          message: 'OK',
-        } as DataSaveResultRowDto;
+        return createSuccessResult(income.id);
       } catch (e) {
-        return {
-          id: income.id,
-          statusCode: e.status || 500,
-          message: e.message,
-        } as DataSaveResultRowDto;
+        return createErrorResult(income.id, e);
       }
     });
 
-    return this.getSaveTaskResult(deleteTask, incomes);
-  }
-
-  private async getSaveTaskResult(
-    tasks: Promise<DataSaveResultRowDto>[],
-    items: Income[],
-  ): Promise<DataSaveResultDto> {
-    const results = await Promise.all(tasks);
-    const successCount = results.filter((r) => r.statusCode === 200).length;
-    const failedCount = results.filter((r) => r.statusCode !== 200).length;
-
-    return {
-      rows: {
-        total: items.length,
-        success: successCount,
-        failed: failedCount,
-      },
-      allSuccess: failedCount === 0,
-      results,
-    };
+    return buildBulkOperationResult(deleteTask, incomes.length);
   }
 
   private mapData(income: Income, input: IncomeInputDto) {

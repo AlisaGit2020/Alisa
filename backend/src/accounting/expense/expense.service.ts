@@ -17,10 +17,13 @@ import { DepreciationService } from '@alisa-backend/accounting/depreciation/depr
 import { TransactionStatus } from '@alisa-backend/common/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Events, ExpenseAccountingDateChangedEvent } from '@alisa-backend/common/events';
+import { DataSaveResultDto } from '@alisa-backend/common/dtos/data-save-result.dto';
 import {
-  DataSaveResultDto,
-  DataSaveResultRowDto,
-} from '@alisa-backend/common/dtos/data-save-result.dto';
+  buildBulkOperationResult,
+  createSuccessResult,
+  createUnauthorizedResult,
+  createErrorResult,
+} from '@alisa-backend/common/utils/bulk-operation.util';
 
 @Injectable()
 export class ExpenseService {
@@ -207,11 +210,7 @@ export class ExpenseService {
     const deleteTask = expenses.map(async (expense) => {
       try {
         if (!(await this.authService.hasOwnership(user, expense.propertyId))) {
-          return {
-            id: expense.id,
-            statusCode: 401,
-            message: 'Unauthorized',
-          } as DataSaveResultRowDto;
+          return createUnauthorizedResult(expense.id);
         }
 
         // Delete associated depreciation asset
@@ -225,40 +224,13 @@ export class ExpenseService {
           await this.transactionRepository.delete(expense.transactionId);
         }
 
-        return {
-          id: expense.id,
-          statusCode: 200,
-          message: 'OK',
-        } as DataSaveResultRowDto;
+        return createSuccessResult(expense.id);
       } catch (e) {
-        return {
-          id: expense.id,
-          statusCode: e.status || 500,
-          message: e.message,
-        } as DataSaveResultRowDto;
+        return createErrorResult(expense.id, e);
       }
     });
 
-    return this.getSaveTaskResult(deleteTask, expenses);
-  }
-
-  private async getSaveTaskResult(
-    tasks: Promise<DataSaveResultRowDto>[],
-    items: Expense[],
-  ): Promise<DataSaveResultDto> {
-    const results = await Promise.all(tasks);
-    const successCount = results.filter((r) => r.statusCode === 200).length;
-    const failedCount = results.filter((r) => r.statusCode !== 200).length;
-
-    return {
-      rows: {
-        total: items.length,
-        success: successCount,
-        failed: failedCount,
-      },
-      allSuccess: failedCount === 0,
-      results,
-    };
+    return buildBulkOperationResult(deleteTask, expenses.length);
   }
 
   private async handleDepreciationAsset(expense: Expense): Promise<void> {
