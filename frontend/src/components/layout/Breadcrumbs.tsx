@@ -60,9 +60,19 @@ function AlisaBreadcrumbs({ t }: WithTranslation) {
         // Check if we're in an /app route to reconstruct proper links
         const isAppRoute = location.pathname.startsWith('/app');
 
+        // Segments that require an ID parameter to be valid routes
+        const segmentsRequiringId = ['edit', 'add'];
+
         return pathSegments.map((crumb, index) => {
             // Build the path from filtered segments
-            const segmentPath = pathSegments.slice(0, index + 1).join('/');
+            let segmentPath = pathSegments.slice(0, index + 1).join('/');
+
+            // If this segment requires an ID and next segment is numeric, include it
+            const nextSegment = pathSegments[index + 1];
+            if (segmentsRequiringId.includes(crumb) && nextSegment && /^\d+$/.test(nextSegment)) {
+                segmentPath = pathSegments.slice(0, index + 2).join('/');
+            }
+
             // Prepend /app if we're in an app route
             const linkPath = isAppRoute ? `/app/${segmentPath}` : `/${segmentPath}`;
             const prevSegment = index > 0 ? pathSegments[index - 1] : null;

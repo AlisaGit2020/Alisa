@@ -49,8 +49,40 @@ describe('Breadcrumbs', () => {
     // Check all links have /app prefix
     expect(links[0]).toHaveAttribute('href', '/app/portfolio');
     expect(links[1]).toHaveAttribute('href', '/app/portfolio/properties');
-    expect(links[2]).toHaveAttribute('href', '/app/portfolio/properties/edit');
+    // "edit" segment followed by ID should include the ID in the link
+    // (navigating to /edit without ID is invalid)
+    expect(links[2]).toHaveAttribute('href', '/app/portfolio/properties/edit/123');
     expect(links[3]).toHaveAttribute('href', '/app/portfolio/properties/edit/123');
+  });
+
+  it('should include ID in edit breadcrumb link when followed by numeric ID', () => {
+    renderWithRouter(<Breadcrumbs />, {
+      initialEntries: ['/app/portfolio/properties/edit/456'],
+    });
+
+    const links = screen.getAllByRole('link');
+
+    // The "edit" breadcrumb should link to the full path including ID
+    // because /edit without an ID is not a valid route
+    const editLink = links.find(link =>
+      link.textContent?.toLowerCase().includes('edit')
+    );
+    expect(editLink).toHaveAttribute('href', '/app/portfolio/properties/edit/456');
+  });
+
+  it('should include ID in add breadcrumb link when followed by numeric ID', () => {
+    // Settings uses add/:id pattern
+    renderWithRouter(<Breadcrumbs />, {
+      initialEntries: ['/app/settings/expense-types/add/789'],
+    });
+
+    const links = screen.getAllByRole('link');
+
+    // The "add" breadcrumb should link to the full path including ID
+    const addLink = links.find(link =>
+      link.textContent?.toLowerCase().includes('add')
+    );
+    expect(addLink).toHaveAttribute('href', '/app/settings/expense-types/add/789');
   });
 
   it('should translate breadcrumb segments', () => {
