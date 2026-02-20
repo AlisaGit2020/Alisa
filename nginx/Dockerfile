@@ -1,11 +1,14 @@
+# syntax=docker/dockerfile:1
+
 # Stage 1: Build frontend
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
 # Copy frontend package files and install dependencies
 COPY frontend/package*.json frontend/.npmrc ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci
 
 # Copy frontend source
 COPY frontend/ .
