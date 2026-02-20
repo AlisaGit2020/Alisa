@@ -62,6 +62,7 @@ const fi = {
     rowsSelected: "{{count}} riviä valittu",
     rowsSucceeded: "Onnistui",
     save: "Tallenna",
+    search: "Hae",
     selectAll: "Valitse kaikki",
     settings: "Asetukset",
     totalAmount: "Yhteensä",

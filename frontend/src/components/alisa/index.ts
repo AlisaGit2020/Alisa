@@ -1,6 +1,7 @@
 // Form components
 export { default as AlisaButton } from "./form/AlisaButton";
 export { default as AlisaTextField } from "./form/AlisaTextField";
+export { default as AlisaTextButton } from "./form/AlisaTextButton";
 export { default as AlisaNumberField } from "./form/AlisaNumberField";
 export { default as AlisaDatePicker } from "./form/AlisaDatePicker";
 export { default as AlisaSelectField } from "./form/AlisaSelectField";

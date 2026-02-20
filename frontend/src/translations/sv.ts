@@ -62,6 +62,7 @@ const sv = {
     rowsSelected: "{{count}} rader valda",
     rowsSucceeded: "Lyckades",
     save: "Spara",
+    search: "Sök",
     selectAll: "Välj alla",
     settings: "Inställningar",
     totalAmount: "Totalt",
