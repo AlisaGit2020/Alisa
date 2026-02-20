@@ -12,6 +12,7 @@ import TransactionDetails from "./components/TransactionDetails";
 import TransactionForm from "./TransactionForm.tsx";
 import { usePropertyRequired } from "@alisa-lib/hooks/usePropertyRequired";
 import { PropertyRequiredSnackbar } from "../alisa/PropertyRequiredSnackbar";
+import TransactionCategoryChips from "./components/TransactionCategoryChips";
 
 interface TransactionsProps extends WithTranslation {
   filter: TransactionFilterData;
@@ -94,8 +95,8 @@ function Transactions({
       "amount",
     ],
     relations: {
-      expenses: true,
-      incomes: true,
+      expenses: { expenseType: true },
+      incomes: { incomeType: true },
     },
     order: {
       transactionDate: "DESC",
@@ -127,6 +128,11 @@ function Transactions({
               name: "type",
               format: "transactionType",
               label: "",
+            },
+            {
+              name: "expenses" as keyof Transaction,
+              label: t("category"),
+              render: (item) => <TransactionCategoryChips transaction={item} />,
             },
             { name: "transactionDate", format: "date" },
             { name: "sender", maxLength: 20 },

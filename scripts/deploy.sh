@@ -7,7 +7,7 @@ echo "Pulling latest changes..."
 git pull
 
 echo "Building containers..."
-docker compose -f docker-compose.prod.yml --env-file .env.production build
+DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml --env-file .env.production build --parallel
 
 echo "Starting services..."
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d

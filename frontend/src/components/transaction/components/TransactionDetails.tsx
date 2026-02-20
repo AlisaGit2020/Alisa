@@ -233,6 +233,104 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
           />
           <DetailRow label={t("id")} value={`#${data.id}`} />
         </Box>
+
+        {/* Expense Details */}
+        {data.expenses && data.expenses.length > 0 && (
+          <>
+            <Divider />
+            <Box>
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+                gutterBottom
+              >
+                {t("expenseDetails")}
+              </Typography>
+              <Stack spacing={1}>
+                {data.expenses.map((expense) => (
+                  <Paper
+                    key={`expense-detail-${expense.id}`}
+                    variant="outlined"
+                    sx={{ p: 2 }}
+                  >
+                    <Stack spacing={1}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Chip
+                          label={expense.expenseType?.name}
+                          color="error"
+                          size="small"
+                          variant="outlined"
+                        />
+                        <Typography variant="body1" fontWeight="bold">
+                          {getCurrency(expense.totalAmount)}
+                        </Typography>
+                      </Stack>
+                      {expense.description && (
+                        <Typography variant="body2" color="text.secondary">
+                          {expense.description}
+                        </Typography>
+                      )}
+                      {expense.quantity > 1 && (
+                        <Typography variant="body2" color="text.secondary">
+                          {getCurrency(expense.amount)} x {expense.quantity}
+                        </Typography>
+                      )}
+                    </Stack>
+                  </Paper>
+                ))}
+              </Stack>
+            </Box>
+          </>
+        )}
+
+        {/* Income Details */}
+        {data.incomes && data.incomes.length > 0 && (
+          <>
+            <Divider />
+            <Box>
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+                gutterBottom
+              >
+                {t("incomeDetails")}
+              </Typography>
+              <Stack spacing={1}>
+                {data.incomes.map((income) => (
+                  <Paper
+                    key={`income-detail-${income.id}`}
+                    variant="outlined"
+                    sx={{ p: 2 }}
+                  >
+                    <Stack spacing={1}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Chip
+                          label={income.incomeType?.name}
+                          color="success"
+                          size="small"
+                          variant="outlined"
+                        />
+                        <Typography variant="body1" fontWeight="bold">
+                          {getCurrency(income.totalAmount)}
+                        </Typography>
+                      </Stack>
+                      {income.description && (
+                        <Typography variant="body2" color="text.secondary">
+                          {income.description}
+                        </Typography>
+                      )}
+                      {income.quantity > 1 && (
+                        <Typography variant="body2" color="text.secondary">
+                          {getCurrency(income.amount)} x {income.quantity}
+                        </Typography>
+                      )}
+                    </Stack>
+                  </Paper>
+                ))}
+              </Stack>
+            </Box>
+          </>
+        )}
       </Stack>
     </AlisaDialog>
   );

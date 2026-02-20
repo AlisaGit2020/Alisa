@@ -40,6 +40,7 @@ interface AlisaDataTableField<T> {
   label?: string;
   format?: "number" | "currency" | "date" | "transactionType" | "translation" | "boolean";
   sum?: boolean;
+  render?: (item: T, t: TFunction) => React.ReactNode;
 }
 
 type SortDirection = "asc" | "desc";
@@ -179,6 +180,11 @@ function AlisaDataTable<T extends { id: number }>(props: {
     field: AlisaDataTableField<T>,
     dataItem: T,
   ): React.ReactNode => {
+    // Use custom render function if provided
+    if (field.render) {
+      return field.render(dataItem, props.t);
+    }
+
     let value = dataItem[field.name];
 
     if (
@@ -259,9 +265,15 @@ function AlisaDataTable<T extends { id: number }>(props: {
             borderColor: "divider",
           }}
         >
-          <Typography variant="body1" color="text.secondary">
-            {props.t("rowCount", { count: data.length })}
-          </Typography>
+          <Chip
+            label={props.t("rowCount", { count: data.length })}
+            size="small"
+            variant="outlined"
+            sx={{
+              fontWeight: 500,
+              borderRadius: 1,
+            }}
+          />
           <Box sx={{ display: "flex", gap: 3 }}>
             {sumFields.map((field) => (
               <Box key={`summary-${field.name as string}`}>

@@ -343,6 +343,51 @@ describe('AlisaDataTable', () => {
     expect(mockOnSelectAllChange).toHaveBeenCalledWith([], []);
   });
 
+  describe('custom render function', () => {
+    it('uses render function when provided', () => {
+      const fieldsWithRender = [
+        { name: 'name' as keyof TestData },
+        {
+          name: 'amount' as keyof TestData,
+          render: (item: TestData) => <span data-testid="custom-render">Custom: {item.amount}</span>,
+        },
+      ];
+
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={fieldsWithRender}
+          data={mockData}
+        />
+      );
+
+      expect(screen.getAllByTestId('custom-render')).toHaveLength(3);
+      expect(screen.getByText('Custom: 100')).toBeInTheDocument();
+      expect(screen.getByText('Custom: 200')).toBeInTheDocument();
+      expect(screen.getByText('Custom: 300')).toBeInTheDocument();
+    });
+
+    it('render function receives the full item', () => {
+      const renderFn = jest.fn((item: TestData) => <span>{item.name} - {item.amount}</span>);
+      const fieldsWithRender = [
+        { name: 'name' as keyof TestData, render: renderFn },
+      ];
+
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={fieldsWithRender}
+          data={mockData}
+        />
+      );
+
+      expect(renderFn).toHaveBeenCalledTimes(3);
+      expect(renderFn).toHaveBeenCalledWith(mockData[0], mockT);
+      expect(renderFn).toHaveBeenCalledWith(mockData[1], mockT);
+      expect(renderFn).toHaveBeenCalledWith(mockData[2], mockT);
+    });
+  });
+
   describe('sorting', () => {
     it('does not show sort controls when sortable is false (default)', () => {
       renderWithProviders(
