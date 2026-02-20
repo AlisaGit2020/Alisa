@@ -1,10 +1,11 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, In, Repository } from 'typeorm';
 import { Income } from './entities/income.entity';
 import { IncomeInputDto } from './dtos/income-input.dto';
 import { Property } from 'src/real-estate/property/entities/property.entity';
@@ -16,6 +17,10 @@ import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeo
 import { TransactionStatus } from '@alisa-backend/common/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Events, IncomeAccountingDateChangedEvent } from '@alisa-backend/common/events';
+import {
+  DataSaveResultDto,
+  DataSaveResultRowDto,
+} from '@alisa-backend/common/dtos/data-save-result.dto';
 
 @Injectable()
 export class IncomeService {
@@ -179,6 +184,69 @@ export class IncomeService {
     if (transactionId) {
       await this.transactionRepository.delete(transactionId);
     }
+  }
+
+  async deleteMany(user: JWTUser, ids: number[]): Promise<DataSaveResultDto> {
+    if (ids.length === 0) {
+      throw new BadRequestException('No ids provided');
+    }
+
+    const incomes = await this.repository.find({
+      where: { id: In(ids) },
+    });
+
+    const deleteTask = incomes.map(async (income) => {
+      try {
+        if (!(await this.authService.hasOwnership(user, income.propertyId))) {
+          return {
+            id: income.id,
+            statusCode: 401,
+            message: 'Unauthorized',
+          } as DataSaveResultRowDto;
+        }
+
+        // Delete the income
+        await this.repository.delete(income.id);
+
+        // Delete associated transaction if it exists
+        if (income.transactionId) {
+          await this.transactionRepository.delete(income.transactionId);
+        }
+
+        return {
+          id: income.id,
+          statusCode: 200,
+          message: 'OK',
+        } as DataSaveResultRowDto;
+      } catch (e) {
+        return {
+          id: income.id,
+          statusCode: e.status || 500,
+          message: e.message,
+        } as DataSaveResultRowDto;
+      }
+    });
+
+    return this.getSaveTaskResult(deleteTask, incomes);
+  }
+
+  private async getSaveTaskResult(
+    tasks: Promise<DataSaveResultRowDto>[],
+    items: Income[],
+  ): Promise<DataSaveResultDto> {
+    const results = await Promise.all(tasks);
+    const successCount = results.filter((r) => r.statusCode === 200).length;
+    const failedCount = results.filter((r) => r.statusCode !== 200).length;
+
+    return {
+      rows: {
+        total: items.length,
+        success: successCount,
+        failed: failedCount,
+      },
+      allSuccess: failedCount === 0,
+      results,
+    };
   }
 
   private mapData(income: Income, input: IncomeInputDto) {

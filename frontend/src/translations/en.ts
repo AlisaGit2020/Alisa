@@ -62,6 +62,8 @@ const en = {
     rowsFailed: "Rows failed",
     rowsSelected: "{{count}} rows selected",
     rowsSucceeded: "Rows succeeded",
+    confirmDeleteSelected: "Are you sure you want to delete {{count}} selected items?",
+    deleteSelectedAriaLabel: "Delete {{count}} selected items",
     save: "Save",
     search: "Search",
     selectAll: "Select all",

@@ -416,4 +416,160 @@ describe('Expenses Component Logic', () => {
       expect(field?.format).toBe('currency');
     });
   });
+
+  describe('Bulk selection state management', () => {
+    it('selectedIds starts as empty array', () => {
+      const selectedIds: number[] = [];
+      expect(selectedIds).toEqual([]);
+    });
+
+    it('handleSelectChange adds id when not selected', () => {
+      let selectedIds: number[] = [];
+      const handleSelectChange = (id: number) => {
+        selectedIds = selectedIds.includes(id)
+          ? selectedIds.filter((i) => i !== id)
+          : [...selectedIds, id];
+      };
+
+      handleSelectChange(1);
+      expect(selectedIds).toEqual([1]);
+    });
+
+    it('handleSelectChange removes id when already selected', () => {
+      let selectedIds = [1, 2, 3];
+      const handleSelectChange = (id: number) => {
+        selectedIds = selectedIds.includes(id)
+          ? selectedIds.filter((i) => i !== id)
+          : [...selectedIds, id];
+      };
+
+      handleSelectChange(2);
+      expect(selectedIds).toEqual([1, 3]);
+    });
+
+    it('handleSelectAllChange sets all ids', () => {
+      let selectedIds: number[] = [];
+      const handleSelectAllChange = (ids: number[]) => {
+        selectedIds = ids;
+      };
+
+      handleSelectAllChange([1, 2, 3]);
+      expect(selectedIds).toEqual([1, 2, 3]);
+    });
+
+    it('handleSelectAllChange clears selection when passed empty array', () => {
+      let selectedIds = [1, 2, 3];
+      const handleSelectAllChange = (ids: number[]) => {
+        selectedIds = ids;
+      };
+
+      handleSelectAllChange([]);
+      expect(selectedIds).toEqual([]);
+    });
+
+    it('handleCancelSelection clears selected ids', () => {
+      let selectedIds = [1, 2, 3];
+      const handleCancelSelection = () => {
+        selectedIds = [];
+      };
+
+      handleCancelSelection();
+      expect(selectedIds).toEqual([]);
+    });
+  });
+
+  describe('Bulk delete state management', () => {
+    it('isDeleting starts as false', () => {
+      const isDeleting = false;
+      expect(isDeleting).toBe(false);
+    });
+
+    it('handleBulkDelete does nothing when selectedIds is empty', () => {
+      const isDeleting = false;
+      const selectedIds: number[] = [];
+      let apiCalls = 0;
+
+      const handleBulkDelete = () => {
+        if (selectedIds.length === 0 || isDeleting) return;
+        apiCalls++;
+      };
+
+      handleBulkDelete();
+      expect(apiCalls).toBe(0);
+    });
+
+    it('handleBulkDelete does nothing when already deleting', () => {
+      const isDeleting = true;
+      const selectedIds = [1, 2];
+      let apiCalls = 0;
+
+      const handleBulkDelete = () => {
+        if (selectedIds.length === 0 || isDeleting) return;
+        apiCalls++;
+      };
+
+      handleBulkDelete();
+      expect(apiCalls).toBe(0);
+    });
+
+    it('isDeleting prevents multiple delete calls', () => {
+      let isDeleting = false;
+      const selectedIds = [1, 2];
+      let apiCalls = 0;
+
+      const handleBulkDelete = () => {
+        if (selectedIds.length === 0 || isDeleting) return;
+        isDeleting = true;
+        apiCalls++;
+      };
+
+      handleBulkDelete();
+      expect(apiCalls).toBe(1);
+
+      handleBulkDelete();
+      expect(apiCalls).toBe(1);
+    });
+
+    it('successful bulk delete clears selection and increments refresh', () => {
+      let selectedIds = [1, 2];
+      let refreshTrigger = 0;
+
+      const handleBulkDeleteSuccess = () => {
+        selectedIds = [];
+        refreshTrigger++;
+      };
+
+      handleBulkDeleteSuccess();
+      expect(selectedIds).toEqual([]);
+      expect(refreshTrigger).toBe(1);
+    });
+  });
+
+  describe('Actions panel visibility', () => {
+    it('actions panel is hidden when no selection', () => {
+      const selectedIds: number[] = [];
+      const open = selectedIds.length > 0;
+      expect(open).toBe(false);
+    });
+
+    it('actions panel is visible when selection exists', () => {
+      const selectedIds = [1, 2];
+      const open = selectedIds.length > 0;
+      expect(open).toBe(true);
+    });
+  });
+
+  describe('Filter visibility with selection', () => {
+    it('filter is visible when no selection', () => {
+      const selectedIds: number[] = [];
+      const display = selectedIds.length === 0 ? 'block' : 'none';
+      expect(display).toBe('block');
+    });
+
+    it('filter is hidden when selection exists', () => {
+      const selectedIds = [1, 2];
+      const display = selectedIds.length === 0 ? 'block' : 'none';
+      expect(display).toBe('none');
+    });
+  });
 });

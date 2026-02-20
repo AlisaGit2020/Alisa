@@ -17,6 +17,8 @@ import { FindManyOptions } from 'typeorm';
 import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
 import { User } from '@alisa-backend/common/decorators/user.decorator';
 import { JWTUser } from '@alisa-backend/auth/types';
+import { BulkDeleteInputDto } from '@alisa-backend/common/dtos/bulk-delete-input.dto';
+import { DataSaveResultDto } from '@alisa-backend/common/dtos/data-save-result.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('accounting/expense')
@@ -73,5 +75,13 @@ export class ExpenseController {
   ): Promise<boolean> {
     await this.service.delete(user, id);
     return true;
+  }
+
+  @Post('/delete')
+  async deleteMany(
+    @User() user: JWTUser,
+    @Body() input: BulkDeleteInputDto,
+  ): Promise<DataSaveResultDto> {
+    return this.service.deleteMany(user, input.ids);
   }
 }

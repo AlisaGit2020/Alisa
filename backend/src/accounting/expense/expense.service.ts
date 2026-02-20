@@ -1,10 +1,11 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, In, Repository } from 'typeorm';
 import { Expense } from './entities/expense.entity';
 import { ExpenseInputDto } from './dtos/expense-input.dto';
 import { ExpenseType } from './entities/expense-type.entity';
@@ -16,6 +17,10 @@ import { DepreciationService } from '@alisa-backend/accounting/depreciation/depr
 import { TransactionStatus } from '@alisa-backend/common/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Events, ExpenseAccountingDateChangedEvent } from '@alisa-backend/common/events';
+import {
+  DataSaveResultDto,
+  DataSaveResultRowDto,
+} from '@alisa-backend/common/dtos/data-save-result.dto';
 
 @Injectable()
 export class ExpenseService {
@@ -188,6 +193,72 @@ export class ExpenseService {
     if (transactionId) {
       await this.transactionRepository.delete(transactionId);
     }
+  }
+
+  async deleteMany(user: JWTUser, ids: number[]): Promise<DataSaveResultDto> {
+    if (ids.length === 0) {
+      throw new BadRequestException('No ids provided');
+    }
+
+    const expenses = await this.repository.find({
+      where: { id: In(ids) },
+    });
+
+    const deleteTask = expenses.map(async (expense) => {
+      try {
+        if (!(await this.authService.hasOwnership(user, expense.propertyId))) {
+          return {
+            id: expense.id,
+            statusCode: 401,
+            message: 'Unauthorized',
+          } as DataSaveResultRowDto;
+        }
+
+        // Delete associated depreciation asset
+        await this.depreciationService.deleteByExpenseId(expense.id);
+
+        // Delete the expense
+        await this.repository.delete(expense.id);
+
+        // Delete associated transaction if it exists
+        if (expense.transactionId) {
+          await this.transactionRepository.delete(expense.transactionId);
+        }
+
+        return {
+          id: expense.id,
+          statusCode: 200,
+          message: 'OK',
+        } as DataSaveResultRowDto;
+      } catch (e) {
+        return {
+          id: expense.id,
+          statusCode: e.status || 500,
+          message: e.message,
+        } as DataSaveResultRowDto;
+      }
+    });
+
+    return this.getSaveTaskResult(deleteTask, expenses);
+  }
+
+  private async getSaveTaskResult(
+    tasks: Promise<DataSaveResultRowDto>[],
+    items: Expense[],
+  ): Promise<DataSaveResultDto> {
+    const results = await Promise.all(tasks);
+    const successCount = results.filter((r) => r.statusCode === 200).length;
+    const failedCount = results.filter((r) => r.statusCode !== 200).length;
+
+    return {
+      rows: {
+        total: items.length,
+        success: successCount,
+        failed: failedCount,
+      },
+      allSuccess: failedCount === 0,
+      results,
+    };
   }
 
   private async handleDepreciationAsset(expense: Expense): Promise<void> {

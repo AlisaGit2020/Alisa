@@ -1,4 +1,4 @@
-import { Paper, Stack } from "@mui/material";
+import { Box, Paper, Stack } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import AlisaDataTable from "../../alisa/datatable/AlisaDataTable";
 import { expenseContext } from "@alisa-lib/alisa-contexts";
@@ -18,6 +18,9 @@ import { View } from "@alisa-lib/views";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../../transaction/TransactionLeftMenuItems";
 import { usePropertyRequired } from "@alisa-lib/hooks/usePropertyRequired";
 import { PropertyRequiredSnackbar } from "../../alisa/PropertyRequiredSnackbar";
+import BulkDeleteActions from "../../alisa/BulkDeleteActions";
+import ApiClient from "@alisa-lib/api-client";
+import { useToast } from "../../alisa";
 
 const getDefaultFilter = (): AccountingFilterData => ({
   typeIds: [],
@@ -47,6 +50,9 @@ function Expenses({ t }: WithTranslation) {
   const [editId, setEditId] = useState<number | undefined>(undefined);
   const [addNew, setAddNew] = useState<boolean>(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { showToast } = useToast();
 
   const { requireProperty, popoverOpen, popoverAnchorEl, closePopover, openPropertySelector } =
     usePropertyRequired(propertyId);
@@ -158,6 +164,55 @@ function Expenses({ t }: WithTranslation) {
     setRefreshTrigger((prev) => prev + 1);
   };
 
+  const handleSelectChange = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllChange = (ids: number[]) => {
+    setSelectedIds(ids);
+  };
+
+  const handleCancelSelection = () => {
+    setSelectedIds([]);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0 || isDeleting) return;
+
+    setIsDeleting(true);
+    try {
+      const result = await ApiClient.postSaveTask("accounting/expense/delete", {
+        ids: selectedIds,
+      });
+      if (result.allSuccess) {
+        showToast({
+          message: t("common:toast.deleteSuccess"),
+          severity: "success",
+        });
+      } else {
+        showToast({
+          message: t("common:toast.partialSuccess", {
+            success: result.rows.success,
+            failed: result.rows.failed,
+          }),
+          severity: "warning",
+        });
+      }
+      setSelectedIds([]);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error deleting expenses:", error);
+      showToast({
+        message: t("common:toast.error"),
+        severity: "error",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // Create a simple data service wrapper for the transformed data
   // Include refreshTrigger in dependencies to force refresh after form submit
   const rowDataService = useMemo(() => {
@@ -189,15 +244,26 @@ function Expenses({ t }: WithTranslation) {
       descriptionKey="expensesPageDescription"
     >
       <Stack spacing={2}>
-        <AccountingFilter
-          mode="expense"
-          data={filter}
-          onTypeChange={handleTypeChange}
-          onSearchTextChange={handleSearchTextChange}
-          onStartDateChange={handleStartDateChange}
-          onEndDateChange={handleEndDateChange}
-          onReset={handleReset}
+        <BulkDeleteActions
+          t={t}
+          open={selectedIds.length > 0}
+          selectedCount={selectedIds.length}
+          onCancel={handleCancelSelection}
+          onDelete={handleBulkDelete}
+          isDeleting={isDeleting}
         />
+
+        <Box sx={{ display: selectedIds.length === 0 ? "block" : "none" }}>
+          <AccountingFilter
+            mode="expense"
+            data={filter}
+            onTypeChange={handleTypeChange}
+            onSearchTextChange={handleSearchTextChange}
+            onStartDateChange={handleStartDateChange}
+            onEndDateChange={handleEndDateChange}
+            onReset={handleReset}
+          />
+        </Box>
 
         <Paper>
           <AlisaDataTable<ExpenseRow>
@@ -212,6 +278,9 @@ function Expenses({ t }: WithTranslation) {
               { name: "amount", format: "currency" },
               { name: "totalAmount", format: "currency", sum: true },
             ]}
+            selectedIds={selectedIds}
+            onSelectChange={handleSelectChange}
+            onSelectAllChange={handleSelectAllChange}
             onNewRow={handleAdd}
             onOpen={handleOpenDetails}
             onEdit={handleOpenDetails}
