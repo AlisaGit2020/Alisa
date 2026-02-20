@@ -120,7 +120,7 @@ export class IncomeTypeService {
     input: IncomeTypeInputDto,
   ) {
     Object.entries(input).forEach(([key, value]) => {
-      if (value !== undefined) {
+      if (value !== undefined && key !== 'id') {
         incomeType[key] = value;
       }
     });

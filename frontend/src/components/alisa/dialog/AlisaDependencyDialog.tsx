@@ -3,7 +3,6 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
-  Button,
   Chip,
   Dialog,
   DialogActions,
@@ -14,6 +13,7 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
+import AlisaButton from "../form/AlisaButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { useTranslation } from "react-i18next";
@@ -50,7 +50,6 @@ function AlisaDependencyDialog({
   }
 
   const handleConfirmDelete = () => {
-    onClose();
     onConfirmDelete();
   };
 
@@ -117,16 +116,17 @@ function AlisaDependencyDialog({
         ))}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant="outlined">
-          {t("common:cancel")}
-        </Button>
-        <Button
+        <AlisaButton
+          label={t("common:cancel")}
+          onClick={onClose}
+          variant="outlined"
+        />
+        <AlisaButton
+          label={t("common:dependencies.deleteConfirm")}
           onClick={handleConfirmDelete}
           variant="contained"
           color="error"
-        >
-          {t("common:dependencies.deleteConfirm")}
-        </Button>
+        />
       </DialogActions>
     </Dialog>
   );

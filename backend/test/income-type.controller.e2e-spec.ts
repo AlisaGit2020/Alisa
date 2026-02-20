@@ -463,6 +463,7 @@ describe('IncomeTypeController (e2e)', () => {
   describe('GET /accounting/income/type/:id/can-delete', () => {
     let user1Token: string;
     let incomeTypeCounter = 0;
+    const createdTypeIds: number[] = [];
 
     const createUniqueIncomeType = (
       baseName: string,
@@ -486,6 +487,19 @@ describe('IncomeTypeController (e2e)', () => {
       await addIncomeAndExpenseTypes(testUsers.user1WithProperties.jwtUser, app);
     });
 
+    afterAll(async () => {
+      // Clean up created income types
+      for (const id of createdTypeIds) {
+        try {
+          await request(server)
+            .delete(`/accounting/income/type/${id}`)
+            .set('Authorization', getBearerToken(user1Token));
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
+    });
+
     it('returns canDelete true with no dependencies when income type has no incomes', async () => {
       // Create an income type without any incomes
       const createResponse = await request(server)
@@ -493,6 +507,8 @@ describe('IncomeTypeController (e2e)', () => {
         .set('Authorization', getBearerToken(user1Token))
         .send(createUniqueIncomeType('No Dependencies Type'))
         .expect(201);
+
+      createdTypeIds.push(createResponse.body.id);
 
       const response = await request(server)
         .get(`/accounting/income/type/${createResponse.body.id}/can-delete`)
@@ -511,6 +527,8 @@ describe('IncomeTypeController (e2e)', () => {
         .set('Authorization', getBearerToken(user1Token))
         .send(createUniqueIncomeType('Type With Dependencies'))
         .expect(201);
+
+      createdTypeIds.push(createResponse.body.id);
 
       const propertyId = testUsers.user1WithProperties.properties[0].id;
       const transaction = getTransactionIncome1(propertyId);
@@ -562,6 +580,8 @@ describe('IncomeTypeController (e2e)', () => {
         .set('Authorization', getBearerToken(user1Token))
         .send(createUniqueIncomeType('User1 Private Type'))
         .expect(201);
+
+      createdTypeIds.push(createResponse.body.id);
 
       // User2 tries to check it
       await request(server)
