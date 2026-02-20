@@ -247,9 +247,9 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
                 {t("expenseDetails")}
               </Typography>
               <Stack spacing={1}>
-                {data.expenses.map((expense, index) => (
+                {data.expenses.map((expense) => (
                   <Paper
-                    key={`expense-detail-${index}`}
+                    key={`expense-detail-${expense.id}`}
                     variant="outlined"
                     sx={{ p: 2 }}
                   >
@@ -296,9 +296,9 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
                 {t("incomeDetails")}
               </Typography>
               <Stack spacing={1}>
-                {data.incomes.map((income, index) => (
+                {data.incomes.map((income) => (
                   <Paper
-                    key={`income-detail-${index}`}
+                    key={`income-detail-${income.id}`}
                     variant="outlined"
                     sx={{ p: 2 }}
                   >

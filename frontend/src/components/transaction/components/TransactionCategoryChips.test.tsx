@@ -204,4 +204,53 @@ describe('TransactionCategoryChips', () => {
     expect(screen.getByText('Utilities')).toBeInTheDocument();
     expect(screen.queryByText(/\+\d/)).not.toBeInTheDocument();
   });
+
+  it('deduplicates categories with same name', () => {
+    const transaction = createTransaction({
+      expenses: [
+        {
+          id: 1,
+          description: 'Expense 1',
+          amount: 30,
+          quantity: 1,
+          totalAmount: 30,
+          accountingDate: new Date(),
+          expenseTypeId: 1,
+          propertyId: 1,
+          transactionId: 1,
+          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+        },
+        {
+          id: 2,
+          description: 'Expense 2',
+          amount: 40,
+          quantity: 1,
+          totalAmount: 40,
+          accountingDate: new Date(),
+          expenseTypeId: 1,
+          propertyId: 1,
+          transactionId: 1,
+          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+        },
+        {
+          id: 3,
+          description: 'Expense 3',
+          amount: 30,
+          quantity: 1,
+          totalAmount: 30,
+          accountingDate: new Date(),
+          expenseTypeId: 2,
+          propertyId: 1,
+          transactionId: 1,
+          expenseType: { id: 2, name: 'Repairs', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+        },
+      ],
+    });
+
+    renderWithProviders(<TransactionCategoryChips transaction={transaction} />);
+
+    // Should show "Utilities" and "+1" (for Repairs), not "+2"
+    expect(screen.getByText('Utilities')).toBeInTheDocument();
+    expect(screen.getByText('+1')).toBeInTheDocument();
+  });
 });

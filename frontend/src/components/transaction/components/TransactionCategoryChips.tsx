@@ -11,27 +11,29 @@ function TransactionCategoryChips({
   const expenses = transaction.expenses || [];
   const incomes = transaction.incomes || [];
 
-  const allCategories: string[] = [];
+  const categorySet = new Set<string>();
 
   expenses.forEach((expense) => {
     if (expense.expenseType?.name) {
-      allCategories.push(expense.expenseType.name);
+      categorySet.add(expense.expenseType.name);
     }
   });
 
   incomes.forEach((income) => {
     if (income.incomeType?.name) {
-      allCategories.push(income.incomeType.name);
+      categorySet.add(income.incomeType.name);
     }
   });
 
-  if (allCategories.length === 0) {
+  const uniqueCategories = [...categorySet];
+
+  if (uniqueCategories.length === 0) {
     return null;
   }
 
-  const firstCategory = allCategories[0];
-  const remainingCount = allCategories.length - 1;
-  const tooltipText = allCategories.join(", ");
+  const firstCategory = uniqueCategories[0];
+  const remainingCount = uniqueCategories.length - 1;
+  const tooltipText = uniqueCategories.join(", ");
 
   const content = (
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
