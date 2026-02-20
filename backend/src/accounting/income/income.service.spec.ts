@@ -511,4 +511,97 @@ describe('IncomeService', () => {
       expect(result).toEqual(income);
     });
   });
+
+  describe('deleteMany', () => {
+    it('deletes multiple incomes and returns success result', async () => {
+      const income1 = createIncome({ id: 1, propertyId: 1, transactionId: null });
+      const income2 = createIncome({ id: 2, propertyId: 1, transactionId: null });
+
+      mockRepository.find.mockResolvedValue([income1, income2]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      expect(result.allSuccess).toBe(true);
+      expect(result.rows.total).toBe(2);
+      expect(result.rows.success).toBe(2);
+      expect(result.rows.failed).toBe(0);
+      expect(mockRepository.delete).toHaveBeenCalledTimes(2);
+    });
+
+    it('deletes incomes and their associated transactions', async () => {
+      const income1 = createIncome({ id: 1, propertyId: 1, transactionId: 100 });
+      const income2 = createIncome({ id: 2, propertyId: 1, transactionId: 101 });
+
+      mockRepository.find.mockResolvedValue([income1, income2]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+      mockTransactionRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      expect(result.allSuccess).toBe(true);
+      expect(mockTransactionRepository.delete).toHaveBeenCalledWith(100);
+      expect(mockTransactionRepository.delete).toHaveBeenCalledWith(101);
+    });
+
+    it('throws BadRequestException when ids array is empty', async () => {
+      const { BadRequestException } = await import('@nestjs/common');
+
+      await expect(service.deleteMany(testUser, [])).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('returns unauthorized result for incomes user does not own', async () => {
+      const income1 = createIncome({ id: 1, propertyId: 1, transactionId: null });
+      const income2 = createIncome({ id: 2, propertyId: 3, transactionId: null });
+
+      mockRepository.find.mockResolvedValue([income1, income2]);
+      mockAuthService.hasOwnership
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      expect(result.allSuccess).toBe(false);
+      expect(result.rows.success).toBe(1);
+      expect(result.rows.failed).toBe(1);
+      expect(result.results.find((r) => r.id === 2)?.statusCode).toBe(401);
+    });
+
+    it('returns partial success when some deletions fail', async () => {
+      const income1 = createIncome({ id: 1, propertyId: 1, transactionId: null });
+      const income2 = createIncome({ id: 2, propertyId: 1, transactionId: null });
+
+      mockRepository.find.mockResolvedValue([income1, income2]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete
+        .mockResolvedValueOnce({ affected: 1 })
+        .mockRejectedValueOnce(new Error('Database error'));
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      expect(result.allSuccess).toBe(false);
+      expect(result.rows.success).toBe(1);
+      expect(result.rows.failed).toBe(1);
+    });
+
+    it('handles non-existent income ids gracefully', async () => {
+      const income1 = createIncome({ id: 1, propertyId: 1, transactionId: null });
+
+      // Only income1 exists, income2 (id: 2) does not exist
+      mockRepository.find.mockResolvedValue([income1]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      // Only the existing income is processed
+      expect(result.rows.total).toBe(1);
+      expect(result.rows.success).toBe(1);
+    });
+  });
 });

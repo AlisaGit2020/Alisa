@@ -399,6 +399,87 @@ describe('ExpenseController (e2e)', () => {
     });
   });
 
+  describe('POST /accounting/expense/delete (bulk delete)', () => {
+    it('deletes multiple expenses when user owns them', async () => {
+      // Create expenses to delete
+      const transaction1 = await addTransaction(
+        app,
+        mainUser.jwtUser,
+        getTransactionExpense1(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
+      );
+      const transaction2 = await addTransaction(
+        app,
+        mainUser.jwtUser,
+        getTransactionExpense2(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
+      );
+      const ids = [transaction1.expenses[0].id, transaction2.expenses[0].id];
+
+      const response = await request(server)
+        .post(`${baseUrl}/delete`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({ ids })
+        .expect(201);
+
+      expect(response.body.allSuccess).toBe(true);
+      expect(response.body.rows.total).toBe(2);
+      expect(response.body.rows.success).toBe(2);
+      expect(response.body.rows.failed).toBe(0);
+
+      // Verify expenses are deleted
+      await request(server)
+        .get(`${baseUrl}/${ids[0]}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(404);
+      await request(server)
+        .get(`${baseUrl}/${ids[1]}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(404);
+    });
+
+    it('returns 401 when not authenticated', () => {
+      return request(server)
+        .post(`${baseUrl}/delete`)
+        .send({ ids: [1, 2] })
+        .expect(401);
+    });
+
+    it('returns 400 when ids array is empty', async () => {
+      return request(server)
+        .post(`${baseUrl}/delete`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({ ids: [] })
+        .expect(400);
+    });
+
+    it('returns partial success when some expenses belong to other user', async () => {
+      // Create expense for main user
+      const mainUserTransaction = await addTransaction(
+        app,
+        mainUser.jwtUser,
+        getTransactionExpense1(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
+      );
+      // Get expense from user2 (created in User isolation tests)
+      const user2 = testUsers.user2WithProperties;
+      const user2Transaction = await addTransaction(
+        app,
+        user2.jwtUser,
+        getTransactionExpense1(user2.properties[0].id, TransactionStatus.ACCEPTED),
+      );
+
+      const ids = [mainUserTransaction.expenses[0].id, user2Transaction.expenses[0].id];
+
+      const response = await request(server)
+        .post(`${baseUrl}/delete`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({ ids })
+        .expect(201);
+
+      expect(response.body.allSuccess).toBe(false);
+      expect(response.body.rows.success).toBe(1);
+      expect(response.body.rows.failed).toBe(1);
+    });
+  });
+
   describe('Transaction status handling', () => {
     it('returns expense when its transaction is accepted', async () => {
       const user = testUsers.user2WithProperties;

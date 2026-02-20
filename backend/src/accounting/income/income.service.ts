@@ -1,10 +1,11 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, In, Repository } from 'typeorm';
 import { Income } from './entities/income.entity';
 import { IncomeInputDto } from './dtos/income-input.dto';
 import { Property } from 'src/real-estate/property/entities/property.entity';
@@ -16,6 +17,13 @@ import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeo
 import { TransactionStatus } from '@alisa-backend/common/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Events, IncomeAccountingDateChangedEvent } from '@alisa-backend/common/events';
+import { DataSaveResultDto } from '@alisa-backend/common/dtos/data-save-result.dto';
+import {
+  buildBulkOperationResult,
+  createSuccessResult,
+  createUnauthorizedResult,
+  createErrorResult,
+} from '@alisa-backend/common/utils/bulk-operation.util';
 
 @Injectable()
 export class IncomeService {
@@ -179,6 +187,38 @@ export class IncomeService {
     if (transactionId) {
       await this.transactionRepository.delete(transactionId);
     }
+  }
+
+  async deleteMany(user: JWTUser, ids: number[]): Promise<DataSaveResultDto> {
+    if (ids.length === 0) {
+      throw new BadRequestException('No ids provided');
+    }
+
+    const incomes = await this.repository.find({
+      where: { id: In(ids) },
+    });
+
+    const deleteTask = incomes.map(async (income) => {
+      try {
+        if (!(await this.authService.hasOwnership(user, income.propertyId))) {
+          return createUnauthorizedResult(income.id);
+        }
+
+        // Delete the income
+        await this.repository.delete(income.id);
+
+        // Delete associated transaction if it exists
+        if (income.transactionId) {
+          await this.transactionRepository.delete(income.transactionId);
+        }
+
+        return createSuccessResult(income.id);
+      } catch (e) {
+        return createErrorResult(income.id, e);
+      }
+    });
+
+    return buildBulkOperationResult(deleteTask, incomes.length);
   }
 
   private mapData(income: Income, input: IncomeInputDto) {

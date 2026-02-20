@@ -62,6 +62,8 @@ const fi = {
     rowsFailed: "Epäonnistui",
     rowsSelected: "{{count}} riviä valittu",
     rowsSucceeded: "Onnistui",
+    confirmDeleteSelected: "Haluatko varmasti poistaa {{count}} valittua kohdetta?",
+    deleteSelectedAriaLabel: "Poista {{count}} valittua kohdetta",
     save: "Tallenna",
     search: "Hae",
     selectAll: "Valitse kaikki",

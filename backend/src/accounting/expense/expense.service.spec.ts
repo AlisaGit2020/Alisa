@@ -520,4 +520,98 @@ describe('ExpenseService', () => {
       expect(result).toEqual(expense);
     });
   });
+
+  describe('deleteMany', () => {
+    it('deletes multiple expenses and returns success result', async () => {
+      const expense1 = createExpense({ id: 1, propertyId: 1, transactionId: null });
+      const expense2 = createExpense({ id: 2, propertyId: 1, transactionId: null });
+
+      mockRepository.find.mockResolvedValue([expense1, expense2]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      expect(result.allSuccess).toBe(true);
+      expect(result.rows.total).toBe(2);
+      expect(result.rows.success).toBe(2);
+      expect(result.rows.failed).toBe(0);
+      expect(mockRepository.delete).toHaveBeenCalledTimes(2);
+      expect(mockDepreciationService.deleteByExpenseId).toHaveBeenCalledTimes(2);
+    });
+
+    it('deletes expenses and their associated transactions', async () => {
+      const expense1 = createExpense({ id: 1, propertyId: 1, transactionId: 100 });
+      const expense2 = createExpense({ id: 2, propertyId: 1, transactionId: 101 });
+
+      mockRepository.find.mockResolvedValue([expense1, expense2]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+      mockTransactionRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      expect(result.allSuccess).toBe(true);
+      expect(mockTransactionRepository.delete).toHaveBeenCalledWith(100);
+      expect(mockTransactionRepository.delete).toHaveBeenCalledWith(101);
+    });
+
+    it('throws BadRequestException when ids array is empty', async () => {
+      const { BadRequestException } = await import('@nestjs/common');
+
+      await expect(service.deleteMany(testUser, [])).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('returns unauthorized result for expenses user does not own', async () => {
+      const expense1 = createExpense({ id: 1, propertyId: 1, transactionId: null });
+      const expense2 = createExpense({ id: 2, propertyId: 3, transactionId: null });
+
+      mockRepository.find.mockResolvedValue([expense1, expense2]);
+      mockAuthService.hasOwnership
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      expect(result.allSuccess).toBe(false);
+      expect(result.rows.success).toBe(1);
+      expect(result.rows.failed).toBe(1);
+      expect(result.results.find((r) => r.id === 2)?.statusCode).toBe(401);
+    });
+
+    it('returns partial success when some deletions fail', async () => {
+      const expense1 = createExpense({ id: 1, propertyId: 1, transactionId: null });
+      const expense2 = createExpense({ id: 2, propertyId: 1, transactionId: null });
+
+      mockRepository.find.mockResolvedValue([expense1, expense2]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete
+        .mockResolvedValueOnce({ affected: 1 })
+        .mockRejectedValueOnce(new Error('Database error'));
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      expect(result.allSuccess).toBe(false);
+      expect(result.rows.success).toBe(1);
+      expect(result.rows.failed).toBe(1);
+    });
+
+    it('handles non-existent expense ids gracefully', async () => {
+      const expense1 = createExpense({ id: 1, propertyId: 1, transactionId: null });
+
+      // Only expense1 exists, expense2 (id: 2) does not exist
+      mockRepository.find.mockResolvedValue([expense1]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.deleteMany(testUser, [1, 2]);
+
+      // Only the existing expense is processed
+      expect(result.rows.total).toBe(1);
+      expect(result.rows.success).toBe(1);
+    });
+  });
 });
