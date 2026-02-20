@@ -74,7 +74,7 @@ function AlisaDependencyDialog({
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
+                  justifyContent: "space-between",
                   width: "100%",
                 }}
               >
