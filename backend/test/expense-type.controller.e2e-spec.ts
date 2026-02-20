@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
+  addIncomeAndExpenseTypes,
+  addTransaction,
   closeAppGracefully,
   getBearerToken,
   getTestUsers,
@@ -13,6 +15,7 @@ import {
 } from './helper-functions';
 import * as http from 'http';
 import { ExpenseTypeInputDto } from '@alisa-backend/accounting/expense/dtos/expense-type-input.dto';
+import { getTransactionExpense1 } from './data/mocks/transaction.mock';
 
 describe('ExpenseTypeController (e2e)', () => {
   let app: INestApplication;
@@ -26,6 +29,7 @@ describe('ExpenseTypeController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ transform: true }));
     await app.init();
     server = app.getHttpServer();
 
@@ -443,6 +447,104 @@ describe('ExpenseTypeController (e2e)', () => {
       await request(server)
         .get(`/accounting/expense/type/${user2CreateResponse.body.id}`)
         .set('Authorization', getBearerToken(user1Token))
+        .expect(401);
+    });
+  });
+
+  describe('GET /accounting/expense/type/:id/can-delete', () => {
+    let user1Token: string;
+
+    beforeAll(async () => {
+      user1Token = await getUserAccessToken2(
+        authService,
+        testUsers.user1WithProperties.jwtUser,
+      );
+
+      // Add income and expense types for user1
+      await addIncomeAndExpenseTypes(testUsers.user1WithProperties.jwtUser, app);
+    });
+
+    it('returns canDelete true with no dependencies when expense type has no expenses', async () => {
+      // Create an expense type without any expenses
+      const createResponse = await request(server)
+        .post('/accounting/expense/type')
+        .set('Authorization', getBearerToken(user1Token))
+        .send(createExpenseType('No Dependencies Type'))
+        .expect(201);
+
+      const response = await request(server)
+        .get(`/accounting/expense/type/${createResponse.body.id}/can-delete`)
+        .set('Authorization', getBearerToken(user1Token))
+        .expect(200);
+
+      expect(response.body.canDelete).toBe(true);
+      expect(response.body.dependencies).toEqual([]);
+      expect(response.body.message).toBeUndefined();
+    });
+
+    it('returns dependencies when expense type has linked expenses', async () => {
+      // Create an expense type with a linked expense
+      const createResponse = await request(server)
+        .post('/accounting/expense/type')
+        .set('Authorization', getBearerToken(user1Token))
+        .send(createExpenseType('Type With Dependencies'))
+        .expect(201);
+
+      const propertyId = testUsers.user1WithProperties.properties[0].id;
+      const transaction = getTransactionExpense1(propertyId);
+      transaction.expenses[0].expenseTypeId = createResponse.body.id;
+
+      await addTransaction(
+        app,
+        testUsers.user1WithProperties.jwtUser,
+        transaction,
+      );
+
+      const response = await request(server)
+        .get(`/accounting/expense/type/${createResponse.body.id}/can-delete`)
+        .set('Authorization', getBearerToken(user1Token))
+        .expect(200);
+
+      expect(response.body.canDelete).toBe(true);
+      expect(response.body.dependencies).toHaveLength(1);
+      expect(response.body.dependencies[0].type).toBe('expense');
+      expect(response.body.dependencies[0].count).toBeGreaterThanOrEqual(1);
+      expect(response.body.dependencies[0].samples.length).toBeGreaterThanOrEqual(1);
+      expect(response.body.message).toBe(
+        'The following related data will be deleted',
+      );
+    });
+
+    it('returns 401 when not authenticated', async () => {
+      await request(server)
+        .get('/accounting/expense/type/1/can-delete')
+        .expect(401);
+    });
+
+    it('returns 404 for non-existent expense type', async () => {
+      await request(server)
+        .get('/accounting/expense/type/999999/can-delete')
+        .set('Authorization', getBearerToken(user1Token))
+        .expect(404);
+    });
+
+    it('returns 401 when trying to check another users expense type', async () => {
+      const user2Token = await getUserAccessToken2(
+        authService,
+        testUsers.user2WithProperties.jwtUser,
+      );
+
+      // Create expense type for user1
+      const createResponse = await request(server)
+        .post('/accounting/expense/type')
+        .set('Authorization', getBearerToken(user1Token))
+        .send(createExpenseType('User1 Private Type'))
+        .expect(201);
+
+      // User2 tries to check it
+      await request(server)
+        .get(`/accounting/expense/type/${createResponse.body.id}/can-delete`)
+        .set('Authorization', getBearerToken(user2Token))
         .expect(401);
     });
   });

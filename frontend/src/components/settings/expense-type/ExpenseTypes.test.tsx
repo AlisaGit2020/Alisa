@@ -6,6 +6,7 @@ import ExpenseTypes from './ExpenseTypes';
 import DataService from '@alisa-lib/data-service';
 
 jest.mock('@alisa-lib/data-service');
+jest.mock('@alisa-lib/api-client');
 
 describe('ExpenseTypes', () => {
   const mockExpenseTypes = [
@@ -144,6 +145,20 @@ describe('ExpenseTypes', () => {
 
       // Boolean values should be displayed (format: 'boolean' in field config)
       // The exact display depends on AlisaDataTable boolean formatting
+    });
+  });
+
+  describe('Delete functionality', () => {
+    it('renders delete buttons in the table', async () => {
+      renderWithProviders(<ExpenseTypes {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Repairs')).toBeInTheDocument();
+      });
+
+      // Delete buttons should be rendered
+      const deleteButtons = screen.getAllByTestId('DeleteIcon');
+      expect(deleteButtons.length).toBeGreaterThan(0);
     });
   });
 });

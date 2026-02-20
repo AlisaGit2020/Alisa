@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
+  addIncomeAndExpenseTypes,
+  addTransaction,
   closeAppGracefully,
   getBearerToken,
   getTestUsers,
@@ -13,6 +15,7 @@ import {
 } from './helper-functions';
 import * as http from 'http';
 import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
+import { getTransactionIncome1 } from './data/mocks/transaction.mock';
 
 describe('IncomeTypeController (e2e)', () => {
   let app: INestApplication;
@@ -26,6 +29,7 @@ describe('IncomeTypeController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ transform: true }));
     await app.init();
     server = app.getHttpServer();
 
@@ -453,6 +457,117 @@ describe('IncomeTypeController (e2e)', () => {
       response2.body.forEach((incomeType: { userId: number }) => {
         expect(incomeType.userId).toBe(user2.user.id);
       });
+    });
+  });
+
+  describe('GET /accounting/income/type/:id/can-delete', () => {
+    let user1Token: string;
+    let incomeTypeCounter = 0;
+
+    const createUniqueIncomeType = (
+      baseName: string,
+      isTaxable = false,
+    ): IncomeTypeInputDto => {
+      incomeTypeCounter++;
+      return {
+        name: `${baseName} ${Date.now()}-${incomeTypeCounter}`,
+        description: `Description for ${baseName}`,
+        isTaxable,
+      };
+    };
+
+    beforeAll(async () => {
+      user1Token = await getUserAccessToken2(
+        authService,
+        testUsers.user1WithProperties.jwtUser,
+      );
+
+      // Add income and expense types for user1
+      await addIncomeAndExpenseTypes(testUsers.user1WithProperties.jwtUser, app);
+    });
+
+    it('returns canDelete true with no dependencies when income type has no incomes', async () => {
+      // Create an income type without any incomes
+      const createResponse = await request(server)
+        .post('/accounting/income/type')
+        .set('Authorization', getBearerToken(user1Token))
+        .send(createUniqueIncomeType('No Dependencies Type'))
+        .expect(201);
+
+      const response = await request(server)
+        .get(`/accounting/income/type/${createResponse.body.id}/can-delete`)
+        .set('Authorization', getBearerToken(user1Token))
+        .expect(200);
+
+      expect(response.body.canDelete).toBe(true);
+      expect(response.body.dependencies).toEqual([]);
+      expect(response.body.message).toBeUndefined();
+    });
+
+    it('returns dependencies when income type has linked incomes', async () => {
+      // Create an income type with a linked income
+      const createResponse = await request(server)
+        .post('/accounting/income/type')
+        .set('Authorization', getBearerToken(user1Token))
+        .send(createUniqueIncomeType('Type With Dependencies'))
+        .expect(201);
+
+      const propertyId = testUsers.user1WithProperties.properties[0].id;
+      const transaction = getTransactionIncome1(propertyId);
+      transaction.incomes[0].incomeTypeId = createResponse.body.id;
+
+      await addTransaction(
+        app,
+        testUsers.user1WithProperties.jwtUser,
+        transaction,
+      );
+
+      const response = await request(server)
+        .get(`/accounting/income/type/${createResponse.body.id}/can-delete`)
+        .set('Authorization', getBearerToken(user1Token))
+        .expect(200);
+
+      expect(response.body.canDelete).toBe(true);
+      expect(response.body.dependencies).toHaveLength(1);
+      expect(response.body.dependencies[0].type).toBe('income');
+      expect(response.body.dependencies[0].count).toBeGreaterThanOrEqual(1);
+      expect(response.body.dependencies[0].samples.length).toBeGreaterThanOrEqual(1);
+      expect(response.body.message).toBe(
+        'The following related data will be deleted',
+      );
+    });
+
+    it('returns 401 when not authenticated', async () => {
+      await request(server)
+        .get('/accounting/income/type/1/can-delete')
+        .expect(401);
+    });
+
+    it('returns 404 for non-existent income type', async () => {
+      await request(server)
+        .get('/accounting/income/type/999999/can-delete')
+        .set('Authorization', getBearerToken(user1Token))
+        .expect(404);
+    });
+
+    it('returns 401 when trying to check another users income type', async () => {
+      const user2Token = await getUserAccessToken2(
+        authService,
+        testUsers.user2WithProperties.jwtUser,
+      );
+
+      // Create income type for user1
+      const createResponse = await request(server)
+        .post('/accounting/income/type')
+        .set('Authorization', getBearerToken(user1Token))
+        .send(createUniqueIncomeType('User1 Private Type'))
+        .expect(201);
+
+      // User2 tries to check it
+      await request(server)
+        .get(`/accounting/income/type/${createResponse.body.id}/can-delete`)
+        .set('Authorization', getBearerToken(user2Token))
+        .expect(401);
     });
   });
 });

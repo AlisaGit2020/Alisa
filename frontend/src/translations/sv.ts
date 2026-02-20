@@ -46,6 +46,7 @@ const sv = {
     category: "Kategori",
     confirm: "Bekräfta",
     confirmDelete: "Vill du ta bort posten?",
+    confirmDeleteMessage: "Denna åtgärd kan inte ångras.",
     dataNotSelected: "Välj",
     delete: "Ta bort",
     description: "Beskrivning",

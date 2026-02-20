@@ -56,6 +56,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
   onEdit?: (id: number) => void;
   onOpen?: (id: number) => void;
   onDelete?: (id: number) => void;
+  onDeleteRequest?: (id: number) => void;
   refreshTrigger?: number;
   sortable?: boolean;
 }) {
@@ -127,6 +128,11 @@ function AlisaDataTable<T extends { id: number }>(props: {
   }, [idDeleted, props.dataService, props.refreshTrigger]);
 
   const handleDeleteOpen = (apartmentId: number) => {
+    // If onDeleteRequest is provided, delegate entire delete flow to parent
+    if (props.onDeleteRequest) {
+      props.onDeleteRequest(apartmentId);
+      return;
+    }
     setIdToDelete(apartmentId);
     setOpen(true);
   };
@@ -366,11 +372,11 @@ function AlisaDataTable<T extends { id: number }>(props: {
                     </TableCell>
                   ))}
 
-                  {(props.onEdit || props.onDelete || props.onNewRow) && (
+                  {(props.onEdit || props.onDelete || props.onDeleteRequest || props.onNewRow) && (
                     <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                       <AlisaDataTableActionButtons
                         id={item.id}
-                        onDelete={props.onDelete ? handleDeleteOpen : undefined}
+                        onDelete={(props.onDelete || props.onDeleteRequest) ? handleDeleteOpen : undefined}
                         onEdit={props.onEdit}
                         visible={
                           props.selectedIds?.length == 0 ||

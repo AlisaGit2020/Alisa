@@ -7,6 +7,7 @@ import {
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExpenseTypeService } from './expense-type.service';
 import { ExpenseType } from './entities/expense-type.entity';
+import { Expense } from './entities/expense.entity';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
   createMockRepository,
@@ -14,11 +15,12 @@ import {
   MockRepository,
   MockAuthService,
 } from 'test/mocks';
-import { createExpenseType, createJWTUser } from 'test/factories';
+import { createExpense, createExpenseType, createJWTUser } from 'test/factories';
 
 describe('ExpenseTypeService', () => {
   let service: ExpenseTypeService;
   let mockRepository: MockRepository<ExpenseType>;
+  let mockExpenseRepository: MockRepository<Expense>;
   let mockAuthService: MockAuthService;
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
@@ -26,12 +28,14 @@ describe('ExpenseTypeService', () => {
 
   beforeEach(async () => {
     mockRepository = createMockRepository<ExpenseType>();
+    mockExpenseRepository = createMockRepository<Expense>();
     mockAuthService = createMockAuthService();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExpenseTypeService,
         { provide: getRepositoryToken(ExpenseType), useValue: mockRepository },
+        { provide: getRepositoryToken(Expense), useValue: mockExpenseRepository },
         { provide: AuthService, useValue: mockAuthService },
       ],
     }).compile();
@@ -226,6 +230,85 @@ describe('ExpenseTypeService', () => {
       const result = await service.search(testUser, undefined);
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('validateDelete', () => {
+    it('returns canDelete true with empty dependencies when no expenses exist', async () => {
+      const expenseType = createExpenseType({ id: 1, userId: testUser.id });
+      mockRepository.findOne.mockResolvedValue(expenseType);
+      mockExpenseRepository.count.mockResolvedValue(0);
+
+      const result = await service.validateDelete(testUser, 1);
+
+      expect(result.validation.canDelete).toBe(true);
+      expect(result.validation.dependencies).toEqual([]);
+      expect(result.validation.message).toBeUndefined();
+      expect(result.expenseType).toEqual(expenseType);
+    });
+
+    it('returns dependencies array when expenses exist', async () => {
+      const expenseType = createExpenseType({ id: 1, userId: testUser.id });
+      const expenses = [
+        createExpense({ id: 1, expenseTypeId: 1, description: 'Expense 1' }),
+        createExpense({ id: 2, expenseTypeId: 1, description: 'Expense 2' }),
+      ];
+      mockRepository.findOne.mockResolvedValue(expenseType);
+      mockExpenseRepository.count.mockResolvedValue(2);
+      mockExpenseRepository.find.mockResolvedValue(expenses);
+
+      const result = await service.validateDelete(testUser, 1);
+
+      expect(result.validation.canDelete).toBe(true);
+      expect(result.validation.dependencies).toHaveLength(1);
+      expect(result.validation.dependencies[0]).toEqual({
+        type: 'expense',
+        count: 2,
+        samples: [
+          { id: 1, description: 'Expense 1' },
+          { id: 2, description: 'Expense 2' },
+        ],
+      });
+      expect(result.validation.message).toBe(
+        'The following related data will be deleted',
+      );
+    });
+
+    it('limits samples to 5 items', async () => {
+      const expenseType = createExpenseType({ id: 1, userId: testUser.id });
+      const expenses = Array.from({ length: 10 }, (_, i) =>
+        createExpense({ id: i + 1, expenseTypeId: 1, description: `Expense ${i + 1}` }),
+      );
+      mockRepository.findOne.mockResolvedValue(expenseType);
+      mockExpenseRepository.count.mockResolvedValue(10);
+      mockExpenseRepository.find.mockResolvedValue(expenses.slice(0, 5));
+
+      const result = await service.validateDelete(testUser, 1);
+
+      expect(result.validation.dependencies[0].count).toBe(10);
+      expect(result.validation.dependencies[0].samples).toHaveLength(5);
+      expect(mockExpenseRepository.find).toHaveBeenCalledWith({
+        where: { expenseTypeId: 1 },
+        take: 5,
+        order: { id: 'DESC' },
+      });
+    });
+
+    it('throws NotFoundException when expense type does not exist', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.validateDelete(testUser, 999)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('throws UnauthorizedException when user does not own expense type', async () => {
+      const expenseType = createExpenseType({ id: 1, userId: testUser.id });
+      mockRepository.findOne.mockResolvedValue(expenseType);
+
+      await expect(service.validateDelete(otherUser, 1)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

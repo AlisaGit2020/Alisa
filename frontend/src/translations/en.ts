@@ -46,6 +46,7 @@ const en = {
     category: "Category",
     confirm: "Confirm",
     confirmDelete: "Are you sure delete item?",
+    confirmDeleteMessage: "This action cannot be undone.",
     dataNotSelected: "Select",
     delete: "Delete",
     description: "Description",
