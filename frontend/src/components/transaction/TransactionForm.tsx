@@ -243,7 +243,7 @@ function TransactionForm({
     return newData;
   };
 
-  const handleRowChange = async (
+  const handleRowChange = (
     rows: ExpenseInput[] | IncomeInput[],
   ) => {
     const transactionType = getType();
@@ -256,16 +256,25 @@ function TransactionForm({
       ? -Math.abs(rowsTotal)
       : Math.abs(rowsTotal);
 
-    if (transactionType === TransactionType.EXPENSE) {
-      await handleChange("expenses", rows);
-    } else {
-      await handleChange("incomes", rows);
-    }
+    // Use functional state update to ensure we don't lose expense row data
+    // Bug fix for issue #84: Previously, sequential handleChange calls would
+    // cause stale state issues where expense row type and description were lost
+    setData(prev => {
+      let newData = { ...prev };
 
-    // Update transaction amount to match rows total
-    if (rowsTotal !== 0) {
-      await handleChange("amount", transactionAmount);
-    }
+      if (transactionType === TransactionType.EXPENSE) {
+        newData.expenses = rows as ExpenseInput[];
+      } else {
+        newData.incomes = rows as IncomeInput[];
+      }
+
+      // Update transaction amount to match rows total
+      if (rowsTotal !== 0) {
+        newData.amount = transactionAmount;
+      }
+
+      return newData;
+    });
   };
 
   const handleDescriptionChange = (value: string) => {

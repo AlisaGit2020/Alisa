@@ -779,4 +779,45 @@ describe('TransactionForm', () => {
       expect(String(buggyRowsTotal)).toBe("0693"); // 0 + "6" + "93" = "0693"
     });
   });
+
+  describe('Issue #84: Expense row type and description not saved', () => {
+    it('demonstrates the stale state bug in handleRowChange', () => {
+      // This test documents the bug in handleRowChange where sequential
+      // handleChange calls use stale state, causing expense row data to be lost.
+      //
+      // Bug scenario:
+      // 1. handleRowChange receives rows with expenseTypeId=5 and description="Custom"
+      // 2. handleChange("expenses", rows) is called - newData = {...data, expenses: rows}
+      // 3. setData(newData) is called but state update is not immediate
+      // 4. handleChange("amount", amount) is called - but 'data' is STILL the old state!
+      // 5. newData = {...oldData, amount: amount} - this overwrites expenses with old value
+      //
+      // The fix is to use setData with a function to get the latest state:
+      // setData(prev => ({ ...prev, expenses: rows }))
+      // setData(prev => ({ ...prev, amount: amount }))
+
+      // Simulate the bug: two sequential state updates with object spread
+      const state = { expenses: [] as { expenseTypeId: number; description: string }[], amount: 0 };
+
+      // First update (expenses) - this would be scheduled but not applied yet
+      const update1 = { ...state, expenses: [{ expenseTypeId: 5, description: "Custom" }] };
+
+      // Second update (amount) - USING OLD STATE (not the result of update1!)
+      const update2 = { ...state, amount: 100 };
+      // This overwrites expenses back to empty because it used 'state' not 'update1'!
+
+      // Verify update1 had the correct expenses (it does, but gets lost)
+      expect(update1.expenses).toHaveLength(1);
+      expect(update1.expenses[0].expenseTypeId).toBe(5);
+
+      // But update2 - which would be the final state - lost the expenses!
+      expect(update2.expenses).toEqual([]); // Bug: expenses lost!
+      expect(update2.amount).toBe(100);
+
+      // With functional updates, each update builds on the previous:
+      // setData(prev => ({ ...prev, expenses: [...] }))
+      // setData(prev => ({ ...prev, amount: 100 }))
+      // Final state would have both expenses AND amount
+    });
+  });
 });

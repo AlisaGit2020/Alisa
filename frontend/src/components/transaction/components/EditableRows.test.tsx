@@ -448,4 +448,99 @@ describe('EditableRows', () => {
       expect(descriptionInput).toBeInTheDocument();
     });
   });
+
+  it('preserves user-entered description when calling onHandleChange', async () => {
+    // This test verifies the bug fix for issue #84:
+    // User changes expense row description, but the change is not saved
+    const user = userEvent.setup();
+    const mockOnHandleChange = jest.fn();
+
+    // Start with default row that has default description
+    (ApiClient.getDefault as unknown as jest.SpyInstance).mockResolvedValue({
+      ...mockDefaultRow,
+      description: 'Default Type Name',
+      expenseTypeId: 1,
+    });
+
+    renderWithProviders(
+      <EditableRows
+        transaction={mockTransaction}
+        type={TransactionType.EXPENSE}
+        onHandleChange={mockOnHandleChange}
+        changedDescription=""
+        changedAmount={0}
+      />
+    );
+
+    // Wait for initial row to be created
+    await waitFor(() => {
+      expect(mockOnHandleChange).toHaveBeenCalled();
+    });
+
+    // Find the description input and clear it, then type new description
+    const descriptionInput = screen.getByDisplayValue('Default Type Name');
+    mockOnHandleChange.mockClear();
+
+    await user.clear(descriptionInput);
+    await user.type(descriptionInput, 'User Custom Description');
+
+    // Verify that the final call to onHandleChange includes the user-entered description
+    await waitFor(() => {
+      const lastCall = mockOnHandleChange.mock.calls[mockOnHandleChange.mock.calls.length - 1];
+      const expenseRows = lastCall[0];
+      expect(expenseRows[0].description).toBe('User Custom Description');
+    });
+  });
+
+  it('preserves expenseTypeId when user changes other fields', async () => {
+    // This test verifies that expenseTypeId is not lost when other effects run
+    const user = userEvent.setup();
+    const mockOnHandleChange = jest.fn();
+
+    // Start with a row that has a specific expenseTypeId
+    const transactionWithExpense = {
+      ...mockTransaction,
+      id: 1,
+      expenses: [
+        {
+          id: 0,
+          description: 'Test expense',
+          quantity: 1,
+          amount: 100,
+          totalAmount: 100,
+          expenseTypeId: 5, // Specific expense type ID
+        },
+      ],
+    };
+
+    renderWithProviders(
+      <EditableRows
+        transaction={transactionWithExpense}
+        type={TransactionType.EXPENSE}
+        onHandleChange={mockOnHandleChange}
+        changedDescription=""
+        changedAmount={0}
+      />
+    );
+
+    // Wait for initial render
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Test expense')).toBeInTheDocument();
+    });
+
+    mockOnHandleChange.mockClear();
+
+    // Change the description
+    const descriptionInput = screen.getByDisplayValue('Test expense');
+    await user.clear(descriptionInput);
+    await user.type(descriptionInput, 'Updated expense');
+
+    // Verify that expenseTypeId is preserved in the callback
+    await waitFor(() => {
+      const lastCall = mockOnHandleChange.mock.calls[mockOnHandleChange.mock.calls.length - 1];
+      const expenseRows = lastCall[0];
+      expect(expenseRows[0].expenseTypeId).toBe(5);
+      expect(expenseRows[0].description).toBe('Updated expense');
+    });
+  });
 });
