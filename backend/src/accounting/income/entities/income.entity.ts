@@ -34,6 +34,7 @@ export class Income {
   @ManyToOne(() => IncomeType, (incomeType) => incomeType.incomes, {
     eager: false,
     cascade: ['insert', 'update'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'incomeTypeId' })
   incomeType: IncomeType;

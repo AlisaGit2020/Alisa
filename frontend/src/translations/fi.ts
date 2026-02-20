@@ -46,6 +46,7 @@ const fi = {
     category: "Kategoria",
     confirm: "Vahvista",
     confirmDelete: "Poistetaanko tietue?",
+    confirmDeleteMessage: "Tätä toimintoa ei voi peruuttaa.",
     dataNotSelected: "Valitse",
     description: "Kuvaus",
     delete: "Poista",

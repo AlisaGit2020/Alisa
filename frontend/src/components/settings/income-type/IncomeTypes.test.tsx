@@ -6,6 +6,7 @@ import IncomeTypes from './IncomeTypes';
 import DataService from '@alisa-lib/data-service';
 
 jest.mock('@alisa-lib/data-service');
+jest.mock('@alisa-lib/api-client');
 
 describe('IncomeTypes', () => {
   const mockIncomeTypes = [
@@ -141,6 +142,20 @@ describe('IncomeTypes', () => {
       });
 
       // Boolean values should be displayed (format: 'boolean' in field config)
+    });
+  });
+
+  describe('Delete functionality', () => {
+    it('renders delete buttons in the table', async () => {
+      renderWithProviders(<IncomeTypes {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Rent')).toBeInTheDocument();
+      });
+
+      // Delete buttons should be rendered
+      const deleteButtons = screen.getAllByTestId('DeleteIcon');
+      expect(deleteButtons.length).toBeGreaterThan(0);
     });
   });
 });

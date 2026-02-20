@@ -7,16 +7,20 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Repository } from 'typeorm';
 import { ExpenseType } from './entities/expense-type.entity';
+import { Expense } from './entities/expense.entity';
 import { ExpenseTypeInputDto } from './dtos/expense-type-input.dto';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { FindOptionsWhereWithUserId } from '@alisa-backend/common/types';
+import { DeleteValidationDto } from '@alisa-backend/common/dtos/delete-validation.dto';
 
 @Injectable()
 export class ExpenseTypeService {
   constructor(
     @InjectRepository(ExpenseType)
     private repository: Repository<ExpenseType>,
+    @InjectRepository(Expense)
+    private expenseRepository: Repository<Expense>,
     private authService: AuthService,
   ) {}
 
@@ -72,13 +76,50 @@ export class ExpenseTypeService {
     await this.repository.delete(id);
   }
 
+  async validateDelete(
+    user: JWTUser,
+    id: number,
+  ): Promise<{ validation: DeleteValidationDto; expenseType: ExpenseType }> {
+    const expenseType = await this.getEntityOrThrow(user, id);
+
+    const expenseCount = await this.expenseRepository.count({
+      where: { expenseTypeId: id },
+    });
+
+    const dependencies = [];
+    if (expenseCount > 0) {
+      const samples = await this.expenseRepository.find({
+        where: { expenseTypeId: id },
+        take: 5,
+        order: { id: 'DESC' },
+      });
+      dependencies.push({
+        type: 'expense' as const,
+        count: expenseCount,
+        samples: samples.map((e) => ({ id: e.id, description: e.description })),
+      });
+    }
+
+    return {
+      validation: {
+        canDelete: true,
+        dependencies,
+        message:
+          dependencies.length > 0
+            ? 'The following related data will be deleted'
+            : undefined,
+      },
+      expenseType,
+    };
+  }
+
   private mapData(
     user: JWTUser,
     expenseType: ExpenseType,
     input: ExpenseTypeInputDto,
   ) {
     Object.entries(input).forEach(([key, value]) => {
-      if (value !== undefined) {
+      if (value !== undefined && key !== 'id') {
         expenseType[key] = value;
       }
     });

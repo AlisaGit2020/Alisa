@@ -7,6 +7,7 @@ import {
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { IncomeTypeService } from './income-type.service';
 import { IncomeType } from './entities/income-type.entity';
+import { Income } from './entities/income.entity';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import {
   createMockRepository,
@@ -14,11 +15,12 @@ import {
   MockRepository,
   MockAuthService,
 } from 'test/mocks';
-import { createIncomeType, createJWTUser } from 'test/factories';
+import { createIncome, createIncomeType, createJWTUser } from 'test/factories';
 
 describe('IncomeTypeService', () => {
   let service: IncomeTypeService;
   let mockRepository: MockRepository<IncomeType>;
+  let mockIncomeRepository: MockRepository<Income>;
   let mockAuthService: MockAuthService;
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
@@ -26,12 +28,14 @@ describe('IncomeTypeService', () => {
 
   beforeEach(async () => {
     mockRepository = createMockRepository<IncomeType>();
+    mockIncomeRepository = createMockRepository<Income>();
     mockAuthService = createMockAuthService();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         IncomeTypeService,
         { provide: getRepositoryToken(IncomeType), useValue: mockRepository },
+        { provide: getRepositoryToken(Income), useValue: mockIncomeRepository },
         { provide: AuthService, useValue: mockAuthService },
       ],
     }).compile();
@@ -210,6 +214,85 @@ describe('IncomeTypeService', () => {
       const result = await service.search(testUser, undefined);
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('validateDelete', () => {
+    it('returns canDelete true with empty dependencies when no incomes exist', async () => {
+      const incomeType = createIncomeType({ id: 1, userId: testUser.id });
+      mockRepository.findOne.mockResolvedValue(incomeType);
+      mockIncomeRepository.count.mockResolvedValue(0);
+
+      const result = await service.validateDelete(testUser, 1);
+
+      expect(result.validation.canDelete).toBe(true);
+      expect(result.validation.dependencies).toEqual([]);
+      expect(result.validation.message).toBeUndefined();
+      expect(result.incomeType).toEqual(incomeType);
+    });
+
+    it('returns dependencies array when incomes exist', async () => {
+      const incomeType = createIncomeType({ id: 1, userId: testUser.id });
+      const incomes = [
+        createIncome({ id: 1, incomeTypeId: 1, description: 'Income 1' }),
+        createIncome({ id: 2, incomeTypeId: 1, description: 'Income 2' }),
+      ];
+      mockRepository.findOne.mockResolvedValue(incomeType);
+      mockIncomeRepository.count.mockResolvedValue(2);
+      mockIncomeRepository.find.mockResolvedValue(incomes);
+
+      const result = await service.validateDelete(testUser, 1);
+
+      expect(result.validation.canDelete).toBe(true);
+      expect(result.validation.dependencies).toHaveLength(1);
+      expect(result.validation.dependencies[0]).toEqual({
+        type: 'income',
+        count: 2,
+        samples: [
+          { id: 1, description: 'Income 1' },
+          { id: 2, description: 'Income 2' },
+        ],
+      });
+      expect(result.validation.message).toBe(
+        'The following related data will be deleted',
+      );
+    });
+
+    it('limits samples to 5 items', async () => {
+      const incomeType = createIncomeType({ id: 1, userId: testUser.id });
+      const incomes = Array.from({ length: 10 }, (_, i) =>
+        createIncome({ id: i + 1, incomeTypeId: 1, description: `Income ${i + 1}` }),
+      );
+      mockRepository.findOne.mockResolvedValue(incomeType);
+      mockIncomeRepository.count.mockResolvedValue(10);
+      mockIncomeRepository.find.mockResolvedValue(incomes.slice(0, 5));
+
+      const result = await service.validateDelete(testUser, 1);
+
+      expect(result.validation.dependencies[0].count).toBe(10);
+      expect(result.validation.dependencies[0].samples).toHaveLength(5);
+      expect(mockIncomeRepository.find).toHaveBeenCalledWith({
+        where: { incomeTypeId: 1 },
+        take: 5,
+        order: { id: 'DESC' },
+      });
+    });
+
+    it('throws NotFoundException when income type does not exist', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.validateDelete(testUser, 999)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('throws UnauthorizedException when user does not own income type', async () => {
+      const incomeType = createIncomeType({ id: 1, userId: testUser.id });
+      mockRepository.findOne.mockResolvedValue(incomeType);
+
+      await expect(service.validateDelete(otherUser, 1)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

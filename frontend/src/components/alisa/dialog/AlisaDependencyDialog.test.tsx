@@ -170,7 +170,8 @@ describe('AlisaDependencyDialog', () => {
     const deleteButton = screen.getByRole('button', { name: 'dependencies.deleteConfirm' });
     await user.click(deleteButton);
 
-    expect(mockOnClose).toHaveBeenCalledTimes(1);
+    // onClose should NOT be called - onConfirmDelete handles dialog closing
+    expect(mockOnClose).not.toHaveBeenCalled();
     expect(mockOnConfirmDelete).toHaveBeenCalledTimes(1);
   });
 

@@ -17,6 +17,7 @@ import { FindManyOptions } from 'typeorm';
 import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
 import { User } from '@alisa-backend/common/decorators/user.decorator';
 import { JWTUser } from '@alisa-backend/auth/types';
+import { DeleteValidationDto } from '@alisa-backend/common/dtos/delete-validation.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('accounting/income/type')
@@ -30,6 +31,15 @@ export class IncomeTypeController {
     @Body() options: FindManyOptions<IncomeType>,
   ): Promise<IncomeType[]> {
     return this.service.search(user, options);
+  }
+
+  @Get('/:id/can-delete')
+  async canDelete(
+    @User() user: JWTUser,
+    @Param('id') id: string,
+  ): Promise<DeleteValidationDto> {
+    const { validation } = await this.service.validateDelete(user, Number(id));
+    return validation;
   }
 
   @Get('/:id')
