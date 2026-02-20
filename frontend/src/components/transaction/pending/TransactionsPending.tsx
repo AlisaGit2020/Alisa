@@ -34,6 +34,7 @@ import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../TransactionLeftMenuItems.t
 import { ListPageTemplate } from "../../templates";
 import { usePropertyRequired } from "@alisa-lib/hooks/usePropertyRequired";
 import { PropertyRequiredSnackbar, useToast } from "../../alisa";
+import TransactionCategoryChips from "../components/TransactionCategoryChips";
 
 const getDefaultFilter = (): TransactionFilterData => ({
   propertyId: 0,
@@ -310,8 +311,8 @@ function TransactionsPending({ t }: WithTranslation) {
       "amount",
     ],
     relations: {
-      expenses: true,
-      incomes: true,
+      expenses: { expenseType: true },
+      incomes: { incomeType: true },
     },
     order: {
       transactionDate: "DESC",
@@ -375,6 +376,11 @@ function TransactionsPending({ t }: WithTranslation) {
                 name: "type",
                 format: "transactionType",
                 label: "",
+              },
+              {
+                name: "expenses" as keyof Transaction,
+                label: t("category"),
+                render: (item) => <TransactionCategoryChips transaction={item} />,
               },
               { name: "transactionDate", format: "date" },
               { name: "sender", maxLength: 20 },
