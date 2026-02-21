@@ -143,6 +143,14 @@ describe('SettingsDialog', () => {
       });
     });
 
+    it('renders airbnb settings menu item', async () => {
+      renderWithThemeContext(<SettingsDialog {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Airbnb settings')).toBeInTheDocument();
+      });
+    });
+
     it('renders menu icons', async () => {
       renderWithThemeContext(<SettingsDialog {...defaultProps} />);
 
@@ -151,6 +159,7 @@ describe('SettingsDialog', () => {
         expect(screen.getByTestId('PaymentIcon')).toBeInTheDocument();
         expect(screen.getByTestId('MonetizationOnIcon')).toBeInTheDocument();
         expect(screen.getByTestId('AccountBalanceIcon')).toBeInTheDocument();
+        expect(screen.getByTestId('HolidayVillageIcon')).toBeInTheDocument();
       });
     });
   });

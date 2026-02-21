@@ -95,6 +95,9 @@ export class AuthService {
     if (input.loanHandlingFeeExpenseTypeId !== undefined) {
       user.loanHandlingFeeExpenseTypeId = input.loanHandlingFeeExpenseTypeId;
     }
+    if (input.airbnbIncomeTypeId !== undefined) {
+      user.airbnbIncomeTypeId = input.airbnbIncomeTypeId;
+    }
     if (input.dashboardConfig !== undefined) {
       user.dashboardConfig = input.dashboardConfig;
     }

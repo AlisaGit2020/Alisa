@@ -136,6 +136,7 @@ class ApiClient {
     loanPrincipalExpenseTypeId?: number;
     loanInterestExpenseTypeId?: number;
     loanHandlingFeeExpenseTypeId?: number;
+    airbnbIncomeTypeId?: number;
     dashboardConfig?: {
       widgets: Array<{
         id: string;

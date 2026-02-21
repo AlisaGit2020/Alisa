@@ -322,5 +322,20 @@ describe('AuthService', () => {
       expect(result).toBeNull();
       expect(mockUserService.save).not.toHaveBeenCalled();
     });
+
+    it('updates user airbnbIncomeTypeId setting', async () => {
+      const user = createUser({ id: 1, airbnbIncomeTypeId: undefined });
+      mockUserService.findOne.mockResolvedValue(user);
+      mockUserService.save.mockResolvedValue({ ...user, airbnbIncomeTypeId: 5 });
+
+      const result = await service.updateUserSettings(1, {
+        airbnbIncomeTypeId: 5,
+      });
+
+      expect(result.airbnbIncomeTypeId).toBe(5);
+      expect(mockUserService.save).toHaveBeenCalledWith(
+        expect.objectContaining({ airbnbIncomeTypeId: 5 }),
+      );
+    });
   });
 });

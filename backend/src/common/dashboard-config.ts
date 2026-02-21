@@ -19,5 +19,6 @@ export const DEFAULT_DASHBOARD_CONFIG: DashboardConfig = {
     { id: 'netResult', visible: true, order: 3, size: '1/3' },
     { id: 'deposit', visible: true, order: 4, size: '1/2' },
     { id: 'withdraw', visible: true, order: 5, size: '1/2' },
+    { id: 'airbnbVisits', visible: true, order: 6, size: '1/3' },
   ],
 };

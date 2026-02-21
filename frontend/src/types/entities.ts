@@ -42,6 +42,7 @@ export interface User {
   loanPrincipalExpenseTypeId?: number;
   loanInterestExpenseTypeId?: number;
   loanHandlingFeeExpenseTypeId?: number;
+  airbnbIncomeTypeId?: number;
   dashboardConfig?: DashboardConfig;
   isAdmin: boolean;
 }

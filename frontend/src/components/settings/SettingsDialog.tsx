@@ -2,9 +2,11 @@ import PaletteIcon from "@mui/icons-material/Palette";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import PaymentIcon from "@mui/icons-material/Payment";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import HolidayVillageIcon from "@mui/icons-material/HolidayVillage";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { useState } from "react";
 import LoanSettings from "./loan-settings/LoanSettings";
+import AirbnbSettings from "./airbnb-settings/AirbnbSettings";
 import ThemeSettings from "./theme/ThemeSettings";
 import ExpenseTypes from "./expense-type/ExpenseTypes";
 import ExpenseTypeForm from "./expense-type/ExpenseTypeForm";
@@ -18,6 +20,7 @@ import FullscreenDialogLayout, {
 enum SettingsPage {
   Theme = "theme",
   LoanSettings = "loan-settings",
+  AirbnbSettings = "airbnb-settings",
   ExpenseTypes = "expense-types",
   IncomeTypes = "income-types",
 }
@@ -60,6 +63,11 @@ function SettingsDialog({ t, open, onClose }: SettingsDialogProps) {
       label: t("loanSettings"),
       icon: <AccountBalanceIcon fontSize="small" sx={{ color: "primary.main" }} />,
     },
+    {
+      id: SettingsPage.AirbnbSettings,
+      label: t("airbnbSettings"),
+      icon: <HolidayVillageIcon fontSize="small" sx={{ color: "info.main" }} />,
+    },
   ];
 
   const handleMenuClick = (selectedPage: SettingsPage) => {
@@ -90,6 +98,8 @@ function SettingsDialog({ t, open, onClose }: SettingsDialogProps) {
         return <ThemeSettings />;
       case SettingsPage.LoanSettings:
         return <LoanSettings />;
+      case SettingsPage.AirbnbSettings:
+        return <AirbnbSettings />;
       case SettingsPage.ExpenseTypes:
         if (action === Action.Add) {
           return (

@@ -9,6 +9,7 @@ import {
   WidgetConfig,
   WidgetSize,
   DEFAULT_DASHBOARD_CONFIG,
+  WIDGET_REGISTRY,
 } from "../config/widget-registry";
 import ApiClient from "@alisa-lib/api-client";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
@@ -43,6 +44,30 @@ interface DashboardContextType {
 }
 
 const STORAGE_KEY = "dashboard_filters";
+
+/**
+ * Merge user's saved dashboard config with the current widget registry.
+ * This ensures new widgets are added to existing users' dashboards.
+ */
+const mergeDashboardConfig = (savedConfig: DashboardConfig): DashboardConfig => {
+  const savedWidgetIds = new Set(savedConfig.widgets.map((w) => w.id));
+  const maxOrder = Math.max(...savedConfig.widgets.map((w) => w.order), -1);
+
+  // Find new widgets that are in the registry but not in the user's saved config
+  const newWidgets: WidgetConfig[] = WIDGET_REGISTRY
+    .filter((widget) => !savedWidgetIds.has(widget.id))
+    .map((widget, index) => ({
+      id: widget.id,
+      visible: true,
+      order: maxOrder + 1 + index,
+      size: widget.defaultSize,
+    }));
+
+  return {
+    ...savedConfig,
+    widgets: [...savedConfig.widgets, ...newWidgets],
+  };
+};
 
 const getStoredFilters = (): Partial<DashboardFilters> => {
   const stored = UserStorage.getItem<DashboardFilters>(STORAGE_KEY);
@@ -99,7 +124,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       try {
         const user = await ApiClient.me();
         if (user.dashboardConfig) {
-          setDashboardConfig(user.dashboardConfig);
+          // Merge saved config with current registry to include new widgets
+          setDashboardConfig(mergeDashboardConfig(user.dashboardConfig));
         }
         setConfigLoaded(true);
       } catch {

@@ -30,6 +30,7 @@ describe('useStatisticsData Logic', () => {
         expense: 0,
         deposit: 0,
         withdraw: 0,
+        airbnbVisits: 0,
         net: 0,
       }));
 
@@ -182,6 +183,7 @@ describe('useStatisticsData Logic', () => {
           expense: 0,
           deposit: 0,
           withdraw: 0,
+          airbnbVisits: 0,
           net: 0,
         });
       }
@@ -338,6 +340,7 @@ describe('useStatisticsData Logic', () => {
         expense: 500,
         deposit: 200,
         withdraw: 100,
+        airbnbVisits: 5,
         net: 500,
       };
 
@@ -346,6 +349,7 @@ describe('useStatisticsData Logic', () => {
       expect(dataPoint.expense).toBeDefined();
       expect(dataPoint.deposit).toBeDefined();
       expect(dataPoint.withdraw).toBeDefined();
+      expect(dataPoint.airbnbVisits).toBeDefined();
       expect(dataPoint.net).toBeDefined();
     });
 
@@ -356,6 +360,7 @@ describe('useStatisticsData Logic', () => {
         expense: 0,
         deposit: 0,
         withdraw: 0,
+        airbnbVisits: 0,
         net: 0,
       };
 
