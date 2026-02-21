@@ -14,6 +14,7 @@ const settings = {
     airbnbSettings: 'Airbnb-asetukset',
     airbnbSettingsDescription: 'Määritä tulolaji, joka vastaa Airbnb-vuokratuloa vierailujen seurantaa varten.',
     airbnbIncomeType: 'Airbnb-tulolaji',
+    airbnbIncomeTypeHelperText: 'Luo tulolajit ensin Asetukset → Tulolajit',
     save: 'Tallenna',
     themeSettings: 'Teema',
     lightTheme: 'Vaalea',

@@ -14,6 +14,7 @@ const settings = {
     airbnbSettings: 'Airbnb settings',
     airbnbSettingsDescription: 'Configure which income type represents Airbnb rental income for visit tracking.',
     airbnbIncomeType: 'Airbnb income type',
+    airbnbIncomeTypeHelperText: 'Create income types in Settings → Income types first',
     save: 'Save',
     themeSettings: 'Theme',
     lightTheme: 'Light',

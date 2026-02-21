@@ -8,10 +8,11 @@ import {
   StandaloneIncomeUpdatedEvent,
   TransactionCreatedEvent,
   TransactionDeletedEvent,
+  UserAirbnbIncomeTypeChangedEvent,
 } from '@alisa-backend/common/events';
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
+import { StatisticKey, TransactionStatus, TransactionType } from '@alisa-backend/common/types';
 
 describe('AirbnbStatisticsService', () => {
   let service: AirbnbStatisticsService;
@@ -46,9 +47,12 @@ describe('AirbnbStatisticsService', () => {
       // Should call query 4 times: delete + all-time + yearly + monthly
       expect(mockDataSource.query).toHaveBeenCalledTimes(4);
 
-      // First call should be delete
+      // First call should be delete with propertyId and statisticKey parameters
       expect(mockDataSource.query.mock.calls[0][0]).toContain('DELETE');
-      expect(mockDataSource.query.mock.calls[0][1]).toEqual([1]);
+      expect(mockDataSource.query.mock.calls[0][1]).toEqual([
+        1,
+        StatisticKey.AIRBNB_VISITS,
+      ]);
 
       // Second call should be all-time insert (year IS NULL, month IS NULL)
       expect(mockDataSource.query.mock.calls[1][0]).toContain('INSERT');
@@ -72,13 +76,13 @@ describe('AirbnbStatisticsService', () => {
       }
     });
 
-    it('counts incomes (COUNT(*)) instead of summing amounts', async () => {
+    it('counts distinct incomes to avoid duplicate counting with multiple owners', async () => {
       await service.recalculateAirbnbVisits(1);
 
-      // All insert queries should use COUNT
+      // All insert queries should use COUNT(DISTINCT i.id) to handle multi-owner properties
       const insertCalls = mockDataSource.query.mock.calls.slice(1);
       for (const call of insertCalls) {
-        expect(call[0]).toContain('COUNT(*)');
+        expect(call[0]).toContain('COUNT(DISTINCT i.id)');
         expect(call[0]).not.toContain('SUM');
       }
     });
@@ -193,6 +197,33 @@ describe('AirbnbStatisticsService', () => {
       const spy = jest.spyOn(service, 'recalculateAirbnbVisits');
 
       await service.handleTransactionDeleted(event);
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleAirbnbIncomeTypeChanged', () => {
+    it('triggers recalculation for all user properties', async () => {
+      const event = new UserAirbnbIncomeTypeChangedEvent(1, [1, 2, 3]);
+
+      const spy = jest.spyOn(service, 'recalculateAirbnbVisits');
+
+      await service.handleAirbnbIncomeTypeChanged(event);
+
+      expect(mockEventTracker.increment).toHaveBeenCalled();
+      expect(spy).toHaveBeenCalledTimes(3);
+      expect(spy).toHaveBeenCalledWith(1);
+      expect(spy).toHaveBeenCalledWith(2);
+      expect(spy).toHaveBeenCalledWith(3);
+      expect(mockEventTracker.decrement).toHaveBeenCalled();
+    });
+
+    it('handles empty property list', async () => {
+      const event = new UserAirbnbIncomeTypeChangedEvent(1, []);
+
+      const spy = jest.spyOn(service, 'recalculateAirbnbVisits');
+
+      await service.handleAirbnbIncomeTypeChanged(event);
 
       expect(spy).not.toHaveBeenCalled();
     });

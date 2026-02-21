@@ -14,6 +14,7 @@ const settings = {
     airbnbSettings: 'Airbnb-inställningar',
     airbnbSettingsDescription: 'Konfigurera vilken intäktstyp som representerar Airbnb-hyresintäkter för besöksspårning.',
     airbnbIncomeType: 'Airbnb-intäktstyp',
+    airbnbIncomeTypeHelperText: 'Skapa intäktstyper först i Inställningar → Intäktstyper',
     save: 'Spara',
     themeSettings: 'Tema',
     lightTheme: 'Ljust',

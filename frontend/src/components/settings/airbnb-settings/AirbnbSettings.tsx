@@ -8,47 +8,64 @@ import DataService from "@alisa-lib/data-service";
 import { IncomeType } from "@alisa-types";
 import { AlisaApproveIcon } from "../../alisa/AlisaIcons";
 import { AlisaButton, useToast } from "../../alisa";
+import AlisaLoadingProgress from "../../alisa/AlisaLoadingProgress";
 
 interface AirbnbSettingsData {
-  airbnbIncomeTypeId: number;
+  airbnbIncomeTypeId: number | null;
 }
 
 function AirbnbSettings({ t }: WithTranslation) {
   const [data, setData] = React.useState<AirbnbSettingsData>({
-    airbnbIncomeTypeId: 0,
+    airbnbIncomeTypeId: null,
   });
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
+  const [incomeTypes, setIncomeTypes] = React.useState<IncomeType[]>([]);
   const { showToast } = useToast();
 
   React.useEffect(() => {
-    const loadSettings = async () => {
-      const user = await ApiClient.me();
+    const loadData = async () => {
+      const [user, types] = await Promise.all([
+        ApiClient.me(),
+        new DataService<IncomeType>({
+          context: incomeTypeContext,
+          fetchOptions: { order: { name: "ASC" } },
+        }).search(),
+      ]);
       setData({
-        airbnbIncomeTypeId: user.airbnbIncomeTypeId || 0,
+        airbnbIncomeTypeId: user.airbnbIncomeTypeId ?? null,
       });
+      setIncomeTypes(types);
       setLoading(false);
     };
-    loadSettings();
+    loadData();
   }, []);
 
-  const handleChange = (fieldName: keyof AirbnbSettingsData, value: number) => {
+  const handleChange = (
+    fieldName: keyof AirbnbSettingsData,
+    value: number | null
+  ) => {
     setData({ ...data, [fieldName]: value });
   };
 
   const handleSave = async () => {
     setSaving(true);
     await ApiClient.updateUserSettings({
-      airbnbIncomeTypeId:
-        data.airbnbIncomeTypeId > 0 ? data.airbnbIncomeTypeId : undefined,
+      airbnbIncomeTypeId: data.airbnbIncomeTypeId ?? undefined,
     });
     setSaving(false);
     showToast({ message: t("common:toast.settingsSaved"), severity: "success" });
   };
 
   if (loading) {
-    return null;
+    return (
+      <Paper sx={{ padding: 3 }}>
+        <AlisaLoadingProgress />
+      </Paper>
+    );
   }
+
+  const hasIncomeTypes = incomeTypes.length > 0;
 
   return (
     <Paper sx={{ padding: 3 }}>
@@ -68,8 +85,9 @@ function AirbnbSettings({ t }: WithTranslation) {
             })
           }
           fieldName="airbnbIncomeTypeId"
-          value={data.airbnbIncomeTypeId}
+          value={data.airbnbIncomeTypeId ?? 0}
           onHandleChange={handleChange}
+          helperText={!hasIncomeTypes ? t("airbnbIncomeTypeHelperText") : undefined}
         />
         <Box>
           <AlisaButton
