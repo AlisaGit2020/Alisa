@@ -1,4 +1,4 @@
-import { Button, CircularProgress, SxProps, Theme } from "@mui/material";
+import { Button, CircularProgress, SxProps, Theme, Tooltip } from "@mui/material";
 import { ElementType, ReactNode } from "react";
 
 interface AlisaButtonProps {
@@ -18,6 +18,7 @@ interface AlisaButtonProps {
   onClick?: () => void;
   component?: ElementType;
   children?: ReactNode;
+  tooltip?: string;
 }
 
 function AlisaButton({
@@ -37,8 +38,9 @@ function AlisaButton({
   onClick,
   component,
   children,
+  tooltip,
 }: AlisaButtonProps) {
-  return (
+  const button = (
     <Button
       variant={variant}
       color={color}
@@ -58,6 +60,16 @@ function AlisaButton({
       {children}
     </Button>
   );
+
+  if (tooltip) {
+    return (
+      <Tooltip title={tooltip}>
+        <span>{button}</span>
+      </Tooltip>
+    );
+  }
+
+  return button;
 }
 
 export default AlisaButton;

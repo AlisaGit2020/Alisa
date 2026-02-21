@@ -18,6 +18,7 @@ const transaction = {
   importDescription:
     "Tuo uusia tilitapahtumia pankistasi viedyistä CSV-tiedostoista.",
 
+  accept: "Hyväksy",
   accepted: "Hyväksytty",
   close: "Sulje",
   activeFilters: "Aktiiviset suodattimet",
@@ -64,6 +65,20 @@ const transaction = {
   transactions: "Tilitapahtumat",
   withdraw: "Nosto",
   unknown: "Tuntematon",
+  allocation: "Kohdistaminen",
+  loanSplitting: "Lainan jakaminen",
+  automaticAllocation: "Automaattinen kohdistaminen",
+  automaticAllocationDescription: "Jaa lainanmaksut automaattisesti lyhennykseen, korkoon ja käsittelykuluihin tapahtuman kuvauksen perusteella.",
+  automaticAllocationNotSupported: "{{bank}}-tuonti ei tue automaattista lainan jakamista.",
+  otherActions: "Muut toiminnot",
+  saveAllocationTooltip: "Valitse ensin kohdistustyyppi",
+  saveAllocationCategoryTooltip: "Valitse ensin kategoria",
+  acceptDisabledTooltip: "Kaikki valitut tapahtumat on kohdistettava ennen hyväksymistä",
+  loanSplitErrors: {
+    unauthorized: "Sinulla ei ole oikeutta muokata tätä tapahtumaa",
+    notPending: "Vain odottavia tapahtumia voi jakaa",
+    notLoanFormat: "Tapahtuman kuvaus ei vastaa lainanmaksun muotoa",
+  },
   confirmDeleteTransactions:
     "Haluatko varmasti poistaa {{count}} valittua tapahtumaa?",
   networkError: "Verkkovirhe",
@@ -72,7 +87,7 @@ const transaction = {
     title: "Tuo pankkitapahtumat",
     steps: {
       import: "Tuo",
-      review: "Tarkista",
+      review: "Kohdistaminen",
       accept: "Hyväksy",
       done: "Valmis",
     },
@@ -96,6 +111,8 @@ const transaction = {
       "{{count}} tapahtumaa ohitettiin, koska ne on jo tuotu ja hyväksytty aiemmin.",
     unknownTypesWarning:
       "Joidenkin tapahtumien tyyppi on tuntematon. Luokittele kaikki tapahtumat ennen jatkamista.",
+    allocationRequired:
+      "Voit jatkaa, kun kaikki tapahtumat on kohdistettu tai poistettu.",
     back: "Takaisin",
     next: "Seuraava",
     readyToApprove: "Valmiina hyväksyttäväksi",
@@ -112,7 +129,7 @@ const transaction = {
     importAnotherFile: "Tuo toinen tiedosto",
     viewTransactions: "Siirry tapahtumiin",
     allFields: "Kaikki kentät",
-    unknownOnly: "Vain tuntemattomat",
+    unknownOnly: "Kohdistamattomat",
     showAll: "Näytä kaikki",
     showingCount: "Näytetään {{count}} riviä",
   },

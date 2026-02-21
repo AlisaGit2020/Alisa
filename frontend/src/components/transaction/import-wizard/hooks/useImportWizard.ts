@@ -389,7 +389,7 @@ export function useImportWizard() {
     ) => {
       if (state.selectedIds.length === 0) return;
 
-      await ApiClient.postSaveTask<SplitLoanPaymentBulkInput>(
+      const result = await ApiClient.postSaveTask<SplitLoanPaymentBulkInput>(
         transactionContext.apiPath + "/split-loan-payment",
         {
           ids: state.selectedIds,
@@ -399,7 +399,44 @@ export function useImportWizard() {
         }
       );
 
-      showToast({ message: t("common:toast.loanSplit"), severity: "success" });
+      // Helper to translate backend error messages
+      const translateLoanSplitError = (message: string): string => {
+        if (message === "Unauthorized") {
+          return t("loanSplitErrors.unauthorized");
+        }
+        if (message === "Can only split pending transactions") {
+          return t("loanSplitErrors.notPending");
+        }
+        if (message === "Transaction description does not match loan payment format") {
+          return t("loanSplitErrors.notLoanFormat");
+        }
+        return message;
+      };
+
+      if (result.allSuccess) {
+        showToast({ message: t("common:toast.loanSplit"), severity: "success" });
+      } else if (result.rows?.success > 0) {
+        // Partial success - show first error message from failed results
+        const firstError = result.results?.find(r => r.statusCode !== 200);
+        const errorMessage = firstError?.message
+          ? translateLoanSplitError(firstError.message)
+          : t("common:toast.partialSuccess", {
+              success: result.rows.success,
+              failed: result.rows.failed
+            });
+        showToast({
+          message: errorMessage,
+          severity: "warning"
+        });
+      } else {
+        // All failed - show first error message from backend
+        const firstError = result.results?.[0];
+        const errorMessage = firstError?.message
+          ? translateLoanSplitError(firstError.message)
+          : t("common:toast.error");
+        showToast({ message: errorMessage, severity: "error" });
+      }
+
       // Refetch transactions to update UI
       await fetchTransactions(state.importedTransactionIds);
       clearSelection();

@@ -18,6 +18,7 @@ const transaction = {
   importDescription:
     "Import new bank transactions from CSV files exported from your bank.",
 
+  accept: "Accept",
   accepted: "Accepted",
   close: "Close",
   activeFilters: "Active filters",
@@ -64,6 +65,20 @@ const transaction = {
   transactions: "Transactions",
   withdraw: "Withdraw",
   unknown: "Unknown",
+  allocation: "Allocation",
+  loanSplitting: "Loan Splitting",
+  automaticAllocation: "Automatic Allocation",
+  automaticAllocationDescription: "Automatically split loan payments into principal, interest, and handling fee based on transaction description.",
+  automaticAllocationNotSupported: "{{bank}} import does not support automatic loan splitting.",
+  otherActions: "Other Actions",
+  saveAllocationTooltip: "Select an allocation type first",
+  saveAllocationCategoryTooltip: "Select a category first",
+  acceptDisabledTooltip: "All selected transactions must be allocated before accepting",
+  loanSplitErrors: {
+    unauthorized: "You don't have permission to modify this transaction",
+    notPending: "Can only split pending transactions",
+    notLoanFormat: "Transaction description does not match loan payment format",
+  },
   confirmDeleteTransactions:
     "Are you sure you want to delete {{count}} selected transactions?",
   networkError: "Network error occurred",
@@ -72,7 +87,7 @@ const transaction = {
     title: "Import Bank Transactions",
     steps: {
       import: "Import",
-      review: "Review",
+      review: "Allocation",
       accept: "Approve",
       done: "Done",
     },
@@ -95,6 +110,8 @@ const transaction = {
       "{{count}} transactions were skipped because they have already been imported and approved.",
     unknownTypesWarning:
       "Some transactions have unknown types. Please categorize all transactions before proceeding.",
+    allocationRequired:
+      "You can continue when all transactions are allocated or removed.",
     back: "Back",
     next: "Next",
     readyToApprove: "Ready to Approve",
@@ -112,7 +129,7 @@ const transaction = {
     importAnotherFile: "Import Another File",
     viewTransactions: "Go to Transactions",
     allFields: "All fields",
-    unknownOnly: "Unknown only",
+    unknownOnly: "Not allocated",
     showAll: "Show all",
     showingCount: "Showing {{count}} rows",
   },

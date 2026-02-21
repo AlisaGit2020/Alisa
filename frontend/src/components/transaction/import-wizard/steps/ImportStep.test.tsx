@@ -83,8 +83,8 @@ describe('ImportStep', () => {
     it('renders supported bank options', () => {
       renderWithProviders(<ImportStep {...defaultProps} />);
 
-      expect(screen.getByText('Osuuspankki (OP)')).toBeInTheDocument();
-      expect(screen.getByText('S-Pankki')).toBeInTheDocument();
+      expect(screen.getByAltText('Osuuspankki (OP)')).toBeInTheDocument();
+      expect(screen.getByAltText('S-Pankki')).toBeInTheDocument();
     });
 
     it('shows bank selection warning when no bank selected', () => {
@@ -134,7 +134,7 @@ describe('ImportStep', () => {
 
       renderWithProviders(<ImportStep {...defaultProps} />);
 
-      await user.click(screen.getByText('Osuuspankki (OP)'));
+      await user.click(screen.getByAltText('Osuuspankki (OP)'));
 
       expect(mockOnBankSelect).toHaveBeenCalledWith('op');
     });
@@ -144,7 +144,7 @@ describe('ImportStep', () => {
 
       renderWithProviders(<ImportStep {...defaultProps} />);
 
-      await user.click(screen.getByText('S-Pankki'));
+      await user.click(screen.getByAltText('S-Pankki'));
 
       expect(mockOnBankSelect).toHaveBeenCalledWith('s-pankki');
     });
@@ -162,7 +162,7 @@ describe('ImportStep', () => {
 
       renderWithProviders(<ImportStep {...defaultProps} isUploading={true} />);
 
-      await user.click(screen.getByText('Osuuspankki (OP)'));
+      await user.click(screen.getByAltText('Osuuspankki (OP)'));
 
       expect(mockOnBankSelect).not.toHaveBeenCalled();
     });
