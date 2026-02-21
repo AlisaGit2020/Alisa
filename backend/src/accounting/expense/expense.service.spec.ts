@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExpenseService } from './expense.service';
 import { Expense } from './entities/expense.entity';
@@ -292,18 +292,14 @@ describe('ExpenseService', () => {
       expect(mockTransactionRepository.delete).not.toHaveBeenCalled();
     });
 
-    it('deletes expense and associated transaction', async () => {
+    it('throws BadRequestException when expense has a transaction relation', async () => {
       const expense = createExpense({ id: 1, propertyId: 1, transactionId: 100 });
       mockRepository.findOne.mockResolvedValue(expense);
       mockAuthService.hasOwnership.mockResolvedValue(true);
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
-      mockTransactionRepository.delete.mockResolvedValue({ affected: 1 });
 
-      await service.delete(testUser, 1);
+      await expect(service.delete(testUser, 1)).rejects.toThrow(BadRequestException);
 
-      expect(mockRepository.delete).toHaveBeenCalledWith(1);
-      expect(mockDepreciationService.deleteByExpenseId).toHaveBeenCalledWith(1);
-      expect(mockTransactionRepository.delete).toHaveBeenCalledWith(100);
+      expect(mockRepository.delete).not.toHaveBeenCalled();
     });
 
     it('throws NotFoundException when expense does not exist', async () => {
@@ -540,20 +536,21 @@ describe('ExpenseService', () => {
       expect(mockDepreciationService.deleteByExpenseId).toHaveBeenCalledTimes(2);
     });
 
-    it('deletes expenses and their associated transactions', async () => {
+    it('returns 400 for expenses with transaction relations', async () => {
       const expense1 = createExpense({ id: 1, propertyId: 1, transactionId: 100 });
       const expense2 = createExpense({ id: 2, propertyId: 1, transactionId: 101 });
 
       mockRepository.find.mockResolvedValue([expense1, expense2]);
       mockAuthService.hasOwnership.mockResolvedValue(true);
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
-      mockTransactionRepository.delete.mockResolvedValue({ affected: 1 });
 
       const result = await service.deleteMany(testUser, [1, 2]);
 
-      expect(result.allSuccess).toBe(true);
-      expect(mockTransactionRepository.delete).toHaveBeenCalledWith(100);
-      expect(mockTransactionRepository.delete).toHaveBeenCalledWith(101);
+      expect(result.allSuccess).toBe(false);
+      expect(result.rows.success).toBe(0);
+      expect(result.rows.failed).toBe(2);
+      expect(result.results[0].statusCode).toBe(400);
+      expect(result.results[0].message).toContain('transaction');
+      expect(mockRepository.delete).not.toHaveBeenCalled();
     });
 
     it('throws BadRequestException when ids array is empty', async () => {

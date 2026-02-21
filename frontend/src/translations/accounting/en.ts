@@ -6,10 +6,24 @@ const accounting = {
   // Page template for incomes
   incomesPageTitle: "Incomes",
   incomesPageDescription: "Track rental income and other revenue from your properties.",
+  incomesPageMoreDetails: `Income rows can be created in two ways:
+• Manually by adding new income entries
+• Automatically when accepting bank transactions as income
+
+Deletion rules:
+• Manually created income rows can be deleted directly
+• Income rows linked to a bank transaction cannot be deleted separately — delete the associated transaction instead`,
 
   // Page template for expenses
   expensesPageTitle: "Expenses",
   expensesPageDescription: "Manage costs and expenses related to your properties.",
+  expensesPageMoreDetails: `Expense rows can be created in two ways:
+• Manually by adding new expense entries
+• Automatically when accepting bank transactions as expenses
+
+Deletion rules:
+• Manually created expense rows can be deleted directly
+• Expense rows linked to a bank transaction cannot be deleted separately — delete the associated transaction instead`,
 
   // Left menu
   accounting: "Accounting",
@@ -72,6 +86,16 @@ const accounting = {
   confirmDeleteIncome: "Are you sure you want to delete this income?",
   delete: "Delete",
   add: "Add",
+
+  // Bulk delete with transaction warnings
+  cannotDeleteWithTransaction: "Cannot delete item",
+  someItemsHaveTransactions:
+    "{{count}} item(s) have a transaction relation and cannot be deleted directly. Delete the transaction instead. Do you want to delete the {{deletableCount}} remaining item(s)?",
+  allItemsHaveTransactions:
+    "All {{count}} selected item(s) have a transaction relation. To delete these, please delete the associated transaction instead.",
+  singleItemHasTransaction:
+    "This item has a transaction relation and cannot be deleted directly. To delete this item, please delete the associated transaction instead.",
+  noItemsToDelete: "No items available to delete",
 
   // Format helpers
   "format.number": "{{val, number}}",

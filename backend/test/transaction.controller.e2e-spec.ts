@@ -917,6 +917,144 @@ describe('TransactionController (e2e)', () => {
         .delete('/accounting/transaction/1')
         .expect(401);
     });
+
+    it('deletes related expenses and incomes when transaction is deleted', async () => {
+      // Create a transaction with expenses via HTTP
+      const createResponse = await request(server)
+        .post('/accounting/transaction')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          sender: 'Cascade Delete Sender',
+          receiver: 'Cascade Delete Receiver',
+          description: 'Transaction with expenses to cascade delete',
+          transactionDate: new Date('2024-02-10'),
+          accountingDate: new Date('2024-02-10'),
+          amount: -150,
+          propertyId: mainUser.properties[0].id,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.EXPENSE,
+          externalId: `cascade-expense-${Date.now()}`,
+          expenses: [
+            {
+              expenseTypeId: 1,
+              description: 'Expense row 1',
+              amount: 100,
+              quantity: 1,
+              totalAmount: 100,
+            },
+            {
+              expenseTypeId: 1,
+              description: 'Expense row 2',
+              amount: 50,
+              quantity: 1,
+              totalAmount: 50,
+            },
+          ],
+        })
+        .expect(201);
+
+      const transactionId = createResponse.body.id;
+
+      // Verify expenses were created by fetching transaction with relations
+      const searchBefore = await request(server)
+        .post('/accounting/transaction/search')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          where: { id: transactionId },
+          relations: { expenses: true },
+        })
+        .expect(200);
+
+      expect(searchBefore.body.length).toBe(1);
+      expect(searchBefore.body[0].expenses.length).toBe(2);
+      const expenseIds = searchBefore.body[0].expenses.map((e: { id: number }) => e.id);
+
+      // Delete the transaction
+      await request(server)
+        .delete(`/accounting/transaction/${transactionId}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(200);
+
+      // Verify transaction is deleted
+      await request(server)
+        .get(`/accounting/transaction/${transactionId}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(404);
+
+      // Verify expenses are also deleted (not just orphaned)
+      // Search expenses by their IDs - they should not exist anymore
+      const searchExpensesAfter = await request(server)
+        .post('/accounting/expense/search')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          where: { id: { $in: expenseIds } },
+        })
+        .expect(200);
+
+      expect(searchExpensesAfter.body.length).toBe(0);
+    });
+
+    it('deletes related incomes when transaction is deleted', async () => {
+      // Create a transaction with incomes via HTTP
+      const createResponse = await request(server)
+        .post('/accounting/transaction')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          sender: 'Income Cascade Sender',
+          receiver: 'Income Cascade Receiver',
+          description: 'Transaction with incomes to cascade delete',
+          transactionDate: new Date('2024-02-11'),
+          accountingDate: new Date('2024-02-11'),
+          amount: 200,
+          propertyId: mainUser.properties[0].id,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.INCOME,
+          externalId: `cascade-income-${Date.now()}`,
+          incomes: [
+            {
+              incomeTypeId: 1,
+              description: 'Income row 1',
+              amount: 200,
+              quantity: 1,
+              totalAmount: 200,
+            },
+          ],
+        })
+        .expect(201);
+
+      const transactionId = createResponse.body.id;
+
+      // Verify incomes were created by fetching transaction with relations
+      const searchBefore = await request(server)
+        .post('/accounting/transaction/search')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          where: { id: transactionId },
+          relations: { incomes: true },
+        })
+        .expect(200);
+
+      expect(searchBefore.body.length).toBe(1);
+      expect(searchBefore.body[0].incomes.length).toBe(1);
+      const incomeIds = searchBefore.body[0].incomes.map((i: { id: number }) => i.id);
+
+      // Delete the transaction
+      await request(server)
+        .delete(`/accounting/transaction/${transactionId}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(200);
+
+      // Verify incomes are also deleted
+      const searchIncomesAfter = await request(server)
+        .post('/accounting/income/search')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          where: { id: { $in: incomeIds } },
+        })
+        .expect(200);
+
+      expect(searchIncomesAfter.body.length).toBe(0);
+    });
   });
 
   // ==========================================

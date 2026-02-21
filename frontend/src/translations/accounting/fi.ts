@@ -6,10 +6,24 @@ const accounting = {
   // Page template for incomes
   incomesPageTitle: "Tulot",
   incomesPageDescription: "Seuraa vuokratuloja ja muita kiinteistöjesi tuottoja.",
+  incomesPageMoreDetails: `Tulorivejä voi luoda kahdella tavalla:
+• Manuaalisesti lisäämällä uusia tuloja
+• Automaattisesti hyväksymällä pankkitapahtumia tuloiksi
+
+Poistosäännöt:
+• Manuaalisesti luodut tulorivit voi poistaa suoraan
+• Pankkitapahtumaan liitettyjä tulorivejä ei voi poistaa erikseen — poista sen sijaan liitetty tapahtuma`,
 
   // Page template for expenses
   expensesPageTitle: "Kulut",
   expensesPageDescription: "Hallitse kiinteistöihisi liittyviä kustannuksia ja kuluja.",
+  expensesPageMoreDetails: `Kulurivejä voi luoda kahdella tavalla:
+• Manuaalisesti lisäämällä uusia kuluja
+• Automaattisesti hyväksymällä pankkitapahtumia kuluiksi
+
+Poistosäännöt:
+• Manuaalisesti luodut kulurivit voi poistaa suoraan
+• Pankkitapahtumaan liitettyjä kulurivejä ei voi poistaa erikseen — poista sen sijaan liitetty tapahtuma`,
 
   // Left menu
   accounting: "Kirjanpito",
@@ -72,6 +86,16 @@ const accounting = {
   confirmDeleteIncome: "Haluatko varmasti poistaa tämän tulon?",
   delete: "Poista",
   add: "Lisää",
+
+  // Bulk delete with transaction warnings
+  cannotDeleteWithTransaction: "Kohdetta ei voi poistaa",
+  someItemsHaveTransactions:
+    "{{count}} kohdetta on liitetty tapahtumaan eikä niitä voi poistaa suoraan. Poista tapahtuma ensin. Haluatko poistaa loput {{deletableCount}} kohdetta?",
+  allItemsHaveTransactions:
+    "Kaikki {{count}} valittua kohdetta on liitetty tapahtumaan. Poista tapahtuma ensin.",
+  singleItemHasTransaction:
+    "Tämä kohde on liitetty tapahtumaan eikä sitä voi poistaa suoraan. Poista tapahtuma ensin.",
+  noItemsToDelete: "Ei poistettavia kohteita",
 
   // Format helpers
   "format.number": "{{val, number}}",

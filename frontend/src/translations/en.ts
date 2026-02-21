@@ -57,6 +57,7 @@ const en = {
     month: "Month",
     name: "Name",
     noRowsFound: "No rows found",
+    ok: "OK",
     quantity: "Quantity",
     rows: "Rows",
     rowsFailed: "Rows failed",
@@ -109,6 +110,8 @@ const en = {
     },
 
     close: "Close",
+    readMore: "Read more",
+    showLess: "Show less",
 
     dependencies: {
       cannotDelete: "This item cannot be deleted because it has related data.",

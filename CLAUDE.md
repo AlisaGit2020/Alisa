@@ -222,7 +222,9 @@ Backend requires in `.env`:
 ### Internationalization
 Frontend uses i18next with translation files in `frontend/src/translations/` organized by feature domain.
 
-**Never hardcode user-visible text in components.** Always use translation keys via `t('namespace:key')`. This applies to all labels, headings, descriptions, button texts, error messages, and any other text shown to the user. Add new keys to both `en.ts` and `fi.ts` translation files.
+**Supported languages:** English (`en.ts`), Finnish (`fi.ts`), and Swedish (`sv.ts`).
+
+**Never hardcode user-visible text in components.** Always use translation keys via `t('namespace:key')`. This applies to all labels, headings, descriptions, button texts, error messages, and any other text shown to the user. **When adding new translation keys, you must add them to all three language files (`en.ts`, `fi.ts`, `sv.ts`).**
 
 ### Financial Data Conventions
 **Transaction amounts:**
@@ -263,9 +265,10 @@ Frontend uses i18next with translation files in `frontend/src/translations/` org
   - Validation errors
 
 #### Translation Validation
-- All translation keys must exist in all language files (en.json, fi.json)
+- All translation keys must exist in all three language files (`en.ts`, `fi.ts`, `sv.ts`)
 - Translation coverage test runs automatically
 - Missing keys cause test failures
+- **Code reviews must verify translations exist in all supported languages**
 
 #### Running Frontend Tests
 ```bash

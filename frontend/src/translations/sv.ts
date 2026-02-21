@@ -57,6 +57,7 @@ const sv = {
     month: "Månad",
     name: "Namn",
     noRowsFound: "Inga rader hittades",
+    ok: "OK",
     quantity: "Antal",
     rows: "Rader",
     rowsFailed: "Misslyckades",
@@ -107,6 +108,8 @@ const sv = {
     },
 
     close: "Stäng",
+    readMore: "Läs mer",
+    showLess: "Visa mindre",
 
     dependencies: {
       cannotDelete: "Detta kan inte raderas eftersom det har relaterade data.",

@@ -1,11 +1,9 @@
 import { Box, Paper, Stack } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Typography from "@mui/material/Typography";
-import React from "react";
 import { TFunction } from "i18next";
 import { AlisaCloseIcon } from "./AlisaIcons";
 import AlisaButton from "./form/AlisaButton";
-import AlisaConfirmDialog from "./dialog/AlisaConfirmDialog";
 
 interface BulkDeleteActionsProps {
   t: TFunction;
@@ -24,21 +22,6 @@ function BulkDeleteActions({
   onDelete,
   isDeleting = false,
 }: BulkDeleteActionsProps) {
-  const [confirmOpen, setConfirmOpen] = React.useState(false);
-
-  const handleDeleteClick = () => {
-    setConfirmOpen(true);
-  };
-
-  const handleConfirmDelete = () => {
-    setConfirmOpen(false);
-    onDelete();
-  };
-
-  const handleConfirmClose = () => {
-    setConfirmOpen(false);
-  };
-
   if (!open) {
     return null;
   }
@@ -57,7 +40,7 @@ function BulkDeleteActions({
             label={t("delete")}
             variant="text"
             color="error"
-            onClick={handleDeleteClick}
+            onClick={onDelete}
             disabled={isDeleting}
             loading={isDeleting}
             ariaLabel={t("deleteSelectedAriaLabel", {
@@ -74,18 +57,6 @@ function BulkDeleteActions({
           />
         </Stack>
       </Stack>
-
-      <AlisaConfirmDialog
-        title={t("confirm")}
-        contentText={t("confirmDeleteSelected", {
-          count: selectedCount,
-        })}
-        buttonTextConfirm={t("delete")}
-        buttonTextCancel={t("cancel")}
-        open={confirmOpen}
-        onConfirm={handleConfirmDelete}
-        onClose={handleConfirmClose}
-      />
     </Paper>
   );
 }

@@ -5,7 +5,7 @@ import { expenseContext } from "@alisa-lib/alisa-contexts";
 import { Expense } from "@alisa-types";
 import DataService from "@alisa-lib/data-service";
 import { TypeOrmFetchOptions } from "@alisa-lib/types";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { ListPageTemplate } from "../../templates";
 import ExpenseForm from "./ExpenseForm";
 import AccountingFilter, { AccountingFilterData } from "../AccountingFilter";
@@ -17,10 +17,12 @@ import {
 import { View } from "@alisa-lib/views";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../../transaction/TransactionLeftMenuItems";
 import { usePropertyRequired } from "@alisa-lib/hooks/usePropertyRequired";
+import { useDeletePreValidation } from "@alisa-lib/hooks/useDeletePreValidation";
 import { PropertyRequiredSnackbar } from "../../alisa/PropertyRequiredSnackbar";
 import BulkDeleteActions from "../../alisa/BulkDeleteActions";
 import ApiClient from "@alisa-lib/api-client";
 import { useToast } from "../../alisa";
+import AlisaConfirmDialog from "../../alisa/dialog/AlisaConfirmDialog";
 
 const getDefaultFilter = (): AccountingFilterData => ({
   typeIds: [],
@@ -37,6 +39,7 @@ interface ExpenseRow {
   quantity: number;
   amount: number;
   totalAmount: number;
+  transactionId: number | null;
 }
 
 function Expenses({ t }: WithTranslation) {
@@ -52,6 +55,7 @@ function Expenses({ t }: WithTranslation) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [expenseData, setExpenseData] = useState<ExpenseRow[]>([]);
   const { showToast } = useToast();
 
   const { requireProperty, popoverOpen, popoverAnchorEl, closePopover, openPropertySelector } =
@@ -178,40 +182,79 @@ function Expenses({ t }: WithTranslation) {
     setSelectedIds([]);
   };
 
-  const handleBulkDelete = async () => {
-    if (selectedIds.length === 0 || isDeleting) return;
+  const handleRefresh = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
 
-    setIsDeleting(true);
-    try {
-      const result = await ApiClient.postSaveTask("accounting/expense/delete", {
-        ids: selectedIds,
-      });
-      if (result.allSuccess) {
-        showToast({
-          message: t("common:toast.deleteSuccess"),
-          severity: "success",
+  const handleSingleDelete = useCallback(
+    async (id: number) => {
+      await dataService.delete(id);
+    },
+    [dataService]
+  );
+
+  const handleBulkDeleteApi = useCallback(
+    async (idsToDelete: number[]) => {
+      setIsDeleting(true);
+      try {
+        const result = await ApiClient.postSaveTask("accounting/expense/delete", {
+          ids: idsToDelete,
         });
-      } else {
+        if (result.allSuccess) {
+          showToast({
+            message: t("common:toast.deleteSuccess"),
+            severity: "success",
+          });
+        } else {
+          showToast({
+            message: t("common:toast.partialSuccess", {
+              success: result.rows.success,
+              failed: result.rows.failed,
+            }),
+            severity: "warning",
+          });
+        }
+        setSelectedIds([]);
+        setRefreshTrigger((prev) => prev + 1);
+      } catch (error) {
+        console.error("Error deleting expenses:", error);
         showToast({
-          message: t("common:toast.partialSuccess", {
-            success: result.rows.success,
-            failed: result.rows.failed,
-          }),
-          severity: "warning",
+          message: t("common:toast.error"),
+          severity: "error",
         });
+      } finally {
+        setIsDeleting(false);
       }
-      setSelectedIds([]);
-      setRefreshTrigger((prev) => prev + 1);
-    } catch (error) {
-      console.error("Error deleting expenses:", error);
-      showToast({
-        message: t("common:toast.error"),
-        severity: "error",
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+    },
+    [showToast, t]
+  );
+
+  const {
+    handleSingleDeleteRequest,
+    singleDeleteWarningOpen,
+    singleDeleteConfirmOpen,
+    handleSingleDeleteWarningClose,
+    handleSingleDeleteConfirm,
+    handleSingleDeleteConfirmClose,
+    handleBulkDelete,
+    transactionWarningOpen,
+    itemsWithTransaction,
+    deletableIds,
+    bulkDeleteConfirmOpen,
+    handleTransactionWarningConfirm,
+    handleTransactionWarningClose,
+    handleBulkDeleteConfirm,
+    handleBulkDeleteConfirmClose,
+  } = useDeletePreValidation<ExpenseRow>({
+    data: expenseData,
+    showToast,
+    t,
+    onDelete: handleSingleDelete,
+    onBulkDelete: handleBulkDeleteApi,
+    onRefresh: handleRefresh,
+    selectedIds,
+    setSelectedIds,
+  });
 
   // Create a simple data service wrapper for the transformed data
   // Include refreshTrigger in dependencies to force refresh after form submit
@@ -219,7 +262,7 @@ function Expenses({ t }: WithTranslation) {
     const service = {
       search: async () => {
         const expenses = await dataService.search();
-        return expenses.map((expense) => ({
+        const rows = expenses.map((expense) => ({
           id: expense.id,
           accountingDate: expense.accountingDate || null,
           expenseTypeName: expense.expenseType?.name || "",
@@ -227,7 +270,10 @@ function Expenses({ t }: WithTranslation) {
           quantity: expense.quantity,
           amount: expense.amount,
           totalAmount: expense.totalAmount,
+          transactionId: expense.transactionId,
         }));
+        setExpenseData(rows);
+        return rows;
       },
       delete: async (id: number) => {
         await dataService.delete(id);
@@ -242,6 +288,7 @@ function Expenses({ t }: WithTranslation) {
       translationPrefix="accounting"
       titleKey="expensesPageTitle"
       descriptionKey="expensesPageDescription"
+      moreDetailsKey="expensesPageMoreDetails"
     >
       <Stack spacing={2}>
         <BulkDeleteActions
@@ -284,7 +331,7 @@ function Expenses({ t }: WithTranslation) {
             onNewRow={handleAdd}
             onOpen={handleOpenDetails}
             onEdit={handleOpenDetails}
-            onDelete={() => setRefreshTrigger((prev) => prev + 1)}
+            onDeleteRequest={handleSingleDeleteRequest}
             refreshTrigger={refreshTrigger}
           />
         </Paper>
@@ -307,6 +354,71 @@ function Expenses({ t }: WithTranslation) {
         onClose={closePopover}
         onSelectProperty={openPropertySelector}
       />
+
+      {transactionWarningOpen && deletableIds.length > 0 && (
+        <AlisaConfirmDialog
+          title={t("accounting:cannotDeleteWithTransaction")}
+          contentText={t("accounting:someItemsHaveTransactions", {
+            count: itemsWithTransaction.length,
+            deletableCount: deletableIds.length,
+          })}
+          buttonTextConfirm={t("common:delete")}
+          buttonTextCancel={t("common:close")}
+          open={transactionWarningOpen}
+          onConfirm={handleTransactionWarningConfirm}
+          onClose={handleTransactionWarningClose}
+        />
+      )}
+
+      {transactionWarningOpen && deletableIds.length === 0 && (
+        <AlisaConfirmDialog
+          title={t("accounting:cannotDeleteWithTransaction")}
+          contentText={t("accounting:allItemsHaveTransactions", {
+            count: itemsWithTransaction.length,
+          })}
+          buttonTextConfirm={t("common:ok")}
+          buttonTextCancel={t("common:close")}
+          open={transactionWarningOpen}
+          onConfirm={handleTransactionWarningClose}
+          onClose={handleTransactionWarningClose}
+        />
+      )}
+
+      {singleDeleteWarningOpen && (
+        <AlisaConfirmDialog
+          title={t("accounting:cannotDeleteWithTransaction")}
+          contentText={t("accounting:singleItemHasTransaction")}
+          buttonTextConfirm={t("common:ok")}
+          buttonTextCancel={t("common:close")}
+          open={singleDeleteWarningOpen}
+          onConfirm={handleSingleDeleteWarningClose}
+          onClose={handleSingleDeleteWarningClose}
+        />
+      )}
+
+      {singleDeleteConfirmOpen && (
+        <AlisaConfirmDialog
+          title={t("common:confirm")}
+          contentText={t("common:confirmDelete")}
+          buttonTextConfirm={t("common:delete")}
+          buttonTextCancel={t("common:cancel")}
+          open={singleDeleteConfirmOpen}
+          onConfirm={handleSingleDeleteConfirm}
+          onClose={handleSingleDeleteConfirmClose}
+        />
+      )}
+
+      {bulkDeleteConfirmOpen && (
+        <AlisaConfirmDialog
+          title={t("common:confirm")}
+          contentText={t("common:confirmDeleteSelected", { count: selectedIds.length })}
+          buttonTextConfirm={t("common:delete")}
+          buttonTextCancel={t("common:cancel")}
+          open={bulkDeleteConfirmOpen}
+          onConfirm={handleBulkDeleteConfirm}
+          onClose={handleBulkDeleteConfirmClose}
+        />
+      )}
     </ListPageTemplate>
   );
 }

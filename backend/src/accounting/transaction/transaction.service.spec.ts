@@ -28,10 +28,13 @@ import {
   TransactionType,
 } from '@alisa-backend/common/types';
 import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
+import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 
 describe('TransactionService', () => {
   let service: TransactionService;
   let mockRepository: MockRepository<Transaction>;
+  let mockExpenseRepository: MockRepository<Expense>;
+  let mockIncomeRepository: MockRepository<Income>;
   let mockAuthService: MockAuthService;
   let mockEventEmitter: MockEventEmitter;
 
@@ -40,6 +43,8 @@ describe('TransactionService', () => {
 
   beforeEach(async () => {
     mockRepository = createMockRepository<Transaction>();
+    mockExpenseRepository = createMockRepository<Expense>();
+    mockIncomeRepository = createMockRepository<Income>();
     mockAuthService = createMockAuthService();
     mockEventEmitter = createMockEventEmitter();
 
@@ -47,6 +52,8 @@ describe('TransactionService', () => {
       providers: [
         TransactionService,
         { provide: getRepositoryToken(Transaction), useValue: mockRepository },
+        { provide: getRepositoryToken(Expense), useValue: mockExpenseRepository },
+        { provide: getRepositoryToken(Income), useValue: mockIncomeRepository },
         { provide: AuthService, useValue: mockAuthService },
         { provide: EventEmitter2, useValue: mockEventEmitter },
       ],

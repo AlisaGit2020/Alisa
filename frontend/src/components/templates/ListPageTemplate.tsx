@@ -6,6 +6,7 @@ interface ListPageTemplateProps {
   translationPrefix: string;
   titleKey?: string;
   descriptionKey?: string;
+  moreDetailsKey?: string;
   children: ReactNode;
 }
 
@@ -13,7 +14,8 @@ function ListPageTemplate({
   translationPrefix,
   titleKey,
   descriptionKey,
-  children
+  moreDetailsKey,
+  children,
 }: ListPageTemplateProps) {
   return (
     <Box>
@@ -21,10 +23,9 @@ function ListPageTemplate({
         translationPrefix={translationPrefix}
         titleKey={titleKey}
         descriptionKey={descriptionKey}
+        moreDetailsKey={moreDetailsKey}
       />
-      <Box sx={{ mt: 2 }}>
-        {children}
-      </Box>
+      <Box sx={{ mt: 2 }}>{children}</Box>
     </Box>
   );
 }
