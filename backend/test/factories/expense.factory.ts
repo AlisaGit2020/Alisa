@@ -10,6 +10,7 @@ export interface CreateExpenseOptions {
   amount?: number;
   quantity?: number;
   totalAmount?: number;
+  accountingDate?: Date | null;
 }
 
 export const createExpense = (options: CreateExpenseOptions = {}): Expense => {
@@ -22,6 +23,9 @@ export const createExpense = (options: CreateExpenseOptions = {}): Expense => {
   expense.amount = options.amount ?? 100;
   expense.quantity = options.quantity ?? 1;
   expense.totalAmount = options.totalAmount ?? 100;
+  if (options.accountingDate !== undefined) {
+    expense.accountingDate = options.accountingDate;
+  }
   return expense;
 };
 

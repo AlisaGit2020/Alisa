@@ -16,7 +16,13 @@ import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeo
 import { DepreciationService } from '@alisa-backend/accounting/depreciation/depreciation.service';
 import { TransactionStatus } from '@alisa-backend/common/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Events, ExpenseAccountingDateChangedEvent } from '@alisa-backend/common/events';
+import {
+  Events,
+  ExpenseAccountingDateChangedEvent,
+  StandaloneExpenseCreatedEvent,
+  StandaloneExpenseDeletedEvent,
+  StandaloneExpenseUpdatedEvent,
+} from '@alisa-backend/common/events';
 import { DataSaveResultDto } from '@alisa-backend/common/dtos/data-save-result.dto';
 import {
   buildBulkOperationResult,
@@ -121,6 +127,14 @@ export class ExpenseService {
     // Create depreciation asset if this is a capital improvement
     await this.handleDepreciationAsset(savedExpense);
 
+    // Emit event for standalone expense (no transaction)
+    if (!savedExpense.transactionId) {
+      this.eventEmitter.emit(
+        Events.Expense.StandaloneCreated,
+        new StandaloneExpenseCreatedEvent(savedExpense),
+      );
+    }
+
     return savedExpense;
   }
 
@@ -159,8 +173,14 @@ export class ExpenseService {
 
     await this.repository.save(expenseEntity);
 
-    // Emit event if accountingDate changed and transaction is accepted
-    if (
+    // Emit event for standalone expense (no transaction) - triggers recalculation
+    if (!expenseEntity.transactionId) {
+      this.eventEmitter.emit(
+        Events.Expense.StandaloneUpdated,
+        new StandaloneExpenseUpdatedEvent(expenseEntity),
+      );
+    } else if (
+      // Emit event if accountingDate changed and transaction is accepted
       this.hasAccountingDateChanged(oldAccountingDate, expenseEntity.accountingDate) &&
       expenseEntity.transaction?.status === TransactionStatus.ACCEPTED
     ) {
@@ -192,11 +212,22 @@ export class ExpenseService {
       );
     }
 
+    const propertyId = expense.propertyId;
+
     // Delete associated depreciation asset
     await this.depreciationService.deleteByExpenseId(id);
 
     // Delete the expense
     await this.repository.delete(id);
+
+    // Emit event to trigger statistics recalculation
+    // Note: Only standalone expenses (transactionId IS NULL) can be deleted - the guard above
+    // throws for linked expenses. Standalone expenses need this event because they don't have
+    // a transaction that would trigger statistics updates.
+    this.eventEmitter.emit(
+      Events.Expense.StandaloneDeleted,
+      new StandaloneExpenseDeletedEvent(propertyId),
+    );
   }
 
   async deleteMany(user: JWTUser, ids: number[]): Promise<DataSaveResultDto> {
@@ -207,6 +238,8 @@ export class ExpenseService {
     const expenses = await this.repository.find({
       where: { id: In(ids) },
     });
+
+    const deletedPropertyIds = new Set<number>();
 
     const deleteTask = expenses.map(async (expense) => {
       try {
@@ -229,6 +262,7 @@ export class ExpenseService {
 
         // Delete the expense
         await this.repository.delete(expense.id);
+        deletedPropertyIds.add(expense.propertyId);
 
         return createSuccessResult(expense.id);
       } catch (e) {
@@ -236,7 +270,19 @@ export class ExpenseService {
       }
     });
 
-    return buildBulkOperationResult(deleteTask, expenses.length);
+    const result = await buildBulkOperationResult(deleteTask, expenses.length);
+
+    // Emit events for each affected property to trigger statistics recalculation
+    // Note: deletedPropertyIds only contains IDs from standalone expenses - linked expenses
+    // return an error above and are not added to this set
+    for (const propertyId of deletedPropertyIds) {
+      this.eventEmitter.emit(
+        Events.Expense.StandaloneDeleted,
+        new StandaloneExpenseDeletedEvent(propertyId),
+      );
+    }
+
+    return result;
   }
 
   private async handleDepreciationAsset(expense: Expense): Promise<void> {

@@ -18,7 +18,7 @@ WHERE key IN ('income', 'expense', 'deposit', 'withdraw');
 
 -- ----------------------------------------------------------------------------
 -- Step 2: Insert INCOME statistics from income table
--- Only include income linked to ACCEPTED transactions (status = 2)
+-- Include: standalone income (no transaction) OR income linked to ACCEPTED transactions
 -- ----------------------------------------------------------------------------
 
 -- All-time income (year = NULL, month = NULL)
@@ -30,8 +30,8 @@ SELECT
     NULL as month,
     TO_CHAR(COALESCE(SUM(i."totalAmount"), 0), 'FM999999999999990.00') as value
 FROM income i
-INNER JOIN transaction t ON t.id = i."transactionId"
-WHERE t.status = 2  -- ACCEPTED
+LEFT JOIN transaction t ON t.id = i."transactionId"
+WHERE i."transactionId" IS NULL OR t.status = 2  -- Standalone OR ACCEPTED
 GROUP BY i."propertyId";
 
 -- Yearly income (year = X, month = NULL)
@@ -39,30 +39,30 @@ INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
 SELECT
     i."propertyId",
     'income' as key,
-    EXTRACT(YEAR FROM t."accountingDate")::SMALLINT as year,
+    EXTRACT(YEAR FROM i."accountingDate")::SMALLINT as year,
     NULL as month,
     TO_CHAR(COALESCE(SUM(i."totalAmount"), 0), 'FM999999999999990.00') as value
 FROM income i
-INNER JOIN transaction t ON t.id = i."transactionId"
-WHERE t.status = 2  -- ACCEPTED
-GROUP BY i."propertyId", EXTRACT(YEAR FROM t."accountingDate");
+LEFT JOIN transaction t ON t.id = i."transactionId"
+WHERE i."transactionId" IS NULL OR t.status = 2  -- Standalone OR ACCEPTED
+GROUP BY i."propertyId", EXTRACT(YEAR FROM i."accountingDate");
 
 -- Monthly income (year = X, month = Y)
 INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
 SELECT
     i."propertyId",
     'income' as key,
-    EXTRACT(YEAR FROM t."accountingDate")::SMALLINT as year,
-    EXTRACT(MONTH FROM t."accountingDate")::SMALLINT as month,
+    EXTRACT(YEAR FROM i."accountingDate")::SMALLINT as year,
+    EXTRACT(MONTH FROM i."accountingDate")::SMALLINT as month,
     TO_CHAR(COALESCE(SUM(i."totalAmount"), 0), 'FM999999999999990.00') as value
 FROM income i
-INNER JOIN transaction t ON t.id = i."transactionId"
-WHERE t.status = 2  -- ACCEPTED
-GROUP BY i."propertyId", EXTRACT(YEAR FROM t."accountingDate"), EXTRACT(MONTH FROM t."accountingDate");
+LEFT JOIN transaction t ON t.id = i."transactionId"
+WHERE i."transactionId" IS NULL OR t.status = 2  -- Standalone OR ACCEPTED
+GROUP BY i."propertyId", EXTRACT(YEAR FROM i."accountingDate"), EXTRACT(MONTH FROM i."accountingDate");
 
 -- ----------------------------------------------------------------------------
 -- Step 3: Insert EXPENSE statistics from expense table
--- Only include expense linked to ACCEPTED transactions (status = 2)
+-- Include: standalone expense (no transaction) OR expense linked to ACCEPTED transactions
 -- Note: Expense values are stored as POSITIVE
 -- ----------------------------------------------------------------------------
 
@@ -75,8 +75,8 @@ SELECT
     NULL as month,
     TO_CHAR(COALESCE(SUM(e."totalAmount"), 0), 'FM999999999999990.00') as value
 FROM expense e
-INNER JOIN transaction t ON t.id = e."transactionId"
-WHERE t.status = 2  -- ACCEPTED
+LEFT JOIN transaction t ON t.id = e."transactionId"
+WHERE e."transactionId" IS NULL OR t.status = 2  -- Standalone OR ACCEPTED
 GROUP BY e."propertyId";
 
 -- Yearly expense (year = X, month = NULL)
@@ -84,26 +84,26 @@ INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
 SELECT
     e."propertyId",
     'expense' as key,
-    EXTRACT(YEAR FROM t."accountingDate")::SMALLINT as year,
+    EXTRACT(YEAR FROM e."accountingDate")::SMALLINT as year,
     NULL as month,
     TO_CHAR(COALESCE(SUM(e."totalAmount"), 0), 'FM999999999999990.00') as value
 FROM expense e
-INNER JOIN transaction t ON t.id = e."transactionId"
-WHERE t.status = 2  -- ACCEPTED
-GROUP BY e."propertyId", EXTRACT(YEAR FROM t."accountingDate");
+LEFT JOIN transaction t ON t.id = e."transactionId"
+WHERE e."transactionId" IS NULL OR t.status = 2  -- Standalone OR ACCEPTED
+GROUP BY e."propertyId", EXTRACT(YEAR FROM e."accountingDate");
 
 -- Monthly expense (year = X, month = Y)
 INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
 SELECT
     e."propertyId",
     'expense' as key,
-    EXTRACT(YEAR FROM t."accountingDate")::SMALLINT as year,
-    EXTRACT(MONTH FROM t."accountingDate")::SMALLINT as month,
+    EXTRACT(YEAR FROM e."accountingDate")::SMALLINT as year,
+    EXTRACT(MONTH FROM e."accountingDate")::SMALLINT as month,
     TO_CHAR(COALESCE(SUM(e."totalAmount"), 0), 'FM999999999999990.00') as value
 FROM expense e
-INNER JOIN transaction t ON t.id = e."transactionId"
-WHERE t.status = 2  -- ACCEPTED
-GROUP BY e."propertyId", EXTRACT(YEAR FROM t."accountingDate"), EXTRACT(MONTH FROM t."accountingDate");
+LEFT JOIN transaction t ON t.id = e."transactionId"
+WHERE e."transactionId" IS NULL OR t.status = 2  -- Standalone OR ACCEPTED
+GROUP BY e."propertyId", EXTRACT(YEAR FROM e."accountingDate"), EXTRACT(MONTH FROM e."accountingDate");
 
 -- ----------------------------------------------------------------------------
 -- Step 4: Insert DEPOSIT statistics from transaction table
@@ -149,7 +149,8 @@ GROUP BY t."propertyId", EXTRACT(YEAR FROM t."accountingDate"), EXTRACT(MONTH FR
 -- ----------------------------------------------------------------------------
 -- Step 5: Insert WITHDRAW statistics from transaction table
 -- Only include ACCEPTED transactions (status = 2) with type = 4 (WITHDRAW)
--- Note: Withdraw values are stored as NEGATIVE
+-- Note: Withdraw transaction amounts are negative, but we store as POSITIVE
+-- (negate the sum to convert to positive values)
 -- ----------------------------------------------------------------------------
 
 -- All-time withdraw (year = NULL, month = NULL)
@@ -159,7 +160,7 @@ SELECT
     'withdraw' as key,
     NULL as year,
     NULL as month,
-    TO_CHAR(COALESCE(SUM(t.amount), 0), 'FM999999999999990.00') as value
+    TO_CHAR(-COALESCE(SUM(t.amount), 0), 'FM999999999999990.00') as value
 FROM transaction t
 WHERE t.status = 2 AND t.type = 4  -- ACCEPTED, WITHDRAW
 GROUP BY t."propertyId";
@@ -171,7 +172,7 @@ SELECT
     'withdraw' as key,
     EXTRACT(YEAR FROM t."accountingDate")::SMALLINT as year,
     NULL as month,
-    TO_CHAR(COALESCE(SUM(t.amount), 0), 'FM999999999999990.00') as value
+    TO_CHAR(-COALESCE(SUM(t.amount), 0), 'FM999999999999990.00') as value
 FROM transaction t
 WHERE t.status = 2 AND t.type = 4  -- ACCEPTED, WITHDRAW
 GROUP BY t."propertyId", EXTRACT(YEAR FROM t."accountingDate");
@@ -183,7 +184,7 @@ SELECT
     'withdraw' as key,
     EXTRACT(YEAR FROM t."accountingDate")::SMALLINT as year,
     EXTRACT(MONTH FROM t."accountingDate")::SMALLINT as month,
-    TO_CHAR(COALESCE(SUM(t.amount), 0), 'FM999999999999990.00') as value
+    TO_CHAR(-COALESCE(SUM(t.amount), 0), 'FM999999999999990.00') as value
 FROM transaction t
 WHERE t.status = 2 AND t.type = 4  -- ACCEPTED, WITHDRAW
 GROUP BY t."propertyId", EXTRACT(YEAR FROM t."accountingDate"), EXTRACT(MONTH FROM t."accountingDate");
@@ -206,12 +207,17 @@ COMMIT;
 -- Summary of what this script does:
 -- 1. Deletes all existing 'income', 'expense', 'deposit', 'withdraw' statistics
 -- 2. Recalculates income from the income table (all-time, yearly, monthly)
+--    - Includes standalone income (no transaction) AND income linked to ACCEPTED transactions
+--    - Uses income.accountingDate for date grouping
 -- 3. Recalculates expense from the expense table (all-time, yearly, monthly)
+--    - Includes standalone expense (no transaction) AND expense linked to ACCEPTED transactions
+--    - Uses expense.accountingDate for date grouping
 -- 4. Recalculates deposit from transaction table where type=3 (all-time, yearly, monthly)
 -- 5. Recalculates withdraw from transaction table where type=4 (all-time, yearly, monthly)
 -- 6. Shows a summary of the recalculated statistics
 --
--- Note: Only transactions with status = 2 (ACCEPTED) are included.
--- Withdraw values are stored as negative numbers. Expense values are positive.
+-- Note: Standalone income/expense (transactionId IS NULL) are always included.
+-- Income/expense linked to transactions are only included if status = 2 (ACCEPTED).
+-- All statistic values are stored as POSITIVE numbers (including withdraw).
 -- Balance is NOT recalculated by this script.
 -- ============================================================================

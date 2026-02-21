@@ -7,6 +7,12 @@ import {
   Events,
   ExpenseAccountingDateChangedEvent,
   IncomeAccountingDateChangedEvent,
+  StandaloneExpenseCreatedEvent,
+  StandaloneExpenseDeletedEvent,
+  StandaloneExpenseUpdatedEvent,
+  StandaloneIncomeCreatedEvent,
+  StandaloneIncomeDeletedEvent,
+  StandaloneIncomeUpdatedEvent,
   TransactionCreatedEvent,
   TransactionDeletedEvent,
 } from '@alisa-backend/common/events';
@@ -241,6 +247,78 @@ export class PropertyStatisticsService {
     this.eventTracker.increment();
     try {
       await this.recalculate(event.income.propertyId);
+    } finally {
+      this.eventTracker.decrement();
+    }
+  }
+
+  @OnEvent(Events.Income.StandaloneCreated)
+  async handleStandaloneIncomeCreated(
+    event: StandaloneIncomeCreatedEvent,
+  ): Promise<void> {
+    this.eventTracker.increment();
+    try {
+      await this.recalculate(event.income.propertyId);
+    } finally {
+      this.eventTracker.decrement();
+    }
+  }
+
+  @OnEvent(Events.Income.StandaloneUpdated)
+  async handleStandaloneIncomeUpdated(
+    event: StandaloneIncomeUpdatedEvent,
+  ): Promise<void> {
+    this.eventTracker.increment();
+    try {
+      await this.recalculate(event.income.propertyId);
+    } finally {
+      this.eventTracker.decrement();
+    }
+  }
+
+  @OnEvent(Events.Income.StandaloneDeleted)
+  async handleStandaloneIncomeDeleted(
+    event: StandaloneIncomeDeletedEvent,
+  ): Promise<void> {
+    this.eventTracker.increment();
+    try {
+      await this.recalculate(event.propertyId);
+    } finally {
+      this.eventTracker.decrement();
+    }
+  }
+
+  @OnEvent(Events.Expense.StandaloneCreated)
+  async handleStandaloneExpenseCreated(
+    event: StandaloneExpenseCreatedEvent,
+  ): Promise<void> {
+    this.eventTracker.increment();
+    try {
+      await this.recalculate(event.expense.propertyId);
+    } finally {
+      this.eventTracker.decrement();
+    }
+  }
+
+  @OnEvent(Events.Expense.StandaloneUpdated)
+  async handleStandaloneExpenseUpdated(
+    event: StandaloneExpenseUpdatedEvent,
+  ): Promise<void> {
+    this.eventTracker.increment();
+    try {
+      await this.recalculate(event.expense.propertyId);
+    } finally {
+      this.eventTracker.decrement();
+    }
+  }
+
+  @OnEvent(Events.Expense.StandaloneDeleted)
+  async handleStandaloneExpenseDeleted(
+    event: StandaloneExpenseDeletedEvent,
+  ): Promise<void> {
+    this.eventTracker.increment();
+    try {
+      await this.recalculate(event.propertyId);
     } finally {
       this.eventTracker.decrement();
     }
@@ -510,6 +588,7 @@ export class PropertyStatisticsService {
     const decimals = this.decimals.get(StatisticKey.INCOME);
 
     // All-time
+    // Include: standalone income (no transaction) OR income linked to ACCEPTED transaction
     await this.dataSource.query(
       `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
        SELECT
@@ -519,8 +598,8 @@ export class PropertyStatisticsService {
          NULL,
          ROUND(COALESCE(SUM(i."totalAmount"), 0), ${decimals})::TEXT
        FROM income i
-       INNER JOIN transaction t ON t.id = i."transactionId"
-       WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
+       LEFT JOIN transaction t ON t.id = i."transactionId"
+       WHERE (i."transactionId" IS NULL OR t.status = ${TransactionStatus.ACCEPTED}) ${propertyFilter}
        GROUP BY i."propertyId"
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
@@ -537,8 +616,8 @@ export class PropertyStatisticsService {
          NULL,
          ROUND(COALESCE(SUM(i."totalAmount"), 0), ${decimals})::TEXT
        FROM income i
-       INNER JOIN transaction t ON t.id = i."transactionId"
-       WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
+       LEFT JOIN transaction t ON t.id = i."transactionId"
+       WHERE (i."transactionId" IS NULL OR t.status = ${TransactionStatus.ACCEPTED}) ${propertyFilter}
        GROUP BY i."propertyId", EXTRACT(YEAR FROM i."accountingDate")
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
@@ -555,8 +634,8 @@ export class PropertyStatisticsService {
          EXTRACT(MONTH FROM i."accountingDate")::SMALLINT,
          ROUND(COALESCE(SUM(i."totalAmount"), 0), ${decimals})::TEXT
        FROM income i
-       INNER JOIN transaction t ON t.id = i."transactionId"
-       WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
+       LEFT JOIN transaction t ON t.id = i."transactionId"
+       WHERE (i."transactionId" IS NULL OR t.status = ${TransactionStatus.ACCEPTED}) ${propertyFilter}
        GROUP BY i."propertyId", EXTRACT(YEAR FROM i."accountingDate"), EXTRACT(MONTH FROM i."accountingDate")
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
@@ -571,6 +650,7 @@ export class PropertyStatisticsService {
     const decimals = this.decimals.get(StatisticKey.EXPENSE);
 
     // All-time (positive value)
+    // Include: standalone expense (no transaction) OR expense linked to ACCEPTED transaction
     await this.dataSource.query(
       `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
        SELECT
@@ -580,8 +660,8 @@ export class PropertyStatisticsService {
          NULL,
          ROUND(COALESCE(SUM(e."totalAmount"), 0), ${decimals})::TEXT
        FROM expense e
-       INNER JOIN transaction t ON t.id = e."transactionId"
-       WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
+       LEFT JOIN transaction t ON t.id = e."transactionId"
+       WHERE (e."transactionId" IS NULL OR t.status = ${TransactionStatus.ACCEPTED}) ${propertyFilter}
        GROUP BY e."propertyId"
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
@@ -598,8 +678,8 @@ export class PropertyStatisticsService {
          NULL,
          ROUND(COALESCE(SUM(e."totalAmount"), 0), ${decimals})::TEXT
        FROM expense e
-       INNER JOIN transaction t ON t.id = e."transactionId"
-       WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
+       LEFT JOIN transaction t ON t.id = e."transactionId"
+       WHERE (e."transactionId" IS NULL OR t.status = ${TransactionStatus.ACCEPTED}) ${propertyFilter}
        GROUP BY e."propertyId", EXTRACT(YEAR FROM e."accountingDate")
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
@@ -616,8 +696,8 @@ export class PropertyStatisticsService {
          EXTRACT(MONTH FROM e."accountingDate")::SMALLINT,
          ROUND(COALESCE(SUM(e."totalAmount"), 0), ${decimals})::TEXT
        FROM expense e
-       INNER JOIN transaction t ON t.id = e."transactionId"
-       WHERE t.status = ${TransactionStatus.ACCEPTED} ${propertyFilter}
+       LEFT JOIN transaction t ON t.id = e."transactionId"
+       WHERE (e."transactionId" IS NULL OR t.status = ${TransactionStatus.ACCEPTED}) ${propertyFilter}
        GROUP BY e."propertyId", EXTRACT(YEAR FROM e."accountingDate"), EXTRACT(MONTH FROM e."accountingDate")
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,

@@ -10,6 +10,7 @@ export interface CreateIncomeOptions {
   amount?: number;
   quantity?: number;
   totalAmount?: number;
+  accountingDate?: Date | null;
 }
 
 export const createIncome = (options: CreateIncomeOptions = {}): Income => {
@@ -22,6 +23,9 @@ export const createIncome = (options: CreateIncomeOptions = {}): Income => {
   income.amount = options.amount ?? 100;
   income.quantity = options.quantity ?? 1;
   income.totalAmount = options.totalAmount ?? 100;
+  if (options.accountingDate !== undefined) {
+    income.accountingDate = options.accountingDate;
+  }
   return income;
 };
 

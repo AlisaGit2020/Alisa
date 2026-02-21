@@ -1,4 +1,6 @@
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
+import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 import {
   TransactionStatus,
   TransactionType,
@@ -17,6 +19,8 @@ export interface CreateTransactionOptions {
   amount?: number;
   balance?: number;
   externalId?: string;
+  incomes?: Income[];
+  expenses?: Expense[];
 }
 
 export const createTransaction = (
@@ -35,6 +39,8 @@ export const createTransaction = (
   transaction.amount = options.amount ?? 100;
   transaction.balance = options.balance ?? 100;
   transaction.externalId = options.externalId;
+  transaction.incomes = options.incomes;
+  transaction.expenses = options.expenses;
   return transaction;
 };
 

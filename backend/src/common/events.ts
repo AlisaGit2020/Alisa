@@ -14,9 +14,15 @@ export const Events = {
   },
   Expense: {
     AccountingDateChanged: 'expense.accountingDateChanged',
+    StandaloneCreated: 'expense.standaloneCreated',
+    StandaloneUpdated: 'expense.standaloneUpdated',
+    StandaloneDeleted: 'expense.standaloneDeleted',
   },
   Income: {
     AccountingDateChanged: 'income.accountingDateChanged',
+    StandaloneCreated: 'income.standaloneCreated',
+    StandaloneUpdated: 'income.standaloneUpdated',
+    StandaloneDeleted: 'income.standaloneDeleted',
   },
 };
 
@@ -74,5 +80,47 @@ export class IncomeAccountingDateChangedEvent {
   constructor(income: Income, oldAccountingDate: Date) {
     this.income = income;
     this.oldAccountingDate = oldAccountingDate;
+  }
+}
+
+export class StandaloneIncomeCreatedEvent {
+  public income: Income;
+  constructor(income: Income) {
+    this.income = income;
+  }
+}
+
+export class StandaloneIncomeUpdatedEvent {
+  public income: Income;
+  constructor(income: Income) {
+    this.income = income;
+  }
+}
+
+export class StandaloneIncomeDeletedEvent {
+  public propertyId: number;
+  constructor(propertyId: number) {
+    this.propertyId = propertyId;
+  }
+}
+
+export class StandaloneExpenseCreatedEvent {
+  public expense: Expense;
+  constructor(expense: Expense) {
+    this.expense = expense;
+  }
+}
+
+export class StandaloneExpenseUpdatedEvent {
+  public expense: Expense;
+  constructor(expense: Expense) {
+    this.expense = expense;
+  }
+}
+
+export class StandaloneExpenseDeletedEvent {
+  public propertyId: number;
+  constructor(propertyId: number) {
+    this.propertyId = propertyId;
   }
 }

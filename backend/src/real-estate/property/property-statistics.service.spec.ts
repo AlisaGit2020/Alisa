@@ -371,4 +371,378 @@ describe('PropertyStatisticsService', () => {
       expect(mockEventTracker.decrement).toHaveBeenCalled();
     });
   });
+
+  describe('searchAll', () => {
+    it('returns statistics for all user properties when no propertyId specified', async () => {
+      mockPropertyService.search.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+      const statistics = [
+        { propertyId: 1, key: StatisticKey.BALANCE, year: null, month: null, value: '1000.00' },
+        { propertyId: 2, key: StatisticKey.BALANCE, year: null, month: null, value: '2000.00' },
+      ] as PropertyStatistics[];
+      mockRepository.find.mockResolvedValue(statistics);
+
+      const result = await service.searchAll(testUser, { key: StatisticKey.BALANCE });
+
+      expect(result).toEqual(statistics);
+      expect(mockPropertyService.search).toHaveBeenCalledWith(testUser, { select: ['id'] });
+    });
+
+    it('returns statistics for specific property when propertyId is specified', async () => {
+      const statistics = [
+        { propertyId: 1, key: StatisticKey.INCOME, year: null, month: null, value: '500.00' },
+      ] as PropertyStatistics[];
+      mockRepository.find.mockResolvedValue(statistics);
+
+      const result = await service.searchAll(testUser, { propertyId: 1, key: StatisticKey.INCOME });
+
+      expect(result).toEqual(statistics);
+      expect(mockAuthService.hasOwnership).toHaveBeenCalledWith(testUser, 1);
+    });
+
+    it('returns empty array when user does not own the specified property', async () => {
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      const result = await service.searchAll(testUser, { propertyId: 999, key: StatisticKey.BALANCE });
+
+      expect(result).toEqual([]);
+      expect(mockRepository.find).not.toHaveBeenCalled();
+    });
+
+    it('returns empty array when user has no properties', async () => {
+      mockPropertyService.search.mockResolvedValue([]);
+
+      const result = await service.searchAll(testUser, { key: StatisticKey.BALANCE });
+
+      expect(result).toEqual([]);
+      expect(mockRepository.find).not.toHaveBeenCalled();
+    });
+
+    it('includes yearly statistics when includeYearly is true', async () => {
+      mockPropertyService.search.mockResolvedValue([{ id: 1 }]);
+      const statistics = [
+        { propertyId: 1, key: StatisticKey.INCOME, year: 2023, month: null, value: '1000.00' },
+        { propertyId: 1, key: StatisticKey.INCOME, year: 2024, month: null, value: '1500.00' },
+      ] as PropertyStatistics[];
+      mockRepository.find.mockResolvedValue(statistics);
+
+      const result = await service.searchAll(testUser, {
+        key: StatisticKey.INCOME,
+        includeYearly: true,
+      });
+
+      expect(result).toEqual(statistics);
+      // Verify the where clause includes year: Not(IsNull())
+      expect(mockRepository.find).toHaveBeenCalled();
+    });
+
+    it('includes monthly statistics when includeMonthly is true', async () => {
+      mockPropertyService.search.mockResolvedValue([{ id: 1 }]);
+      const statistics = [
+        { propertyId: 1, key: StatisticKey.EXPENSE, year: 2023, month: 1, value: '100.00' },
+        { propertyId: 1, key: StatisticKey.EXPENSE, year: 2023, month: 2, value: '150.00' },
+      ] as PropertyStatistics[];
+      mockRepository.find.mockResolvedValue(statistics);
+
+      const result = await service.searchAll(testUser, {
+        key: StatisticKey.EXPENSE,
+        includeMonthly: true,
+      });
+
+      expect(result).toEqual(statistics);
+    });
+  });
+
+  describe('handleTransactionCreated - deposit/withdraw', () => {
+    it('uses positive delta for deposit transactions', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        amount: 200,
+        type: TransactionType.DEPOSIT,
+        status: TransactionStatus.ACCEPTED,
+        transactionDate: new Date('2023-03-15'),
+        accountingDate: new Date('2023-03-15'),
+      });
+
+      await service.handleTransactionCreated({ transaction });
+
+      const depositCalls = mockDataSource.query.mock.calls.filter(
+        (call) => call[1][1] === StatisticKey.DEPOSIT,
+      );
+      expect(depositCalls.length).toBeGreaterThan(0);
+      expect(depositCalls[0][1][4]).toBe('200.00');
+      expect(depositCalls[0][1][5]).toBe(200);
+    });
+
+    it('uses positive delta for withdraw transactions', async () => {
+      // Withdraw transactions have negative amounts (e.g., -150)
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        amount: -150,
+        type: TransactionType.WITHDRAW,
+        status: TransactionStatus.ACCEPTED,
+        transactionDate: new Date('2023-03-15'),
+        accountingDate: new Date('2023-03-15'),
+      });
+
+      await service.handleTransactionCreated({ transaction });
+
+      const withdrawCalls = mockDataSource.query.mock.calls.filter(
+        (call) => call[1][1] === StatisticKey.WITHDRAW,
+      );
+      expect(withdrawCalls.length).toBeGreaterThan(0);
+      // WITHDRAW should be stored as positive (negated from -150)
+      expect(withdrawCalls[0][1][4]).toBe('150.00');
+      expect(withdrawCalls[0][1][5]).toBe(150);
+    });
+  });
+
+  describe('handleTransactionDeleted - deposit/withdraw', () => {
+    it('uses negative delta when deleting deposit transaction', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        amount: 200,
+        type: TransactionType.DEPOSIT,
+        status: TransactionStatus.ACCEPTED,
+        transactionDate: new Date('2023-03-15'),
+        accountingDate: new Date('2023-03-15'),
+      });
+
+      await service.handleTransactionDeleted({ transaction });
+
+      const depositCalls = mockDataSource.query.mock.calls.filter(
+        (call) => call[1][1] === StatisticKey.DEPOSIT,
+      );
+      expect(depositCalls.length).toBeGreaterThan(0);
+      expect(depositCalls[0][1][4]).toBe('-200.00');
+      expect(depositCalls[0][1][5]).toBe(-200);
+    });
+
+    it('uses negative delta when deleting withdraw transaction', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        amount: -150,
+        type: TransactionType.WITHDRAW,
+        status: TransactionStatus.ACCEPTED,
+        transactionDate: new Date('2023-03-15'),
+        accountingDate: new Date('2023-03-15'),
+      });
+
+      await service.handleTransactionDeleted({ transaction });
+
+      const withdrawCalls = mockDataSource.query.mock.calls.filter(
+        (call) => call[1][1] === StatisticKey.WITHDRAW,
+      );
+      expect(withdrawCalls.length).toBeGreaterThan(0);
+      expect(withdrawCalls[0][1][4]).toBe('-150.00');
+      expect(withdrawCalls[0][1][5]).toBe(-150);
+    });
+  });
+
+  describe('handleTransactionCreated - accountingDate from income/expense', () => {
+    it('uses income accountingDate for INCOME statistics when available', async () => {
+      const incomeAccountingDate = new Date('2023-06-15');
+      const transactionAccountingDate = new Date('2023-03-15');
+
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        amount: 100,
+        type: TransactionType.INCOME,
+        status: TransactionStatus.ACCEPTED,
+        transactionDate: new Date('2023-03-15'),
+        accountingDate: transactionAccountingDate,
+        incomes: [createIncome({ id: 1, accountingDate: incomeAccountingDate })],
+      });
+
+      await service.handleTransactionCreated({ transaction });
+
+      // Find the yearly INCOME call
+      const yearlyIncomeCalls = mockDataSource.query.mock.calls.filter(
+        (call) => call[1][1] === StatisticKey.INCOME && call[1][2] === 2023 && call[1][3] === null,
+      );
+      expect(yearlyIncomeCalls.length).toBe(1);
+
+      // Find the monthly INCOME call - should use income's month (June = 6)
+      const monthlyIncomeCalls = mockDataSource.query.mock.calls.filter(
+        (call) => call[1][1] === StatisticKey.INCOME && call[1][2] === 2023 && call[1][3] === 6,
+      );
+      expect(monthlyIncomeCalls.length).toBe(1);
+    });
+
+    it('uses expense accountingDate for EXPENSE statistics when available', async () => {
+      const expenseAccountingDate = new Date('2023-09-20');
+      const transactionAccountingDate = new Date('2023-03-15');
+
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        amount: -50,
+        type: TransactionType.EXPENSE,
+        status: TransactionStatus.ACCEPTED,
+        transactionDate: new Date('2023-03-15'),
+        accountingDate: transactionAccountingDate,
+        expenses: [createExpense({ id: 1, accountingDate: expenseAccountingDate })],
+      });
+
+      await service.handleTransactionCreated({ transaction });
+
+      // Find the monthly EXPENSE call - should use expense's month (September = 9)
+      const monthlyExpenseCalls = mockDataSource.query.mock.calls.filter(
+        (call) => call[1][1] === StatisticKey.EXPENSE && call[1][2] === 2023 && call[1][3] === 9,
+      );
+      expect(monthlyExpenseCalls.length).toBe(1);
+    });
+
+    it('falls back to transaction accountingDate when income has no accountingDate', async () => {
+      const transactionAccountingDate = new Date('2023-03-15');
+
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        amount: 100,
+        type: TransactionType.INCOME,
+        status: TransactionStatus.ACCEPTED,
+        transactionDate: new Date('2023-03-15'),
+        accountingDate: transactionAccountingDate,
+        incomes: [createIncome({ id: 1, accountingDate: null })],
+      });
+
+      await service.handleTransactionCreated({ transaction });
+
+      // Should use transaction's accountingDate (March = 3)
+      const monthlyIncomeCalls = mockDataSource.query.mock.calls.filter(
+        (call) => call[1][1] === StatisticKey.INCOME && call[1][2] === 2023 && call[1][3] === 3,
+      );
+      expect(monthlyIncomeCalls.length).toBe(1);
+    });
+  });
+
+  describe('recalculate', () => {
+    it('deletes existing statistics except balance', async () => {
+      mockRepository.delete.mockResolvedValue({ affected: 4 });
+      mockRepository.find.mockResolvedValue([]);
+
+      await service.recalculate(1);
+
+      expect(mockRepository.delete).toHaveBeenCalledWith({
+        propertyId: 1,
+        key: expect.objectContaining({ _value: expect.arrayContaining([
+          StatisticKey.INCOME,
+          StatisticKey.EXPENSE,
+          StatisticKey.DEPOSIT,
+          StatisticKey.WITHDRAW,
+        ]) }),
+      });
+    });
+
+    it('calls recalculation queries for income, expense, deposit, withdraw', async () => {
+      mockRepository.delete.mockResolvedValue({ affected: 0 });
+      mockRepository.find.mockResolvedValue([]);
+
+      await service.recalculate(1);
+
+      // Should have called queries for:
+      // - INCOME: all-time, yearly, monthly (3 queries)
+      // - EXPENSE: all-time, yearly, monthly (3 queries)
+      // - DEPOSIT: all-time, yearly, monthly (3 queries)
+      // - WITHDRAW: all-time, yearly, monthly (3 queries)
+      // Total: 12 queries
+      expect(mockDataSource.query).toHaveBeenCalled();
+      const calls = mockDataSource.query.mock.calls;
+      expect(calls.length).toBe(12);
+    });
+
+    it('returns summary with counts and totals', async () => {
+      mockRepository.delete.mockResolvedValue({ affected: 0 });
+      mockRepository.find.mockResolvedValue([
+        { key: StatisticKey.INCOME, value: '1000.00' },
+        { key: StatisticKey.EXPENSE, value: '500.00' },
+        { key: StatisticKey.DEPOSIT, value: '2000.00' },
+        { key: StatisticKey.WITHDRAW, value: '300.00' },
+      ] as PropertyStatistics[]);
+
+      const result = await service.recalculate(1);
+
+      expect(result).toEqual({
+        income: { count: 1, total: 1000 },
+        expense: { count: 1, total: 500 },
+        deposit: { count: 1, total: 2000 },
+        withdraw: { count: 1, total: 300 },
+      });
+    });
+  });
+
+  describe('recalculateForProperties', () => {
+    it('recalculates for multiple properties and combines results', async () => {
+      mockRepository.delete.mockResolvedValue({ affected: 0 });
+
+      // Mock different results for each property
+      mockRepository.find
+        .mockResolvedValueOnce([
+          { key: StatisticKey.INCOME, value: '1000.00' },
+        ] as PropertyStatistics[])
+        .mockResolvedValueOnce([
+          { key: StatisticKey.INCOME, value: '500.00' },
+        ] as PropertyStatistics[]);
+
+      const result = await service.recalculateForProperties([1, 2]);
+
+      expect(result.income.count).toBe(2);
+      expect(result.income.total).toBe(1500);
+    });
+  });
+
+  describe('recalculate - standalone income/expense', () => {
+    it('includes standalone incomes (without transaction) in recalculation', async () => {
+      mockRepository.delete.mockResolvedValue({ affected: 0 });
+      mockRepository.find.mockResolvedValue([]);
+
+      await service.recalculate(1);
+
+      // Find the INCOME queries
+      const incomeCalls = mockDataSource.query.mock.calls.filter(
+        (call) => call[0].includes("'income'"),
+      );
+
+      expect(incomeCalls.length).toBe(3); // all-time, yearly, monthly
+
+      // Each income query should include standalone incomes (transactionId IS NULL)
+      // The query should use LEFT JOIN or include a condition for NULL transactionId
+      for (const call of incomeCalls) {
+        const query = call[0];
+        // Either uses LEFT JOIN or includes condition for transactionId IS NULL
+        const includesStandalone =
+          query.includes('LEFT JOIN') ||
+          query.includes('"transactionId" IS NULL');
+        expect(includesStandalone).toBe(true);
+      }
+    });
+
+    it('includes standalone expenses (without transaction) in recalculation', async () => {
+      mockRepository.delete.mockResolvedValue({ affected: 0 });
+      mockRepository.find.mockResolvedValue([]);
+
+      await service.recalculate(1);
+
+      // Find the EXPENSE queries
+      const expenseCalls = mockDataSource.query.mock.calls.filter(
+        (call) => call[0].includes("'expense'"),
+      );
+
+      expect(expenseCalls.length).toBe(3); // all-time, yearly, monthly
+
+      // Each expense query should include standalone expenses (transactionId IS NULL)
+      for (const call of expenseCalls) {
+        const query = call[0];
+        const includesStandalone =
+          query.includes('LEFT JOIN') ||
+          query.includes('"transactionId" IS NULL');
+        expect(includesStandalone).toBe(true);
+      }
+    });
+  });
 });

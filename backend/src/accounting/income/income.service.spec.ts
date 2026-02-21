@@ -245,7 +245,7 @@ describe('IncomeService', () => {
       expect(mockEventEmitter.emit).not.toHaveBeenCalled();
     });
 
-    it('does not emit event when income has no transaction', async () => {
+    it('emits StandaloneUpdated event when income has no transaction', async () => {
       const existingIncome = createIncome({
         id: 1,
         propertyId: 1,
@@ -267,7 +267,10 @@ describe('IncomeService', () => {
         totalAmount: 100,
       });
 
-      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'income.standaloneUpdated',
+        expect.objectContaining({ income: expect.any(Object) }),
+      );
     });
   });
 
