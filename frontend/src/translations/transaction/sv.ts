@@ -18,6 +18,7 @@ const transaction = {
   importDescription:
     "Importera nya transaktioner från CSV-filer exporterade från din bank.",
 
+  accept: "Godkänn",
   accepted: "Godkänd",
   close: "Stäng",
   activeFilters: "Aktiva filter",
@@ -68,6 +69,8 @@ const transaction = {
   automaticAllocationNotSupported: "{{bank}}-import stöder inte automatisk lånedelning.",
   otherActions: "Andra åtgärder",
   saveAllocationTooltip: "Välj en tilldelningstyp först",
+  saveAllocationCategoryTooltip: "Välj en kategori först",
+  acceptDisabledTooltip: "Alla valda transaktioner måste tilldelas innan godkännande",
   loanSplitErrors: {
     unauthorized: "Du har inte behörighet att ändra denna transaktion",
     notPending: "Kan bara dela upp väntande transaktioner",

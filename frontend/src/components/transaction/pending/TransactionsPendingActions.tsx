@@ -6,6 +6,7 @@ import {
 } from "@alisa-lib/alisa-contexts.ts";
 import { TransactionType, ExpenseType, IncomeType } from "@alisa-types";
 import { Box, Chip, Paper, Stack } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import SaveIcon from "@mui/icons-material/Save";
@@ -27,6 +28,7 @@ interface TransactionsPendingActionsProps extends WithTranslation {
   selectedIds: number[];
   hasExpenseTransactions: boolean;
   hasIncomeTransactions: boolean;
+  hasUnallocatedSelected?: boolean;
   hideApprove?: boolean;
   hideSplitLoanPayment?: boolean;
   supportsLoanSplit?: boolean;
@@ -176,7 +178,30 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
     setConfirmOpen(false);
   };
 
-  const isSaveDisabled = transactionType <= 0;
+  // Save is disabled if:
+  // - No type selected
+  // - EXPENSE selected but no expense category
+  // - INCOME selected but no income category
+  const isSaveDisabled =
+    transactionType <= 0 ||
+    (transactionType === TransactionType.EXPENSE && categoryTypeData.expenseTypeId <= 0) ||
+    (transactionType === TransactionType.INCOME && categoryTypeData.incomeTypeId <= 0);
+
+  // Determine appropriate tooltip based on why save is disabled
+  const getSaveTooltip = (): string | undefined => {
+    if (!isSaveDisabled) return undefined;
+    if (transactionType <= 0) {
+      return props.t("saveAllocationTooltip");
+    }
+    if (
+      (transactionType === TransactionType.EXPENSE && categoryTypeData.expenseTypeId <= 0) ||
+      (transactionType === TransactionType.INCOME && categoryTypeData.incomeTypeId <= 0)
+    ) {
+      return props.t("saveAllocationCategoryTooltip");
+    }
+    return undefined;
+  };
+
   const supportsLoanSplit = props.supportsLoanSplit ?? true;
 
   return (
@@ -276,7 +301,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
               color="primary"
               onClick={handleSave}
               disabled={isSaveDisabled}
-              tooltip={isSaveDisabled ? props.t("saveAllocationTooltip") : undefined}
+              tooltip={getSaveTooltip()}
               endIcon={<SaveIcon />}
             />
           </Box>
@@ -403,6 +428,21 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
             {props.t("otherActions")}
           </Typography>
           <Stack direction="row" spacing={2}>
+            {!props.hideApprove && (
+              <AlisaButton
+                label={props.t("accept")}
+                variant="text"
+                color="success"
+                onClick={props.onApprove}
+                disabled={props.hasUnallocatedSelected}
+                tooltip={
+                  props.hasUnallocatedSelected
+                    ? props.t("acceptDisabledTooltip")
+                    : undefined
+                }
+                endIcon={<CheckIcon />}
+              />
+            )}
             <AlisaButton
               label={props.t("delete")}
               variant="text"

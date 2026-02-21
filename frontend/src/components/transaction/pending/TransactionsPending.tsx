@@ -356,6 +356,9 @@ function TransactionsPending({ t }: WithTranslation) {
           hasIncomeTransactions={selectedTransactionTypes.includes(
             TransactionType.INCOME,
           )}
+          hasUnallocatedSelected={selectedTransactionTypes.includes(
+            TransactionType.UNKNOWN,
+          )}
           onApprove={handleApproveSelected}
           onSetType={handleSetTypeForSelected}
           onSetCategoryType={handleSetCategoryTypeForSelected}

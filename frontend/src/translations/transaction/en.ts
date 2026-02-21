@@ -18,6 +18,7 @@ const transaction = {
   importDescription:
     "Import new bank transactions from CSV files exported from your bank.",
 
+  accept: "Accept",
   accepted: "Accepted",
   close: "Close",
   activeFilters: "Active filters",
@@ -71,6 +72,8 @@ const transaction = {
   automaticAllocationNotSupported: "{{bank}} import does not support automatic loan splitting.",
   otherActions: "Other Actions",
   saveAllocationTooltip: "Select an allocation type first",
+  saveAllocationCategoryTooltip: "Select a category first",
+  acceptDisabledTooltip: "All selected transactions must be allocated before accepting",
   loanSplitErrors: {
     unauthorized: "You don't have permission to modify this transaction",
     notPending: "Can only split pending transactions",

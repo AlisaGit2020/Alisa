@@ -18,6 +18,7 @@ const transaction = {
   importDescription:
     "Tuo uusia tilitapahtumia pankistasi viedyistä CSV-tiedostoista.",
 
+  accept: "Hyväksy",
   accepted: "Hyväksytty",
   close: "Sulje",
   activeFilters: "Aktiiviset suodattimet",
@@ -71,6 +72,8 @@ const transaction = {
   automaticAllocationNotSupported: "{{bank}}-tuonti ei tue automaattista lainan jakamista.",
   otherActions: "Muut toiminnot",
   saveAllocationTooltip: "Valitse ensin kohdistustyyppi",
+  saveAllocationCategoryTooltip: "Valitse ensin kategoria",
+  acceptDisabledTooltip: "Kaikki valitut tapahtumat on kohdistettava ennen hyväksymistä",
   loanSplitErrors: {
     unauthorized: "Sinulla ei ole oikeutta muokata tätä tapahtumaa",
     notPending: "Vain odottavia tapahtumia voi jakaa",

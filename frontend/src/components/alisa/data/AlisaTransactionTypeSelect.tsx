@@ -26,6 +26,7 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
   const visible = props.visible !== undefined ? props.visible : true;
 
   // Use useMemo to recompute when language or excludeTypes changes
+  // i18n.language is needed because t function reference doesn't change on language switch
   const transactionTypes = useMemo(() => {
     const data: AlisaSelectFieldItem[] = [];
     transactionTypeNames.forEach((value: TransactionTypeName, key: number) => {
@@ -36,6 +37,7 @@ function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
       data.push({ id: key, name: t(value) });
     });
     return data;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t, props.excludeTypes, i18n.language]);
 
   if (!visible) {

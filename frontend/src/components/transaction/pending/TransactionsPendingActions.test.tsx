@@ -174,15 +174,15 @@ describe("TransactionsPendingActions", () => {
         <TransactionsPendingActions {...defaultProps} onSetType={mockOnSetType} />
       );
 
-      // Wait for type buttons to load
-      const expenseButton = await screen.findByRole("button", { name: /expense/i });
-      await user.click(expenseButton);
+      // Wait for type buttons to load - use DEPOSIT which doesn't require category
+      const depositButton = await screen.findByRole("button", { name: /deposit/i });
+      await user.click(depositButton);
 
       // Click save
       const saveButton = await screen.findByRole("button", { name: /save/i });
       await user.click(saveButton);
 
-      expect(mockOnSetType).toHaveBeenCalledWith(2); // EXPENSE = 2
+      expect(mockOnSetType).toHaveBeenCalledWith(3); // DEPOSIT = 3
     });
 
     it("deselects rows after Save is clicked", async () => {
@@ -197,9 +197,9 @@ describe("TransactionsPendingActions", () => {
         />
       );
 
-      // Wait for type buttons to load
-      const expenseButton = await screen.findByRole("button", { name: /expense/i });
-      await user.click(expenseButton);
+      // Wait for type buttons to load - use DEPOSIT which doesn't require category
+      const depositButton = await screen.findByRole("button", { name: /deposit/i });
+      await user.click(depositButton);
 
       // Click save
       const saveButton = await screen.findByRole("button", { name: /save/i });
@@ -256,6 +256,45 @@ describe("TransactionsPendingActions", () => {
       expect(screen.queryByLabelText(/expenseType/i)).not.toBeInTheDocument();
       expect(screen.queryByLabelText(/incomeType/i)).not.toBeInTheDocument();
     });
+
+    it("disables Save button when EXPENSE selected without category", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<TransactionsPendingActions {...defaultProps} />);
+
+      // Select EXPENSE type
+      const expenseButton = await screen.findByRole("button", { name: /expense/i });
+      await user.click(expenseButton);
+
+      // Save button should be disabled (no category selected)
+      const saveButton = await screen.findByRole("button", { name: /save/i });
+      expect(saveButton).toBeDisabled();
+    });
+
+    it("disables Save button when INCOME selected without category", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<TransactionsPendingActions {...defaultProps} />);
+
+      // Select INCOME type
+      const incomeButton = await screen.findByRole("button", { name: /income/i });
+      await user.click(incomeButton);
+
+      // Save button should be disabled (no category selected)
+      const saveButton = await screen.findByRole("button", { name: /save/i });
+      expect(saveButton).toBeDisabled();
+    });
+
+    it("enables Save button for DEPOSIT without category", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<TransactionsPendingActions {...defaultProps} />);
+
+      // Select DEPOSIT type
+      const depositButton = await screen.findByRole("button", { name: /deposit/i });
+      await user.click(depositButton);
+
+      // Save button should be enabled (DEPOSIT doesn't require category)
+      const saveButton = await screen.findByRole("button", { name: /save/i });
+      expect(saveButton).not.toBeDisabled();
+    });
   });
 
   describe("Section grouping", () => {
@@ -280,11 +319,49 @@ describe("TransactionsPendingActions", () => {
       expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
     });
 
-    it("does not render Approve button anymore", () => {
+    it("renders Accept button when hideApprove is not set", () => {
       renderWithProviders(<TransactionsPendingActions {...defaultProps} />);
 
-      // Approve button should not exist (removed from component)
-      expect(screen.queryByRole("button", { name: /approve/i })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /accept/i })).toBeInTheDocument();
+    });
+
+    it("hides Accept button when hideApprove is true", () => {
+      renderWithProviders(
+        <TransactionsPendingActions {...defaultProps} hideApprove={true} />
+      );
+
+      expect(screen.queryByRole("button", { name: /accept/i })).not.toBeInTheDocument();
+    });
+
+    it("calls onApprove when Accept button is clicked", async () => {
+      const user = userEvent.setup();
+      const mockOnApprove = jest.fn();
+      renderWithProviders(
+        <TransactionsPendingActions {...defaultProps} onApprove={mockOnApprove} />
+      );
+
+      const acceptButton = screen.getByRole("button", { name: /accept/i });
+      await user.click(acceptButton);
+
+      expect(mockOnApprove).toHaveBeenCalled();
+    });
+
+    it("disables Accept button when hasUnallocatedSelected is true", () => {
+      renderWithProviders(
+        <TransactionsPendingActions {...defaultProps} hasUnallocatedSelected={true} />
+      );
+
+      const acceptButton = screen.getByRole("button", { name: /accept/i });
+      expect(acceptButton).toBeDisabled();
+    });
+
+    it("enables Accept button when hasUnallocatedSelected is false", () => {
+      renderWithProviders(
+        <TransactionsPendingActions {...defaultProps} hasUnallocatedSelected={false} />
+      );
+
+      const acceptButton = screen.getByRole("button", { name: /accept/i });
+      expect(acceptButton).not.toBeDisabled();
     });
   });
 
