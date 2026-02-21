@@ -265,7 +265,7 @@ function Incomes({ t }: WithTranslation) {
 
   const handleSingleDeleteRequest = (id: number) => {
     const income = incomeData.find((i) => i.id === id);
-    if (income?.transactionId !== null) {
+    if (!income || income.transactionId !== null) {
       setSingleDeleteWarningOpen(true);
       return;
     }
@@ -417,7 +417,7 @@ function Incomes({ t }: WithTranslation) {
             count: itemsWithTransaction.length,
             deletableCount: deletableIds.length,
           })}
-          buttonTextConfirm={t("delete")}
+          buttonTextConfirm={t("common:delete")}
           buttonTextCancel={t("common:close")}
           open={transactionWarningOpen}
           onConfirm={handleTransactionWarningConfirm}

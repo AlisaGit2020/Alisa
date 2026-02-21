@@ -265,7 +265,7 @@ function Expenses({ t }: WithTranslation) {
 
   const handleSingleDeleteRequest = (id: number) => {
     const expense = expenseData.find((e) => e.id === id);
-    if (expense?.transactionId !== null) {
+    if (!expense || expense.transactionId !== null) {
       setSingleDeleteWarningOpen(true);
       return;
     }
@@ -417,7 +417,7 @@ function Expenses({ t }: WithTranslation) {
             count: itemsWithTransaction.length,
             deletableCount: deletableIds.length,
           })}
-          buttonTextConfirm={t("delete")}
+          buttonTextConfirm={t("common:delete")}
           buttonTextCancel={t("common:close")}
           open={transactionWarningOpen}
           onConfirm={handleTransactionWarningConfirm}
