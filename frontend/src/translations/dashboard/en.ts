@@ -16,6 +16,7 @@ const dashboard = {
   year: "Year",
   noData: "No data available",
   netResult: "Net result",
+  airbnbVisits: "Airbnb visits",
   editDashboard: "Edit",
   doneEditing: "Done",
   widgets: "Widgets",

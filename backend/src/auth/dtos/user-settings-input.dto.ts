@@ -52,6 +52,10 @@ export class UserSettingsInputDto {
   loanHandlingFeeExpenseTypeId?: number;
 
   @IsOptional()
+  @IsNumber()
+  airbnbIncomeTypeId?: number;
+
+  @IsOptional()
   @ValidateNested()
   @Type(() => DashboardConfigDto)
   dashboardConfig?: DashboardConfigDto;

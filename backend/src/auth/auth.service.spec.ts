@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthService } from './auth.service';
 import { UserService } from '../people/user/user.service';
 import { UserDefaultsService } from '../defaults/user-defaults.service';
@@ -16,6 +17,7 @@ describe('AuthService', () => {
     Record<keyof UserDefaultsService, jest.Mock>
   >;
   let mockTierService: Partial<Record<keyof TierService, jest.Mock>>;
+  let mockEventEmitter: Partial<Record<keyof EventEmitter2, jest.Mock>>;
 
   beforeEach(async () => {
     mockJwtService = {
@@ -39,6 +41,10 @@ describe('AuthService', () => {
       findDefault: jest.fn().mockResolvedValue(null),
     };
 
+    mockEventEmitter = {
+      emit: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -46,6 +52,7 @@ describe('AuthService', () => {
         { provide: UserService, useValue: mockUserService },
         { provide: UserDefaultsService, useValue: mockUserDefaultsService },
         { provide: TierService, useValue: mockTierService },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -321,6 +328,64 @@ describe('AuthService', () => {
 
       expect(result).toBeNull();
       expect(mockUserService.save).not.toHaveBeenCalled();
+    });
+
+    it('updates user airbnbIncomeTypeId setting', async () => {
+      const user = createUser({ id: 1, airbnbIncomeTypeId: undefined });
+      user.ownerships = [];
+      mockUserService.findOne.mockResolvedValue(user);
+      mockUserService.save.mockResolvedValue({ ...user, airbnbIncomeTypeId: 5 });
+
+      const result = await service.updateUserSettings(1, {
+        airbnbIncomeTypeId: 5,
+      });
+
+      expect(result.airbnbIncomeTypeId).toBe(5);
+      expect(mockUserService.save).toHaveBeenCalledWith(
+        expect.objectContaining({ airbnbIncomeTypeId: 5 }),
+      );
+    });
+
+    it('emits event when airbnbIncomeTypeId changes and user has properties', async () => {
+      const user = createUser({ id: 1, airbnbIncomeTypeId: 3 });
+      user.ownerships = [
+        { propertyId: 10, userId: 1, share: 100 },
+        { propertyId: 20, userId: 1, share: 50 },
+      ] as Ownership[];
+      mockUserService.findOne.mockResolvedValue(user);
+      mockUserService.save.mockResolvedValue({ ...user, airbnbIncomeTypeId: 5 });
+
+      await service.updateUserSettings(1, { airbnbIncomeTypeId: 5 });
+
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'user.airbnbIncomeTypeChanged',
+        expect.objectContaining({
+          userId: 1,
+          propertyIds: [10, 20],
+        }),
+      );
+    });
+
+    it('does not emit event when airbnbIncomeTypeId is unchanged', async () => {
+      const user = createUser({ id: 1, airbnbIncomeTypeId: 5 });
+      user.ownerships = [{ propertyId: 10, userId: 1, share: 100 }] as Ownership[];
+      mockUserService.findOne.mockResolvedValue(user);
+      mockUserService.save.mockResolvedValue(user);
+
+      await service.updateUserSettings(1, { airbnbIncomeTypeId: 5 });
+
+      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+    });
+
+    it('does not emit event when user has no properties', async () => {
+      const user = createUser({ id: 1, airbnbIncomeTypeId: 3 });
+      user.ownerships = [];
+      mockUserService.findOne.mockResolvedValue(user);
+      mockUserService.save.mockResolvedValue({ ...user, airbnbIncomeTypeId: 5 });
+
+      await service.updateUserSettings(1, { airbnbIncomeTypeId: 5 });
+
+      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
     });
   });
 });

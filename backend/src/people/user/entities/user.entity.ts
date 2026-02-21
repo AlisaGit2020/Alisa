@@ -69,6 +69,9 @@ export class User {
   @Column({ nullable: true })
   loanHandlingFeeExpenseTypeId?: number;
 
+  @Column({ nullable: true })
+  airbnbIncomeTypeId?: number;
+
   @Column({ type: 'jsonb', nullable: true })
   dashboardConfig?: DashboardConfig;
 

@@ -11,6 +11,7 @@ export interface ChartDataPoint {
   expense: number;
   deposit: number;
   withdraw: number;
+  airbnbVisits: number;
   net: number;
   month?: number;
   year?: number;
@@ -68,6 +69,7 @@ function aggregateStatistics(
       expense: 0,
       deposit: 0,
       withdraw: 0,
+      airbnbVisits: 0,
       net: 0,
     }));
 
@@ -85,6 +87,8 @@ function aggregateStatistics(
             dataPoints[monthIndex].deposit += value;
           } else if (stat.key === "withdraw") {
             dataPoints[monthIndex].withdraw += value;
+          } else if (stat.key === "airbnb_visits") {
+            dataPoints[monthIndex].airbnbVisits += value;
           }
         }
       }
@@ -110,6 +114,7 @@ function aggregateStatistics(
         expense: 0,
         deposit: 0,
         withdraw: 0,
+        airbnbVisits: 0,
         net: 0,
       });
     }
@@ -127,6 +132,8 @@ function aggregateStatistics(
             existing.deposit += value;
           } else if (stat.key === "withdraw") {
             existing.withdraw += value;
+          } else if (stat.key === "airbnb_visits") {
+            existing.airbnbVisits += value;
           }
         }
       }

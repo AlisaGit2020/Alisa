@@ -30,5 +30,9 @@ export class UserInputDto {
   loanHandlingFeeExpenseTypeId?: number;
 
   @IsOptional()
+  @IsNumber()
+  airbnbIncomeTypeId?: number;
+
+  @IsOptional()
   dashboardConfig?: DashboardConfig;
 }

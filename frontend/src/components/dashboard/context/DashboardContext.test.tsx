@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { DashboardConfig, WidgetConfig, DEFAULT_DASHBOARD_CONFIG } from '../config/widget-registry';
+import { DashboardConfig, WidgetConfig, WidgetSize, DEFAULT_DASHBOARD_CONFIG, WIDGET_REGISTRY } from '../config/widget-registry';
 
 // Since Jest mock hoisting causes issues with hooks and context in ESM mode,
 // we test the data transformation logic separately from the React component
@@ -302,6 +302,128 @@ describe('DashboardContext Logic', () => {
       expect(widgetIds).toContain('netResult');
       expect(widgetIds).toContain('deposit');
       expect(widgetIds).toContain('withdraw');
+      expect(widgetIds).toContain('airbnbVisits');
+    });
+  });
+
+  describe('mergeDashboardConfig', () => {
+    // Replicate the merge function logic for testing
+    const mergeDashboardConfig = (savedConfig: DashboardConfig): DashboardConfig => {
+      const savedWidgetIds = new Set(savedConfig.widgets.map((w) => w.id));
+      const maxOrder = Math.max(...savedConfig.widgets.map((w) => w.order), -1);
+
+      const newWidgets: WidgetConfig[] = WIDGET_REGISTRY
+        .filter((widget) => !savedWidgetIds.has(widget.id))
+        .map((widget, index) => ({
+          id: widget.id,
+          visible: true,
+          order: maxOrder + 1 + index,
+          size: widget.defaultSize,
+        }));
+
+      return {
+        ...savedConfig,
+        widgets: [...savedConfig.widgets, ...newWidgets],
+      };
+    };
+
+    it('adds new widgets to saved config that are missing', () => {
+      // Simulate a saved config without the airbnbVisits widget
+      const savedConfig: DashboardConfig = {
+        widgets: [
+          { id: 'incomeExpense', visible: true, order: 0, size: '1/1' as WidgetSize },
+          { id: 'income', visible: true, order: 1, size: '1/3' as WidgetSize },
+          { id: 'expense', visible: true, order: 2, size: '1/3' as WidgetSize },
+          { id: 'netResult', visible: true, order: 3, size: '1/3' as WidgetSize },
+          { id: 'deposit', visible: false, order: 4, size: '1/2' as WidgetSize },
+          { id: 'withdraw', visible: true, order: 5, size: '1/2' as WidgetSize },
+        ],
+      };
+
+      const merged = mergeDashboardConfig(savedConfig);
+
+      // Should include all saved widgets plus airbnbVisits
+      expect(merged.widgets).toHaveLength(7);
+      expect(merged.widgets.map((w) => w.id)).toContain('airbnbVisits');
+    });
+
+    it('preserves user settings for existing widgets', () => {
+      const savedConfig: DashboardConfig = {
+        widgets: [
+          { id: 'incomeExpense', visible: false, order: 3, size: '1/2' as WidgetSize },
+          { id: 'income', visible: true, order: 0, size: '1/1' as WidgetSize },
+        ],
+      };
+
+      const merged = mergeDashboardConfig(savedConfig);
+
+      // Find the preserved widgets
+      const incomeExpense = merged.widgets.find((w) => w.id === 'incomeExpense');
+      const income = merged.widgets.find((w) => w.id === 'income');
+
+      // User settings should be preserved
+      expect(incomeExpense?.visible).toBe(false);
+      expect(incomeExpense?.order).toBe(3);
+      expect(incomeExpense?.size).toBe('1/2');
+      expect(income?.visible).toBe(true);
+      expect(income?.order).toBe(0);
+      expect(income?.size).toBe('1/1');
+    });
+
+    it('assigns order after existing widgets for new widgets', () => {
+      const savedConfig: DashboardConfig = {
+        widgets: [
+          { id: 'incomeExpense', visible: true, order: 0 },
+          { id: 'income', visible: true, order: 1 },
+          { id: 'expense', visible: true, order: 2 },
+        ],
+      };
+
+      const merged = mergeDashboardConfig(savedConfig);
+
+      // New widgets should have orders starting after max order (2)
+      const newWidgets = merged.widgets.filter(
+        (w) => !['incomeExpense', 'income', 'expense'].includes(w.id)
+      );
+
+      newWidgets.forEach((widget) => {
+        expect(widget.order).toBeGreaterThan(2);
+      });
+    });
+
+    it('new widgets are visible by default', () => {
+      const savedConfig: DashboardConfig = {
+        widgets: [
+          { id: 'incomeExpense', visible: true, order: 0 },
+        ],
+      };
+
+      const merged = mergeDashboardConfig(savedConfig);
+
+      // All new widgets should be visible
+      const newWidgets = merged.widgets.filter((w) => w.id !== 'incomeExpense');
+      newWidgets.forEach((widget) => {
+        expect(widget.visible).toBe(true);
+      });
+    });
+
+    it('returns unchanged config if all widgets already exist', () => {
+      const savedConfig = { ...DEFAULT_DASHBOARD_CONFIG };
+
+      const merged = mergeDashboardConfig(savedConfig);
+
+      expect(merged.widgets.length).toBe(DEFAULT_DASHBOARD_CONFIG.widgets.length);
+    });
+
+    it('handles empty saved config', () => {
+      const savedConfig: DashboardConfig = {
+        widgets: [],
+      };
+
+      const merged = mergeDashboardConfig(savedConfig);
+
+      // Should add all widgets from registry
+      expect(merged.widgets.length).toBe(WIDGET_REGISTRY.length);
     });
   });
 

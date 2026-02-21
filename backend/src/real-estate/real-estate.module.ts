@@ -12,6 +12,7 @@ import { AuthModule } from '@alisa-backend/auth/auth.module';
 import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
 import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
 import { PropertyStatisticsSchemaService } from '@alisa-backend/real-estate/property/property-statistics-schema.service';
+import { AirbnbStatisticsService } from '@alisa-backend/real-estate/property/airbnb-statistics.service';
 import { AccountingModule } from '@alisa-backend/accounting/accounting.module';
 import { TaxController } from './property/tax.controller';
 import { TaxService } from './property/tax.service';
@@ -24,7 +25,7 @@ import { Address } from './address/entities/address.entity';
 
 @Module({
   controllers: [InvestmentController, TaxController, PropertyController],
-  providers: [InvestmentService, PropertyService, PropertyStatisticsService, PropertyStatisticsSchemaService, TaxService],
+  providers: [InvestmentService, PropertyService, PropertyStatisticsService, PropertyStatisticsSchemaService, AirbnbStatisticsService, TaxService],
   imports: [
     TypeOrmModule.forFeature([
       Address,

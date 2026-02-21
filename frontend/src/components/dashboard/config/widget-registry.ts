@@ -5,6 +5,7 @@ import ExpenseChart from "../widgets/ExpenseChart";
 import NetResultChart from "../widgets/NetResultChart";
 import DepositChart from "../widgets/DepositChart";
 import WithdrawChart from "../widgets/WithdrawChart";
+import AirbnbVisitsChart from "../widgets/AirbnbVisitsChart";
 
 export type WidgetSize = "1/1" | "1/2" | "1/3" | "1/4";
 
@@ -69,6 +70,13 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     component: WithdrawChart,
     translationKey: "withdrawals",
     defaultSize: "1/2",
+    height: 300,
+  },
+  {
+    id: "airbnbVisits",
+    component: AirbnbVisitsChart,
+    translationKey: "airbnbVisits",
+    defaultSize: "1/3",
     height: 300,
   },
 ];
