@@ -10,7 +10,7 @@ import AlisaSelect from "../../alisa/data/AlisaSelect";
 import { incomeContext, incomeTypeContext } from "@alisa-lib/alisa-contexts";
 import DataService from "@alisa-lib/data-service";
 import AlisaFormHandler from "../../alisa/form/AlisaFormHandler";
-import { AlisaButton, AlisaDialog, AlisaConfirmDialog, useToast } from "../../alisa";
+import { AlisaAlert, AlisaButton, AlisaDialog, AlisaConfirmDialog, useToast } from "../../alisa";
 import { getNumber } from "@alisa-lib/functions";
 import { getFieldErrorProps } from "@alisa-lib/form-utils";
 
@@ -84,14 +84,21 @@ function IncomeForm({
     }
   };
 
+  const isLinkedToTransaction = data.transactionId != null;
+
   const renderFormContent = (fieldErrors: Partial<Record<keyof IncomeInput, string>>) => (
     <Stack spacing={2} marginBottom={2}>
+      {isLinkedToTransaction && (
+        <AlisaAlert severity="info" content={t("editNotAllowed")} />
+      )}
+
       <AlisaDatePicker
         label={t("accountingDate")}
         value={data.accountingDate || new Date()}
         onChange={(value) =>
           handleChange("accountingDate", value?.toDate() || new Date())
         }
+        disabled={isLinkedToTransaction}
         {...getFieldErrorProps<IncomeInput>(fieldErrors, "accountingDate")}
       />
 
@@ -106,6 +113,7 @@ function IncomeForm({
         fieldName="incomeTypeId"
         value={data.incomeTypeId}
         onHandleChange={handleChange}
+        disabled={isLinkedToTransaction}
         {...getFieldErrorProps<IncomeInput>(fieldErrors, "incomeTypeId")}
       />
 
@@ -114,6 +122,7 @@ function IncomeForm({
         value={data.description}
         autoComplete="off"
         onChange={(e) => handleChange("description", e.target.value)}
+        disabled={isLinkedToTransaction}
         {...getFieldErrorProps<IncomeInput>(fieldErrors, "description")}
       />
 
@@ -122,6 +131,7 @@ function IncomeForm({
           label={t("quantity")}
           value={data.quantity}
           onChange={(e) => handleChange("quantity", getNumber(e.target.value, 0))}
+          disabled={isLinkedToTransaction}
           {...getFieldErrorProps<IncomeInput>(fieldErrors, "quantity")}
         />
         <AlisaNumberField
@@ -129,6 +139,7 @@ function IncomeForm({
           value={data.amount}
           onChange={(e) => handleChange("amount", getNumber(e.target.value, 2))}
           adornment="€"
+          disabled={isLinkedToTransaction}
           {...getFieldErrorProps<IncomeInput>(fieldErrors, "amount")}
         />
         <AlisaNumberField
@@ -136,6 +147,7 @@ function IncomeForm({
           value={data.totalAmount}
           onChange={(e) => handleChange("totalAmount", getNumber(e.target.value, 2))}
           adornment="€"
+          disabled={isLinkedToTransaction}
           {...getFieldErrorProps<IncomeInput>(fieldErrors, "totalAmount")}
         />
       </Stack>
@@ -148,6 +160,7 @@ function IncomeForm({
             color="error"
             startIcon={<DeleteIcon />}
             onClick={() => setDeleteDialogOpen(true)}
+            disabled={isLinkedToTransaction}
           />
         </Box>
       )}
@@ -175,6 +188,7 @@ function IncomeForm({
             quantity: { min: 1 },
             totalAmount: { min: 0.01 },
           }}
+          submitDisabled={isLinkedToTransaction}
           translation={{
             cancelButton: t("cancel"),
             submitButton: t("save"),

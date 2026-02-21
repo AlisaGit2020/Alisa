@@ -96,6 +96,8 @@ Raderingsregler:
   singleItemHasTransaction:
     "Detta objekt har en transaktionskoppling och kan inte raderas direkt. För att radera detta objekt, radera den associerade transaktionen istället.",
   noItemsToDelete: "Inga objekt att radera",
+  editNotAllowed:
+    "Detta objekt är kopplat till en banktransaktion och kan inte redigeras. För att ändra detta objekt, redigera eller radera den associerade transaktionen istället.",
 
   // Format helpers
   "format.number": "{{val, number}}",

@@ -96,6 +96,8 @@ Deletion rules:
   singleItemHasTransaction:
     "This item has a transaction relation and cannot be deleted directly. To delete this item, please delete the associated transaction instead.",
   noItemsToDelete: "No items available to delete",
+  editNotAllowed:
+    "This item is linked to a bank transaction and cannot be edited. To modify this item, edit or delete the associated transaction instead.",
 
   // Format helpers
   "format.number": "{{val, number}}",
