@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Alert, Stack } from "@mui/material";
+import { Box, Typography, Paper, Alert, Stack, Tooltip } from "@mui/material";
 import AlisaButton from "../../../alisa/form/AlisaButton";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -105,46 +105,41 @@ export default function ImportStep({
         </Typography>
         <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
           {SUPPORTED_BANKS.map((bank) => (
-            <Box
-              key={bank.id}
-              onClick={() => !isUploading && onBankSelect(bank.id)}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                p: 1.5,
-                borderRadius: 1,
-                bgcolor: selectedBank === bank.id ? "primary.light" : "action.hover",
-                border: 2,
-                borderColor: selectedBank === bank.id ? "primary.main" : "transparent",
-                cursor: isUploading ? "not-allowed" : "pointer",
-                transition: "all 0.2s ease",
-                position: "relative",
-                "&:hover": {
-                  bgcolor: selectedBank === bank.id ? "primary.light" : "action.selected",
-                },
-              }}
-            >
-              <img src={bank.logo} alt={bank.name} width={48} height={48} />
-              <Typography
-                variant="body1"
-                sx={{ color: selectedBank === bank.id ? "primary.contrastText" : "text.primary" }}
+            <Tooltip key={bank.id} title={bank.name} arrow>
+              <Box
+                onClick={() => !isUploading && onBankSelect(bank.id)}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  p: 1.5,
+                  borderRadius: 1,
+                  bgcolor: selectedBank === bank.id ? "primary.light" : "action.hover",
+                  border: 2,
+                  borderColor: selectedBank === bank.id ? "primary.main" : "transparent",
+                  cursor: isUploading ? "not-allowed" : "pointer",
+                  transition: "all 0.2s ease",
+                  position: "relative",
+                  "&:hover": {
+                    bgcolor: selectedBank === bank.id ? "primary.light" : "action.selected",
+                  },
+                }}
               >
-                {bank.name}
-              </Typography>
-              {selectedBank === bank.id && (
-                <CheckCircleIcon
-                  sx={{
-                    position: "absolute",
-                    top: -8,
-                    right: -8,
-                    color: "primary.main",
-                    bgcolor: "background.paper",
-                    borderRadius: "50%",
-                  }}
-                />
-              )}
-            </Box>
+                <img src={bank.logo} alt={bank.name} style={{ height: 48 }} />
+                {selectedBank === bank.id && (
+                  <CheckCircleIcon
+                    sx={{
+                      position: "absolute",
+                      top: -8,
+                      right: -8,
+                      color: "primary.main",
+                      bgcolor: "background.paper",
+                      borderRadius: "50%",
+                    }}
+                  />
+                )}
+              </Box>
+            </Tooltip>
           ))}
         </Stack>
         {!isBankSelected && (

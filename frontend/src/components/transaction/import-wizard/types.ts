@@ -12,12 +12,12 @@ export const SUPPORTED_BANKS: SupportedBank[] = [
   {
     id: "op",
     name: "Osuuspankki (OP)",
-    logo: "/assets/banks/op-logo.svg",
+    logo: "/assets/banks/op-logo.png",
   },
   {
     id: "s-pankki",
     name: "S-Pankki",
-    logo: "/assets/banks/s-pankki-logo.svg",
+    logo: "/assets/banks/s-pankki-logo.png",
   },
 ];
 
