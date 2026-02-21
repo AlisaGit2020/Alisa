@@ -21,6 +21,7 @@ import { PropertyRequiredSnackbar } from "../../alisa/PropertyRequiredSnackbar";
 import BulkDeleteActions from "../../alisa/BulkDeleteActions";
 import ApiClient from "@alisa-lib/api-client";
 import { useToast } from "../../alisa";
+import AlisaConfirmDialog from "../../alisa/dialog/AlisaConfirmDialog";
 
 const getDefaultFilter = (): AccountingFilterData => ({
   typeIds: [],
@@ -37,6 +38,7 @@ interface ExpenseRow {
   quantity: number;
   amount: number;
   totalAmount: number;
+  transactionId: number | null;
 }
 
 function Expenses({ t }: WithTranslation) {
@@ -52,6 +54,14 @@ function Expenses({ t }: WithTranslation) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [expenseData, setExpenseData] = useState<ExpenseRow[]>([]);
+  const [transactionWarningOpen, setTransactionWarningOpen] = useState(false);
+  const [itemsWithTransaction, setItemsWithTransaction] = useState<ExpenseRow[]>([]);
+  const [deletableIds, setDeletableIds] = useState<number[]>([]);
+  const [singleDeleteWarningOpen, setSingleDeleteWarningOpen] = useState(false);
+  const [singleDeleteConfirmOpen, setSingleDeleteConfirmOpen] = useState(false);
+  const [singleDeleteId, setSingleDeleteId] = useState<number | null>(null);
+  const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
   const { showToast } = useToast();
 
   const { requireProperty, popoverOpen, popoverAnchorEl, closePopover, openPropertySelector } =
@@ -181,10 +191,39 @@ function Expenses({ t }: WithTranslation) {
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0 || isDeleting) return;
 
+    // Pre-check: identify items with transaction relations
+    const selectedExpenses = expenseData.filter((e) => selectedIds.includes(e.id));
+    const withTransaction = selectedExpenses.filter((e) => e.transactionId !== null);
+    const withoutTransaction = selectedExpenses.filter((e) => e.transactionId === null);
+    const deletableIdsToProcess = withoutTransaction.map((e) => e.id);
+
+    // If some items have transactions, show warning dialog (which also acts as confirmation)
+    if (withTransaction.length > 0) {
+      setItemsWithTransaction(withTransaction);
+      setDeletableIds(deletableIdsToProcess);
+      setTransactionWarningOpen(true);
+      // Deselect items with transactions
+      setSelectedIds(deletableIdsToProcess);
+      return;
+    }
+
+    // All items are deletable - show confirmation dialog
+    setBulkDeleteConfirmOpen(true);
+  };
+
+  const performBulkDelete = async (idsToDelete: number[]) => {
+    if (idsToDelete.length === 0) {
+      showToast({
+        message: t("accounting:noItemsToDelete"),
+        severity: "info",
+      });
+      return;
+    }
+
     setIsDeleting(true);
     try {
       const result = await ApiClient.postSaveTask("accounting/expense/delete", {
-        ids: selectedIds,
+        ids: idsToDelete,
       });
       if (result.allSuccess) {
         showToast({
@@ -213,13 +252,72 @@ function Expenses({ t }: WithTranslation) {
     }
   };
 
+  const handleTransactionWarningConfirm = async () => {
+    setTransactionWarningOpen(false);
+    await performBulkDelete(deletableIds);
+  };
+
+  const handleTransactionWarningClose = () => {
+    setTransactionWarningOpen(false);
+    setItemsWithTransaction([]);
+    setDeletableIds([]);
+  };
+
+  const handleSingleDeleteRequest = (id: number) => {
+    const expense = expenseData.find((e) => e.id === id);
+    if (expense?.transactionId !== null) {
+      setSingleDeleteWarningOpen(true);
+      return;
+    }
+    // Show confirmation dialog
+    setSingleDeleteId(id);
+    setSingleDeleteConfirmOpen(true);
+  };
+
+  const performSingleDelete = async (id: number) => {
+    try {
+      await dataService.delete(id);
+      showToast({ message: t("common:toast.deleteSuccess"), severity: "success" });
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+      showToast({ message: t("common:toast.deleteError"), severity: "error" });
+    }
+  };
+
+  const handleSingleDeleteWarningClose = () => {
+    setSingleDeleteWarningOpen(false);
+  };
+
+  const handleSingleDeleteConfirm = async () => {
+    if (singleDeleteId !== null) {
+      await performSingleDelete(singleDeleteId);
+    }
+    setSingleDeleteConfirmOpen(false);
+    setSingleDeleteId(null);
+  };
+
+  const handleSingleDeleteConfirmClose = () => {
+    setSingleDeleteConfirmOpen(false);
+    setSingleDeleteId(null);
+  };
+
+  const handleBulkDeleteConfirm = async () => {
+    setBulkDeleteConfirmOpen(false);
+    await performBulkDelete(selectedIds);
+  };
+
+  const handleBulkDeleteConfirmClose = () => {
+    setBulkDeleteConfirmOpen(false);
+  };
+
   // Create a simple data service wrapper for the transformed data
   // Include refreshTrigger in dependencies to force refresh after form submit
   const rowDataService = useMemo(() => {
     const service = {
       search: async () => {
         const expenses = await dataService.search();
-        return expenses.map((expense) => ({
+        const rows = expenses.map((expense) => ({
           id: expense.id,
           accountingDate: expense.accountingDate || null,
           expenseTypeName: expense.expenseType?.name || "",
@@ -227,7 +325,10 @@ function Expenses({ t }: WithTranslation) {
           quantity: expense.quantity,
           amount: expense.amount,
           totalAmount: expense.totalAmount,
+          transactionId: expense.transactionId,
         }));
+        setExpenseData(rows);
+        return rows;
       },
       delete: async (id: number) => {
         await dataService.delete(id);
@@ -284,7 +385,7 @@ function Expenses({ t }: WithTranslation) {
             onNewRow={handleAdd}
             onOpen={handleOpenDetails}
             onEdit={handleOpenDetails}
-            onDelete={() => setRefreshTrigger((prev) => prev + 1)}
+            onDeleteRequest={handleSingleDeleteRequest}
             refreshTrigger={refreshTrigger}
           />
         </Paper>
@@ -307,6 +408,71 @@ function Expenses({ t }: WithTranslation) {
         onClose={closePopover}
         onSelectProperty={openPropertySelector}
       />
+
+      {transactionWarningOpen && deletableIds.length > 0 && (
+        <AlisaConfirmDialog
+          title={t("accounting:cannotDeleteWithTransaction")}
+          contentText={t("accounting:someItemsHaveTransactions", {
+            count: itemsWithTransaction.length,
+            deletableCount: deletableIds.length,
+          })}
+          buttonTextConfirm={t("delete")}
+          buttonTextCancel={t("common:close")}
+          open={transactionWarningOpen}
+          onConfirm={handleTransactionWarningConfirm}
+          onClose={handleTransactionWarningClose}
+        />
+      )}
+
+      {transactionWarningOpen && deletableIds.length === 0 && (
+        <AlisaConfirmDialog
+          title={t("accounting:cannotDeleteWithTransaction")}
+          contentText={t("accounting:allItemsHaveTransactions", {
+            count: itemsWithTransaction.length,
+          })}
+          buttonTextConfirm={t("common:ok")}
+          buttonTextCancel={t("common:close")}
+          open={transactionWarningOpen}
+          onConfirm={handleTransactionWarningClose}
+          onClose={handleTransactionWarningClose}
+        />
+      )}
+
+      {singleDeleteWarningOpen && (
+        <AlisaConfirmDialog
+          title={t("accounting:cannotDeleteWithTransaction")}
+          contentText={t("accounting:singleItemHasTransaction")}
+          buttonTextConfirm={t("common:ok")}
+          buttonTextCancel={t("common:close")}
+          open={singleDeleteWarningOpen}
+          onConfirm={handleSingleDeleteWarningClose}
+          onClose={handleSingleDeleteWarningClose}
+        />
+      )}
+
+      {singleDeleteConfirmOpen && (
+        <AlisaConfirmDialog
+          title={t("common:confirm")}
+          contentText={t("common:confirmDelete")}
+          buttonTextConfirm={t("common:delete")}
+          buttonTextCancel={t("common:cancel")}
+          open={singleDeleteConfirmOpen}
+          onConfirm={handleSingleDeleteConfirm}
+          onClose={handleSingleDeleteConfirmClose}
+        />
+      )}
+
+      {bulkDeleteConfirmOpen && (
+        <AlisaConfirmDialog
+          title={t("common:confirm")}
+          contentText={t("common:confirmDeleteSelected", { count: selectedIds.length })}
+          buttonTextConfirm={t("common:delete")}
+          buttonTextCancel={t("common:cancel")}
+          open={bulkDeleteConfirmOpen}
+          onConfirm={handleBulkDeleteConfirm}
+          onClose={handleBulkDeleteConfirmClose}
+        />
+      )}
     </ListPageTemplate>
   );
 }

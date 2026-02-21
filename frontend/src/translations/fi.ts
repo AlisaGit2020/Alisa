@@ -57,6 +57,7 @@ const fi = {
     month: "Kuukausi",
     name: "Nimi",
     noRowsFound: "Rivejä ei löytynyt",
+    ok: "OK",
     quantity: "Määrä",
     rows: "Rivit",
     rowsFailed: "Epäonnistui",

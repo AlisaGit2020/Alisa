@@ -73,6 +73,16 @@ const accounting = {
   delete: "Delete",
   add: "Add",
 
+  // Bulk delete with transaction warnings
+  cannotDeleteWithTransaction: "Cannot delete item",
+  someItemsHaveTransactions:
+    "{{count}} item(s) have a transaction relation and cannot be deleted directly. Delete the transaction instead. Do you want to delete the {{deletableCount}} remaining item(s)?",
+  allItemsHaveTransactions:
+    "All {{count}} selected item(s) have a transaction relation. To delete these, please delete the associated transaction instead.",
+  singleItemHasTransaction:
+    "This item has a transaction relation and cannot be deleted directly. To delete this item, please delete the associated transaction instead.",
+  noItemsToDelete: "No items available to delete",
+
   // Format helpers
   "format.number": "{{val, number}}",
   "format.currency.euro": "{{val, number(minimumFractionDigits: 2; maximumFractionDigits: 2)}} €",

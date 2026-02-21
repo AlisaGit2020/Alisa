@@ -73,6 +73,16 @@ const accounting = {
   delete: "Poista",
   add: "Lisää",
 
+  // Bulk delete with transaction warnings
+  cannotDeleteWithTransaction: "Kohdetta ei voi poistaa",
+  someItemsHaveTransactions:
+    "{{count}} kohdetta on liitetty tapahtumaan eikä niitä voi poistaa suoraan. Poista tapahtuma ensin. Haluatko poistaa loput {{deletableCount}} kohdetta?",
+  allItemsHaveTransactions:
+    "Kaikki {{count}} valittua kohdetta on liitetty tapahtumaan. Poista tapahtuma ensin.",
+  singleItemHasTransaction:
+    "Tämä kohde on liitetty tapahtumaan eikä sitä voi poistaa suoraan. Poista tapahtuma ensin.",
+  noItemsToDelete: "Ei poistettavia kohteita",
+
   // Format helpers
   "format.number": "{{val, number}}",
   "format.currency.euro": "{{val, number(minimumFractionDigits: 2; maximumFractionDigits: 2)}} €",

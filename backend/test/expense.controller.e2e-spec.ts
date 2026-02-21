@@ -18,7 +18,7 @@ import {
   getTransactionExpense1,
   getTransactionExpense2,
 } from './data/mocks/transaction.mock';
-import { TransactionStatus } from '@alisa-backend/common/types';
+import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
 import * as http from 'http';
 import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-input.dto';
 import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
@@ -369,14 +369,22 @@ describe('ExpenseController (e2e)', () => {
   });
 
   describe('DELETE /accounting/expense/:id', () => {
-    it('deletes expense when user owns it', async () => {
-      // Create expense to delete
-      const transaction = await addTransaction(
-        app,
-        mainUser.jwtUser,
-        getTransactionExpense1(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
-      );
-      const expenseIdToDelete = transaction.expenses[0].id;
+    it('deletes standalone expense when user owns it', async () => {
+      // Create standalone expense (without transaction)
+      const createResponse = await request(server)
+        .post(baseUrl)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          expenseTypeId: 1,
+          propertyId: mainUser.properties[0].id,
+          description: 'Standalone expense to delete',
+          amount: 25,
+          quantity: 1,
+          totalAmount: 25,
+        })
+        .expect(201);
+
+      const expenseIdToDelete = createResponse.body.id;
 
       await request(server)
         .delete(`${baseUrl}/${expenseIdToDelete}`)
@@ -397,22 +405,87 @@ describe('ExpenseController (e2e)', () => {
         .set('Authorization', getBearerToken(mainUserToken))
         .expect(404);
     });
+
+    it('returns 400 when expense has a transaction relation', async () => {
+      // Create expense with transaction via HTTP
+      const createResponse = await request(server)
+        .post('/accounting/transaction')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          sender: 'Expense Delete Prevention Test',
+          receiver: 'Test Receiver',
+          description: 'Transaction with expense to test delete prevention',
+          transactionDate: new Date('2024-03-01'),
+          accountingDate: new Date('2024-03-01'),
+          amount: -100,
+          propertyId: mainUser.properties[0].id,
+          status: TransactionStatus.ACCEPTED,
+          type: TransactionType.EXPENSE,
+          externalId: `delete-prevention-${Date.now()}`,
+          expenses: [
+            {
+              expenseTypeId: 1,
+              description: 'Expense with transaction',
+              amount: 100,
+              quantity: 1,
+              totalAmount: 100,
+            },
+          ],
+        })
+        .expect(201);
+
+      // Get the expense ID from the transaction
+      const searchResponse = await request(server)
+        .post('/accounting/transaction/search')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          where: { id: createResponse.body.id },
+          relations: { expenses: true },
+        })
+        .expect(200);
+
+      const expenseId = searchResponse.body[0].expenses[0].id;
+
+      // Try to delete the expense - should be rejected
+      const deleteResponse = await request(server)
+        .delete(`${baseUrl}/${expenseId}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(400);
+
+      expect(deleteResponse.body.message).toContain('transaction');
+    });
   });
 
   describe('POST /accounting/expense/delete (bulk delete)', () => {
-    it('deletes multiple expenses when user owns them', async () => {
-      // Create expenses to delete
-      const transaction1 = await addTransaction(
-        app,
-        mainUser.jwtUser,
-        getTransactionExpense1(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
-      );
-      const transaction2 = await addTransaction(
-        app,
-        mainUser.jwtUser,
-        getTransactionExpense2(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
-      );
-      const ids = [transaction1.expenses[0].id, transaction2.expenses[0].id];
+    it('deletes multiple standalone expenses when user owns them', async () => {
+      // Create standalone expenses (without transactions)
+      const expense1Response = await request(server)
+        .post(baseUrl)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          expenseTypeId: 1,
+          propertyId: mainUser.properties[0].id,
+          description: 'Standalone expense 1 for bulk delete',
+          amount: 30,
+          quantity: 1,
+          totalAmount: 30,
+        })
+        .expect(201);
+
+      const expense2Response = await request(server)
+        .post(baseUrl)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          expenseTypeId: 1,
+          propertyId: mainUser.properties[0].id,
+          description: 'Standalone expense 2 for bulk delete',
+          amount: 40,
+          quantity: 1,
+          totalAmount: 40,
+        })
+        .expect(201);
+
+      const ids = [expense1Response.body.id, expense2Response.body.id];
 
       const response = await request(server)
         .post(`${baseUrl}/delete`)
@@ -452,21 +525,37 @@ describe('ExpenseController (e2e)', () => {
     });
 
     it('returns partial success when some expenses belong to other user', async () => {
-      // Create expense for main user
-      const mainUserTransaction = await addTransaction(
-        app,
-        mainUser.jwtUser,
-        getTransactionExpense1(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
-      );
-      // Get expense from user2 (created in User isolation tests)
-      const user2 = testUsers.user2WithProperties;
-      const user2Transaction = await addTransaction(
-        app,
-        user2.jwtUser,
-        getTransactionExpense1(user2.properties[0].id, TransactionStatus.ACCEPTED),
-      );
+      // Create standalone expense for main user
+      const mainUserExpenseResponse = await request(server)
+        .post(baseUrl)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          expenseTypeId: 1,
+          propertyId: mainUser.properties[0].id,
+          description: 'Main user standalone expense for partial success test',
+          amount: 60,
+          quantity: 1,
+          totalAmount: 60,
+        })
+        .expect(201);
 
-      const ids = [mainUserTransaction.expenses[0].id, user2Transaction.expenses[0].id];
+      // Create standalone expense for user2
+      const user2 = testUsers.user2WithProperties;
+      const user2Token = await getUserAccessToken2(authService, user2.jwtUser);
+      const user2ExpenseResponse = await request(server)
+        .post(baseUrl)
+        .set('Authorization', getBearerToken(user2Token))
+        .send({
+          expenseTypeId: 1,
+          propertyId: user2.properties[0].id,
+          description: 'User2 standalone expense for partial success test',
+          amount: 70,
+          quantity: 1,
+          totalAmount: 70,
+        })
+        .expect(201);
+
+      const ids = [mainUserExpenseResponse.body.id, user2ExpenseResponse.body.id];
 
       const response = await request(server)
         .post(`${baseUrl}/delete`)
@@ -477,6 +566,93 @@ describe('ExpenseController (e2e)', () => {
       expect(response.body.allSuccess).toBe(false);
       expect(response.body.rows.success).toBe(1);
       expect(response.body.rows.failed).toBe(1);
+    });
+
+    it('returns 400 for expenses with transaction relation and deletes only standalone expenses', async () => {
+      // Create a standalone expense (without transaction)
+      const standaloneExpenseResponse = await request(server)
+        .post(baseUrl)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          expenseTypeId: 1,
+          propertyId: mainUser.properties[0].id,
+          description: 'Standalone expense for bulk delete test',
+          amount: 50,
+          quantity: 1,
+          totalAmount: 50,
+        })
+        .expect(201);
+
+      const standaloneExpenseId = standaloneExpenseResponse.body.id;
+
+      // Create an expense with transaction
+      const transactionResponse = await request(server)
+        .post('/accounting/transaction')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          sender: 'Bulk Delete Prevention Test',
+          receiver: 'Test Receiver',
+          description: 'Transaction with expense for bulk delete prevention',
+          transactionDate: new Date('2024-03-02'),
+          accountingDate: new Date('2024-03-02'),
+          amount: -75,
+          propertyId: mainUser.properties[0].id,
+          status: TransactionStatus.ACCEPTED,
+          type: TransactionType.EXPENSE,
+          externalId: `bulk-delete-prevention-${Date.now()}`,
+          expenses: [
+            {
+              expenseTypeId: 1,
+              description: 'Expense with transaction for bulk delete',
+              amount: 75,
+              quantity: 1,
+              totalAmount: 75,
+            },
+          ],
+        })
+        .expect(201);
+
+      // Get the expense ID from the transaction
+      const searchResponse = await request(server)
+        .post('/accounting/transaction/search')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          where: { id: transactionResponse.body.id },
+          relations: { expenses: true },
+        })
+        .expect(200);
+
+      const expenseWithTransactionId = searchResponse.body[0].expenses[0].id;
+
+      // Try to bulk delete both - should succeed for standalone, fail for expense with transaction
+      const deleteResponse = await request(server)
+        .post(`${baseUrl}/delete`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({ ids: [standaloneExpenseId, expenseWithTransactionId] })
+        .expect(201);
+
+      expect(deleteResponse.body.allSuccess).toBe(false);
+      expect(deleteResponse.body.rows.success).toBe(1);
+      expect(deleteResponse.body.rows.failed).toBe(1);
+
+      // The failed one should have 400 status code
+      const failedResult = deleteResponse.body.results.find(
+        (r: { id: number; statusCode: number }) => r.id === expenseWithTransactionId,
+      );
+      expect(failedResult.statusCode).toBe(400);
+      expect(failedResult.message).toContain('transaction');
+
+      // Verify standalone expense was deleted
+      await request(server)
+        .get(`${baseUrl}/${standaloneExpenseId}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(404);
+
+      // Verify expense with transaction still exists
+      await request(server)
+        .get(`${baseUrl}/${expenseWithTransactionId}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(200);
     });
   });
 

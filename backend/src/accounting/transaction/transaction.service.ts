@@ -42,6 +42,12 @@ export class TransactionService {
     @InjectRepository(Transaction)
     private repository: Repository<Transaction>,
 
+    @InjectRepository(Expense)
+    private expenseRepository: Repository<Expense>,
+
+    @InjectRepository(Income)
+    private incomeRepository: Repository<Income>,
+
     private authService: AuthService,
     private eventEmitter: EventEmitter2,
   ) {}
@@ -175,6 +181,11 @@ export class TransactionService {
 
   async delete(user: JWTUser, id: number): Promise<void> {
     const transaction = await this.getEntityOrThrow(user, id);
+
+    // Cascade delete related expenses and incomes
+    await this.expenseRepository.delete({ transactionId: id });
+    await this.incomeRepository.delete({ transactionId: id });
+
     await this.repository.delete(id);
     this.eventEmitter.emit(
       Events.Transaction.Deleted,
@@ -200,6 +211,10 @@ export class TransactionService {
             message: 'Unauthorized',
           } as DataSaveResultRowDto;
         }
+
+        // Cascade delete related expenses and incomes
+        await this.expenseRepository.delete({ transactionId: transaction.id });
+        await this.incomeRepository.delete({ transactionId: transaction.id });
 
         await this.repository.delete(transaction.id);
         this.eventEmitter.emit(

@@ -184,18 +184,19 @@ export class ExpenseService {
 
   async delete(user: JWTUser, id: number): Promise<void> {
     const expense = await this.getEntityOrThrow(user, id);
-    const transactionId = expense.transactionId;
+
+    // Prevent deletion if expense is linked to a transaction
+    if (expense.transactionId) {
+      throw new BadRequestException(
+        'Cannot delete expense with a transaction relation. Delete the transaction instead.',
+      );
+    }
 
     // Delete associated depreciation asset
     await this.depreciationService.deleteByExpenseId(id);
 
     // Delete the expense
     await this.repository.delete(id);
-
-    // Delete associated transaction if it exists
-    if (transactionId) {
-      await this.transactionRepository.delete(transactionId);
-    }
   }
 
   async deleteMany(user: JWTUser, ids: number[]): Promise<DataSaveResultDto> {
@@ -213,16 +214,21 @@ export class ExpenseService {
           return createUnauthorizedResult(expense.id);
         }
 
+        // Prevent deletion if expense is linked to a transaction
+        if (expense.transactionId) {
+          return {
+            id: expense.id,
+            statusCode: 400,
+            message:
+              'Cannot delete expense with a transaction relation. Delete the transaction instead.',
+          };
+        }
+
         // Delete associated depreciation asset
         await this.depreciationService.deleteByExpenseId(expense.id);
 
         // Delete the expense
         await this.repository.delete(expense.id);
-
-        // Delete associated transaction if it exists
-        if (expense.transactionId) {
-          await this.transactionRepository.delete(expense.transactionId);
-        }
 
         return createSuccessResult(expense.id);
       } catch (e) {

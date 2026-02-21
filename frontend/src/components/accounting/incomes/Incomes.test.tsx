@@ -588,6 +588,158 @@ describe('Incomes Component Logic', () => {
     });
   });
 
+  describe('Bulk delete pre-validation', () => {
+    interface IncomeRowWithTransaction {
+      id: number;
+      accountingDate: Date | null;
+      incomeTypeName: string;
+      description: string;
+      quantity: number;
+      amount: number;
+      totalAmount: number;
+      transactionId: number | null;
+    }
+
+    const incomeWithTransaction1: IncomeRowWithTransaction = {
+      id: 1,
+      accountingDate: new Date('2024-03-15'),
+      incomeTypeName: 'Rent',
+      description: 'March rent',
+      quantity: 1,
+      amount: 1200,
+      totalAmount: 1200,
+      transactionId: 100,
+    };
+
+    const incomeWithTransaction2: IncomeRowWithTransaction = {
+      id: 2,
+      accountingDate: new Date('2024-03-16'),
+      incomeTypeName: 'Rent',
+      description: 'Late fee',
+      quantity: 1,
+      amount: 50,
+      totalAmount: 50,
+      transactionId: 101,
+    };
+
+    const incomeWithoutTransaction1: IncomeRowWithTransaction = {
+      id: 3,
+      accountingDate: new Date('2024-03-17'),
+      incomeTypeName: 'Deposit',
+      description: 'Security deposit',
+      quantity: 1,
+      amount: 500,
+      totalAmount: 500,
+      transactionId: null,
+    };
+
+    const incomeWithoutTransaction2: IncomeRowWithTransaction = {
+      id: 4,
+      accountingDate: new Date('2024-03-18'),
+      incomeTypeName: 'Other',
+      description: 'Parking fee',
+      quantity: 1,
+      amount: 100,
+      totalAmount: 100,
+      transactionId: null,
+    };
+
+    it('shows warning and filters out items with transactions when some have transactions', () => {
+      const incomeData = [
+        incomeWithTransaction1,
+        incomeWithTransaction2,
+        incomeWithoutTransaction1,
+        incomeWithoutTransaction2,
+      ];
+      let selectedIds = [1, 2, 3, 4];
+      let transactionWarningOpen = false;
+      let itemsWithTransaction: IncomeRowWithTransaction[] = [];
+      let deletableIds: number[] = [];
+      let bulkDeleteCalled = false;
+
+      const handleBulkDelete = () => {
+        const selectedIncomes = incomeData.filter((i) => selectedIds.includes(i.id));
+        const withTransaction = selectedIncomes.filter((i) => i.transactionId !== null);
+        const withoutTransaction = selectedIncomes.filter((i) => i.transactionId === null);
+        const deletableIdsToProcess = withoutTransaction.map((i) => i.id);
+
+        if (withTransaction.length > 0) {
+          itemsWithTransaction = withTransaction;
+          deletableIds = deletableIdsToProcess;
+          transactionWarningOpen = true;
+          selectedIds = deletableIdsToProcess;
+          return;
+        }
+
+        bulkDeleteCalled = true;
+      };
+
+      handleBulkDelete();
+
+      expect(transactionWarningOpen).toBe(true);
+      expect(itemsWithTransaction).toHaveLength(2);
+      expect(itemsWithTransaction.map((i) => i.id)).toEqual([1, 2]);
+      expect(deletableIds).toEqual([3, 4]);
+      expect(selectedIds).toEqual([3, 4]);
+      expect(bulkDeleteCalled).toBe(false);
+    });
+
+    it('shows confirmation dialog when all items are deletable', () => {
+      const incomeData = [incomeWithoutTransaction1, incomeWithoutTransaction2];
+      let selectedIds = [3, 4];
+      let transactionWarningOpen = false;
+      let bulkDeleteConfirmOpen = false;
+
+      const handleBulkDelete = () => {
+        const selectedIncomes = incomeData.filter((i) => selectedIds.includes(i.id));
+        const withTransaction = selectedIncomes.filter((i) => i.transactionId !== null);
+        const withoutTransaction = selectedIncomes.filter((i) => i.transactionId === null);
+        const deletableIdsToProcess = withoutTransaction.map((i) => i.id);
+
+        if (withTransaction.length > 0) {
+          transactionWarningOpen = true;
+          selectedIds = deletableIdsToProcess;
+          return;
+        }
+
+        // All items are deletable - show confirmation dialog
+        bulkDeleteConfirmOpen = true;
+      };
+
+      handleBulkDelete();
+
+      expect(transactionWarningOpen).toBe(false);
+      expect(bulkDeleteConfirmOpen).toBe(true);
+    });
+
+    it('shows warning with no deletable items when all have transactions', () => {
+      const incomeData = [incomeWithTransaction1, incomeWithTransaction2];
+      let selectedIds = [1, 2];
+      let transactionWarningOpen = false;
+      let deletableIds: number[] = [];
+
+      const handleBulkDelete = () => {
+        const selectedIncomes = incomeData.filter((i) => selectedIds.includes(i.id));
+        const withTransaction = selectedIncomes.filter((i) => i.transactionId !== null);
+        const withoutTransaction = selectedIncomes.filter((i) => i.transactionId === null);
+        const deletableIdsToProcess = withoutTransaction.map((i) => i.id);
+
+        if (withTransaction.length > 0) {
+          deletableIds = deletableIdsToProcess;
+          transactionWarningOpen = true;
+          selectedIds = deletableIdsToProcess;
+          return;
+        }
+      };
+
+      handleBulkDelete();
+
+      expect(transactionWarningOpen).toBe(true);
+      expect(deletableIds).toEqual([]);
+      expect(selectedIds).toEqual([]);
+    });
+  });
+
   describe('Actions panel visibility', () => {
     it('actions panel is hidden when no selection', () => {
       const selectedIds: number[] = [];
@@ -613,6 +765,109 @@ describe('Incomes Component Logic', () => {
       const selectedIds = [1, 2];
       const display = selectedIds.length === 0 ? 'block' : 'none';
       expect(display).toBe('none');
+    });
+  });
+
+  describe('Single row delete pre-validation', () => {
+    interface IncomeRowWithTransaction {
+      id: number;
+      accountingDate: Date | null;
+      incomeTypeName: string;
+      description: string;
+      quantity: number;
+      amount: number;
+      totalAmount: number;
+      transactionId: number | null;
+    }
+
+    const incomeWithTransaction: IncomeRowWithTransaction = {
+      id: 1,
+      accountingDate: new Date('2024-03-15'),
+      incomeTypeName: 'Rent',
+      description: 'March rent payment',
+      quantity: 1,
+      amount: 1200,
+      totalAmount: 1200,
+      transactionId: 100,
+    };
+
+    const incomeWithoutTransaction: IncomeRowWithTransaction = {
+      id: 2,
+      accountingDate: new Date('2024-03-16'),
+      incomeTypeName: 'Deposit',
+      description: 'Security deposit',
+      quantity: 1,
+      amount: 500,
+      totalAmount: 500,
+      transactionId: null,
+    };
+
+    it('shows warning dialog when deleting income with transaction', () => {
+      const incomeData = [incomeWithTransaction, incomeWithoutTransaction];
+      let singleDeleteWarningOpen = false;
+      let singleDeleteItemId: number | null = null;
+      let deleteProceed = false;
+
+      const handleSingleDeleteRequest = (id: number) => {
+        const income = incomeData.find((i) => i.id === id);
+        if (income?.transactionId !== null) {
+          singleDeleteWarningOpen = true;
+          singleDeleteItemId = id;
+          return;
+        }
+        deleteProceed = true;
+      };
+
+      handleSingleDeleteRequest(1);
+
+      expect(singleDeleteWarningOpen).toBe(true);
+      expect(singleDeleteItemId).toBe(1);
+      expect(deleteProceed).toBe(false);
+    });
+
+    it('proceeds with delete when income has no transaction', () => {
+      const incomeData = [incomeWithTransaction, incomeWithoutTransaction];
+      let singleDeleteWarningOpen = false;
+      let singleDeleteItemId: number | null = null;
+      let deleteProceed = false;
+
+      const handleSingleDeleteRequest = (id: number) => {
+        const income = incomeData.find((i) => i.id === id);
+        if (income?.transactionId !== null) {
+          singleDeleteWarningOpen = true;
+          singleDeleteItemId = id;
+          return;
+        }
+        deleteProceed = true;
+      };
+
+      handleSingleDeleteRequest(2);
+
+      expect(singleDeleteWarningOpen).toBe(false);
+      expect(singleDeleteItemId).toBeNull();
+      expect(deleteProceed).toBe(true);
+    });
+
+    it('shows warning when income not found in data', () => {
+      const incomeData = [incomeWithTransaction, incomeWithoutTransaction];
+      let singleDeleteWarningOpen = false;
+      let deleteProceed = false;
+
+      const handleSingleDeleteRequest = (id: number) => {
+        const income = incomeData.find((i) => i.id === id);
+        if (income?.transactionId !== null) {
+          singleDeleteWarningOpen = true;
+          return;
+        }
+        deleteProceed = true;
+      };
+
+      handleSingleDeleteRequest(999); // Non-existent id
+
+      // When income not found, transactionId check returns undefined !== null which is true
+      // This is expected behavior - if item not found, show warning (defensive)
+      expect(singleDeleteWarningOpen).toBe(true);
+      expect(deleteProceed).toBe(false);
     });
   });
 });

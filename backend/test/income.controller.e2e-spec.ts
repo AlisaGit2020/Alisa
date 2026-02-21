@@ -16,7 +16,7 @@ import {
   TestUsersSetup,
 } from './helper-functions';
 import { getTransactionIncome1 } from './data/mocks/transaction.mock';
-import { TransactionStatus } from '@alisa-backend/common/types';
+import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
 import * as http from 'http';
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
@@ -363,35 +363,116 @@ describe('IncomeController (e2e)', () => {
         .expect(401);
     });
 
-    it('deletes an income', async () => {
+    it('deletes a standalone income', async () => {
+      // Create a standalone income (without transaction) to delete
+      const createResponse = await request(server)
+        .post('/accounting/income')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          incomeTypeId: 1,
+          propertyId: mainUser.properties[0].id,
+          description: 'Standalone income to delete',
+          amount: 55,
+          quantity: 1,
+          totalAmount: 55,
+        })
+        .expect(201);
+
+      const standaloneIncomeId = createResponse.body.id;
+
       await request(server)
-        .delete(`/accounting/income/${createdIncomeId}`)
+        .delete(`/accounting/income/${standaloneIncomeId}`)
         .set('Authorization', getBearerToken(mainUserToken))
         .expect(200)
         .expect('true');
 
       // Verify it's deleted
       await request(server)
-        .get(`/accounting/income/${createdIncomeId}`)
+        .get(`/accounting/income/${standaloneIncomeId}`)
         .set('Authorization', getBearerToken(mainUserToken))
         .expect(404);
+    });
+
+    it('returns 400 when income has a transaction relation', async () => {
+      // Create income with transaction via HTTP
+      const createResponse = await request(server)
+        .post('/accounting/transaction')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          sender: 'Income Delete Prevention Test',
+          receiver: 'Test Receiver',
+          description: 'Transaction with income to test delete prevention',
+          transactionDate: new Date('2024-03-01'),
+          accountingDate: new Date('2024-03-01'),
+          amount: 200,
+          propertyId: mainUser.properties[0].id,
+          status: TransactionStatus.ACCEPTED,
+          type: TransactionType.INCOME,
+          externalId: `income-delete-prevention-${Date.now()}`,
+          incomes: [
+            {
+              incomeTypeId: 1,
+              description: 'Income with transaction',
+              amount: 200,
+              quantity: 1,
+              totalAmount: 200,
+            },
+          ],
+        })
+        .expect(201);
+
+      // Get the income ID from the transaction
+      const searchResponse = await request(server)
+        .post('/accounting/transaction/search')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          where: { id: createResponse.body.id },
+          relations: { incomes: true },
+        })
+        .expect(200);
+
+      const incomeId = searchResponse.body[0].incomes[0].id;
+
+      // Try to delete the income - should be rejected
+      const deleteResponse = await request(server)
+        .delete(`/accounting/income/${incomeId}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(400);
+
+      expect(deleteResponse.body.message).toContain('transaction');
     });
   });
 
   describe('POST /accounting/income/delete (bulk delete)', () => {
-    it('deletes multiple incomes when user owns them', async () => {
-      // Create incomes to delete
-      const transaction1 = await addTransaction(
-        app,
-        mainUser.jwtUser,
-        getTransactionIncome1(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
-      );
-      const transaction2 = await addTransaction(
-        app,
-        mainUser.jwtUser,
-        getTransactionIncome1(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
-      );
-      const ids = [transaction1.incomes[0].id, transaction2.incomes[0].id];
+    it('deletes multiple standalone incomes when user owns them', async () => {
+      // Create standalone incomes (without transactions)
+      const income1Response = await request(server)
+        .post('/accounting/income')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          incomeTypeId: 1,
+          propertyId: mainUser.properties[0].id,
+          description: 'Standalone income 1 for bulk delete',
+          amount: 80,
+          quantity: 1,
+          totalAmount: 80,
+        })
+        .expect(201);
+
+      const income2Response = await request(server)
+        .post('/accounting/income')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          incomeTypeId: 1,
+          propertyId: mainUser.properties[0].id,
+          description: 'Standalone income 2 for bulk delete',
+          amount: 90,
+          quantity: 1,
+          totalAmount: 90,
+        })
+        .expect(201);
+
+      const ids = [income1Response.body.id, income2Response.body.id];
 
       const response = await request(server)
         .post('/accounting/income/delete')
@@ -431,21 +512,37 @@ describe('IncomeController (e2e)', () => {
     });
 
     it('returns partial success when some incomes belong to other user', async () => {
-      // Create income for main user
-      const mainUserTransaction = await addTransaction(
-        app,
-        mainUser.jwtUser,
-        getTransactionIncome1(mainUser.properties[0].id, TransactionStatus.ACCEPTED),
-      );
-      // Create income for user2
-      const user2 = testUsers.user2WithProperties;
-      const user2Transaction = await addTransaction(
-        app,
-        user2.jwtUser,
-        getTransactionIncome1(user2.properties[0].id, TransactionStatus.ACCEPTED),
-      );
+      // Create standalone income for main user
+      const mainUserIncomeResponse = await request(server)
+        .post('/accounting/income')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          incomeTypeId: 1,
+          propertyId: mainUser.properties[0].id,
+          description: 'Main user standalone income for partial success test',
+          amount: 110,
+          quantity: 1,
+          totalAmount: 110,
+        })
+        .expect(201);
 
-      const ids = [mainUserTransaction.incomes[0].id, user2Transaction.incomes[0].id];
+      // Create standalone income for user2
+      const user2 = testUsers.user2WithProperties;
+      const user2Token = await getUserAccessToken2(authService, user2.jwtUser);
+      const user2IncomeResponse = await request(server)
+        .post('/accounting/income')
+        .set('Authorization', getBearerToken(user2Token))
+        .send({
+          incomeTypeId: 1,
+          propertyId: user2.properties[0].id,
+          description: 'User2 standalone income for partial success test',
+          amount: 120,
+          quantity: 1,
+          totalAmount: 120,
+        })
+        .expect(201);
+
+      const ids = [mainUserIncomeResponse.body.id, user2IncomeResponse.body.id];
 
       const response = await request(server)
         .post('/accounting/income/delete')
@@ -456,6 +553,93 @@ describe('IncomeController (e2e)', () => {
       expect(response.body.allSuccess).toBe(false);
       expect(response.body.rows.success).toBe(1);
       expect(response.body.rows.failed).toBe(1);
+    });
+
+    it('returns 400 for incomes with transaction relation and deletes only standalone incomes', async () => {
+      // Create a standalone income (without transaction)
+      const standaloneIncomeResponse = await request(server)
+        .post('/accounting/income')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          incomeTypeId: 1,
+          propertyId: mainUser.properties[0].id,
+          description: 'Standalone income for bulk delete test',
+          amount: 100,
+          quantity: 1,
+          totalAmount: 100,
+        })
+        .expect(201);
+
+      const standaloneIncomeId = standaloneIncomeResponse.body.id;
+
+      // Create an income with transaction
+      const transactionResponse = await request(server)
+        .post('/accounting/transaction')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          sender: 'Bulk Delete Prevention Test',
+          receiver: 'Test Receiver',
+          description: 'Transaction with income for bulk delete prevention',
+          transactionDate: new Date('2024-03-02'),
+          accountingDate: new Date('2024-03-02'),
+          amount: 150,
+          propertyId: mainUser.properties[0].id,
+          status: TransactionStatus.ACCEPTED,
+          type: TransactionType.INCOME,
+          externalId: `income-bulk-delete-prevention-${Date.now()}`,
+          incomes: [
+            {
+              incomeTypeId: 1,
+              description: 'Income with transaction for bulk delete',
+              amount: 150,
+              quantity: 1,
+              totalAmount: 150,
+            },
+          ],
+        })
+        .expect(201);
+
+      // Get the income ID from the transaction
+      const searchResponse = await request(server)
+        .post('/accounting/transaction/search')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          where: { id: transactionResponse.body.id },
+          relations: { incomes: true },
+        })
+        .expect(200);
+
+      const incomeWithTransactionId = searchResponse.body[0].incomes[0].id;
+
+      // Try to bulk delete both - should succeed for standalone, fail for income with transaction
+      const deleteResponse = await request(server)
+        .post('/accounting/income/delete')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({ ids: [standaloneIncomeId, incomeWithTransactionId] })
+        .expect(201);
+
+      expect(deleteResponse.body.allSuccess).toBe(false);
+      expect(deleteResponse.body.rows.success).toBe(1);
+      expect(deleteResponse.body.rows.failed).toBe(1);
+
+      // The failed one should have 400 status code
+      const failedResult = deleteResponse.body.results.find(
+        (r: { id: number; statusCode: number }) => r.id === incomeWithTransactionId,
+      );
+      expect(failedResult.statusCode).toBe(400);
+      expect(failedResult.message).toContain('transaction');
+
+      // Verify standalone income was deleted
+      await request(server)
+        .get(`/accounting/income/${standaloneIncomeId}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(404);
+
+      // Verify income with transaction still exists
+      await request(server)
+        .get(`/accounting/income/${incomeWithTransactionId}`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(200);
     });
   });
 });

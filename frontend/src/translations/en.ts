@@ -57,6 +57,7 @@ const en = {
     month: "Month",
     name: "Name",
     noRowsFound: "No rows found",
+    ok: "OK",
     quantity: "Quantity",
     rows: "Rows",
     rowsFailed: "Rows failed",
