@@ -16,7 +16,13 @@ import { AuthService } from '@alisa-backend/auth/auth.service';
 import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
 import { TransactionStatus } from '@alisa-backend/common/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Events, IncomeAccountingDateChangedEvent } from '@alisa-backend/common/events';
+import {
+  Events,
+  IncomeAccountingDateChangedEvent,
+  StandaloneIncomeCreatedEvent,
+  StandaloneIncomeDeletedEvent,
+  StandaloneIncomeUpdatedEvent,
+} from '@alisa-backend/common/events';
 import { DataSaveResultDto } from '@alisa-backend/common/dtos/data-save-result.dto';
 import {
   buildBulkOperationResult,
@@ -117,7 +123,17 @@ export class IncomeService {
 
     this.mapData(incomeEntity, input);
 
-    return await this.repository.save(incomeEntity);
+    const savedIncome = await this.repository.save(incomeEntity);
+
+    // Emit event for standalone income (no transaction)
+    if (!savedIncome.transactionId) {
+      this.eventEmitter.emit(
+        Events.Income.StandaloneCreated,
+        new StandaloneIncomeCreatedEvent(savedIncome),
+      );
+    }
+
+    return savedIncome;
   }
 
   async save(user: JWTUser, input: IncomeInputDto): Promise<Income> {
@@ -156,8 +172,14 @@ export class IncomeService {
 
     await this.repository.save(incomeEntity);
 
-    // Emit event if accountingDate changed and transaction is accepted
-    if (
+    // Emit event for standalone income (no transaction) - triggers recalculation
+    if (!incomeEntity.transactionId) {
+      this.eventEmitter.emit(
+        Events.Income.StandaloneUpdated,
+        new StandaloneIncomeUpdatedEvent(incomeEntity),
+      );
+    } else if (
+      // Emit event if accountingDate changed and transaction is accepted
       this.hasAccountingDateChanged(oldAccountingDate, incomeEntity.accountingDate) &&
       incomeEntity.transaction?.status === TransactionStatus.ACCEPTED
     ) {
@@ -186,8 +208,16 @@ export class IncomeService {
       );
     }
 
+    const propertyId = income.propertyId;
+
     // Delete the income
     await this.repository.delete(id);
+
+    // Emit event for standalone income deletion (triggers recalculation)
+    this.eventEmitter.emit(
+      Events.Income.StandaloneDeleted,
+      new StandaloneIncomeDeletedEvent(propertyId),
+    );
   }
 
   async deleteMany(user: JWTUser, ids: number[]): Promise<DataSaveResultDto> {
@@ -198,6 +228,8 @@ export class IncomeService {
     const incomes = await this.repository.find({
       where: { id: In(ids) },
     });
+
+    const deletedPropertyIds = new Set<number>();
 
     const deleteTask = incomes.map(async (income) => {
       try {
@@ -217,6 +249,7 @@ export class IncomeService {
 
         // Delete the income
         await this.repository.delete(income.id);
+        deletedPropertyIds.add(income.propertyId);
 
         return createSuccessResult(income.id);
       } catch (e) {
@@ -224,7 +257,17 @@ export class IncomeService {
       }
     });
 
-    return buildBulkOperationResult(deleteTask, incomes.length);
+    const result = await buildBulkOperationResult(deleteTask, incomes.length);
+
+    // Emit events for each affected property (triggers recalculation)
+    for (const propertyId of deletedPropertyIds) {
+      this.eventEmitter.emit(
+        Events.Income.StandaloneDeleted,
+        new StandaloneIncomeDeletedEvent(propertyId),
+      );
+    }
+
+    return result;
   }
 
   private mapData(income: Income, input: IncomeInputDto) {

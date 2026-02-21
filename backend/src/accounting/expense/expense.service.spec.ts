@@ -251,7 +251,7 @@ describe('ExpenseService', () => {
       expect(mockEventEmitter.emit).not.toHaveBeenCalled();
     });
 
-    it('does not emit event when expense has no transaction', async () => {
+    it('emits StandaloneUpdated event when expense has no transaction', async () => {
       const existingExpense = createExpense({
         id: 1,
         propertyId: 1,
@@ -274,7 +274,10 @@ describe('ExpenseService', () => {
         totalAmount: 100,
       });
 
-      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'expense.standaloneUpdated',
+        expect.objectContaining({ expense: expect.any(Object) }),
+      );
     });
   });
 
