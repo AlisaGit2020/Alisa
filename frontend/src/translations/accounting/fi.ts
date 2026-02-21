@@ -6,10 +6,24 @@ const accounting = {
   // Page template for incomes
   incomesPageTitle: "Tulot",
   incomesPageDescription: "Seuraa vuokratuloja ja muita kiinteistöjesi tuottoja.",
+  incomesPageMoreDetails: `Tulorivejä voi luoda kahdella tavalla:
+• Manuaalisesti lisäämällä uusia tuloja
+• Automaattisesti hyväksymällä pankkitapahtumia tuloiksi
+
+Poistosäännöt:
+• Manuaalisesti luodut tulorivit voi poistaa suoraan
+• Pankkitapahtumaan liitettyjä tulorivejä ei voi poistaa erikseen — poista sen sijaan liitetty tapahtuma`,
 
   // Page template for expenses
   expensesPageTitle: "Kulut",
   expensesPageDescription: "Hallitse kiinteistöihisi liittyviä kustannuksia ja kuluja.",
+  expensesPageMoreDetails: `Kulurivejä voi luoda kahdella tavalla:
+• Manuaalisesti lisäämällä uusia kuluja
+• Automaattisesti hyväksymällä pankkitapahtumia kuluiksi
+
+Poistosäännöt:
+• Manuaalisesti luodut kulurivit voi poistaa suoraan
+• Pankkitapahtumaan liitettyjä kulurivejä ei voi poistaa erikseen — poista sen sijaan liitetty tapahtuma`,
 
   // Left menu
   accounting: "Kirjanpito",

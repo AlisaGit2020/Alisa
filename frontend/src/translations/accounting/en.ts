@@ -6,10 +6,24 @@ const accounting = {
   // Page template for incomes
   incomesPageTitle: "Incomes",
   incomesPageDescription: "Track rental income and other revenue from your properties.",
+  incomesPageMoreDetails: `Income rows can be created in two ways:
+• Manually by adding new income entries
+• Automatically when accepting bank transactions as income
+
+Deletion rules:
+• Manually created income rows can be deleted directly
+• Income rows linked to a bank transaction cannot be deleted separately — delete the associated transaction instead`,
 
   // Page template for expenses
   expensesPageTitle: "Expenses",
   expensesPageDescription: "Manage costs and expenses related to your properties.",
+  expensesPageMoreDetails: `Expense rows can be created in two ways:
+• Manually by adding new expense entries
+• Automatically when accepting bank transactions as expenses
+
+Deletion rules:
+• Manually created expense rows can be deleted directly
+• Expense rows linked to a bank transaction cannot be deleted separately — delete the associated transaction instead`,
 
   // Left menu
   accounting: "Accounting",

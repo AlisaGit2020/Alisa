@@ -36,4 +36,19 @@ describe("ListPageTemplate", () => {
     const papers = container.querySelectorAll(".MuiPaper-root");
     expect(papers.length).toBe(1);
   });
+
+  it("passes moreDetailsKey to PageHeader", () => {
+    renderWithProviders(
+      <ListPageTemplate
+        translationPrefix="accounting"
+        titleKey="expensesPageTitle"
+        descriptionKey="expensesPageDescription"
+        moreDetailsKey="expensesPageMoreDetails"
+      >
+        <div>Content</div>
+      </ListPageTemplate>
+    );
+
+    expect(screen.getByText("Read more")).toBeInTheDocument();
+  });
 });

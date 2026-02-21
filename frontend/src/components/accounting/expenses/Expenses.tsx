@@ -343,6 +343,7 @@ function Expenses({ t }: WithTranslation) {
       translationPrefix="accounting"
       titleKey="expensesPageTitle"
       descriptionKey="expensesPageDescription"
+      moreDetailsKey="expensesPageMoreDetails"
     >
       <Stack spacing={2}>
         <BulkDeleteActions

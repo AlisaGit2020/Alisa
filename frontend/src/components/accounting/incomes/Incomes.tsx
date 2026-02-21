@@ -343,6 +343,7 @@ function Incomes({ t }: WithTranslation) {
       translationPrefix="accounting"
       titleKey="incomesPageTitle"
       descriptionKey="incomesPageDescription"
+      moreDetailsKey="incomesPageMoreDetails"
     >
       <Stack spacing={2}>
         <BulkDeleteActions

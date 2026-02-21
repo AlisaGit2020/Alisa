@@ -110,6 +110,8 @@ const fi = {
     },
 
     close: "Sulje",
+    readMore: "Lue lisää",
+    showLess: "Näytä vähemmän",
 
     dependencies: {
       cannotDelete: "Tätä ei voi poistaa, koska sillä on liittyviä tietoja.",

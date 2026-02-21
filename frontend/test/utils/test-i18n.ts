@@ -9,11 +9,18 @@ import admin from '../../src/translations/admin/en';
 import investmentCalculator from '../../src/translations/investment-calculator/en';
 import landing from '../../src/translations/landing/en';
 
+// Partial common namespace - only include keys that tests need translated
+// Don't include all keys to avoid breaking tests that expect untranslated keys
+const partialCommon = {
+  readMore: 'Read more',
+  showLess: 'Show less',
+};
+
 // Create a simple i18n instance for testing
 i18n.use(initReactI18next).init({
   lng: 'en',
   fallbackLng: 'en',
-  ns: ['translation', 'property', 'settings', 'expense-type', 'income-type', 'admin', 'investment-calculator', 'landing'],
+  ns: ['translation', 'property', 'settings', 'expense-type', 'income-type', 'admin', 'investment-calculator', 'landing', 'common'],
   defaultNS: 'translation',
   debug: false,
   interpolation: {
@@ -29,6 +36,7 @@ i18n.use(initReactI18next).init({
       admin,
       'investment-calculator': investmentCalculator,
       landing,
+      common: partialCommon,
     },
   },
 });
