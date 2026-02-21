@@ -92,7 +92,7 @@ function IncomeTypes({ t, onAdd, onEdit }: IncomeTypesProps) {
         dataService={dataService}
         fields={[
           { name: "name" },
-          { name: "description" },
+          { name: "description", hideOnMobile: true },
           { name: "isTaxable", format: "boolean" },
         ]}
         onNewRow={handleAdd}
