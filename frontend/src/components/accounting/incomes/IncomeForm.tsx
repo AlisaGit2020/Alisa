@@ -84,7 +84,7 @@ function IncomeForm({
     }
   };
 
-  const isLinkedToTransaction = data.transactionId !== null;
+  const isLinkedToTransaction = data.transactionId != null;
 
   const renderFormContent = (fieldErrors: Partial<Record<keyof IncomeInput, string>>) => (
     <Stack spacing={2} marginBottom={2}>

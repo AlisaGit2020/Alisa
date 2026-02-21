@@ -345,7 +345,7 @@ describe('ExpenseForm Component Logic', () => {
         transactionId: 123,
       };
 
-      const isLinkedToTransaction = data.transactionId !== null;
+      const isLinkedToTransaction = data.transactionId != null;
       expect(isLinkedToTransaction).toBe(true);
     });
 
@@ -361,13 +361,20 @@ describe('ExpenseForm Component Logic', () => {
         transactionId: null,
       };
 
-      const isLinkedToTransaction = data.transactionId !== null;
+      const isLinkedToTransaction = data.transactionId != null;
+      expect(isLinkedToTransaction).toBe(false);
+    });
+
+    it('isLinkedToTransaction returns false when transactionId is undefined', () => {
+      // When creating a new expense, transactionId may be undefined
+      const transactionId: number | null | undefined = undefined;
+      const isLinkedToTransaction = transactionId != null;
       expect(isLinkedToTransaction).toBe(false);
     });
 
     it('form fields should be disabled when linked to transaction', () => {
       const transactionId = 123;
-      const isLinkedToTransaction = transactionId !== null;
+      const isLinkedToTransaction = transactionId != null;
 
       // All form fields should be disabled
       const fieldsDisabled = isLinkedToTransaction;
@@ -376,7 +383,7 @@ describe('ExpenseForm Component Logic', () => {
 
     it('save button should be disabled when linked to transaction', () => {
       const transactionId = 123;
-      const isLinkedToTransaction = transactionId !== null;
+      const isLinkedToTransaction = transactionId != null;
 
       // Save button should be disabled
       const saveButtonDisabled = isLinkedToTransaction;
@@ -385,7 +392,7 @@ describe('ExpenseForm Component Logic', () => {
 
     it('delete button should be disabled when linked to transaction', () => {
       const transactionId = 123;
-      const isLinkedToTransaction = transactionId !== null;
+      const isLinkedToTransaction = transactionId != null;
 
       // Delete button should be disabled
       const deleteButtonDisabled = isLinkedToTransaction;
@@ -394,7 +401,7 @@ describe('ExpenseForm Component Logic', () => {
 
     it('form fields should NOT be disabled when transactionId is null', () => {
       const transactionId = null;
-      const isLinkedToTransaction = transactionId !== null;
+      const isLinkedToTransaction = transactionId != null;
 
       // Fields should be enabled
       const fieldsDisabled = isLinkedToTransaction;
@@ -403,7 +410,7 @@ describe('ExpenseForm Component Logic', () => {
 
     it('edit not allowed message should be shown when linked to transaction', () => {
       const transactionId = 123;
-      const isLinkedToTransaction = transactionId !== null;
+      const isLinkedToTransaction = transactionId != null;
 
       // Message should be visible
       const showEditNotAllowedMessage = isLinkedToTransaction;
@@ -412,7 +419,7 @@ describe('ExpenseForm Component Logic', () => {
 
     it('edit not allowed message should NOT be shown when transactionId is null', () => {
       const transactionId = null;
-      const isLinkedToTransaction = transactionId !== null;
+      const isLinkedToTransaction = transactionId != null;
 
       // Message should be hidden
       const showEditNotAllowedMessage = isLinkedToTransaction;
