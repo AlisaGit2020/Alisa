@@ -96,6 +96,8 @@ Poistosäännöt:
   singleItemHasTransaction:
     "Tämä kohde on liitetty tapahtumaan eikä sitä voi poistaa suoraan. Poista tapahtuma ensin.",
   noItemsToDelete: "Ei poistettavia kohteita",
+  editNotAllowed:
+    "Tämä kohde on liitetty pankkitapahtumaan eikä sitä voi muokata. Muokataksesi tätä kohdetta, muokkaa tai poista liitetty tapahtuma.",
 
   // Format helpers
   "format.number": "{{val, number}}",

@@ -7,6 +7,7 @@ function AlisaForm(props: {
     formComponents: React.JSX.Element
     submitButtonText: string
     submitButtonIcon?: ReactNode
+    submitDisabled?: boolean
     cancelButtonText: string
     errorMessage?: string | string[]
     errorMessageTitle?: string
@@ -23,6 +24,7 @@ function AlisaForm(props: {
                 <ButtonGroup>
                     <Button variant="contained" color="primary"
                         onClick={props.onSubmit}
+                        disabled={props.submitDisabled}
                         startIcon={props.submitButtonIcon}>
                         {props.submitButtonText}
                     </Button>

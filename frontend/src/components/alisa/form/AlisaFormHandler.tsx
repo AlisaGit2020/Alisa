@@ -21,6 +21,7 @@ interface AlisaFormHandlerProps<T extends object> {
   };
   validationRules?: Partial<Record<keyof T, FieldRules>>;
   submitButtonIcon?: ReactNode;
+  submitDisabled?: boolean;
   onCancel: () => void;
   onAfterSubmit: () => void;
   onSetData: React.Dispatch<React.SetStateAction<T>>;
@@ -162,6 +163,7 @@ function AlisaFormHandler<T extends object>(props: AlisaFormHandlerProps<T>) {
       <AlisaForm
         submitButtonIcon={props.submitButtonIcon}
         submitButtonText={props.translation.submitButton}
+        submitDisabled={props.submitDisabled}
         cancelButtonText={props.translation.cancelButton}
         errorMessageTitle={props.translation.errorMessageTitle}
         validationMessageTitle={props.translation.validationMessageTitle}

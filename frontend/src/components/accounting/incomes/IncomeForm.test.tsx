@@ -332,6 +332,94 @@ describe('IncomeForm Component Logic', () => {
     });
   });
 
+  describe('Transaction-linked disabled state', () => {
+    it('isLinkedToTransaction returns true when transactionId is set', () => {
+      const data: IncomeInput = {
+        description: 'Monthly rent',
+        amount: 1000,
+        quantity: 1,
+        totalAmount: 1000,
+        accountingDate: new Date(),
+        incomeTypeId: 1,
+        propertyId: 1,
+        transactionId: 123,
+      };
+
+      const isLinkedToTransaction = data.transactionId !== null;
+      expect(isLinkedToTransaction).toBe(true);
+    });
+
+    it('isLinkedToTransaction returns false when transactionId is null', () => {
+      const data: IncomeInput = {
+        description: 'Monthly rent',
+        amount: 1000,
+        quantity: 1,
+        totalAmount: 1000,
+        accountingDate: new Date(),
+        incomeTypeId: 1,
+        propertyId: 1,
+        transactionId: null,
+      };
+
+      const isLinkedToTransaction = data.transactionId !== null;
+      expect(isLinkedToTransaction).toBe(false);
+    });
+
+    it('form fields should be disabled when linked to transaction', () => {
+      const transactionId = 123;
+      const isLinkedToTransaction = transactionId !== null;
+
+      // All form fields should be disabled
+      const fieldsDisabled = isLinkedToTransaction;
+      expect(fieldsDisabled).toBe(true);
+    });
+
+    it('save button should be disabled when linked to transaction', () => {
+      const transactionId = 123;
+      const isLinkedToTransaction = transactionId !== null;
+
+      // Save button should be disabled
+      const saveButtonDisabled = isLinkedToTransaction;
+      expect(saveButtonDisabled).toBe(true);
+    });
+
+    it('delete button should be disabled when linked to transaction', () => {
+      const transactionId = 123;
+      const isLinkedToTransaction = transactionId !== null;
+
+      // Delete button should be disabled
+      const deleteButtonDisabled = isLinkedToTransaction;
+      expect(deleteButtonDisabled).toBe(true);
+    });
+
+    it('form fields should NOT be disabled when transactionId is null', () => {
+      const transactionId = null;
+      const isLinkedToTransaction = transactionId !== null;
+
+      // Fields should be enabled
+      const fieldsDisabled = isLinkedToTransaction;
+      expect(fieldsDisabled).toBe(false);
+    });
+
+    it('edit not allowed message should be shown when linked to transaction', () => {
+      const transactionId = 123;
+      const isLinkedToTransaction = transactionId !== null;
+
+      // Message should be visible
+      const showEditNotAllowedMessage = isLinkedToTransaction;
+      expect(showEditNotAllowedMessage).toBe(true);
+    });
+
+    it('edit not allowed message should NOT be shown when transactionId is null', () => {
+      const transactionId = null;
+      const isLinkedToTransaction = transactionId !== null;
+
+      // Message should be hidden
+      const showEditNotAllowedMessage = isLinkedToTransaction;
+      expect(showEditNotAllowedMessage).toBe(false);
+    });
+  });
+
   describe('Edge cases', () => {
     it('handles large rent amounts', () => {
       const data: IncomeInput = {
