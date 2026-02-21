@@ -6,10 +6,24 @@ const accounting = {
   // Page template for incomes
   incomesPageTitle: "Intäkter",
   incomesPageDescription: "Följ hyresintäkter och andra inkomster från dina fastigheter.",
+  incomesPageMoreDetails: `Intäktsrader kan skapas på två sätt:
+• Manuellt genom att lägga till nya intäktsposter
+• Automatiskt när banktransaktioner godkänns som intäkter
+
+Raderingsregler:
+• Manuellt skapade intäktsrader kan raderas direkt
+• Intäktsrader kopplade till en banktransaktion kan inte raderas separat — radera den associerade transaktionen istället`,
 
   // Page template for expenses
   expensesPageTitle: "Utgifter",
   expensesPageDescription: "Hantera kostnader och utgifter relaterade till dina fastigheter.",
+  expensesPageMoreDetails: `Utgiftsrader kan skapas på två sätt:
+• Manuellt genom att lägga till nya utgiftsposter
+• Automatiskt när banktransaktioner godkänns som utgifter
+
+Raderingsregler:
+• Manuellt skapade utgiftsrader kan raderas direkt
+• Utgiftsrader kopplade till en banktransaktion kan inte raderas separat — radera den associerade transaktionen istället`,
 
   // Left menu
   accounting: "Bokföring",
@@ -72,6 +86,16 @@ const accounting = {
   confirmDeleteIncome: "Vill du verkligen ta bort denna intäkt?",
   delete: "Ta bort",
   add: "Lägg till",
+
+  // Bulk delete with transaction warnings
+  cannotDeleteWithTransaction: "Kan inte radera objekt",
+  someItemsHaveTransactions:
+    "{{count}} objekt har en transaktionskoppling och kan inte raderas direkt. Radera transaktionen istället. Vill du radera de återstående {{deletableCount}} objekten?",
+  allItemsHaveTransactions:
+    "Alla {{count}} valda objekt har en transaktionskoppling. För att radera dessa, radera den associerade transaktionen istället.",
+  singleItemHasTransaction:
+    "Detta objekt har en transaktionskoppling och kan inte raderas direkt. För att radera detta objekt, radera den associerade transaktionen istället.",
+  noItemsToDelete: "Inga objekt att radera",
 
   // Format helpers
   "format.number": "{{val, number}}",
