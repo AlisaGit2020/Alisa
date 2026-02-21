@@ -79,12 +79,17 @@ function AlisaDataTableActionButtons(props: AlisaDataTableActionButtonsProps) {
   }
 
   // Mobile view: show menu with actions
+  // Don't render menu button if no actions are available
   if (isMobile) {
+    if (!props.onEdit && !props.onDelete) {
+      return null;
+    }
+    const menuId = `action-menu-${props.id}`;
     return (
       <>
         <IconButton
           aria-label="actions"
-          aria-controls={menuOpen ? "action-menu" : undefined}
+          aria-controls={menuOpen ? menuId : undefined}
           aria-haspopup="true"
           aria-expanded={menuOpen ? "true" : undefined}
           onClick={handleMenuOpen}
@@ -93,7 +98,7 @@ function AlisaDataTableActionButtons(props: AlisaDataTableActionButtonsProps) {
           <MoreVertIcon />
         </IconButton>
         <Menu
-          id="action-menu"
+          id={menuId}
           anchorEl={anchorEl}
           open={menuOpen}
           onClose={handleMenuClose}

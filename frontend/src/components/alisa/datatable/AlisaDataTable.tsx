@@ -24,6 +24,12 @@ import {
   transactionTypeNames,
 } from "@alisa-types";
 
+// Mobile layout constants
+const MOBILE_CHECKBOX_WIDTH = 40;
+const MOBILE_ACTION_WIDTH = 48;
+const MOBILE_CELL_PADDING = "6px 8px";
+const MOBILE_ACTION_CELL_PADDING = "6px 8px 6px 0";
+
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(odd)": {
     backgroundColor: theme.palette.action.hover,
@@ -306,7 +312,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
           <TableHead>
             <TableRow>
               {props.onSelectChange && (
-                <TableCell sx={{ width: isMobile ? 40 : "auto", padding: isMobile ? "6px 8px" : undefined }}>
+                <TableCell sx={{ width: isMobile ? MOBILE_CHECKBOX_WIDTH : "auto", padding: isMobile ? MOBILE_CELL_PADDING : undefined }}>
                   <AlisaDataTableSelectHeaderRow
                     t={props.t}
                     checked={data.length == props.selectedIds?.length}
@@ -358,7 +364,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
                 </TableCell>
               ))}
               {props.onNewRow && (
-                <TableCell align="right" sx={{ whiteSpace: "nowrap", width: isMobile ? 48 : "auto", padding: isMobile ? "6px 8px 6px 0" : undefined }}>
+                <TableCell align="right" sx={{ whiteSpace: "nowrap", width: isMobile ? MOBILE_ACTION_WIDTH : "auto", padding: isMobile ? MOBILE_ACTION_CELL_PADDING : undefined }}>
                   <AlisaDataTableAddButton
                     onClick={props.onNewRow}
                     t={props.t}
@@ -376,7 +382,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
               {data.map((item) => (
                 <StyledTableRow key={item.id}>
                   {props.onSelectChange && (
-                    <TableCell sx={{ width: isMobile ? 40 : "auto", padding: isMobile ? "6px 8px" : undefined }}>
+                    <TableCell sx={{ width: isMobile ? MOBILE_CHECKBOX_WIDTH : "auto", padding: isMobile ? MOBILE_CELL_PADDING : undefined }}>
                       <AlisaDataTableSelectRow
                         id={item.id}
                         selectedIds={props.selectedIds || []}
@@ -400,7 +406,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
                   ))}
 
                   {(props.onEdit || props.onDelete || props.onDeleteRequest || props.onNewRow) && (
-                    <TableCell align="right" sx={{ whiteSpace: "nowrap", width: isMobile ? 48 : "auto", padding: isMobile ? "6px 8px 6px 0" : undefined }}>
+                    <TableCell align="right" sx={{ whiteSpace: "nowrap", width: isMobile ? MOBILE_ACTION_WIDTH : "auto", padding: isMobile ? MOBILE_ACTION_CELL_PADDING : undefined }}>
                       <AlisaDataTableActionButtons
                         id={item.id}
                         t={props.t}
