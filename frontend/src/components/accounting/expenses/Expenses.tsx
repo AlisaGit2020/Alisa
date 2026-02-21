@@ -320,9 +320,9 @@ function Expenses({ t }: WithTranslation) {
             fields={[
               { name: "accountingDate", format: "date" },
               { name: "expenseTypeName", label: t("expenseType") },
-              { name: "description", maxLength: 40 },
-              { name: "quantity", format: "number" },
-              { name: "amount", format: "currency" },
+              { name: "description", maxLength: 40, hideOnMobile: true },
+              { name: "quantity", format: "number", hideOnMobile: true },
+              { name: "amount", format: "currency", hideOnMobile: true },
               { name: "totalAmount", format: "currency", sum: true },
             ]}
             selectedIds={selectedIds}

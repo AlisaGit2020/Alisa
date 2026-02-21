@@ -166,11 +166,13 @@ function SavedCalculations({
                 name: "deptFreePrice",
                 label: t("investment-calculator:deptFreePrice"),
                 format: "currency",
+                hideOnMobile: true,
               },
               {
                 name: "rentPerMonth",
                 label: t("investment-calculator:rentPerMonth"),
                 format: "currency",
+                hideOnMobile: true,
               },
               {
                 name: "cashFlowPerMonth",

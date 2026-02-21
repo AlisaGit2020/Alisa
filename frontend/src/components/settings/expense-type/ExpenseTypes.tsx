@@ -92,7 +92,7 @@ function ExpenseTypes({ t, onAdd, onEdit }: ExpenseTypesProps) {
         dataService={dataService}
         fields={[
           { name: "name" },
-          { name: "description" },
+          { name: "description", hideOnMobile: true },
           { name: "isTaxDeductible", format: "boolean" },
         ]}
         onNewRow={handleAdd}

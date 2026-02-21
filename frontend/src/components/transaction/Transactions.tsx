@@ -133,11 +133,12 @@ function Transactions({
               name: "expenses" as keyof Transaction,
               label: t("category"),
               render: (item) => <TransactionCategoryChips transaction={item} />,
+              hideOnMobile: true,
             },
             { name: "transactionDate", format: "date" },
-            { name: "sender", maxLength: 20 },
-            { name: "receiver", maxLength: 20 },
-            { name: "description", maxLength: 40 },
+            { name: "sender", maxLength: 20, hideOnMobile: true },
+            { name: "receiver", maxLength: 20, hideOnMobile: true },
+            { name: "description", maxLength: 40, hideOnMobile: true },
             { name: "amount", format: "currency", sum: true },
           ]}
           onNewRow={handleOpenAddMenu}
