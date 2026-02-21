@@ -220,7 +220,10 @@ export class ExpenseService {
     // Delete the expense
     await this.repository.delete(id);
 
-    // Emit event for standalone expense deletion (triggers recalculation)
+    // Emit event to trigger statistics recalculation
+    // Note: Only standalone expenses (transactionId IS NULL) can be deleted - the guard above
+    // throws for linked expenses. Standalone expenses need this event because they don't have
+    // a transaction that would trigger statistics updates.
     this.eventEmitter.emit(
       Events.Expense.StandaloneDeleted,
       new StandaloneExpenseDeletedEvent(propertyId),
@@ -269,7 +272,9 @@ export class ExpenseService {
 
     const result = await buildBulkOperationResult(deleteTask, expenses.length);
 
-    // Emit events for each affected property (triggers recalculation)
+    // Emit events for each affected property to trigger statistics recalculation
+    // Note: deletedPropertyIds only contains IDs from standalone expenses - linked expenses
+    // return an error above and are not added to this set
     for (const propertyId of deletedPropertyIds) {
       this.eventEmitter.emit(
         Events.Expense.StandaloneDeleted,

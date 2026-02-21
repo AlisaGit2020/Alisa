@@ -213,7 +213,10 @@ export class IncomeService {
     // Delete the income
     await this.repository.delete(id);
 
-    // Emit event for standalone income deletion (triggers recalculation)
+    // Emit event to trigger statistics recalculation
+    // Note: Only standalone incomes (transactionId IS NULL) can be deleted - the guard above
+    // throws for linked incomes. Standalone incomes need this event because they don't have
+    // a transaction that would trigger statistics updates.
     this.eventEmitter.emit(
       Events.Income.StandaloneDeleted,
       new StandaloneIncomeDeletedEvent(propertyId),
@@ -259,7 +262,9 @@ export class IncomeService {
 
     const result = await buildBulkOperationResult(deleteTask, incomes.length);
 
-    // Emit events for each affected property (triggers recalculation)
+    // Emit events for each affected property to trigger statistics recalculation
+    // Note: deletedPropertyIds only contains IDs from standalone incomes - linked incomes
+    // return an error above and are not added to this set
     for (const propertyId of deletedPropertyIds) {
       this.eventEmitter.emit(
         Events.Income.StandaloneDeleted,
