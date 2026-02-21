@@ -1,12 +1,12 @@
 import * as React from "react";
-import { styled } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
-import { Box, Chip, TableContainer, Typography } from "@mui/material";
+import { Box, Chip, TableContainer, Typography, useMediaQuery } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { TFunction } from "i18next";
 import AlisaConfirmDialog from "../dialog/AlisaConfirmDialog.tsx";
@@ -34,13 +34,14 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-interface AlisaDataTableField<T> {
+export interface AlisaDataTableField<T> {
   name: keyof T;
   maxLength?: number;
   label?: string;
   format?: "number" | "currency" | "date" | "transactionType" | "translation" | "boolean";
   sum?: boolean;
   render?: (item: T, t: TFunction) => React.ReactNode;
+  hideOnMobile?: boolean;
 }
 
 type SortDirection = "asc" | "desc";
@@ -68,6 +69,16 @@ function AlisaDataTable<T extends { id: number }>(props: {
   const [sortColumn, setSortColumn] = React.useState<keyof T | null>(null);
   const [sortDirection, setSortDirection] = React.useState<SortDirection>("asc");
   const { showToast } = useToast();
+
+  // Mobile detection for responsive column hiding
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  // Filter visible fields based on screen size
+  const visibleFields = React.useMemo(() => {
+    if (!isMobile) return props.fields;
+    return props.fields.filter(field => !field.hideOnMobile);
+  }, [isMobile, props.fields]);
 
   // Use static data if provided, otherwise fetch from dataService
   const rawData = props.data ?? fetchedData;
@@ -174,7 +185,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
     }, 0);
   };
 
-  const hasSumFields = props.fields.some((field) => field.sum);
+  const hasSumFields = visibleFields.some((field) => field.sum);
 
   const getDataValue = (
     field: AlisaDataTableField<T>,
@@ -248,7 +259,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
     return String(value);
   };
 
-  const sumFields = props.fields.filter((field) => field.sum);
+  const sumFields = visibleFields.filter((field) => field.sum);
 
   return (
     <>
@@ -290,12 +301,12 @@ function AlisaDataTable<T extends { id: number }>(props: {
           </Box>
         </Box>
       )}
-      <TableContainer sx={{ maxHeight: 960 }}>
-        <Table stickyHeader size="small" aria-label="simple table">
+      <TableContainer sx={{ maxHeight: 960, overflowX: isMobile ? "hidden" : "auto" }}>
+        <Table stickyHeader size="small" aria-label="simple table" sx={{ tableLayout: isMobile ? "fixed" : "auto" }}>
           <TableHead>
             <TableRow>
               {props.onSelectChange && (
-                <TableCell>
+                <TableCell sx={{ width: isMobile ? 40 : "auto", padding: isMobile ? "6px 8px" : undefined }}>
                   <AlisaDataTableSelectHeaderRow
                     t={props.t}
                     checked={data.length == props.selectedIds?.length}
@@ -304,11 +315,11 @@ function AlisaDataTable<T extends { id: number }>(props: {
                   ></AlisaDataTableSelectHeaderRow>
                 </TableCell>
               )}
-              {props.fields.map((field) => (
+              {visibleFields.map((field) => (
                 <TableCell
                   key={field.name as string}
                   align={field.format === "currency" ? "right" : "left"}
-                  sx={{ whiteSpace: "nowrap" }}
+                  sx={{ whiteSpace: isMobile ? "normal" : "nowrap" }}
                   sortDirection={sortColumn === field.name ? sortDirection : false}
                 >
                   {props.sortable ? (
@@ -347,7 +358,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
                 </TableCell>
               ))}
               {props.onNewRow && (
-                <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                <TableCell align="right" sx={{ whiteSpace: "nowrap", width: isMobile ? 48 : "auto", padding: isMobile ? "6px 8px 6px 0" : undefined }}>
                   <AlisaDataTableAddButton
                     onClick={props.onNewRow}
                     t={props.t}
@@ -365,7 +376,7 @@ function AlisaDataTable<T extends { id: number }>(props: {
               {data.map((item) => (
                 <StyledTableRow key={item.id}>
                   {props.onSelectChange && (
-                    <TableCell>
+                    <TableCell sx={{ width: isMobile ? 40 : "auto", padding: isMobile ? "6px 8px" : undefined }}>
                       <AlisaDataTableSelectRow
                         id={item.id}
                         selectedIds={props.selectedIds || []}
@@ -373,11 +384,15 @@ function AlisaDataTable<T extends { id: number }>(props: {
                       />
                     </TableCell>
                   )}
-                  {props.fields.map((field) => (
+                  {visibleFields.map((field) => (
                     <TableCell
                       key={field.name as string}
                       align={field.format === "currency" ? "right" : "left"}
-                      sx={{ whiteSpace: "nowrap", cursor: props.onOpen ? "pointer" : "default" }}
+                      sx={{
+                        whiteSpace: isMobile ? "normal" : "nowrap",
+                        cursor: props.onOpen ? "pointer" : "default",
+                        wordBreak: isMobile ? "break-word" : "normal",
+                      }}
                       onClick={() => props.onOpen?.(item.id)}
                     >
                       {getDataValue(field, item)}
@@ -385,9 +400,10 @@ function AlisaDataTable<T extends { id: number }>(props: {
                   ))}
 
                   {(props.onEdit || props.onDelete || props.onDeleteRequest || props.onNewRow) && (
-                    <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                    <TableCell align="right" sx={{ whiteSpace: "nowrap", width: isMobile ? 48 : "auto", padding: isMobile ? "6px 8px 6px 0" : undefined }}>
                       <AlisaDataTableActionButtons
                         id={item.id}
+                        t={props.t}
                         onDelete={(props.onDelete || props.onDeleteRequest) ? handleDeleteOpen : undefined}
                         onEdit={props.onEdit}
                         visible={

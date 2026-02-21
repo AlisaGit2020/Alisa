@@ -5,7 +5,29 @@ import { renderWithProviders } from '@test-utils/test-wrapper';
 import AlisaDataTable from './AlisaDataTable';
 import { TFunction } from 'i18next';
 
+// Helper to mock window.matchMedia for mobile/desktop simulation
+const mockMatchMedia = (matches: boolean) => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation(query => ({
+      matches,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+};
+
 describe('AlisaDataTable', () => {
+  beforeEach(() => {
+    // Default to desktop view (matchMedia returns false for mobile breakpoint)
+    mockMatchMedia(false);
+  });
+
   const mockT = ((key: string, options?: Record<string, unknown>) => {
     if (key === 'format.currency.euro' && options?.val !== undefined) {
       return `€${options.val}`;
@@ -539,6 +561,212 @@ describe('AlisaDataTable', () => {
       const cells = screen.getAllByRole('cell');
       const firstDateCell = cells[0];
       expect(firstDateCell.textContent).toContain('1/10/2024');
+    });
+  });
+
+  describe('mobile responsive columns', () => {
+    interface ResponsiveTestData {
+      id: number;
+      name: string;
+      description: string;
+      amount: number;
+    }
+
+    const responsiveData: ResponsiveTestData[] = [
+      { id: 1, name: 'Item 1', description: 'First item description', amount: 100 },
+      { id: 2, name: 'Item 2', description: 'Second item description', amount: 200 },
+    ];
+
+    const responsiveFields = [
+      { name: 'name' as keyof ResponsiveTestData },
+      { name: 'description' as keyof ResponsiveTestData, hideOnMobile: true },
+      { name: 'amount' as keyof ResponsiveTestData, format: 'currency' as const },
+    ];
+
+    it('shows all columns on desktop', () => {
+      mockMatchMedia(false); // Desktop
+
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={responsiveFields}
+          data={responsiveData}
+        />
+      );
+
+      // All column headers should be visible
+      expect(screen.getByText('name')).toBeInTheDocument();
+      expect(screen.getByText('description')).toBeInTheDocument();
+      expect(screen.getByText('amount')).toBeInTheDocument();
+
+      // All data should be visible
+      expect(screen.getByText('First item description')).toBeInTheDocument();
+      expect(screen.getByText('Second item description')).toBeInTheDocument();
+    });
+
+    it('hides columns with hideOnMobile on mobile', () => {
+      mockMatchMedia(true); // Mobile
+
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={responsiveFields}
+          data={responsiveData}
+        />
+      );
+
+      // Only visible column headers should be present
+      expect(screen.getByText('name')).toBeInTheDocument();
+      expect(screen.queryByText('description')).not.toBeInTheDocument();
+      expect(screen.getByText('amount')).toBeInTheDocument();
+
+      // Hidden column data should not be visible
+      expect(screen.queryByText('First item description')).not.toBeInTheDocument();
+      expect(screen.queryByText('Second item description')).not.toBeInTheDocument();
+
+      // Visible column data should still be present
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
+      expect(screen.getByText('€100')).toBeInTheDocument();
+    });
+
+    it('sum calculations only include visible fields on mobile', () => {
+      mockMatchMedia(true); // Mobile
+
+      const fieldsWithSum = [
+        { name: 'name' as keyof ResponsiveTestData },
+        { name: 'description' as keyof ResponsiveTestData, hideOnMobile: true },
+        { name: 'amount' as keyof ResponsiveTestData, format: 'currency' as const, sum: true, hideOnMobile: true },
+      ];
+
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={fieldsWithSum}
+          data={responsiveData}
+        />
+      );
+
+      // Sum should not be displayed because the sum field is hidden on mobile
+      expect(screen.queryByText('€300')).not.toBeInTheDocument();
+      expect(screen.queryByText('totalAmount')).not.toBeInTheDocument();
+    });
+
+    it('sum calculations show for visible sum fields on mobile', () => {
+      mockMatchMedia(true); // Mobile
+
+      const fieldsWithVisibleSum = [
+        { name: 'name' as keyof ResponsiveTestData },
+        { name: 'description' as keyof ResponsiveTestData, hideOnMobile: true },
+        { name: 'amount' as keyof ResponsiveTestData, format: 'currency' as const, sum: true },
+      ];
+
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={fieldsWithVisibleSum}
+          data={responsiveData}
+        />
+      );
+
+      // Sum should be displayed because the sum field is visible on mobile
+      expect(screen.getByText('€300')).toBeInTheDocument();
+    });
+
+    it('shows all columns when hideOnMobile is false', () => {
+      mockMatchMedia(true); // Mobile
+
+      const fieldsWithExplicitFalse = [
+        { name: 'name' as keyof ResponsiveTestData },
+        { name: 'description' as keyof ResponsiveTestData, hideOnMobile: false },
+        { name: 'amount' as keyof ResponsiveTestData, format: 'currency' as const },
+      ];
+
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={fieldsWithExplicitFalse}
+          data={responsiveData}
+        />
+      );
+
+      // All columns should be visible
+      expect(screen.getByText('name')).toBeInTheDocument();
+      expect(screen.getByText('description')).toBeInTheDocument();
+      expect(screen.getByText('amount')).toBeInTheDocument();
+    });
+
+    it('shows action menu on mobile instead of individual buttons', async () => {
+      const user = userEvent.setup();
+      mockMatchMedia(true); // Mobile
+
+      const mockOnEdit = jest.fn();
+
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={responsiveFields}
+          data={responsiveData}
+          onEdit={mockOnEdit}
+          onNewRow={jest.fn()}
+        />
+      );
+
+      // Should show menu button instead of individual action buttons
+      const menuButtons = screen.getAllByLabelText('actions');
+      expect(menuButtons.length).toBe(responsiveData.length);
+
+      // Click the menu button to open menu
+      await user.click(menuButtons[0]);
+
+      // Menu should show edit option
+      expect(screen.getByText('edit')).toBeInTheDocument();
+    });
+
+    it('shows individual action buttons on desktop', () => {
+      mockMatchMedia(false); // Desktop
+
+      const { container } = renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={responsiveFields}
+          data={responsiveData}
+          onEdit={jest.fn()}
+          onNewRow={jest.fn()}
+        />
+      );
+
+      // Should show individual icon buttons, not menu buttons
+      const iconButtons = container.querySelectorAll('.MuiIconButton-root');
+      expect(iconButtons.length).toBe(responsiveData.length);
+
+      // Should NOT show menu buttons
+      expect(screen.queryByLabelText('actions')).not.toBeInTheDocument();
+    });
+
+    it('mobile action menu calls onEdit when edit is clicked', async () => {
+      const user = userEvent.setup();
+      mockMatchMedia(true); // Mobile
+
+      const mockOnEdit = jest.fn();
+
+      renderWithProviders(
+        <AlisaDataTable
+          t={mockT}
+          fields={responsiveFields}
+          data={responsiveData}
+          onEdit={mockOnEdit}
+          onNewRow={jest.fn()}
+        />
+      );
+
+      // Open menu for first row
+      const menuButtons = screen.getAllByLabelText('actions');
+      await user.click(menuButtons[0]);
+
+      // Click edit in menu
+      await user.click(screen.getByText('edit'));
+
+      expect(mockOnEdit).toHaveBeenCalledWith(1);
     });
   });
 });
