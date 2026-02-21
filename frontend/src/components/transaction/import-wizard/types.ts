@@ -6,20 +6,27 @@ export interface SupportedBank {
   id: BankId;
   name: string;
   logo: string;
+  supportsLoanSplit: boolean;
 }
 
 export const SUPPORTED_BANKS: SupportedBank[] = [
   {
     id: "op",
     name: "Osuuspankki (OP)",
-    logo: "/assets/banks/op-logo.png",
+    logo: "/assets/banks/op-logo.svg",
+    supportsLoanSplit: true,
   },
   {
     id: "s-pankki",
     name: "S-Pankki",
-    logo: "/assets/banks/s-pankki-logo.png",
+    logo: "/assets/banks/s-pankki-logo.svg",
+    supportsLoanSplit: false,
   },
 ];
+
+export const getBankById = (id: BankId | null): SupportedBank | undefined => {
+  return SUPPORTED_BANKS.find(bank => bank.id === id);
+};
 
 export interface ImportWizardState {
   activeStep: number;

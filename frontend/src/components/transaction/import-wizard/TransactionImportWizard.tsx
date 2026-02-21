@@ -3,7 +3,7 @@ import AlisaButton from "../../alisa/form/AlisaButton";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { transactionContext } from "@alisa-lib/alisa-contexts";
 import { useImportWizard } from "./hooks/useImportWizard";
-import { WIZARD_STEPS } from "./types";
+import { WIZARD_STEPS, getBankById } from "./types";
 import ImportStep from "./steps/ImportStep";
 import ReviewStep from "./steps/ReviewStep";
 import AcceptStep from "./steps/AcceptStep";
@@ -91,7 +91,8 @@ function TransactionImportWizard({ t }: WithTranslation) {
             onFetchTransactions={fetchTransactions}
           />
         );
-      case 1:
+      case 1: {
+        const selectedBank = getBankById(state.selectedBank);
         return (
           <ReviewStep
             t={t}
@@ -100,6 +101,8 @@ function TransactionImportWizard({ t }: WithTranslation) {
             selectedTransactionTypes={state.selectedTransactionTypes}
             hasUnknownTypes={state.hasUnknownTypes}
             skippedCount={state.skippedCount}
+            supportsLoanSplit={selectedBank?.supportsLoanSplit}
+            bankName={selectedBank?.name}
             onSelectChange={handleSelectChange}
             onSelectAllChange={handleSelectAllChange}
             onClearSelection={clearSelection}
@@ -111,6 +114,7 @@ function TransactionImportWizard({ t }: WithTranslation) {
             onBack={prevStep}
           />
         );
+      }
       case 2:
         return (
           <AcceptStep

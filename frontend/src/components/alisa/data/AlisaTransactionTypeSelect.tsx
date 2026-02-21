@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { TFunction } from "i18next";
@@ -16,45 +16,32 @@ interface AlisaTransactionTypeSelectProps {
   showLabel?: boolean;
   visible?: boolean;
   showEmptyValue?: boolean;
+  excludeTypes?: number[];
 }
 
 function AlisaTransactionTypeSelect(props: AlisaTransactionTypeSelectProps) {
   const { t } = props;
-  const { t: tCommon } = useTranslation("common");
-  const [transactionTypes, setTransactionTypes] = useState<
-    AlisaSelectFieldItem[]
-  >([]);
-  const [ready, setReady] = useState<boolean>(false);
+  const { i18n } = useTranslation();
   const showLabel = props.showLabel ? props.showLabel : false;
   const visible = props.visible !== undefined ? props.visible : true;
 
-  React.useEffect(() => {
-    if (ready) {
-      return;
-    }
-    const fetchData = async () => {
-      //Loop through the transactionTypeNames array and create a new array of AlisaSelectFieldItem objects
-      const data: AlisaSelectFieldItem[] = [];
-      transactionTypeNames.forEach(
-        (value: TransactionTypeName, key: number) => {
-          data.push({ id: key, name: t(value) });
-        },
-      );
-
-      setReady(true);
-      return data;
-    };
-
-    fetchData().then(setTransactionTypes);
-  }, [ready, t]);
-
-  if (!ready) {
-    return <div>{tCommon("loading")}</div>;
-  }
+  // Use useMemo to recompute when language or excludeTypes changes
+  const transactionTypes = useMemo(() => {
+    const data: AlisaSelectFieldItem[] = [];
+    transactionTypeNames.forEach((value: TransactionTypeName, key: number) => {
+      // Skip excluded types
+      if (props.excludeTypes?.includes(key)) {
+        return;
+      }
+      data.push({ id: key, name: t(value) });
+    });
+    return data;
+  }, [t, props.excludeTypes, i18n.language]);
 
   if (!visible) {
     return null;
   }
+
   return (
     <AlisaSelectVariant
       variant={props.variant ? props.variant : "select"}

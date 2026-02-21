@@ -11,7 +11,6 @@ import {
   MenuItem,
   ToggleButton,
   ToggleButtonGroup,
-  Typography,
 } from "@mui/material";
 import AlisaButton from "../../../alisa/form/AlisaButton";
 import SearchIcon from "@mui/icons-material/Search";
@@ -31,6 +30,8 @@ interface ReviewStepProps {
   selectedTransactionTypes: TransactionType[];
   hasUnknownTypes: boolean;
   skippedCount: number;
+  supportsLoanSplit?: boolean;
+  bankName?: string;
   onSelectChange: (id: number, item?: Transaction) => void;
   onSelectAllChange: (ids: number[], items?: Transaction[]) => void;
   onClearSelection: () => void;
@@ -53,6 +54,8 @@ export default function ReviewStep({
   selectedTransactionTypes,
   hasUnknownTypes,
   skippedCount,
+  supportsLoanSplit,
+  bankName,
   onSelectChange,
   onSelectAllChange,
   onClearSelection,
@@ -158,15 +161,33 @@ export default function ReviewStep({
         </Alert>
       )}
 
-      {/* Warning for unknown types */}
+      {/* Info about allocation requirement */}
       {hasUnknownTypes && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          {t("importWizard.unknownTypesWarning")}
+        <Alert severity="info" sx={{ mb: 2 }}>
+          {t("importWizard.allocationRequired")}
         </Alert>
       )}
 
+      {/* Bulk actions - show above filters when rows selected */}
+      <TransactionsPendingActions
+        marginTop={0}
+        open={selectedIds.length > 0}
+        selectedIds={selectedIds}
+        hasExpenseTransactions={hasExpenseTransactions}
+        hasIncomeTransactions={hasIncomeTransactions}
+        hideApprove
+        supportsLoanSplit={supportsLoanSplit}
+        bankName={bankName}
+        onApprove={() => Promise.resolve()}
+        onSetType={handleSetType}
+        onSetCategoryType={handleSetCategoryType}
+        onSplitLoanPayment={handleSplitLoanPayment}
+        onCancel={handleCancel}
+        onDelete={onDelete}
+      />
+
       {/* Filter controls */}
-      <Stack direction="row" spacing={2} sx={{ mb: 2 }} alignItems="center">
+      <Stack direction="row" spacing={2} sx={{ mb: 2, mt: selectedIds.length > 0 ? 2 : 0 }} alignItems="center">
         <ToggleButtonGroup
           value={showOnlyUnknown ? "unknown" : "all"}
           exclusive
@@ -215,30 +236,10 @@ export default function ReviewStep({
           }}
           sx={{ width: 250 }}
         />
-
-        <Typography variant="body2" color="text.secondary" sx={{ ml: "auto" }}>
-          {t("importWizard.showingCount", { count: filteredTransactions.length })}
-        </Typography>
       </Stack>
 
-      {/* Bulk actions */}
-      <TransactionsPendingActions
-        marginTop={0}
-        open={selectedIds.length > 0}
-        selectedIds={selectedIds}
-        hasExpenseTransactions={hasExpenseTransactions}
-        hasIncomeTransactions={hasIncomeTransactions}
-        hideApprove
-        onApprove={() => Promise.resolve()}
-        onSetType={handleSetType}
-        onSetCategoryType={handleSetCategoryType}
-        onSplitLoanPayment={handleSplitLoanPayment}
-        onCancel={handleCancel}
-        onDelete={onDelete}
-      />
-
       {/* Transaction table */}
-      <Paper sx={{ mt: selectedIds.length > 0 ? 2 : 0 }}>
+      <Paper>
         <AlisaDataTable<Transaction>
           t={t}
           data={filteredTransactions}

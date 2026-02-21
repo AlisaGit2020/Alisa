@@ -61,6 +61,18 @@ const transaction = {
   transactions: "Transaktioner",
   withdraw: "Uttag",
   unknown: "Okänd",
+  allocation: "Tilldelning",
+  loanSplitting: "Lånedelning",
+  automaticAllocation: "Automatisk tilldelning",
+  automaticAllocationDescription: "Dela upp lånebetalningar automatiskt i amortering, ränta och avgifter baserat på transaktionsbeskrivningen.",
+  automaticAllocationNotSupported: "{{bank}}-import stöder inte automatisk lånedelning.",
+  otherActions: "Andra åtgärder",
+  saveAllocationTooltip: "Välj en tilldelningstyp först",
+  loanSplitErrors: {
+    unauthorized: "Du har inte behörighet att ändra denna transaktion",
+    notPending: "Kan bara dela upp väntande transaktioner",
+    notLoanFormat: "Transaktionsbeskrivningen matchar inte lånebetalningsformat",
+  },
   confirmDeleteTransactions:
     "Vill du verkligen ta bort {{count}} valda transaktioner?",
   networkError: "Nätverksfel",
@@ -69,7 +81,7 @@ const transaction = {
     title: "Importera banktransaktioner",
     steps: {
       import: "Importera",
-      review: "Granska",
+      review: "Tilldelning",
       accept: "Godkänn",
       done: "Klar",
     },
@@ -93,6 +105,8 @@ const transaction = {
       "{{count}} transaktioner hoppades över eftersom de redan importerats och godkänts tidigare.",
     unknownTypesWarning:
       "Vissa transaktioner har okänd typ. Kategorisera alla transaktioner innan du fortsätter.",
+    allocationRequired:
+      "Du kan fortsätta när alla transaktioner är tilldelade eller borttagna.",
     back: "Tillbaka",
     next: "Nästa",
     readyToApprove: "Redo att godkänna",
@@ -109,7 +123,7 @@ const transaction = {
     importAnotherFile: "Importera annan fil",
     viewTransactions: "Gå till transaktioner",
     allFields: "Alla fält",
-    unknownOnly: "Endast okända",
+    unknownOnly: "Ej tilldelade",
     showAll: "Visa alla",
     showingCount: "Visar {{count}} rader",
   },

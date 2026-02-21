@@ -46,7 +46,8 @@ describe('ReviewStep', () => {
     const translations: Record<string, string> = {
       'importWizard.skippedRows': `${options?.count ?? 0} transactions were skipped`,
       'importWizard.unknownTypesWarning': 'Some transactions have unknown types. Please categorize all transactions before proceeding.',
-      'importWizard.unknownOnly': 'Unknown only',
+      'importWizard.allocationRequired': 'You can continue when all transactions are allocated or removed.',
+      'importWizard.unknownOnly': 'Not allocated',
       'importWizard.showAll': 'Show all',
       'importWizard.allFields': 'All fields',
       'importWizard.showingCount': `Showing ${options?.count ?? 0} rows`,
@@ -131,7 +132,7 @@ describe('ReviewStep', () => {
     it('renders filter controls', () => {
       renderWithProviders(<ReviewStep {...defaultProps} />);
 
-      expect(screen.getByText(/Unknown only/)).toBeInTheDocument();
+      expect(screen.getByText(/Not allocated/)).toBeInTheDocument();
       expect(screen.getByText(/Show all/)).toBeInTheDocument();
     });
 
@@ -191,16 +192,16 @@ describe('ReviewStep', () => {
       expect(screen.queryByText(/transactions were skipped/)).not.toBeInTheDocument();
     });
 
-    it('displays unknown types warning when hasUnknownTypes is true', () => {
+    it('displays allocation required info when hasUnknownTypes is true', () => {
       renderWithProviders(<ReviewStep {...defaultProps} hasUnknownTypes={true} />);
 
-      expect(screen.getByText('Some transactions have unknown types. Please categorize all transactions before proceeding.')).toBeInTheDocument();
+      expect(screen.getByText('You can continue when all transactions are allocated or removed.')).toBeInTheDocument();
     });
 
-    it('does not display warning when hasUnknownTypes is false', () => {
+    it('does not display info when hasUnknownTypes is false', () => {
       renderWithProviders(<ReviewStep {...defaultProps} hasUnknownTypes={false} />);
 
-      expect(screen.queryByText(/unknown types/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/all transactions are allocated/)).not.toBeInTheDocument();
     });
   });
 });

@@ -5,14 +5,11 @@ import {
   transactionContext,
 } from "@alisa-lib/alisa-contexts.ts";
 import { TransactionType, ExpenseType, IncomeType } from "@alisa-types";
-import { Box, Paper, Stack } from "@mui/material";
+import { Box, Chip, Paper, Stack } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
-import {
-  AlisaApproveIcon,
-  AlisaCloseIcon,
-  AlisaEditIcon,
-} from "../../alisa/AlisaIcons.tsx";
+import SaveIcon from "@mui/icons-material/Save";
+import { AlisaCloseIcon } from "../../alisa/AlisaIcons.tsx";
 import Typography from "@mui/material/Typography";
 import {
   AlisaButton,
@@ -32,6 +29,8 @@ interface TransactionsPendingActionsProps extends WithTranslation {
   hasIncomeTransactions: boolean;
   hideApprove?: boolean;
   hideSplitLoanPayment?: boolean;
+  supportsLoanSplit?: boolean;
+  bankName?: string;
   onCancel: () => void;
   onApprove: () => void;
   onSetType: (type: number) => Promise<void>;
@@ -55,8 +54,9 @@ interface LoanSplitData {
   handlingFeeExpenseTypeId: number;
 }
 
+const CATEGORY_DROPDOWN_WIDTH = 250;
+
 function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
-  const [editState, setEditState] = React.useState<boolean>(false);
   const [loanSplitState, setLoanSplitState] = React.useState<boolean>(false);
   const [confirmOpen, setConfirmOpen] = React.useState<boolean>(false);
   const [transactionType, setTransactionType] = React.useState<number>(0);
@@ -71,42 +71,30 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
     handlingFeeExpenseTypeId: 0,
   });
 
-  const handleEdit = async () => {
-    if (editState) {
-      if (transactionType > 0) {
-        await props.onSetType(transactionType);
-      }
-      if (categoryTypeData.expenseTypeId > 0 || categoryTypeData.incomeTypeId > 0) {
-        await props.onSetCategoryType(
-          categoryTypeData.expenseTypeId > 0
-            ? categoryTypeData.expenseTypeId
-            : undefined,
-          categoryTypeData.incomeTypeId > 0
-            ? categoryTypeData.incomeTypeId
-            : undefined,
-        );
-      }
-      setEditState(false);
-      setCategoryTypeData({ expenseTypeId: 0, incomeTypeId: 0 });
-      setTransactionType(0);
-    } else {
-      setEditState(true);
+  const handleSave = async () => {
+    if (transactionType > 0) {
+      await props.onSetType(transactionType);
     }
-  };
-
-  const handleCancel = () => {
-    if (editState) {
-      setEditState(false);
-      setCategoryTypeData({ expenseTypeId: 0, incomeTypeId: 0 });
-    } else if (loanSplitState) {
-      handleCancelLoanSplit();
-    } else {
-      props.onCancel();
+    if (categoryTypeData.expenseTypeId > 0 || categoryTypeData.incomeTypeId > 0) {
+      await props.onSetCategoryType(
+        categoryTypeData.expenseTypeId > 0
+          ? categoryTypeData.expenseTypeId
+          : undefined,
+        categoryTypeData.incomeTypeId > 0
+          ? categoryTypeData.incomeTypeId
+          : undefined,
+      );
     }
+    // Reset state and deselect rows
+    setTransactionType(0);
+    setCategoryTypeData({ expenseTypeId: 0, incomeTypeId: 0 });
+    props.onCancel();
   };
 
   const handleTypeChange = (type: number) => {
     setTransactionType(type);
+    // Reset category when type changes
+    setCategoryTypeData({ expenseTypeId: 0, incomeTypeId: 0 });
   };
 
   const handleCategoryTypeChange = (
@@ -164,6 +152,17 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
     });
   };
 
+  const handleCancel = () => {
+    if (loanSplitState) {
+      handleCancelLoanSplit();
+    } else {
+      // Reset allocation state and close
+      setTransactionType(0);
+      setCategoryTypeData({ expenseTypeId: 0, incomeTypeId: 0 });
+      props.onCancel();
+    }
+  };
+
   const handleDeleteClick = () => {
     setConfirmOpen(true);
   };
@@ -177,6 +176,9 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
     setConfirmOpen(false);
   };
 
+  const isSaveDisabled = transactionType <= 0;
+  const supportsLoanSplit = props.supportsLoanSplit ?? true;
+
   return (
     <Paper
       sx={{
@@ -185,210 +187,239 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
         padding: 2,
       }}
     >
-      <Stack direction={"column"} spacing={1}>
+      <Stack direction={"column"} spacing={2}>
+        {/* Row count - prominent chip */}
         <Box>
-          <Typography variant={"body2"}>
-            {" "}
-            {props.t("rowsSelected", { count: props.selectedIds.length })}
-          </Typography>
+          <Chip
+            label={props.t("rowsSelected", { count: props.selectedIds.length })}
+            color="primary"
+            size="medium"
+          />
         </Box>
 
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{ display: !editState && !loanSplitState ? "flex" : "none" }}
+        {/* Section 1: Allocation */}
+        <Box
+          sx={{
+            display: !loanSplitState ? "block" : "none",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 1,
+            p: 1.5,
+          }}
         >
-          {!props.hideApprove && (
-            <AlisaButton
-              label={props.t("approve")}
-              variant="text"
-              color="success"
-              onClick={props.onApprove}
-              endIcon={<AlisaApproveIcon />}
-            />
-          )}
-          <AlisaButton
-            label={props.t("edit")}
-            variant="text"
-            onClick={handleEdit}
-            endIcon={<AlisaEditIcon />}
-          />
-          {!props.hideSplitLoanPayment && (
-            <AlisaButton
-              label={props.t("splitLoanPayment")}
-              variant="text"
-              onClick={handleLoanSplit}
-              endIcon={<CallSplitIcon />}
-            />
-          )}
-          <AlisaButton
-            label={props.t("delete")}
-            variant="text"
-            color="error"
-            onClick={handleDeleteClick}
-            endIcon={<DeleteIcon />}
-          />
-          <AlisaButton
-            label={props.t("cancel")}
-            variant="text"
-            onClick={() => handleCancel()}
-            endIcon={<AlisaCloseIcon />}
-          />
-        </Stack>
+          <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: "bold" }}>
+            {props.t("allocation")}
+          </Typography>
 
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{ display: editState ? "flex" : "none" }}
-        >
-          <AlisaButton
-            label={props.t("save")}
-            variant="text"
-            color="success"
-            onClick={handleEdit}
-            endIcon={<AlisaApproveIcon />}
-          />
-          <AlisaButton
-            label={props.t("cancel")}
-            variant="text"
-            onClick={() => handleCancel()}
-            endIcon={<AlisaCloseIcon />}
-          />
-        </Stack>
-
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="flex-end"
-          sx={{ display: editState ? "flex" : "none" }}
-        >
+          {/* Type buttons - exclude Unknown (0) */}
           <AlisaTransactionTypeSelect
             onSelect={handleTypeChange}
             selectedValue={transactionType}
             t={props.t}
-            variant={"split-button"}
+            variant={"button"}
             direction={"row"}
-            showLabel={true}
+            showLabel={false}
             visible={true}
-          ></AlisaTransactionTypeSelect>
+            showEmptyValue={false}
+            excludeTypes={[TransactionType.UNKNOWN]}
+          />
 
+          {/* Category dropdown - conditional based on selected type */}
           {(transactionType === TransactionType.EXPENSE ||
-            (transactionType === 0 && props.hasExpenseTransactions)) && (
-            <Box sx={{ minWidth: 200 }}>
-              <AlisaSelect<CategoryTypeData, ExpenseType>
-                label={props.t("expenseType")}
-                dataService={
-                  new DataService<ExpenseType>({
-                    context: expenseTypeContext,
-                    fetchOptions: { order: { name: "ASC" } },
-                  })
-                }
-                fieldName="expenseTypeId"
-                value={categoryTypeData.expenseTypeId}
-                onHandleChange={handleCategoryTypeChange}
-                size="small"
-              ></AlisaSelect>
-            </Box>
+            transactionType === TransactionType.INCOME) && (
+            <Stack direction="row" spacing={2} alignItems="flex-end" sx={{ mt: 2 }}>
+              {transactionType === TransactionType.EXPENSE && (
+                <Box sx={{ width: CATEGORY_DROPDOWN_WIDTH }}>
+                  <AlisaSelect<CategoryTypeData, ExpenseType>
+                    label={props.t("expenseType")}
+                    dataService={
+                      new DataService<ExpenseType>({
+                        context: expenseTypeContext,
+                        fetchOptions: { order: { name: "ASC" } },
+                      })
+                    }
+                    fieldName="expenseTypeId"
+                    value={categoryTypeData.expenseTypeId}
+                    onHandleChange={handleCategoryTypeChange}
+                    size="small"
+                    fullWidth
+                  />
+                </Box>
+              )}
+
+              {transactionType === TransactionType.INCOME && (
+                <Box sx={{ width: CATEGORY_DROPDOWN_WIDTH }}>
+                  <AlisaSelect<CategoryTypeData, IncomeType>
+                    label={props.t("incomeType")}
+                    dataService={
+                      new DataService<IncomeType>({
+                        context: incomeTypeContext,
+                        fetchOptions: { order: { name: "ASC" } },
+                      })
+                    }
+                    fieldName="incomeTypeId"
+                    value={categoryTypeData.incomeTypeId}
+                    onHandleChange={handleCategoryTypeChange}
+                    size="small"
+                    fullWidth
+                  />
+                </Box>
+              )}
+            </Stack>
           )}
 
-          {(transactionType === TransactionType.INCOME ||
-            (transactionType === 0 && props.hasIncomeTransactions)) && (
-            <Box sx={{ minWidth: 200 }}>
-              <AlisaSelect<CategoryTypeData, IncomeType>
-                label={props.t("incomeType")}
-                dataService={
-                  new DataService<IncomeType>({
-                    context: incomeTypeContext,
-                    fetchOptions: { order: { name: "ASC" } },
-                  })
-                }
-                fieldName="incomeTypeId"
-                value={categoryTypeData.incomeTypeId}
-                onHandleChange={handleCategoryTypeChange}
-                size="small"
-              ></AlisaSelect>
-            </Box>
-          )}
-        </Stack>
+          {/* Save button - always visible, disabled when no type selected */}
+          <Box sx={{ mt: 2 }}>
+            <AlisaButton
+              label={props.t("save")}
+              variant="text"
+              color="primary"
+              onClick={handleSave}
+              disabled={isSaveDisabled}
+              tooltip={isSaveDisabled ? props.t("saveAllocationTooltip") : undefined}
+              endIcon={<SaveIcon />}
+            />
+          </Box>
+        </Box>
 
-        {/* Loan Split Mode UI */}
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{ display: loanSplitState ? "flex" : "none" }}
-        >
-          <AlisaButton
-            label={props.t("save")}
-            variant="text"
-            color="success"
-            onClick={handleLoanSplit}
-            disabled={
-              loanSplitData.principalExpenseTypeId === 0 ||
-              loanSplitData.interestExpenseTypeId === 0
-            }
-            endIcon={<AlisaApproveIcon />}
-          />
-          <AlisaButton
-            label={props.t("cancel")}
-            variant="text"
-            onClick={() => handleCancel()}
-            endIcon={<AlisaCloseIcon />}
-          />
-        </Stack>
+        {/* Section 2: Automatic Allocation (Loan Splitting) */}
+        {!props.hideSplitLoanPayment && (
+          <Box
+            sx={{
+              border: 1,
+              borderColor: "divider",
+              borderRadius: 1,
+              p: 1.5,
+              opacity: supportsLoanSplit ? 1 : 0.6,
+            }}
+          >
+            <Typography variant="subtitle2" sx={{ mb: 0.5, fontWeight: "bold" }}>
+              {props.t("automaticAllocation")}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+              {supportsLoanSplit
+                ? props.t("automaticAllocationDescription")
+                : props.t("automaticAllocationNotSupported", { bank: props.bankName || "This" })}
+            </Typography>
 
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="flex-end"
-          sx={{ display: loanSplitState ? "flex" : "none" }}
+            {supportsLoanSplit && (
+              <>
+                {!loanSplitState ? (
+                  <AlisaButton
+                    label={props.t("splitLoanPayment")}
+                    variant="text"
+                    onClick={handleLoanSplit}
+                    endIcon={<CallSplitIcon />}
+                  />
+                ) : (
+                  <>
+                    <Stack direction="row" spacing={2} alignItems="flex-end">
+                      <Box sx={{ width: CATEGORY_DROPDOWN_WIDTH }}>
+                        <AlisaSelect<LoanSplitData, ExpenseType>
+                          label={props.t("loanPrincipal")}
+                          dataService={
+                            new DataService<ExpenseType>({
+                              context: expenseTypeContext,
+                              fetchOptions: { order: { name: "ASC" } },
+                            })
+                          }
+                          fieldName="principalExpenseTypeId"
+                          value={loanSplitData.principalExpenseTypeId}
+                          onHandleChange={handleLoanSplitDataChange}
+                          size="small"
+                          fullWidth
+                        />
+                      </Box>
+                      <Box sx={{ width: CATEGORY_DROPDOWN_WIDTH }}>
+                        <AlisaSelect<LoanSplitData, ExpenseType>
+                          label={props.t("loanInterest")}
+                          dataService={
+                            new DataService<ExpenseType>({
+                              context: expenseTypeContext,
+                              fetchOptions: { order: { name: "ASC" } },
+                            })
+                          }
+                          fieldName="interestExpenseTypeId"
+                          value={loanSplitData.interestExpenseTypeId}
+                          onHandleChange={handleLoanSplitDataChange}
+                          size="small"
+                          fullWidth
+                        />
+                      </Box>
+                      <Box sx={{ width: CATEGORY_DROPDOWN_WIDTH }}>
+                        <AlisaSelect<LoanSplitData, ExpenseType>
+                          label={props.t("loanHandlingFee")}
+                          dataService={
+                            new DataService<ExpenseType>({
+                              context: expenseTypeContext,
+                              fetchOptions: { order: { name: "ASC" } },
+                            })
+                          }
+                          fieldName="handlingFeeExpenseTypeId"
+                          value={loanSplitData.handlingFeeExpenseTypeId}
+                          onHandleChange={handleLoanSplitDataChange}
+                          size="small"
+                          fullWidth
+                        />
+                      </Box>
+                    </Stack>
+                    <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                      <AlisaButton
+                        label={props.t("save")}
+                        variant="text"
+                        color="primary"
+                        onClick={handleLoanSplit}
+                        disabled={
+                          loanSplitData.principalExpenseTypeId === 0 ||
+                          loanSplitData.interestExpenseTypeId === 0
+                        }
+                        endIcon={<SaveIcon />}
+                      />
+                      <AlisaButton
+                        label={props.t("cancel")}
+                        variant="text"
+                        onClick={handleCancelLoanSplit}
+                        endIcon={<AlisaCloseIcon />}
+                      />
+                    </Stack>
+                  </>
+                )}
+              </>
+            )}
+          </Box>
+        )}
+
+        {/* Section 3: Other Actions */}
+        <Box
+          sx={{
+            display: !loanSplitState ? "block" : "none",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 1,
+            p: 1.5,
+          }}
         >
-          <Box sx={{ minWidth: 200 }}>
-            <AlisaSelect<LoanSplitData, ExpenseType>
-              label={props.t("loanPrincipal")}
-              dataService={
-                new DataService<ExpenseType>({
-                  context: expenseTypeContext,
-                  fetchOptions: { order: { name: "ASC" } },
-                })
-              }
-              fieldName="principalExpenseTypeId"
-              value={loanSplitData.principalExpenseTypeId}
-              onHandleChange={handleLoanSplitDataChange}
-              size="small"
-            ></AlisaSelect>
-          </Box>
-          <Box sx={{ minWidth: 200 }}>
-            <AlisaSelect<LoanSplitData, ExpenseType>
-              label={props.t("loanInterest")}
-              dataService={
-                new DataService<ExpenseType>({
-                  context: expenseTypeContext,
-                  fetchOptions: { order: { name: "ASC" } },
-                })
-              }
-              fieldName="interestExpenseTypeId"
-              value={loanSplitData.interestExpenseTypeId}
-              onHandleChange={handleLoanSplitDataChange}
-              size="small"
-            ></AlisaSelect>
-          </Box>
-          <Box sx={{ minWidth: 200 }}>
-            <AlisaSelect<LoanSplitData, ExpenseType>
-              label={props.t("loanHandlingFee")}
-              dataService={
-                new DataService<ExpenseType>({
-                  context: expenseTypeContext,
-                  fetchOptions: { order: { name: "ASC" } },
-                })
-              }
-              fieldName="handlingFeeExpenseTypeId"
-              value={loanSplitData.handlingFeeExpenseTypeId}
-              onHandleChange={handleLoanSplitDataChange}
-              size="small"
-            ></AlisaSelect>
-          </Box>
-        </Stack>
+          <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: "bold" }}>
+            {props.t("otherActions")}
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            <AlisaButton
+              label={props.t("delete")}
+              variant="text"
+              color="error"
+              onClick={handleDeleteClick}
+              endIcon={<DeleteIcon />}
+            />
+            <AlisaButton
+              label={props.t("cancel")}
+              variant="text"
+              onClick={handleCancel}
+              endIcon={<AlisaCloseIcon />}
+            />
+          </Stack>
+        </Box>
       </Stack>
+
       <AlisaConfirmDialog
         title={props.t("confirm")}
         contentText={props.t("confirmDeleteTransactions", {
