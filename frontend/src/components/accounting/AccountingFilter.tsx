@@ -77,8 +77,8 @@ function AccountingFilter({
   }, [mode]);
 
   const getTypeTranslation = (typeItem: { id: number; key: string }): string => {
-    const prefix = mode === "expense" ? "expenseTypes" : "incomeTypes";
-    return t(`${prefix}.${typeItem.key}`);
+    const namespace = mode === "expense" ? "expense-type" : "income-type";
+    return t(`${namespace}:${typeItem.key}`);
   };
 
   const handleTypeChange = (event: SelectChangeEvent<number[]>) => {

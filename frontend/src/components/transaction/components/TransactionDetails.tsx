@@ -162,7 +162,7 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
                 <Chip
                   key={`expense-${index}`}
                   label={expense.expenseType?.key
-                    ? t(`expenseTypes.${expense.expenseType.key}`)
+                    ? t(`expense-type:${expense.expenseType.key}`)
                     : ""}
                   variant="outlined"
                   color="error"
@@ -173,7 +173,7 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
                 <Chip
                   key={`income-${index}`}
                   label={income.incomeType?.key
-                    ? t(`incomeTypes.${income.incomeType.key}`)
+                    ? t(`income-type:${income.incomeType.key}`)
                     : ""}
                   variant="outlined"
                   color="success"
@@ -261,7 +261,7 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Chip
                           label={expense.expenseType?.key
-                            ? t(`expenseTypes.${expense.expenseType.key}`)
+                            ? t(`expense-type:${expense.expenseType.key}`)
                             : ""}
                           color="error"
                           size="small"
@@ -312,7 +312,7 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Chip
                           label={income.incomeType?.key
-                            ? t(`incomeTypes.${income.incomeType.key}`)
+                            ? t(`income-type:${income.incomeType.key}`)
                             : ""}
                           color="success"
                           size="small"
