@@ -10,7 +10,6 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { jwtConstants, facebookConstants } from './constants';
 import { PeopleModule } from '../people/people.module';
-import { DefaultsModule } from '../defaults/defaults.module';
 import { TierModule } from '@alisa-backend/admin/tier.module';
 
 // Only include Facebook OAuth if credentials are configured
@@ -26,7 +25,6 @@ const conditionalControllers = facebookEnabled ? [FacebookAuthController] : [];
       signOptions: { expiresIn: '1d' },
     }),
     PeopleModule,
-    DefaultsModule,
     TierModule,
   ],
   controllers: [AuthController, ...conditionalControllers],

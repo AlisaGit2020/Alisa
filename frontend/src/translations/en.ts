@@ -1,4 +1,27 @@
 const en = {
+  expenseTypes: {
+    "housing-charge": "Housing company charge",
+    "maintenance-charge": "Maintenance charge",
+    "financial-charge": "Financial charge",
+    repairs: "Repairs",
+    "capital-improvement": "Capital improvement",
+    insurance: "Insurance",
+    "property-tax": "Property tax",
+    water: "Water fee",
+    electricity: "Electricity",
+    "rental-brokerage": "Rental brokerage",
+    "loan-interest": "Loan interest",
+    "loan-principal": "Loan principal",
+    "loan-handling-fee": "Loan handling fees",
+  },
+
+  incomeTypes: {
+    rental: "Rental income",
+    airbnb: "Airbnb",
+    "capital-income": "Capital income",
+    "insurance-compensation": "Insurance compensation",
+  },
+
   appBar: {
     admin: "Admin",
     language: "Language",

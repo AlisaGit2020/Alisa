@@ -147,12 +147,12 @@ export class IncomeService {
   async getDefault(): Promise<IncomeInputDto> {
     const incomeTypes = await this.incomeTypeRepository.find({
       take: 1,
-      order: { name: 'ASC' },
+      order: { key: 'ASC' },
     });
 
     const income = new IncomeInputDto();
     income.incomeTypeId = incomeTypes[0].id;
-    income.description = incomeTypes[0].name;
+    income.description = '';
 
     return income;
   }

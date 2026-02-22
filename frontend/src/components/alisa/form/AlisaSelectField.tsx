@@ -1,9 +1,11 @@
 import { InputAdornment, MenuItem, TextField } from "@mui/material"
 import { ChangeEventHandler } from "react"
+import { TFunction } from "i18next"
 
 export type AlisaSelectFieldItem = {
     id: number
-    name: string
+    name?: string
+    key?: string
 }
 function AlisaSelectField(props: {
     label: string,
@@ -18,10 +20,19 @@ function AlisaSelectField(props: {
     helperText?: string,
     size?: "small" | "medium",
     items: AlisaSelectFieldItem[],
-    onChange?: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> | undefined
+    onChange?: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> | undefined,
+    t?: TFunction,
+    translateKeyPrefix?: string,
 }) {
     const isSmall = props.size === "small";
     const fullWidth = props.fullWidth !== undefined ? props.fullWidth : !isSmall;
+
+    const getItemLabel = (item: AlisaSelectFieldItem): string => {
+        if (props.t && props.translateKeyPrefix && item.key) {
+            return props.t(`${props.translateKeyPrefix}:${item.key}`);
+        }
+        return item.name || "";
+    };
 
     return (
         <TextField
@@ -44,7 +55,7 @@ function AlisaSelectField(props: {
             }}
         >
             {props.items.map((item: AlisaSelectFieldItem) => (
-                <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
+                <MenuItem key={item.id} value={item.id}>{getItemLabel(item)}</MenuItem>
             ))}
         </TextField>
 

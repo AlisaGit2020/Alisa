@@ -1,6 +1,10 @@
 const incomeTypes = {
-    add: 'Lisää uusi tulolaji',
-    confirmDelete: 'Poistetaanko tulolaji?',
+    // Type display names (keyed by type.key)
+    'rental': 'Vuokratulo',
+    'airbnb': 'Airbnb',
+    'capital-income': 'Pääomatulo',
+    'insurance-compensation': 'Vakuutuskorvaus',
+    // General labels
     incomeTypes: 'Tulolajit',
     isTaxable: 'Verotettava',
 }

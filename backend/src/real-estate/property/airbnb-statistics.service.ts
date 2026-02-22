@@ -8,9 +8,13 @@ import {
   StandaloneIncomeUpdatedEvent,
   TransactionCreatedEvent,
   TransactionDeletedEvent,
-  UserAirbnbIncomeTypeChangedEvent,
 } from '@alisa-backend/common/events';
-import { StatisticKey, TransactionStatus, TransactionType } from '@alisa-backend/common/types';
+import {
+  IncomeTypeKey,
+  StatisticKey,
+  TransactionStatus,
+  TransactionType,
+} from '@alisa-backend/common/types';
 import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
 
 @Injectable()
@@ -22,7 +26,7 @@ export class AirbnbStatisticsService {
 
   /**
    * Recalculates AIRBNB_VISITS statistics for a property.
-   * Counts incomes matching the property owner's airbnbIncomeTypeId setting.
+   * Counts incomes with the global 'airbnb' income type key.
    * Creates all-time, yearly, and monthly statistics.
    */
   async recalculateAirbnbVisits(propertyId: number): Promise<void> {
@@ -37,7 +41,6 @@ export class AirbnbStatisticsService {
     );
 
     // All-time aggregation (year IS NULL, month IS NULL)
-    // Use COUNT(DISTINCT i.id) to avoid multiplying counts when property has multiple owners
     await this.dataSource.query(
       `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
        SELECT
@@ -45,19 +48,17 @@ export class AirbnbStatisticsService {
          $2,
          NULL,
          NULL,
-         COUNT(DISTINCT i.id)::TEXT
+         COUNT(i.id)::TEXT
        FROM income i
        LEFT JOIN transaction t ON t.id = i."transactionId"
-       INNER JOIN ownership o ON o."propertyId" = i."propertyId"
-       INNER JOIN "user" u ON u.id = o."userId"
+       INNER JOIN income_type it ON it.id = i."incomeTypeId"
        WHERE i."propertyId" = $1
          AND (i."transactionId" IS NULL OR t.status = $3)
-         AND i."incomeTypeId" = u."airbnbIncomeTypeId"
-         AND u."airbnbIncomeTypeId" IS NOT NULL
+         AND it.key = $4
        GROUP BY i."propertyId"
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
-      [propertyId, statisticKey, acceptedStatus],
+      [propertyId, statisticKey, acceptedStatus, IncomeTypeKey.AIRBNB],
     );
 
     // Yearly aggregation
@@ -68,19 +69,17 @@ export class AirbnbStatisticsService {
          $2,
          EXTRACT(YEAR FROM i."accountingDate")::SMALLINT,
          NULL,
-         COUNT(DISTINCT i.id)::TEXT
+         COUNT(i.id)::TEXT
        FROM income i
        LEFT JOIN transaction t ON t.id = i."transactionId"
-       INNER JOIN ownership o ON o."propertyId" = i."propertyId"
-       INNER JOIN "user" u ON u.id = o."userId"
+       INNER JOIN income_type it ON it.id = i."incomeTypeId"
        WHERE i."propertyId" = $1
          AND (i."transactionId" IS NULL OR t.status = $3)
-         AND i."incomeTypeId" = u."airbnbIncomeTypeId"
-         AND u."airbnbIncomeTypeId" IS NOT NULL
+         AND it.key = $4
        GROUP BY i."propertyId", EXTRACT(YEAR FROM i."accountingDate")
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
-      [propertyId, statisticKey, acceptedStatus],
+      [propertyId, statisticKey, acceptedStatus, IncomeTypeKey.AIRBNB],
     );
 
     // Monthly aggregation
@@ -91,19 +90,17 @@ export class AirbnbStatisticsService {
          $2,
          EXTRACT(YEAR FROM i."accountingDate")::SMALLINT,
          EXTRACT(MONTH FROM i."accountingDate")::SMALLINT,
-         COUNT(DISTINCT i.id)::TEXT
+         COUNT(i.id)::TEXT
        FROM income i
        LEFT JOIN transaction t ON t.id = i."transactionId"
-       INNER JOIN ownership o ON o."propertyId" = i."propertyId"
-       INNER JOIN "user" u ON u.id = o."userId"
+       INNER JOIN income_type it ON it.id = i."incomeTypeId"
        WHERE i."propertyId" = $1
          AND (i."transactionId" IS NULL OR t.status = $3)
-         AND i."incomeTypeId" = u."airbnbIncomeTypeId"
-         AND u."airbnbIncomeTypeId" IS NOT NULL
+         AND it.key = $4
        GROUP BY i."propertyId", EXTRACT(YEAR FROM i."accountingDate"), EXTRACT(MONTH FROM i."accountingDate")
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
-      [propertyId, statisticKey, acceptedStatus],
+      [propertyId, statisticKey, acceptedStatus, IncomeTypeKey.AIRBNB],
     );
   }
 
@@ -170,21 +167,6 @@ export class AirbnbStatisticsService {
     this.eventTracker.increment();
     try {
       await this.recalculateAirbnbVisits(event.transaction.propertyId);
-    } finally {
-      this.eventTracker.decrement();
-    }
-  }
-
-  @OnEvent(Events.User.AirbnbIncomeTypeChanged)
-  async handleAirbnbIncomeTypeChanged(
-    event: UserAirbnbIncomeTypeChangedEvent,
-  ): Promise<void> {
-    this.eventTracker.increment();
-    try {
-      // Recalculate statistics for all properties owned by this user
-      for (const propertyId of event.propertyIds) {
-        await this.recalculateAirbnbVisits(propertyId);
-      }
     } finally {
       this.eventTracker.decrement();
     }

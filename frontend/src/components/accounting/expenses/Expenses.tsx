@@ -265,7 +265,9 @@ function Expenses({ t }: WithTranslation) {
         const rows = expenses.map((expense) => ({
           id: expense.id,
           accountingDate: expense.accountingDate || null,
-          expenseTypeName: expense.expenseType?.name || "",
+          expenseTypeName: expense.expenseType?.key
+            ? t(`expenseTypes.${expense.expenseType.key}`)
+            : "",
           description: expense.description,
           quantity: expense.quantity,
           amount: expense.amount,

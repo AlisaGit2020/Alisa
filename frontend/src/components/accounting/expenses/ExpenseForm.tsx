@@ -107,13 +107,15 @@ function ExpenseForm({
         dataService={
           new DataService<ExpenseType>({
             context: expenseTypeContext,
-            fetchOptions: { order: { name: "ASC" } },
+            fetchOptions: { order: { key: "ASC" } },
           })
         }
         fieldName="expenseTypeId"
         value={data.expenseTypeId}
         onHandleChange={handleChange}
         disabled={isLinkedToTransaction}
+        t={t}
+        translateKeyPrefix="expenseTypes"
         {...getFieldErrorProps<ExpenseInput>(fieldErrors, "expenseTypeId")}
       />
 

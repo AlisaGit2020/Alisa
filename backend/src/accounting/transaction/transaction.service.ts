@@ -20,6 +20,7 @@ import {
   TransactionDeletedEvent,
 } from '@alisa-backend/common/events';
 import {
+  ExpenseTypeKey,
   TransactionStatus,
   TransactionType,
 } from '@alisa-backend/common/types';
@@ -35,6 +36,7 @@ import {
 } from '@alisa-backend/common/dtos/data-save-result.dto';
 import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
+import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
 
 @Injectable()
 export class TransactionService {
@@ -50,6 +52,7 @@ export class TransactionService {
 
     private authService: AuthService,
     private eventEmitter: EventEmitter2,
+    private expenseTypeService: ExpenseTypeService,
   ) {}
 
   async search(
@@ -464,6 +467,20 @@ export class TransactionService {
       throw new BadRequestException('No ids provided');
     }
 
+    // Look up expense types by their global keys
+    const [principalExpenseType, interestExpenseType, handlingFeeExpenseType] =
+      await Promise.all([
+        this.expenseTypeService.findByKey(ExpenseTypeKey.LOAN_PRINCIPAL),
+        this.expenseTypeService.findByKey(ExpenseTypeKey.LOAN_INTEREST),
+        this.expenseTypeService.findByKey(ExpenseTypeKey.LOAN_HANDLING_FEE),
+      ]);
+
+    if (!principalExpenseType || !interestExpenseType) {
+      throw new BadRequestException(
+        'Loan expense types not found. Please ensure the database is properly seeded.',
+      );
+    }
+
     const transactions = await this.repository.find({
       where: { id: In(input.ids) },
       relations: { expenses: true },
@@ -507,7 +524,7 @@ export class TransactionService {
 
         if (loanComponents.principal > 0) {
           expenses.push({
-            expenseTypeId: input.principalExpenseTypeId,
+            expenseTypeId: principalExpenseType.id,
             propertyId: transaction.propertyId,
             transactionId: transaction.id,
             description: 'Lainan lyhennys',
@@ -520,7 +537,7 @@ export class TransactionService {
 
         if (loanComponents.interest > 0) {
           expenses.push({
-            expenseTypeId: input.interestExpenseTypeId,
+            expenseTypeId: interestExpenseType.id,
             propertyId: transaction.propertyId,
             transactionId: transaction.id,
             description: 'Lainan korko',
@@ -531,9 +548,9 @@ export class TransactionService {
           });
         }
 
-        if (loanComponents.handlingFee > 0 && input.handlingFeeExpenseTypeId) {
+        if (loanComponents.handlingFee > 0 && handlingFeeExpenseType) {
           expenses.push({
-            expenseTypeId: input.handlingFeeExpenseTypeId,
+            expenseTypeId: handlingFeeExpenseType.id,
             propertyId: transaction.propertyId,
             transactionId: transaction.id,
             description: 'Lainakulut',

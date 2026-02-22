@@ -1,4 +1,27 @@
 const fi = {
+  expenseTypes: {
+    "housing-charge": "Taloyhtiön vastike",
+    "maintenance-charge": "Hoitovastike",
+    "financial-charge": "Rahoitusvastike",
+    repairs: "Korjaukset",
+    "capital-improvement": "Perusparannus",
+    insurance: "Vakuutus",
+    "property-tax": "Kiinteistövero",
+    water: "Vesimaksu",
+    electricity: "Sähkö",
+    "rental-brokerage": "Vuokranvälitys",
+    "loan-interest": "Lainan korko",
+    "loan-principal": "Lainan lyhennys",
+    "loan-handling-fee": "Lainan käsittelykulut",
+  },
+
+  incomeTypes: {
+    rental: "Vuokratulo",
+    airbnb: "Airbnb",
+    "capital-income": "Pääomatulo",
+    "insurance-compensation": "Vakuutuskorvaus",
+  },
+
   appBar: {
     admin: "Hallinta",
     language: "Kieli",

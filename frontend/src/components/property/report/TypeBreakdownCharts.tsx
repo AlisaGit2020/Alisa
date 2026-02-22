@@ -72,11 +72,13 @@ function TypeBreakdownCharts({
 
     transactions.forEach((tx) => {
       if (tx.type === TransactionType.EXPENSE && tx.expenses?.[0]?.expenseType) {
-        const typeName = tx.expenses[0].expenseType.name;
+        const expenseType = tx.expenses[0].expenseType;
+        const typeName = t(`expenseTypes.${expenseType.key}`);
         const current = expenseMap.get(typeName) || 0;
         expenseMap.set(typeName, current + Math.abs(tx.amount));
       } else if (tx.type === TransactionType.INCOME && tx.incomes?.[0]?.incomeType) {
-        const typeName = tx.incomes[0].incomeType.name;
+        const incomeType = tx.incomes[0].incomeType;
+        const typeName = t(`incomeTypes.${incomeType.key}`);
         const current = incomeMap.get(typeName) || 0;
         incomeMap.set(typeName, current + Math.abs(tx.amount));
       }
@@ -99,7 +101,7 @@ function TypeBreakdownCharts({
       .sort((a, b) => b.value - a.value);
 
     return { expensesByType, incomesByType };
-  }, [transactions]);
+  }, [transactions, t]);
 
   // Aggregate by transaction type
   const transactionTypeData = useMemo(() => {

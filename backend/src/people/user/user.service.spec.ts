@@ -138,9 +138,6 @@ describe('UserService', () => {
         lastName: 'Doe',
         email: 'john@example.com',
         photo: 'https://example.com/photo.jpg',
-        loanPrincipalExpenseTypeId: 1,
-        loanInterestExpenseTypeId: 2,
-        loanHandlingFeeExpenseTypeId: 3,
       };
       const savedUser = createUser({ id: 1, ...input });
       mockRepository.save.mockResolvedValue(savedUser);
@@ -238,25 +235,6 @@ describe('UserService', () => {
       expect(result.email).toBe('john@example.com');
     });
 
-    it('updates loan expense type ids', async () => {
-      const existingUser = createUser({ id: 1 });
-      const input = {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        loanPrincipalExpenseTypeId: 10,
-        loanInterestExpenseTypeId: 20,
-        loanHandlingFeeExpenseTypeId: 30,
-      };
-      mockRepository.findOne.mockResolvedValue(existingUser);
-      mockRepository.save.mockImplementation((user) => Promise.resolve(user));
-
-      const result = await service.update(1, input);
-
-      expect(result.loanPrincipalExpenseTypeId).toBe(10);
-      expect(result.loanInterestExpenseTypeId).toBe(20);
-      expect(result.loanHandlingFeeExpenseTypeId).toBe(30);
-    });
   });
 
   describe('delete', () => {

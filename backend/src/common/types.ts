@@ -100,3 +100,28 @@ export const propertyExternalSourceNames = new Map<
   [PropertyExternalSource.OIKOTIE, PropertyExternalSourceName.OIKOTIE],
   [PropertyExternalSource.ETUOVI, PropertyExternalSourceName.ETUOVI],
 ]);
+
+// Global expense type keys (translations are handled by i18n using these keys)
+export enum ExpenseTypeKey {
+  HOUSING_CHARGE = 'housing-charge',
+  MAINTENANCE_CHARGE = 'maintenance-charge',
+  FINANCIAL_CHARGE = 'financial-charge',
+  REPAIRS = 'repairs',
+  CAPITAL_IMPROVEMENT = 'capital-improvement',
+  INSURANCE = 'insurance',
+  PROPERTY_TAX = 'property-tax',
+  WATER = 'water',
+  ELECTRICITY = 'electricity',
+  RENTAL_BROKERAGE = 'rental-brokerage',
+  LOAN_INTEREST = 'loan-interest',
+  LOAN_PRINCIPAL = 'loan-principal',
+  LOAN_HANDLING_FEE = 'loan-handling-fee',
+}
+
+// Global income type keys (translations are handled by i18n using these keys)
+export enum IncomeTypeKey {
+  RENTAL = 'rental',
+  AIRBNB = 'airbnb',
+  CAPITAL_INCOME = 'capital-income',
+  INSURANCE_COMPENSATION = 'insurance-compensation',
+}

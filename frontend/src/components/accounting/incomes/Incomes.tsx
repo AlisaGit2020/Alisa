@@ -265,7 +265,9 @@ function Incomes({ t }: WithTranslation) {
         const rows = incomes.map((income) => ({
           id: income.id,
           accountingDate: income.accountingDate || null,
-          incomeTypeName: income.incomeType?.name || "",
+          incomeTypeName: income.incomeType?.key
+            ? t(`incomeTypes.${income.incomeType.key}`)
+            : "",
           description: income.description,
           quantity: income.quantity,
           amount: income.amount,

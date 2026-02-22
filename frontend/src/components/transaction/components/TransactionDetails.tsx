@@ -161,7 +161,9 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
               {data.expenses?.map((expense, index) => (
                 <Chip
                   key={`expense-${index}`}
-                  label={expense.expenseType?.name}
+                  label={expense.expenseType?.key
+                    ? t(`expenseTypes.${expense.expenseType.key}`)
+                    : ""}
                   variant="outlined"
                   color="error"
                   size="small"
@@ -170,7 +172,9 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
               {data.incomes?.map((income, index) => (
                 <Chip
                   key={`income-${index}`}
-                  label={income.incomeType?.name}
+                  label={income.incomeType?.key
+                    ? t(`incomeTypes.${income.incomeType.key}`)
+                    : ""}
                   variant="outlined"
                   color="success"
                   size="small"
@@ -256,7 +260,9 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
                     <Stack spacing={1}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Chip
-                          label={expense.expenseType?.name}
+                          label={expense.expenseType?.key
+                            ? t(`expenseTypes.${expense.expenseType.key}`)
+                            : ""}
                           color="error"
                           size="small"
                           variant="outlined"
@@ -305,7 +311,9 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
                     <Stack spacing={1}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Chip
-                          label={income.incomeType?.name}
+                          label={income.incomeType?.key
+                            ? t(`incomeTypes.${income.incomeType.key}`)
+                            : ""}
                           color="success"
                           size="small"
                           variant="outlined"

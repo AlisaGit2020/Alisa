@@ -107,13 +107,15 @@ function IncomeForm({
         dataService={
           new DataService<IncomeType>({
             context: incomeTypeContext,
-            fetchOptions: { order: { name: "ASC" } },
+            fetchOptions: { order: { key: "ASC" } },
           })
         }
         fieldName="incomeTypeId"
         value={data.incomeTypeId}
         onHandleChange={handleChange}
         disabled={isLinkedToTransaction}
+        t={t}
+        translateKeyPrefix="incomeTypes"
         {...getFieldErrorProps<IncomeInput>(fieldErrors, "incomeTypeId")}
       />
 

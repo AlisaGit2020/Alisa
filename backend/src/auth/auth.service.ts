@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserInputDto } from '../people/user/dtos/user-input.dto';
 import { UserService } from '../people/user/user.service';
 import { User } from '../people/user/entities/user.entity';
@@ -9,21 +8,14 @@ import { FindOptionsWhere } from 'typeorm';
 import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
 import { FindOptionsWhereWithUserId } from '@alisa-backend/common/types';
 import { UserSettingsInputDto } from './dtos/user-settings-input.dto';
-import { UserDefaultsService } from '@alisa-backend/defaults/user-defaults.service';
 import { TierService } from '@alisa-backend/admin/tier.service';
-import {
-  Events,
-  UserAirbnbIncomeTypeChangedEvent,
-} from '@alisa-backend/common/events';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private userService: UserService,
-    private userDefaultsService: UserDefaultsService,
     private tierService: TierService,
-    private eventEmitter: EventEmitter2,
   ) {}
 
   async login(user: UserInputDto) {
@@ -37,10 +29,6 @@ export class AuthService {
     } else {
       await this.userService.add(user);
       userEntity = await this.getUserByEmail(user.email);
-      await this.userDefaultsService.initializeDefaults(
-        userEntity.id,
-        userEntity.language,
-      );
 
       const defaultTier = await this.tierService.findDefault();
       if (defaultTier) {
@@ -86,30 +74,12 @@ export class AuthService {
     userId: number,
     input: UserSettingsInputDto,
   ): Promise<User> {
-    const user = await this.userService.findOne(userId, {
-      relations: ['ownerships'],
-    });
+    const user = await this.userService.findOne(userId);
     if (!user) {
       return null;
     }
 
-    const airbnbIncomeTypeChanged =
-      input.airbnbIncomeTypeId !== undefined &&
-      input.airbnbIncomeTypeId !== user.airbnbIncomeTypeId;
-
     // Update only settings fields
-    if (input.loanPrincipalExpenseTypeId !== undefined) {
-      user.loanPrincipalExpenseTypeId = input.loanPrincipalExpenseTypeId;
-    }
-    if (input.loanInterestExpenseTypeId !== undefined) {
-      user.loanInterestExpenseTypeId = input.loanInterestExpenseTypeId;
-    }
-    if (input.loanHandlingFeeExpenseTypeId !== undefined) {
-      user.loanHandlingFeeExpenseTypeId = input.loanHandlingFeeExpenseTypeId;
-    }
-    if (input.airbnbIncomeTypeId !== undefined) {
-      user.airbnbIncomeTypeId = input.airbnbIncomeTypeId;
-    }
     if (input.dashboardConfig !== undefined) {
       user.dashboardConfig = input.dashboardConfig;
     }
@@ -117,18 +87,7 @@ export class AuthService {
       user.language = input.language;
     }
 
-    const savedUser = await this.userService.save(user as UserInputDto);
-
-    // Emit event if airbnbIncomeTypeId changed to trigger statistics recalculation
-    if (airbnbIncomeTypeChanged && user.ownerships?.length > 0) {
-      const propertyIds = user.ownerships.map((o) => o.propertyId);
-      this.eventEmitter.emit(
-        Events.User.AirbnbIncomeTypeChanged,
-        new UserAirbnbIncomeTypeChangedEvent(userId, propertyIds),
-      );
-    }
-
-    return savedUser;
+    return await this.userService.save(user as UserInputDto);
   }
 
   async hasOwnership(

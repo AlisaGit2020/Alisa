@@ -37,11 +37,7 @@ interface ReviewStepProps {
   onClearSelection: () => void;
   onSetType: (type: number) => Promise<void>;
   onSetCategoryType: (expenseTypeId?: number, incomeTypeId?: number) => Promise<void>;
-  onSplitLoanPayment: (
-    principalExpenseTypeId: number,
-    interestExpenseTypeId: number,
-    handlingFeeExpenseTypeId?: number
-  ) => Promise<void>;
+  onSplitLoanPayment: () => Promise<void>;
   onDelete: () => Promise<void>;
   onNext: () => void;
   onBack: () => void;
@@ -131,12 +127,8 @@ export default function ReviewStep({
     await onSetCategoryType(expenseTypeId, incomeTypeId);
   };
 
-  const handleSplitLoanPayment = async (
-    principalExpenseTypeId: number,
-    interestExpenseTypeId: number,
-    handlingFeeExpenseTypeId?: number
-  ) => {
-    await onSplitLoanPayment(principalExpenseTypeId, interestExpenseTypeId, handlingFeeExpenseTypeId);
+  const handleSplitLoanPayment = async () => {
+    await onSplitLoanPayment();
     // Clear search to show remaining unknown rows
     setSearchText("");
   };

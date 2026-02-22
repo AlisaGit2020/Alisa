@@ -1,6 +1,10 @@
 const incomeTypes = {
-    add: 'Lägg till ny intäktstyp',
-    confirmDelete: 'Vill du ta bort intäktstypen?',
+    // Type display names (keyed by type.key)
+    'rental': 'Hyresintäkt',
+    'airbnb': 'Airbnb',
+    'capital-income': 'Kapitalinkomst',
+    'insurance-compensation': 'Försäkringsersättning',
+    // General labels
     incomeTypes: 'Intäktstyper',
     isTaxable: 'Skattepliktig',
 }

@@ -1,21 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DefaultsSeeder } from './defaults.seeder';
-import { ExpenseTypeDefault } from './entities/expense-type-default.entity';
-import { IncomeTypeDefault } from './entities/income-type-default.entity';
+import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
+import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
 
 describe('DefaultsSeeder', () => {
   let seeder: DefaultsSeeder;
-  let mockExpenseTypeDefaultRepo: Record<string, jest.Mock>;
-  let mockIncomeTypeDefaultRepo: Record<string, jest.Mock>;
+  let mockExpenseTypeRepo: Record<string, jest.Mock>;
+  let mockIncomeTypeRepo: Record<string, jest.Mock>;
 
   beforeEach(async () => {
-    mockExpenseTypeDefaultRepo = {
+    mockExpenseTypeRepo = {
       count: jest.fn(),
       save: jest.fn(),
     };
 
-    mockIncomeTypeDefaultRepo = {
+    mockIncomeTypeRepo = {
       count: jest.fn(),
       save: jest.fn(),
     };
@@ -24,12 +24,12 @@ describe('DefaultsSeeder', () => {
       providers: [
         DefaultsSeeder,
         {
-          provide: getRepositoryToken(ExpenseTypeDefault),
-          useValue: mockExpenseTypeDefaultRepo,
+          provide: getRepositoryToken(ExpenseType),
+          useValue: mockExpenseTypeRepo,
         },
         {
-          provide: getRepositoryToken(IncomeTypeDefault),
-          useValue: mockIncomeTypeDefaultRepo,
+          provide: getRepositoryToken(IncomeType),
+          useValue: mockIncomeTypeRepo,
         },
       ],
     }).compile();
@@ -37,101 +37,95 @@ describe('DefaultsSeeder', () => {
     seeder = module.get<DefaultsSeeder>(DefaultsSeeder);
   });
 
-  it('seeds 13 expense type defaults when table is empty', async () => {
-    mockExpenseTypeDefaultRepo.count.mockResolvedValue(0);
-    mockIncomeTypeDefaultRepo.count.mockResolvedValue(0);
-    mockExpenseTypeDefaultRepo.save.mockResolvedValue([]);
-    mockIncomeTypeDefaultRepo.save.mockResolvedValue([]);
+  it('seeds 13 global expense types when table is empty', async () => {
+    mockExpenseTypeRepo.count.mockResolvedValue(0);
+    mockIncomeTypeRepo.count.mockResolvedValue(0);
+    mockExpenseTypeRepo.save.mockResolvedValue({});
+    mockIncomeTypeRepo.save.mockResolvedValue({});
 
     await seeder.onModuleInit();
 
-    expect(mockExpenseTypeDefaultRepo.save).toHaveBeenCalledTimes(1);
-    const savedExpenseTypes = mockExpenseTypeDefaultRepo.save.mock.calls[0][0];
-    expect(savedExpenseTypes).toHaveLength(13);
+    // Each type is saved individually
+    expect(mockExpenseTypeRepo.save).toHaveBeenCalledTimes(13);
   });
 
-  it('seeds 4 income type defaults when table is empty', async () => {
-    mockExpenseTypeDefaultRepo.count.mockResolvedValue(0);
-    mockIncomeTypeDefaultRepo.count.mockResolvedValue(0);
-    mockExpenseTypeDefaultRepo.save.mockResolvedValue([]);
-    mockIncomeTypeDefaultRepo.save.mockResolvedValue([]);
+  it('seeds 4 global income types when table is empty', async () => {
+    mockExpenseTypeRepo.count.mockResolvedValue(0);
+    mockIncomeTypeRepo.count.mockResolvedValue(0);
+    mockExpenseTypeRepo.save.mockResolvedValue({});
+    mockIncomeTypeRepo.save.mockResolvedValue({});
 
     await seeder.onModuleInit();
 
-    expect(mockIncomeTypeDefaultRepo.save).toHaveBeenCalledTimes(1);
-    const savedIncomeTypes = mockIncomeTypeDefaultRepo.save.mock.calls[0][0];
-    expect(savedIncomeTypes).toHaveLength(4);
+    // Each type is saved individually
+    expect(mockIncomeTypeRepo.save).toHaveBeenCalledTimes(4);
   });
 
   it('does not seed expense types if data already exists', async () => {
-    mockExpenseTypeDefaultRepo.count.mockResolvedValue(13);
-    mockIncomeTypeDefaultRepo.count.mockResolvedValue(0);
-    mockIncomeTypeDefaultRepo.save.mockResolvedValue([]);
+    mockExpenseTypeRepo.count.mockResolvedValue(13);
+    mockIncomeTypeRepo.count.mockResolvedValue(0);
+    mockIncomeTypeRepo.save.mockResolvedValue({});
 
     await seeder.onModuleInit();
 
-    expect(mockExpenseTypeDefaultRepo.save).not.toHaveBeenCalled();
+    expect(mockExpenseTypeRepo.save).not.toHaveBeenCalled();
   });
 
   it('does not seed income types if data already exists', async () => {
-    mockExpenseTypeDefaultRepo.count.mockResolvedValue(0);
-    mockExpenseTypeDefaultRepo.save.mockResolvedValue([]);
-    mockIncomeTypeDefaultRepo.count.mockResolvedValue(4);
+    mockExpenseTypeRepo.count.mockResolvedValue(0);
+    mockExpenseTypeRepo.save.mockResolvedValue({});
+    mockIncomeTypeRepo.count.mockResolvedValue(4);
 
     await seeder.onModuleInit();
 
-    expect(mockIncomeTypeDefaultRepo.save).not.toHaveBeenCalled();
+    expect(mockIncomeTypeRepo.save).not.toHaveBeenCalled();
   });
 
-  it('seeds expense types with correct loan setting keys', async () => {
-    mockExpenseTypeDefaultRepo.count.mockResolvedValue(0);
-    mockIncomeTypeDefaultRepo.count.mockResolvedValue(0);
-    mockExpenseTypeDefaultRepo.save.mockResolvedValue([]);
-    mockIncomeTypeDefaultRepo.save.mockResolvedValue([]);
+  it('seeds expense types with loan-related keys', async () => {
+    mockExpenseTypeRepo.count.mockResolvedValue(0);
+    mockIncomeTypeRepo.count.mockResolvedValue(0);
+    mockExpenseTypeRepo.save.mockResolvedValue({});
+    mockIncomeTypeRepo.save.mockResolvedValue({});
 
     await seeder.onModuleInit();
 
-    const savedExpenseTypes = mockExpenseTypeDefaultRepo.save.mock.calls[0][0];
-    const withLoanKeys = savedExpenseTypes.filter(
-      (t: Partial<ExpenseTypeDefault>) => t.loanSettingKey,
+    const savedKeys = mockExpenseTypeRepo.save.mock.calls.map(
+      (call) => call[0].key,
     );
-    expect(withLoanKeys).toHaveLength(3);
-
-    const keys = withLoanKeys.map(
-      (t: Partial<ExpenseTypeDefault>) => t.loanSettingKey,
-    );
-    expect(keys).toContain('interest');
-    expect(keys).toContain('principal');
-    expect(keys).toContain('handlingFee');
+    expect(savedKeys).toContain('loan-interest');
+    expect(savedKeys).toContain('loan-principal');
+    expect(savedKeys).toContain('loan-handling-fee');
   });
 
-  it('seeds expense types with Swedish translations', async () => {
-    mockExpenseTypeDefaultRepo.count.mockResolvedValue(0);
-    mockIncomeTypeDefaultRepo.count.mockResolvedValue(0);
-    mockExpenseTypeDefaultRepo.save.mockResolvedValue([]);
-    mockIncomeTypeDefaultRepo.save.mockResolvedValue([]);
+  it('seeds expense types with unique keys', async () => {
+    mockExpenseTypeRepo.count.mockResolvedValue(0);
+    mockIncomeTypeRepo.count.mockResolvedValue(0);
+    mockExpenseTypeRepo.save.mockResolvedValue({});
+    mockIncomeTypeRepo.save.mockResolvedValue({});
 
     await seeder.onModuleInit();
 
-    const savedExpenseTypes = mockExpenseTypeDefaultRepo.save.mock.calls[0][0];
-    const allHaveSwedish = savedExpenseTypes.every(
-      (t: Partial<ExpenseTypeDefault>) => t.nameSv && t.nameSv.length > 0,
+    const savedKeys = mockExpenseTypeRepo.save.mock.calls.map(
+      (call) => call[0].key,
     );
-    expect(allHaveSwedish).toBe(true);
+    const uniqueKeys = new Set(savedKeys);
+    expect(uniqueKeys.size).toBe(13);
   });
 
-  it('seeds income types with Swedish translations', async () => {
-    mockExpenseTypeDefaultRepo.count.mockResolvedValue(0);
-    mockIncomeTypeDefaultRepo.count.mockResolvedValue(0);
-    mockExpenseTypeDefaultRepo.save.mockResolvedValue([]);
-    mockIncomeTypeDefaultRepo.save.mockResolvedValue([]);
+  it('seeds income types with unique keys', async () => {
+    mockExpenseTypeRepo.count.mockResolvedValue(0);
+    mockIncomeTypeRepo.count.mockResolvedValue(0);
+    mockExpenseTypeRepo.save.mockResolvedValue({});
+    mockIncomeTypeRepo.save.mockResolvedValue({});
 
     await seeder.onModuleInit();
 
-    const savedIncomeTypes = mockIncomeTypeDefaultRepo.save.mock.calls[0][0];
-    const allHaveSwedish = savedIncomeTypes.every(
-      (t: Partial<IncomeTypeDefault>) => t.nameSv && t.nameSv.length > 0,
+    const savedKeys = mockIncomeTypeRepo.save.mock.calls.map(
+      (call) => call[0].key,
     );
-    expect(allHaveSwedish).toBe(true);
+    const uniqueKeys = new Set(savedKeys);
+    expect(uniqueKeys.size).toBe(4);
+    expect(savedKeys).toContain('airbnb');
+    expect(savedKeys).toContain('rental');
   });
 });

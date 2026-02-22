@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import type { DashboardConfig } from '@alisa-backend/common/dashboard-config';
 
 export class UserInputDto {
@@ -16,22 +16,6 @@ export class UserInputDto {
   language?: string;
 
   photo?: string;
-
-  @IsOptional()
-  @IsNumber()
-  loanPrincipalExpenseTypeId?: number;
-
-  @IsOptional()
-  @IsNumber()
-  loanInterestExpenseTypeId?: number;
-
-  @IsOptional()
-  @IsNumber()
-  loanHandlingFeeExpenseTypeId?: number;
-
-  @IsOptional()
-  @IsNumber()
-  airbnbIncomeTypeId?: number;
 
   @IsOptional()
   dashboardConfig?: DashboardConfig;

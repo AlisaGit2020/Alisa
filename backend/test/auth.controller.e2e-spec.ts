@@ -14,8 +14,6 @@ import {
 } from './helper-functions';
 import * as http from 'http';
 import { DataSource } from 'typeorm';
-import { ExpenseTypeDefault } from '@alisa-backend/defaults/entities/expense-type-default.entity';
-import { IncomeTypeDefault } from '@alisa-backend/defaults/entities/income-type-default.entity';
 import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
 import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
 import { User } from '@alisa-backend/people/user/entities/user.entity';
@@ -104,27 +102,6 @@ describe('AuthController (e2e)', () => {
   });
 
   describe('PUT /auth/user/settings', () => {
-    it('updates user loan expense type settings', async () => {
-      const user = testUsers.user1WithProperties;
-      const token = await getUserAccessToken2(authService, user.jwtUser);
-
-      const settingsInput = {
-        loanPrincipalExpenseTypeId: 1,
-        loanInterestExpenseTypeId: 2,
-        loanHandlingFeeExpenseTypeId: 3,
-      };
-
-      const response = await request(server)
-        .put('/auth/user/settings')
-        .set('Authorization', getBearerToken(token))
-        .send(settingsInput)
-        .expect(200);
-
-      expect(response.body.loanPrincipalExpenseTypeId).toBe(1);
-      expect(response.body.loanInterestExpenseTypeId).toBe(2);
-      expect(response.body.loanHandlingFeeExpenseTypeId).toBe(3);
-    });
-
     it('updates user dashboard config', async () => {
       const user = testUsers.user1WithProperties;
       const token = await getUserAccessToken2(authService, user.jwtUser);
@@ -148,23 +125,6 @@ describe('AuthController (e2e)', () => {
       expect(response.body.dashboardConfig.widgets).toHaveLength(2);
       expect(response.body.dashboardConfig.widgets[0].id).toBe('widget1');
       expect(response.body.dashboardConfig.widgets[0].visible).toBe(true);
-    });
-
-    it('allows partial settings update', async () => {
-      const user = testUsers.user2WithProperties;
-      const token = await getUserAccessToken2(authService, user.jwtUser);
-
-      const settingsInput = {
-        loanPrincipalExpenseTypeId: 5,
-      };
-
-      const response = await request(server)
-        .put('/auth/user/settings')
-        .set('Authorization', getBearerToken(token))
-        .send(settingsInput)
-        .expect(200);
-
-      expect(response.body.loanPrincipalExpenseTypeId).toBe(5);
     });
 
     it('updates user language', async () => {
@@ -194,7 +154,7 @@ describe('AuthController (e2e)', () => {
     it('returns 401 when not authenticated', async () => {
       await request(server)
         .put('/auth/user/settings')
-        .send({ loanPrincipalExpenseTypeId: 1 })
+        .send({ language: 'en' })
         .expect(401);
     });
 
@@ -203,7 +163,7 @@ describe('AuthController (e2e)', () => {
       const token = await getUserAccessToken2(authService, user.jwtUser);
 
       const settingsInput = {
-        loanPrincipalExpenseTypeId: 10,
+        language: 'fi',
       };
 
       const response = await request(server)
@@ -247,18 +207,20 @@ describe('AuthController (e2e)', () => {
       const token1 = await getUserAccessToken2(authService, user1.jwtUser);
       const token2 = await getUserAccessToken2(authService, user2.jwtUser);
 
+      // Update user1's language
       await request(server)
         .put('/auth/user/settings')
         .set('Authorization', getBearerToken(token1))
-        .send({ loanPrincipalExpenseTypeId: 99 })
+        .send({ language: 'sv' })
         .expect(200);
 
+      // User2's language should not be affected
       const response2 = await request(server)
         .get('/auth/user')
         .set('Authorization', getBearerToken(token2))
         .expect(200);
 
-      expect(response2.body.loanPrincipalExpenseTypeId).not.toBe(99);
+      expect(response2.body.language).not.toBe('sv');
     });
   });
 
@@ -279,13 +241,43 @@ describe('AuthController (e2e)', () => {
     });
   });
 
-  describe('User defaults', () => {
+  describe('Global types', () => {
+    it('global expense types are seeded and available', async () => {
+      const expenseTypeRepo = dataSource.getRepository(ExpenseType);
+      const expenseTypes = await expenseTypeRepo.find();
+
+      // Should have 13 global expense types seeded by DefaultsSeeder
+      expect(expenseTypes.length).toBe(13);
+
+      // Verify some expected keys exist
+      const keys = expenseTypes.map((t) => t.key);
+      expect(keys).toContain('loan-interest');
+      expect(keys).toContain('loan-principal');
+      expect(keys).toContain('loan-handling-fee');
+      expect(keys).toContain('housing-charge');
+    });
+
+    it('global income types are seeded and available', async () => {
+      const incomeTypeRepo = dataSource.getRepository(IncomeType);
+      const incomeTypes = await incomeTypeRepo.find();
+
+      // Should have 4 global income types seeded by DefaultsSeeder
+      expect(incomeTypes.length).toBe(4);
+
+      // Verify some expected keys exist
+      const keys = incomeTypes.map((t) => t.key);
+      expect(keys).toContain('rental');
+      expect(keys).toContain('airbnb');
+      expect(keys).toContain('capital-income');
+      expect(keys).toContain('insurance-compensation');
+    });
+  });
+
+  describe('Language persistence on re-login', () => {
     beforeEach(async () => {
       await emptyTables(dataSource, [
         'expense',
-        'expense_type',
         'income',
-        'income_type',
         'transaction',
         'ownership',
         'user',
@@ -294,238 +286,57 @@ describe('AuthController (e2e)', () => {
       ]);
     });
 
-    describe('Default templates seeding', () => {
-      it('seeds default expense types on app startup', async () => {
-        const repo = dataSource.getRepository(ExpenseTypeDefault);
-        const defaults = await repo.find();
-
-        expect(defaults.length).toBe(13);
+    it('preserves user language preference on subsequent logins', async () => {
+      // First login - user gets Finnish from Google profile
+      await authService.login({
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'langtest@test.com',
+        language: 'fi',
       });
 
-      it('seeds default income types on app startup', async () => {
-        const repo = dataSource.getRepository(IncomeTypeDefault);
-        const defaults = await repo.find();
-
-        expect(defaults.length).toBe(4);
+      // User changes language to English via settings
+      const userRepo = dataSource.getRepository(User);
+      let user = await userRepo.findOne({
+        where: { email: 'langtest@test.com' },
       });
+      await authService.updateUserSettings(user.id, { language: 'en' });
+
+      // Verify language was changed
+      user = await userRepo.findOne({
+        where: { email: 'langtest@test.com' },
+      });
+      expect(user.language).toBe('en');
+
+      // Second login - Google sends Finnish again
+      await authService.login({
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'langtest@test.com',
+        language: 'fi',
+      });
+
+      // Language should still be English (user preference preserved)
+      user = await userRepo.findOne({
+        where: { email: 'langtest@test.com' },
+      });
+      expect(user.language).toBe('en');
     });
 
-    describe('New user initialization', () => {
-      it('creates 13 expense types for a new user after first login', async () => {
-        await authService.login({
-          firstName: 'New',
-          lastName: 'User',
-          email: 'new@test.com',
-          language: 'fi',
-        });
-
-        const userRepo = dataSource.getRepository(User);
-        const user = await userRepo.findOne({
-          where: { email: 'new@test.com' },
-        });
-
-        const expenseTypeRepo = dataSource.getRepository(ExpenseType);
-        const expenseTypes = await expenseTypeRepo.find({
-          where: { userId: user.id },
-        });
-
-        expect(expenseTypes.length).toBe(13);
+    it('sets language on first login from Google profile', async () => {
+      await authService.login({
+        firstName: 'New',
+        lastName: 'User',
+        email: 'newlang@test.com',
+        language: 'en',
       });
 
-      it('creates 4 income types for a new user after first login', async () => {
-        await authService.login({
-          firstName: 'New',
-          lastName: 'User',
-          email: 'new2@test.com',
-          language: 'fi',
-        });
-
-        const userRepo = dataSource.getRepository(User);
-        const user = await userRepo.findOne({
-          where: { email: 'new2@test.com' },
-        });
-
-        const incomeTypeRepo = dataSource.getRepository(IncomeType);
-        const incomeTypes = await incomeTypeRepo.find({
-          where: { userId: user.id },
-        });
-
-        expect(incomeTypes.length).toBe(4);
+      const userRepo = dataSource.getRepository(User);
+      const user = await userRepo.findOne({
+        where: { email: 'newlang@test.com' },
       });
 
-      it('uses Finnish names when user language is fi', async () => {
-        await authService.login({
-          firstName: 'Finnish',
-          lastName: 'User',
-          email: 'fi@test.com',
-          language: 'fi',
-        });
-
-        const userRepo = dataSource.getRepository(User);
-        const user = await userRepo.findOne({
-          where: { email: 'fi@test.com' },
-        });
-
-        const expenseTypeRepo = dataSource.getRepository(ExpenseType);
-        const expenseTypes = await expenseTypeRepo.find({
-          where: { userId: user.id },
-        });
-
-        const names = expenseTypes.map((t) => t.name);
-        expect(names).toContain('Yhtiövastike');
-        expect(names).toContain('Lainan korko');
-      });
-
-      it('uses English names when user language is en', async () => {
-        await authService.login({
-          firstName: 'English',
-          lastName: 'User',
-          email: 'en@test.com',
-          language: 'en',
-        });
-
-        const userRepo = dataSource.getRepository(User);
-        const user = await userRepo.findOne({
-          where: { email: 'en@test.com' },
-        });
-
-        const expenseTypeRepo = dataSource.getRepository(ExpenseType);
-        const expenseTypes = await expenseTypeRepo.find({
-          where: { userId: user.id },
-        });
-
-        const names = expenseTypes.map((t) => t.name);
-        expect(names).toContain('Housing company charge');
-        expect(names).toContain('Loan interest');
-      });
-
-      it('maps loan settings on user entity', async () => {
-        await authService.login({
-          firstName: 'Loan',
-          lastName: 'User',
-          email: 'loan@test.com',
-          language: 'fi',
-        });
-
-        const userRepo = dataSource.getRepository(User);
-        const user = await userRepo.findOne({
-          where: { email: 'loan@test.com' },
-        });
-
-        expect(user.loanInterestExpenseTypeId).toBeDefined();
-        expect(user.loanPrincipalExpenseTypeId).toBeDefined();
-        expect(user.loanHandlingFeeExpenseTypeId).toBeDefined();
-
-        // Verify they point to actual expense types
-        const expenseTypeRepo = dataSource.getRepository(ExpenseType);
-
-        const interestType = await expenseTypeRepo.findOne({
-          where: { id: user.loanInterestExpenseTypeId },
-        });
-        expect(interestType).toBeDefined();
-        expect(interestType.name).toBe('Lainan korko');
-
-        const principalType = await expenseTypeRepo.findOne({
-          where: { id: user.loanPrincipalExpenseTypeId },
-        });
-        expect(principalType).toBeDefined();
-        expect(principalType.name).toBe('Lainan lyhennys');
-
-        const handlingFeeType = await expenseTypeRepo.findOne({
-          where: { id: user.loanHandlingFeeExpenseTypeId },
-        });
-        expect(handlingFeeType).toBeDefined();
-        expect(handlingFeeType.name).toBe('Lainan käsittelykulut');
-      });
-
-      it('does not duplicate types on re-login', async () => {
-        const userInput = {
-          firstName: 'Repeat',
-          lastName: 'User',
-          email: 'repeat@test.com',
-          language: 'fi',
-        };
-
-        // First login
-        await authService.login(userInput);
-
-        // Second login
-        await authService.login(userInput);
-
-        const userRepo = dataSource.getRepository(User);
-        const user = await userRepo.findOne({
-          where: { email: 'repeat@test.com' },
-        });
-
-        const expenseTypeRepo = dataSource.getRepository(ExpenseType);
-        const expenseTypes = await expenseTypeRepo.find({
-          where: { userId: user.id },
-        });
-
-        expect(expenseTypes.length).toBe(13);
-
-        const incomeTypeRepo = dataSource.getRepository(IncomeType);
-        const incomeTypes = await incomeTypeRepo.find({
-          where: { userId: user.id },
-        });
-
-        expect(incomeTypes.length).toBe(4);
-      });
-    });
-
-    describe('Language persistence on re-login', () => {
-      it('preserves user language preference on subsequent logins', async () => {
-        // First login - user gets Finnish from Google profile
-        await authService.login({
-          firstName: 'Test',
-          lastName: 'User',
-          email: 'langtest@test.com',
-          language: 'fi',
-        });
-
-        // User changes language to English via settings
-        const userRepo = dataSource.getRepository(User);
-        let user = await userRepo.findOne({
-          where: { email: 'langtest@test.com' },
-        });
-        await authService.updateUserSettings(user.id, { language: 'en' });
-
-        // Verify language was changed
-        user = await userRepo.findOne({
-          where: { email: 'langtest@test.com' },
-        });
-        expect(user.language).toBe('en');
-
-        // Second login - Google sends Finnish again
-        await authService.login({
-          firstName: 'Test',
-          lastName: 'User',
-          email: 'langtest@test.com',
-          language: 'fi',
-        });
-
-        // Language should still be English (user preference preserved)
-        user = await userRepo.findOne({
-          where: { email: 'langtest@test.com' },
-        });
-        expect(user.language).toBe('en');
-      });
-
-      it('sets language on first login from Google profile', async () => {
-        await authService.login({
-          firstName: 'New',
-          lastName: 'User',
-          email: 'newlang@test.com',
-          language: 'en',
-        });
-
-        const userRepo = dataSource.getRepository(User);
-        const user = await userRepo.findOne({
-          where: { email: 'newlang@test.com' },
-        });
-
-        expect(user.language).toBe('en');
-      });
+      expect(user.language).toBe('en');
     });
   });
 });

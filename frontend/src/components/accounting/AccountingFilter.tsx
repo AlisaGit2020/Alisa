@@ -52,29 +52,34 @@ function AccountingFilter({
   onEndDateChange,
   onReset,
 }: AccountingFilterProps) {
-  const [types, setTypes] = useState<{ id: number; name: string }[]>([]);
+  const [types, setTypes] = useState<{ id: number; key: string }[]>([]);
 
   useEffect(() => {
     const fetchTypes = async () => {
       if (mode === "expense") {
         const service = new DataService<ExpenseType>({
           context: expenseTypeContext,
-          fetchOptions: { order: { name: "ASC" } },
+          fetchOptions: { order: { key: "ASC" } },
         });
         const fetchedData = await service.search();
-        setTypes(fetchedData.map((t) => ({ id: t.id, name: t.name })));
+        setTypes(fetchedData.map((type) => ({ id: type.id, key: type.key })));
       } else {
         const service = new DataService<IncomeType>({
           context: incomeTypeContext,
-          fetchOptions: { order: { name: "ASC" } },
+          fetchOptions: { order: { key: "ASC" } },
         });
         const fetchedData = await service.search();
-        setTypes(fetchedData.map((t) => ({ id: t.id, name: t.name })));
+        setTypes(fetchedData.map((type) => ({ id: type.id, key: type.key })));
       }
     };
 
     fetchTypes();
   }, [mode]);
+
+  const getTypeTranslation = (typeItem: { id: number; key: string }): string => {
+    const prefix = mode === "expense" ? "expenseTypes" : "incomeTypes";
+    return t(`${prefix}.${typeItem.key}`);
+  };
 
   const handleTypeChange = (event: SelectChangeEvent<number[]>) => {
     const value = event.target.value;
@@ -87,8 +92,8 @@ function AccountingFilter({
     }
     return selected
       .map((id) => {
-        const type = types.find((t) => t.id === id);
-        return type ? type.name : "";
+        const type = types.find((typeItem) => typeItem.id === id);
+        return type ? getTypeTranslation(type) : "";
       })
       .join(", ");
   };
@@ -104,8 +109,8 @@ function AccountingFilter({
     if (data.typeIds.length > 0) {
       const typeNames = data.typeIds
         .map((id) => {
-          const type = types.find((t) => t.id === id);
-          return type ? type.name : "";
+          const type = types.find((typeItem) => typeItem.id === id);
+          return type ? getTypeTranslation(type) : "";
         })
         .join(", ");
       filters.push(
@@ -158,7 +163,7 @@ function AccountingFilter({
                 {types.map((type) => (
                   <MenuItem key={type.id} value={type.id}>
                     <Checkbox checked={data.typeIds.includes(type.id)} />
-                    <ListItemText primary={type.name} />
+                    <ListItemText primary={getTypeTranslation(type)} />
                   </MenuItem>
                 ))}
               </Select>

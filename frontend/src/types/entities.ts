@@ -37,12 +37,6 @@ export interface User {
   tier?: Tier;
   tierId?: number;
   ownerships?: Ownership[];
-  expenseTypes?: ExpenseType[];
-  incomeTypes?: IncomeType[];
-  loanPrincipalExpenseTypeId?: number;
-  loanInterestExpenseTypeId?: number;
-  loanHandlingFeeExpenseTypeId?: number;
-  airbnbIncomeTypeId?: number;
   dashboardConfig?: DashboardConfig;
   isAdmin: boolean;
 }
@@ -87,26 +81,20 @@ export interface PropertyStatistics {
   value: string;
 }
 
-// ExpenseType
+// ExpenseType - Global types shared by all users (translations via i18n using key)
 export interface ExpenseType {
   id: number;
-  user?: User;
-  userId: number;
+  key: string;
   expenses?: Expense[];
-  name: string;
-  description: string;
   isTaxDeductible: boolean;
   isCapitalImprovement: boolean;
 }
 
-// IncomeType
+// IncomeType - Global types shared by all users (translations via i18n using key)
 export interface IncomeType {
   id: number;
-  user?: User;
-  userId: number;
+  key: string;
   incomes?: Income[];
-  name: string;
-  description: string;
   isTaxable: boolean;
 }
 

@@ -1,4 +1,27 @@
 const sv = {
+  expenseTypes: {
+    "housing-charge": "Bostadsbolagsavgift",
+    "maintenance-charge": "Underhållsavgift",
+    "financial-charge": "Finansieringsavgift",
+    repairs: "Reparationer",
+    "capital-improvement": "Kapitalförbättring",
+    insurance: "Försäkring",
+    "property-tax": "Fastighetsskatt",
+    water: "Vattenavgift",
+    electricity: "El",
+    "rental-brokerage": "Hyresförmedling",
+    "loan-interest": "Låneränta",
+    "loan-principal": "Låneamortering",
+    "loan-handling-fee": "Låneavgifter",
+  },
+
+  incomeTypes: {
+    rental: "Hyresintäkt",
+    airbnb: "Airbnb",
+    "capital-income": "Kapitalinkomst",
+    "insurance-compensation": "Försäkringsersättning",
+  },
+
   appBar: {
     admin: "Admin",
     language: "Språk",

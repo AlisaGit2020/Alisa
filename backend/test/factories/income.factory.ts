@@ -1,5 +1,6 @@
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
 import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
+import { IncomeTypeKey } from '@alisa-backend/common/types';
 
 export interface CreateIncomeOptions {
   id?: number;
@@ -31,9 +32,8 @@ export const createIncome = (options: CreateIncomeOptions = {}): Income => {
 
 export interface CreateIncomeTypeOptions {
   id?: number;
-  userId?: number;
-  name?: string;
-  description?: string;
+  key?: IncomeTypeKey;
+  isTaxable?: boolean;
 }
 
 export const createIncomeType = (
@@ -41,8 +41,7 @@ export const createIncomeType = (
 ): IncomeType => {
   const incomeType = new IncomeType();
   incomeType.id = options.id ?? 1;
-  incomeType.userId = options.userId ?? 1;
-  incomeType.name = options.name ?? 'Test Income Type';
-  incomeType.description = options.description ?? 'Test Description';
+  incomeType.key = options.key ?? IncomeTypeKey.RENTAL;
+  incomeType.isTaxable = options.isTaxable ?? true;
   return incomeType;
 };

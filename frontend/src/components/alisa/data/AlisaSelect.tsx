@@ -1,8 +1,9 @@
 import React, { ChangeEventHandler, useState } from "react";
 import AlisaSelectField from "../form/AlisaSelectField.tsx";
 import DataService from "@alisa-lib/data-service.ts";
+import { TFunction } from "i18next";
 
-interface InputProps<T1, T2 extends { id: number; name: string }> {
+interface InputProps<T1, T2 extends { id: number; name?: string; key?: string }> {
   onHandleChange: (fieldName: keyof T1, value: T1[keyof T1]) => void;
   label: string;
   fieldName: keyof T1;
@@ -13,9 +14,11 @@ interface InputProps<T1, T2 extends { id: number; name: string }> {
   disabled?: boolean;
   error?: boolean;
   helperText?: string;
+  t?: TFunction;
+  translateKeyPrefix?: string;
 }
 
-function AlisaSelect<T1, T2 extends { id: number; name: string }>({
+function AlisaSelect<T1, T2 extends { id: number; name?: string; key?: string }>({
   onHandleChange,
   label,
   fieldName,
@@ -26,6 +29,8 @@ function AlisaSelect<T1, T2 extends { id: number; name: string }>({
   disabled,
   error,
   helperText,
+  t,
+  translateKeyPrefix,
 }: InputProps<T1, T2>) {
   const [data, setData] = useState<T2[]>([]);
 
@@ -71,6 +76,8 @@ function AlisaSelect<T1, T2 extends { id: number; name: string }>({
         disabled={disabled}
         error={error}
         helperText={helperText}
+        t={t}
+        translateKeyPrefix={translateKeyPrefix}
       ></AlisaSelectField>
     );
   }

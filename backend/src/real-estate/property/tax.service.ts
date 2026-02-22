@@ -289,7 +289,7 @@ export class TaxService {
     const result = await this.dataSource.query(
       `SELECT
          e."propertyId",
-         et.name as category,
+         et.key as category,
          COALESCE(SUM(e."totalAmount"), 0) as amount
        FROM expense e
        LEFT JOIN transaction t ON t.id = e."transactionId"
@@ -299,8 +299,8 @@ export class TaxService {
          AND EXTRACT(YEAR FROM e."accountingDate") = $3
          AND et."isTaxDeductible" = true
          AND et."isCapitalImprovement" = false
-       GROUP BY e."propertyId", et.id, et.name
-       ORDER BY et.name`,
+       GROUP BY e."propertyId", et.id, et.key
+       ORDER BY et.key`,
       [propertyIdsArray, TransactionStatus.ACCEPTED, year],
     );
 

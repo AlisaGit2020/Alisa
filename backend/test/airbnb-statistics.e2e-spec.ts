@@ -5,7 +5,6 @@ import { AppModule } from '../src/app.module';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
 import {
-  addIncomeAndExpenseTypes,
   closeAppGracefully,
   getBearerToken,
   getTestUsers,
@@ -13,10 +12,9 @@ import {
   TestUser,
   TestUsersSetup,
 } from './helper-functions';
-import { StatisticKey } from '@alisa-backend/common/types';
+import { IncomeTypeKey, StatisticKey } from '@alisa-backend/common/types';
 import { IncomeService } from '@alisa-backend/accounting/income/income.service';
 import { IncomeTypeService } from '@alisa-backend/accounting/income/income-type.service';
-import { UserService } from '@alisa-backend/people/user/user.service';
 import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
 import * as http from 'http';
 
@@ -27,7 +25,6 @@ describe('AirbnbStatisticsService (e2e)', () => {
   let eventTracker: EventTrackerService;
   let incomeService: IncomeService;
   let incomeTypeService: IncomeTypeService;
-  let userService: UserService;
   let testUsers: TestUsersSetup;
   let mainUser: TestUser;
   let airbnbIncomeTypeId: number;
@@ -46,26 +43,14 @@ describe('AirbnbStatisticsService (e2e)', () => {
     eventTracker = app.get(EventTrackerService);
     incomeService = app.get(IncomeService);
     incomeTypeService = app.get(IncomeTypeService);
-    userService = app.get(UserService);
 
     await prepareDatabase(app);
     testUsers = await getTestUsers(app);
     mainUser = testUsers.user1WithProperties;
 
-    // Add income and expense types needed for tests
-    await addIncomeAndExpenseTypes(mainUser.jwtUser, app);
-
-    // Create a special Airbnb income type
-    const airbnbType = await incomeTypeService.add(mainUser.jwtUser, {
-      name: 'Airbnb Rental',
-      description: 'Income from Airbnb rentals',
-    });
+    // Get the global Airbnb income type ID (seeded by DefaultsSeeder)
+    const airbnbType = await incomeTypeService.findByKey(IncomeTypeKey.AIRBNB);
     airbnbIncomeTypeId = airbnbType.id;
-
-    // Set user's airbnbIncomeTypeId setting
-    const user = await userService.findOne(mainUser.user.id);
-    user.airbnbIncomeTypeId = airbnbIncomeTypeId;
-    await userService.save(user);
   });
 
   afterAll(async () => {
@@ -247,13 +232,16 @@ describe('AirbnbStatisticsService (e2e)', () => {
         StatisticKey.AIRBNB_VISITS,
       );
 
-      // Create income with a different income type (using incomeType 1 from addIncomeTypes)
+      // Get a non-airbnb income type (rental)
+      const rentalType = await incomeTypeService.findByKey(IncomeTypeKey.RENTAL);
+
+      // Create income with a different income type
       const nonAirbnbIncome: IncomeInputDto = {
         description: 'Regular rental income',
         amount: 500,
         quantity: 1,
         totalAmount: 500,
-        incomeTypeId: 1, // Regular income type, not Airbnb
+        incomeTypeId: rentalType.id,
         propertyId,
         accountingDate: new Date('2024-06-01'),
       };
