@@ -14,8 +14,6 @@ import {
 } from "@mui/material";
 import AlisaButton from "../../../alisa/form/AlisaButton";
 import SearchIcon from "@mui/icons-material/Search";
-import RuleIcon from "@mui/icons-material/Rule";
-import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
 type SearchField = "all" | "sender" | "receiver" | "description" | "amount";
@@ -254,26 +252,11 @@ export default function ReviewStep({
         onSplitLoanPayment={handleSplitLoanPayment}
         onCancel={handleCancel}
         onDelete={onDelete}
+        onOpenAllocationRules={() => setRulesModalOpen(true)}
+        onAutoAllocate={handleAutoAllocate}
+        autoAllocateDisabled={!hasUnknownTransactions || !propertyId}
+        isAllocating={isAllocating}
       />
-
-      {/* Allocation buttons */}
-      <Stack direction="row" spacing={1} sx={{ mb: 2, mt: selectedIds.length > 0 ? 2 : 0 }}>
-        <AlisaButton
-          label={t("allocation:rules")}
-          variant="outlined"
-          size="small"
-          startIcon={<RuleIcon />}
-          onClick={() => setRulesModalOpen(true)}
-        />
-        <AlisaButton
-          label={t("allocation:autoAllocate")}
-          variant="contained"
-          size="small"
-          startIcon={<AutoFixHighIcon />}
-          onClick={handleAutoAllocate}
-          disabled={!hasUnknownTransactions || isAllocating || !propertyId}
-        />
-      </Stack>
 
       {/* Filter controls */}
       <Stack direction="row" spacing={2} sx={{ mb: 2 }} alignItems="center">

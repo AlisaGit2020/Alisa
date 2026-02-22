@@ -10,6 +10,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import SaveIcon from "@mui/icons-material/Save";
+import RuleIcon from "@mui/icons-material/Rule";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import { AlisaCloseIcon } from "../../alisa/AlisaIcons.tsx";
 import Typography from "@mui/material/Typography";
 import {
@@ -38,6 +40,10 @@ interface TransactionsPendingActionsProps extends WithTranslation {
   onSetCategoryType: (expenseTypeId?: number, incomeTypeId?: number) => Promise<void>;
   onSplitLoanPayment: () => Promise<void>;
   onDelete: () => void;
+  onOpenAllocationRules?: () => void;
+  onAutoAllocate?: () => void;
+  autoAllocateDisabled?: boolean;
+  isAllocating?: boolean;
 }
 
 interface CategoryTypeData {
@@ -246,33 +252,54 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
           </Box>
         </Box>
 
-        {/* Section 2: Automatic Allocation (Loan Splitting) */}
-        {!props.hideSplitLoanPayment && (
+        {/* Section 2: Automatic Allocation */}
+        {(!props.hideSplitLoanPayment || props.onOpenAllocationRules || props.onAutoAllocate) && (
           <Box
             sx={{
               border: 1,
               borderColor: "divider",
               borderRadius: 1,
               p: 1.5,
-              opacity: supportsLoanSplit ? 1 : 0.6,
             }}
           >
-            <Typography variant="subtitle2" sx={{ mb: 0.5, fontWeight: "bold" }}>
+            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: "bold" }}>
               {props.t("automaticAllocation")}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-              {supportsLoanSplit
-                ? props.t("automaticAllocationDescription")
-                : props.t("automaticAllocationNotSupported", { bank: props.bankName || "This" })}
-            </Typography>
 
-            {supportsLoanSplit && (
-              <AlisaButton
-                label={props.t("splitLoanPayment")}
-                variant="text"
-                onClick={handleLoanSplit}
-                endIcon={<CallSplitIcon />}
-              />
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {props.onOpenAllocationRules && (
+                <AlisaButton
+                  label={props.t("allocation:rules")}
+                  variant="outlined"
+                  size="small"
+                  startIcon={<RuleIcon />}
+                  onClick={props.onOpenAllocationRules}
+                />
+              )}
+              {props.onAutoAllocate && (
+                <AlisaButton
+                  label={props.t("allocation:autoAllocate")}
+                  variant="contained"
+                  size="small"
+                  startIcon={<AutoFixHighIcon />}
+                  onClick={props.onAutoAllocate}
+                  disabled={props.autoAllocateDisabled || props.isAllocating}
+                />
+              )}
+              {!props.hideSplitLoanPayment && supportsLoanSplit && (
+                <AlisaButton
+                  label={props.t("splitLoanPayment")}
+                  variant="text"
+                  onClick={handleLoanSplit}
+                  endIcon={<CallSplitIcon />}
+                />
+              )}
+            </Stack>
+
+            {!props.hideSplitLoanPayment && !supportsLoanSplit && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                {props.t("automaticAllocationNotSupported", { bank: props.bankName || "This" })}
+              </Typography>
             )}
           </Box>
         )}

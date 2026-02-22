@@ -28,10 +28,10 @@ interface AllocationRuleFormProps {
 }
 
 const TRANSACTION_TYPES: AlisaSelectFieldItem[] = [
-  { id: TransactionType.EXPENSE, name: "Expense" },
-  { id: TransactionType.INCOME, name: "Income" },
-  { id: TransactionType.DEPOSIT, name: "Deposit" },
-  { id: TransactionType.WITHDRAW, name: "Withdraw" },
+  { id: TransactionType.EXPENSE, key: "expense" },
+  { id: TransactionType.INCOME, key: "income" },
+  { id: TransactionType.DEPOSIT, key: "deposit" },
+  { id: TransactionType.WITHDRAW, key: "withdraw" },
 ];
 
 function AllocationRuleForm({
