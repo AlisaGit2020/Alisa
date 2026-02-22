@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import AlisaSelectField from './AlisaSelectField';
+import { TFunction } from 'i18next';
 
 const mockItems = [
   { id: 1, name: 'Item 1' },
@@ -120,5 +121,69 @@ describe('AlisaSelectField', () => {
 
     const formControl = container.querySelector('.MuiFormControl-root');
     expect(formControl).toHaveClass('MuiFormControl-fullWidth');
+  });
+
+  describe('translation with translateKeyPrefix', () => {
+    const itemsWithKeys = [
+      { id: 1, name: 'Repairs Fallback', key: 'repairs' },
+      { id: 2, name: 'Insurance Fallback', key: 'insurance' },
+    ];
+
+    it('translates item labels using namespace:key syntax when translateKeyPrefix and t are provided', async () => {
+      const user = userEvent.setup();
+      // Mock t function that expects namespace:key format
+      const mockT = jest.fn((key: string, options?: { defaultValue?: string }) => {
+        // Simulate i18next behavior: namespace:key format
+        if (key === 'expenseTypes:repairs') return 'Translated Repairs';
+        if (key === 'expenseTypes:insurance') return 'Translated Insurance';
+        return options?.defaultValue || key;
+      }) as unknown as TFunction;
+
+      renderWithProviders(
+        <AlisaSelectField
+          label="Expense Type"
+          value={1}
+          items={itemsWithKeys}
+          onChange={jest.fn()}
+          t={mockT}
+          translateKeyPrefix="expenseTypes"
+        />
+      );
+
+      // Open dropdown to see options
+      const selectButton = screen.getByRole('combobox');
+      await user.click(selectButton);
+
+      // Should show translated labels, not fallback names
+      expect(screen.getByRole('option', { name: 'Translated Repairs' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Translated Insurance' })).toBeInTheDocument();
+    });
+
+    it('falls back to item.name when item has no key', async () => {
+      const user = userEvent.setup();
+      const itemsWithoutKeys = [
+        { id: 1, name: 'No Key Item' },
+      ];
+      const mockT = jest.fn() as unknown as TFunction;
+
+      renderWithProviders(
+        <AlisaSelectField
+          label="Type"
+          value={1}
+          items={itemsWithoutKeys}
+          onChange={jest.fn()}
+          t={mockT}
+          translateKeyPrefix="types"
+        />
+      );
+
+      const selectButton = screen.getByRole('combobox');
+      await user.click(selectButton);
+
+      // Should show item.name since there's no key
+      expect(screen.getByRole('option', { name: 'No Key Item' })).toBeInTheDocument();
+      // t should not be called since there's no key
+      expect(mockT).not.toHaveBeenCalled();
+    });
   });
 });
