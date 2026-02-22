@@ -9,9 +9,6 @@ import {
   ListItemText,
   Divider,
   Fade,
-  Avatar,
-  styled,
-  Stack,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -20,7 +17,6 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LanguageIcon from "@mui/icons-material/Language";
-import CheckIcon from "@mui/icons-material/Check";
 import ApiClient from "@alisa-lib/api-client";
 import { User } from "@alisa-types";
 import { emptyUser } from "@alisa-lib/initial-data";
@@ -29,24 +25,10 @@ import AdminDialog from "../admin/AdminDialog";
 import UserDetails from "../user/UserDetails";
 import FeedbackDialog from "../feedback/FeedbackDialog";
 import { useSignOutWithCleanup } from "@alisa-lib/use-sign-out-with-cleanup";
-
-const SmallAvatar = styled(Avatar)(({ theme }) => ({
-  width: 24,
-  height: 24,
-  border: `1px solid ${theme.palette.background.paper}`,
-}));
-
-const getFlag = (language: string) => {
-  if (language === "fi") {
-    return "/assets/flags/finland-48.png";
-  }
-  if (language === "en") {
-    return "/assets/flags/great-britain-48.png";
-  }
-};
+import LanguageMenu from "./LanguageMenu";
 
 function MobileMoreMenu() {
-  const { t, i18n } = useTranslation("appBar");
+  const { t } = useTranslation("appBar");
   const signOut = useSignOutWithCleanup();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -92,8 +74,7 @@ function MobileMoreMenu() {
     setLanguageAnchorEl(null);
   };
 
-  const handleLanguageChange = (language: string) => {
-    i18n.changeLanguage(language);
+  const handleLanguageChange = () => {
     handleLanguageMenuClose();
     handleMenuClose();
   };
@@ -122,9 +103,6 @@ function MobileMoreMenu() {
     signOut();
   };
 
-  const getCheckIconVisibility = (language: string): "visible" | "hidden" => {
-    return language === i18n.language ? "visible" : "hidden";
-  };
 
   return (
     <Box>
@@ -193,28 +171,11 @@ function MobileMoreMenu() {
         </MenuItem>
       </Menu>
 
-      <Menu
-        id="language-menu"
+      <LanguageMenu
         anchorEl={languageAnchorEl}
         open={languageMenuOpen}
-        onClose={handleLanguageMenuClose}
-        TransitionComponent={Fade}
-      >
-        <MenuItem onClick={() => handleLanguageChange("en")}>
-          <Stack direction="row" spacing={2}>
-            <SmallAvatar src={getFlag("en")} />
-            <Box>English</Box>
-            <CheckIcon visibility={getCheckIconVisibility("en")} />
-          </Stack>
-        </MenuItem>
-        <MenuItem onClick={() => handleLanguageChange("fi")}>
-          <Stack direction="row" spacing={2}>
-            <SmallAvatar src={getFlag("fi")} />
-            <Box>Suomi</Box>
-            <CheckIcon visibility={getCheckIconVisibility("fi")} />
-          </Stack>
-        </MenuItem>
-      </Menu>
+        onClose={handleLanguageChange}
+      />
 
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <AdminDialog open={adminOpen} onClose={() => setAdminOpen(false)} />

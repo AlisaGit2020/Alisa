@@ -1,104 +1,38 @@
-import React from 'react';
-import { WithTranslation, useTranslation, withTranslation } from 'react-i18next';
-import { MenuItem, Box, Menu, Fade, IconButton, Tooltip, styled, Avatar, Stack } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import useIsAuthenticated from 'react-auth-kit/hooks/useIsAuthenticated';
-import ApiClient from '@alisa-lib/api-client';
-import { SupportedLanguage } from '@alisa-types';
-
-const SmallAvatar = styled(Avatar)(({ theme }) => ({
-    width: 24,
-    height: 24,
-    border: `1px solid ${theme.palette.background.paper}`,
-}));
-
-const getFlag = (language: string): string => {
-    if (language === 'fi') {
-        return '/assets/flags/finland-48.png'
-    }
-    if (language === 'en') {
-        return '/assets/flags/great-britain-48.png'
-    }
-    if (language === 'sv') {
-        return '/assets/flags/sweden-48.png'
-    }
-    return '/assets/flags/great-britain-48.png'
-}
+import React from "react";
+import { WithTranslation, useTranslation, withTranslation } from "react-i18next";
+import { Box, IconButton, Tooltip } from "@mui/material";
+import LanguageMenu, { getFlag } from "./LanguageMenu";
 
 function LanguageSelector({ t }: WithTranslation) {
-    const { i18n } = useTranslation();
-    const isAuthenticated = useIsAuthenticated();
+  const { i18n } = useTranslation();
 
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const open = Boolean(anchorEl);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
 
-    const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
 
-    const changeLanguage = async (language: SupportedLanguage) => {
-        i18n.changeLanguage(language);
-        handleClose();
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
-        if (isAuthenticated) {
-            try {
-                await ApiClient.updateUserSettings({ language });
-            } catch (error) {
-                console.error('Failed to persist language preference:', error);
-            }
-        }
-    };
-
-    const getCheckIconVisibility = (language: string): string => {
-        return language == i18n.language ? 'visible' : 'hidden'
-    };
-
-    const getMenuItem = (language: SupportedLanguage, languageText: string) => {
-        return (
-            <MenuItem onClick={() => changeLanguage(language)}>
-                <Stack direction={'row'} spacing={2}>
-                    <SmallAvatar src={getFlag(language)}></SmallAvatar>
-                    <Box>{languageText}</Box>
-                    <CheckIcon visibility={getCheckIconVisibility(language)}></CheckIcon>
-                </Stack>
-            </MenuItem>
-        )
-    }
-
-    return (
-        <Box >
-            <Tooltip title={t('selectLanguage')}>
-
-                <IconButton                    
-                    id="open-language-menu"
-                    aria-controls={open ? 'language-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={handleOpen}
-                >
-                    <img width={24} src={getFlag(i18n.language)}></img>
-                </IconButton>
-
-            </Tooltip>
-            <Menu
-                id="language-menu"
-                MenuListProps={{
-                    'aria-labelledby': 'open-language-menu',
-                }}
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                TransitionComponent={Fade}
-            >
-                {getMenuItem('en', 'English')}
-                {getMenuItem('fi', 'Suomi')}
-                {getMenuItem('sv', 'Svenska')}
-            </Menu>
-        </Box>
-    );
+  return (
+    <Box>
+      <Tooltip title={t("selectLanguage")}>
+        <IconButton
+          id="open-language-menu"
+          aria-controls={open ? "language-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? "true" : undefined}
+          onClick={handleOpen}
+        >
+          <img width={24} src={getFlag(i18n.language)} alt="" />
+        </IconButton>
+      </Tooltip>
+      <LanguageMenu anchorEl={anchorEl} open={open} onClose={handleClose} />
+    </Box>
+  );
 }
 
-export default withTranslation('appBar')(LanguageSelector);
+export default withTranslation("appBar")(LanguageSelector);
