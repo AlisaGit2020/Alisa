@@ -87,8 +87,8 @@ function AllocationRulesModal({
   const loadTypes = useCallback(async () => {
     try {
       const [expenseData, incomeData] = await Promise.all([
-        ApiClient.search<ExpenseType>("accounting/expense-type"),
-        ApiClient.search<IncomeType>("accounting/income-type"),
+        ApiClient.search<ExpenseType>("accounting/expense/type"),
+        ApiClient.search<IncomeType>("accounting/income/type"),
       ]);
 
       setExpenseTypes(expenseData.map((et) => ({ id: et.id, key: et.key })));
