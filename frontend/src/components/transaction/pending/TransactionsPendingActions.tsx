@@ -5,7 +5,7 @@ import {
   transactionContext,
 } from "@alisa-lib/alisa-contexts.ts";
 import { TransactionType, ExpenseType, IncomeType } from "@alisa-types";
-import { Box, Chip, Paper, Stack } from "@mui/material";
+import { Box, Button, ButtonGroup, Chip, Paper, Stack, Tooltip } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
@@ -267,23 +267,35 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
             </Typography>
 
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-              {props.onOpenAllocationRules && (
+              {props.onAutoAllocate && (
+                <ButtonGroup variant="contained" size="small">
+                  <Button
+                    startIcon={<AutoFixHighIcon />}
+                    onClick={props.onAutoAllocate}
+                    disabled={props.autoAllocateDisabled || props.isAllocating}
+                  >
+                    {props.t("allocation:autoAllocate")}
+                  </Button>
+                  {props.onOpenAllocationRules && (
+                    <Tooltip title={props.t("allocation:rules")}>
+                      <Button
+                        color="inherit"
+                        onClick={props.onOpenAllocationRules}
+                        sx={{ px: 1, minWidth: "auto" }}
+                      >
+                        <RuleIcon fontSize="small" />
+                      </Button>
+                    </Tooltip>
+                  )}
+                </ButtonGroup>
+              )}
+              {!props.onAutoAllocate && props.onOpenAllocationRules && (
                 <AlisaButton
                   label={props.t("allocation:rules")}
                   variant="outlined"
                   size="small"
                   startIcon={<RuleIcon />}
                   onClick={props.onOpenAllocationRules}
-                />
-              )}
-              {props.onAutoAllocate && (
-                <AlisaButton
-                  label={props.t("allocation:autoAllocate")}
-                  variant="contained"
-                  size="small"
-                  startIcon={<AutoFixHighIcon />}
-                  onClick={props.onAutoAllocate}
-                  disabled={props.autoAllocateDisabled || props.isAllocating}
                 />
               )}
               {!props.hideSplitLoanPayment && supportsLoanSplit && (

@@ -188,6 +188,12 @@ export default function ReviewStep({
       // Show results
       if (result.allocated.length > 0) {
         showToast({ message: t("allocation:allocatedCount", { count: result.allocated.length }), severity: "success" });
+
+        // Deselect successfully allocated transactions
+        const allocatedIds = new Set(result.allocated.map((a) => a.transactionId));
+        const remainingSelectedIds = selectedIds.filter((id) => !allocatedIds.has(id));
+        onSelectAllChange(remainingSelectedIds);
+
         // Refresh transactions to show updated types
         if (onRefresh) {
           await onRefresh();
@@ -206,7 +212,7 @@ export default function ReviewStep({
     } finally {
       setIsAllocating(false);
     }
-  }, [propertyId, transactions, t, showToast, onRefresh]);
+  }, [propertyId, transactions, t, showToast, onRefresh, selectedIds, onSelectAllChange]);
 
   const hasExpenseTransactions = selectedTransactionTypes.includes(
     TransactionType.EXPENSE
