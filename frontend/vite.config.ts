@@ -1,6 +1,9 @@
 import { UserConfig, defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -13,7 +16,12 @@ export default defineConfig({
   esbuild: {
     target: 'esnext'
   },
-
+  build: {
+    // Disable source maps to reduce memory usage during build
+    sourcemap: false,
+    // Reduce memory by limiting concurrent transforms
+    minify: 'esbuild',
+  },
   optimizeDeps: {
     include: ['tsconfig.json'],
   },

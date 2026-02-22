@@ -6,8 +6,8 @@ cd "$(dirname "$0")/.."
 echo "Pulling latest changes..."
 git pull
 
-echo "Building containers..."
-DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml --env-file .env.production build --parallel
+echo "Building containers (sequential to reduce memory usage)..."
+DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml --env-file .env.production build
 
 echo "Starting services..."
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d

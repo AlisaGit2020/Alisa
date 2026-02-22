@@ -16,6 +16,8 @@ COPY frontend/ .
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
 
+# Limit Node.js memory to prevent build hanging on low-memory servers (512MB for 1GB VPS)
+ENV NODE_OPTIONS="--max-old-space-size=512"
 RUN npx vite build
 
 # Stage 2: Nginx
