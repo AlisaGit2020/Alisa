@@ -382,21 +382,12 @@ export function useImportWizard() {
   );
 
   const splitLoanPaymentForSelected = useCallback(
-    async (
-      principalExpenseTypeId: number,
-      interestExpenseTypeId: number,
-      handlingFeeExpenseTypeId?: number
-    ) => {
+    async () => {
       if (state.selectedIds.length === 0) return;
 
       const result = await ApiClient.postSaveTask<SplitLoanPaymentBulkInput>(
         transactionContext.apiPath + "/split-loan-payment",
-        {
-          ids: state.selectedIds,
-          principalExpenseTypeId,
-          interestExpenseTypeId,
-          handlingFeeExpenseTypeId,
-        }
+        { ids: state.selectedIds }
       );
 
       // Helper to translate backend error messages

@@ -105,9 +105,6 @@ export interface TransactionSetCategoryTypeInput {
 // Split loan payment bulk input
 export interface SplitLoanPaymentBulkInput {
   ids: number[];
-  principalExpenseTypeId: number;
-  interestExpenseTypeId: number;
-  handlingFeeExpenseTypeId?: number;
 }
 
 // OP import input

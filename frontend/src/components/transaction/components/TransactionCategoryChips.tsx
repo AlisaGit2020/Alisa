@@ -1,5 +1,6 @@
 import { Box, Chip, Tooltip, Typography } from "@mui/material";
 import { Transaction } from "@alisa-types";
+import { useTranslation } from "react-i18next";
 
 interface TransactionCategoryChipsProps {
   transaction: Transaction;
@@ -8,19 +9,24 @@ interface TransactionCategoryChipsProps {
 function TransactionCategoryChips({
   transaction,
 }: TransactionCategoryChipsProps) {
+  const { t } = useTranslation();
   const expenses = transaction.expenses || [];
   const incomes = transaction.incomes || [];
 
   const categorySet = new Set<string>();
 
   expenses.forEach((expense) => {
-    if (expense.expenseType?.name) {
+    if (expense.expenseType?.key) {
+      categorySet.add(t(`expenseTypes.${expense.expenseType.key}`, { defaultValue: expense.expenseType.name }));
+    } else if (expense.expenseType?.name) {
       categorySet.add(expense.expenseType.name);
     }
   });
 
   incomes.forEach((income) => {
-    if (income.incomeType?.name) {
+    if (income.incomeType?.key) {
+      categorySet.add(t(`incomeTypes.${income.incomeType.key}`, { defaultValue: income.incomeType.name }));
+    } else if (income.incomeType?.name) {
       categorySet.add(income.incomeType.name);
     }
   });

@@ -29,6 +29,7 @@ import {
 } from '@alisa-backend/common/types';
 import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
+import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
 
 describe('TransactionService', () => {
   let service: TransactionService;
@@ -37,6 +38,7 @@ describe('TransactionService', () => {
   let mockIncomeRepository: MockRepository<Income>;
   let mockAuthService: MockAuthService;
   let mockEventEmitter: MockEventEmitter;
+  let mockExpenseTypeService: { findByKey: jest.Mock };
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
   const otherUser = createJWTUser({ id: 2, ownershipInProperties: [] });
@@ -47,6 +49,16 @@ describe('TransactionService', () => {
     mockIncomeRepository = createMockRepository<Income>();
     mockAuthService = createMockAuthService();
     mockEventEmitter = createMockEventEmitter();
+    mockExpenseTypeService = {
+      findByKey: jest.fn().mockImplementation((key: string) => {
+        const types: Record<string, { id: number; key: string; name: string }> = {
+          'loan-principal': { id: 1, key: 'loan-principal', name: 'Loan principal' },
+          'loan-interest': { id: 2, key: 'loan-interest', name: 'Loan interest' },
+          'loan-handling-fee': { id: 3, key: 'loan-handling-fee', name: 'Loan handling fees' },
+        };
+        return Promise.resolve(types[key] || null);
+      }),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -56,6 +68,7 @@ describe('TransactionService', () => {
         { provide: getRepositoryToken(Income), useValue: mockIncomeRepository },
         { provide: AuthService, useValue: mockAuthService },
         { provide: EventEmitter2, useValue: mockEventEmitter },
+        { provide: ExpenseTypeService, useValue: mockExpenseTypeService },
       ],
     }).compile();
 
@@ -904,8 +917,6 @@ describe('TransactionService', () => {
 
       const result = await service.splitLoanPaymentBulk(testUser, {
         ids: [1, 2],
-        principalExpenseTypeId: 1,
-        interestExpenseTypeId: 2,
       });
 
       expect(result.rows.total).toBe(2);
@@ -916,8 +927,6 @@ describe('TransactionService', () => {
       await expect(
         service.splitLoanPaymentBulk(testUser, {
           ids: [],
-          principalExpenseTypeId: 1,
-          interestExpenseTypeId: 2,
         }),
       ).rejects.toThrow(BadRequestException);
     });
@@ -935,8 +944,6 @@ describe('TransactionService', () => {
 
       const result = await service.splitLoanPaymentBulk(testUser, {
         ids: [1],
-        principalExpenseTypeId: 1,
-        interestExpenseTypeId: 2,
       });
 
       expect(result.rows.failed).toBe(1);
@@ -956,8 +963,6 @@ describe('TransactionService', () => {
 
       const result = await service.splitLoanPaymentBulk(testUser, {
         ids: [1],
-        principalExpenseTypeId: 1,
-        interestExpenseTypeId: 2,
       });
 
       expect(result.rows.failed).toBe(1);
@@ -977,8 +982,6 @@ describe('TransactionService', () => {
 
       const result = await service.splitLoanPaymentBulk(testUser, {
         ids: [1],
-        principalExpenseTypeId: 1,
-        interestExpenseTypeId: 2,
       });
 
       expect(result.rows.failed).toBe(1);

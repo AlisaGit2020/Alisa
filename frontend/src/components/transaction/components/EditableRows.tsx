@@ -210,6 +210,8 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
             fieldName="expenseTypeId"
             value={row.expenseTypeId}
             onHandleChange={handleExpenseTypeChange}
+            t={props.t}
+            translateKeyPrefix="expenseTypes"
           ></AlisaSelect>
         );
       }
@@ -227,6 +229,8 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
             fieldName="incomeTypeId"
             value={row.incomeTypeId}
             onHandleChange={handleIncomeTypeChange}
+            t={props.t}
+            translateKeyPrefix="incomeTypes"
           ></AlisaSelect>
         );
       }

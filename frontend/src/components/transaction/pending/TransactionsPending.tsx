@@ -206,21 +206,12 @@ function TransactionsPending({ t }: WithTranslation) {
     }
   };
 
-  const handleSplitLoanPaymentForSelected = async (
-    principalExpenseTypeId: number,
-    interestExpenseTypeId: number,
-    handlingFeeExpenseTypeId?: number,
-  ) => {
+  const handleSplitLoanPaymentForSelected = async () => {
     if (selectedIds.length > 0) {
       const result =
         await ApiClient.postSaveTask<SplitLoanPaymentBulkInput>(
           transactionContext.apiPath + "/split-loan-payment",
-          {
-            ids: selectedIds,
-            principalExpenseTypeId,
-            interestExpenseTypeId,
-            handlingFeeExpenseTypeId,
-          },
+          { ids: selectedIds },
         );
       if (result.allSuccess) {
         showToast({ message: t("common:toast.loanSplit"), severity: "success" });
