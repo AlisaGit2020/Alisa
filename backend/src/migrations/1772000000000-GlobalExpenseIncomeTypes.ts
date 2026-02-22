@@ -57,9 +57,7 @@ export class GlobalExpenseIncomeTypes1772000000000
     await queryRunner.query(`
       CREATE TABLE expense_type (
         id SERIAL PRIMARY KEY,
-        key VARCHAR UNIQUE,
-        name VARCHAR NOT NULL,
-        description VARCHAR NOT NULL DEFAULT '',
+        key VARCHAR NOT NULL UNIQUE,
         "isTaxDeductible" BOOLEAN NOT NULL DEFAULT false,
         "isCapitalImprovement" BOOLEAN NOT NULL DEFAULT false
       )
@@ -70,9 +68,7 @@ export class GlobalExpenseIncomeTypes1772000000000
     await queryRunner.query(`
       CREATE TABLE income_type (
         id SERIAL PRIMARY KEY,
-        key VARCHAR UNIQUE,
-        name VARCHAR NOT NULL,
-        description VARCHAR NOT NULL DEFAULT '',
+        key VARCHAR NOT NULL UNIQUE,
         "isTaxable" BOOLEAN NOT NULL DEFAULT false
       )
     `);
@@ -80,30 +76,30 @@ export class GlobalExpenseIncomeTypes1772000000000
     // 6. Seed global expense types
     console.log('Seeding global expense types...');
     await queryRunner.query(`
-      INSERT INTO expense_type (key, name, description, "isTaxDeductible", "isCapitalImprovement") VALUES
-        ('housing-charge', 'Housing company charge', '', true, false),
-        ('maintenance-charge', 'Maintenance charge', '', true, false),
-        ('financial-charge', 'Financial charge', '', true, false),
-        ('repairs', 'Repairs', '', true, false),
-        ('capital-improvement', 'Capital improvement', '', false, true),
-        ('insurance', 'Insurance', '', true, false),
-        ('property-tax', 'Property tax', '', true, false),
-        ('water', 'Water fee', '', true, false),
-        ('electricity', 'Electricity', '', true, false),
-        ('rental-brokerage', 'Rental brokerage', '', true, false),
-        ('loan-interest', 'Loan interest', '', true, false),
-        ('loan-principal', 'Loan principal', '', false, false),
-        ('loan-handling-fee', 'Loan handling fees', '', true, false)
+      INSERT INTO expense_type (key, "isTaxDeductible", "isCapitalImprovement") VALUES
+        ('housing-charge', true, false),
+        ('maintenance-charge', true, false),
+        ('financial-charge', true, false),
+        ('repairs', true, false),
+        ('capital-improvement', false, true),
+        ('insurance', true, false),
+        ('property-tax', true, false),
+        ('water', true, false),
+        ('electricity', true, false),
+        ('rental-brokerage', true, false),
+        ('loan-interest', true, false),
+        ('loan-principal', false, false),
+        ('loan-handling-fee', true, false)
     `);
 
     // 7. Seed global income types
     console.log('Seeding global income types...');
     await queryRunner.query(`
-      INSERT INTO income_type (key, name, description, "isTaxable") VALUES
-        ('rental', 'Rental income', '', true),
-        ('airbnb', 'Airbnb', '', true),
-        ('capital-income', 'Capital income', '', true),
-        ('insurance-compensation', 'Insurance compensation', '', true)
+      INSERT INTO income_type (key, "isTaxable") VALUES
+        ('rental', true),
+        ('airbnb', true),
+        ('capital-income', true),
+        ('insurance-compensation', true)
     `);
 
     console.log('Global expense/income types migration completed');
@@ -140,8 +136,6 @@ export class GlobalExpenseIncomeTypes1772000000000
       CREATE TABLE expense_type (
         id SERIAL PRIMARY KEY,
         "userId" integer NOT NULL,
-        name VARCHAR NOT NULL,
-        description VARCHAR NOT NULL DEFAULT '',
         "isTaxDeductible" BOOLEAN NOT NULL DEFAULT false,
         "isCapitalImprovement" BOOLEAN NOT NULL DEFAULT false
       )
@@ -151,8 +145,6 @@ export class GlobalExpenseIncomeTypes1772000000000
       CREATE TABLE income_type (
         id SERIAL PRIMARY KEY,
         "userId" integer NOT NULL,
-        name VARCHAR NOT NULL,
-        description VARCHAR NOT NULL DEFAULT '',
         "isTaxable" BOOLEAN NOT NULL DEFAULT false
       )
     `);

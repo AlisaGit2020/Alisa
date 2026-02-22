@@ -73,16 +73,12 @@ function TypeBreakdownCharts({
     transactions.forEach((tx) => {
       if (tx.type === TransactionType.EXPENSE && tx.expenses?.[0]?.expenseType) {
         const expenseType = tx.expenses[0].expenseType;
-        const typeName = expenseType.key
-          ? t(`expenseTypes.${expenseType.key}`, { defaultValue: expenseType.name })
-          : expenseType.name;
+        const typeName = t(`expenseTypes.${expenseType.key}`);
         const current = expenseMap.get(typeName) || 0;
         expenseMap.set(typeName, current + Math.abs(tx.amount));
       } else if (tx.type === TransactionType.INCOME && tx.incomes?.[0]?.incomeType) {
         const incomeType = tx.incomes[0].incomeType;
-        const typeName = incomeType.key
-          ? t(`incomeTypes.${incomeType.key}`, { defaultValue: incomeType.name })
-          : incomeType.name;
+        const typeName = t(`incomeTypes.${incomeType.key}`);
         const current = incomeMap.get(typeName) || 0;
         incomeMap.set(typeName, current + Math.abs(tx.amount));
       }

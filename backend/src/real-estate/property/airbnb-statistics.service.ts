@@ -10,14 +10,12 @@ import {
   TransactionDeletedEvent,
 } from '@alisa-backend/common/events';
 import {
+  IncomeTypeKey,
   StatisticKey,
   TransactionStatus,
   TransactionType,
 } from '@alisa-backend/common/types';
 import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
-
-// Global Airbnb income type key
-const AIRBNB_INCOME_TYPE_KEY = 'airbnb';
 
 @Injectable()
 export class AirbnbStatisticsService {
@@ -60,7 +58,7 @@ export class AirbnbStatisticsService {
        GROUP BY i."propertyId"
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
-      [propertyId, statisticKey, acceptedStatus, AIRBNB_INCOME_TYPE_KEY],
+      [propertyId, statisticKey, acceptedStatus, IncomeTypeKey.AIRBNB],
     );
 
     // Yearly aggregation
@@ -81,7 +79,7 @@ export class AirbnbStatisticsService {
        GROUP BY i."propertyId", EXTRACT(YEAR FROM i."accountingDate")
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
-      [propertyId, statisticKey, acceptedStatus, AIRBNB_INCOME_TYPE_KEY],
+      [propertyId, statisticKey, acceptedStatus, IncomeTypeKey.AIRBNB],
     );
 
     // Monthly aggregation
@@ -102,7 +100,7 @@ export class AirbnbStatisticsService {
        GROUP BY i."propertyId", EXTRACT(YEAR FROM i."accountingDate"), EXTRACT(MONTH FROM i."accountingDate")
        ON CONFLICT ("propertyId", "year", "month", "key")
        DO UPDATE SET "value" = EXCLUDED."value"`,
-      [propertyId, statisticKey, acceptedStatus, AIRBNB_INCOME_TYPE_KEY],
+      [propertyId, statisticKey, acceptedStatus, IncomeTypeKey.AIRBNB],
     );
   }
 

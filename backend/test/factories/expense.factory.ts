@@ -1,5 +1,6 @@
 import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
 import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
+import { ExpenseTypeKey } from '@alisa-backend/common/types';
 
 export interface CreateExpenseOptions {
   id?: number;
@@ -31,9 +32,7 @@ export const createExpense = (options: CreateExpenseOptions = {}): Expense => {
 
 export interface CreateExpenseTypeOptions {
   id?: number;
-  key?: string;
-  name?: string;
-  description?: string;
+  key?: ExpenseTypeKey;
   isTaxDeductible?: boolean;
   isCapitalImprovement?: boolean;
 }
@@ -43,9 +42,7 @@ export const createExpenseType = (
 ): ExpenseType => {
   const expenseType = new ExpenseType();
   expenseType.id = options.id ?? 1;
-  expenseType.key = options.key ?? 'test-expense-type';
-  expenseType.name = options.name ?? 'Test Expense Type';
-  expenseType.description = options.description ?? 'Test Description';
+  expenseType.key = options.key ?? ExpenseTypeKey.REPAIRS;
   expenseType.isTaxDeductible = options.isTaxDeductible ?? false;
   expenseType.isCapitalImprovement = options.isCapitalImprovement ?? false;
   return expenseType;

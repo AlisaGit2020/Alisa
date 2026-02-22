@@ -3,96 +3,82 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
 import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
+import { ExpenseTypeKey, IncomeTypeKey } from '@alisa-backend/common/types';
 
 interface GlobalExpenseType {
-  key: string;
-  name: string;
+  key: ExpenseTypeKey;
   isTaxDeductible: boolean;
   isCapitalImprovement: boolean;
 }
 
 interface GlobalIncomeType {
-  key: string;
-  name: string;
+  key: IncomeTypeKey;
   isTaxable: boolean;
 }
 
 const GLOBAL_EXPENSE_TYPES: GlobalExpenseType[] = [
   {
-    key: 'housing-charge',
-    name: 'Housing company charge',
+    key: ExpenseTypeKey.HOUSING_CHARGE,
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    key: 'maintenance-charge',
-    name: 'Maintenance charge',
+    key: ExpenseTypeKey.MAINTENANCE_CHARGE,
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    key: 'financial-charge',
-    name: 'Financial charge',
+    key: ExpenseTypeKey.FINANCIAL_CHARGE,
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    key: 'repairs',
-    name: 'Repairs',
+    key: ExpenseTypeKey.REPAIRS,
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    key: 'capital-improvement',
-    name: 'Capital improvement',
+    key: ExpenseTypeKey.CAPITAL_IMPROVEMENT,
     isTaxDeductible: false,
     isCapitalImprovement: true,
   },
   {
-    key: 'insurance',
-    name: 'Insurance',
+    key: ExpenseTypeKey.INSURANCE,
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    key: 'property-tax',
-    name: 'Property tax',
+    key: ExpenseTypeKey.PROPERTY_TAX,
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    key: 'water',
-    name: 'Water fee',
+    key: ExpenseTypeKey.WATER,
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    key: 'electricity',
-    name: 'Electricity',
+    key: ExpenseTypeKey.ELECTRICITY,
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    key: 'rental-brokerage',
-    name: 'Rental brokerage',
+    key: ExpenseTypeKey.RENTAL_BROKERAGE,
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    key: 'loan-interest',
-    name: 'Loan interest',
+    key: ExpenseTypeKey.LOAN_INTEREST,
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    key: 'loan-principal',
-    name: 'Loan principal',
+    key: ExpenseTypeKey.LOAN_PRINCIPAL,
     isTaxDeductible: false,
     isCapitalImprovement: false,
   },
   {
-    key: 'loan-handling-fee',
-    name: 'Loan handling fees',
+    key: ExpenseTypeKey.LOAN_HANDLING_FEE,
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
@@ -100,23 +86,19 @@ const GLOBAL_EXPENSE_TYPES: GlobalExpenseType[] = [
 
 const GLOBAL_INCOME_TYPES: GlobalIncomeType[] = [
   {
-    key: 'rental',
-    name: 'Rental income',
+    key: IncomeTypeKey.RENTAL,
     isTaxable: true,
   },
   {
-    key: 'airbnb',
-    name: 'Airbnb',
+    key: IncomeTypeKey.AIRBNB,
     isTaxable: true,
   },
   {
-    key: 'capital-income',
-    name: 'Capital income',
+    key: IncomeTypeKey.CAPITAL_INCOME,
     isTaxable: true,
   },
   {
-    key: 'insurance-compensation',
-    name: 'Insurance compensation',
+    key: IncomeTypeKey.INSURANCE_COMPENSATION,
     isTaxable: true,
   },
 ];
@@ -147,8 +129,6 @@ export class DefaultsSeeder implements OnModuleInit {
     for (const typeData of GLOBAL_EXPENSE_TYPES) {
       const expenseType = new ExpenseType();
       expenseType.key = typeData.key;
-      expenseType.name = typeData.name;
-      expenseType.description = '';
       expenseType.isTaxDeductible = typeData.isTaxDeductible;
       expenseType.isCapitalImprovement = typeData.isCapitalImprovement;
       await this.expenseTypeRepository.save(expenseType);
@@ -168,8 +148,6 @@ export class DefaultsSeeder implements OnModuleInit {
     for (const typeData of GLOBAL_INCOME_TYPES) {
       const incomeType = new IncomeType();
       incomeType.key = typeData.key;
-      incomeType.name = typeData.name;
-      incomeType.description = '';
       incomeType.isTaxable = typeData.isTaxable;
       await this.incomeTypeRepository.save(incomeType);
     }

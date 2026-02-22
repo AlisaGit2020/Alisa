@@ -12,7 +12,7 @@ import {
   TestUser,
   TestUsersSetup,
 } from './helper-functions';
-import { StatisticKey } from '@alisa-backend/common/types';
+import { IncomeTypeKey, StatisticKey } from '@alisa-backend/common/types';
 import { IncomeService } from '@alisa-backend/accounting/income/income.service';
 import { IncomeTypeService } from '@alisa-backend/accounting/income/income-type.service';
 import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
@@ -48,8 +48,8 @@ describe('AirbnbStatisticsService (e2e)', () => {
     testUsers = await getTestUsers(app);
     mainUser = testUsers.user1WithProperties;
 
-    // Get the global Airbnb income type ID (seeded by DefaultsSeeder with key='airbnb')
-    const airbnbType = await incomeTypeService.findByKey('airbnb');
+    // Get the global Airbnb income type ID (seeded by DefaultsSeeder)
+    const airbnbType = await incomeTypeService.findByKey(IncomeTypeKey.AIRBNB);
     airbnbIncomeTypeId = airbnbType.id;
   });
 
@@ -233,7 +233,7 @@ describe('AirbnbStatisticsService (e2e)', () => {
       );
 
       // Get a non-airbnb income type (rental)
-      const rentalType = await incomeTypeService.findByKey('rental');
+      const rentalType = await incomeTypeService.findByKey(IncomeTypeKey.RENTAL);
 
       // Create income with a different income type
       const nonAirbnbIncome: IncomeInputDto = {

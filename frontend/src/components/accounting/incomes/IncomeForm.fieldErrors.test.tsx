@@ -19,8 +19,8 @@ describe('IncomeForm field error handling', () => {
   };
 
   const mockIncomeTypes: IncomeType[] = [
-    { id: 1, name: 'Rent', key: 'rental', description: 'Rental income', isTaxable: true },
-    { id: 2, name: 'Deposit', key: 'deposit', description: 'Security deposit', isTaxable: false },
+    { id: 1, key: 'rental', isTaxable: true },
+    { id: 2, key: 'airbnb', isTaxable: true },
   ];
 
   beforeEach(() => {
@@ -168,7 +168,7 @@ describe('IncomeForm field error handling', () => {
       // Select income type
       const incomeTypeSelect = screen.getByLabelText('incomeType');
       await user.click(incomeTypeSelect);
-      const option = await screen.findByRole('option', { name: 'Rent' });
+      const option = await screen.findByRole('option', { name: 'Rental income' });
       await user.click(option);
 
       // Trigger a change on the date field to set invalid date via our mock
@@ -217,7 +217,7 @@ describe('IncomeForm field error handling', () => {
       // Select income type (now required)
       const incomeTypeSelect = screen.getByLabelText('incomeType');
       await user.click(incomeTypeSelect);
-      const option = await screen.findByRole('option', { name: 'Rent' });
+      const option = await screen.findByRole('option', { name: 'Rental income' });
       await user.click(option);
 
       // Submit form
@@ -256,7 +256,7 @@ describe('IncomeForm field error handling', () => {
       // Select income type (now required)
       const incomeTypeSelect = screen.getByLabelText('incomeType');
       await user.click(incomeTypeSelect);
-      const option = await screen.findByRole('option', { name: 'Rent' });
+      const option = await screen.findByRole('option', { name: 'Rental income' });
       await user.click(option);
 
       // Submit form

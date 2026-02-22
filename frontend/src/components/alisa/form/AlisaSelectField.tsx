@@ -4,7 +4,7 @@ import { TFunction } from "i18next"
 
 export type AlisaSelectFieldItem = {
     id: number
-    name: string
+    name?: string
     key?: string
 }
 function AlisaSelectField(props: {
@@ -29,9 +29,9 @@ function AlisaSelectField(props: {
 
     const getItemLabel = (item: AlisaSelectFieldItem): string => {
         if (props.t && props.translateKeyPrefix && item.key) {
-            return props.t(`${props.translateKeyPrefix}:${item.key}`, { defaultValue: item.name });
+            return props.t(`${props.translateKeyPrefix}:${item.key}`);
         }
-        return item.name;
+        return item.name || "";
     };
 
     return (

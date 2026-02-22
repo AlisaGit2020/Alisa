@@ -20,6 +20,7 @@ import {
   TransactionDeletedEvent,
 } from '@alisa-backend/common/events';
 import {
+  ExpenseTypeKey,
   TransactionStatus,
   TransactionType,
 } from '@alisa-backend/common/types';
@@ -469,9 +470,9 @@ export class TransactionService {
     // Look up expense types by their global keys
     const [principalExpenseType, interestExpenseType, handlingFeeExpenseType] =
       await Promise.all([
-        this.expenseTypeService.findByKey('loan-principal'),
-        this.expenseTypeService.findByKey('loan-interest'),
-        this.expenseTypeService.findByKey('loan-handling-fee'),
+        this.expenseTypeService.findByKey(ExpenseTypeKey.LOAN_PRINCIPAL),
+        this.expenseTypeService.findByKey(ExpenseTypeKey.LOAN_INTEREST),
+        this.expenseTypeService.findByKey(ExpenseTypeKey.LOAN_HANDLING_FEE),
       ]);
 
     if (!principalExpenseType || !interestExpenseType) {

@@ -162,8 +162,8 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
                 <Chip
                   key={`expense-${index}`}
                   label={expense.expenseType?.key
-                    ? t(`expenseTypes.${expense.expenseType.key}`, { defaultValue: expense.expenseType?.name })
-                    : expense.expenseType?.name}
+                    ? t(`expenseTypes.${expense.expenseType.key}`)
+                    : ""}
                   variant="outlined"
                   color="error"
                   size="small"
@@ -173,8 +173,8 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
                 <Chip
                   key={`income-${index}`}
                   label={income.incomeType?.key
-                    ? t(`incomeTypes.${income.incomeType.key}`, { defaultValue: income.incomeType?.name })
-                    : income.incomeType?.name}
+                    ? t(`incomeTypes.${income.incomeType.key}`)
+                    : ""}
                   variant="outlined"
                   color="success"
                   size="small"
@@ -261,8 +261,8 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Chip
                           label={expense.expenseType?.key
-                            ? t(`expenseTypes.${expense.expenseType.key}`, { defaultValue: expense.expenseType?.name })
-                            : expense.expenseType?.name}
+                            ? t(`expenseTypes.${expense.expenseType.key}`)
+                            : ""}
                           color="error"
                           size="small"
                           variant="outlined"
@@ -312,8 +312,8 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Chip
                           label={income.incomeType?.key
-                            ? t(`incomeTypes.${income.incomeType.key}`, { defaultValue: income.incomeType?.name })
-                            : income.incomeType?.name}
+                            ? t(`incomeTypes.${income.incomeType.key}`)
+                            : ""}
                           color="success"
                           size="small"
                           variant="outlined"

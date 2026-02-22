@@ -107,7 +107,7 @@ function ExpenseForm({
         dataService={
           new DataService<ExpenseType>({
             context: expenseTypeContext,
-            fetchOptions: { order: { name: "ASC" } },
+            fetchOptions: { order: { key: "ASC" } },
           })
         }
         fieldName="expenseTypeId"

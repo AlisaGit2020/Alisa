@@ -4,6 +4,7 @@ import { FindManyOptions, Repository } from 'typeorm';
 import { ExpenseType } from './entities/expense-type.entity';
 import { Expense } from './entities/expense.entity';
 import { DeleteValidationDto } from '@alisa-backend/common/dtos/delete-validation.dto';
+import { ExpenseTypeKey } from '@alisa-backend/common/types';
 
 @Injectable()
 export class ExpenseTypeService {
@@ -29,7 +30,7 @@ export class ExpenseTypeService {
     return expenseType || null;
   }
 
-  async findByKey(key: string): Promise<ExpenseType> {
+  async findByKey(key: ExpenseTypeKey): Promise<ExpenseType> {
     const expenseType = await this.repository.findOne({ where: { key } });
     return expenseType || null;
   }

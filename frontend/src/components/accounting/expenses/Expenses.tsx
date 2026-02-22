@@ -266,8 +266,8 @@ function Expenses({ t }: WithTranslation) {
           id: expense.id,
           accountingDate: expense.accountingDate || null,
           expenseTypeName: expense.expenseType?.key
-            ? t(`expenseTypes.${expense.expenseType.key}`, { defaultValue: expense.expenseType?.name || "" })
-            : expense.expenseType?.name || "",
+            ? t(`expenseTypes.${expense.expenseType.key}`)
+            : "",
           description: expense.description,
           quantity: expense.quantity,
           amount: expense.amount,

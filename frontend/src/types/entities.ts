@@ -81,24 +81,20 @@ export interface PropertyStatistics {
   value: string;
 }
 
-// ExpenseType - Global types shared by all users
+// ExpenseType - Global types shared by all users (translations via i18n using key)
 export interface ExpenseType {
   id: number;
   key: string;
   expenses?: Expense[];
-  name: string;
-  description: string;
   isTaxDeductible: boolean;
   isCapitalImprovement: boolean;
 }
 
-// IncomeType - Global types shared by all users
+// IncomeType - Global types shared by all users (translations via i18n using key)
 export interface IncomeType {
   id: number;
   key: string;
   incomes?: Income[];
-  name: string;
-  description: string;
   isTaxable: boolean;
 }
 

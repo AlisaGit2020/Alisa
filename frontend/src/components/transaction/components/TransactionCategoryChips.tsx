@@ -17,17 +17,13 @@ function TransactionCategoryChips({
 
   expenses.forEach((expense) => {
     if (expense.expenseType?.key) {
-      categorySet.add(t(`expenseTypes.${expense.expenseType.key}`, { defaultValue: expense.expenseType.name }));
-    } else if (expense.expenseType?.name) {
-      categorySet.add(expense.expenseType.name);
+      categorySet.add(t(`expenseTypes.${expense.expenseType.key}`));
     }
   });
 
   incomes.forEach((income) => {
     if (income.incomeType?.key) {
-      categorySet.add(t(`incomeTypes.${income.incomeType.key}`, { defaultValue: income.incomeType.name }));
-    } else if (income.incomeType?.name) {
-      categorySet.add(income.incomeType.name);
+      categorySet.add(t(`incomeTypes.${income.incomeType.key}`));
     }
   });
 

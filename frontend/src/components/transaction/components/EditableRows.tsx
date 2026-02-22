@@ -204,7 +204,7 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
             dataService={
               new DataService<ExpenseType>({
                 context: expenseTypeContext,
-                fetchOptions: { order: { name: "ASC" } },
+                fetchOptions: { order: { key: "ASC" } },
               })
             }
             fieldName="expenseTypeId"
@@ -223,7 +223,7 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
             dataService={
               new DataService<IncomeType>({
                 context: incomeTypeContext,
-                fetchOptions: { order: { name: "ASC" } },
+                fetchOptions: { order: { key: "ASC" } },
               })
             }
             fieldName="incomeTypeId"

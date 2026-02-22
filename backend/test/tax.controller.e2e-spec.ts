@@ -15,7 +15,12 @@ import {
   TestUser,
   TestUsersSetup,
 } from './helper-functions';
-import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
+import {
+  ExpenseTypeKey,
+  IncomeTypeKey,
+  TransactionStatus,
+  TransactionType,
+} from '@alisa-backend/common/types';
 import * as http from 'http';
 
 describe('TaxController (e2e)', () => {
@@ -51,17 +56,17 @@ describe('TaxController (e2e)', () => {
     mainUser = testUsers.user1WithProperties;
 
     // Use global expense types (seeded by DefaultsSeeder)
-    const repairsType = await expenseTypeService.findByKey('repairs');
+    const repairsType = await expenseTypeService.findByKey(ExpenseTypeKey.REPAIRS);
     taxDeductibleExpenseTypeId = repairsType.id;
 
-    const loanPrincipalType = await expenseTypeService.findByKey('loan-principal');
+    const loanPrincipalType = await expenseTypeService.findByKey(ExpenseTypeKey.LOAN_PRINCIPAL);
     nonDeductibleExpenseTypeId = loanPrincipalType.id;
 
-    const capitalImprovementType = await expenseTypeService.findByKey('capital-improvement');
+    const capitalImprovementType = await expenseTypeService.findByKey(ExpenseTypeKey.CAPITAL_IMPROVEMENT);
     capitalImprovementExpenseTypeId = capitalImprovementType.id;
 
     // Use global income type
-    const rentalType = await incomeTypeService.findByKey('rental');
+    const rentalType = await incomeTypeService.findByKey(IncomeTypeKey.RENTAL);
     incomeTypeId = rentalType.id;
 
     // Add income transaction
@@ -429,8 +434,8 @@ describe('TaxController (e2e)', () => {
       const propertyId = propertyResponse.body.id;
 
       // Use global expense and income types
-      const repairsType = await expenseTypeService.findByKey('repairs');
-      const rentalType = await incomeTypeService.findByKey('rental');
+      const repairsType = await expenseTypeService.findByKey(ExpenseTypeKey.REPAIRS);
+      const rentalType = await incomeTypeService.findByKey(IncomeTypeKey.RENTAL);
 
       // Add income: 1000
       await transactionService.add(user.jwtUser, {
@@ -615,7 +620,7 @@ describe('TaxController (e2e)', () => {
       const token2 = await getUserAccessToken2(authService, user2.jwtUser);
 
       // Use global capital improvement expense type
-      const capitalImprovementType = await expenseTypeService.findByKey('capital-improvement');
+      const capitalImprovementType = await expenseTypeService.findByKey(ExpenseTypeKey.CAPITAL_IMPROVEMENT);
 
       // Create capital improvement for user2
       await transactionService.add(user2.jwtUser, {

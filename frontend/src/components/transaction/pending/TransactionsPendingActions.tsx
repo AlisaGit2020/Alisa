@@ -195,7 +195,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
                     dataService={
                       new DataService<ExpenseType>({
                         context: expenseTypeContext,
-                        fetchOptions: { order: { name: "ASC" } },
+                        fetchOptions: { order: { key: "ASC" } },
                       })
                     }
                     fieldName="expenseTypeId"
@@ -216,7 +216,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
                     dataService={
                       new DataService<IncomeType>({
                         context: incomeTypeContext,
-                        fetchOptions: { order: { name: "ASC" } },
+                        fetchOptions: { order: { key: "ASC" } },
                       })
                     }
                     fieldName="incomeTypeId"

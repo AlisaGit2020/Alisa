@@ -35,14 +35,14 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
+          expenseType: { id: 1, isTaxDeductible: true, isCapitalImprovement: false, key: 'electricity' },
         },
       ],
     });
 
     renderWithProviders(<TransactionCategoryChips transaction={transaction} />);
 
-    expect(screen.getByText('Utilities')).toBeInTheDocument();
+    expect(screen.getByText('Electricity')).toBeInTheDocument();
   });
 
   it('renders income type as text', () => {
@@ -59,14 +59,14 @@ describe('TransactionCategoryChips', () => {
           incomeTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          incomeType: { id: 1, name: 'Rent', description: '', isTaxable: true, key: 'test-key' },
+          incomeType: { id: 1, isTaxable: true, key: 'rental' },
         },
       ],
     });
 
     renderWithProviders(<TransactionCategoryChips transaction={transaction} />);
 
-    expect(screen.getByText('Rent')).toBeInTheDocument();
+    expect(screen.getByText('Rental income')).toBeInTheDocument();
   });
 
   it('shows only first category with +N badge when multiple categories exist', () => {
@@ -82,7 +82,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
+          expenseType: { id: 1, isTaxDeductible: true, isCapitalImprovement: false, key: 'electricity' },
         },
         {
           id: 2,
@@ -94,7 +94,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 2,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 2, name: 'Repairs', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
+          expenseType: { id: 2, isTaxDeductible: true, isCapitalImprovement: false, key: 'repairs' },
         },
         {
           id: 3,
@@ -106,14 +106,14 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 3,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 3, name: 'Insurance', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
+          expenseType: { id: 3, isTaxDeductible: true, isCapitalImprovement: false, key: 'insurance' },
         },
       ],
     });
 
     renderWithProviders(<TransactionCategoryChips transaction={transaction} />);
 
-    expect(screen.getByText('Utilities')).toBeInTheDocument();
+    expect(screen.getByText('Electricity')).toBeInTheDocument();
     expect(screen.queryByText('Repairs')).not.toBeInTheDocument();
     expect(screen.queryByText('Insurance')).not.toBeInTheDocument();
     expect(screen.getByText('+2')).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
+          expenseType: { id: 1, isTaxDeductible: true, isCapitalImprovement: false, key: 'electricity' },
         },
         {
           id: 2,
@@ -145,7 +145,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 2,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 2, name: 'Repairs', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
+          expenseType: { id: 2, isTaxDeductible: true, isCapitalImprovement: false, key: 'repairs' },
         },
       ],
     });
@@ -153,10 +153,10 @@ describe('TransactionCategoryChips', () => {
     renderWithProviders(<TransactionCategoryChips transaction={transaction} />);
 
     // Hover over the text to trigger tooltip
-    await user.hover(screen.getByText('Utilities'));
+    await user.hover(screen.getByText('Electricity'));
 
     // Tooltip should show all categories
-    expect(await screen.findByRole('tooltip')).toHaveTextContent('Utilities, Repairs');
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Electricity, Repairs');
   });
 
   it('renders nothing when no expenses or incomes', () => {
@@ -194,18 +194,18 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
+          expenseType: { id: 1, isTaxDeductible: true, isCapitalImprovement: false, key: 'electricity' },
         },
       ],
     });
 
     renderWithProviders(<TransactionCategoryChips transaction={transaction} />);
 
-    expect(screen.getByText('Utilities')).toBeInTheDocument();
+    expect(screen.getByText('Electricity')).toBeInTheDocument();
     expect(screen.queryByText(/\+\d/)).not.toBeInTheDocument();
   });
 
-  it('deduplicates categories with same name', () => {
+  it('deduplicates categories with same key', () => {
     const transaction = createTransaction({
       expenses: [
         {
@@ -218,7 +218,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
+          expenseType: { id: 1, isTaxDeductible: true, isCapitalImprovement: false, key: 'electricity' },
         },
         {
           id: 2,
@@ -230,7 +230,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
+          expenseType: { id: 1, isTaxDeductible: true, isCapitalImprovement: false, key: 'electricity' },
         },
         {
           id: 3,
@@ -242,15 +242,15 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 2,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 2, name: 'Repairs', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
+          expenseType: { id: 2, isTaxDeductible: true, isCapitalImprovement: false, key: 'repairs' },
         },
       ],
     });
 
     renderWithProviders(<TransactionCategoryChips transaction={transaction} />);
 
-    // Should show "Utilities" and "+1" (for Repairs), not "+2"
-    expect(screen.getByText('Utilities')).toBeInTheDocument();
+    // Should show "Electricity" and "+1" (for Repairs), not "+2"
+    expect(screen.getByText('Electricity')).toBeInTheDocument();
     expect(screen.getByText('+1')).toBeInTheDocument();
   });
 });

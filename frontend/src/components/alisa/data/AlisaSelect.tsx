@@ -3,7 +3,7 @@ import AlisaSelectField from "../form/AlisaSelectField.tsx";
 import DataService from "@alisa-lib/data-service.ts";
 import { TFunction } from "i18next";
 
-interface InputProps<T1, T2 extends { id: number; name: string; key?: string }> {
+interface InputProps<T1, T2 extends { id: number; name?: string; key?: string }> {
   onHandleChange: (fieldName: keyof T1, value: T1[keyof T1]) => void;
   label: string;
   fieldName: keyof T1;
@@ -18,7 +18,7 @@ interface InputProps<T1, T2 extends { id: number; name: string; key?: string }> 
   translateKeyPrefix?: string;
 }
 
-function AlisaSelect<T1, T2 extends { id: number; name: string; key?: string }>({
+function AlisaSelect<T1, T2 extends { id: number; name?: string; key?: string }>({
   onHandleChange,
   label,
   fieldName,

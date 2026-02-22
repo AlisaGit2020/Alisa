@@ -19,8 +19,8 @@ describe('ExpenseForm field error handling', () => {
   };
 
   const mockExpenseTypes: ExpenseType[] = [
-    { id: 1, name: 'Maintenance', key: 'maintenance', description: 'Maintenance costs', isTaxDeductible: true, isCapitalImprovement: false },
-    { id: 2, name: 'Utilities', key: 'utilities', description: 'Utility bills', isTaxDeductible: true, isCapitalImprovement: false },
+    { id: 1, key: 'maintenance-charge', isTaxDeductible: true, isCapitalImprovement: false },
+    { id: 2, key: 'electricity', isTaxDeductible: true, isCapitalImprovement: false },
   ];
 
   beforeEach(() => {
@@ -168,7 +168,7 @@ describe('ExpenseForm field error handling', () => {
       // Select expense type
       const expenseTypeSelect = screen.getByLabelText('expenseType');
       await user.click(expenseTypeSelect);
-      const option = await screen.findByRole('option', { name: 'Maintenance' });
+      const option = await screen.findByRole('option', { name: 'Maintenance charge' });
       await user.click(option);
 
       // Trigger a change on the date field to set invalid date via our mock
@@ -217,7 +217,7 @@ describe('ExpenseForm field error handling', () => {
       // Select expense type (now required)
       const expenseTypeSelect = screen.getByLabelText('expenseType');
       await user.click(expenseTypeSelect);
-      const option = await screen.findByRole('option', { name: 'Maintenance' });
+      const option = await screen.findByRole('option', { name: 'Maintenance charge' });
       await user.click(option);
 
       // Submit form
@@ -256,7 +256,7 @@ describe('ExpenseForm field error handling', () => {
       // Select expense type (now required)
       const expenseTypeSelect = screen.getByLabelText('expenseType');
       await user.click(expenseTypeSelect);
-      const option = await screen.findByRole('option', { name: 'Maintenance' });
+      const option = await screen.findByRole('option', { name: 'Maintenance charge' });
       await user.click(option);
 
       // Submit form

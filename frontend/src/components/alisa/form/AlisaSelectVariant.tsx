@@ -41,11 +41,15 @@ function AlisaSelectVariant(props: {
     }
 
     if (props.variant === "radio") {
+      const itemsWithName = props.items.map((item) => ({
+        id: item.id,
+        name: item.name || "",
+      }));
       return (
         <AlisaRadioGroup
           label={props.label}
           value={props.value}
-          items={props.items}
+          items={itemsWithName}
           onChange={props.onChange}
           direction={props.direction}
         />
@@ -53,11 +57,15 @@ function AlisaSelectVariant(props: {
     }
 
     if (props.variant === "button") {
+      const itemsWithName = props.items.map((item) => ({
+        id: item.id,
+        name: item.name || "",
+      }));
       return (
         <AlisaButtonGroup
           label={props.label}
           value={props.value}
-          items={props.items}
+          items={itemsWithName}
           onChange={props.onChange}
           direction={props.direction}
         ></AlisaButtonGroup>

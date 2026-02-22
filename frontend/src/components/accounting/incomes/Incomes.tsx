@@ -266,8 +266,8 @@ function Incomes({ t }: WithTranslation) {
           id: income.id,
           accountingDate: income.accountingDate || null,
           incomeTypeName: income.incomeType?.key
-            ? t(`incomeTypes.${income.incomeType.key}`, { defaultValue: income.incomeType?.name || "" })
-            : income.incomeType?.name || "",
+            ? t(`incomeTypes.${income.incomeType.key}`)
+            : "",
           description: income.description,
           quantity: income.quantity,
           amount: income.amount,

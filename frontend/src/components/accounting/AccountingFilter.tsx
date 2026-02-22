@@ -52,33 +52,33 @@ function AccountingFilter({
   onEndDateChange,
   onReset,
 }: AccountingFilterProps) {
-  const [types, setTypes] = useState<{ id: number; name: string; key: string }[]>([]);
+  const [types, setTypes] = useState<{ id: number; key: string }[]>([]);
 
   useEffect(() => {
     const fetchTypes = async () => {
       if (mode === "expense") {
         const service = new DataService<ExpenseType>({
           context: expenseTypeContext,
-          fetchOptions: { order: { name: "ASC" } },
+          fetchOptions: { order: { key: "ASC" } },
         });
         const fetchedData = await service.search();
-        setTypes(fetchedData.map((type) => ({ id: type.id, name: type.name, key: type.key })));
+        setTypes(fetchedData.map((type) => ({ id: type.id, key: type.key })));
       } else {
         const service = new DataService<IncomeType>({
           context: incomeTypeContext,
-          fetchOptions: { order: { name: "ASC" } },
+          fetchOptions: { order: { key: "ASC" } },
         });
         const fetchedData = await service.search();
-        setTypes(fetchedData.map((type) => ({ id: type.id, name: type.name, key: type.key })));
+        setTypes(fetchedData.map((type) => ({ id: type.id, key: type.key })));
       }
     };
 
     fetchTypes();
   }, [mode]);
 
-  const getTypeTranslation = (typeItem: { id: number; name: string; key: string }): string => {
+  const getTypeTranslation = (typeItem: { id: number; key: string }): string => {
     const prefix = mode === "expense" ? "expenseTypes" : "incomeTypes";
-    return t(`${prefix}.${typeItem.key}`, { defaultValue: typeItem.name });
+    return t(`${prefix}.${typeItem.key}`);
   };
 
   const handleTypeChange = (event: SelectChangeEvent<number[]>) => {

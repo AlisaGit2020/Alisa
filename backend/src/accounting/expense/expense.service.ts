@@ -148,12 +148,12 @@ export class ExpenseService {
   async getDefault(): Promise<ExpenseInputDto> {
     const expenseTypes = await this.expenseTypeRepository.find({
       take: 1,
-      order: { name: 'ASC' },
+      order: { key: 'ASC' },
     });
 
     const expense = new ExpenseInputDto();
     expense.expenseTypeId = expenseTypes[0].id;
-    expense.description = expenseTypes[0].name;
+    expense.description = '';
 
     return expense;
   }
