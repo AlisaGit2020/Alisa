@@ -17,13 +17,13 @@ function TransactionCategoryChips({
 
   expenses.forEach((expense) => {
     if (expense.expenseType?.key) {
-      categorySet.add(t(`expenseTypes.${expense.expenseType.key}`));
+      categorySet.add(t(`expense-type:${expense.expenseType.key}`));
     }
   });
 
   incomes.forEach((income) => {
     if (income.incomeType?.key) {
-      categorySet.add(t(`incomeTypes.${income.incomeType.key}`));
+      categorySet.add(t(`income-type:${income.incomeType.key}`));
     }
   });
 
