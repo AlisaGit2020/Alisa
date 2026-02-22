@@ -11,10 +11,10 @@
 BEGIN;
 
 -- ----------------------------------------------------------------------------
--- Step 1: Delete existing income, expense, deposit, withdraw statistics (keep balance)
+-- Step 1: Delete existing income, expense, deposit, withdraw, airbnb_visits statistics (keep balance)
 -- ----------------------------------------------------------------------------
 DELETE FROM property_statistics
-WHERE key IN ('income', 'expense', 'deposit', 'withdraw');
+WHERE key IN ('income', 'expense', 'deposit', 'withdraw', 'airbnb_visits');
 
 -- ----------------------------------------------------------------------------
 -- Step 2: Insert INCOME statistics from income table
@@ -190,14 +190,65 @@ WHERE t.status = 2 AND t.type = 4  -- ACCEPTED, WITHDRAW
 GROUP BY t."propertyId", EXTRACT(YEAR FROM t."accountingDate"), EXTRACT(MONTH FROM t."accountingDate");
 
 -- ----------------------------------------------------------------------------
--- Step 6: Verify results
+-- Step 6: Insert AIRBNB_VISITS statistics from income table
+-- Count income records where income type key = 'airbnb'
+-- Include: standalone income (no transaction) OR income linked to ACCEPTED transactions
+-- ----------------------------------------------------------------------------
+
+-- All-time airbnb visits (year = NULL, month = NULL)
+INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+SELECT
+    i."propertyId",
+    'airbnb_visits' as key,
+    NULL as year,
+    NULL as month,
+    COUNT(i.id)::TEXT as value
+FROM income i
+LEFT JOIN transaction t ON t.id = i."transactionId"
+INNER JOIN income_type it ON it.id = i."incomeTypeId"
+WHERE (i."transactionId" IS NULL OR t.status = 2)  -- Standalone OR ACCEPTED
+  AND it.key = 'airbnb'
+GROUP BY i."propertyId";
+
+-- Yearly airbnb visits (year = X, month = NULL)
+INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+SELECT
+    i."propertyId",
+    'airbnb_visits' as key,
+    EXTRACT(YEAR FROM i."accountingDate")::SMALLINT as year,
+    NULL as month,
+    COUNT(i.id)::TEXT as value
+FROM income i
+LEFT JOIN transaction t ON t.id = i."transactionId"
+INNER JOIN income_type it ON it.id = i."incomeTypeId"
+WHERE (i."transactionId" IS NULL OR t.status = 2)  -- Standalone OR ACCEPTED
+  AND it.key = 'airbnb'
+GROUP BY i."propertyId", EXTRACT(YEAR FROM i."accountingDate");
+
+-- Monthly airbnb visits (year = X, month = Y)
+INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+SELECT
+    i."propertyId",
+    'airbnb_visits' as key,
+    EXTRACT(YEAR FROM i."accountingDate")::SMALLINT as year,
+    EXTRACT(MONTH FROM i."accountingDate")::SMALLINT as month,
+    COUNT(i.id)::TEXT as value
+FROM income i
+LEFT JOIN transaction t ON t.id = i."transactionId"
+INNER JOIN income_type it ON it.id = i."incomeTypeId"
+WHERE (i."transactionId" IS NULL OR t.status = 2)  -- Standalone OR ACCEPTED
+  AND it.key = 'airbnb'
+GROUP BY i."propertyId", EXTRACT(YEAR FROM i."accountingDate"), EXTRACT(MONTH FROM i."accountingDate");
+
+-- ----------------------------------------------------------------------------
+-- Step 7: Verify results
 -- ----------------------------------------------------------------------------
 SELECT
     key,
     COUNT(*) as record_count,
     SUM(value::DECIMAL) as total_value
 FROM property_statistics
-WHERE key IN ('income', 'expense', 'deposit', 'withdraw')
+WHERE key IN ('income', 'expense', 'deposit', 'withdraw', 'airbnb_visits')
 GROUP BY key
 ORDER BY key;
 
@@ -205,7 +256,7 @@ COMMIT;
 
 -- ============================================================================
 -- Summary of what this script does:
--- 1. Deletes all existing 'income', 'expense', 'deposit', 'withdraw' statistics
+-- 1. Deletes all existing 'income', 'expense', 'deposit', 'withdraw', 'airbnb_visits' statistics
 -- 2. Recalculates income from the income table (all-time, yearly, monthly)
 --    - Includes standalone income (no transaction) AND income linked to ACCEPTED transactions
 --    - Uses income.accountingDate for date grouping
@@ -214,7 +265,9 @@ COMMIT;
 --    - Uses expense.accountingDate for date grouping
 -- 4. Recalculates deposit from transaction table where type=3 (all-time, yearly, monthly)
 -- 5. Recalculates withdraw from transaction table where type=4 (all-time, yearly, monthly)
--- 6. Shows a summary of the recalculated statistics
+-- 6. Recalculates airbnb_visits by counting income records with income type key='airbnb'
+--    - Includes standalone income (no transaction) AND income linked to ACCEPTED transactions
+-- 7. Shows a summary of the recalculated statistics
 --
 -- Note: Standalone income/expense (transactionId IS NULL) are always included.
 -- Income/expense linked to transactions are only included if status = 2 (ACCEPTED).
