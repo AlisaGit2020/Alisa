@@ -43,6 +43,7 @@ interface ReviewStepProps {
   onClearSelection: () => void;
   onSetType: (type: number) => Promise<void>;
   onSetCategoryType: (expenseTypeId?: number, incomeTypeId?: number) => Promise<void>;
+  onResetAllocation: () => Promise<void>;
   onSplitLoanPayment: () => Promise<void>;
   onDelete: () => Promise<void>;
   onNext: () => void;
@@ -65,6 +66,7 @@ export default function ReviewStep({
   onClearSelection,
   onSetType,
   onSetCategoryType,
+  onResetAllocation,
   onSplitLoanPayment,
   onDelete,
   onNext,
@@ -137,7 +139,7 @@ export default function ReviewStep({
   };
 
   const handleResetAllocation = async () => {
-    await onSetType(TransactionType.UNKNOWN);
+    await onResetAllocation();
     setSearchText("");
   };
 

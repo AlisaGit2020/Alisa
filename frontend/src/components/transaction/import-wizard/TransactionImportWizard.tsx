@@ -30,6 +30,7 @@ function TransactionImportWizard({ t }: WithTranslation) {
     clearSelection,
     setTypeForSelected,
     setCategoryTypeForSelected,
+    resetAllocationForSelected,
     splitLoanPaymentForSelected,
     deleteSelected,
     approveAll,
@@ -110,6 +111,7 @@ function TransactionImportWizard({ t }: WithTranslation) {
             onClearSelection={clearSelection}
             onSetType={setTypeForSelected}
             onSetCategoryType={setCategoryTypeForSelected}
+            onResetAllocation={resetAllocationForSelected}
             onSplitLoanPayment={splitLoanPaymentForSelected}
             onDelete={deleteSelected}
             onNext={nextStep}

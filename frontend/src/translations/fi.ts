@@ -121,6 +121,7 @@ const fi = {
       approveError: "Hyväksyminen epäonnistui",
       typeUpdated: "Tyyppi päivitetty",
       categoryUpdated: "Kategoria päivitetty",
+      allocationReset: "Kohdistaminen nollattu",
       loanSplit: "Lainanmaksu jaettu",
       importSuccess: "{{count}} tapahtumaa tuotu",
       settingsSaved: "Asetukset tallennettu",

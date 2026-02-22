@@ -119,6 +119,7 @@ const sv = {
       approveError: "Kunde inte godkänna",
       typeUpdated: "Typ uppdaterad",
       categoryUpdated: "Kategori uppdaterad",
+      allocationReset: "Allokering återställd",
       loanSplit: "Lånbetalning uppdelad",
       importSuccess: "{{count}} transaktioner importerade",
       settingsSaved: "Inställningar sparade",

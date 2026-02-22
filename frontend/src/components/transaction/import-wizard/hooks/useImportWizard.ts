@@ -381,6 +381,26 @@ export function useImportWizard() {
     [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection, showToast, t]
   );
 
+  const resetAllocationForSelected = useCallback(
+    async () => {
+      if (state.selectedIds.length === 0) return;
+
+      await ApiClient.postSaveTask<TransactionSetTypeInput>(
+        transactionContext.apiPath + "/type",
+        {
+          ids: state.selectedIds,
+          type: TransactionType.UNKNOWN,
+        }
+      );
+
+      showToast({ message: t("common:toast.allocationReset"), severity: "success" });
+      // Refetch transactions to update UI
+      await fetchTransactions(state.importedTransactionIds);
+      clearSelection();
+    },
+    [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection, showToast, t]
+  );
+
   const splitLoanPaymentForSelected = useCallback(
     async () => {
       if (state.selectedIds.length === 0) return;
@@ -558,6 +578,7 @@ export function useImportWizard() {
     clearSelection,
     setTypeForSelected,
     setCategoryTypeForSelected,
+    resetAllocationForSelected,
     splitLoanPaymentForSelected,
     deleteSelected,
     approveAll,
