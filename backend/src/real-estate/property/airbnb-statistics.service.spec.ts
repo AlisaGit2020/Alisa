@@ -143,24 +143,128 @@ describe('AirbnbStatisticsService', () => {
   });
 
   describe('handleStandaloneIncomeUpdated', () => {
-    it('triggers recalculation when income type might have changed to airbnb', async () => {
+    it('skips update when neither old nor new is airbnb', async () => {
       const income = {
         propertyId: 2,
         incomeTypeId: 5,
+        accountingDate: new Date('2023-06-15'),
+        incomeType: { key: 'rent' },
+      } as unknown as Income;
+      const event = new StandaloneIncomeUpdatedEvent(
+        income,
+        100, // oldTotalAmount
+        new Date('2023-06-15'), // oldAccountingDate
+        3, // oldIncomeTypeId
+        'other', // oldIncomeTypeKey
+      );
+
+      await service.handleStandaloneIncomeUpdated(event);
+
+      expect(mockDataSource.query).not.toHaveBeenCalled();
+    });
+
+    it('decrements old bucket when changed from airbnb to non-airbnb', async () => {
+      const income = {
+        propertyId: 2,
+        incomeTypeId: 5,
+        accountingDate: new Date('2023-06-15'),
+        incomeType: { key: 'rent' },
+      } as unknown as Income;
+      const event = new StandaloneIncomeUpdatedEvent(
+        income,
+        100, // oldTotalAmount
+        new Date('2023-06-15'), // oldAccountingDate
+        3, // oldIncomeTypeId
+        'airbnb', // oldIncomeTypeKey - was airbnb
+      );
+
+      await service.handleStandaloneIncomeUpdated(event);
+
+      expect(mockEventTracker.increment).toHaveBeenCalled();
+      // Should decrement (-1) the old bucket
+      const queries = mockDataSource.query.mock.calls;
+      expect(queries.length).toBe(3);
+      for (const call of queries) {
+        expect(call[1][5]).toBe(-1);
+      }
+    });
+
+    it('increments new bucket when changed from non-airbnb to airbnb', async () => {
+      const income = {
+        propertyId: 2,
+        incomeTypeId: 5,
+        accountingDate: new Date('2023-07-20'),
         incomeType: { key: 'airbnb' },
       } as unknown as Income;
       const event = new StandaloneIncomeUpdatedEvent(
         income,
         100, // oldTotalAmount
         new Date('2023-06-15'), // oldAccountingDate
-        5, // oldIncomeTypeId
+        3, // oldIncomeTypeId
+        'rent', // oldIncomeTypeKey - was not airbnb
       );
-
-      const spy = jest.spyOn(service, 'recalculateAirbnbVisits');
 
       await service.handleStandaloneIncomeUpdated(event);
 
-      expect(spy).toHaveBeenCalledWith(2);
+      expect(mockEventTracker.increment).toHaveBeenCalled();
+      // Should increment (+1) the new bucket
+      const queries = mockDataSource.query.mock.calls;
+      expect(queries.length).toBe(3);
+      for (const call of queries) {
+        expect(call[1][5]).toBe(1);
+      }
+    });
+
+    it('moves count between buckets when date changes but stays airbnb', async () => {
+      const income = {
+        propertyId: 2,
+        incomeTypeId: 5,
+        accountingDate: new Date('2023-07-20'), // new month
+        incomeType: { key: 'airbnb' },
+      } as unknown as Income;
+      const event = new StandaloneIncomeUpdatedEvent(
+        income,
+        100, // oldTotalAmount
+        new Date('2023-06-15'), // oldAccountingDate - different month
+        5, // oldIncomeTypeId
+        'airbnb', // oldIncomeTypeKey
+      );
+
+      await service.handleStandaloneIncomeUpdated(event);
+
+      expect(mockEventTracker.increment).toHaveBeenCalled();
+      // Should decrement old bucket and increment new bucket (6 queries total)
+      const queries = mockDataSource.query.mock.calls;
+      expect(queries.length).toBe(6);
+      // First 3 should be -1 (decrement old)
+      for (let i = 0; i < 3; i++) {
+        expect(queries[i][1][5]).toBe(-1);
+      }
+      // Last 3 should be +1 (increment new)
+      for (let i = 3; i < 6; i++) {
+        expect(queries[i][1][5]).toBe(1);
+      }
+    });
+
+    it('does nothing when date bucket is same and stays airbnb', async () => {
+      const income = {
+        propertyId: 2,
+        incomeTypeId: 5,
+        accountingDate: new Date('2023-06-20'), // same month
+        incomeType: { key: 'airbnb' },
+      } as unknown as Income;
+      const event = new StandaloneIncomeUpdatedEvent(
+        income,
+        100, // oldTotalAmount
+        new Date('2023-06-15'), // oldAccountingDate - same month
+        5, // oldIncomeTypeId
+        'airbnb', // oldIncomeTypeKey
+      );
+
+      await service.handleStandaloneIncomeUpdated(event);
+
+      // No queries needed when bucket doesn't change
+      expect(mockDataSource.query).not.toHaveBeenCalled();
     });
   });
 

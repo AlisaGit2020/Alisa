@@ -126,19 +126,39 @@ export class AirbnbStatisticsService {
   async handleStandaloneIncomeUpdated(
     event: StandaloneIncomeUpdatedEvent,
   ): Promise<void> {
-    // For updates, we need to check if income type changed to/from airbnb
-    // For simplicity, just recalculate when airbnb is involved
-    const { income, oldIncomeTypeId } = event;
+    const { income, oldAccountingDate, oldIncomeTypeKey } = event;
     const isNewAirbnb = income.incomeType?.key === IncomeTypeKey.AIRBNB;
-    // We don't have old income type key, so just recalculate if current is airbnb
-    // or if incomeTypeId changed
-    if (isNewAirbnb || income.incomeTypeId !== oldIncomeTypeId) {
-      this.eventTracker.increment();
-      try {
-        await this.recalculateAirbnbVisits(income.propertyId);
-      } finally {
-        this.eventTracker.decrement();
+    const wasOldAirbnb = oldIncomeTypeKey === IncomeTypeKey.AIRBNB;
+
+    // Skip if neither old nor new is airbnb
+    if (!isNewAirbnb && !wasOldAirbnb) {
+      return;
+    }
+
+    this.eventTracker.increment();
+    try {
+      if (wasOldAirbnb && !isNewAirbnb) {
+        // Changed from airbnb to non-airbnb: decrement old bucket
+        await this.upsertAirbnbVisits(income.propertyId, oldAccountingDate, -1);
+      } else if (!wasOldAirbnb && isNewAirbnb) {
+        // Changed from non-airbnb to airbnb: increment new bucket
+        await this.upsertAirbnbVisits(income.propertyId, income.accountingDate, 1);
+      } else if (wasOldAirbnb && isNewAirbnb) {
+        // Still airbnb, but date might have changed
+        const oldYear = oldAccountingDate ? new Date(oldAccountingDate).getFullYear() : null;
+        const oldMonth = oldAccountingDate ? new Date(oldAccountingDate).getMonth() + 1 : null;
+        const newYear = income.accountingDate ? new Date(income.accountingDate).getFullYear() : null;
+        const newMonth = income.accountingDate ? new Date(income.accountingDate).getMonth() + 1 : null;
+
+        if (oldYear !== newYear || oldMonth !== newMonth) {
+          // Date bucket changed: decrement old, increment new
+          await this.upsertAirbnbVisits(income.propertyId, oldAccountingDate, -1);
+          await this.upsertAirbnbVisits(income.propertyId, income.accountingDate, 1);
+        }
+        // If date bucket is same, count doesn't change - nothing to do
       }
+    } finally {
+      this.eventTracker.decrement();
     }
   }
 
@@ -216,12 +236,13 @@ export class AirbnbStatisticsService {
     month: number | null,
     delta: number,
   ): Promise<void> {
+    // Use GREATEST(0, ...) to prevent negative values from race conditions or bugs
     await this.dataSource.query(
       `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
        VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT ("propertyId", "year", "month", "key")
-       DO UPDATE SET "value" = (CAST(property_statistics."value" AS INTEGER) + $6)::TEXT`,
-      [propertyId, key, year, month, delta.toString(), delta],
+       DO UPDATE SET "value" = GREATEST(0, CAST(property_statistics."value" AS INTEGER) + $6)::TEXT`,
+      [propertyId, key, year, month, Math.max(0, delta).toString(), delta],
     );
   }
 }

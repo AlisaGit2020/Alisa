@@ -95,16 +95,19 @@ export class StandaloneIncomeUpdatedEvent {
   public oldTotalAmount: number;
   public oldAccountingDate: Date;
   public oldIncomeTypeId: number;
+  public oldIncomeTypeKey: string;
   constructor(
     income: Income,
     oldTotalAmount: number,
     oldAccountingDate: Date,
     oldIncomeTypeId: number,
+    oldIncomeTypeKey: string,
   ) {
     this.income = income;
     this.oldTotalAmount = oldTotalAmount;
     this.oldAccountingDate = oldAccountingDate;
     this.oldIncomeTypeId = oldIncomeTypeId;
+    this.oldIncomeTypeKey = oldIncomeTypeKey;
   }
 }
 

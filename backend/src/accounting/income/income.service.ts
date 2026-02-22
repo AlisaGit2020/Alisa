@@ -167,11 +167,23 @@ export class IncomeService {
     id: number,
     input: IncomeInputDto,
   ): Promise<Income> {
-    const incomeEntity = await this.getEntityOrThrow(user, id);
+    // Load with incomeType relation to capture oldIncomeTypeKey
+    const incomeEntity = await this.repository.findOne({
+      where: { id },
+      relations: ['incomeType', 'transaction'],
+    });
+    if (!incomeEntity) {
+      throw new NotFoundException();
+    }
+    if (!(await this.authService.hasOwnership(user, incomeEntity.propertyId))) {
+      throw new UnauthorizedException();
+    }
+
     // Capture old values before update for delta calculation
     const oldAccountingDate = incomeEntity.accountingDate;
     const oldTotalAmount = incomeEntity.totalAmount;
     const oldIncomeTypeId = incomeEntity.incomeTypeId;
+    const oldIncomeTypeKey = incomeEntity.incomeType?.key;
 
     this.mapData(incomeEntity, input);
     if (incomeEntity.transaction) {
@@ -182,7 +194,7 @@ export class IncomeService {
 
     // Emit event for standalone income (no transaction) - triggers incremental update
     if (!incomeEntity.transactionId) {
-      // Load incomeType relation for statistics services that need it
+      // Load updated incomeType relation for statistics services that need it
       const incomeWithType = await this.repository.findOne({
         where: { id: incomeEntity.id },
         relations: ['incomeType'],
@@ -194,6 +206,7 @@ export class IncomeService {
           oldTotalAmount,
           oldAccountingDate,
           oldIncomeTypeId,
+          oldIncomeTypeKey,
         ),
       );
     } else if (

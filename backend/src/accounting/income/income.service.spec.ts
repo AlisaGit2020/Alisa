@@ -132,6 +132,60 @@ describe('IncomeService', () => {
         UnauthorizedException,
       );
     });
+
+    it('emits StandaloneCreated event when income has no transaction', async () => {
+      const input = {
+        propertyId: 1,
+        incomeTypeId: 5,
+        description: 'Airbnb income',
+        amount: 100,
+        quantity: 1,
+        totalAmount: 100,
+        accountingDate: new Date('2023-06-15'),
+      };
+      const savedIncome = createIncome({ id: 1, ...input, transactionId: null });
+      const incomeWithType = {
+        ...savedIncome,
+        incomeType: { id: 5, key: 'airbnb' },
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue(savedIncome);
+      // Second findOne call to load incomeType relation
+      mockRepository.findOne.mockResolvedValue(incomeWithType);
+
+      await service.add(testUser, input);
+
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        Events.Income.StandaloneCreated,
+        expect.objectContaining({
+          income: expect.objectContaining({
+            id: 1,
+            incomeType: expect.objectContaining({ key: 'airbnb' }),
+          }),
+        }),
+      );
+    });
+
+    it('does not emit StandaloneCreated event when income has transaction', async () => {
+      const input = {
+        propertyId: 1,
+        incomeTypeId: 1,
+        description: 'Test income',
+        amount: 100,
+        quantity: 1,
+        totalAmount: 100,
+        transactionId: 10,
+      };
+      const savedIncome = createIncome({ id: 1, ...input, transactionId: 10 });
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue(savedIncome);
+
+      await service.add(testUser, input);
+
+      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+    });
   });
 
   describe('update', () => {
@@ -283,6 +337,7 @@ describe('IncomeService', () => {
       });
       existingIncome.accountingDate = new Date('2023-06-15');
       existingIncome.transaction = null;
+      existingIncome.incomeType = { id: 1, key: 'airbnb' } as IncomeType;
 
       mockRepository.findOne.mockResolvedValue(existingIncome);
       mockAuthService.hasOwnership.mockResolvedValue(true);
@@ -307,6 +362,7 @@ describe('IncomeService', () => {
           oldTotalAmount: 100,
           oldAccountingDate: new Date('2023-06-15'),
           oldIncomeTypeId: 1,
+          oldIncomeTypeKey: 'airbnb',
         }),
       );
     });

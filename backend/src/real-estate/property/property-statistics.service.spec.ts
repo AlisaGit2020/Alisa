@@ -903,6 +903,7 @@ describe('PropertyStatisticsService', () => {
         oldTotalAmount: 150,
         oldAccountingDate: new Date('2023-06-15'),
         oldIncomeTypeId: 1,
+        oldIncomeTypeKey: 'rental',
       });
 
       // Delta should be new - old = 200 - 150 = 50
@@ -927,6 +928,7 @@ describe('PropertyStatisticsService', () => {
         oldTotalAmount: 150,
         oldAccountingDate: new Date('2023-06-15'), // old date
         oldIncomeTypeId: 1,
+        oldIncomeTypeKey: 'rental',
       });
 
       // Should have 6 upserts: 3 for subtracting from old buckets + 3 for adding to new buckets
