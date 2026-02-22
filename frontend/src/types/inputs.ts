@@ -1,6 +1,7 @@
 // Input DTO interfaces - for form submissions
 
 import {
+  AllocationCondition,
   PropertyExternalSource,
   PropertyStatus,
   TransactionStatus,
@@ -119,4 +120,29 @@ export interface SPankkiImportInput {
   file: string;
   fileName?: string;
   propertyId: number;
+}
+
+// Allocation rule input
+export interface AllocationRuleInput {
+  id?: number;
+  name: string;
+  propertyId: number;
+  priority?: number;
+  transactionType: TransactionType;
+  expenseTypeId?: number | null;
+  incomeTypeId?: number | null;
+  conditions: AllocationCondition[];
+  isActive?: boolean;
+}
+
+// Apply allocation input
+export interface ApplyAllocationInput {
+  propertyId: number;
+  transactionIds: number[];
+}
+
+// Reorder rules input
+export interface ReorderRulesInput {
+  propertyId: number;
+  ruleIds: number[];
 }

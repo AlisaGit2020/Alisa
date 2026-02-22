@@ -34,6 +34,7 @@ function TransactionImportWizard({ t }: WithTranslation) {
     deleteSelected,
     approveAll,
     reset,
+    refreshTransactions,
   } = useImportWizard();
 
   // Track global property selection (from AppBar)
@@ -96,6 +97,7 @@ function TransactionImportWizard({ t }: WithTranslation) {
         return (
           <ReviewStep
             t={t}
+            propertyId={state.propertyId}
             transactions={state.transactions}
             selectedIds={state.selectedIds}
             selectedTransactionTypes={state.selectedTransactionTypes}
@@ -112,6 +114,7 @@ function TransactionImportWizard({ t }: WithTranslation) {
             onDelete={deleteSelected}
             onNext={nextStep}
             onBack={prevStep}
+            onRefresh={refreshTransactions}
           />
         );
       }

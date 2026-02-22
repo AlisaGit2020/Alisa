@@ -116,6 +116,7 @@ export enum ExpenseTypeKey {
   LOAN_INTEREST = 'loan-interest',
   LOAN_PRINCIPAL = 'loan-principal',
   LOAN_HANDLING_FEE = 'loan-handling-fee',
+  LOAN_PAYMENT = 'loan-payment',
 }
 
 // Global income type keys (translations are handled by i18n using these keys)
@@ -124,4 +125,22 @@ export enum IncomeTypeKey {
   AIRBNB = 'airbnb',
   CAPITAL_INCOME = 'capital-income',
   INSURANCE_COMPENSATION = 'insurance-compensation',
+}
+
+// Allocation rule condition types
+export type AllocationConditionField =
+  | 'sender'
+  | 'receiver'
+  | 'description'
+  | 'amount';
+export type AllocationConditionOperator =
+  | 'equals'
+  | 'contains'
+  | 'greaterThan'
+  | 'lessThan';
+
+export interface AllocationCondition {
+  field: AllocationConditionField;
+  operator: AllocationConditionOperator;
+  value: string;
 }

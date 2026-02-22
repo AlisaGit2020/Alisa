@@ -82,6 +82,11 @@ const GLOBAL_EXPENSE_TYPES: GlobalExpenseType[] = [
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
+  {
+    key: ExpenseTypeKey.LOAN_PAYMENT,
+    isTaxDeductible: false,
+    isCapitalImprovement: false,
+  },
 ];
 
 const GLOBAL_INCOME_TYPES: GlobalIncomeType[] = [

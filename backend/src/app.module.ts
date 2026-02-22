@@ -18,6 +18,7 @@ import { PricingModule } from './pricing/pricing.module';
 import { DefaultsModule } from './defaults/defaults.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CommonModule } from './common/common.module';
+import { AllocationRuleModule } from './accounting/allocation-rule/allocation-rule.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { CommonModule } from './common/common.module';
     }),
     AccountingModule,
     AdminModule,
+    AllocationRuleModule,
     AuthModule,
     DefaultsModule,
     FeedbackModule,

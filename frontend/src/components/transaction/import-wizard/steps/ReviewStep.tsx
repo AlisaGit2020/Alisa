@@ -14,17 +14,25 @@ import {
 } from "@mui/material";
 import AlisaButton from "../../../alisa/form/AlisaButton";
 import SearchIcon from "@mui/icons-material/Search";
+import RuleIcon from "@mui/icons-material/Rule";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
 type SearchField = "all" | "sender" | "receiver" | "description" | "amount";
 import { TFunction } from "i18next";
-import { Transaction, TransactionType } from "@alisa-types";
+import { Transaction, TransactionType, AllocationResult } from "@alisa-types";
 import AlisaDataTable from "../../../alisa/datatable/AlisaDataTable";
 import TransactionsPendingActions from "../../pending/TransactionsPendingActions";
 import TransactionDetails from "../../components/TransactionDetails";
-import { useState, useMemo } from "react";
+import { AllocationRulesModal } from "../../../allocation";
+import { useState, useMemo, useCallback } from "react";
+import axios from "axios";
+import ApiClient from "@alisa-lib/api-client";
+import { useToast } from "../../../alisa/toast/AlisaToastProvider";
 
 interface ReviewStepProps {
   t: TFunction;
+  propertyId: number;
   transactions: Transaction[];
   selectedIds: number[];
   selectedTransactionTypes: TransactionType[];
@@ -41,10 +49,12 @@ interface ReviewStepProps {
   onDelete: () => Promise<void>;
   onNext: () => void;
   onBack: () => void;
+  onRefresh?: () => Promise<void>;
 }
 
 export default function ReviewStep({
   t,
+  propertyId,
   transactions,
   selectedIds,
   selectedTransactionTypes,
@@ -61,19 +71,27 @@ export default function ReviewStep({
   onDelete,
   onNext,
   onBack,
+  onRefresh,
 }: ReviewStepProps) {
+  const { showToast } = useToast();
   const [searchText, setSearchText] = useState("");
   const [searchField, setSearchField] = useState<SearchField>("all");
   const [showOnlyUnknown, setShowOnlyUnknown] = useState(true);
   const [detailId, setDetailId] = useState<number>(0);
+  const [rulesModalOpen, setRulesModalOpen] = useState(false);
+  const [isAllocating, setIsAllocating] = useState(false);
+  const [conflictingIds, setConflictingIds] = useState<Set<number>>(new Set());
 
-  // Filter transactions based on unknown filter, search text, and selected field
+  // Filter transactions based on unknown/allocated filter, search text, and selected field
   const filteredTransactions = useMemo(() => {
     let filtered = transactions;
 
-    // First filter by unknown type if enabled
+    // Filter by unknown/allocated toggle
     if (showOnlyUnknown) {
       filtered = filtered.filter((tx) => tx.type === TransactionType.UNKNOWN);
+    } else {
+      // "Allocated" view - show transactions that have a type set (not UNKNOWN)
+      filtered = filtered.filter((tx) => tx.type !== TransactionType.UNKNOWN);
     }
 
     // Then filter by search text
@@ -137,11 +155,71 @@ export default function ReviewStep({
     onClearSelection();
   };
 
+  const handleAutoAllocate = useCallback(async () => {
+    if (!propertyId) return;
+
+    // Get IDs of unknown transactions
+    const unknownTransactions = transactions.filter(
+      (tx) => tx.type === TransactionType.UNKNOWN
+    );
+
+    if (unknownTransactions.length === 0) {
+      showToast({ message: t("allocation:noTransactionsSelected"), severity: "info" });
+      return;
+    }
+
+    setIsAllocating(true);
+    try {
+      const options = await ApiClient.getOptions();
+      const response = await axios.post<AllocationResult>(
+        `${import.meta.env.VITE_API_URL}/allocation-rules/apply`,
+        {
+          propertyId,
+          transactionIds: unknownTransactions.map((tx) => tx.id),
+        },
+        options
+      );
+
+      const result = response.data;
+
+      // Track conflicting transactions
+      if (result.conflicting.length > 0) {
+        setConflictingIds(new Set(result.conflicting.map((c) => c.transactionId)));
+      }
+
+      // Show results
+      if (result.allocated.length > 0) {
+        showToast({ message: t("allocation:allocatedCount", { count: result.allocated.length }), severity: "success" });
+        // Refresh transactions to show updated types
+        if (onRefresh) {
+          await onRefresh();
+        }
+      }
+
+      if (result.conflicting.length > 0) {
+        showToast({ message: t("allocation:conflictingCount", { count: result.conflicting.length }), severity: "warning" });
+      }
+
+      // Clear search to see results
+      setSearchText("");
+    } catch (error) {
+      console.error("Auto-allocate failed:", error);
+      showToast({ message: t("common:toast.error"), severity: "error" });
+    } finally {
+      setIsAllocating(false);
+    }
+  }, [propertyId, transactions, t, showToast, onRefresh]);
+
   const hasExpenseTransactions = selectedTransactionTypes.includes(
     TransactionType.EXPENSE
   );
   const hasIncomeTransactions = selectedTransactionTypes.includes(
     TransactionType.INCOME
+  );
+
+  // Check if any unknown transactions exist for the auto-allocate button
+  const hasUnknownTransactions = transactions.some(
+    (tx) => tx.type === TransactionType.UNKNOWN
   );
 
   return (
@@ -178,10 +256,29 @@ export default function ReviewStep({
         onDelete={onDelete}
       />
 
+      {/* Allocation buttons */}
+      <Stack direction="row" spacing={1} sx={{ mb: 2, mt: selectedIds.length > 0 ? 2 : 0 }}>
+        <AlisaButton
+          label={t("allocation:rules")}
+          variant="outlined"
+          size="small"
+          startIcon={<RuleIcon />}
+          onClick={() => setRulesModalOpen(true)}
+        />
+        <AlisaButton
+          label={t("allocation:autoAllocate")}
+          variant="contained"
+          size="small"
+          startIcon={<AutoFixHighIcon />}
+          onClick={handleAutoAllocate}
+          disabled={!hasUnknownTransactions || isAllocating || !propertyId}
+        />
+      </Stack>
+
       {/* Filter controls */}
-      <Stack direction="row" spacing={2} sx={{ mb: 2, mt: selectedIds.length > 0 ? 2 : 0 }} alignItems="center">
+      <Stack direction="row" spacing={2} sx={{ mb: 2 }} alignItems="center">
         <ToggleButtonGroup
-          value={showOnlyUnknown ? "unknown" : "all"}
+          value={showOnlyUnknown ? "unknown" : "allocated"}
           exclusive
           onChange={(_, value) => {
             if (value !== null) {
@@ -193,8 +290,8 @@ export default function ReviewStep({
           <ToggleButton value="unknown">
             {t("importWizard.unknownOnly")} ({unknownCount})
           </ToggleButton>
-          <ToggleButton value="all">
-            {t("importWizard.showAll")} ({transactions.length})
+          <ToggleButton value="allocated">
+            {t("allocation:allocated")} ({transactions.length - unknownCount})
           </ToggleButton>
         </ToggleButtonGroup>
 
@@ -272,6 +369,25 @@ export default function ReviewStep({
           disabled={hasUnknownTypes}
         />
       </Stack>
+
+      {/* Allocation Rules Modal */}
+      {propertyId > 0 && (
+        <AllocationRulesModal
+          open={rulesModalOpen}
+          propertyId={propertyId}
+          onClose={() => setRulesModalOpen(false)}
+        />
+      )}
+
+      {/* Conflict indicator tooltip for rows with conflicts */}
+      {conflictingIds.size > 0 && (
+        <Alert severity="warning" sx={{ mt: 2 }}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <WarningAmberIcon fontSize="small" />
+            <span>{t("allocation:conflictingCount", { count: conflictingIds.size })}</span>
+          </Stack>
+        </Alert>
+      )}
     </Box>
   );
 }

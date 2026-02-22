@@ -38,6 +38,31 @@ jest.mock(
   { virtual: true }
 );
 
+// Mock AllocationRulesModal
+jest.mock(
+  '@/components/allocation',
+  () => ({
+    __esModule: true,
+    AllocationRulesModal: () => null,
+  }),
+  { virtual: true }
+);
+
+// Mock AlisaToast
+jest.mock(
+  '@/components/alisa/toast/AlisaToast',
+  () => ({
+    __esModule: true,
+    default: () => ({
+      success: jest.fn(),
+      error: jest.fn(),
+      warning: jest.fn(),
+      info: jest.fn(),
+    }),
+  }),
+  { virtual: true }
+);
+
 // Import ReviewStep after mocks are set up
 import ReviewStep from './ReviewStep';
 
@@ -49,6 +74,9 @@ describe('ReviewStep', () => {
       'importWizard.allocationRequired': 'You can continue when all transactions are allocated or removed.',
       'importWizard.unknownOnly': 'Not allocated',
       'importWizard.showAll': 'Show all',
+      'allocation:allocated': 'Allocated',
+      'allocation:rules': 'Allocation Rules',
+      'allocation:autoAllocate': 'Auto-Allocate',
       'importWizard.allFields': 'All fields',
       'importWizard.showingCount': `Showing ${options?.count ?? 0} rows`,
       'importWizard.back': 'Back',
@@ -101,6 +129,7 @@ describe('ReviewStep', () => {
 
   const defaultProps = {
     t: mockT,
+    propertyId: 1,
     transactions: defaultTransactions,
     selectedIds: [] as number[],
     selectedTransactionTypes: [] as TransactionType[],
@@ -133,7 +162,7 @@ describe('ReviewStep', () => {
       renderWithProviders(<ReviewStep {...defaultProps} />);
 
       expect(screen.getByText(/Not allocated/)).toBeInTheDocument();
-      expect(screen.getByText(/Show all/)).toBeInTheDocument();
+      expect(screen.getByText(/Allocated/)).toBeInTheDocument();
     });
 
     it('renders search input', () => {
