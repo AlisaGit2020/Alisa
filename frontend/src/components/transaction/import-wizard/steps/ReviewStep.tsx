@@ -265,7 +265,7 @@ export default function ReviewStep({
       />
 
       {/* Filter controls */}
-      <Stack direction="row" spacing={2} sx={{ mb: 2 }} alignItems="center">
+      <Stack direction="row" spacing={2} sx={{ mt: 2, mb: 2 }} alignItems="center">
         <ToggleButtonGroup
           value={showOnlyUnknown ? "unknown" : "allocated"}
           exclusive

@@ -14,6 +14,7 @@ const expenseTypes = {
     'loan-principal': 'Loan principal',
     'loan-handling-fee': 'Loan handling fees',
     'loan-payment': 'Loan payment (auto-split)',
+    'cleaning': 'Cleaning',
     // General labels
     expenseTypes: 'Expense types',
     isTaxDeductible: 'Tax deductible',
