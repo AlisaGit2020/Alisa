@@ -100,6 +100,7 @@ describe('ReviewStep', () => {
   const mockOnDelete = jest.fn();
   const mockOnNext = jest.fn();
   const mockOnBack = jest.fn();
+  const mockOnResetAllocation = jest.fn().mockResolvedValue(undefined);
 
   const createTransaction = (
     id: number,
@@ -144,6 +145,7 @@ describe('ReviewStep', () => {
     onDelete: mockOnDelete,
     onNext: mockOnNext,
     onBack: mockOnBack,
+    onResetAllocation: mockOnResetAllocation,
   };
 
   beforeEach(() => {
