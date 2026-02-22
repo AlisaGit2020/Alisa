@@ -111,24 +111,50 @@ describe('AirbnbStatisticsService', () => {
   });
 
   describe('handleStandaloneIncomeCreated', () => {
-    it('triggers recalculation when income is created', async () => {
-      const income = { propertyId: 1, incomeTypeId: 5 } as Income;
+    it('uses incremental update for airbnb income', async () => {
+      const income = {
+        propertyId: 1,
+        incomeTypeId: 5,
+        accountingDate: new Date('2023-06-15'),
+        incomeType: { key: 'airbnb' },
+      } as unknown as Income;
       const event = new StandaloneIncomeCreatedEvent(income);
-
-      const spy = jest.spyOn(service, 'recalculateAirbnbVisits');
 
       await service.handleStandaloneIncomeCreated(event);
 
       expect(mockEventTracker.increment).toHaveBeenCalled();
-      expect(spy).toHaveBeenCalledWith(1);
+      expect(mockDataSource.query).toHaveBeenCalled();
       expect(mockEventTracker.decrement).toHaveBeenCalled();
+    });
+
+    it('skips update for non-airbnb income', async () => {
+      const income = {
+        propertyId: 1,
+        incomeTypeId: 5,
+        accountingDate: new Date('2023-06-15'),
+        incomeType: { key: 'rent' },
+      } as unknown as Income;
+      const event = new StandaloneIncomeCreatedEvent(income);
+
+      await service.handleStandaloneIncomeCreated(event);
+
+      expect(mockDataSource.query).not.toHaveBeenCalled();
     });
   });
 
   describe('handleStandaloneIncomeUpdated', () => {
-    it('triggers recalculation when income is updated', async () => {
-      const income = { propertyId: 2, incomeTypeId: 5 } as Income;
-      const event = new StandaloneIncomeUpdatedEvent(income);
+    it('triggers recalculation when income type might have changed to airbnb', async () => {
+      const income = {
+        propertyId: 2,
+        incomeTypeId: 5,
+        incomeType: { key: 'airbnb' },
+      } as unknown as Income;
+      const event = new StandaloneIncomeUpdatedEvent(
+        income,
+        100, // oldTotalAmount
+        new Date('2023-06-15'), // oldAccountingDate
+        5, // oldIncomeTypeId
+      );
 
       const spy = jest.spyOn(service, 'recalculateAirbnbVisits');
 
@@ -139,14 +165,34 @@ describe('AirbnbStatisticsService', () => {
   });
 
   describe('handleStandaloneIncomeDeleted', () => {
-    it('triggers recalculation when income is deleted', async () => {
-      const event = new StandaloneIncomeDeletedEvent(3);
-
-      const spy = jest.spyOn(service, 'recalculateAirbnbVisits');
+    it('uses incremental update for airbnb income', async () => {
+      const income = {
+        propertyId: 3,
+        incomeTypeId: 5,
+        accountingDate: new Date('2023-06-15'),
+        incomeType: { key: 'airbnb' },
+      } as unknown as Income;
+      const event = new StandaloneIncomeDeletedEvent(income);
 
       await service.handleStandaloneIncomeDeleted(event);
 
-      expect(spy).toHaveBeenCalledWith(3);
+      expect(mockEventTracker.increment).toHaveBeenCalled();
+      expect(mockDataSource.query).toHaveBeenCalled();
+      expect(mockEventTracker.decrement).toHaveBeenCalled();
+    });
+
+    it('skips update for non-airbnb income', async () => {
+      const income = {
+        propertyId: 3,
+        incomeTypeId: 5,
+        accountingDate: new Date('2023-06-15'),
+        incomeType: { key: 'rent' },
+      } as unknown as Income;
+      const event = new StandaloneIncomeDeletedEvent(income);
+
+      await service.handleStandaloneIncomeDeleted(event);
+
+      expect(mockDataSource.query).not.toHaveBeenCalled();
     });
   });
 
@@ -211,6 +257,72 @@ describe('AirbnbStatisticsService', () => {
       await service.handleTransactionDeleted(event);
 
       expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('incremental updates', () => {
+    it('handleStandaloneIncomeCreated uses incremental +1 count for airbnb income', async () => {
+      const income = {
+        id: 1,
+        propertyId: 1,
+        incomeTypeId: 5,
+        accountingDate: new Date('2023-06-15'),
+        incomeType: { key: 'airbnb' },
+      } as unknown as Income;
+      const event = new StandaloneIncomeCreatedEvent(income);
+
+      await service.handleStandaloneIncomeCreated(event);
+
+      // Should NOT call delete (which is part of full recalculation)
+      const queries = mockDataSource.query.mock.calls;
+      const hasDelete = queries.some((call) => call[0].includes('DELETE'));
+      expect(hasDelete).toBe(false);
+
+      // Should call incremental upsert with +1 delta
+      expect(queries.length).toBe(3); // all-time, yearly, monthly
+      for (const call of queries) {
+        expect(call[0]).toContain('ON CONFLICT');
+        // Delta should be 1
+        expect(call[1][5]).toBe(1);
+      }
+    });
+
+    it('handleStandaloneIncomeDeleted uses incremental -1 count for airbnb income', async () => {
+      const income = {
+        id: 1,
+        propertyId: 1,
+        incomeTypeId: 5,
+        accountingDate: new Date('2023-06-15'),
+        incomeType: { key: 'airbnb' },
+      } as unknown as Income;
+      const event = new StandaloneIncomeDeletedEvent(income);
+
+      await service.handleStandaloneIncomeDeleted(event);
+
+      // Should call incremental upsert with -1 delta
+      const queries = mockDataSource.query.mock.calls;
+      expect(queries.length).toBe(3);
+      for (const call of queries) {
+        expect(call[0]).toContain('ON CONFLICT');
+        // Delta should be -1
+        expect(call[1][5]).toBe(-1);
+      }
+    });
+
+    it('skips incremental update for non-airbnb income type', async () => {
+      const income = {
+        id: 1,
+        propertyId: 1,
+        incomeTypeId: 5,
+        accountingDate: new Date('2023-06-15'),
+        incomeType: { key: 'rent' },
+      } as unknown as Income;
+      const event = new StandaloneIncomeCreatedEvent(income);
+
+      await service.handleStandaloneIncomeCreated(event);
+
+      // Should not call any queries for non-airbnb income
+      expect(mockDataSource.query).not.toHaveBeenCalled();
     });
   });
 });

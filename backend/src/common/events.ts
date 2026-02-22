@@ -92,15 +92,26 @@ export class StandaloneIncomeCreatedEvent {
 
 export class StandaloneIncomeUpdatedEvent {
   public income: Income;
-  constructor(income: Income) {
+  public oldTotalAmount: number;
+  public oldAccountingDate: Date;
+  public oldIncomeTypeId: number;
+  constructor(
+    income: Income,
+    oldTotalAmount: number,
+    oldAccountingDate: Date,
+    oldIncomeTypeId: number,
+  ) {
     this.income = income;
+    this.oldTotalAmount = oldTotalAmount;
+    this.oldAccountingDate = oldAccountingDate;
+    this.oldIncomeTypeId = oldIncomeTypeId;
   }
 }
 
 export class StandaloneIncomeDeletedEvent {
-  public propertyId: number;
-  constructor(propertyId: number) {
-    this.propertyId = propertyId;
+  public income: Income;
+  constructor(income: Income) {
+    this.income = income;
   }
 }
 
@@ -113,14 +124,22 @@ export class StandaloneExpenseCreatedEvent {
 
 export class StandaloneExpenseUpdatedEvent {
   public expense: Expense;
-  constructor(expense: Expense) {
+  public oldTotalAmount: number;
+  public oldAccountingDate: Date;
+  constructor(
+    expense: Expense,
+    oldTotalAmount: number,
+    oldAccountingDate: Date,
+  ) {
     this.expense = expense;
+    this.oldTotalAmount = oldTotalAmount;
+    this.oldAccountingDate = oldAccountingDate;
   }
 }
 
 export class StandaloneExpenseDeletedEvent {
-  public propertyId: number;
-  constructor(propertyId: number) {
-    this.propertyId = propertyId;
+  public expense: Expense;
+  constructor(expense: Expense) {
+    this.expense = expense;
   }
 }

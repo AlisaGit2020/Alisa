@@ -279,6 +279,44 @@ describe('ExpenseService', () => {
         expect.objectContaining({ expense: expect.any(Object) }),
       );
     });
+
+    it('emits StandaloneUpdated event with old values for delta calculation', async () => {
+      const existingExpense = createExpense({
+        id: 1,
+        propertyId: 1,
+        expenseTypeId: 1,
+        transactionId: null,
+        totalAmount: 100,
+      });
+      existingExpense.accountingDate = new Date('2023-06-15');
+      existingExpense.transaction = null;
+
+      mockRepository.findOne.mockResolvedValue(existingExpense);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({
+        ...existingExpense,
+        totalAmount: 200,
+        accountingDate: new Date('2023-07-15'),
+      });
+      mockExpenseTypeRepository.findOne.mockResolvedValue({ id: 1, isCapitalImprovement: false });
+
+      await service.update(testUser, 1, {
+        description: 'Test expense',
+        accountingDate: new Date('2023-07-15'),
+        amount: 200,
+        quantity: 1,
+        totalAmount: 200,
+      });
+
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        Events.Expense.StandaloneUpdated,
+        expect.objectContaining({
+          expense: expect.any(Object),
+          oldTotalAmount: 100,
+          oldAccountingDate: new Date('2023-06-15'),
+        }),
+      );
+    });
   });
 
   describe('delete', () => {
@@ -320,6 +358,34 @@ describe('ExpenseService', () => {
 
       await expect(service.delete(userWithoutProperties, 1)).rejects.toThrow(
         UnauthorizedException,
+      );
+    });
+
+    it('emits StandaloneDeleted event with deleted expense data', async () => {
+      const expense = createExpense({
+        id: 1,
+        propertyId: 1,
+        transactionId: null,
+        totalAmount: 150,
+        accountingDate: new Date('2023-06-15'),
+        expenseTypeId: 5,
+      });
+      mockRepository.findOne.mockResolvedValue(expense);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      await service.delete(testUser, 1);
+
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        Events.Expense.StandaloneDeleted,
+        expect.objectContaining({
+          expense: expect.objectContaining({
+            id: 1,
+            totalAmount: 150,
+            accountingDate: new Date('2023-06-15'),
+            expenseTypeId: 5,
+          }),
+        }),
       );
     });
   });

@@ -108,9 +108,15 @@ export class AirbnbStatisticsService {
   async handleStandaloneIncomeCreated(
     event: StandaloneIncomeCreatedEvent,
   ): Promise<void> {
+    const { income } = event;
+    // Only process airbnb income types
+    if (income.incomeType?.key !== IncomeTypeKey.AIRBNB) {
+      return;
+    }
+
     this.eventTracker.increment();
     try {
-      await this.recalculateAirbnbVisits(event.income.propertyId);
+      await this.upsertAirbnbVisits(income.propertyId, income.accountingDate, 1);
     } finally {
       this.eventTracker.decrement();
     }
@@ -120,11 +126,19 @@ export class AirbnbStatisticsService {
   async handleStandaloneIncomeUpdated(
     event: StandaloneIncomeUpdatedEvent,
   ): Promise<void> {
-    this.eventTracker.increment();
-    try {
-      await this.recalculateAirbnbVisits(event.income.propertyId);
-    } finally {
-      this.eventTracker.decrement();
+    // For updates, we need to check if income type changed to/from airbnb
+    // For simplicity, just recalculate when airbnb is involved
+    const { income, oldIncomeTypeId } = event;
+    const isNewAirbnb = income.incomeType?.key === IncomeTypeKey.AIRBNB;
+    // We don't have old income type key, so just recalculate if current is airbnb
+    // or if incomeTypeId changed
+    if (isNewAirbnb || income.incomeTypeId !== oldIncomeTypeId) {
+      this.eventTracker.increment();
+      try {
+        await this.recalculateAirbnbVisits(income.propertyId);
+      } finally {
+        this.eventTracker.decrement();
+      }
     }
   }
 
@@ -132,9 +146,15 @@ export class AirbnbStatisticsService {
   async handleStandaloneIncomeDeleted(
     event: StandaloneIncomeDeletedEvent,
   ): Promise<void> {
+    const { income } = event;
+    // Only process airbnb income types
+    if (income.incomeType?.key !== IncomeTypeKey.AIRBNB) {
+      return;
+    }
+
     this.eventTracker.increment();
     try {
-      await this.recalculateAirbnbVisits(event.propertyId);
+      await this.upsertAirbnbVisits(income.propertyId, income.accountingDate, -1);
     } finally {
       this.eventTracker.decrement();
     }
@@ -170,5 +190,38 @@ export class AirbnbStatisticsService {
     } finally {
       this.eventTracker.decrement();
     }
+  }
+
+  private async upsertAirbnbVisits(
+    propertyId: number,
+    accountingDate: Date,
+    delta: number,
+  ): Promise<void> {
+    const statisticKey = StatisticKey.AIRBNB_VISITS;
+    const year = accountingDate ? new Date(accountingDate).getFullYear() : null;
+    const month = accountingDate ? new Date(accountingDate).getMonth() + 1 : null;
+
+    // Upsert all-time
+    await this.upsertStatistic(propertyId, statisticKey, null, null, delta);
+    // Upsert yearly
+    await this.upsertStatistic(propertyId, statisticKey, year, null, delta);
+    // Upsert monthly
+    await this.upsertStatistic(propertyId, statisticKey, year, month, delta);
+  }
+
+  private async upsertStatistic(
+    propertyId: number,
+    key: string,
+    year: number | null,
+    month: number | null,
+    delta: number,
+  ): Promise<void> {
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = (CAST(property_statistics."value" AS INTEGER) + $6)::TEXT`,
+      [propertyId, key, year, month, delta.toString(), delta],
+    );
   }
 }
