@@ -12,6 +12,7 @@ import CallSplitIcon from "@mui/icons-material/CallSplit";
 import SaveIcon from "@mui/icons-material/Save";
 import RuleIcon from "@mui/icons-material/Rule";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { AlisaCloseIcon } from "../../alisa/AlisaIcons.tsx";
 import Typography from "@mui/material/Typography";
 import {
@@ -44,6 +45,8 @@ interface TransactionsPendingActionsProps extends WithTranslation {
   onAutoAllocate?: () => void;
   autoAllocateDisabled?: boolean;
   isAllocating?: boolean;
+  onResetAllocation?: () => void;
+  hasAllocatedSelected?: boolean;
 }
 
 interface CategoryTypeData {
@@ -157,7 +160,13 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
         {/* Row count - prominent chip */}
         <Box>
           <Chip
-            label={props.t("rowsSelected", { count: props.selectedIds.length })}
+            label={
+              props.hasAllocatedSelected && !props.hasUnallocatedSelected
+                ? props.t("allocatedRowsSelected", { count: props.selectedIds.length })
+                : !props.hasAllocatedSelected && props.hasUnallocatedSelected
+                  ? props.t("notAllocatedRowsSelected", { count: props.selectedIds.length })
+                  : props.t("rowsSelected", { count: props.selectedIds.length })
+            }
             color="primary"
             size="medium"
           />
@@ -343,6 +352,21 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
                     : undefined
                 }
                 endIcon={<CheckIcon />}
+              />
+            )}
+            {props.onResetAllocation && (
+              <AlisaButton
+                label={props.t("resetAllocation")}
+                variant="text"
+                color="warning"
+                onClick={props.onResetAllocation}
+                disabled={!props.hasAllocatedSelected}
+                tooltip={
+                  !props.hasAllocatedSelected
+                    ? props.t("resetAllocationDisabledTooltip")
+                    : undefined
+                }
+                endIcon={<RestartAltIcon />}
               />
             )}
             <AlisaButton

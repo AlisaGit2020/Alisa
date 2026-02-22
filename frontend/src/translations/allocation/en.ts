@@ -44,6 +44,7 @@ const allocation = {
   conflictingCount: '{{count}} transactions have conflicting rules',
   skippedCount: '{{count}} transactions skipped',
   noTransactionsSelected: 'No transactions selected',
+  noMatchesFound: 'No matches to allocation rules',
   rulesApplied: 'Allocation rules applied',
 
   // Transaction type

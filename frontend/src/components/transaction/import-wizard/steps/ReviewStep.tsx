@@ -136,6 +136,11 @@ export default function ReviewStep({
     setSearchText("");
   };
 
+  const handleResetAllocation = async () => {
+    await onSetType(TransactionType.UNKNOWN);
+    setSearchText("");
+  };
+
   const handleSetCategoryType = async (
     expenseTypeId?: number,
     incomeTypeId?: number
@@ -204,6 +209,11 @@ export default function ReviewStep({
         showToast({ message: t("allocation:conflictingCount", { count: result.conflicting.length }), severity: "warning" });
       }
 
+      // Show info message when no matches found
+      if (result.allocated.length === 0 && result.conflicting.length === 0) {
+        showToast({ message: t("allocation:noMatchesFound"), severity: "info" });
+      }
+
       // Clear search to see results
       setSearchText("");
     } catch (error) {
@@ -225,6 +235,18 @@ export default function ReviewStep({
   const hasUnknownTransactions = transactions.some(
     (tx) => tx.type === TransactionType.UNKNOWN
   );
+
+  // Check if any selected transactions are allocated (not UNKNOWN)
+  const hasAllocatedSelected = selectedIds.some((id) => {
+    const tx = transactions.find((t) => t.id === id);
+    return tx && tx.type !== TransactionType.UNKNOWN;
+  });
+
+  // Check if any selected transactions are not allocated (UNKNOWN)
+  const hasUnallocatedSelected = selectedIds.some((id) => {
+    const tx = transactions.find((t) => t.id === id);
+    return tx && tx.type === TransactionType.UNKNOWN;
+  });
 
   return (
     <Box>
@@ -262,6 +284,9 @@ export default function ReviewStep({
         onAutoAllocate={handleAutoAllocate}
         autoAllocateDisabled={!hasUnknownTransactions || !propertyId}
         isAllocating={isAllocating}
+        onResetAllocation={handleResetAllocation}
+        hasAllocatedSelected={hasAllocatedSelected}
+        hasUnallocatedSelected={hasUnallocatedSelected}
       />
 
       {/* Filter controls */}

@@ -44,6 +44,7 @@ const allocation = {
   conflictingCount: '{{count}} tapahtumalla on ristiriitaisia sääntöjä',
   skippedCount: '{{count}} tapahtumaa ohitettu',
   noTransactionsSelected: 'Ei valittuja tapahtumia',
+  noMatchesFound: 'Ei osumia kohdistussääntöihin',
   rulesApplied: 'Kohdistussäännöt käytetty',
 
   // Transaction type
