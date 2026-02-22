@@ -15,6 +15,7 @@ import {
 import AlisaButton from "../../../alisa/form/AlisaButton";
 import SearchIcon from "@mui/icons-material/Search";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 type SearchField = "all" | "sender" | "receiver" | "description" | "amount";
 import { TFunction } from "i18next";
@@ -309,6 +310,7 @@ export default function ReviewStep({
             {t("importWizard.unknownOnly")} ({unknownCount})
           </ToggleButton>
           <ToggleButton value="allocated">
+            <CheckCircleIcon fontSize="small" color="success" sx={{ mr: 0.5 }} />
             {t("allocation:allocated")} ({transactions.length - unknownCount})
           </ToggleButton>
         </ToggleButtonGroup>
