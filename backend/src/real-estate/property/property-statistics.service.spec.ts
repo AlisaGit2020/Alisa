@@ -336,39 +336,99 @@ describe('PropertyStatisticsService', () => {
     });
   });
 
-  describe('handleExpenseAccountingDateChanged', () => {
-    it('triggers recalculation for the expense property', async () => {
-      const expense = createExpense({ id: 1, propertyId: 1 });
-      mockRepository.delete.mockResolvedValue({ affected: 0 });
-      mockRepository.find.mockResolvedValue([]);
+  describe('handleExpenseAccountingDateChanged - incremental', () => {
+    it('uses incremental update instead of full recalculation', async () => {
+      const expense = createExpense({
+        id: 1,
+        propertyId: 1,
+        totalAmount: 100,
+        accountingDate: new Date('2023-07-15'), // new date
+      });
 
       await service.handleExpenseAccountingDateChanged({
         expense,
-        oldAccountingDate: new Date('2023-06-15'),
+        oldAccountingDate: new Date('2023-06-15'), // old date
       });
 
-      // Should call the recalculation queries
+      // Should NOT call delete (which is used in recalculate)
+      expect(mockRepository.delete).not.toHaveBeenCalled();
+
+      // Should call 6 upserts: 3 for subtracting from old buckets + 3 for adding to new buckets
       expect(mockDataSource.query).toHaveBeenCalled();
-      expect(mockEventTracker.increment).toHaveBeenCalled();
-      expect(mockEventTracker.decrement).toHaveBeenCalled();
+      const calls = mockDataSource.query.mock.calls;
+      expect(calls.length).toBe(6);
+    });
+
+    it('subtracts from old date bucket and adds to new date bucket', async () => {
+      const expense = createExpense({
+        id: 1,
+        propertyId: 1,
+        totalAmount: 100,
+        accountingDate: new Date('2023-07-15'), // new date
+      });
+
+      await service.handleExpenseAccountingDateChanged({
+        expense,
+        oldAccountingDate: new Date('2023-06-15'), // old date
+      });
+
+      const calls = mockDataSource.query.mock.calls;
+      // First 3 calls should subtract from old bucket (June)
+      expect(calls[0][1][4]).toBe('-100.00');
+      expect(calls[1][1][4]).toBe('-100.00');
+      expect(calls[2][1][4]).toBe('-100.00');
+      // Last 3 calls should add to new bucket (July)
+      expect(calls[3][1][4]).toBe('100.00');
+      expect(calls[4][1][4]).toBe('100.00');
+      expect(calls[5][1][4]).toBe('100.00');
     });
   });
 
-  describe('handleIncomeAccountingDateChanged', () => {
-    it('triggers recalculation for the income property', async () => {
-      const income = createIncome({ id: 1, propertyId: 1 });
-      mockRepository.delete.mockResolvedValue({ affected: 0 });
-      mockRepository.find.mockResolvedValue([]);
+  describe('handleIncomeAccountingDateChanged - incremental', () => {
+    it('uses incremental update instead of full recalculation', async () => {
+      const income = createIncome({
+        id: 1,
+        propertyId: 1,
+        totalAmount: 150,
+        accountingDate: new Date('2023-07-15'), // new date
+      });
 
       await service.handleIncomeAccountingDateChanged({
         income,
-        oldAccountingDate: new Date('2023-06-15'),
+        oldAccountingDate: new Date('2023-06-15'), // old date
       });
 
-      // Should call the recalculation queries
+      // Should NOT call delete (which is used in recalculate)
+      expect(mockRepository.delete).not.toHaveBeenCalled();
+
+      // Should call 6 upserts
       expect(mockDataSource.query).toHaveBeenCalled();
-      expect(mockEventTracker.increment).toHaveBeenCalled();
-      expect(mockEventTracker.decrement).toHaveBeenCalled();
+      const calls = mockDataSource.query.mock.calls;
+      expect(calls.length).toBe(6);
+    });
+
+    it('subtracts from old date bucket and adds to new date bucket', async () => {
+      const income = createIncome({
+        id: 1,
+        propertyId: 1,
+        totalAmount: 150,
+        accountingDate: new Date('2023-07-15'), // new date
+      });
+
+      await service.handleIncomeAccountingDateChanged({
+        income,
+        oldAccountingDate: new Date('2023-06-15'), // old date
+      });
+
+      const calls = mockDataSource.query.mock.calls;
+      // First 3 calls should subtract from old bucket
+      expect(calls[0][1][4]).toBe('-150.00');
+      expect(calls[1][1][4]).toBe('-150.00');
+      expect(calls[2][1][4]).toBe('-150.00');
+      // Last 3 calls should add to new bucket
+      expect(calls[3][1][4]).toBe('150.00');
+      expect(calls[4][1][4]).toBe('150.00');
+      expect(calls[5][1][4]).toBe('150.00');
     });
   });
 
@@ -742,6 +802,180 @@ describe('PropertyStatisticsService', () => {
           query.includes('LEFT JOIN') ||
           query.includes('"transactionId" IS NULL');
         expect(includesStandalone).toBe(true);
+      }
+    });
+  });
+
+  describe('handleStandaloneIncomeCreated - incremental', () => {
+    it('uses incremental upsert instead of full recalculation', async () => {
+      const income = createIncome({
+        id: 1,
+        propertyId: 1,
+        totalAmount: 150,
+        accountingDate: new Date('2023-06-15'),
+      });
+
+      await service.handleStandaloneIncomeCreated({ income });
+
+      // Should NOT call delete (which is used in recalculate)
+      expect(mockRepository.delete).not.toHaveBeenCalled();
+
+      // Should call upsert queries with ON CONFLICT
+      expect(mockDataSource.query).toHaveBeenCalled();
+      const calls = mockDataSource.query.mock.calls;
+      // 3 upserts: all-time, yearly, monthly
+      expect(calls.length).toBe(3);
+      for (const call of calls) {
+        expect(call[0]).toContain('ON CONFLICT');
+        expect(call[0]).toContain('INSERT INTO property_statistics');
+      }
+    });
+
+    it('adds positive delta for created income', async () => {
+      const income = createIncome({
+        id: 1,
+        propertyId: 1,
+        totalAmount: 150,
+        accountingDate: new Date('2023-06-15'),
+      });
+
+      await service.handleStandaloneIncomeCreated({ income });
+
+      // Find the calls and verify delta is positive
+      const calls = mockDataSource.query.mock.calls;
+      for (const call of calls) {
+        // The 5th parameter (delta as string) should be positive
+        expect(call[1][4]).toBe('150.00');
+        expect(call[1][5]).toBe(150);
+      }
+    });
+  });
+
+  describe('handleStandaloneIncomeDeleted - incremental', () => {
+    it('uses incremental upsert instead of full recalculation', async () => {
+      const income = createIncome({
+        id: 1,
+        propertyId: 1,
+        totalAmount: 150,
+        accountingDate: new Date('2023-06-15'),
+      });
+
+      await service.handleStandaloneIncomeDeleted({ income });
+
+      // Should NOT call delete (which is used in recalculate)
+      expect(mockRepository.delete).not.toHaveBeenCalled();
+
+      // Should call upsert queries
+      expect(mockDataSource.query).toHaveBeenCalled();
+    });
+
+    it('subtracts amount (negative delta) for deleted income', async () => {
+      const income = createIncome({
+        id: 1,
+        propertyId: 1,
+        totalAmount: 150,
+        accountingDate: new Date('2023-06-15'),
+      });
+
+      await service.handleStandaloneIncomeDeleted({ income });
+
+      // Find the calls and verify delta is negative
+      const calls = mockDataSource.query.mock.calls;
+      for (const call of calls) {
+        // The 5th parameter (delta as string) should be negative
+        expect(call[1][4]).toBe('-150.00');
+        expect(call[1][5]).toBe(-150);
+      }
+    });
+  });
+
+  describe('handleStandaloneIncomeUpdated - incremental', () => {
+    it('calculates delta between old and new amount', async () => {
+      const income = createIncome({
+        id: 1,
+        propertyId: 1,
+        totalAmount: 200,
+        accountingDate: new Date('2023-06-15'),
+      });
+
+      await service.handleStandaloneIncomeUpdated({
+        income,
+        oldTotalAmount: 150,
+        oldAccountingDate: new Date('2023-06-15'),
+        oldIncomeTypeId: 1,
+        oldIncomeTypeKey: 'rental',
+      });
+
+      // Delta should be new - old = 200 - 150 = 50
+      const calls = mockDataSource.query.mock.calls;
+      expect(calls.length).toBe(3);
+      for (const call of calls) {
+        expect(call[1][4]).toBe('50.00');
+        expect(call[1][5]).toBe(50);
+      }
+    });
+
+    it('handles accounting date change by subtracting from old bucket and adding to new', async () => {
+      const income = createIncome({
+        id: 1,
+        propertyId: 1,
+        totalAmount: 150,
+        accountingDate: new Date('2023-07-15'), // new date
+      });
+
+      await service.handleStandaloneIncomeUpdated({
+        income,
+        oldTotalAmount: 150,
+        oldAccountingDate: new Date('2023-06-15'), // old date
+        oldIncomeTypeId: 1,
+        oldIncomeTypeKey: 'rental',
+      });
+
+      // Should have 6 upserts: 3 for subtracting from old buckets + 3 for adding to new buckets
+      const calls = mockDataSource.query.mock.calls;
+      expect(calls.length).toBe(6);
+    });
+  });
+
+  describe('handleStandaloneExpenseCreated - incremental', () => {
+    it('adds positive delta for created expense', async () => {
+      const expense = createExpense({
+        id: 1,
+        propertyId: 1,
+        totalAmount: 100,
+        accountingDate: new Date('2023-06-15'),
+      });
+
+      await service.handleStandaloneExpenseCreated({ expense });
+
+      // Should call upsert queries
+      expect(mockDataSource.query).toHaveBeenCalled();
+      const calls = mockDataSource.query.mock.calls;
+      expect(calls.length).toBe(3);
+      for (const call of calls) {
+        expect(call[1][4]).toBe('100.00');
+        expect(call[1][5]).toBe(100);
+      }
+    });
+  });
+
+  describe('handleStandaloneExpenseDeleted - incremental', () => {
+    it('subtracts amount (negative delta) for deleted expense', async () => {
+      const expense = createExpense({
+        id: 1,
+        propertyId: 1,
+        totalAmount: 100,
+        accountingDate: new Date('2023-06-15'),
+      });
+
+      await service.handleStandaloneExpenseDeleted({ expense });
+
+      // Find the calls and verify delta is negative
+      const calls = mockDataSource.query.mock.calls;
+      expect(calls.length).toBe(3);
+      for (const call of calls) {
+        expect(call[1][4]).toBe('-100.00');
+        expect(call[1][5]).toBe(-100);
       }
     });
   });

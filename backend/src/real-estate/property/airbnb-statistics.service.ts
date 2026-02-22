@@ -108,9 +108,15 @@ export class AirbnbStatisticsService {
   async handleStandaloneIncomeCreated(
     event: StandaloneIncomeCreatedEvent,
   ): Promise<void> {
+    const { income } = event;
+    // Only process airbnb income types
+    if (income.incomeType?.key !== IncomeTypeKey.AIRBNB) {
+      return;
+    }
+
     this.eventTracker.increment();
     try {
-      await this.recalculateAirbnbVisits(event.income.propertyId);
+      await this.upsertAirbnbVisits(income.propertyId, income.accountingDate, 1);
     } finally {
       this.eventTracker.decrement();
     }
@@ -120,9 +126,37 @@ export class AirbnbStatisticsService {
   async handleStandaloneIncomeUpdated(
     event: StandaloneIncomeUpdatedEvent,
   ): Promise<void> {
+    const { income, oldAccountingDate, oldIncomeTypeKey } = event;
+    const isNewAirbnb = income.incomeType?.key === IncomeTypeKey.AIRBNB;
+    const wasOldAirbnb = oldIncomeTypeKey === IncomeTypeKey.AIRBNB;
+
+    // Skip if neither old nor new is airbnb
+    if (!isNewAirbnb && !wasOldAirbnb) {
+      return;
+    }
+
     this.eventTracker.increment();
     try {
-      await this.recalculateAirbnbVisits(event.income.propertyId);
+      if (wasOldAirbnb && !isNewAirbnb) {
+        // Changed from airbnb to non-airbnb: decrement old bucket
+        await this.upsertAirbnbVisits(income.propertyId, oldAccountingDate, -1);
+      } else if (!wasOldAirbnb && isNewAirbnb) {
+        // Changed from non-airbnb to airbnb: increment new bucket
+        await this.upsertAirbnbVisits(income.propertyId, income.accountingDate, 1);
+      } else if (wasOldAirbnb && isNewAirbnb) {
+        // Still airbnb, but date might have changed
+        const oldYear = oldAccountingDate ? new Date(oldAccountingDate).getFullYear() : null;
+        const oldMonth = oldAccountingDate ? new Date(oldAccountingDate).getMonth() + 1 : null;
+        const newYear = income.accountingDate ? new Date(income.accountingDate).getFullYear() : null;
+        const newMonth = income.accountingDate ? new Date(income.accountingDate).getMonth() + 1 : null;
+
+        if (oldYear !== newYear || oldMonth !== newMonth) {
+          // Date bucket changed: decrement old, increment new
+          await this.upsertAirbnbVisits(income.propertyId, oldAccountingDate, -1);
+          await this.upsertAirbnbVisits(income.propertyId, income.accountingDate, 1);
+        }
+        // If date bucket is same, count doesn't change - nothing to do
+      }
     } finally {
       this.eventTracker.decrement();
     }
@@ -132,9 +166,15 @@ export class AirbnbStatisticsService {
   async handleStandaloneIncomeDeleted(
     event: StandaloneIncomeDeletedEvent,
   ): Promise<void> {
+    const { income } = event;
+    // Only process airbnb income types
+    if (income.incomeType?.key !== IncomeTypeKey.AIRBNB) {
+      return;
+    }
+
     this.eventTracker.increment();
     try {
-      await this.recalculateAirbnbVisits(event.propertyId);
+      await this.upsertAirbnbVisits(income.propertyId, income.accountingDate, -1);
     } finally {
       this.eventTracker.decrement();
     }
@@ -170,5 +210,39 @@ export class AirbnbStatisticsService {
     } finally {
       this.eventTracker.decrement();
     }
+  }
+
+  private async upsertAirbnbVisits(
+    propertyId: number,
+    accountingDate: Date,
+    delta: number,
+  ): Promise<void> {
+    const statisticKey = StatisticKey.AIRBNB_VISITS;
+    const year = accountingDate ? new Date(accountingDate).getFullYear() : null;
+    const month = accountingDate ? new Date(accountingDate).getMonth() + 1 : null;
+
+    // Upsert all-time
+    await this.upsertStatistic(propertyId, statisticKey, null, null, delta);
+    // Upsert yearly
+    await this.upsertStatistic(propertyId, statisticKey, year, null, delta);
+    // Upsert monthly
+    await this.upsertStatistic(propertyId, statisticKey, year, month, delta);
+  }
+
+  private async upsertStatistic(
+    propertyId: number,
+    key: string,
+    year: number | null,
+    month: number | null,
+    delta: number,
+  ): Promise<void> {
+    // Use GREATEST(0, ...) to prevent negative values from race conditions or bugs
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = GREATEST(0, CAST(property_statistics."value" AS INTEGER) + $6)::TEXT`,
+      [propertyId, key, year, month, Math.max(0, delta).toString(), delta],
+    );
   }
 }

@@ -234,7 +234,18 @@ export class PropertyStatisticsService {
   ): Promise<void> {
     this.eventTracker.increment();
     try {
-      await this.recalculate(event.expense.propertyId);
+      const { expense, oldAccountingDate } = event;
+      // Incremental: subtract from old bucket, add to new bucket
+      await this.upsertExpenseStatistic(
+        expense.propertyId,
+        oldAccountingDate,
+        -expense.totalAmount,
+      );
+      await this.upsertExpenseStatistic(
+        expense.propertyId,
+        expense.accountingDate,
+        expense.totalAmount,
+      );
     } finally {
       this.eventTracker.decrement();
     }
@@ -246,7 +257,18 @@ export class PropertyStatisticsService {
   ): Promise<void> {
     this.eventTracker.increment();
     try {
-      await this.recalculate(event.income.propertyId);
+      const { income, oldAccountingDate } = event;
+      // Incremental: subtract from old bucket, add to new bucket
+      await this.upsertIncomeStatistic(
+        income.propertyId,
+        oldAccountingDate,
+        -income.totalAmount,
+      );
+      await this.upsertIncomeStatistic(
+        income.propertyId,
+        income.accountingDate,
+        income.totalAmount,
+      );
     } finally {
       this.eventTracker.decrement();
     }
@@ -258,7 +280,13 @@ export class PropertyStatisticsService {
   ): Promise<void> {
     this.eventTracker.increment();
     try {
-      await this.recalculate(event.income.propertyId);
+      const { income } = event;
+      // Incremental update: add the new income amount
+      await this.upsertIncomeStatistic(
+        income.propertyId,
+        income.accountingDate,
+        income.totalAmount,
+      );
     } finally {
       this.eventTracker.decrement();
     }
@@ -270,7 +298,37 @@ export class PropertyStatisticsService {
   ): Promise<void> {
     this.eventTracker.increment();
     try {
-      await this.recalculate(event.income.propertyId);
+      const { income, oldTotalAmount, oldAccountingDate } = event;
+      const oldYear = oldAccountingDate ? new Date(oldAccountingDate).getFullYear() : null;
+      const oldMonth = oldAccountingDate ? new Date(oldAccountingDate).getMonth() + 1 : null;
+      const newYear = income.accountingDate ? new Date(income.accountingDate).getFullYear() : null;
+      const newMonth = income.accountingDate ? new Date(income.accountingDate).getMonth() + 1 : null;
+
+      // Check if accounting date changed (different year/month bucket)
+      const bucketChanged = oldYear !== newYear || oldMonth !== newMonth;
+
+      if (bucketChanged) {
+        // Subtract from old bucket
+        await this.upsertIncomeStatistic(
+          income.propertyId,
+          oldAccountingDate,
+          -oldTotalAmount,
+        );
+        // Add to new bucket
+        await this.upsertIncomeStatistic(
+          income.propertyId,
+          income.accountingDate,
+          income.totalAmount,
+        );
+      } else {
+        // Same bucket, just update the delta
+        const delta = income.totalAmount - oldTotalAmount;
+        await this.upsertIncomeStatistic(
+          income.propertyId,
+          income.accountingDate,
+          delta,
+        );
+      }
     } finally {
       this.eventTracker.decrement();
     }
@@ -282,7 +340,13 @@ export class PropertyStatisticsService {
   ): Promise<void> {
     this.eventTracker.increment();
     try {
-      await this.recalculate(event.propertyId);
+      const { income } = event;
+      // Incremental update: subtract the deleted income amount
+      await this.upsertIncomeStatistic(
+        income.propertyId,
+        income.accountingDate,
+        -income.totalAmount,
+      );
     } finally {
       this.eventTracker.decrement();
     }
@@ -294,7 +358,13 @@ export class PropertyStatisticsService {
   ): Promise<void> {
     this.eventTracker.increment();
     try {
-      await this.recalculate(event.expense.propertyId);
+      const { expense } = event;
+      // Incremental update: add the new expense amount
+      await this.upsertExpenseStatistic(
+        expense.propertyId,
+        expense.accountingDate,
+        expense.totalAmount,
+      );
     } finally {
       this.eventTracker.decrement();
     }
@@ -306,7 +376,37 @@ export class PropertyStatisticsService {
   ): Promise<void> {
     this.eventTracker.increment();
     try {
-      await this.recalculate(event.expense.propertyId);
+      const { expense, oldTotalAmount, oldAccountingDate } = event;
+      const oldYear = oldAccountingDate ? new Date(oldAccountingDate).getFullYear() : null;
+      const oldMonth = oldAccountingDate ? new Date(oldAccountingDate).getMonth() + 1 : null;
+      const newYear = expense.accountingDate ? new Date(expense.accountingDate).getFullYear() : null;
+      const newMonth = expense.accountingDate ? new Date(expense.accountingDate).getMonth() + 1 : null;
+
+      // Check if accounting date changed (different year/month bucket)
+      const bucketChanged = oldYear !== newYear || oldMonth !== newMonth;
+
+      if (bucketChanged) {
+        // Subtract from old bucket
+        await this.upsertExpenseStatistic(
+          expense.propertyId,
+          oldAccountingDate,
+          -oldTotalAmount,
+        );
+        // Add to new bucket
+        await this.upsertExpenseStatistic(
+          expense.propertyId,
+          expense.accountingDate,
+          expense.totalAmount,
+        );
+      } else {
+        // Same bucket, just update the delta
+        const delta = expense.totalAmount - oldTotalAmount;
+        await this.upsertExpenseStatistic(
+          expense.propertyId,
+          expense.accountingDate,
+          delta,
+        );
+      }
     } finally {
       this.eventTracker.decrement();
     }
@@ -318,10 +418,69 @@ export class PropertyStatisticsService {
   ): Promise<void> {
     this.eventTracker.increment();
     try {
-      await this.recalculate(event.propertyId);
+      const { expense } = event;
+      // Incremental update: subtract the deleted expense amount
+      await this.upsertExpenseStatistic(
+        expense.propertyId,
+        expense.accountingDate,
+        -expense.totalAmount,
+      );
     } finally {
       this.eventTracker.decrement();
     }
+  }
+
+  private async upsertIncomeStatistic(
+    propertyId: number,
+    accountingDate: Date,
+    delta: number,
+  ): Promise<void> {
+    const key = StatisticKey.INCOME;
+    const decimals = this.decimals.get(key) ?? 2;
+    const year = accountingDate ? new Date(accountingDate).getFullYear() : null;
+    const month = accountingDate ? new Date(accountingDate).getMonth() + 1 : null;
+
+    // Upsert all-time
+    await this.upsertStatisticDirect(propertyId, key, null, null, delta, decimals);
+    // Upsert yearly
+    await this.upsertStatisticDirect(propertyId, key, year, null, delta, decimals);
+    // Upsert monthly
+    await this.upsertStatisticDirect(propertyId, key, year, month, delta, decimals);
+  }
+
+  private async upsertExpenseStatistic(
+    propertyId: number,
+    accountingDate: Date,
+    delta: number,
+  ): Promise<void> {
+    const key = StatisticKey.EXPENSE;
+    const decimals = this.decimals.get(key) ?? 2;
+    const year = accountingDate ? new Date(accountingDate).getFullYear() : null;
+    const month = accountingDate ? new Date(accountingDate).getMonth() + 1 : null;
+
+    // Upsert all-time
+    await this.upsertStatisticDirect(propertyId, key, null, null, delta, decimals);
+    // Upsert yearly
+    await this.upsertStatisticDirect(propertyId, key, year, null, delta, decimals);
+    // Upsert monthly
+    await this.upsertStatisticDirect(propertyId, key, year, month, delta, decimals);
+  }
+
+  private async upsertStatisticDirect(
+    propertyId: number,
+    key: StatisticKey,
+    year: number | null,
+    month: number | null,
+    delta: number,
+    decimals: number,
+  ): Promise<void> {
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = (CAST(property_statistics."value" AS DECIMAL) + $6)::TEXT`,
+      [propertyId, key, year, month, delta.toFixed(decimals), delta],
+    );
   }
 
   private async upsertStatistic(

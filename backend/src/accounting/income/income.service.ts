@@ -127,9 +127,14 @@ export class IncomeService {
 
     // Emit event for standalone income (no transaction)
     if (!savedIncome.transactionId) {
+      // Load incomeType relation for statistics services that need it
+      const incomeWithType = await this.repository.findOne({
+        where: { id: savedIncome.id },
+        relations: ['incomeType'],
+      });
       this.eventEmitter.emit(
         Events.Income.StandaloneCreated,
-        new StandaloneIncomeCreatedEvent(savedIncome),
+        new StandaloneIncomeCreatedEvent(incomeWithType),
       );
     }
 
@@ -162,8 +167,23 @@ export class IncomeService {
     id: number,
     input: IncomeInputDto,
   ): Promise<Income> {
-    const incomeEntity = await this.getEntityOrThrow(user, id);
+    // Load with incomeType relation to capture oldIncomeTypeKey
+    const incomeEntity = await this.repository.findOne({
+      where: { id },
+      relations: ['incomeType', 'transaction'],
+    });
+    if (!incomeEntity) {
+      throw new NotFoundException();
+    }
+    if (!(await this.authService.hasOwnership(user, incomeEntity.propertyId))) {
+      throw new UnauthorizedException();
+    }
+
+    // Capture old values before update for delta calculation
     const oldAccountingDate = incomeEntity.accountingDate;
+    const oldTotalAmount = incomeEntity.totalAmount;
+    const oldIncomeTypeId = incomeEntity.incomeTypeId;
+    const oldIncomeTypeKey = incomeEntity.incomeType?.key;
 
     this.mapData(incomeEntity, input);
     if (incomeEntity.transaction) {
@@ -172,11 +192,22 @@ export class IncomeService {
 
     await this.repository.save(incomeEntity);
 
-    // Emit event for standalone income (no transaction) - triggers recalculation
+    // Emit event for standalone income (no transaction) - triggers incremental update
     if (!incomeEntity.transactionId) {
+      // Load updated incomeType relation for statistics services that need it
+      const incomeWithType = await this.repository.findOne({
+        where: { id: incomeEntity.id },
+        relations: ['incomeType'],
+      });
       this.eventEmitter.emit(
         Events.Income.StandaloneUpdated,
-        new StandaloneIncomeUpdatedEvent(incomeEntity),
+        new StandaloneIncomeUpdatedEvent(
+          incomeWithType,
+          oldTotalAmount,
+          oldAccountingDate,
+          oldIncomeTypeId,
+          oldIncomeTypeKey,
+        ),
       );
     } else if (
       // Emit event if accountingDate changed and transaction is accepted
@@ -208,18 +239,22 @@ export class IncomeService {
       );
     }
 
-    const propertyId = income.propertyId;
+    // Load incomeType relation for statistics services that need it
+    const incomeWithType = await this.repository.findOne({
+      where: { id: income.id },
+      relations: ['incomeType'],
+    });
 
     // Delete the income
     await this.repository.delete(id);
 
-    // Emit event to trigger statistics recalculation
+    // Emit event to trigger incremental statistics update
     // Note: Only standalone incomes (transactionId IS NULL) can be deleted - the guard above
     // throws for linked incomes. Standalone incomes need this event because they don't have
     // a transaction that would trigger statistics updates.
     this.eventEmitter.emit(
       Events.Income.StandaloneDeleted,
-      new StandaloneIncomeDeletedEvent(propertyId),
+      new StandaloneIncomeDeletedEvent(incomeWithType),
     );
   }
 
@@ -228,11 +263,13 @@ export class IncomeService {
       throw new BadRequestException('No ids provided');
     }
 
+    // Load incomes with incomeType relation for statistics services
     const incomes = await this.repository.find({
       where: { id: In(ids) },
+      relations: ['incomeType'],
     });
 
-    const deletedPropertyIds = new Set<number>();
+    const deletedIncomes: Income[] = [];
 
     const deleteTask = incomes.map(async (income) => {
       try {
@@ -250,9 +287,12 @@ export class IncomeService {
           };
         }
 
+        // Store income data before deletion for incremental statistics update
+        const deletedIncome = { ...income, incomeType: income.incomeType } as Income;
+
         // Delete the income
         await this.repository.delete(income.id);
-        deletedPropertyIds.add(income.propertyId);
+        deletedIncomes.push(deletedIncome);
 
         return createSuccessResult(income.id);
       } catch (e) {
@@ -262,13 +302,13 @@ export class IncomeService {
 
     const result = await buildBulkOperationResult(deleteTask, incomes.length);
 
-    // Emit events for each affected property to trigger statistics recalculation
-    // Note: deletedPropertyIds only contains IDs from standalone incomes - linked incomes
-    // return an error above and are not added to this set
-    for (const propertyId of deletedPropertyIds) {
+    // Emit events for each deleted income to trigger incremental statistics update
+    // Note: deletedIncomes only contains standalone incomes - linked incomes
+    // return an error above and are not added to this array
+    for (const income of deletedIncomes) {
       this.eventEmitter.emit(
         Events.Income.StandaloneDeleted,
-        new StandaloneIncomeDeletedEvent(propertyId),
+        new StandaloneIncomeDeletedEvent(income),
       );
     }
 

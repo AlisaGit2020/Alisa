@@ -132,6 +132,60 @@ describe('IncomeService', () => {
         UnauthorizedException,
       );
     });
+
+    it('emits StandaloneCreated event when income has no transaction', async () => {
+      const input = {
+        propertyId: 1,
+        incomeTypeId: 5,
+        description: 'Airbnb income',
+        amount: 100,
+        quantity: 1,
+        totalAmount: 100,
+        accountingDate: new Date('2023-06-15'),
+      };
+      const savedIncome = createIncome({ id: 1, ...input, transactionId: null });
+      const incomeWithType = {
+        ...savedIncome,
+        incomeType: { id: 5, key: 'airbnb' },
+      };
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue(savedIncome);
+      // Second findOne call to load incomeType relation
+      mockRepository.findOne.mockResolvedValue(incomeWithType);
+
+      await service.add(testUser, input);
+
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        Events.Income.StandaloneCreated,
+        expect.objectContaining({
+          income: expect.objectContaining({
+            id: 1,
+            incomeType: expect.objectContaining({ key: 'airbnb' }),
+          }),
+        }),
+      );
+    });
+
+    it('does not emit StandaloneCreated event when income has transaction', async () => {
+      const input = {
+        propertyId: 1,
+        incomeTypeId: 1,
+        description: 'Test income',
+        amount: 100,
+        quantity: 1,
+        totalAmount: 100,
+        transactionId: 10,
+      };
+      const savedIncome = createIncome({ id: 1, ...input, transactionId: 10 });
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue(savedIncome);
+
+      await service.add(testUser, input);
+
+      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+    });
   });
 
   describe('update', () => {
@@ -272,6 +326,46 @@ describe('IncomeService', () => {
         expect.objectContaining({ income: expect.any(Object) }),
       );
     });
+
+    it('emits StandaloneUpdated event with old values for delta calculation', async () => {
+      const existingIncome = createIncome({
+        id: 1,
+        propertyId: 1,
+        incomeTypeId: 1,
+        transactionId: null,
+        totalAmount: 100,
+      });
+      existingIncome.accountingDate = new Date('2023-06-15');
+      existingIncome.transaction = null;
+      existingIncome.incomeType = { id: 1, key: 'airbnb' } as IncomeType;
+
+      mockRepository.findOne.mockResolvedValue(existingIncome);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({
+        ...existingIncome,
+        totalAmount: 200,
+        accountingDate: new Date('2023-07-15'),
+      });
+
+      await service.update(testUser, 1, {
+        description: 'Test income',
+        accountingDate: new Date('2023-07-15'),
+        amount: 200,
+        quantity: 1,
+        totalAmount: 200,
+      });
+
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        Events.Income.StandaloneUpdated,
+        expect.objectContaining({
+          income: expect.any(Object),
+          oldTotalAmount: 100,
+          oldAccountingDate: new Date('2023-06-15'),
+          oldIncomeTypeId: 1,
+          oldIncomeTypeKey: 'airbnb',
+        }),
+      );
+    });
   });
 
   describe('delete', () => {
@@ -312,6 +406,34 @@ describe('IncomeService', () => {
 
       await expect(service.delete(userWithoutProperties, 1)).rejects.toThrow(
         UnauthorizedException,
+      );
+    });
+
+    it('emits StandaloneDeleted event with deleted income data', async () => {
+      const income = createIncome({
+        id: 1,
+        propertyId: 1,
+        transactionId: null,
+        totalAmount: 150,
+        accountingDate: new Date('2023-06-15'),
+        incomeTypeId: 5,
+      });
+      mockRepository.findOne.mockResolvedValue(income);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      await service.delete(testUser, 1);
+
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        Events.Income.StandaloneDeleted,
+        expect.objectContaining({
+          income: expect.objectContaining({
+            id: 1,
+            totalAmount: 150,
+            accountingDate: new Date('2023-06-15'),
+            incomeTypeId: 5,
+          }),
+        }),
       );
     });
   });

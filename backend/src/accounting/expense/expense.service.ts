@@ -164,7 +164,9 @@ export class ExpenseService {
     input: ExpenseInputDto,
   ): Promise<Expense> {
     const expenseEntity = await this.getEntityOrThrow(user, id);
+    // Capture old values before update for delta calculation
     const oldAccountingDate = expenseEntity.accountingDate;
+    const oldTotalAmount = expenseEntity.totalAmount;
 
     this.mapData(user, expenseEntity, input);
     if (expenseEntity.transaction) {
@@ -173,11 +175,15 @@ export class ExpenseService {
 
     await this.repository.save(expenseEntity);
 
-    // Emit event for standalone expense (no transaction) - triggers recalculation
+    // Emit event for standalone expense (no transaction) - triggers incremental update
     if (!expenseEntity.transactionId) {
       this.eventEmitter.emit(
         Events.Expense.StandaloneUpdated,
-        new StandaloneExpenseUpdatedEvent(expenseEntity),
+        new StandaloneExpenseUpdatedEvent(
+          expenseEntity,
+          oldTotalAmount,
+          oldAccountingDate,
+        ),
       );
     } else if (
       // Emit event if accountingDate changed and transaction is accepted
@@ -212,7 +218,8 @@ export class ExpenseService {
       );
     }
 
-    const propertyId = expense.propertyId;
+    // Store expense data before deletion for incremental statistics update
+    const deletedExpense = { ...expense };
 
     // Delete associated depreciation asset
     await this.depreciationService.deleteByExpenseId(id);
@@ -220,13 +227,13 @@ export class ExpenseService {
     // Delete the expense
     await this.repository.delete(id);
 
-    // Emit event to trigger statistics recalculation
+    // Emit event to trigger incremental statistics update
     // Note: Only standalone expenses (transactionId IS NULL) can be deleted - the guard above
     // throws for linked expenses. Standalone expenses need this event because they don't have
     // a transaction that would trigger statistics updates.
     this.eventEmitter.emit(
       Events.Expense.StandaloneDeleted,
-      new StandaloneExpenseDeletedEvent(propertyId),
+      new StandaloneExpenseDeletedEvent(deletedExpense as Expense),
     );
   }
 
@@ -239,7 +246,7 @@ export class ExpenseService {
       where: { id: In(ids) },
     });
 
-    const deletedPropertyIds = new Set<number>();
+    const deletedExpenses: Expense[] = [];
 
     const deleteTask = expenses.map(async (expense) => {
       try {
@@ -257,12 +264,15 @@ export class ExpenseService {
           };
         }
 
+        // Store expense data before deletion for incremental statistics update
+        const deletedExpense = { ...expense } as Expense;
+
         // Delete associated depreciation asset
         await this.depreciationService.deleteByExpenseId(expense.id);
 
         // Delete the expense
         await this.repository.delete(expense.id);
-        deletedPropertyIds.add(expense.propertyId);
+        deletedExpenses.push(deletedExpense);
 
         return createSuccessResult(expense.id);
       } catch (e) {
@@ -272,13 +282,13 @@ export class ExpenseService {
 
     const result = await buildBulkOperationResult(deleteTask, expenses.length);
 
-    // Emit events for each affected property to trigger statistics recalculation
-    // Note: deletedPropertyIds only contains IDs from standalone expenses - linked expenses
-    // return an error above and are not added to this set
-    for (const propertyId of deletedPropertyIds) {
+    // Emit events for each deleted expense to trigger incremental statistics update
+    // Note: deletedExpenses only contains standalone expenses - linked expenses
+    // return an error above and are not added to this array
+    for (const expense of deletedExpenses) {
       this.eventEmitter.emit(
         Events.Expense.StandaloneDeleted,
-        new StandaloneExpenseDeletedEvent(propertyId),
+        new StandaloneExpenseDeletedEvent(expense),
       );
     }
 
