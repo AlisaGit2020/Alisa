@@ -108,24 +108,8 @@ function TransactionForm({
     loadExpenseTypes();
   }, []);
 
-  const findExpenseTypeByKeyword = (
-    ...keywords: string[]
-  ): ExpenseType | undefined => {
-    // Try exact match first
-    for (const keyword of keywords) {
-      const exact = expenseTypes.find(
-        (et) => et.name.toLowerCase() === keyword.toLowerCase()
-      );
-      if (exact) return exact;
-    }
-    // Then try partial match (contains keyword)
-    for (const keyword of keywords) {
-      const partial = expenseTypes.find((et) =>
-        et.name.toLowerCase().includes(keyword.toLowerCase())
-      );
-      if (partial) return partial;
-    }
-    return undefined;
+  const findExpenseTypeByKey = (key: string): ExpenseType | undefined => {
+    return expenseTypes.find((et) => et.key === key);
   };
 
   const canSplitLoanPayment = (): boolean => {
@@ -144,18 +128,10 @@ function TransactionForm({
     const loanComponents = parseLoanPaymentMessage(data.description);
     if (!loanComponents) return;
 
-    // Find expense types by name or use user's configured defaults
-    const user = await ApiClient.me();
-
-    const principalType =
-      expenseTypes.find((et) => et.id === user.loanPrincipalExpenseTypeId) ||
-      findExpenseTypeByKeyword("Lainan lyhennys", "lyhennys");
-    const interestType =
-      expenseTypes.find((et) => et.id === user.loanInterestExpenseTypeId) ||
-      findExpenseTypeByKeyword("Lainan korko", "korko");
-    const handlingFeeType =
-      expenseTypes.find((et) => et.id === user.loanHandlingFeeExpenseTypeId) ||
-      findExpenseTypeByKeyword("Lainakulut", "lainakulu", "pankkikulu", "kulu");
+    // Find expense types by their global keys
+    const principalType = findExpenseTypeByKey("loan-principal");
+    const interestType = findExpenseTypeByKey("loan-interest");
+    const handlingFeeType = findExpenseTypeByKey("loan-handling-fee");
 
     const expenses: ExpenseInput[] = [];
 

@@ -1,11 +1,11 @@
 import {
-  IsNumber,
   IsOptional,
   IsArray,
   ValidateNested,
   IsString,
   IsBoolean,
   IsIn,
+  IsNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { WidgetSize } from '@alisa-backend/common/dashboard-config';
@@ -38,22 +38,6 @@ export class UserSettingsInputDto {
   @IsString()
   @IsIn(SUPPORTED_LANGUAGES)
   language?: string;
-
-  @IsOptional()
-  @IsNumber()
-  loanPrincipalExpenseTypeId?: number;
-
-  @IsOptional()
-  @IsNumber()
-  loanInterestExpenseTypeId?: number;
-
-  @IsOptional()
-  @IsNumber()
-  loanHandlingFeeExpenseTypeId?: number;
-
-  @IsOptional()
-  @IsNumber()
-  airbnbIncomeTypeId?: number;
 
   @IsOptional()
   @ValidateNested()

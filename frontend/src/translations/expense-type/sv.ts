@@ -1,10 +1,22 @@
 const expenseTypes = {
-    add: 'Lägg till ny utgiftstyp',
-    confirmDelete: 'Vill du ta bort utgiftstypen?',
+    // Type display names (keyed by type.key)
+    'housing-charge': 'Bolagsavgift',
+    'maintenance-charge': 'Underhållsavgift',
+    'financial-charge': 'Finansieringsavgift',
+    'repairs': 'Reparationer',
+    'capital-improvement': 'Grundförbättring',
+    'insurance': 'Försäkringar',
+    'property-tax': 'Fastighetsskatt',
+    'water': 'Vattenavgift',
+    'electricity': 'Elektricitet',
+    'rental-brokerage': 'Hyresförmedling',
+    'loan-interest': 'Låneränta',
+    'loan-principal': 'Låneamortering',
+    'loan-handling-fee': 'Låneavgifter',
+    // General labels
     expenseTypes: 'Utgiftstyper',
     isTaxDeductible: 'Avdragsgill',
     isCapitalImprovement: 'Kapitalförbättring (10% årlig avskrivning)',
-    isCapitalImprovementHelp: 'Välj detta för grundförbättringar (t.ex. badrumsrenovering). Avskrivs med 10% per år, max 10 år. För löpande reparationer (t.ex. byte av kran) lämna omarkerat.'
 }
 
 export default expenseTypes

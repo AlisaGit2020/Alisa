@@ -1,10 +1,22 @@
 const expenseTypes = {
-    add: 'Lisää uusi kululaji',
-    confirmDelete: 'Poistetaanko kululaji?',
+    // Type display names (keyed by type.key)
+    'housing-charge': 'Yhtiövastike',
+    'maintenance-charge': 'Hoitovastike',
+    'financial-charge': 'Rahoitusvastike',
+    'repairs': 'Korjaukset',
+    'capital-improvement': 'Perusparannus',
+    'insurance': 'Vakuutukset',
+    'property-tax': 'Kiinteistövero',
+    'water': 'Vesimaksu',
+    'electricity': 'Sähkö',
+    'rental-brokerage': 'Vuokranvälitys',
+    'loan-interest': 'Lainan korko',
+    'loan-principal': 'Lainan lyhennys',
+    'loan-handling-fee': 'Lainan käsittelykulut',
+    // General labels
     expenseTypes: 'Kululajit',
     isTaxDeductible: 'Verovähennettävä',
     isCapitalImprovement: 'Pääomaparannus (10% vuosipoisto)',
-    isCapitalImprovementHelp: 'Valitse tämä perusparannuksille (esim. kylppäriremontti). Vähennetään 10% vuodessa, max 10 vuotta. Vuosikorjauksille (esim. hanan vaihto) jätä valitsematta.'
 }
 
 export default expenseTypes

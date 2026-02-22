@@ -50,38 +50,19 @@ describe('TaxController (e2e)', () => {
     testUsers = await getTestUsers(app);
     mainUser = testUsers.user1WithProperties;
 
-    // Create expense types
-    const taxDeductibleExpenseType = await expenseTypeService.add(mainUser.jwtUser, {
-      name: 'Repairs',
-      description: 'Tax deductible repairs',
-      isTaxDeductible: true,
-      isCapitalImprovement: false,
-    });
-    taxDeductibleExpenseTypeId = taxDeductibleExpenseType.id;
+    // Use global expense types (seeded by DefaultsSeeder)
+    const repairsType = await expenseTypeService.findByKey('repairs');
+    taxDeductibleExpenseTypeId = repairsType.id;
 
-    const nonDeductibleExpenseType = await expenseTypeService.add(mainUser.jwtUser, {
-      name: 'Non-deductible',
-      description: 'Not tax deductible',
-      isTaxDeductible: false,
-      isCapitalImprovement: false,
-    });
-    nonDeductibleExpenseTypeId = nonDeductibleExpenseType.id;
+    const loanPrincipalType = await expenseTypeService.findByKey('loan-principal');
+    nonDeductibleExpenseTypeId = loanPrincipalType.id;
 
-    // Create capital improvement expense type
-    const capitalImprovementExpenseType = await expenseTypeService.add(mainUser.jwtUser, {
-      name: 'Capital Improvement',
-      description: 'Major improvements that add value',
-      isTaxDeductible: true,
-      isCapitalImprovement: true,
-    });
-    capitalImprovementExpenseTypeId = capitalImprovementExpenseType.id;
+    const capitalImprovementType = await expenseTypeService.findByKey('capital-improvement');
+    capitalImprovementExpenseTypeId = capitalImprovementType.id;
 
-    // Create income type
-    const incomeType = await incomeTypeService.add(mainUser.jwtUser, {
-      name: 'Rent',
-      description: 'Rental income',
-    });
-    incomeTypeId = incomeType.id;
+    // Use global income type
+    const rentalType = await incomeTypeService.findByKey('rental');
+    incomeTypeId = rentalType.id;
 
     // Add income transaction
     await transactionService.add(mainUser.jwtUser, {
@@ -156,14 +137,14 @@ describe('TaxController (e2e)', () => {
       status: TransactionStatus.ACCEPTED,
       sender: 'Owner',
       receiver: 'Store',
-      description: 'Furniture',
+      description: 'Loan principal payment',
       transactionDate: new Date('2024-06-25'),
       accountingDate: new Date('2024-06-25'),
       amount: 500,
       expenses: [
         {
           expenseTypeId: nonDeductibleExpenseTypeId,
-          description: 'New furniture',
+          description: 'Loan principal',
           amount: 500,
           quantity: 1,
           totalAmount: 500,
@@ -447,19 +428,9 @@ describe('TaxController (e2e)', () => {
 
       const propertyId = propertyResponse.body.id;
 
-      // Create expense type
-      const expenseType = await expenseTypeService.add(user.jwtUser, {
-        name: 'Test Repairs',
-        description: 'For tax test',
-        isTaxDeductible: true,
-        isCapitalImprovement: false,
-      });
-
-      // Create income type
-      const incomeType = await incomeTypeService.add(user.jwtUser, {
-        name: 'Test Rent',
-        description: 'For tax test',
-      });
+      // Use global expense and income types
+      const repairsType = await expenseTypeService.findByKey('repairs');
+      const rentalType = await incomeTypeService.findByKey('rental');
 
       // Add income: 1000
       await transactionService.add(user.jwtUser, {
@@ -474,7 +445,7 @@ describe('TaxController (e2e)', () => {
         amount: 1000,
         incomes: [
           {
-            incomeTypeId: incomeType.id,
+            incomeTypeId: rentalType.id,
             description: 'August rent',
             amount: 1000,
             quantity: 1,
@@ -496,7 +467,7 @@ describe('TaxController (e2e)', () => {
         amount: 200,
         expenses: [
           {
-            expenseTypeId: expenseType.id,
+            expenseTypeId: repairsType.id,
             description: 'Fix something',
             amount: 200,
             quantity: 1,
@@ -643,13 +614,8 @@ describe('TaxController (e2e)', () => {
       const user2 = testUsers.user2WithProperties;
       const token2 = await getUserAccessToken2(authService, user2.jwtUser);
 
-      // Create expense type for user2
-      const user2ExpenseType = await expenseTypeService.add(user2.jwtUser, {
-        name: 'Capital Improvement User2',
-        description: 'User2 improvements',
-        isTaxDeductible: true,
-        isCapitalImprovement: true,
-      });
+      // Use global capital improvement expense type
+      const capitalImprovementType = await expenseTypeService.findByKey('capital-improvement');
 
       // Create capital improvement for user2
       await transactionService.add(user2.jwtUser, {
@@ -664,7 +630,7 @@ describe('TaxController (e2e)', () => {
         amount: 20000,
         expenses: [
           {
-            expenseTypeId: user2ExpenseType.id,
+            expenseTypeId: capitalImprovementType.id,
             description: 'User2 major renovation',
             amount: 20000,
             quantity: 1,

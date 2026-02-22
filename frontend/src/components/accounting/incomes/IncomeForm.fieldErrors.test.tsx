@@ -19,8 +19,8 @@ describe('IncomeForm field error handling', () => {
   };
 
   const mockIncomeTypes: IncomeType[] = [
-    { id: 1, name: 'Rent', userId: 1, description: 'Rental income', isTaxable: true },
-    { id: 2, name: 'Deposit', userId: 1, description: 'Security deposit', isTaxable: false },
+    { id: 1, name: 'Rent', key: 'rental', description: 'Rental income', isTaxable: true },
+    { id: 2, name: 'Deposit', key: 'deposit', description: 'Security deposit', isTaxable: false },
   ];
 
   beforeEach(() => {

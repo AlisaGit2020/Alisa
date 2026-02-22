@@ -24,9 +24,6 @@ export const Events = {
     StandaloneUpdated: 'income.standaloneUpdated',
     StandaloneDeleted: 'income.standaloneDeleted',
   },
-  User: {
-    AirbnbIncomeTypeChanged: 'user.airbnbIncomeTypeChanged',
-  },
 };
 
 export class BalanceChangedEvent {
@@ -125,14 +122,5 @@ export class StandaloneExpenseDeletedEvent {
   public propertyId: number;
   constructor(propertyId: number) {
     this.propertyId = propertyId;
-  }
-}
-
-export class UserAirbnbIncomeTypeChangedEvent {
-  public userId: number;
-  public propertyIds: number[];
-  constructor(userId: number, propertyIds: number[]) {
-    this.userId = userId;
-    this.propertyIds = propertyIds;
   }
 }

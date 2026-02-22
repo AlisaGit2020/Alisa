@@ -1,8 +1,6 @@
 import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
 import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-input.dto';
 import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
-import { ExpenseTypeInputDto } from '@alisa-backend/accounting/expense/dtos/expense-type-input.dto';
-import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
 import {
   TransactionStatus,
   TransactionType,
@@ -166,37 +164,6 @@ export const getTransactionWithdrawal1 = (
   };
 };
 
-export const expenseType1: ExpenseTypeInputDto = {
-  id: 1,
-  name: 'Siivous',
-  description: '',
-  isTaxDeductible: true,
-  isCapitalImprovement: false,
-};
-
-export const expenseType2: ExpenseTypeInputDto = {
-  id: 2,
-  name: 'Rahoitusvastike',
-  description: '',
-  isTaxDeductible: true,
-  isCapitalImprovement: false,
-};
-export const expenseType3: ExpenseTypeInputDto = {
-  id: 3,
-  name: 'Hoito- ja ylläpitovastike',
-  description: '',
-  isTaxDeductible: true,
-  isCapitalImprovement: false,
-};
-
-export const incomeType1: IncomeTypeInputDto = {
-  id: 1,
-  name: 'Airbnb',
-  description: '',
-};
-
-export const incomeType2: IncomeTypeInputDto = {
-  id: 2,
-  name: 'Vuokrasuoritus',
-  description: '',
-};
+// Expense and income types are now global and seeded by DefaultsSeeder.
+// The transactions above reference global type IDs (1, 2) which are assigned
+// based on the order in which DefaultsSeeder inserts them.

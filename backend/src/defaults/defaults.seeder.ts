@@ -1,129 +1,122 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ExpenseTypeDefault } from './entities/expense-type-default.entity';
-import { IncomeTypeDefault } from './entities/income-type-default.entity';
+import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
+import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
 
-const DEFAULT_EXPENSE_TYPES: Partial<ExpenseTypeDefault>[] = [
+interface GlobalExpenseType {
+  key: string;
+  name: string;
+  isTaxDeductible: boolean;
+  isCapitalImprovement: boolean;
+}
+
+interface GlobalIncomeType {
+  key: string;
+  name: string;
+  isTaxable: boolean;
+}
+
+const GLOBAL_EXPENSE_TYPES: GlobalExpenseType[] = [
   {
-    nameFi: 'Yhtiövastike',
-    nameEn: 'Housing company charge',
-    nameSv: 'Bolagsavgift',
+    key: 'housing-charge',
+    name: 'Housing company charge',
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    nameFi: 'Hoitovastike',
-    nameEn: 'Maintenance charge',
-    nameSv: 'Underhållsavgift',
+    key: 'maintenance-charge',
+    name: 'Maintenance charge',
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    nameFi: 'Rahoitusvastike',
-    nameEn: 'Financial charge',
-    nameSv: 'Finansieringsavgift',
+    key: 'financial-charge',
+    name: 'Financial charge',
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    nameFi: 'Korjaukset',
-    nameEn: 'Repairs',
-    nameSv: 'Reparationer',
+    key: 'repairs',
+    name: 'Repairs',
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    nameFi: 'Perusparannus',
-    nameEn: 'Capital improvement',
-    nameSv: 'Grundförbättring',
+    key: 'capital-improvement',
+    name: 'Capital improvement',
     isTaxDeductible: false,
     isCapitalImprovement: true,
   },
   {
-    nameFi: 'Vakuutukset',
-    nameEn: 'Insurance',
-    nameSv: 'Försäkringar',
+    key: 'insurance',
+    name: 'Insurance',
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    nameFi: 'Kiinteistövero',
-    nameEn: 'Property tax',
-    nameSv: 'Fastighetsskatt',
+    key: 'property-tax',
+    name: 'Property tax',
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    nameFi: 'Vesimaksu',
-    nameEn: 'Water fee',
-    nameSv: 'Vattenavgift',
+    key: 'water',
+    name: 'Water fee',
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    nameFi: 'Sähkö',
-    nameEn: 'Electricity',
-    nameSv: 'Elektricitet',
+    key: 'electricity',
+    name: 'Electricity',
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    nameFi: 'Vuokranvälitys',
-    nameEn: 'Rental brokerage',
-    nameSv: 'Hyresförmedling',
+    key: 'rental-brokerage',
+    name: 'Rental brokerage',
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
   {
-    nameFi: 'Lainan korko',
-    nameEn: 'Loan interest',
-    nameSv: 'Låneränta',
+    key: 'loan-interest',
+    name: 'Loan interest',
     isTaxDeductible: true,
     isCapitalImprovement: false,
-    loanSettingKey: 'interest',
   },
   {
-    nameFi: 'Lainan lyhennys',
-    nameEn: 'Loan principal',
-    nameSv: 'Låneamortering',
+    key: 'loan-principal',
+    name: 'Loan principal',
     isTaxDeductible: false,
     isCapitalImprovement: false,
-    loanSettingKey: 'principal',
   },
   {
-    nameFi: 'Lainan käsittelykulut',
-    nameEn: 'Loan handling fees',
-    nameSv: 'Låneavgifter',
+    key: 'loan-handling-fee',
+    name: 'Loan handling fees',
     isTaxDeductible: true,
     isCapitalImprovement: false,
-    loanSettingKey: 'handlingFee',
   },
 ];
 
-const DEFAULT_INCOME_TYPES: Partial<IncomeTypeDefault>[] = [
+const GLOBAL_INCOME_TYPES: GlobalIncomeType[] = [
   {
-    nameFi: 'Vuokratulo',
-    nameEn: 'Rental income',
-    nameSv: 'Hyresintäkt',
+    key: 'rental',
+    name: 'Rental income',
     isTaxable: true,
   },
   {
-    nameFi: 'Airbnb',
-    nameEn: 'Airbnb',
-    nameSv: 'Airbnb',
+    key: 'airbnb',
+    name: 'Airbnb',
     isTaxable: true,
   },
   {
-    nameFi: 'Pääomatulo',
-    nameEn: 'Capital income',
-    nameSv: 'Kapitalinkomst',
+    key: 'capital-income',
+    name: 'Capital income',
     isTaxable: true,
   },
   {
-    nameFi: 'Vakuutuskorvaus',
-    nameEn: 'Insurance compensation',
-    nameSv: 'Försäkringsersättning',
+    key: 'insurance-compensation',
+    name: 'Insurance compensation',
     isTaxable: true,
   },
 ];
@@ -133,36 +126,53 @@ export class DefaultsSeeder implements OnModuleInit {
   private readonly logger = new Logger(DefaultsSeeder.name);
 
   constructor(
-    @InjectRepository(ExpenseTypeDefault)
-    private expenseTypeDefaultRepository: Repository<ExpenseTypeDefault>,
-    @InjectRepository(IncomeTypeDefault)
-    private incomeTypeDefaultRepository: Repository<IncomeTypeDefault>,
+    @InjectRepository(ExpenseType)
+    private expenseTypeRepository: Repository<ExpenseType>,
+    @InjectRepository(IncomeType)
+    private incomeTypeRepository: Repository<IncomeType>,
   ) {}
 
   async onModuleInit(): Promise<void> {
-    await this.seedExpenseTypeDefaults();
-    await this.seedIncomeTypeDefaults();
+    await this.seedExpenseTypes();
+    await this.seedIncomeTypes();
   }
 
-  private async seedExpenseTypeDefaults(): Promise<void> {
-    const count = await this.expenseTypeDefaultRepository.count();
+  private async seedExpenseTypes(): Promise<void> {
+    const count = await this.expenseTypeRepository.count();
     if (count > 0) {
       return;
     }
 
-    this.logger.log('Seeding default expense types...');
-    await this.expenseTypeDefaultRepository.save(DEFAULT_EXPENSE_TYPES);
-    this.logger.log(`Seeded ${DEFAULT_EXPENSE_TYPES.length} default expense types`);
+    this.logger.log('Seeding global expense types...');
+    for (const typeData of GLOBAL_EXPENSE_TYPES) {
+      const expenseType = new ExpenseType();
+      expenseType.key = typeData.key;
+      expenseType.name = typeData.name;
+      expenseType.description = '';
+      expenseType.isTaxDeductible = typeData.isTaxDeductible;
+      expenseType.isCapitalImprovement = typeData.isCapitalImprovement;
+      await this.expenseTypeRepository.save(expenseType);
+    }
+    this.logger.log(
+      `Seeded ${GLOBAL_EXPENSE_TYPES.length} global expense types`,
+    );
   }
 
-  private async seedIncomeTypeDefaults(): Promise<void> {
-    const count = await this.incomeTypeDefaultRepository.count();
+  private async seedIncomeTypes(): Promise<void> {
+    const count = await this.incomeTypeRepository.count();
     if (count > 0) {
       return;
     }
 
-    this.logger.log('Seeding default income types...');
-    await this.incomeTypeDefaultRepository.save(DEFAULT_INCOME_TYPES);
-    this.logger.log(`Seeded ${DEFAULT_INCOME_TYPES.length} default income types`);
+    this.logger.log('Seeding global income types...');
+    for (const typeData of GLOBAL_INCOME_TYPES) {
+      const incomeType = new IncomeType();
+      incomeType.key = typeData.key;
+      incomeType.name = typeData.name;
+      incomeType.description = '';
+      incomeType.isTaxable = typeData.isTaxable;
+      await this.incomeTypeRepository.save(incomeType);
+    }
+    this.logger.log(`Seeded ${GLOBAL_INCOME_TYPES.length} global income types`);
   }
 }

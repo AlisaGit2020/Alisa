@@ -57,6 +57,6 @@ import { DepreciationMigrationService } from './depreciation/depreciation-migrat
       DepreciationRecord,
     ]),
   ],
-  exports: [BalanceService, DepreciationMigrationService, DepreciationService, ExpenseService, IncomeService, TransactionService],
+  exports: [BalanceService, DepreciationMigrationService, DepreciationService, ExpenseService, ExpenseTypeService, IncomeService, IncomeTypeService, TransactionService],
 })
 export class AccountingModule {}

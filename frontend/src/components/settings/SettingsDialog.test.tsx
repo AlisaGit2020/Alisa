@@ -119,47 +119,11 @@ describe('SettingsDialog', () => {
       });
     });
 
-    it('renders expense types menu item', async () => {
-      renderWithThemeContext(<SettingsDialog {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Expense types')).toBeInTheDocument();
-      });
-    });
-
-    it('renders income types menu item', async () => {
-      renderWithThemeContext(<SettingsDialog {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Income types')).toBeInTheDocument();
-      });
-    });
-
-    it('renders loan settings menu item', async () => {
-      renderWithThemeContext(<SettingsDialog {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Loan settings')).toBeInTheDocument();
-      });
-    });
-
-    it('renders airbnb settings menu item', async () => {
-      renderWithThemeContext(<SettingsDialog {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Airbnb settings')).toBeInTheDocument();
-      });
-    });
-
-    it('renders menu icons', async () => {
+    it('renders theme menu icon', async () => {
       renderWithThemeContext(<SettingsDialog {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('PaletteIcon')).toBeInTheDocument();
-        expect(screen.getByTestId('PaymentIcon')).toBeInTheDocument();
-        expect(screen.getByTestId('MonetizationOnIcon')).toBeInTheDocument();
-        expect(screen.getByTestId('AccountBalanceIcon')).toBeInTheDocument();
-        expect(screen.getByTestId('HolidayVillageIcon')).toBeInTheDocument();
       });
     });
   });
@@ -170,81 +134,6 @@ describe('SettingsDialog', () => {
 
       await waitFor(() => {
         // Theme settings content should be visible
-        expect(screen.getByText('Light')).toBeInTheDocument();
-        expect(screen.getByText('Dark')).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Menu navigation', () => {
-    it('switches to expense types when clicked', async () => {
-      const user = userEvent.setup();
-
-      renderWithThemeContext(<SettingsDialog {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Expense types')).toBeInTheDocument();
-      });
-
-      await user.click(screen.getByText('Expense types'));
-
-      await waitFor(() => {
-        // ExpenseTypes component should show table
-        expect(screen.getByRole('table')).toBeInTheDocument();
-      });
-    });
-
-    it('switches to income types when clicked', async () => {
-      const user = userEvent.setup();
-
-      renderWithThemeContext(<SettingsDialog {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Income types')).toBeInTheDocument();
-      });
-
-      await user.click(screen.getByText('Income types'));
-
-      await waitFor(() => {
-        expect(screen.getByRole('table')).toBeInTheDocument();
-      });
-    });
-
-    it('switches to loan settings when clicked', async () => {
-      const user = userEvent.setup();
-
-      renderWithThemeContext(<SettingsDialog {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Loan settings')).toBeInTheDocument();
-      });
-
-      await user.click(screen.getByText('Loan settings'));
-
-      // LoanSettings component may show loading state - just verify menu item is selected
-      await waitFor(() => {
-        const menuNav = screen.getByRole('navigation');
-        expect(menuNav).toBeInTheDocument();
-      });
-    });
-
-    it('switches back to theme settings when clicked', async () => {
-      const user = userEvent.setup();
-
-      renderWithThemeContext(<SettingsDialog {...defaultProps} />);
-
-      // First switch to expense types
-      await waitFor(() => {
-        expect(screen.getByText('Expense types')).toBeInTheDocument();
-      });
-
-      await user.click(screen.getByText('Expense types'));
-
-      // Then switch back to theme (Theme appears multiple times)
-      const themeElements = screen.getAllByText('Theme');
-      await user.click(themeElements[0]);
-
-      await waitFor(() => {
         expect(screen.getByText('Light')).toBeInTheDocument();
         expect(screen.getByText('Dark')).toBeInTheDocument();
       });

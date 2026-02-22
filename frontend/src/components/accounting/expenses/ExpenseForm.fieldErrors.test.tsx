@@ -19,8 +19,8 @@ describe('ExpenseForm field error handling', () => {
   };
 
   const mockExpenseTypes: ExpenseType[] = [
-    { id: 1, name: 'Maintenance', userId: 1, description: 'Maintenance costs', isTaxDeductible: true, isCapitalImprovement: false },
-    { id: 2, name: 'Utilities', userId: 1, description: 'Utility bills', isTaxDeductible: true, isCapitalImprovement: false },
+    { id: 1, name: 'Maintenance', key: 'maintenance', description: 'Maintenance costs', isTaxDeductible: true, isCapitalImprovement: false },
+    { id: 2, name: 'Utilities', key: 'utilities', description: 'Utility bills', isTaxDeductible: true, isCapitalImprovement: false },
   ];
 
   beforeEach(() => {

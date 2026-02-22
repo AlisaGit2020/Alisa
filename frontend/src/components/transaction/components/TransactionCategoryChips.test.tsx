@@ -35,7 +35,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
         },
       ],
     });
@@ -59,7 +59,7 @@ describe('TransactionCategoryChips', () => {
           incomeTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          incomeType: { id: 1, name: 'Rent', description: '', isTaxable: true, userId: 1 },
+          incomeType: { id: 1, name: 'Rent', description: '', isTaxable: true, key: 'test-key' },
         },
       ],
     });
@@ -82,7 +82,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
         },
         {
           id: 2,
@@ -94,7 +94,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 2,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 2, name: 'Repairs', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+          expenseType: { id: 2, name: 'Repairs', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
         },
         {
           id: 3,
@@ -106,7 +106,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 3,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 3, name: 'Insurance', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+          expenseType: { id: 3, name: 'Insurance', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
         },
       ],
     });
@@ -133,7 +133,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
         },
         {
           id: 2,
@@ -145,7 +145,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 2,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 2, name: 'Repairs', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+          expenseType: { id: 2, name: 'Repairs', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
         },
       ],
     });
@@ -194,7 +194,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
         },
       ],
     });
@@ -218,7 +218,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
         },
         {
           id: 2,
@@ -230,7 +230,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 1,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+          expenseType: { id: 1, name: 'Utilities', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
         },
         {
           id: 3,
@@ -242,7 +242,7 @@ describe('TransactionCategoryChips', () => {
           expenseTypeId: 2,
           propertyId: 1,
           transactionId: 1,
-          expenseType: { id: 2, name: 'Repairs', description: '', isTaxDeductible: true, isCapitalImprovement: false, userId: 1 },
+          expenseType: { id: 2, name: 'Repairs', description: '', isTaxDeductible: true, isCapitalImprovement: false, key: 'test-key' },
         },
       ],
     });

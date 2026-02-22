@@ -20,7 +20,6 @@ import {
 } from "../../alisa";
 import React from "react";
 import DataService from "@alisa-lib/data-service.ts";
-import ApiClient from "@alisa-lib/api-client.ts";
 
 interface TransactionsPendingActionsProps extends WithTranslation {
   marginTop?: number;
@@ -127,12 +126,17 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
         handlingFeeExpenseTypeId: 0,
       });
     } else {
-      // Load user's default loan expense types from settings
-      const user = await ApiClient.me();
+      // Load loan expense types by their global keys
+      const expenseTypeService = new DataService<ExpenseType>({
+        context: expenseTypeContext,
+      });
+      const expenseTypes = await expenseTypeService.search();
+      const findByKey = (key: string) => expenseTypes.find((et) => et.key === key);
+
       setLoanSplitData({
-        principalExpenseTypeId: user.loanPrincipalExpenseTypeId || 0,
-        interestExpenseTypeId: user.loanInterestExpenseTypeId || 0,
-        handlingFeeExpenseTypeId: user.loanHandlingFeeExpenseTypeId || 0,
+        principalExpenseTypeId: findByKey("loan-principal")?.id || 0,
+        interestExpenseTypeId: findByKey("loan-interest")?.id || 0,
+        handlingFeeExpenseTypeId: findByKey("loan-handling-fee")?.id || 0,
       });
       setLoanSplitState(true);
     }

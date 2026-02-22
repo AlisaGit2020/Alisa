@@ -31,9 +31,10 @@ export const createIncome = (options: CreateIncomeOptions = {}): Income => {
 
 export interface CreateIncomeTypeOptions {
   id?: number;
-  userId?: number;
+  key?: string;
   name?: string;
   description?: string;
+  isTaxable?: boolean;
 }
 
 export const createIncomeType = (
@@ -41,8 +42,9 @@ export const createIncomeType = (
 ): IncomeType => {
   const incomeType = new IncomeType();
   incomeType.id = options.id ?? 1;
-  incomeType.userId = options.userId ?? 1;
+  incomeType.key = options.key ?? 'test-income-type';
   incomeType.name = options.name ?? 'Test Income Type';
   incomeType.description = options.description ?? 'Test Description';
+  incomeType.isTaxable = options.isTaxable ?? true;
   return incomeType;
 };

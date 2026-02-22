@@ -326,9 +326,6 @@ export class ExpenseService {
         expense.accountingDate = expense.transaction.accountingDate;
       }
     }
-    if (expense.expenseType) {
-      expense.expenseType.userId = user.id;
-    }
   }
 
   private async getEntityOrThrow(user: JWTUser, id: number): Promise<Expense> {

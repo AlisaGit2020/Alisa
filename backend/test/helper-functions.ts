@@ -1,7 +1,3 @@
-import { ExpenseTypeInputDto } from '@alisa-backend/accounting/expense/dtos/expense-type-input.dto';
-import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
-import { IncomeTypeInputDto } from '@alisa-backend/accounting/income/dtos/income-type-input.dto';
-import { IncomeTypeService } from '@alisa-backend/accounting/income/income-type.service';
 import { AuthService } from '@alisa-backend/auth/auth.service';
 import { JWTUser } from '@alisa-backend/auth/types';
 import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownership-input.dto';
@@ -20,11 +16,6 @@ import { Tier } from '@alisa-backend/admin/entities/tier.entity';
 import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
 import * as http from 'http';
 import {
-  expenseType1,
-  expenseType2,
-  expenseType3,
-  incomeType1,
-  incomeType2,
   getTransactionExpense1,
   getTransactionExpense2,
   getTransactionIncome1,
@@ -59,15 +50,15 @@ export const emptyTables = async (
   tables: string[] = [
     'feedback',
     'expense',
-    'expense_type',
     'income',
-    'income_type',
     'transaction',
     'ownership',
     'user',
     'property',
     'property_statistics',
     'tier',
+    // Note: expense_type and income_type are now global and seeded by DefaultsSeeder.
+    // They should not be truncated unless you plan to re-seed them.
   ],
 ) => {
   const sqlStatements: string[] = [];
@@ -166,34 +157,33 @@ export const getTestUsers = async (
   return testUsers;
 };
 
+// Expense and income types are now global and seeded by DefaultsSeeder.
+// These helper functions are kept for backwards compatibility but are no-ops.
 export const addIncomeAndExpenseTypes = async (
   user: JWTUser,
   app: INestApplication,
 ): Promise<void> => {
-  await addExpenseTypes(user, app);
-  await addIncomeTypes(user, app);
+  void user;
+  void app;
+  // No-op: Global types are seeded by DefaultsSeeder
 };
 
 export const addExpenseTypes = async (
   user: JWTUser,
   app: INestApplication,
 ): Promise<void> => {
-  const expenseTypeService = app.get<ExpenseTypeService>(ExpenseTypeService);
-
-  for (const expenseType of [expenseType1, expenseType2, expenseType3]) {
-    await expenseTypeService.add(user, expenseType);
-  }
+  void user;
+  void app;
+  // No-op: Global expense types are seeded by DefaultsSeeder
 };
 
 export const addIncomeTypes = async (
   user: JWTUser,
   app: INestApplication,
 ): Promise<void> => {
-  const incomeTypeService = app.get<IncomeTypeService>(IncomeTypeService);
-
-  for (const incomeType of [incomeType1, incomeType2, expenseType3]) {
-    await incomeTypeService.add(user, incomeType);
-  }
+  void user;
+  void app;
+  // No-op: Global income types are seeded by DefaultsSeeder
 };
 
 export const addTransactionsToTestUsers = async (
@@ -254,33 +244,9 @@ export const addProperty = async (
   return service.add(user, inputProperty);
 };
 
-export const addExpenseType = async (
-  user: JWTUser,
-  service: ExpenseTypeService,
-  name: string,
-  description: string = '',
-  isTaxDeductible: boolean = false,
-) => {
-  const expenseType = new ExpenseTypeInputDto();
-  expenseType.name = name;
-  expenseType.description = description;
-  expenseType.isTaxDeductible = isTaxDeductible;
-
-  await service.add(user, expenseType);
-};
-
-export const addIncomeType = async (
-  user: JWTUser,
-  service: IncomeTypeService,
-  name: string,
-  description: string = '',
-) => {
-  const incomeType = new IncomeTypeInputDto();
-  incomeType.name = name;
-  incomeType.description = description;
-
-  await service.add(user, incomeType);
-};
+// addExpenseType and addIncomeType helper functions have been removed.
+// Expense and income types are now global and seeded by DefaultsSeeder.
+// Use expenseTypeService.findByKey() or incomeTypeService.findByKey() to get global types.
 
 export const sleep = async (milliseconds: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, milliseconds));

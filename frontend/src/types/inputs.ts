@@ -37,23 +37,6 @@ export interface PropertyInput {
   ownerships?: OwnershipInput[];
 }
 
-// ExpenseType input
-export interface ExpenseTypeInput {
-  id?: number;
-  name: string;
-  description?: string;
-  isTaxDeductible: boolean;
-  isCapitalImprovement: boolean;
-}
-
-// IncomeType input
-export interface IncomeTypeInput {
-  id?: number;
-  name: string;
-  description?: string;
-  isTaxable?: boolean;
-}
-
 // Expense input
 export interface ExpenseInput {
   id?: number;
@@ -62,7 +45,6 @@ export interface ExpenseInput {
   quantity: number;
   totalAmount: number;
   accountingDate?: Date;
-  expenseType?: ExpenseTypeInput;
   expenseTypeId?: number;
   property?: PropertyInput;
   propertyId?: number;
@@ -78,7 +60,6 @@ export interface IncomeInput {
   quantity: number;
   totalAmount: number;
   accountingDate?: Date;
-  incomeType?: IncomeTypeInput;
   incomeTypeId?: number;
   property?: PropertyInput;
   propertyId?: number;

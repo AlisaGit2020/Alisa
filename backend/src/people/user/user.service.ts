@@ -82,14 +82,6 @@ export class UserService {
     if (input.email !== undefined) user.email = input.email;
     if (input.language !== undefined) user.language = input.language;
     if (input.photo !== undefined) user.photo = input.photo;
-    if (input.loanPrincipalExpenseTypeId !== undefined)
-      user.loanPrincipalExpenseTypeId = input.loanPrincipalExpenseTypeId;
-    if (input.loanInterestExpenseTypeId !== undefined)
-      user.loanInterestExpenseTypeId = input.loanInterestExpenseTypeId;
-    if (input.loanHandlingFeeExpenseTypeId !== undefined)
-      user.loanHandlingFeeExpenseTypeId = input.loanHandlingFeeExpenseTypeId;
-    if (input.airbnbIncomeTypeId !== undefined)
-      user.airbnbIncomeTypeId = input.airbnbIncomeTypeId;
     if (input.dashboardConfig !== undefined)
       user.dashboardConfig = input.dashboardConfig;
   }

@@ -36,7 +36,6 @@ export interface CreateUserOptions {
   photo?: string;
   isAdmin?: boolean;
   tierId?: number;
-  airbnbIncomeTypeId?: number;
 }
 
 export const createUser = (options: CreateUserOptions = {}): User => {
@@ -49,7 +48,6 @@ export const createUser = (options: CreateUserOptions = {}): User => {
   user.photo = options.photo ?? 'https://example.com/photo.jpg';
   user.isAdmin = options.isAdmin ?? false;
   user.tierId = options.tierId;
-  user.airbnbIncomeTypeId = options.airbnbIncomeTypeId;
   user.ownerships = [];
   return user;
 };
