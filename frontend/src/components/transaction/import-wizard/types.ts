@@ -31,6 +31,7 @@ export const getBankById = (id: BankId | null): SupportedBank | undefined => {
 export interface ImportWizardState {
   activeStep: number;
   propertyId: number;
+  propertyName: string;
   selectedBank: BankId | null;
   files: File[];
   isUploading: boolean;

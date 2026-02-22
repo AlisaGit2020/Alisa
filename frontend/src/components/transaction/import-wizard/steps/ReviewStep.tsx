@@ -31,6 +31,7 @@ import { useToast } from "../../../alisa/toast/AlisaToastProvider";
 interface ReviewStepProps {
   t: TFunction;
   propertyId: number;
+  propertyName?: string;
   transactions: Transaction[];
   selectedIds: number[];
   selectedTransactionTypes: TransactionType[];
@@ -54,6 +55,7 @@ interface ReviewStepProps {
 export default function ReviewStep({
   t,
   propertyId,
+  propertyName,
   transactions,
   selectedIds,
   selectedTransactionTypes,
@@ -391,6 +393,7 @@ export default function ReviewStep({
         <AllocationRulesModal
           open={rulesModalOpen}
           propertyId={propertyId}
+          propertyName={propertyName}
           onClose={() => setRulesModalOpen(false)}
         />
       )}

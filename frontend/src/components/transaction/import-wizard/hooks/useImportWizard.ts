@@ -47,6 +47,7 @@ const createEmptyStats = (): ImportStats => ({
 const initialState: ImportWizardState = {
   activeStep: 0,
   propertyId: 0,
+  propertyName: "",
   selectedBank: null,
   files: [],
   isUploading: false,
@@ -96,6 +97,28 @@ export function useImportWizard() {
       window.removeEventListener(TRANSACTION_PROPERTY_CHANGE_EVENT, handlePropertyChange);
     };
   }, []);
+
+  // Fetch property name when propertyId changes
+  useEffect(() => {
+    const fetchPropertyName = async () => {
+      if (state.propertyId <= 0) {
+        setState((prev) => ({ ...prev, propertyName: "" }));
+        return;
+      }
+      try {
+        const property = await ApiClient.get<{ id: number; name: string }>(
+          "real-estate/property",
+          state.propertyId
+        );
+        if (property?.name) {
+          setState((prev) => ({ ...prev, propertyName: property.name }));
+        }
+      } catch {
+        // Keep empty name if fetch fails
+      }
+    };
+    fetchPropertyName();
+  }, [state.propertyId]);
 
   // Restore session on mount if there's an unfinished import
   useEffect(() => {

@@ -294,6 +294,7 @@ function PropertyView({ t }: WithTranslation) {
       <AllocationRulesModal
         open={rulesModalOpen}
         propertyId={property.id}
+        propertyName={property.name}
         onClose={() => setRulesModalOpen(false)}
       />
     </Paper>

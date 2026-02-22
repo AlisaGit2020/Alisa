@@ -99,6 +99,7 @@ function TransactionImportWizard({ t }: WithTranslation) {
           <ReviewStep
             t={t}
             propertyId={state.propertyId}
+            propertyName={state.propertyName}
             transactions={state.transactions}
             selectedIds={state.selectedIds}
             selectedTransactionTypes={state.selectedTransactionTypes}

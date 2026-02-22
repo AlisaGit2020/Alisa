@@ -32,6 +32,7 @@ import { AlisaSelectFieldItem } from "../alisa/form/AlisaSelectField";
 interface AllocationRulesModalProps {
   open: boolean;
   propertyId: number;
+  propertyName?: string;
   onClose: () => void;
 }
 
@@ -50,6 +51,7 @@ const API_PATH = "allocation-rules";
 function AllocationRulesModal({
   open,
   propertyId,
+  propertyName,
   onClose,
 }: AllocationRulesModalProps) {
   const { t } = useTranslation();
@@ -224,6 +226,18 @@ function AllocationRulesModal({
     }
   };
 
+  const getExpenseTypeName = (expenseTypeId: number | null | undefined): string | null => {
+    if (!expenseTypeId) return null;
+    const expenseType = expenseTypes.find((et) => et.id === expenseTypeId);
+    return expenseType ? t(`expense-type:${expenseType.key}`) : null;
+  };
+
+  const getIncomeTypeName = (incomeTypeId: number | null | undefined): string | null => {
+    if (!incomeTypeId) return null;
+    const incomeType = incomeTypes.find((it) => it.id === incomeTypeId);
+    return incomeType ? t(`income-type:${incomeType.key}`) : null;
+  };
+
   if (editingRule) {
     return (
       <AlisaDialog
@@ -253,7 +267,7 @@ function AllocationRulesModal({
     <>
       <AlisaDialog
         open={open}
-        title={t("allocation:rules")}
+        title={propertyName ? `${t("allocation:rules")}: ${propertyName}` : t("allocation:rules")}
         onClose={onClose}
         maxWidth="md"
         actions={
@@ -275,10 +289,11 @@ function AllocationRulesModal({
             {t("allocation:noRules")}
           </Typography>
         ) : (
-          <List>
-            {rules.map((rule) => (
+          <List disablePadding>
+            {rules.map((rule, index) => (
               <ListItem
                 key={rule.id}
+                divider={index < rules.length - 1}
                 secondaryAction={
                   <Box>
                     <IconButton
@@ -301,24 +316,46 @@ function AllocationRulesModal({
               >
                 <ListItemText
                   primary={
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      {rule.name}
-                      <Chip
-                        label={getTypeName(rule.transactionType)}
-                        size="small"
-                        color={
-                          rule.transactionType === TransactionType.INCOME
-                            ? "success"
-                            : "default"
-                        }
-                      />
-                      {!rule.isActive && (
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        {rule.name}
+                        {!rule.isActive && (
+                          <Chip
+                            label={t("allocation:inactive")}
+                            size="small"
+                            color="warning"
+                          />
+                        )}
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                         <Chip
-                          label={t("allocation:inactive")}
+                          label={getTypeName(rule.transactionType)}
                           size="small"
-                          color="warning"
+                          color={
+                            rule.transactionType === TransactionType.INCOME
+                              ? "success"
+                              : rule.transactionType === TransactionType.EXPENSE
+                                ? "error"
+                                : "default"
+                          }
                         />
-                      )}
+                        {rule.transactionType === TransactionType.EXPENSE &&
+                          getExpenseTypeName(rule.expenseTypeId) && (
+                            <Chip
+                              label={getExpenseTypeName(rule.expenseTypeId)}
+                              size="small"
+                              variant="outlined"
+                            />
+                          )}
+                        {rule.transactionType === TransactionType.INCOME &&
+                          getIncomeTypeName(rule.incomeTypeId) && (
+                            <Chip
+                              label={getIncomeTypeName(rule.incomeTypeId)}
+                              size="small"
+                              variant="outlined"
+                            />
+                          )}
+                      </Box>
                     </Box>
                   }
                   secondary={getConditionsSummary(rule)}
