@@ -14,7 +14,6 @@ import {
   Edit as EditIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import axios from "axios";
 import AlisaDialog from "../alisa/dialog/AlisaDialog";
 import AlisaButton from "../alisa/form/AlisaButton";
 import AlisaConfirmDialog from "../alisa/dialog/AlisaConfirmDialog";
@@ -176,19 +175,9 @@ function AllocationRulesModal({
 
     try {
       if (editingRule.id) {
-        const options = await ApiClient.getOptions();
-        await axios.put(
-          `${import.meta.env.VITE_API_URL}/${API_PATH}/${editingRule.id}`,
-          input,
-          options
-        );
+        await ApiClient.put(API_PATH, editingRule.id, input);
       } else {
-        const options = await ApiClient.getOptions();
-        await axios.post(
-          `${import.meta.env.VITE_API_URL}/${API_PATH}`,
-          input,
-          options
-        );
+        await ApiClient.post(API_PATH, input);
       }
 
       showToast({ message: t("common:toast.saveSuccess"), severity: "success" });

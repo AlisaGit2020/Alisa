@@ -149,12 +149,16 @@ export class AllocationRuleService {
       );
     }
 
-    // Update priorities based on the order in ruleIds
-    const updatePromises = ruleIds.map((ruleId, index) => {
-      return this.repository.update(ruleId, { priority: index });
-    });
+    // Update priorities sequentially to avoid race conditions with unique constraints
+    // First, set all priorities to negative values to avoid conflicts
+    for (let i = 0; i < ruleIds.length; i++) {
+      await this.repository.update(ruleIds[i], { priority: -(i + 1) });
+    }
 
-    await Promise.all(updatePromises);
+    // Then, set the final priorities
+    for (let i = 0; i < ruleIds.length; i++) {
+      await this.repository.update(ruleIds[i], { priority: i });
+    }
 
     return this.findByProperty(user, propertyId);
   }
