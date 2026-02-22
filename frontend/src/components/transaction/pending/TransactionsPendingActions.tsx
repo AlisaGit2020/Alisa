@@ -5,11 +5,14 @@ import {
   transactionContext,
 } from "@alisa-lib/alisa-contexts.ts";
 import { TransactionType, ExpenseType, IncomeType } from "@alisa-types";
-import { Box, Chip, Paper, Stack } from "@mui/material";
+import { Box, Button, ButtonGroup, Chip, Paper, Stack, Tooltip } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import SaveIcon from "@mui/icons-material/Save";
+import RuleIcon from "@mui/icons-material/Rule";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { AlisaCloseIcon } from "../../alisa/AlisaIcons.tsx";
 import Typography from "@mui/material/Typography";
 import {
@@ -38,6 +41,12 @@ interface TransactionsPendingActionsProps extends WithTranslation {
   onSetCategoryType: (expenseTypeId?: number, incomeTypeId?: number) => Promise<void>;
   onSplitLoanPayment: () => Promise<void>;
   onDelete: () => void;
+  onOpenAllocationRules?: () => void;
+  onAutoAllocate?: () => void;
+  autoAllocateDisabled?: boolean;
+  isAllocating?: boolean;
+  onResetAllocation?: () => void;
+  hasAllocatedSelected?: boolean;
 }
 
 interface CategoryTypeData {
@@ -151,7 +160,13 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
         {/* Row count - prominent chip */}
         <Box>
           <Chip
-            label={props.t("rowsSelected", { count: props.selectedIds.length })}
+            label={
+              props.hasAllocatedSelected && !props.hasUnallocatedSelected
+                ? props.t("allocatedRowsSelected", { count: props.selectedIds.length })
+                : !props.hasAllocatedSelected && props.hasUnallocatedSelected
+                  ? props.t("notAllocatedRowsSelected", { count: props.selectedIds.length })
+                  : props.t("rowsSelected", { count: props.selectedIds.length })
+            }
             color="primary"
             size="medium"
           />
@@ -246,33 +261,66 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
           </Box>
         </Box>
 
-        {/* Section 2: Automatic Allocation (Loan Splitting) */}
-        {!props.hideSplitLoanPayment && (
+        {/* Section 2: Automatic Allocation */}
+        {(!props.hideSplitLoanPayment || props.onOpenAllocationRules || props.onAutoAllocate) && (
           <Box
             sx={{
               border: 1,
               borderColor: "divider",
               borderRadius: 1,
               p: 1.5,
-              opacity: supportsLoanSplit ? 1 : 0.6,
             }}
           >
-            <Typography variant="subtitle2" sx={{ mb: 0.5, fontWeight: "bold" }}>
+            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: "bold" }}>
               {props.t("automaticAllocation")}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-              {supportsLoanSplit
-                ? props.t("automaticAllocationDescription")
-                : props.t("automaticAllocationNotSupported", { bank: props.bankName || "This" })}
-            </Typography>
 
-            {supportsLoanSplit && (
-              <AlisaButton
-                label={props.t("splitLoanPayment")}
-                variant="text"
-                onClick={handleLoanSplit}
-                endIcon={<CallSplitIcon />}
-              />
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {props.onAutoAllocate && (
+                <ButtonGroup variant="contained" size="small">
+                  <Button
+                    startIcon={<AutoFixHighIcon />}
+                    onClick={props.onAutoAllocate}
+                    disabled={props.autoAllocateDisabled || props.isAllocating}
+                  >
+                    {props.t("allocation:autoAllocate")}
+                  </Button>
+                  {props.onOpenAllocationRules && (
+                    <Tooltip title={props.t("allocation:rules")}>
+                      <Button
+                        color="inherit"
+                        onClick={props.onOpenAllocationRules}
+                        sx={{ px: 1, minWidth: "auto" }}
+                      >
+                        <RuleIcon fontSize="small" />
+                      </Button>
+                    </Tooltip>
+                  )}
+                </ButtonGroup>
+              )}
+              {!props.onAutoAllocate && props.onOpenAllocationRules && (
+                <AlisaButton
+                  label={props.t("allocation:rules")}
+                  variant="outlined"
+                  size="small"
+                  startIcon={<RuleIcon />}
+                  onClick={props.onOpenAllocationRules}
+                />
+              )}
+              {!props.hideSplitLoanPayment && supportsLoanSplit && (
+                <AlisaButton
+                  label={props.t("splitLoanPayment")}
+                  variant="text"
+                  onClick={handleLoanSplit}
+                  endIcon={<CallSplitIcon />}
+                />
+              )}
+            </Stack>
+
+            {!props.hideSplitLoanPayment && !supportsLoanSplit && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                {props.t("automaticAllocationNotSupported", { bank: props.bankName || "This" })}
+              </Typography>
             )}
           </Box>
         )}
@@ -304,6 +352,21 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
                     : undefined
                 }
                 endIcon={<CheckIcon />}
+              />
+            )}
+            {props.onResetAllocation && (
+              <AlisaButton
+                label={props.t("resetAllocation")}
+                variant="text"
+                color="warning"
+                onClick={props.onResetAllocation}
+                disabled={!props.hasAllocatedSelected}
+                tooltip={
+                  !props.hasAllocatedSelected
+                    ? props.t("resetAllocationDisabledTooltip")
+                    : undefined
+                }
+                endIcon={<RestartAltIcon />}
               />
             )}
             <AlisaButton

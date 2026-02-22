@@ -14,7 +14,9 @@ import SquareFootIcon from '@mui/icons-material/SquareFoot';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
+import RuleIcon from '@mui/icons-material/Rule';
 import PropertyReportSection from './report/PropertyReportSection';
+import { AllocationRulesModal } from '../allocation';
 
 interface DetailRowProps {
   icon: ReactNode;
@@ -82,6 +84,7 @@ function PropertyView({ t }: WithTranslation) {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [rulesModalOpen, setRulesModalOpen] = useState(false);
   const { idParam } = useParams();
   const navigate = useNavigate();
 
@@ -196,12 +199,20 @@ function PropertyView({ t }: WithTranslation) {
               </Typography>
             )}
           </Box>
-          <AlisaButton
-            label={t('editProperty')}
-            variant="contained"
-            startIcon={<EditIcon />}
-            onClick={handleEdit}
-          />
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <AlisaButton
+              label={t('allocation:rules')}
+              variant="outlined"
+              startIcon={<RuleIcon />}
+              onClick={() => setRulesModalOpen(true)}
+            />
+            <AlisaButton
+              label={t('editProperty')}
+              variant="contained"
+              startIcon={<EditIcon />}
+              onClick={handleEdit}
+            />
+          </Box>
         </Stack>
       </Box>
 
@@ -278,6 +289,14 @@ function PropertyView({ t }: WithTranslation) {
         </Typography>
         <PropertyReportSection propertyId={property.id} />
       </Box>
+
+      {/* Allocation Rules Modal */}
+      <AllocationRulesModal
+        open={rulesModalOpen}
+        propertyId={property.id}
+        propertyName={property.name}
+        onClose={() => setRulesModalOpen(false)}
+      />
     </Paper>
   );
 }

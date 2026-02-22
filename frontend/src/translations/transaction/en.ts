@@ -50,6 +50,8 @@ const transaction = {
   receiver: "Receiver",
   reset: "Reset",
   rowCount: "{{count}} transactions",
+  allocatedRowsSelected: "{{count}} allocated rows selected",
+  notAllocatedRowsSelected: "{{count}} not allocated rows selected",
   search: "Search",
   searchField: "Search from",
   sender: "Sender",
@@ -74,6 +76,8 @@ const transaction = {
   saveAllocationTooltip: "Select an allocation type first",
   saveAllocationCategoryTooltip: "Select a category first",
   acceptDisabledTooltip: "All selected transactions must be allocated before accepting",
+  resetAllocation: "Reset Allocation",
+  resetAllocationDisabledTooltip: "Select allocated transactions to reset",
   loanSplitErrors: {
     unauthorized: "You don't have permission to modify this transaction",
     notPending: "Can only split pending transactions",

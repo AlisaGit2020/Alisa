@@ -36,7 +36,7 @@ docker-compose up    # Start all services (database:5432, backend:3000, frontend
 ### Tech Stack
 - **Frontend:** React 19 + TypeScript + Vite + Material-UI + i18next
 - **Backend:** NestJS + TypeORM + PostgreSQL + Passport JWT/Google OAuth
-- **Database:** PostgreSQL with TypeORM auto-sync enabled
+- **Database:** PostgreSQL with TypeORM (auto-sync in dev, migrations in prod)
 
 ### Backend Modules
 The backend uses NestJS feature modules located in `backend/src/`:
@@ -303,6 +303,86 @@ See `frontend/docs/testing-guide.md` for detailed examples and patterns.
 - Use helper functions from `backend/test/helper-functions.ts`
 - Test full HTTP request/response cycle including authentication
 - Verify response status codes and body structure
+
+## Database Migrations
+
+**CRITICAL: Every database schema change requires a migration script for production.**
+
+Development uses `synchronize: true` which auto-syncs schema changes, but **production disables auto-sync** and relies exclusively on migrations. Deploying entity changes without a migration will cause production to fail.
+
+### When Migrations Are Required
+
+**Always create a migration when:**
+- Adding, removing, or renaming a table
+- Adding, removing, or renaming a column
+- Changing column types, constraints, or defaults
+- Adding or modifying indexes
+- Adding or modifying foreign key relationships
+- Seeding required data (e.g., new expense/income types)
+
+**Migration NOT required for:**
+- Code-only changes (services, controllers, DTOs)
+- Changes to entity decorators that don't affect schema (e.g., `@Exclude()`)
+- Adding computed/virtual properties (not stored in DB)
+
+### Migration Commands
+
+```bash
+cd backend
+
+# Generate migration from entity changes (compares entities to current DB)
+npm run migration:generate src/migrations/MigrationName
+
+# Run pending migrations (development)
+npm run migration:run
+
+# Run migrations in production (uses compiled JS)
+npm run migration:run:prod
+
+# Revert last migration
+npm run migration:revert
+```
+
+### Migration Naming Convention
+
+Use timestamp prefix (auto-generated) + descriptive PascalCase name:
+- `1772050000000-CreateAllocationRuleTable.ts`
+- `1772100000000-AddCleaningAndLoanPaymentExpenseTypes.ts`
+- `1739864400000-FixTimezoneShiftedDates.ts`
+
+### Migration Structure
+
+```typescript
+import { MigrationInterface, QueryRunner } from 'typeorm';
+
+export class CreateExampleTable1234567890000 implements MigrationInterface {
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    // Apply changes
+    await queryRunner.query(`CREATE TABLE ...`);
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    // Revert changes
+    await queryRunner.query(`DROP TABLE IF EXISTS ...`);
+  }
+}
+```
+
+### Code Review Migration Checklist
+
+**Reviewers MUST verify:**
+1. ✅ Entity changes have corresponding migration file in `backend/src/migrations/`
+2. ✅ Migration includes both `up()` and `down()` methods
+3. ✅ Column types match entity decorators
+4. ✅ Foreign keys include appropriate `ON DELETE` behavior
+5. ✅ Indexes are created for frequently queried columns
+6. ✅ Migration is idempotent (safe to run multiple times if needed)
+
+**Red flags that indicate missing migration:**
+- New `@Entity()` class added
+- New `@Column()` decorator added to existing entity
+- Column type or options changed in entity decorator
+- `@ManyToOne`, `@OneToMany`, `@JoinColumn` added or modified
 
 ## CI/CD
 

@@ -47,6 +47,8 @@ const transaction = {
   receiver: "Mottagare",
   reset: "Rensa",
   rowCount: "{{count}} transaktioner",
+  allocatedRowsSelected: "{{count}} tilldelade rader valda",
+  notAllocatedRowsSelected: "{{count}} ej tilldelade rader valda",
   search: "Sök",
   searchField: "Sök i fält",
   sender: "Avsändare",
@@ -71,6 +73,8 @@ const transaction = {
   saveAllocationTooltip: "Välj en tilldelningstyp först",
   saveAllocationCategoryTooltip: "Välj en kategori först",
   acceptDisabledTooltip: "Alla valda transaktioner måste tilldelas innan godkännande",
+  resetAllocation: "Återställ tilldelning",
+  resetAllocationDisabledTooltip: "Välj tilldelade transaktioner för att återställa",
   loanSplitErrors: {
     unauthorized: "Du har inte behörighet att ändra denna transaktion",
     notPending: "Kan bara dela upp väntande transaktioner",

@@ -37,7 +37,7 @@ describe('DefaultsSeeder', () => {
     seeder = module.get<DefaultsSeeder>(DefaultsSeeder);
   });
 
-  it('seeds 13 global expense types when table is empty', async () => {
+  it('seeds 15 global expense types when table is empty', async () => {
     mockExpenseTypeRepo.count.mockResolvedValue(0);
     mockIncomeTypeRepo.count.mockResolvedValue(0);
     mockExpenseTypeRepo.save.mockResolvedValue({});
@@ -46,7 +46,7 @@ describe('DefaultsSeeder', () => {
     await seeder.onModuleInit();
 
     // Each type is saved individually
-    expect(mockExpenseTypeRepo.save).toHaveBeenCalledTimes(13);
+    expect(mockExpenseTypeRepo.save).toHaveBeenCalledTimes(15);
   });
 
   it('seeds 4 global income types when table is empty', async () => {
@@ -62,7 +62,7 @@ describe('DefaultsSeeder', () => {
   });
 
   it('does not seed expense types if data already exists', async () => {
-    mockExpenseTypeRepo.count.mockResolvedValue(13);
+    mockExpenseTypeRepo.count.mockResolvedValue(15);
     mockIncomeTypeRepo.count.mockResolvedValue(0);
     mockIncomeTypeRepo.save.mockResolvedValue({});
 
@@ -109,7 +109,7 @@ describe('DefaultsSeeder', () => {
       (call) => call[0].key,
     );
     const uniqueKeys = new Set(savedKeys);
-    expect(uniqueKeys.size).toBe(13);
+    expect(uniqueKeys.size).toBe(15);
   });
 
   it('seeds income types with unique keys', async () => {

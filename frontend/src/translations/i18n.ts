@@ -8,6 +8,7 @@ const availableLanguages = ['en', 'fi', 'sv'];
 const namespaces = [
     'accounting',
     'admin',
+    'allocation',
     'dashboard',
     'expense',
     'expense-type',

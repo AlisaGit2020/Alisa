@@ -121,6 +121,7 @@ const en = {
       approveError: "Failed to approve",
       typeUpdated: "Type updated",
       categoryUpdated: "Category updated",
+      allocationReset: "Allocation reset",
       loanSplit: "Loan payment split",
       importSuccess: "{{count}} transactions imported",
       settingsSaved: "Settings saved",

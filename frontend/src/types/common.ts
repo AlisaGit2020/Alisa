@@ -140,3 +140,50 @@ export interface DeleteValidationResult {
   dependencies: DependencyGroup[];
   message?: string;
 }
+
+// Allocation rule types
+export type AllocationConditionField = 'sender' | 'receiver' | 'description' | 'amount';
+export type AllocationConditionOperator = 'equals' | 'contains' | 'greaterThan' | 'lessThan';
+
+export interface AllocationCondition {
+  field: AllocationConditionField;
+  operator: AllocationConditionOperator;
+  value: string;
+}
+
+export interface AllocationRule {
+  id: number;
+  name: string;
+  propertyId: number;
+  priority: number;
+  transactionType: TransactionType;
+  expenseTypeId?: number | null;
+  incomeTypeId?: number | null;
+  conditions: AllocationCondition[];
+  isActive: boolean;
+  expenseType?: { id: number; key: string };
+  incomeType?: { id: number; key: string };
+}
+
+export interface AllocatedTransaction {
+  transactionId: number;
+  ruleId: number;
+  ruleName: string;
+  action?: 'type_set' | 'loan_split';
+}
+
+export interface SkippedTransaction {
+  transactionId: number;
+  reason: 'no_match' | 'loan_split_failed' | 'already_allocated';
+}
+
+export interface ConflictingTransaction {
+  transactionId: number;
+  matchingRules: { id: number; name: string }[];
+}
+
+export interface AllocationResult {
+  allocated: AllocatedTransaction[];
+  skipped: SkippedTransaction[];
+  conflicting: ConflictingTransaction[];
+}

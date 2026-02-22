@@ -13,6 +13,8 @@ const expenseTypes = {
     'loan-interest': 'Lainan korko',
     'loan-principal': 'Lainan lyhennys',
     'loan-handling-fee': 'Lainan käsittelykulut',
+    'loan-payment': 'Lainan maksu (automaattinen jako)',
+    'cleaning': 'Siivous',
     // General labels
     expenseTypes: 'Kululajit',
     isTaxDeductible: 'Verovähennettävä',

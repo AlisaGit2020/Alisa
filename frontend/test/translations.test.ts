@@ -41,12 +41,15 @@ import landingEn from '../src/translations/landing/en';
 import landingFi from '../src/translations/landing/fi';
 import adminEn from '../src/translations/admin/en';
 import adminFi from '../src/translations/admin/fi';
+import allocationEn from '../src/translations/allocation/en';
+import allocationFi from '../src/translations/allocation/fi';
 
 // Combine all translations
 const en = {
   ...baseEn,
   accounting: accountingEn,
   admin: adminEn,
+  allocation: allocationEn,
   dashboard: dashboardEn,
   property: propertyEn,
   expense: expenseEn,
@@ -68,6 +71,7 @@ const fi = {
   ...baseFi,
   accounting: accountingFi,
   admin: adminFi,
+  allocation: allocationFi,
   dashboard: dashboardFi,
   property: propertyFi,
   expense: expenseFi,
@@ -142,12 +146,13 @@ function extractTranslationKeys(content: string): Set<string> {
 /**
  * Flattens nested translation object into dot-notation keys
  */
-function flattenTranslations(obj: any, prefix = ''): Set<string> {
+function flattenTranslations(obj: Record<string, unknown>, prefix = ''): Set<string> {
   const keys = new Set<string>();
 
   for (const key in obj) {
-    if (typeof obj[key] === 'object' && obj[key] !== null) {
-      const nested = flattenTranslations(obj[key], prefix ? `${prefix}.${key}` : key);
+    const value = obj[key];
+    if (typeof value === 'object' && value !== null) {
+      const nested = flattenTranslations(value as Record<string, unknown>, prefix ? `${prefix}.${key}` : key);
       nested.forEach(k => keys.add(k));
     } else {
       keys.add(prefix ? `${prefix}.${key}` : key);

@@ -13,6 +13,8 @@ const expenseTypes = {
     'loan-interest': 'Låneränta',
     'loan-principal': 'Låneamortering',
     'loan-handling-fee': 'Låneavgifter',
+    'loan-payment': 'Lånebetalning (auto-uppdelning)',
+    'cleaning': 'Städning',
     // General labels
     expenseTypes: 'Utgiftstyper',
     isTaxDeductible: 'Avdragsgill',

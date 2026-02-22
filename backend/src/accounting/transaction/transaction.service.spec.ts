@@ -647,6 +647,57 @@ describe('TransactionService', () => {
         service.setType(testUser, [1], -1 as TransactionType),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it.each([
+      TransactionType.UNKNOWN,
+      TransactionType.DEPOSIT,
+      TransactionType.WITHDRAW,
+    ])('deletes related expenses and incomes when setting type to %s', async (targetType) => {
+      const transaction = createExpenseTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+      });
+      transaction.expenses = [
+        { id: 10, transactionId: 1, expenseTypeId: 1 } as Expense,
+      ];
+      transaction.incomes = [
+        { id: 20, transactionId: 1, incomeTypeId: 1 } as Income,
+      ];
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockRepository.findOneBy.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity }),
+      );
+
+      await service.setType(testUser, [1], targetType);
+
+      expect(mockExpenseRepository.delete).toHaveBeenCalledWith({ transactionId: 1 });
+      expect(mockIncomeRepository.delete).toHaveBeenCalledWith({ transactionId: 1 });
+    });
+
+    it('does not delete expenses/incomes when setting type to EXPENSE or INCOME', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        type: TransactionType.UNKNOWN,
+      });
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockRepository.findOneBy.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity }),
+      );
+
+      await service.setType(testUser, [1], TransactionType.EXPENSE);
+
+      expect(mockExpenseRepository.delete).not.toHaveBeenCalled();
+      expect(mockIncomeRepository.delete).not.toHaveBeenCalled();
+    });
   });
 
   describe('setCategoryType', () => {

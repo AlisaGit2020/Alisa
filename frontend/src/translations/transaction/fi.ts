@@ -50,6 +50,8 @@ const transaction = {
   receiver: "Saaja",
   reset: "Tyhjennä",
   rowCount: "{{count}} tapahtumaa",
+  allocatedRowsSelected: "{{count}} kohdistettua riviä valittu",
+  notAllocatedRowsSelected: "{{count}} kohdistamatonta riviä valittu",
   search: "Hae",
   searchField: "Haetaan kentästä",
   sender: "Maksaja",
@@ -74,6 +76,8 @@ const transaction = {
   saveAllocationTooltip: "Valitse ensin kohdistustyyppi",
   saveAllocationCategoryTooltip: "Valitse ensin kategoria",
   acceptDisabledTooltip: "Kaikki valitut tapahtumat on kohdistettava ennen hyväksymistä",
+  resetAllocation: "Poista kohdistus",
+  resetAllocationDisabledTooltip: "Valitse kohdistettuja tapahtumia poistaaksesi kohdistuksen",
   loanSplitErrors: {
     unauthorized: "Sinulla ei ole oikeutta muokata tätä tapahtumaa",
     notPending: "Vain odottavia tapahtumia voi jakaa",

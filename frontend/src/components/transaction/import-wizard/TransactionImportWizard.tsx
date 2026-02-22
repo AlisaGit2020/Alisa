@@ -30,10 +30,12 @@ function TransactionImportWizard({ t }: WithTranslation) {
     clearSelection,
     setTypeForSelected,
     setCategoryTypeForSelected,
+    resetAllocationForSelected,
     splitLoanPaymentForSelected,
     deleteSelected,
     approveAll,
     reset,
+    refreshTransactions,
   } = useImportWizard();
 
   // Track global property selection (from AppBar)
@@ -96,6 +98,8 @@ function TransactionImportWizard({ t }: WithTranslation) {
         return (
           <ReviewStep
             t={t}
+            propertyId={state.propertyId}
+            propertyName={state.propertyName}
             transactions={state.transactions}
             selectedIds={state.selectedIds}
             selectedTransactionTypes={state.selectedTransactionTypes}
@@ -108,10 +112,12 @@ function TransactionImportWizard({ t }: WithTranslation) {
             onClearSelection={clearSelection}
             onSetType={setTypeForSelected}
             onSetCategoryType={setCategoryTypeForSelected}
+            onResetAllocation={resetAllocationForSelected}
             onSplitLoanPayment={splitLoanPaymentForSelected}
             onDelete={deleteSelected}
             onNext={nextStep}
             onBack={prevStep}
+            onRefresh={refreshTransactions}
           />
         );
       }

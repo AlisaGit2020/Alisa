@@ -47,6 +47,7 @@ const createEmptyStats = (): ImportStats => ({
 const initialState: ImportWizardState = {
   activeStep: 0,
   propertyId: 0,
+  propertyName: "",
   selectedBank: null,
   files: [],
   isUploading: false,
@@ -96,6 +97,28 @@ export function useImportWizard() {
       window.removeEventListener(TRANSACTION_PROPERTY_CHANGE_EVENT, handlePropertyChange);
     };
   }, []);
+
+  // Fetch property name when propertyId changes
+  useEffect(() => {
+    const fetchPropertyName = async () => {
+      if (state.propertyId <= 0) {
+        setState((prev) => ({ ...prev, propertyName: "" }));
+        return;
+      }
+      try {
+        const property = await ApiClient.get<{ id: number; name: string }>(
+          "real-estate/property",
+          state.propertyId
+        );
+        if (property?.name) {
+          setState((prev) => ({ ...prev, propertyName: property.name }));
+        }
+      } catch {
+        // Keep empty name if fetch fails
+      }
+    };
+    fetchPropertyName();
+  }, [state.propertyId]);
 
   // Restore session on mount if there's an unfinished import
   useEffect(() => {
@@ -381,6 +404,26 @@ export function useImportWizard() {
     [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection, showToast, t]
   );
 
+  const resetAllocationForSelected = useCallback(
+    async () => {
+      if (state.selectedIds.length === 0) return;
+
+      await ApiClient.postSaveTask<TransactionSetTypeInput>(
+        transactionContext.apiPath + "/type",
+        {
+          ids: state.selectedIds,
+          type: TransactionType.UNKNOWN,
+        }
+      );
+
+      showToast({ message: t("common:toast.allocationReset"), severity: "success" });
+      // Refetch transactions to update UI
+      await fetchTransactions(state.importedTransactionIds);
+      clearSelection();
+    },
+    [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection, showToast, t]
+  );
+
   const splitLoanPaymentForSelected = useCallback(
     async () => {
       if (state.selectedIds.length === 0) return;
@@ -558,6 +601,7 @@ export function useImportWizard() {
     clearSelection,
     setTypeForSelected,
     setCategoryTypeForSelected,
+    resetAllocationForSelected,
     splitLoanPaymentForSelected,
     deleteSelected,
     approveAll,

@@ -283,12 +283,25 @@ export class TransactionService {
       throw new BadRequestException('Invalid type');
     }
 
+    // Types that don't support expenses/incomes - delete them when switching to these
+    const typesWithoutExpensesOrIncomes = [
+      TransactionType.UNKNOWN,
+      TransactionType.DEPOSIT,
+      TransactionType.WITHDRAW,
+    ];
+
     const transactions = await this.repository.find({
       where: { id: In(ids) },
     });
 
     //Update all transactions simultaneously and gather all promises
     const saveTask = transactions.map(async (transaction) => {
+      // Delete related expenses and incomes when switching to a type that doesn't support them
+      if (typesWithoutExpensesOrIncomes.includes(type)) {
+        await this.expenseRepository.delete({ transactionId: transaction.id });
+        await this.incomeRepository.delete({ transactionId: transaction.id });
+      }
+
       transaction.type = type;
       return this.executeUpdateTask(jwtUser, transaction);
     });
