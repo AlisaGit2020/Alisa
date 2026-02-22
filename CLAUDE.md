@@ -384,6 +384,15 @@ export class CreateExampleTable1234567890000 implements MigrationInterface {
 - Column type or options changed in entity decorator
 - `@ManyToOne`, `@OneToMany`, `@JoinColumn` added or modified
 
+## Production Server
+
+**Hetzner Cloud CX23**
+- **Hostname:** alisa-prod
+- **IP:** 89.167.53.64
+- **IPv6:** 2a01:4f9:c014:7c54::/64
+- **Resources:** 2 vCPU, 4 GB RAM, 40 GB disk
+- **SSH:** `ssh root@89.167.53.64`
+
 ## CI/CD
 
 ### Workflow Principles
