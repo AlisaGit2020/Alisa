@@ -127,9 +127,14 @@ export class IncomeService {
 
     // Emit event for standalone income (no transaction)
     if (!savedIncome.transactionId) {
+      // Load incomeType relation for statistics services that need it
+      const incomeWithType = await this.repository.findOne({
+        where: { id: savedIncome.id },
+        relations: ['incomeType'],
+      });
       this.eventEmitter.emit(
         Events.Income.StandaloneCreated,
-        new StandaloneIncomeCreatedEvent(savedIncome),
+        new StandaloneIncomeCreatedEvent(incomeWithType),
       );
     }
 
@@ -177,10 +182,15 @@ export class IncomeService {
 
     // Emit event for standalone income (no transaction) - triggers incremental update
     if (!incomeEntity.transactionId) {
+      // Load incomeType relation for statistics services that need it
+      const incomeWithType = await this.repository.findOne({
+        where: { id: incomeEntity.id },
+        relations: ['incomeType'],
+      });
       this.eventEmitter.emit(
         Events.Income.StandaloneUpdated,
         new StandaloneIncomeUpdatedEvent(
-          incomeEntity,
+          incomeWithType,
           oldTotalAmount,
           oldAccountingDate,
           oldIncomeTypeId,
@@ -216,8 +226,11 @@ export class IncomeService {
       );
     }
 
-    // Store income data before deletion for incremental statistics update
-    const deletedIncome = { ...income };
+    // Load incomeType relation for statistics services that need it
+    const incomeWithType = await this.repository.findOne({
+      where: { id: income.id },
+      relations: ['incomeType'],
+    });
 
     // Delete the income
     await this.repository.delete(id);
@@ -228,7 +241,7 @@ export class IncomeService {
     // a transaction that would trigger statistics updates.
     this.eventEmitter.emit(
       Events.Income.StandaloneDeleted,
-      new StandaloneIncomeDeletedEvent(deletedIncome as Income),
+      new StandaloneIncomeDeletedEvent(incomeWithType),
     );
   }
 
@@ -237,8 +250,10 @@ export class IncomeService {
       throw new BadRequestException('No ids provided');
     }
 
+    // Load incomes with incomeType relation for statistics services
     const incomes = await this.repository.find({
       where: { id: In(ids) },
+      relations: ['incomeType'],
     });
 
     const deletedIncomes: Income[] = [];
@@ -260,7 +275,7 @@ export class IncomeService {
         }
 
         // Store income data before deletion for incremental statistics update
-        const deletedIncome = { ...income } as Income;
+        const deletedIncome = { ...income, incomeType: income.incomeType } as Income;
 
         // Delete the income
         await this.repository.delete(income.id);
