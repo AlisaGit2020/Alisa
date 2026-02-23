@@ -288,8 +288,9 @@ export default function ReviewStep({
         </Alert>
       )}
 
-      {/* Bulk actions - show above filters when rows selected */}
+      {/* Bulk actions - compact floating action bar */}
       <TransactionsPendingActions
+        compact
         marginTop={0}
         open={selectedIds.length > 0}
         selectedIds={selectedIds}

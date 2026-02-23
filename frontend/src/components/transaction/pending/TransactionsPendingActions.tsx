@@ -5,7 +5,17 @@ import {
   transactionContext,
 } from "@asset-lib/asset-contexts.ts";
 import { TransactionType, ExpenseType, IncomeType } from "@asset-types";
-import { Box, Button, ButtonGroup, Chip, Paper, Stack, Tooltip } from "@mui/material";
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Chip,
+  Collapse,
+  IconButton,
+  Paper,
+  Stack,
+  Tooltip,
+} from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
@@ -13,6 +23,8 @@ import SaveIcon from "@mui/icons-material/Save";
 import RuleIcon from "@mui/icons-material/Rule";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { AssetCloseIcon } from "../../asset/AssetIcons.tsx";
 import Typography from "@mui/material/Typography";
 import {
@@ -47,6 +59,8 @@ interface TransactionsPendingActionsProps extends WithTranslation {
   isAllocating?: boolean;
   onResetAllocation?: () => void;
   hasAllocatedSelected?: boolean;
+  /** Compact floating action bar mode */
+  compact?: boolean;
 }
 
 interface CategoryTypeData {
@@ -59,6 +73,7 @@ const CATEGORY_DROPDOWN_WIDTH = 250;
 function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
   const [confirmOpen, setConfirmOpen] = React.useState<boolean>(false);
   const [transactionType, setTransactionType] = React.useState<number>(0);
+  const [expanded, setExpanded] = React.useState<boolean>(false);
   const [categoryTypeData, setCategoryTypeData] =
     React.useState<CategoryTypeData>({
       expenseTypeId: 0,
@@ -148,6 +163,249 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
 
   const supportsLoanSplit = props.supportsLoanSplit ?? true;
 
+  // Compact floating action bar mode
+  if (props.compact) {
+    return (
+      <>
+        <Paper
+          sx={{
+            display: props.open ? "block" : "none",
+            marginTop: props.marginTop,
+            padding: 1,
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+            borderRadius: 2,
+          }}
+          elevation={3}
+        >
+          {/* Main compact bar */}
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            flexWrap="wrap"
+            useFlexGap
+          >
+            {/* Selection count */}
+            <Chip
+              label={props.selectedIds.length}
+              color="primary"
+              size="small"
+            />
+
+            {/* Type buttons - inline */}
+            <AssetTransactionTypeSelect
+              onSelect={handleTypeChange}
+              selectedValue={transactionType}
+              t={props.t}
+              variant="button"
+              direction="row"
+              showLabel={false}
+              visible={true}
+              showEmptyValue={false}
+              excludeTypes={[TransactionType.UNKNOWN]}
+            />
+
+            {/* Category dropdown - shows when type selected */}
+            {transactionType === TransactionType.EXPENSE && (
+              <Box sx={{ minWidth: 180 }}>
+                <AssetSelect<CategoryTypeData, ExpenseType>
+                  label={props.t("expenseType")}
+                  dataService={
+                    new DataService<ExpenseType>({
+                      context: expenseTypeContext,
+                      fetchOptions: { order: { key: "ASC" } },
+                    })
+                  }
+                  fieldName="expenseTypeId"
+                  value={categoryTypeData.expenseTypeId}
+                  onHandleChange={handleCategoryTypeChange}
+                  size="small"
+                  fullWidth
+                  t={props.t}
+                  translateKeyPrefix="expense-type"
+                />
+              </Box>
+            )}
+
+            {transactionType === TransactionType.INCOME && (
+              <Box sx={{ minWidth: 180 }}>
+                <AssetSelect<CategoryTypeData, IncomeType>
+                  label={props.t("incomeType")}
+                  dataService={
+                    new DataService<IncomeType>({
+                      context: incomeTypeContext,
+                      fetchOptions: { order: { key: "ASC" } },
+                    })
+                  }
+                  fieldName="incomeTypeId"
+                  value={categoryTypeData.incomeTypeId}
+                  onHandleChange={handleCategoryTypeChange}
+                  size="small"
+                  fullWidth
+                  t={props.t}
+                  translateKeyPrefix="income-type"
+                />
+              </Box>
+            )}
+
+            {/* Save button */}
+            <Tooltip title={getSaveTooltip() || props.t("save")}>
+              <span>
+                <IconButton
+                  color="primary"
+                  onClick={handleSave}
+                  disabled={isSaveDisabled}
+                  size="small"
+                >
+                  <SaveIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
+
+            {/* Divider */}
+            <Box sx={{ borderLeft: 1, borderColor: "divider", height: 24, mx: 0.5 }} />
+
+            {/* Auto-allocate */}
+            {props.onAutoAllocate && (
+              <Tooltip title={props.t("allocation:autoAllocate")}>
+                <span>
+                  <IconButton
+                    color="primary"
+                    onClick={props.onAutoAllocate}
+                    disabled={props.autoAllocateDisabled || props.isAllocating}
+                    size="small"
+                  >
+                    <AutoFixHighIcon />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+
+            {/* Rules */}
+            {props.onOpenAllocationRules && (
+              <Tooltip title={props.t("allocation:rules")}>
+                <IconButton
+                  onClick={props.onOpenAllocationRules}
+                  size="small"
+                >
+                  <RuleIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+
+            {/* Divider */}
+            <Box sx={{ borderLeft: 1, borderColor: "divider", height: 24, mx: 0.5 }} />
+
+            {/* Delete */}
+            <Tooltip title={props.t("delete")}>
+              <IconButton
+                color="error"
+                onClick={handleDeleteClick}
+                size="small"
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+
+            {/* Cancel/Close */}
+            <Tooltip title={props.t("cancel")}>
+              <IconButton onClick={handleCancel} size="small">
+                <AssetCloseIcon />
+              </IconButton>
+            </Tooltip>
+
+            {/* Expand toggle for more options */}
+            <Tooltip title={expanded ? props.t("common:showLess") : props.t("common:showMore")}>
+              <IconButton onClick={() => setExpanded(!expanded)} size="small">
+                {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+              </IconButton>
+            </Tooltip>
+          </Stack>
+
+          {/* Expanded section for less common actions */}
+          <Collapse in={expanded}>
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              sx={{ mt: 1, pt: 1, borderTop: 1, borderColor: "divider" }}
+              flexWrap="wrap"
+              useFlexGap
+            >
+              {/* Split loan payment */}
+              {!props.hideSplitLoanPayment && supportsLoanSplit && (
+                <AssetButton
+                  label={props.t("splitLoanPayment")}
+                  variant="text"
+                  size="small"
+                  onClick={handleLoanSplit}
+                  endIcon={<CallSplitIcon />}
+                />
+              )}
+
+              {/* Reset allocation */}
+              {props.onResetAllocation && (
+                <AssetButton
+                  label={props.t("resetAllocation")}
+                  variant="text"
+                  size="small"
+                  color="warning"
+                  onClick={props.onResetAllocation}
+                  disabled={!props.hasAllocatedSelected}
+                  tooltip={
+                    !props.hasAllocatedSelected
+                      ? props.t("resetAllocationDisabledTooltip")
+                      : undefined
+                  }
+                  endIcon={<RestartAltIcon />}
+                />
+              )}
+
+              {/* Accept (if shown) */}
+              {!props.hideApprove && (
+                <AssetButton
+                  label={props.t("accept")}
+                  variant="text"
+                  size="small"
+                  color="success"
+                  onClick={props.onApprove}
+                  disabled={props.hasUnallocatedSelected}
+                  tooltip={
+                    props.hasUnallocatedSelected
+                      ? props.t("acceptDisabledTooltip")
+                      : undefined
+                  }
+                  endIcon={<CheckIcon />}
+                />
+              )}
+
+              {!props.hideSplitLoanPayment && !supportsLoanSplit && (
+                <Typography variant="body2" color="text.secondary">
+                  {props.t("automaticAllocationNotSupported", { bank: props.bankName || "This" })}
+                </Typography>
+              )}
+            </Stack>
+          </Collapse>
+        </Paper>
+
+        <AssetConfirmDialog
+          title={props.t("confirm")}
+          contentText={props.t("confirmDeleteTransactions", {
+            count: props.selectedIds.length,
+          })}
+          buttonTextConfirm={props.t("delete")}
+          buttonTextCancel={props.t("cancel")}
+          open={confirmOpen}
+          onConfirm={handleConfirmDelete}
+          onClose={handleConfirmClose}
+        />
+      </>
+    );
+  }
+
+  // Original full-size layout
   return (
     <Paper
       sx={{

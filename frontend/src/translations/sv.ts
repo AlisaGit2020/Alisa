@@ -137,6 +137,7 @@ const sv = {
     close: "Stäng",
     readMore: "Läs mer",
     showLess: "Visa mindre",
+    showMore: "Visa mer",
 
     dependencies: {
       cannotDelete: "Detta kan inte raderas eftersom det har relaterade data.",

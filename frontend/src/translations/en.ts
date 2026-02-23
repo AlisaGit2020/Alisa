@@ -137,6 +137,7 @@ const en = {
     close: "Close",
     readMore: "Read more",
     showLess: "Show less",
+    showMore: "Show more",
 
     dependencies: {
       cannotDelete: "This item cannot be deleted because it has related data.",
