@@ -130,6 +130,7 @@ const sv = {
       calculationSaved: "Beräkning sparad",
       tierSaved: "Nivå sparad",
       error: "Ett fel uppstod",
+      loadFailed: "Kunde inte ladda data",
       partialSuccess: "{{success}} lyckades, {{failed}} misslyckades",
     },
 

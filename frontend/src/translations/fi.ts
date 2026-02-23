@@ -130,6 +130,7 @@ const fi = {
       calculationSaved: "Laskelma tallennettu",
       tierSaved: "Taso tallennettu",
       error: "Tapahtui virhe",
+      loadFailed: "Tietojen lataaminen epäonnistui",
       partialSuccess: "{{success}} onnistui, {{failed}} epäonnistui",
     },
 
