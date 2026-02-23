@@ -92,6 +92,10 @@ export const prepareDatabase = async (app: INestApplication): Promise<void> => {
 /**
  * Ensures all expense and income types from the enums exist in the database.
  * Uses INSERT ... ON CONFLICT DO NOTHING to safely add missing types.
+ *
+ * IMPORTANT: The type definitions below are duplicated from DefaultsSeeder
+ * (backend/src/defaults/defaults.seeder.ts). If you add new types or change
+ * type properties in the enum or seeder, you must update this function as well.
  */
 export const ensureAllTypesExist = async (
   dataSource: DataSource,

@@ -29,6 +29,8 @@
       "@alisa-types/*": ["src/types/*"],
       "@alisa-mocks/*": ["test/mocks/*"],
       "@test-utils/*": ["test/utils/*"],
+      // Backend path alias - used for importing shared types (enums, DTOs) in tests.
+      // Jest config has matching mapping. Do not import Node.js-specific code.
       "@alisa-backend/*": ["../backend/src/*"]
     }
   },

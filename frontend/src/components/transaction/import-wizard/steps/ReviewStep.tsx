@@ -16,15 +16,9 @@ import AlisaButton from "../../../alisa/form/AlisaButton";
 import SearchIcon from "@mui/icons-material/Search";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-
-type SearchField = "all" | "sender" | "receiver" | "description" | "amount";
 import { TFunction } from "i18next";
 import { Transaction, TransactionType, AllocationResult } from "@alisa-types";
 import AlisaDataTable from "../../../alisa/datatable/AlisaDataTable";
-
-interface TransactionRow extends Transaction {
-  categoryName: string;
-}
 import TransactionsPendingActions from "../../pending/TransactionsPendingActions";
 import TransactionDetails from "../../components/TransactionDetails";
 import { AllocationRulesModal } from "../../../allocation";
@@ -32,6 +26,12 @@ import { useState, useMemo, useCallback } from "react";
 import axios from "axios";
 import ApiClient from "@alisa-lib/api-client";
 import { useToast } from "../../../alisa/toast/AlisaToastProvider";
+
+type SearchField = "all" | "sender" | "receiver" | "description" | "amount";
+
+interface TransactionRow extends Transaction {
+  categoryName: string;
+}
 
 interface ReviewStepProps {
   t: TFunction;
