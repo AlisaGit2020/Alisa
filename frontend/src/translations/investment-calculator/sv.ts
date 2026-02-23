@@ -59,6 +59,13 @@ const investmentCalculator = {
   taxPerYear: 'Skatt/år',
   taxDeductibleExpensesPerYear: 'Avdragsgilla kostnader/år',
 
+  // Etuovi import
+  etuoviUrl: 'Etuovi.com URL',
+  fetchFromEtuovi: 'Hämta data',
+  fetchSuccess: 'Fastighetsdata laddad',
+  fetchError: 'Kunde inte hämta fastighetsdata',
+  invalidUrl: 'Ogiltig etuovi.com URL',
+
   // Saved calculations
   createdAt: 'Skapad',
   associatedProperty: 'Fastighet',

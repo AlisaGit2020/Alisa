@@ -28,7 +28,8 @@
       "@alisa-types": ["src/types/index.ts"],
       "@alisa-types/*": ["src/types/*"],
       "@alisa-mocks/*": ["test/mocks/*"],
-      "@test-utils/*": ["test/utils/*"]
+      "@test-utils/*": ["test/utils/*"],
+      "@alisa-backend/*": ["../backend/src/*"]
     }
   },
   "include": ["src"],  

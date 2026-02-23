@@ -115,7 +115,7 @@ function IncomeForm({
         onHandleChange={handleChange}
         disabled={isLinkedToTransaction}
         t={t}
-        translateKeyPrefix="incomeTypes"
+        translateKeyPrefix="income-type"
         {...getFieldErrorProps<IncomeInput>(fieldErrors, "incomeTypeId")}
       />
 

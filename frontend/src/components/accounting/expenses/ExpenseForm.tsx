@@ -115,7 +115,7 @@ function ExpenseForm({
         onHandleChange={handleChange}
         disabled={isLinkedToTransaction}
         t={t}
-        translateKeyPrefix="expenseTypes"
+        translateKeyPrefix="expense-type"
         {...getFieldErrorProps<ExpenseInput>(fieldErrors, "expenseTypeId")}
       />
 

@@ -134,8 +134,8 @@ describe('AlisaSelectField', () => {
       // Mock t function that expects namespace:key format
       const mockT = jest.fn((key: string, options?: { defaultValue?: string }) => {
         // Simulate i18next behavior: namespace:key format
-        if (key === 'expenseTypes:repairs') return 'Translated Repairs';
-        if (key === 'expenseTypes:insurance') return 'Translated Insurance';
+        if (key === 'expense-type:repairs') return 'Translated Repairs';
+        if (key === 'expense-type:insurance') return 'Translated Insurance';
         return options?.defaultValue || key;
       }) as unknown as TFunction;
 
@@ -146,7 +146,7 @@ describe('AlisaSelectField', () => {
           items={itemsWithKeys}
           onChange={jest.fn()}
           t={mockT}
-          translateKeyPrefix="expenseTypes"
+          translateKeyPrefix="expense-type"
         />
       );
 
