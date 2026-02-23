@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import * as path from 'path';
 import { AppModule } from '../src/app.module';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   closeAppGracefully,
   getBearerToken,
@@ -13,7 +13,7 @@ import {
   TestUsersSetup,
 } from './helper-functions';
 import * as http from 'http';
-import { MOCKS_PATH } from '@alisa-backend/constants';
+import { MOCKS_PATH } from '@asset-backend/constants';
 
 describe('SPankkiImportController (e2e)', () => {
   let app: INestApplication;

@@ -1,7 +1,7 @@
 import { TestData } from '../test-data';
 import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { Expense } from 'src/accounting/expense/entities/expense.entity';
-import { TransactionType } from '@alisa-backend/common/types';
+import { TransactionType } from '@asset-backend/common/types';
 
 export const transactionTestData = {
   name: 'Transaction',

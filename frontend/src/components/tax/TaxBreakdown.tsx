@@ -11,7 +11,7 @@ import {
   Chip,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import InfoTooltip from "../alisa/InfoTooltip";
+import InfoTooltip from "../asset/InfoTooltip";
 
 interface BreakdownItem {
   category: string;

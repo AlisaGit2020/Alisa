@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import InvestmentCalculationEditDialog from './InvestmentCalculationEditDialog';
-import ApiClient from '@alisa-lib/api-client';
+import ApiClient from '@asset-lib/api-client';
 
 // Spy on ApiClient methods
 jest.spyOn(ApiClient, 'get');
@@ -127,7 +127,7 @@ describe('InvestmentCalculationEditDialog', () => {
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  // Skip: Error handling now works through AlisaFormHandler which handles errors differently
+  // Skip: Error handling now works through AssetFormHandler which handles errors differently
   it.skip('handles API error gracefully', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     (ApiClient.get as unknown as jest.SpyInstance).mockImplementation(() =>

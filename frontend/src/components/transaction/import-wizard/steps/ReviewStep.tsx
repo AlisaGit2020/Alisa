@@ -12,20 +12,20 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import AlisaButton from "../../../alisa/form/AlisaButton";
+import AssetButton from "../../../asset/form/AssetButton";
 import SearchIcon from "@mui/icons-material/Search";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { TFunction } from "i18next";
-import { Transaction, TransactionType, AllocationResult } from "@alisa-types";
-import AlisaDataTable from "../../../alisa/datatable/AlisaDataTable";
+import { Transaction, TransactionType, AllocationResult } from "@asset-types";
+import AssetDataTable from "../../../asset/datatable/AssetDataTable";
 import TransactionsPendingActions from "../../pending/TransactionsPendingActions";
 import TransactionDetails from "../../components/TransactionDetails";
 import { AllocationRulesModal } from "../../../allocation";
 import { useState, useMemo, useCallback } from "react";
 import axios from "axios";
-import ApiClient from "@alisa-lib/api-client";
-import { useToast } from "../../../alisa/toast/AlisaToastProvider";
+import ApiClient from "@asset-lib/api-client";
+import { useAssetToast } from "../../../asset/toast/AssetToastProvider";
 
 type SearchField = "all" | "sender" | "receiver" | "description" | "amount";
 
@@ -80,7 +80,7 @@ export default function ReviewStep({
   onBack,
   onRefresh,
 }: ReviewStepProps) {
-  const { showToast } = useToast();
+  const { showToast } = useAssetToast();
   const [searchText, setSearchText] = useState("");
   const [searchField, setSearchField] = useState<SearchField>("all");
   const [showOnlyUnknown, setShowOnlyUnknown] = useState(true);
@@ -368,7 +368,7 @@ export default function ReviewStep({
 
       {/* Transaction table */}
       <Paper>
-        <AlisaDataTable<TransactionRow>
+        <AssetDataTable<TransactionRow>
           t={t}
           data={filteredTransactions}
           sortable
@@ -401,8 +401,8 @@ export default function ReviewStep({
 
       {/* Navigation buttons */}
       <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ mt: 3 }}>
-        <AlisaButton label={t("importWizard.back")} onClick={onBack} />
-        <AlisaButton
+        <AssetButton label={t("importWizard.back")} onClick={onBack} />
+        <AssetButton
           label={t("importWizard.next")}
           variant="contained"
           onClick={onNext}

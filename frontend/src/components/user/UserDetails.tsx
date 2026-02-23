@@ -1,16 +1,16 @@
 import { WithTranslation, withTranslation } from "react-i18next";
 import { Avatar, Box, Chip, Divider, Stack, Typography } from "@mui/material";
 import React from "react";
-import { userContext } from "@alisa-lib/alisa-contexts";
-import { emptyUser } from "@alisa-lib/initial-data";
-import { User } from "@alisa-types";
-import ApiClient from "@alisa-lib/api-client";
+import { userContext } from "@asset-lib/asset-contexts";
+import { emptyUser } from "@asset-lib/initial-data";
+import { User } from "@asset-types";
+import ApiClient from "@asset-lib/api-client";
 import EmailIcon from '@mui/icons-material/Email';
 import LanguageIcon from '@mui/icons-material/Language';
 import LayersIcon from '@mui/icons-material/Layers';
 import PaymentIcon from '@mui/icons-material/Payment';
 import HomeIcon from '@mui/icons-material/Home';
-import { AlisaDialog } from "../alisa";
+import { AssetDialog } from "../asset";
 
 
 interface UserDetailsProps extends WithTranslation {
@@ -33,7 +33,7 @@ function UserDetails({ t, open, onClose }: UserDetailsProps) {
     }, [])
 
     return (
-        <AlisaDialog
+        <AssetDialog
             open={open}
             title={`${data.firstName} ${data.lastName}`}
             maxWidth="sm"
@@ -95,7 +95,7 @@ function UserDetails({ t, open, onClose }: UserDetailsProps) {
                     </>
                 )}
             </Typography>
-        </AlisaDialog>
+        </AssetDialog>
     )
 }
 

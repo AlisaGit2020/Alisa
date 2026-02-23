@@ -6,9 +6,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
-import type { DashboardConfig } from '@alisa-backend/common/dashboard-config';
-import { Tier } from '@alisa-backend/admin/entities/tier.entity';
+import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
+import type { DashboardConfig } from '@asset-backend/common/dashboard-config';
+import { Tier } from '@asset-backend/admin/entities/tier.entity';
 
 @Entity()
 export class User {

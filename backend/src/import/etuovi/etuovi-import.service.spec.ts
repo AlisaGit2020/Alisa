@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { EtuoviImportService } from './etuovi-import.service';
-import { MOCKS_PATH } from '@alisa-backend/constants';
+import { MOCKS_PATH } from '@asset-backend/constants';
 import * as fs from 'fs';
 import * as path from 'path';
 

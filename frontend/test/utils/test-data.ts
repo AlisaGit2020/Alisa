@@ -1,5 +1,5 @@
 // frontend/test/utils/test-data.ts
-import { Property, Transaction, User, TransactionStatus, TransactionType } from '@alisa-types';
+import { Property, Transaction, User, TransactionStatus, TransactionType } from '@asset-types';
 import { AxiosError, AxiosHeaders } from 'axios';
 
 /**

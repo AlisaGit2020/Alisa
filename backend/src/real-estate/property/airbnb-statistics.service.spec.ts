@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
-import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
+import { EventTrackerService } from '@asset-backend/common/event-tracker.service';
 import { AirbnbStatisticsService } from './airbnb-statistics.service';
 import {
   StandaloneIncomeCreatedEvent,
@@ -8,14 +8,14 @@ import {
   StandaloneIncomeUpdatedEvent,
   TransactionCreatedEvent,
   TransactionDeletedEvent,
-} from '@alisa-backend/common/events';
-import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+} from '@asset-backend/common/events';
+import { Income } from '@asset-backend/accounting/income/entities/income.entity';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
 import {
   StatisticKey,
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 
 describe('AirbnbStatisticsService', () => {
   let service: AirbnbStatisticsService;

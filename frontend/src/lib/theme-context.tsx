@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import UserStorage from "@alisa-lib/user-storage";
+import UserStorage from "@asset-lib/user-storage";
 
 type ThemeMode = "light" | "dark";
 
@@ -11,7 +11,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_STORAGE_KEY = "alisa-theme-mode";
+const THEME_STORAGE_KEY = "asset-theme-mode";
 
 export function ThemeContextProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>(() => {

@@ -18,10 +18,10 @@ import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useEffect, useState } from "react";
-import { AlisaButton } from "../alisa";
-import DataService from "@alisa-lib/data-service";
-import { expenseTypeContext, incomeTypeContext } from "@alisa-lib/alisa-contexts";
-import { ExpenseType, IncomeType } from "@alisa-types";
+import { AssetButton } from "../asset";
+import DataService from "@asset-lib/data-service";
+import { expenseTypeContext, incomeTypeContext } from "@asset-lib/asset-contexts";
+import { ExpenseType, IncomeType } from "@asset-types";
 
 export type AccountingFilterMode = "expense" | "income";
 
@@ -206,7 +206,7 @@ function AccountingFilter({
             sx={{ width: 200 }}
           />
 
-          <AlisaButton
+          <AssetButton
             label={t("reset")}
             variant="outlined"
             size="small"

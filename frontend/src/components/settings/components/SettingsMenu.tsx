@@ -1,4 +1,4 @@
-import { settingsContext } from "@alisa-lib/alisa-contexts";
+import { settingsContext } from "@asset-lib/asset-contexts";
 import { Paper, MenuList } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import PaletteIcon from '@mui/icons-material/Palette';

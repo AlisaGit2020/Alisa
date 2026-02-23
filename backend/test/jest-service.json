@@ -5,7 +5,7 @@
   "testEnvironment": "node",
   "testRegex": ".service.spec.ts$",
   "moduleNameMapper": {        
-    "^@alisa-backend/(.*)": "<rootDir>../backend/src/$1"    
+    "^@asset-backend/(.*)": "<rootDir>../backend/src/$1"    
   },
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"

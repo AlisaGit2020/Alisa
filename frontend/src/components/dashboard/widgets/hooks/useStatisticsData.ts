@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import ApiClient from "@alisa-lib/api-client";
-import { PropertyStatistics } from "@alisa-types";
+import ApiClient from "@asset-lib/api-client";
+import { PropertyStatistics } from "@asset-types";
 import { useDashboard, ViewMode } from "../../context/DashboardContext";
 import { VITE_API_URL } from "../../../../constants";
 

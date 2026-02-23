@@ -9,7 +9,7 @@ import {
 import {
   normalizeFilterStartDate,
   normalizeFilterEndDate,
-} from '@alisa-backend/common/utils/date-normalizer';
+} from '@asset-backend/common/utils/date-normalizer';
 
 // Fields that should have date normalization applied
 const DATE_FIELDS = [

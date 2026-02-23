@@ -2,11 +2,11 @@ services:
   database:
     image: postgres:16
     restart: always
-    container_name: alisa-postgres
+    container_name: asset-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: alisa
+      POSTGRES_DB: asset
     ports:
       - "5432:5432"
     volumes:
@@ -16,7 +16,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile.dev
-    container_name: alisa-backend
+    container_name: asset-backend
     ports:
       - '3000:3000'
     depends_on:
@@ -33,7 +33,7 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-    container_name: alisa-frontend
+    container_name: asset-frontend
     ports:
       - '3001:8080'
     depends_on:

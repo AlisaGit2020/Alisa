@@ -9,13 +9,13 @@ import {
 } from "@mui/material";
 
 import { TFunction } from "i18next";
-import { TransactionType } from "@alisa-types";
+import { TransactionType } from "@asset-types";
 import {
-  AlisaDepositIcon,
-  AlisaExpenseIcon,
-  AlisaIncomeIcon,
-  AlisaWithdrawIcon,
-} from "../../alisa/AlisaIcons.tsx";
+  AssetDepositIcon,
+  AssetExpenseIcon,
+  AssetIncomeIcon,
+  AssetWithdrawIcon,
+} from "../../asset/AssetIcons.tsx";
 
 function TransactionAddMenu(props: {
   t: TFunction;
@@ -39,7 +39,7 @@ function TransactionAddMenu(props: {
             onClick={() => props.onAddTransaction(TransactionType.EXPENSE)}
           >
             <ListItemIcon>
-              <AlisaExpenseIcon size="small" />
+              <AssetExpenseIcon size="small" />
             </ListItemIcon>
             <ListItemText>{props.t("expense")}</ListItemText>
           </MenuItem>
@@ -47,7 +47,7 @@ function TransactionAddMenu(props: {
             onClick={() => props.onAddTransaction(TransactionType.INCOME)}
           >
             <ListItemIcon>
-              <AlisaIncomeIcon size={"small"} />
+              <AssetIncomeIcon size={"small"} />
             </ListItemIcon>
             <ListItemText>{props.t("income")}</ListItemText>
           </MenuItem>
@@ -55,7 +55,7 @@ function TransactionAddMenu(props: {
             onClick={() => props.onAddTransaction(TransactionType.DEPOSIT)}
           >
             <ListItemIcon>
-              <AlisaDepositIcon size={"small"} />
+              <AssetDepositIcon size={"small"} />
             </ListItemIcon>
             <ListItemText>{props.t("deposit")}</ListItemText>
           </MenuItem>
@@ -63,7 +63,7 @@ function TransactionAddMenu(props: {
             onClick={() => props.onAddTransaction(TransactionType.WITHDRAW)}
           >
             <ListItemIcon>
-              <AlisaWithdrawIcon size={"small"} />
+              <AssetWithdrawIcon size={"small"} />
             </ListItemIcon>
             <ListItemText>{props.t("withdraw")}</ListItemText>
           </MenuItem>

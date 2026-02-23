@@ -18,8 +18,8 @@ import {
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import React, { useState, useMemo } from "react";
-import { Transaction } from "@alisa-types";
-import { TransactionType } from "@alisa-types/common";
+import { Transaction } from "@asset-types";
+import { TransactionType } from "@asset-types/common";
 
 interface TypeBreakdownChartsProps {
   transactions: Transaction[];

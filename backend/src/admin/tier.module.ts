@@ -3,8 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Tier } from './entities/tier.entity';
 import { TierService } from './tier.service';
 import { TierSeeder } from './tier.seeder';
-import { PeopleModule } from '@alisa-backend/people/people.module';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { PeopleModule } from '@asset-backend/people/people.module';
+import { User } from '@asset-backend/people/user/entities/user.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Tier, User]), PeopleModule],

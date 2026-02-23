@@ -1,6 +1,6 @@
-# Alisa Frontend
+# Asset Frontend
 
-React user interface for the Alisa property management system.
+React user interface for the Asset property management system.
 
 ## Tech Stack
 
@@ -24,7 +24,7 @@ npm run lint         # ESLint
 ```
 src/
 ├── components/           # React components (domain-based)
-│   ├── alisa/            # Shared UI components (AlisaTextField, AlisaDataTable, etc.)
+│   ├── asset/            # Shared UI components (AssetTextField, AssetDataTable, etc.)
 │   ├── accounting/       # Accounting
 │   ├── dashboard/        # Dashboard and widgets
 │   ├── property/         # Property management
@@ -36,7 +36,7 @@ src/
 │   ├── api-client.ts     # Axios wrapper with JWT token
 │   ├── data-service.ts   # Data layer
 │   ├── theme-context.tsx # Theme management (light/dark)
-│   └── alisa-contexts.ts # React contexts
+│   └── asset-contexts.ts # React contexts
 ├── types/                # TypeScript types (synced with backend)
 │   ├── entities.ts       # Entity types
 │   ├── inputs.ts         # DTO types (matches backend *InputDto)
@@ -45,18 +45,18 @@ src/
 └── App.tsx               # Main component
 ```
 
-## Alisa Component Library
+## Asset Component Library
 
-Shared UI components are located in `components/alisa/`:
+Shared UI components are located in `components/asset/`:
 
 | Folder | Contents |
 |--------|----------|
-| `form/` | AlisaTextField, AlisaNumberField, AlisaDatePicker, AlisaSelectField, etc. |
-| `datatable/` | AlisaDataTable, AlisaDataTableActionButtons |
-| `dialog/` | AlisaConfirmDialog, AlisaAlert |
-| `data/` | AlisaPropertySelect, AlisaTransactionTypeSelect |
+| `form/` | AssetTextField, AssetNumberField, AssetDatePicker, AssetSelectField, etc. |
+| `datatable/` | AssetDataTable, AssetDataTableActionButtons |
+| `dialog/` | AssetConfirmDialog, AssetAlert |
+| `data/` | AssetPropertySelect, AssetTransactionTypeSelect |
 
-All shared components use the `Alisa` prefix.
+All shared components use the `Asset` prefix.
 
 ## Development Guidelines
 

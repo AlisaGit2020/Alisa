@@ -1,4 +1,4 @@
-import { Tier } from '@alisa-backend/admin/entities/tier.entity';
+import { Tier } from '@asset-backend/admin/entities/tier.entity';
 
 export interface CreateTierOptions {
   id?: number;

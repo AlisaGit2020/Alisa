@@ -4,11 +4,11 @@ import { DataSource } from 'typeorm';
 import { TaxService } from './tax.service';
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { PropertyService } from './property.service';
-import { DepreciationService } from '@alisa-backend/accounting/depreciation/depreciation.service';
+import { DepreciationService } from '@asset-backend/accounting/depreciation/depreciation.service';
 import { createMockRepository, MockRepository } from 'test/mocks';
 import { createJWTUser } from 'test/factories';
-import { StatisticKey } from '@alisa-backend/common/types';
-import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
+import { StatisticKey } from '@asset-backend/common/types';
+import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
 
 describe('TaxService', () => {
   let service: TaxService;

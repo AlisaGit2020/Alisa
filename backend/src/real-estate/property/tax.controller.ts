@@ -7,9 +7,9 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
-import { User } from '@alisa-backend/common/decorators/user.decorator';
-import { JWTUser } from '@alisa-backend/auth/types';
+import { JwtAuthGuard } from '@asset-backend/auth/jwt.auth.guard';
+import { User } from '@asset-backend/common/decorators/user.decorator';
+import { JWTUser } from '@asset-backend/auth/types';
 import { TaxService } from './tax.service';
 import { TaxCalculateInputDto } from './dtos/tax-calculate-input.dto';
 import { TaxResponseDto } from './dtos/tax-response.dto';

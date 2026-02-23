@@ -8,8 +8,8 @@ import {
   IsNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import type { WidgetSize } from '@alisa-backend/common/dashboard-config';
-import { SUPPORTED_LANGUAGES } from '@alisa-backend/common/types';
+import type { WidgetSize } from '@asset-backend/common/dashboard-config';
+import { SUPPORTED_LANGUAGES } from '@asset-backend/common/types';
 
 class WidgetConfigDto {
   @IsString()

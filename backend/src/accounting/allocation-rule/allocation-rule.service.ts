@@ -14,23 +14,23 @@ import {
   SkippedTransactionDto,
   ConflictingTransactionDto,
 } from './dtos/allocation-result.dto';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
+import { JWTUser } from '@asset-backend/auth/types';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { TransactionService } from '@asset-backend/accounting/transaction/transaction.service';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
+import { ExpenseTypeService } from '@asset-backend/accounting/expense/expense-type.service';
 import {
   AllocationCondition,
   ExpenseTypeKey,
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 import {
   isLoanPaymentMessage,
   parseLoanPaymentMessage,
-} from '@alisa-backend/common/utils/loan-message-parser';
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
-import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
+} from '@asset-backend/common/utils/loan-message-parser';
+import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
+import { Income } from '@asset-backend/accounting/income/entities/income.entity';
 
 @Injectable()
 export class AllocationRuleService {

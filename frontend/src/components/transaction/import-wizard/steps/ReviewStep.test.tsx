@@ -2,7 +2,7 @@
 import { renderWithProviders, screen } from '@test-utils/test-wrapper';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { Transaction, TransactionType, TransactionStatus } from '@alisa-types';
+import { Transaction, TransactionType, TransactionStatus } from '@asset-types';
 import { TFunction } from 'i18next';
 
 // Mock TransactionsPendingActions
@@ -38,9 +38,9 @@ jest.mock(
   { virtual: true }
 );
 
-// Mock AlisaToast
+// Mock AssetToast
 jest.mock(
-  '@/components/alisa/toast/AlisaToast',
+  '@/components/asset/toast/AssetToast',
   () => ({
     __esModule: true,
     default: () => ({
@@ -53,7 +53,7 @@ jest.mock(
   { virtual: true }
 );
 
-// Don't mock AlisaDataTable - we want to test actual rendering
+// Don't mock AssetDataTable - we want to test actual rendering
 
 // Import ReviewStep after mocks are set up
 import ReviewStep from './ReviewStep';

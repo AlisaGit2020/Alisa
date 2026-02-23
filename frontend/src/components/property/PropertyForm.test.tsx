@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { PropertyInput } from '@alisa-types';
+import { PropertyInput } from '@asset-types';
 
 // Since Jest mock hoisting causes issues with relative paths in ESM mode,
 // we test the data transformation logic separately from the React component

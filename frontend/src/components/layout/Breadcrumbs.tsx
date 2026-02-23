@@ -2,13 +2,13 @@ import { Breadcrumbs, Link, Stack } from "@mui/material"
 import { WithTranslation, withTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom"
 import { useEffect, useState, useMemo } from "react";
-import ApiClient from "@alisa-lib/api-client";
+import ApiClient from "@asset-lib/api-client";
 
 interface EntityNameCache {
     [key: string]: string;
 }
 
-function AlisaBreadcrumbs({ t }: WithTranslation) {
+function AssetBreadcrumbs({ t }: WithTranslation) {
     const location = useLocation()
     const [entityNames, setEntityNames] = useState<EntityNameCache>({});
 
@@ -100,4 +100,4 @@ function AlisaBreadcrumbs({ t }: WithTranslation) {
     )
 }
 
-export default withTranslation('route')(AlisaBreadcrumbs);
+export default withTranslation('route')(AssetBreadcrumbs);

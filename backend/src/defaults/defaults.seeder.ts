@@ -1,9 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
-import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
-import { ExpenseTypeKey, IncomeTypeKey } from '@alisa-backend/common/types';
+import { ExpenseType } from '@asset-backend/accounting/expense/entities/expense-type.entity';
+import { IncomeType } from '@asset-backend/accounting/income/entities/income-type.entity';
+import { ExpenseTypeKey, IncomeTypeKey } from '@asset-backend/common/types';
 
 interface GlobalExpenseType {
   key: ExpenseTypeKey;

@@ -1,8 +1,8 @@
 import { WithTranslation, withTranslation } from "react-i18next";
 import { Box, Card, Container, Grid, Typography, CircularProgress } from "@mui/material";
-import { AlisaButton } from "../alisa";
+import { AssetButton } from "../asset";
 import React from "react";
-import ApiClient from "@alisa-lib/api-client";
+import ApiClient from "@asset-lib/api-client";
 
 interface Tier {
   id: number;
@@ -159,7 +159,7 @@ function PricingSection({ t, onLoginClick }: PricingSectionProps) {
                     {formatProperties(tier.maxProperties)}
                   </Typography>
 
-                  <AlisaButton
+                  <AssetButton
                     label={isFree ? t('landing:pricing.startFree') : t('landing:pricing.getStarted')}
                     variant={isFree ? "contained" : "outlined"}
                     fullWidth

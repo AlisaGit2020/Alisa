@@ -20,15 +20,15 @@ import { PropertyService } from './property.service';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
 import { FindManyOptions } from 'typeorm';
-import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
-import { User } from '@alisa-backend/common/decorators/user.decorator';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
-import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
-import { PropertyStatisticsSearchDto } from '@alisa-backend/real-estate/property/dtos/property-statistics-search.dto';
+import { JwtAuthGuard } from '@asset-backend/auth/jwt.auth.guard';
+import { User } from '@asset-backend/common/decorators/user.decorator';
+import { JWTUser } from '@asset-backend/auth/types';
+import { PropertyStatisticsService } from '@asset-backend/real-estate/property/property-statistics.service';
+import { PropertyStatistics } from '@asset-backend/real-estate/property/entities/property-statistics.entity';
+import { PropertyStatisticsSearchDto } from '@asset-backend/real-estate/property/dtos/property-statistics-search.dto';
 import { PropertyDeleteValidationDto } from './dtos/property-delete-validation.dto';
 import { PropertyTransactionSearchDto } from './dtos/property-transaction-search.dto';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
 
 @UseGuards(JwtAuthGuard)
 @Controller('real-estate/property')

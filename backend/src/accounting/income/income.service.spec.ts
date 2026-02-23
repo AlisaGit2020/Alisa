@@ -4,9 +4,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { IncomeService } from './income.service';
 import { Income } from './entities/income.entity';
 import { IncomeType } from './entities/income-type.entity';
-import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
 import { Transaction } from '../transaction/entities/transaction.entity';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   createMockRepository,
   createMockAuthService,
@@ -14,9 +14,9 @@ import {
   MockAuthService,
 } from 'test/mocks';
 import { createIncome, createJWTUser, createTransaction } from 'test/factories';
-import { TransactionStatus } from '@alisa-backend/common/types';
+import { TransactionStatus } from '@asset-backend/common/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Events } from '@alisa-backend/common/events';
+import { Events } from '@asset-backend/common/events';
 
 describe('IncomeService', () => {
   let service: IncomeService;

@@ -5,10 +5,10 @@ import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import { createAxiosError } from '@test-utils/test-data';
 import ExpenseForm from './ExpenseForm';
-import DataService from '@alisa-lib/data-service';
-import { ExpenseType } from '@alisa-types';
+import DataService from '@asset-lib/data-service';
+import { ExpenseType } from '@asset-types';
 
-jest.mock('@alisa-lib/data-service');
+jest.mock('@asset-lib/data-service');
 
 describe('ExpenseForm field error handling', () => {
   const defaultProps = {
@@ -272,7 +272,7 @@ describe('ExpenseForm field error handling', () => {
     });
 
     it('shows error on expenseTypeId field when server returns validation error', async () => {
-      // This test should FAIL initially - expenseTypeId (AlisaSelect) does NOT support error props
+      // This test should FAIL initially - expenseTypeId (AssetSelect) does NOT support error props
       const user = userEvent.setup();
 
       // Mock server error for expenseTypeId field

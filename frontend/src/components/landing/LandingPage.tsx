@@ -1,7 +1,7 @@
 import { WithTranslation, withTranslation } from "react-i18next";
 import { Box, Card, Container, Grid, SvgIconProps, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
-import { AlisaButton, useToast } from "../alisa";
+import { AssetButton, useAssetToast } from "../asset";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import WorkIcon from "@mui/icons-material/Work";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
@@ -31,7 +31,7 @@ function LandingPage({ t }: WithTranslation) {
   const [loginDialogOpen, setLoginDialogOpen] = React.useState(false);
   const [formKey, setFormKey] = React.useState(0);
   const [searchParams] = useSearchParams();
-  const { showToast } = useToast();
+  const { showToast } = useAssetToast();
 
   React.useEffect(() => {
     // Check if we just saved successfully (coming back from login)
@@ -103,7 +103,7 @@ function LandingPage({ t }: WithTranslation) {
             {t('landing:subtitle')}
           </Typography>
           <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', px: { xs: 2, sm: 0 } }}>
-            <AlisaButton
+            <AssetButton
               label={t('landing:ctaLogin')}
               variant="contained"
               size="large"
@@ -119,7 +119,7 @@ function LandingPage({ t }: WithTranslation) {
                 },
               }}
             />
-            <AlisaButton
+            <AssetButton
               label={t('landing:ctaCalculator')}
               variant="outlined"
               size="large"

@@ -4,9 +4,9 @@ import { DataSource } from 'typeorm';
 import { DepreciationService } from './depreciation.service';
 import { DepreciationAsset } from './entities/depreciation-asset.entity';
 import { DepreciationRecord } from './entities/depreciation-record.entity';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { JWTUser } from '@asset-backend/auth/types';
+import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
 
 describe('DepreciationService', () => {
   let service: DepreciationService;

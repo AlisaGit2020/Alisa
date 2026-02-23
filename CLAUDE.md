@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Alisa is a financial and property management application built as a full-stack TypeScript monorepo with separate frontend and backend directories.
+Asset is a financial and property management application built as a full-stack TypeScript monorepo with separate frontend and backend directories.
 
 ## Commands
 
@@ -67,7 +67,7 @@ Components in `frontend/src/components/` are organized by domain:
 Shared utilities in `frontend/src/lib/`:
 - `api-client.ts` - Axios wrapper with JWT token injection
 - `data-service.ts` - Frontend data layer
-- `alisa-contexts.ts` - React context providers
+- `asset-contexts.ts` - React context providers
 - `theme-context.tsx` - Theme mode context (light/dark)
 
 ### Theming
@@ -77,25 +77,25 @@ When writing frontend code:
 - Avoid hardcoding colors; use Material-UI theme colors (`theme.palette.*`)
 - Use `sx` prop with theme-aware values (e.g., `backgroundColor: "grey.100"` instead of `backgroundColor: "#f5f5f5"`)
 - For custom colors, use theme palette colors that adapt to light/dark mode
-- Access current theme mode via `useThemeMode()` hook from `@alisa-lib/theme-context` if needed
+- Access current theme mode via `useThemeMode()` hook from `@asset-lib/theme-context` if needed
 
-### Alisa Component Usage
+### Asset Component Usage
 
-**Always use Alisa components instead of raw MUI components.**
+**Always use Asset components instead of raw MUI components.**
 
-| Instead of (MUI) | Use (Alisa) |
+| Instead of (MUI) | Use (Asset) |
 |------------------|-------------|
-| `Button` | `AlisaButton` |
-| `TextField` | `AlisaTextField` or `AlisaNumberField` |
-| `TextField` + `Button` | `AlisaTextButton` (combined input with action button) |
-| `Dialog` | `AlisaDialog` or `AlisaConfirmDialog` |
-| `DatePicker` | `AlisaDatePicker` |
-| `Select` | `AlisaSelectField` or `AlisaSelectVariant` |
-| `Switch` | `AlisaSwitch` |
-| `RadioGroup` | `AlisaRadioGroup` |
-| `Table` | `AlisaDataTable` |
-| `Alert` | `AlisaAlert` |
-| `Snackbar` | `AlisaToast` + `useToast` |
+| `Button` | `AssetButton` |
+| `TextField` | `AssetTextField` or `AssetNumberField` |
+| `TextField` + `Button` | `AssetTextButton` (combined input with action button) |
+| `Dialog` | `AssetDialog` or `AssetConfirmDialog` |
+| `DatePicker` | `AssetDatePicker` |
+| `Select` | `AssetSelectField` or `AssetSelectVariant` |
+| `Switch` | `AssetSwitch` |
+| `RadioGroup` | `AssetRadioGroup` |
+| `Table` | `AssetDataTable` |
+| `Alert` | `AssetAlert` |
+| `Snackbar` | `AssetToast` + `useToast` |
 
 **Why:**
 - Consistent theming (light/dark mode works automatically)
@@ -105,13 +105,13 @@ When writing frontend code:
 
 **Exception:** Layout components (Box, Stack, Grid, Paper) can be used directly from MUI.
 
-Alisa components are located in `frontend/src/components/alisa/`.
+Asset components are located in `frontend/src/components/asset/`.
 
 ### Data Tables
 
-**Always use `AlisaDataTable` for displaying tabular data.**
+**Always use `AssetDataTable` for displaying tabular data.**
 
-Never use raw MUI Table components (Table, TableRow, TableCell, TableHead, TableBody, etc.) directly. AlisaDataTable provides:
+Never use raw MUI Table components (Table, TableRow, TableCell, TableHead, TableBody, etc.) directly. AssetDataTable provides:
 - Consistent styling and theming (light/dark mode)
 - Built-in row selection (single and bulk)
 - Integrated delete confirmation dialogs
@@ -123,7 +123,7 @@ Never use raw MUI Table components (Table, TableRow, TableCell, TableHead, Table
 
 Example usage:
 ```tsx
-<AlisaDataTable<MyDataType>
+<AssetDataTable<MyDataType>
   t={t}
   dataService={dataService}
   fields={[
@@ -143,9 +143,9 @@ Example usage:
 
 ### Path Aliases
 Both projects use TypeScript path aliases:
-- `@alisa-backend/*` → Backend source (used by both frontend and backend)
-- `@alisa-lib/*` → Frontend lib directory
-- `@alisa-mocks/*` → Test mocks
+- `@asset-backend/*` → Backend source (used by both frontend and backend)
+- `@asset-lib/*` → Frontend lib directory
+- `@asset-mocks/*` → Test mocks
 
 ### Assets
 Always store images and other static assets in the `frontend/assets/` folder, organized by category:
@@ -174,13 +174,13 @@ All persistent data is stored in `data/` directory which is bind-mounted into Do
 
 ```bash
 # 1. Create backup first (recommended)
-docker exec alisa-postgres pg_dump -U $DB_USERNAME $DB_DATABASE > backup_$(date +%Y%m%d).sql
+docker exec asset-postgres pg_dump -U $DB_USERNAME $DB_DATABASE > backup_$(date +%Y%m%d).sql
 
 # 2. Create target directory
 mkdir -p ./data/postgres
 
 # 3. Copy data from named volume (container must be running)
-docker cp alisa-postgres:/var/lib/postgresql/data/. ./data/postgres/
+docker cp asset-postgres:/var/lib/postgresql/data/. ./data/postgres/
 
 # 4. Fix permissions (postgres user UID is 999)
 sudo chown -R 999:999 ./data/postgres
@@ -190,14 +190,14 @@ docker-compose -f docker-compose.prod.yml down
 docker-compose -f docker-compose.prod.yml up -d
 
 # 6. Verify database works
-docker exec alisa-postgres psql -U $DB_USERNAME -d $DB_DATABASE -c "SELECT COUNT(*) FROM property;"
+docker exec asset-postgres psql -U $DB_USERNAME -d $DB_DATABASE -c "SELECT COUNT(*) FROM property;"
 ```
 
 #### Migration: Uploads from named volume (if not already done)
 
 ```bash
 mkdir -p ./data/uploads
-docker cp alisa-backend:/app/uploads/. ./data/uploads/
+docker cp asset-backend:/app/uploads/. ./data/uploads/
 ```
 
 #### Local development migration
@@ -207,7 +207,7 @@ Developers with existing local setups need to migrate before pulling this change
 ```bash
 # If you have data in the old named volume, migrate it:
 mkdir -p ./data/postgres
-docker cp alisa-postgres:/var/lib/postgresql/data/. ./data/postgres/
+docker cp asset-postgres:/var/lib/postgresql/data/. ./data/postgres/
 sudo chown -R 999:999 ./data/postgres
 docker-compose down && docker-compose up -d
 ```
@@ -246,7 +246,7 @@ Frontend uses i18next with translation files in `frontend/src/translations/` org
 **Every React component and view should have tests.**
 
 #### Component Unit Tests
-- Colocate `.test.tsx` files with components (e.g., `AlisaTextField.tsx` → `AlisaTextField.test.tsx`)
+- Colocate `.test.tsx` files with components (e.g., `AssetTextField.tsx` → `AssetTextField.test.tsx`)
 - Use `renderWithProviders` from `@test-utils/test-wrapper` for rendering
 - Use `@testing-library/user-event` for user interactions
 - Cover these scenarios:
@@ -387,7 +387,7 @@ export class CreateExampleTable1234567890000 implements MigrationInterface {
 ## Production Server
 
 **Hetzner Cloud CX23**
-- **Hostname:** alisa-prod
+- **Hostname:** asset-prod
 - **IP:** 89.167.53.64
 - **IPv6:** 2a01:4f9:c014:7c54::/64
 - **Resources:** 2 vCPU, 4 GB RAM, 40 GB disk

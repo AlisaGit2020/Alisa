@@ -1,10 +1,10 @@
 import { Box, Paper, Stack } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
-import AlisaDataTable from "../../alisa/datatable/AlisaDataTable";
-import { expenseContext } from "@alisa-lib/alisa-contexts";
-import { Expense } from "@alisa-types";
-import DataService from "@alisa-lib/data-service";
-import { TypeOrmFetchOptions } from "@alisa-lib/types";
+import AssetDataTable from "../../asset/datatable/AssetDataTable";
+import { expenseContext } from "@asset-lib/asset-contexts";
+import { Expense } from "@asset-types";
+import DataService from "@asset-lib/data-service";
+import { TypeOrmFetchOptions } from "@asset-lib/types";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { ListPageTemplate } from "../../templates";
 import ExpenseForm from "./ExpenseForm";
@@ -13,16 +13,16 @@ import {
   getStoredFilter,
   setStoredFilter,
   getTransactionPropertyId,
-} from "@alisa-lib/initial-data";
-import { View } from "@alisa-lib/views";
+} from "@asset-lib/initial-data";
+import { View } from "@asset-lib/views";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../../transaction/TransactionLeftMenuItems";
-import { usePropertyRequired } from "@alisa-lib/hooks/usePropertyRequired";
-import { useDeletePreValidation } from "@alisa-lib/hooks/useDeletePreValidation";
-import { PropertyRequiredSnackbar } from "../../alisa/PropertyRequiredSnackbar";
-import BulkDeleteActions from "../../alisa/BulkDeleteActions";
-import ApiClient from "@alisa-lib/api-client";
-import { useToast } from "../../alisa";
-import AlisaConfirmDialog from "../../alisa/dialog/AlisaConfirmDialog";
+import { usePropertyRequired } from "@asset-lib/hooks/usePropertyRequired";
+import { useDeletePreValidation } from "@asset-lib/hooks/useDeletePreValidation";
+import { PropertyRequiredSnackbar } from "../../asset/PropertyRequiredSnackbar";
+import BulkDeleteActions from "../../asset/BulkDeleteActions";
+import ApiClient from "@asset-lib/api-client";
+import { useAssetToast } from "../../asset";
+import AssetConfirmDialog from "../../asset/dialog/AssetConfirmDialog";
 
 const getDefaultFilter = (): AccountingFilterData => ({
   typeIds: [],
@@ -56,7 +56,7 @@ function Expenses({ t }: WithTranslation) {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [expenseData, setExpenseData] = useState<ExpenseRow[]>([]);
-  const { showToast } = useToast();
+  const { showToast } = useAssetToast();
 
   const { requireProperty, popoverOpen, popoverAnchorEl, closePopover, openPropertySelector } =
     usePropertyRequired(propertyId);
@@ -315,7 +315,7 @@ function Expenses({ t }: WithTranslation) {
         </Box>
 
         <Paper>
-          <AlisaDataTable<ExpenseRow>
+          <AssetDataTable<ExpenseRow>
             t={t}
             dataService={rowDataService}
             sortable
@@ -358,7 +358,7 @@ function Expenses({ t }: WithTranslation) {
       />
 
       {transactionWarningOpen && deletableIds.length > 0 && (
-        <AlisaConfirmDialog
+        <AssetConfirmDialog
           title={t("accounting:cannotDeleteWithTransaction")}
           contentText={t("accounting:someItemsHaveTransactions", {
             count: itemsWithTransaction.length,
@@ -373,7 +373,7 @@ function Expenses({ t }: WithTranslation) {
       )}
 
       {transactionWarningOpen && deletableIds.length === 0 && (
-        <AlisaConfirmDialog
+        <AssetConfirmDialog
           title={t("accounting:cannotDeleteWithTransaction")}
           contentText={t("accounting:allItemsHaveTransactions", {
             count: itemsWithTransaction.length,
@@ -387,7 +387,7 @@ function Expenses({ t }: WithTranslation) {
       )}
 
       {singleDeleteWarningOpen && (
-        <AlisaConfirmDialog
+        <AssetConfirmDialog
           title={t("accounting:cannotDeleteWithTransaction")}
           contentText={t("accounting:singleItemHasTransaction")}
           buttonTextConfirm={t("common:ok")}
@@ -399,7 +399,7 @@ function Expenses({ t }: WithTranslation) {
       )}
 
       {singleDeleteConfirmOpen && (
-        <AlisaConfirmDialog
+        <AssetConfirmDialog
           title={t("common:confirm")}
           contentText={t("common:confirmDelete")}
           buttonTextConfirm={t("common:delete")}
@@ -411,7 +411,7 @@ function Expenses({ t }: WithTranslation) {
       )}
 
       {bulkDeleteConfirmOpen && (
-        <AlisaConfirmDialog
+        <AssetConfirmDialog
           title={t("common:confirm")}
           contentText={t("common:confirmDeleteSelected", { count: selectedIds.length })}
           buttonTextConfirm={t("common:delete")}

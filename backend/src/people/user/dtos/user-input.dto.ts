@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
-import type { DashboardConfig } from '@alisa-backend/common/dashboard-config';
+import type { DashboardConfig } from '@asset-backend/common/dashboard-config';
 
 export class UserInputDto {
   id?: number;

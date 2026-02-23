@@ -3,11 +3,11 @@ import { WithTranslation, withTranslation } from 'react-i18next';
 import { MenuItem, Box, Menu, Fade, IconButton, Tooltip, Avatar, ListItemIcon } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import { User } from '@alisa-types';
-import ApiClient from '@alisa-lib/api-client';
-import { emptyUser } from '@alisa-lib/initial-data';
+import { User } from '@asset-types';
+import ApiClient from '@asset-lib/api-client';
+import { emptyUser } from '@asset-lib/initial-data';
 import UserDetails from '../user/UserDetails';
-import { useSignOutWithCleanup } from '@alisa-lib/use-sign-out-with-cleanup';
+import { useSignOutWithCleanup } from '@asset-lib/use-sign-out-with-cleanup';
 
 function UserMenu({ t }: WithTranslation) {
     const signOut = useSignOutWithCleanup()

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import DoneStep from './DoneStep';
 import { ImportStats } from '../types';
-import { TransactionType } from '@alisa-types';
+import { TransactionType } from '@asset-types';
 import { TFunction } from 'i18next';
 
 // Mock useNavigate - must be before importing DoneStep

@@ -3,10 +3,10 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import AdminMenu from './AdminMenu';
-import ApiClient from '@alisa-lib/api-client';
+import ApiClient from '@asset-lib/api-client';
 import { createMockUser } from '@test-utils/test-data';
 
-jest.mock('@alisa-lib/api-client');
+jest.mock('@asset-lib/api-client');
 
 describe('AdminMenu', () => {
   const mockAdminUser = createMockUser({

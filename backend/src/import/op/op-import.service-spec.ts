@@ -4,7 +4,7 @@ Data service test
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { OpImportService } from './op-import.service';
-import { MOCKS_PATH } from '@alisa-backend/constants';
+import { MOCKS_PATH } from '@asset-backend/constants';
 import {
   INestApplication,
   NotFoundException,
@@ -18,8 +18,8 @@ import {
   TestUser,
   TestUsersSetup,
 } from '../../../test/helper-functions';
-import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { TransactionType } from '@alisa-backend/common/types';
+import { TransactionService } from '@asset-backend/accounting/transaction/transaction.service';
+import { TransactionType } from '@asset-backend/common/types';
 
 describe('OpImport service', () => {
   let service: OpImportService;

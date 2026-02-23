@@ -2,7 +2,7 @@ import PaletteIcon from "@mui/icons-material/Palette";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { useState } from "react";
 import ThemeSettings from "./theme/ThemeSettings";
-import { settingsContext } from "@alisa-lib/alisa-contexts";
+import { settingsContext } from "@asset-lib/asset-contexts";
 import FullscreenDialogLayout, {
   MenuItem,
 } from "../layout/FullscreenDialogLayout";

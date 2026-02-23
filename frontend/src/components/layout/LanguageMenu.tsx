@@ -2,8 +2,8 @@ import { useTranslation } from "react-i18next";
 import { MenuItem, Box, Menu, Fade, styled, Avatar, Stack } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
-import ApiClient from "@alisa-lib/api-client";
-import { SupportedLanguage } from "@alisa-types";
+import ApiClient from "@asset-lib/api-client";
+import { SupportedLanguage } from "@asset-types";
 
 const SmallAvatar = styled(Avatar)(({ theme }) => ({
   width: 24,

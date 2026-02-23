@@ -3,14 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import { DepreciationAsset } from './entities/depreciation-asset.entity';
 import { DepreciationRecord } from './entities/depreciation-record.entity';
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
+import { JWTUser } from '@asset-backend/auth/types';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   DepreciationBreakdownDto,
   DepreciationBreakdownItemDto,
 } from './dtos/depreciation-breakdown.dto';
-import { TransactionStatus } from '@alisa-backend/common/types';
+import { TransactionStatus } from '@asset-backend/common/types';
 
 @Injectable()
 export class DepreciationService {

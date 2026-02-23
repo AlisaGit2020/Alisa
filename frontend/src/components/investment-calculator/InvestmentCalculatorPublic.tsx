@@ -6,7 +6,7 @@ import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 import InvestmentCalculatorForm from "./InvestmentCalculatorForm";
 import LoginDialog from "../login/LoginDialog";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../alisa";
+import { useToast } from "../asset";
 import { PageMeta } from "../seo/PageMeta";
 
 function InvestmentCalculatorPublic({ t }: WithTranslation) {

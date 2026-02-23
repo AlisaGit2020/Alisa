@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
-import { TierService } from '@alisa-backend/admin/tier.service';
-import { Tier } from '@alisa-backend/admin/entities/tier.entity';
+import { TierService } from '@asset-backend/admin/tier.service';
+import { Tier } from '@asset-backend/admin/entities/tier.entity';
 
 @Controller('pricing')
 export class PricingController {

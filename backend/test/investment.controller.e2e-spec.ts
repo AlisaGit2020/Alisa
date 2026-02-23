@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   closeAppGracefully,
   getBearerToken,
@@ -12,7 +12,7 @@ import {
   TestUsersSetup,
 } from './helper-functions';
 import * as http from 'http';
-import { Investment } from '@alisa-backend/real-estate/investment/entities/investment.entity';
+import { Investment } from '@asset-backend/real-estate/investment/entities/investment.entity';
 
 describe('InvestmentController (e2e)', () => {
   let app: INestApplication;

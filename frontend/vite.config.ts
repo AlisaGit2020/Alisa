@@ -27,9 +27,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@alisa-lib': path.resolve(__dirname, './src/lib'),
-      '@alisa-types': path.resolve(__dirname, './src/types'),
-      '@alisa-mocks': path.resolve(__dirname, './test/mocks'),
+      '@asset-lib': path.resolve(__dirname, './src/lib'),
+      '@asset-types': path.resolve(__dirname, './src/types'),
+      '@asset-mocks': path.resolve(__dirname, './test/mocks'),
     },
   },
 

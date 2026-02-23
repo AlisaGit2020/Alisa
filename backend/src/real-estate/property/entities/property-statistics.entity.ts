@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
 
 @Entity()
 // Note: TypeORM's @Unique doesn't support NULLS NOT DISTINCT.

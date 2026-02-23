@@ -1,4 +1,4 @@
-import { ExpenseTypeKey, IncomeTypeKey } from '@alisa-backend/common/types';
+import { ExpenseTypeKey, IncomeTypeKey } from '@asset-backend/common/types';
 
 // Import all translation files
 import expenseTypeEn from '../../src/translations/expense-type/en';

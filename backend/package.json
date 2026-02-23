@@ -107,7 +107,7 @@
       "/dist/"
     ],
     "moduleNameMapper": {
-      "^@alisa-backend/(.*)": "<rootDir>../src/$1",
+      "^@asset-backend/(.*)": "<rootDir>../src/$1",
       "^src/(.*)": "<rootDir>/../src/$1",
       "^test/(.*)": "<rootDir>/../test/$1"
     }

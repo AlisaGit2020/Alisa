@@ -1,4 +1,4 @@
-import { TransactionType } from '@alisa-backend/common/types';
+import { TransactionType } from '@asset-backend/common/types';
 
 export class TransactionSetTypeInputDto {
   ids: number[];

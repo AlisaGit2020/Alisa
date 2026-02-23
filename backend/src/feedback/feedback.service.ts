@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Feedback } from './entities/feedback.entity';
 import { FeedbackInputDto } from './dtos/feedback-input.dto';
-import { JWTUser } from '@alisa-backend/auth/types';
+import { JWTUser } from '@asset-backend/auth/types';
 
 @Injectable()
 export class FeedbackService {

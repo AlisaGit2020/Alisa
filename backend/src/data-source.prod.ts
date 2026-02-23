@@ -10,7 +10,7 @@ export default new DataSource({
   port: Number(process.env.DB_PORT) || 5432,
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'mysecretpassword',
-  database: process.env.DB_DATABASE || 'alisa',
+  database: process.env.DB_DATABASE || 'asset',
   entities: ['dist/**/*.entity.js'],
   migrations: ['dist/migrations/*.js'],
 });

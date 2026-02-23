@@ -5,7 +5,7 @@ import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { Expense } from 'src/accounting/expense/entities/expense.entity';
 import { propertyTestData } from '../real-estate/property.test.data';
 import { startOfDay } from 'date-fns';
-import { TransactionStatus } from '@alisa-backend/common/types';
+import { TransactionStatus } from '@asset-backend/common/types';
 
 export const expenseTestData = {
   name: 'Expense',

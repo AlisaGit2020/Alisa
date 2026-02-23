@@ -7,15 +7,15 @@ import {
 import * as fs from 'fs';
 import * as csvParser from 'csv-parser';
 import * as crypto from 'crypto';
-import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
+import { TransactionInputDto } from '@asset-backend/accounting/transaction/dtos/transaction-input.dto';
 import { OpImportInput } from './dtos/op-import-input.dto';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
-import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
+import { JWTUser } from '@asset-backend/auth/types';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { PropertyService } from '@asset-backend/real-estate/property/property.service';
+import { TransactionService } from '@asset-backend/accounting/transaction/transaction.service';
+import { TransactionStatus, TransactionType } from '@asset-backend/common/types';
 import { ImportResultDto } from '../dtos/import-result.dto';
-import { sanitizeCsvField } from '@alisa-backend/common/utils/csv-sanitizer';
+import { sanitizeCsvField } from '@asset-backend/common/utils/csv-sanitizer';
 
 @Injectable()
 export class OpImportService {

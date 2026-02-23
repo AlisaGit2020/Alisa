@@ -3,9 +3,9 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import PricingSection from './PricingSection';
-import ApiClient from '@alisa-lib/api-client';
+import ApiClient from '@asset-lib/api-client';
 
-jest.mock('@alisa-lib/api-client');
+jest.mock('@asset-lib/api-client');
 
 const mockTiers = [
   { id: 1, name: 'Free', price: 0, maxProperties: 1, sortOrder: 1, isDefault: true },

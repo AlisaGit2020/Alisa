@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { UserService } from '@alisa-backend/people/user/user.service';
-import { TierService } from '@alisa-backend/admin/tier.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { UserService } from '@asset-backend/people/user/user.service';
+import { TierService } from '@asset-backend/admin/tier.service';
 import {
   addTier,
   closeAppGracefully,
@@ -14,9 +14,9 @@ import {
   prepareDatabase,
   TestUsersSetup,
 } from './helper-functions';
-import { UserInputDto } from '@alisa-backend/people/user/dtos/user-input.dto';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { UserInputDto } from '@asset-backend/people/user/dtos/user-input.dto';
+import { JWTUser } from '@asset-backend/auth/types';
+import { User } from '@asset-backend/people/user/entities/user.entity';
 import * as http from 'http';
 
 describe('AdminController (e2e)', () => {

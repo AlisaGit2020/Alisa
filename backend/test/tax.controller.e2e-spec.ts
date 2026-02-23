@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
-import { IncomeTypeService } from '@alisa-backend/accounting/income/income-type.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { TransactionService } from '@asset-backend/accounting/transaction/transaction.service';
+import { ExpenseTypeService } from '@asset-backend/accounting/expense/expense-type.service';
+import { IncomeTypeService } from '@asset-backend/accounting/income/income-type.service';
 import {
   closeAppGracefully,
   getBearerToken,
@@ -20,7 +20,7 @@ import {
   IncomeTypeKey,
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 import * as http from 'http';
 
 describe('TaxController (e2e)', () => {

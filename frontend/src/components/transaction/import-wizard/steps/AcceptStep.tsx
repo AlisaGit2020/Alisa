@@ -10,10 +10,10 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import AlisaButton from "../../../alisa/form/AlisaButton";
+import AssetButton from "../../../asset/form/AssetButton";
 import { TFunction } from "i18next";
-import { Transaction, TransactionType, transactionTypeNames } from "@alisa-types";
-import { AlisaApproveIcon } from "../../../alisa/AlisaIcons";
+import { Transaction, TransactionType, transactionTypeNames } from "@asset-types";
+import { AssetApproveIcon } from "../../../asset/AssetIcons";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import MoneyOffIcon from "@mui/icons-material/MoneyOff";
 import SavingsIcon from "@mui/icons-material/Savings";
@@ -145,19 +145,19 @@ export default function AcceptStep({
         justifyContent="space-between"
         sx={{ mt: 3 }}
       >
-        <AlisaButton
+        <AssetButton
           label={t("importWizard.back")}
           onClick={onBack}
           disabled={isApproving}
         />
-        <AlisaButton
+        <AssetButton
           label={isApproving ? t("importWizard.approving") : t("importWizard.approveAll")}
           variant="contained"
           color="success"
           onClick={handleApprove}
           disabled={isApproving}
           loading={isApproving}
-          startIcon={!isApproving ? <AlisaApproveIcon /> : undefined}
+          startIcon={!isApproving ? <AssetApproveIcon /> : undefined}
         />
       </Stack>
     </Box>

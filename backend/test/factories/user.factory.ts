@@ -1,5 +1,5 @@
-import { JWTUser } from '@alisa-backend/auth/types';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { JWTUser } from '@asset-backend/auth/types';
+import { User } from '@asset-backend/people/user/entities/user.entity';
 
 export interface CreateJWTUserOptions {
   id?: number;

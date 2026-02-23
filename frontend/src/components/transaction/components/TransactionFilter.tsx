@@ -1,5 +1,5 @@
 import { withTranslation, WithTranslation } from "react-i18next";
-import { transactionContext } from "@alisa-lib/alisa-contexts.ts";
+import { transactionContext } from "@asset-lib/asset-contexts.ts";
 import {
   Checkbox,
   Chip,
@@ -20,8 +20,8 @@ import {
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import ClearIcon from "@mui/icons-material/Clear";
-import { TransactionType, transactionTypeNames } from "@alisa-types";
-import { AlisaButton } from "../../alisa";
+import { TransactionType, transactionTypeNames } from "@asset-types";
+import { AssetButton } from "../../asset";
 
 export type SearchField = "sender" | "receiver" | "description";
 
@@ -206,7 +206,7 @@ function TransactionFilter(props: TransactionFilterProps) {
             />
           </Stack>
 
-          <AlisaButton
+          <AssetButton
             label={props.t("reset")}
             variant="outlined"
             size="small"

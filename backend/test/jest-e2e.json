@@ -4,8 +4,8 @@
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
-  "moduleNameMapper": {        
-    "^@alisa-backend/(.*)": "<rootDir>../../backend/src/$1"    
+  "moduleNameMapper": {
+    "^@asset-backend/(.*)": "<rootDir>../../backend/src/$1"
   },
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"

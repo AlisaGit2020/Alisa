@@ -7,7 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { getMenuItemById, SubPageConfig } from "@alisa-lib/menu-config";
+import { getMenuItemById, SubPageConfig } from "@asset-lib/menu-config";
 import { HubPageTemplate } from "../templates";
 
 interface HubPageProps {

@@ -3,11 +3,11 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { TierService } from './tier.service';
 import { Tier } from './entities/tier.entity';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
-import { UserService } from '@alisa-backend/people/user/user.service';
+import { User } from '@asset-backend/people/user/entities/user.entity';
+import { UserService } from '@asset-backend/people/user/user.service';
 import { createMockRepository, MockRepository } from 'test/mocks';
 import { createTier, createFreeTier, createUser } from 'test/factories';
-import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
+import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
 
 describe('TierService', () => {
   let service: TierService;

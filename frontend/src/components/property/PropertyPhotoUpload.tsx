@@ -8,9 +8,9 @@ import {
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
-import { AlisaButton, useToast } from '../alisa';
+import { AssetButton, useAssetToast } from '../asset';
 import axios from 'axios';
-import ApiClient from '@alisa-lib/api-client';
+import ApiClient from '@asset-lib/api-client';
 import { VITE_API_URL, VITE_BASE_URL } from '../../constants';
 
 interface PropertyPhotoUploadProps {
@@ -35,7 +35,7 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [photoPath, setPhotoPath] = useState<string | undefined>(currentPhoto);
   const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(null);
-  const { showToast } = useToast();
+  const { showToast } = useAssetToast();
 
   // Handle pending file preview
   useEffect(() => {
@@ -166,7 +166,7 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
 
         {/* Action Buttons */}
         <Stack direction="row" spacing={2}>
-          <AlisaButton
+          <AssetButton
             label={t('uploadPhoto')}
             component="label"
             loading={uploading}
@@ -178,10 +178,10 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
               accept="image/jpeg,image/jpg,image/png,image/webp"
               onChange={handleFileSelect}
             />
-          </AlisaButton>
+          </AssetButton>
 
           {hasPhoto && (
-            <AlisaButton
+            <AssetButton
               label={pendingMode ? t('removePhoto') : t('deletePhoto')}
               variant="outlined"
               color="error"

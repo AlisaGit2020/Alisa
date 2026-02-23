@@ -6,11 +6,11 @@ import MonthlyBarChart, { MonthlyDataPoint } from "./MonthlyBarChart";
 import BalanceTrendChart from "./BalanceTrendChart";
 import TypeBreakdownCharts from "./TypeBreakdownCharts";
 import MonthlyTransactionTable from "./MonthlyTransactionTable";
-import { PropertyStatistics, Transaction } from "@alisa-types";
-import ApiClient from "@alisa-lib/api-client";
+import { PropertyStatistics, Transaction } from "@asset-types";
+import ApiClient from "@asset-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
 import axios from "axios";
-import { useToast } from "../../alisa/toast";
+import { useToast } from "../../asset/toast";
 
 interface PropertyReportChartsProps {
   propertyId: number;

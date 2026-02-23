@@ -14,19 +14,19 @@ import {
   Edit as EditIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import AlisaDialog from "../alisa/dialog/AlisaDialog";
-import AlisaButton from "../alisa/form/AlisaButton";
-import AlisaConfirmDialog from "../alisa/dialog/AlisaConfirmDialog";
+import AssetDialog from "../asset/dialog/AssetDialog";
+import AssetButton from "../asset/form/AssetButton";
+import AssetConfirmDialog from "../asset/dialog/AssetConfirmDialog";
 import AllocationRuleForm from "./AllocationRuleForm";
-import ApiClient from "@alisa-lib/api-client";
-import { useToast } from "../alisa/toast/AlisaToastProvider";
+import ApiClient from "@asset-lib/api-client";
+import { useAssetToast } from "../asset/toast/AssetToastProvider";
 import {
   AllocationRule,
   TransactionType,
   AllocationRuleInput,
   AllocationCondition,
-} from "@alisa-types";
-import { AlisaSelectFieldItem } from "../alisa/form/AlisaSelectField";
+} from "@asset-types";
+import { AssetSelectFieldItem } from "../asset/form/AssetSelectField";
 
 interface AllocationRulesModalProps {
   open: boolean;
@@ -54,11 +54,11 @@ function AllocationRulesModal({
   onClose,
 }: AllocationRulesModalProps) {
   const { t } = useTranslation();
-  const { showToast } = useToast();
+  const { showToast } = useAssetToast();
 
   const [rules, setRules] = useState<AllocationRule[]>([]);
-  const [expenseTypes, setExpenseTypes] = useState<AlisaSelectFieldItem[]>([]);
-  const [incomeTypes, setIncomeTypes] = useState<AlisaSelectFieldItem[]>([]);
+  const [expenseTypes, setExpenseTypes] = useState<AssetSelectFieldItem[]>([]);
+  const [incomeTypes, setIncomeTypes] = useState<AssetSelectFieldItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingRule, setEditingRule] = useState<Partial<AllocationRule> | null>(
     null
@@ -229,14 +229,14 @@ function AllocationRulesModal({
 
   if (editingRule) {
     return (
-      <AlisaDialog
+      <AssetDialog
         open={open}
         title={editingRule.id ? t("allocation:editRule") : t("allocation:addRule")}
         onClose={handleCancelEdit}
         actions={
           <>
-            <AlisaButton label={t("common:cancel")} variant="text" onClick={handleCancelEdit} />
-            <AlisaButton label={t("common:save")} variant="contained" onClick={handleSaveRule} />
+            <AssetButton label={t("common:cancel")} variant="text" onClick={handleCancelEdit} />
+            <AssetButton label={t("common:save")} variant="contained" onClick={handleSaveRule} />
           </>
         }
       >
@@ -248,26 +248,26 @@ function AllocationRulesModal({
           onChange={setEditingRule}
           errors={errors}
         />
-      </AlisaDialog>
+      </AssetDialog>
     );
   }
 
   return (
     <>
-      <AlisaDialog
+      <AssetDialog
         open={open}
         title={propertyName ? `${t("allocation:rules")}: ${propertyName}` : t("allocation:rules")}
         onClose={onClose}
         maxWidth="md"
         actions={
           <>
-            <AlisaButton
+            <AssetButton
               label={t("allocation:addRule")}
               variant="outlined"
               startIcon={<AddIcon />}
               onClick={handleAddRule}
             />
-            <AlisaButton label={t("common:close")} variant="text" onClick={onClose} />
+            <AssetButton label={t("common:close")} variant="text" onClick={onClose} />
           </>
         }
       >
@@ -353,9 +353,9 @@ function AllocationRulesModal({
             ))}
           </List>
         )}
-      </AlisaDialog>
+      </AssetDialog>
 
-      <AlisaConfirmDialog
+      <AssetConfirmDialog
         open={deleteConfirmOpen}
         title={t("common:confirmDelete")}
         contentText={t("common:confirmDeleteMessage")}

@@ -5,7 +5,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MuiDrawer from "@mui/material/Drawer";
 import LeftMenuItems from "./LeftMenuItems";
 import { useTranslation } from "react-i18next";
-import { LOGO_DARK, DRAWER_WIDTH, COLLAPSED_DRAWER_WIDTH } from "@alisa-lib/constants";
+import { LOGO_DARK, DRAWER_WIDTH, COLLAPSED_DRAWER_WIDTH } from "@asset-lib/constants";
 
 const openedMixin = (theme: Theme): CSSObject => ({
   width: DRAWER_WIDTH,

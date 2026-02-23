@@ -5,13 +5,13 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
-import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
-import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
+import { ExpenseType } from '@asset-backend/accounting/expense/entities/expense-type.entity';
+import { IncomeType } from '@asset-backend/accounting/income/entities/income-type.entity';
 import {
   AllocationCondition,
   TransactionType,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 
 @Entity()
 export class AllocationRule {

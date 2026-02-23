@@ -1,10 +1,10 @@
 import { Grid, IconButton } from "@mui/material";
-import AlisaTextField from "../../alisa/form/AlisaTextField.tsx";
-import AlisaNumberField from "../../alisa/form/AlisaNumberField.tsx";
+import AssetTextField from "../../asset/form/AssetTextField.tsx";
+import AssetNumberField from "../../asset/form/AssetNumberField.tsx";
 import DeleteIcon from "@mui/icons-material/Delete";
 import React from "react";
 import { TFunction } from "i18next";
-import { TransactionRow } from "@alisa-lib/types.ts";
+import { TransactionRow } from "@asset-lib/types.ts";
 
 interface RowDataFieldsProps<T> {
   t: TFunction;
@@ -21,7 +21,7 @@ function RowDataFields<T extends TransactionRow>(props: RowDataFieldsProps<T>) {
     <Grid container spacing={1} alignItems="center" sx={{ mb: 1 }}>
       <Grid size={2.5}>{props.typeSelect}</Grid>
       <Grid size={3}>
-        <AlisaTextField
+        <AssetTextField
           label={props.t("description")}
           value={props.data.description}
           autoComplete="off"
@@ -35,7 +35,7 @@ function RowDataFields<T extends TransactionRow>(props: RowDataFieldsProps<T>) {
         />
       </Grid>
       <Grid size={2}>
-        <AlisaNumberField
+        <AssetNumberField
           disabled={true}
           label={props.t("amount")}
           value={props.data.amount}
@@ -50,7 +50,7 @@ function RowDataFields<T extends TransactionRow>(props: RowDataFieldsProps<T>) {
         />
       </Grid>
       <Grid size={1.5}>
-        <AlisaNumberField
+        <AssetNumberField
           label={props.t("quantity")}
           value={props.data.quantity}
           onChange={(e) =>
@@ -64,7 +64,7 @@ function RowDataFields<T extends TransactionRow>(props: RowDataFieldsProps<T>) {
         />
       </Grid>
       <Grid size={2}>
-        <AlisaNumberField
+        <AssetNumberField
           label={props.t("totalAmount")}
           value={props.data.totalAmount}
           autoComplete="off"

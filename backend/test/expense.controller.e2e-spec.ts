@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   addIncomeAndExpenseTypes,
   addTransaction,
@@ -18,10 +18,10 @@ import {
   getTransactionExpense1,
   getTransactionExpense2,
 } from './data/mocks/transaction.mock';
-import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
+import { TransactionStatus, TransactionType } from '@asset-backend/common/types';
 import * as http from 'http';
-import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-input.dto';
-import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
+import { ExpenseInputDto } from '@asset-backend/accounting/expense/dtos/expense-input.dto';
+import { TransactionInputDto } from '@asset-backend/accounting/transaction/dtos/transaction-input.dto';
 import { startOfDay } from 'date-fns';
 
 describe('ExpenseController (e2e)', () => {

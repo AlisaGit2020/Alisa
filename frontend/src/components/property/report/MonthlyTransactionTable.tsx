@@ -15,11 +15,11 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
 import React, { useState, useCallback } from "react";
-import { Transaction } from "@alisa-types";
-import ApiClient from "@alisa-lib/api-client";
+import { Transaction } from "@asset-types";
+import ApiClient from "@asset-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
 import axios from "axios";
-import { useToast } from "../../alisa/toast";
+import { useToast } from "../../asset/toast";
 
 interface MonthlySummary {
   month: number;

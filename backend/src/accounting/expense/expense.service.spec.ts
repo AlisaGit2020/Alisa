@@ -4,9 +4,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExpenseService } from './expense.service';
 import { Expense } from './entities/expense.entity';
 import { ExpenseType } from './entities/expense-type.entity';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { DepreciationService } from '@alisa-backend/accounting/depreciation/depreciation.service';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { DepreciationService } from '@asset-backend/accounting/depreciation/depreciation.service';
 import {
   createMockRepository,
   createMockAuthService,
@@ -14,9 +14,9 @@ import {
   MockAuthService,
 } from 'test/mocks';
 import { createExpense, createJWTUser, createTransaction } from 'test/factories';
-import { TransactionStatus } from '@alisa-backend/common/types';
+import { TransactionStatus } from '@asset-backend/common/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Events } from '@alisa-backend/common/events';
+import { Events } from '@asset-backend/common/events';
 
 describe('ExpenseService', () => {
   let service: ExpenseService;

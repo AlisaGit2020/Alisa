@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   closeAppGracefully,
   getBearerToken,
@@ -11,7 +11,7 @@ import {
   prepareDatabase,
   TestUsersSetup,
 } from './helper-functions';
-import { ExpenseTypeKey, IncomeTypeKey } from '@alisa-backend/common/types';
+import { ExpenseTypeKey, IncomeTypeKey } from '@asset-backend/common/types';
 import * as http from 'http';
 
 describe('Type Seeding (e2e)', () => {

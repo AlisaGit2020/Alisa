@@ -17,14 +17,14 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LanguageIcon from "@mui/icons-material/Language";
-import ApiClient from "@alisa-lib/api-client";
-import { User } from "@alisa-types";
-import { emptyUser } from "@alisa-lib/initial-data";
+import ApiClient from "@asset-lib/api-client";
+import { User } from "@asset-types";
+import { emptyUser } from "@asset-lib/initial-data";
 import SettingsDialog from "../settings/SettingsDialog";
 import AdminDialog from "../admin/AdminDialog";
 import UserDetails from "../user/UserDetails";
 import FeedbackDialog from "../feedback/FeedbackDialog";
-import { useSignOutWithCleanup } from "@alisa-lib/use-sign-out-with-cleanup";
+import { useSignOutWithCleanup } from "@asset-lib/use-sign-out-with-cleanup";
 import LanguageMenu from "./LanguageMenu";
 
 function MobileMoreMenu() {

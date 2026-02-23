@@ -1,11 +1,11 @@
 
 import DataService from "./data-service";
-import AlisaContext from "@alisa-lib/alisa-contexts";
+import AssetContext from "@asset-lib/asset-contexts";
 import ApiClient from "./api-client";
 
 describe('Data service', () => {
 
-    const context: AlisaContext = {
+    const context: AssetContext = {
         apiPath: 'test/data',
         name: 'Test context',
         routePath: 'path/test/data'
@@ -54,7 +54,7 @@ describe('Data service', () => {
             const responseData = { id: 1, name: 'Test Data' };
             apiClientMock.mockResolvedValueOnce(responseData);
 
-            const context = { apiPath: '/test' } as AlisaContext;
+            const context = { apiPath: '/test' } as AssetContext;
             const dataService = new DataService<{ transaction: { totalAmount: number } }>({ context, relations: { transaction: true } });
 
             const result = await dataService.read(1);
@@ -70,7 +70,7 @@ describe('Data service', () => {
             const apiClientPostMock = jest.spyOn(ApiClient, 'post');
             apiClientPostMock.mockResolvedValueOnce({ id: 1, name: 'Test Data' });
 
-            const context = { apiPath: '/test' } as AlisaContext;
+            const context = { apiPath: '/test' } as AssetContext;
             const dataService = new DataService({ context });
 
             const validData = { name: 'Test Data' };
@@ -85,7 +85,7 @@ describe('Data service', () => {
             const apiClientPutMock = jest.spyOn(ApiClient, 'put');
             apiClientPutMock.mockResolvedValueOnce({ id: 1, name: 'Test Data' });
 
-            const context = { apiPath: '/test' } as AlisaContext;
+            const context = { apiPath: '/test' } as AssetContext;
             const dataService = new DataService({ context });
 
             const validData = { name: 'Test Data' };
@@ -101,7 +101,7 @@ describe('Data service', () => {
             const apiClientMock = jest.spyOn(ApiClient, 'delete');
             apiClientMock.mockResolvedValueOnce(undefined);
 
-            const context = { apiPath: '/test' } as AlisaContext;
+            const context = { apiPath: '/test' } as AssetContext;
             const dataService = new DataService<{ transaction: { totalAmount: number } }>({ context, relations: { transaction: true } });
 
             await dataService.delete(1);
@@ -116,7 +116,7 @@ describe('Data service', () => {
             const responseData = [{ id: 1, name: 'Test Data' }];
             apiClientMock.mockResolvedValueOnce(responseData);
 
-            const context = { apiPath: '/test' } as AlisaContext;
+            const context = { apiPath: '/test' } as AssetContext;
             const fetchOptions = {
                 relations: {
                     transaction: true
@@ -150,7 +150,7 @@ describe('Data service', () => {
             const responseData = [{ rowCount: 11, total: 206 }];
             apiClientMock.mockResolvedValueOnce(responseData);
 
-            const context = { apiPath: '/test' } as AlisaContext;
+            const context = { apiPath: '/test' } as AssetContext;
             const fetchOptions = {
                 where: {
                     dateCreated: new Date('2024-01-01'),

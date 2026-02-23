@@ -4,7 +4,7 @@ import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { createMockRepository, MockRepository } from 'test/mocks';
 import { createUser } from 'test/factories';
-import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
+import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
 
 describe('UserService', () => {
   let service: UserService;

@@ -7,7 +7,7 @@ import * as http from 'http';
 import * as nock from 'nock';
 import * as fs from 'fs';
 import * as path from 'path';
-import { MOCKS_PATH } from '@alisa-backend/constants';
+import { MOCKS_PATH } from '@asset-backend/constants';
 
 describe('EtuoviImportController (e2e)', () => {
   let app: INestApplication;

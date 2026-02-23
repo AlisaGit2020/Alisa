@@ -11,10 +11,10 @@ import { IncomeInputDto } from './dtos/income-input.dto';
 import { Property } from 'src/real-estate/property/entities/property.entity';
 import { IncomeType } from './entities/income-type.entity';
 import { Transaction } from '../transaction/entities/transaction.entity';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
-import { TransactionStatus } from '@alisa-backend/common/types';
+import { JWTUser } from '@asset-backend/auth/types';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { typeormWhereTransformer } from '@asset-backend/common/transformer/typeorm-where.transformer';
+import { TransactionStatus } from '@asset-backend/common/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   Events,
@@ -22,14 +22,14 @@ import {
   StandaloneIncomeCreatedEvent,
   StandaloneIncomeDeletedEvent,
   StandaloneIncomeUpdatedEvent,
-} from '@alisa-backend/common/events';
-import { DataSaveResultDto } from '@alisa-backend/common/dtos/data-save-result.dto';
+} from '@asset-backend/common/events';
+import { DataSaveResultDto } from '@asset-backend/common/dtos/data-save-result.dto';
 import {
   buildBulkOperationResult,
   createSuccessResult,
   createUnauthorizedResult,
   createErrorResult,
-} from '@alisa-backend/common/utils/bulk-operation.util';
+} from '@asset-backend/common/utils/bulk-operation.util';
 
 @Injectable()
 export class IncomeService {

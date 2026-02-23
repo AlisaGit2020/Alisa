@@ -16,10 +16,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useEffect, useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
-import ApiClient from "@alisa-lib/api-client";
-import { adminContext } from "@alisa-lib/alisa-contexts";
+import ApiClient from "@asset-lib/api-client";
+import { adminContext } from "@asset-lib/asset-contexts";
 import AdminTierForm from "./AdminTierForm";
-import { AlisaButton, useToast } from "../../alisa";
+import { AssetButton, useAssetToast } from "../../asset";
 
 interface Tier {
   id: number;
@@ -35,7 +35,7 @@ function AdminTierList({ t }: WithTranslation) {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editingTier, setEditingTier] = useState<Tier | null>(null);
-  const { showToast } = useToast();
+  const { showToast } = useAssetToast();
 
   const fetchTiers = async () => {
     try {
@@ -117,7 +117,7 @@ function AdminTierList({ t }: WithTranslation) {
   return (
     <>
       <Box sx={{ mb: 2 }}>
-        <AlisaButton
+        <AssetButton
           label={t("tierAdd")}
           variant="contained"
           startIcon={<AddIcon />}

@@ -90,7 +90,7 @@ jobs:
           DB_USERNAME: postgres
           DB_PASSWORD: mysecretpassword
           DB_DATABASE: postgres
-      - run: PGPASSWORD=mysecretpassword psql -h localhost -U postgres -c "CREATE DATABASE alisa_test;"
+      - run: PGPASSWORD=mysecretpassword psql -h localhost -U postgres -c "CREATE DATABASE asset_test;"
       - run: npm run test:e2e
         working-directory: backend
         env:
@@ -98,7 +98,7 @@ jobs:
           DB_PORT: 5432
           DB_USERNAME: postgres
           DB_PASSWORD: mysecretpassword
-          DB_DATABASE: alisa_test
+          DB_DATABASE: asset_test
 
   test-frontend:
     needs: changes

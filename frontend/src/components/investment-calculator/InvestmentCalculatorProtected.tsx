@@ -4,8 +4,8 @@ import React from "react";
 import { useSearchParams } from "react-router-dom";
 import InvestmentCalculatorForm from "./InvestmentCalculatorForm";
 import SavedCalculations from "./SavedCalculations";
-import PageHeader from "../alisa/PageHeader";
-import { useToast } from "../alisa";
+import PageHeader from "../asset/PageHeader";
+import { useToast } from "../asset";
 
 function InvestmentCalculatorProtected({ t }: WithTranslation) {
   const [tabValue, setTabValue] = React.useState(0);

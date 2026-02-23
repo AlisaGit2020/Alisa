@@ -8,15 +8,15 @@ import {
   TransactionSetTypeInput,
   TransactionSetCategoryTypeInput,
   SplitLoanPaymentBulkInput,
-} from "@alisa-types";
+} from "@asset-types";
 import { ImportWizardState, ImportStats, ImportResponse, BankId } from "../types";
-import ApiClient from "@alisa-lib/api-client";
-import { transactionContext, opImportContext, sPankkiImportContext } from "@alisa-lib/alisa-contexts";
-import { getTransactionPropertyId } from "@alisa-lib/initial-data";
-import { TypeOrmFetchOptions } from "@alisa-lib/types";
+import ApiClient from "@asset-lib/api-client";
+import { transactionContext, opImportContext, sPankkiImportContext } from "@asset-lib/asset-contexts";
+import { getTransactionPropertyId } from "@asset-lib/initial-data";
+import { TypeOrmFetchOptions } from "@asset-lib/types";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../../TransactionLeftMenuItems";
-import { useToast } from "../../../alisa";
-import UserStorage from "@alisa-lib/user-storage";
+import { useToast } from "../../../asset";
+import UserStorage from "@asset-lib/user-storage";
 
 const STORAGE_KEY = "importWizard:session";
 

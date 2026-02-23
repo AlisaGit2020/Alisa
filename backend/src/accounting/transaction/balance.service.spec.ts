@@ -3,8 +3,8 @@ import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BalanceService } from './balance.service';
 import { Transaction } from './entities/transaction.entity';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { PropertyService } from '@asset-backend/real-estate/property/property.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   createMockRepository,
@@ -15,8 +15,8 @@ import {
   MockEventEmitter,
 } from 'test/mocks';
 import { createTransaction, createProperty, createJWTUser } from 'test/factories';
-import { TransactionStatus } from '@alisa-backend/common/types';
-import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
+import { TransactionStatus } from '@asset-backend/common/types';
+import { EventTrackerService } from '@asset-backend/common/event-tracker.service';
 
 describe('BalanceService', () => {
   let service: BalanceService;

@@ -7,7 +7,7 @@ import {
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { TransactionService } from './transaction.service';
 import { Transaction } from './entities/transaction.entity';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   createMockRepository,
@@ -26,10 +26,10 @@ import {
 import {
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
-import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
-import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
+} from '@asset-backend/common/types';
+import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
+import { Income } from '@asset-backend/accounting/income/entities/income.entity';
+import { ExpenseTypeService } from '@asset-backend/accounting/expense/expense-type.service';
 
 describe('TransactionService', () => {
   let service: TransactionService;

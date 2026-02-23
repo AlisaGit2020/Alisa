@@ -1,10 +1,10 @@
-import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
-import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-input.dto';
-import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
+import { TransactionInputDto } from '@asset-backend/accounting/transaction/dtos/transaction-input.dto';
+import { ExpenseInputDto } from '@asset-backend/accounting/expense/dtos/expense-input.dto';
+import { IncomeInputDto } from '@asset-backend/accounting/income/dtos/income-input.dto';
 import {
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 
 export const getTransactionExpense1 = (
   propertyId: number,

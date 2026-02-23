@@ -1,8 +1,8 @@
 {
-  "name": "alisa",
+  "name": "asset",
   "version": "1.0.0",
   "private": true,
-  "description": "Alisa - Financial and property management application",
+  "description": "Financial and property management application",
   "scripts": {
     "prepare": "husky"
   },

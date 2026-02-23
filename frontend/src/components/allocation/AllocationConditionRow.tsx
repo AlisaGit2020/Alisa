@@ -5,7 +5,7 @@ import {
   AllocationCondition,
   AllocationConditionField,
   AllocationConditionOperator,
-} from "@alisa-types";
+} from "@asset-types";
 
 interface AllocationConditionRowProps {
   condition: AllocationCondition;

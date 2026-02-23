@@ -5,7 +5,7 @@ import { renderWithProviders } from "@test-utils/test-wrapper";
 import TransactionsPendingActions from "./TransactionsPendingActions";
 
 // Mock the ApiClient
-jest.mock("@alisa-lib/api-client.ts", () => ({
+jest.mock("@asset-lib/api-client.ts", () => ({
   default: {
     me: jest.fn().mockResolvedValue({
       loanPrincipalExpenseTypeId: 1,
@@ -16,7 +16,7 @@ jest.mock("@alisa-lib/api-client.ts", () => ({
 }));
 
 // Mock DataService to prevent actual API calls
-jest.mock("@alisa-lib/data-service.ts", () => {
+jest.mock("@asset-lib/data-service.ts", () => {
   return jest.fn().mockImplementation(() => ({
     search: jest.fn().mockResolvedValue([
       { id: 1, name: "Expense Type 1" },

@@ -1,4 +1,4 @@
-import { StatisticKey } from '@alisa-backend/common/types';
+import { StatisticKey } from '@asset-backend/common/types';
 
 export class PropertyStatisticsSearchDto {
   propertyId?: number;

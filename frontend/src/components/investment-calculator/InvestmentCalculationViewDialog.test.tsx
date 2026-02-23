@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import InvestmentCalculationViewDialog from './InvestmentCalculationViewDialog';
-import ApiClient from '@alisa-lib/api-client';
+import ApiClient from '@asset-lib/api-client';
 
 // Spy on ApiClient methods
 jest.spyOn(ApiClient, 'get');

@@ -1,6 +1,6 @@
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
-import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
-import { ExpenseTypeKey } from '@alisa-backend/common/types';
+import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
+import { ExpenseType } from '@asset-backend/accounting/expense/entities/expense-type.entity';
+import { ExpenseTypeKey } from '@asset-backend/common/types';
 
 export interface CreateExpenseOptions {
   id?: number;

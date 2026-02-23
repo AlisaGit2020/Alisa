@@ -1,7 +1,7 @@
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { AdminGuard } from './admin.guard';
 import { createJWTUser } from 'test/factories';
-import { JWTUser } from '@alisa-backend/auth/types';
+import { JWTUser } from '@asset-backend/auth/types';
 
 describe('AdminGuard', () => {
   let guard: AdminGuard;

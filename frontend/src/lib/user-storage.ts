@@ -1,4 +1,4 @@
-const USER_ID_KEY = "alisa-current-user-id";
+const USER_ID_KEY = "asset-current-user-id";
 
 let cachedUserId: number | null = null;
 

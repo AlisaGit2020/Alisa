@@ -5,10 +5,10 @@ import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import { createAxiosError } from '@test-utils/test-data';
 import IncomeForm from './IncomeForm';
-import DataService from '@alisa-lib/data-service';
-import { IncomeType } from '@alisa-types';
+import DataService from '@asset-lib/data-service';
+import { IncomeType } from '@asset-types';
 
-jest.mock('@alisa-lib/data-service');
+jest.mock('@asset-lib/data-service');
 
 describe('IncomeForm field error handling', () => {
   const defaultProps = {
@@ -272,7 +272,7 @@ describe('IncomeForm field error handling', () => {
     });
 
     it('shows error on incomeTypeId field when server returns validation error', async () => {
-      // This test should FAIL initially - incomeTypeId (AlisaSelect) does NOT support error props
+      // This test should FAIL initially - incomeTypeId (AssetSelect) does NOT support error props
       const user = userEvent.setup();
 
       // Mock server error for incomeTypeId field

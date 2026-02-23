@@ -6,13 +6,13 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import PropertySummaryCards from "./PropertySummaryCards";
 import PropertyReportCharts from "./PropertyReportCharts";
-import AlisaButton from "../../alisa/form/AlisaButton";
-import { PropertyStatistics } from "@alisa-types";
-import ApiClient from "@alisa-lib/api-client";
+import AssetButton from "../../asset/form/AssetButton";
+import { PropertyStatistics } from "@asset-types";
+import ApiClient from "@asset-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
 import axios from "axios";
 import { calculateSummaryData } from "./report-utils";
-import { useToast } from "../../alisa/toast";
+import { useAssetToast } from "../../asset/toast";
 
 interface PropertyReportSectionProps {
   propertyId: number;
@@ -20,7 +20,7 @@ interface PropertyReportSectionProps {
 
 function PropertyReportSection({ propertyId }: PropertyReportSectionProps) {
   const { t } = useTranslation("property");
-  const { showToast } = useToast();
+  const { showToast } = useAssetToast();
   const [expanded, setExpanded] = useState(false);
   const [statistics, setStatistics] = useState<PropertyStatistics[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +78,7 @@ function PropertyReportSection({ propertyId }: PropertyReportSectionProps) {
 
       {/* Advanced Reports Toggle Button */}
       <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
-        <AlisaButton
+        <AssetButton
           label={t("report.advancedReports")}
           variant="outlined"
           startIcon={<AssessmentIcon />}

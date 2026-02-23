@@ -1,9 +1,9 @@
 import { Box, Paper, Typography, Stack } from "@mui/material";
-import AlisaButton from "../../../alisa/form/AlisaButton";
+import AssetButton from "../../../asset/form/AssetButton";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { TFunction } from "i18next";
 import { ImportStats } from "../types";
-import { transactionContext } from "@alisa-lib/alisa-contexts";
+import { transactionContext } from "@asset-lib/asset-contexts";
 import { useNavigate } from "react-router-dom";
 
 interface DoneStepProps {
@@ -77,12 +77,12 @@ export default function DoneStep({ t, stats, onReset }: DoneStepProps) {
           justifyContent="center"
           sx={{ mt: 4 }}
         >
-          <AlisaButton
+          <AssetButton
             label={t("importWizard.importAnotherFile")}
             variant="outlined"
             onClick={onReset}
           />
-          <AlisaButton
+          <AssetButton
             label={t("importWizard.viewTransactions")}
             variant="contained"
             onClick={handleViewTransactions}

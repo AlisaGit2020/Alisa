@@ -1,20 +1,20 @@
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { ExpenseTypeKey, IncomeTypeKey } from '@alisa-backend/common/types';
-import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownership-input.dto';
-import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/property-input.dto';
-import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
-import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { JWTUser } from '@asset-backend/auth/types';
+import { ExpenseTypeKey, IncomeTypeKey } from '@asset-backend/common/types';
+import { OwnershipInputDto } from '@asset-backend/people/ownership/dtos/ownership-input.dto';
+import { PropertyInputDto } from '@asset-backend/real-estate/property/dtos/property-input.dto';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
+import { PropertyService } from '@asset-backend/real-estate/property/property.service';
 import { DataSource } from 'typeorm';
 import { jwtUser1, jwtUser2, jwtUser3 } from './data/mocks/user.mock';
 import { INestApplication } from '@nestjs/common';
-import { UserService } from '@alisa-backend/people/user/user.service';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
-import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
-import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { TierService } from '@alisa-backend/admin/tier.service';
-import { Tier } from '@alisa-backend/admin/entities/tier.entity';
-import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
+import { UserService } from '@asset-backend/people/user/user.service';
+import { User } from '@asset-backend/people/user/entities/user.entity';
+import { TransactionInputDto } from '@asset-backend/accounting/transaction/dtos/transaction-input.dto';
+import { TransactionService } from '@asset-backend/accounting/transaction/transaction.service';
+import { TierService } from '@asset-backend/admin/tier.service';
+import { Tier } from '@asset-backend/admin/entities/tier.entity';
+import { EventTrackerService } from '@asset-backend/common/event-tracker.service';
 import * as http from 'http';
 import {
   getTransactionExpense1,

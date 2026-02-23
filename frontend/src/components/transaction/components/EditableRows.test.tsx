@@ -2,9 +2,9 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
-import { TransactionInput, TransactionType } from '@alisa-types';
+import { TransactionInput, TransactionType } from '@asset-types';
 import EditableRows from './EditableRows';
-import ApiClient from '@alisa-lib/api-client';
+import ApiClient from '@asset-lib/api-client';
 
 // Spy on ApiClient methods
 jest.spyOn(ApiClient, 'getDefault');
@@ -412,7 +412,7 @@ describe('EditableRows', () => {
 
     mockOnHandleChange.mockClear();
 
-    // Now simulate expenses being loaded (like when AlisaFormHandler fetches data)
+    // Now simulate expenses being loaded (like when AssetFormHandler fetches data)
     const loadedExpenses = [
       {
         id: 1,

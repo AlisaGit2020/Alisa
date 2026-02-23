@@ -10,7 +10,7 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { jwtConstants, facebookConstants } from './constants';
 import { PeopleModule } from '../people/people.module';
-import { TierModule } from '@alisa-backend/admin/tier.module';
+import { TierModule } from '@asset-backend/admin/tier.module';
 
 // Only include Facebook OAuth if credentials are configured
 const facebookEnabled = !!facebookConstants.clientID;

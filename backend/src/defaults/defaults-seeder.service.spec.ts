@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DefaultsSeeder } from './defaults.seeder';
-import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
-import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
+import { ExpenseType } from '@asset-backend/accounting/expense/entities/expense-type.entity';
+import { IncomeType } from '@asset-backend/accounting/income/entities/income-type.entity';
 
 describe('DefaultsSeeder', () => {
   let seeder: DefaultsSeeder;

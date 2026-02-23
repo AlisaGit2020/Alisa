@@ -1,8 +1,8 @@
 import { WithTranslation, withTranslation } from "react-i18next";
 import React from "react";
-import ApiClient from "@alisa-lib/api-client";
+import ApiClient from "@asset-lib/api-client";
 import InvestmentCalculatorResults, { SavedInvestmentCalculation } from "./InvestmentCalculatorResults";
-import { AlisaDialog } from "../alisa";
+import { AssetDialog } from "../asset";
 
 interface InvestmentCalculationViewDialogProps extends WithTranslation {
   calculationId: number;
@@ -42,7 +42,7 @@ function InvestmentCalculationViewDialog({
   }, [open, calculationId, loadCalculation]);
 
   return (
-    <AlisaDialog
+    <AssetDialog
       open={open}
       title={calculation?.name || t('investment-calculator:calculation')}
       maxWidth="md"
@@ -56,7 +56,7 @@ function InvestmentCalculationViewDialog({
           showSaveButton={false}
         />
       )}
-    </AlisaDialog>
+    </AssetDialog>
   );
 }
 

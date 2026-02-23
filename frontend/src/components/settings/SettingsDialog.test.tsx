@@ -9,15 +9,15 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '@test-utils/test-i18n';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeContextProvider } from '@alisa-lib/theme-context';
-import { AlisaToastProvider } from '../alisa';
+import { ThemeContextProvider } from '@asset-lib/theme-context';
+import { AssetToastProvider } from '../asset';
 import SettingsDialog from './SettingsDialog';
-import ApiClient from '@alisa-lib/api-client';
-import DataService from '@alisa-lib/data-service';
+import ApiClient from '@asset-lib/api-client';
+import DataService from '@asset-lib/data-service';
 import { createMockUser } from '@test-utils/test-data';
 
-jest.mock('@alisa-lib/api-client');
-jest.mock('@alisa-lib/data-service');
+jest.mock('@asset-lib/api-client');
+jest.mock('@asset-lib/data-service');
 
 // Custom wrapper that includes ThemeContextProvider
 function TestWrapper({ children }: { children: React.ReactNode }) {
@@ -28,9 +28,9 @@ function TestWrapper({ children }: { children: React.ReactNode }) {
       <ThemeProvider theme={theme}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <I18nextProvider i18n={i18n}>
-            <AlisaToastProvider>
+            <AssetToastProvider>
               <ThemeContextProvider>{children}</ThemeContextProvider>
-            </AlisaToastProvider>
+            </AssetToastProvider>
           </I18nextProvider>
         </LocalizationProvider>
       </ThemeProvider>

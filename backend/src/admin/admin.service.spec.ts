@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminService } from './admin.service';
-import { UserService } from '@alisa-backend/people/user/user.service';
+import { UserService } from '@asset-backend/people/user/user.service';
 import { createUser } from 'test/factories';
 
 describe('AdminService', () => {

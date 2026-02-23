@@ -24,14 +24,14 @@
 
     "baseUrl": ".",
     "paths": {
-      "@alisa-lib/*": ["src/lib/*"],
-      "@alisa-types": ["src/types/index.ts"],
-      "@alisa-types/*": ["src/types/*"],
-      "@alisa-mocks/*": ["test/mocks/*"],
+      "@asset-lib/*": ["src/lib/*"],
+      "@asset-types": ["src/types/index.ts"],
+      "@asset-types/*": ["src/types/*"],
+      "@asset-mocks/*": ["test/mocks/*"],
       "@test-utils/*": ["test/utils/*"],
       // Backend path alias - used for importing shared types (enums, DTOs) in tests.
       // Jest config has matching mapping. Do not import Node.js-specific code.
-      "@alisa-backend/*": ["../backend/src/*"]
+      "@asset-backend/*": ["../backend/src/*"]
     }
   },
   "include": ["src"],  

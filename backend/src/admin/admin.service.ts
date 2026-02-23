@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { UserService } from '@alisa-backend/people/user/user.service';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { UserService } from '@asset-backend/people/user/user.service';
+import { User } from '@asset-backend/people/user/entities/user.entity';
 
 @Injectable()
 export class AdminService {

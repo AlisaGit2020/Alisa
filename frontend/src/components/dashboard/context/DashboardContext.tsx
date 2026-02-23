@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback 
 import {
   getTransactionPropertyId,
   setTransactionPropertyId,
-} from "@alisa-lib/initial-data";
+} from "@asset-lib/initial-data";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../../transaction/TransactionLeftMenuItems";
 import {
   DashboardConfig,
@@ -11,9 +11,9 @@ import {
   DEFAULT_DASHBOARD_CONFIG,
   WIDGET_REGISTRY,
 } from "../config/widget-registry";
-import ApiClient from "@alisa-lib/api-client";
+import ApiClient from "@asset-lib/api-client";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
-import UserStorage from "@alisa-lib/user-storage";
+import UserStorage from "@asset-lib/user-storage";
 
 export type ViewMode = "monthly" | "yearly";
 

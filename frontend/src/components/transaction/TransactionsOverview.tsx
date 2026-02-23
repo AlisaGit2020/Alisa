@@ -13,10 +13,10 @@ import { useTranslation } from "react-i18next";
 import DoneIcon from "@mui/icons-material/Done";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
-import { transactionContext } from "@alisa-lib/alisa-contexts";
-import ApiClient from "@alisa-lib/api-client";
-import { TransactionStatus, Transaction } from "@alisa-types";
-import { getTransactionPropertyId } from "@alisa-lib/initial-data";
+import { transactionContext } from "@asset-lib/asset-contexts";
+import ApiClient from "@asset-lib/api-client";
+import { TransactionStatus, Transaction } from "@asset-types";
+import { getTransactionPropertyId } from "@asset-lib/initial-data";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "./TransactionLeftMenuItems";
 
 interface SubPageCard {
