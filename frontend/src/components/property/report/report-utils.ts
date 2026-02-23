@@ -1,4 +1,4 @@
-import { PropertyStatistics } from "@alisa-types";
+import { PropertyStatistics } from "@asset-types";
 
 export interface SummaryData {
   currentYearIncome: number;

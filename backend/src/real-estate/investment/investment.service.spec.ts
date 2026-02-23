@@ -9,7 +9,7 @@ import { InvestmentService } from './investment.service';
 import { Investment } from './entities/investment.entity';
 import { InvestmentCalculator } from './classes/investment-calculator.class';
 import { InvestmentInputDto } from './dtos/investment-input.dto';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   createMockRepository,
   createMockAuthService,

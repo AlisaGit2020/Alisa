@@ -5,7 +5,7 @@ import {
   incomeContext,
   incomeTypeContext,
   transactionContext,
-} from "@alisa-lib/alisa-contexts.ts";
+} from "@asset-lib/asset-contexts.ts";
 import { IconButton } from "@mui/material";
 import {
   ExpenseInput,
@@ -14,15 +14,15 @@ import {
   IncomeInput,
   IncomeType,
   TransactionType,
-} from "@alisa-types";
+} from "@asset-types";
 import React from "react";
-import DataService from "@alisa-lib/data-service.ts";
-import AlisaSelect from "../../alisa/data/AlisaSelect.tsx";
+import DataService from "@asset-lib/data-service.ts";
+import AssetSelect from "../../asset/data/AssetSelect.tsx";
 import Title from "../../../Title.tsx";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import RowDataFields from "./RowDataFields.tsx";
-import { TransactionRow } from "@alisa-lib/types.ts";
+import { TransactionRow } from "@asset-lib/types.ts";
 
 interface EditableRowsProps extends WithTranslation {
   transaction: TransactionInput;
@@ -199,7 +199,7 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
     const getTypeSelect = (row: T) => {
       if (props.type === TransactionType.EXPENSE) {
         return (
-          <AlisaSelect<ExpenseInput, ExpenseType>
+          <AssetSelect<ExpenseInput, ExpenseType>
             label={props.t("expenseType")}
             dataService={
               new DataService<ExpenseType>({
@@ -212,13 +212,13 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
             onHandleChange={handleExpenseTypeChange}
             t={props.t}
             translateKeyPrefix="expense-type"
-          ></AlisaSelect>
+          ></AssetSelect>
         );
       }
 
       if (props.type === TransactionType.INCOME) {
         return (
-          <AlisaSelect<IncomeInput, IncomeType>
+          <AssetSelect<IncomeInput, IncomeType>
             label={props.t("incomeType")}
             dataService={
               new DataService<IncomeType>({
@@ -231,7 +231,7 @@ function EditableRows<T extends TransactionRow>(props: EditableRowsProps) {
             onHandleChange={handleIncomeTypeChange}
             t={props.t}
             translateKeyPrefix="income-type"
-          ></AlisaSelect>
+          ></AssetSelect>
         );
       }
     };

@@ -1,4 +1,4 @@
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
 import {
   Column,
   Entity,
@@ -6,9 +6,9 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
-import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
-import { columnOptionTwoDecimal } from '@alisa-backend/common/typeorm.column.definitions';
+import { ExpenseType } from '@asset-backend/accounting/expense/entities/expense-type.entity';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
+import { columnOptionTwoDecimal } from '@asset-backend/common/typeorm.column.definitions';
 
 @Entity()
 export class Expense {

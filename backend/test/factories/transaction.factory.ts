@@ -1,10 +1,10 @@
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
+import { Income } from '@asset-backend/accounting/income/entities/income.entity';
+import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
 import {
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 
 export interface CreateTransactionOptions {
   id?: number;

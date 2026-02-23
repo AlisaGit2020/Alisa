@@ -1,12 +1,12 @@
 //TypeOrm entity for property table.
 
-import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
-import { columnOptionOneDecimal } from '@alisa-backend/common/typeorm.column.definitions';
+import { Income } from '@asset-backend/accounting/income/entities/income.entity';
+import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
+import { columnOptionOneDecimal } from '@asset-backend/common/typeorm.column.definitions';
 import {
   PropertyExternalSource,
   PropertyStatus,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 import {
   Column,
   Entity,
@@ -15,10 +15,10 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { PropertyStatistics } from '@alisa-backend/real-estate/property/entities/property-statistics.entity';
-import { Address } from '@alisa-backend/real-estate/address/entities/address.entity';
+import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
+import { PropertyStatistics } from '@asset-backend/real-estate/property/entities/property-statistics.entity';
+import { Address } from '@asset-backend/real-estate/address/entities/address.entity';
 
 @Entity()
 export class Property {

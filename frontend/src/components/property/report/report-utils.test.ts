@@ -1,5 +1,5 @@
 import { calculateSummaryData, SummaryData } from "./report-utils";
-import { PropertyStatistics } from "@alisa-types";
+import { PropertyStatistics } from "@asset-types";
 
 // Factory to create test statistics
 const createStatistic = (

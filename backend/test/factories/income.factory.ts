@@ -1,6 +1,6 @@
-import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
-import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
-import { IncomeTypeKey } from '@alisa-backend/common/types';
+import { Income } from '@asset-backend/accounting/income/entities/income.entity';
+import { IncomeType } from '@asset-backend/accounting/income/entities/income-type.entity';
+import { IncomeTypeKey } from '@asset-backend/common/types';
 
 export interface CreateIncomeOptions {
   id?: number;

@@ -9,14 +9,14 @@ import { InvestmentInputDto } from './dtos/investment-input.dto';
 import { Investment } from './entities/investment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, In, Repository } from 'typeorm';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
-import { FindOptionsWhereWithUserId } from '@alisa-backend/common/types';
+import { JWTUser } from '@asset-backend/auth/types';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { typeormWhereTransformer } from '@asset-backend/common/transformer/typeorm-where.transformer';
+import { FindOptionsWhereWithUserId } from '@asset-backend/common/types';
 import {
   DataSaveResultDto,
   DataSaveResultRowDto,
-} from '@alisa-backend/common/dtos/data-save-result.dto';
+} from '@asset-backend/common/dtos/data-save-result.dto';
 
 @Injectable()
 export class InvestmentService {

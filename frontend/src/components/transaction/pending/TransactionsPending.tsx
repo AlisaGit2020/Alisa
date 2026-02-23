@@ -1,8 +1,8 @@
 import { Paper, Stack } from "@mui/material";
 
 import { WithTranslation, withTranslation } from "react-i18next";
-import AlisaDataTable from "../../alisa/datatable/AlisaDataTable.tsx";
-import { transactionContext } from "@alisa-lib/alisa-contexts.ts";
+import AssetDataTable from "../../asset/datatable/AssetDataTable.tsx";
+import { transactionContext } from "@asset-lib/asset-contexts.ts";
 import {
   Transaction,
   TransactionStatus,
@@ -11,9 +11,9 @@ import {
   TransactionSetTypeInput,
   TransactionSetCategoryTypeInput,
   SplitLoanPaymentBulkInput,
-} from "@alisa-types";
-import DataService from "@alisa-lib/data-service.ts";
-import { TypeOrmFetchOptions } from "@alisa-lib/types.ts";
+} from "@asset-types";
+import DataService from "@asset-lib/data-service.ts";
+import { TypeOrmFetchOptions } from "@asset-lib/types.ts";
 import React from "react";
 import TransactionDetails from "../components/TransactionDetails.tsx";
 import TransactionForm from "../TransactionForm.tsx";
@@ -23,17 +23,17 @@ import TransactionFilter, {
   SearchField,
   TransactionFilterData,
 } from "../components/TransactionFilter.tsx";
-import ApiClient from "@alisa-lib/api-client.ts";
+import ApiClient from "@asset-lib/api-client.ts";
 import {
   getStoredFilter,
   setStoredFilter,
   getTransactionPropertyId,
-} from "@alisa-lib/initial-data.ts";
-import { View } from "@alisa-lib/views.ts";
+} from "@asset-lib/initial-data.ts";
+import { View } from "@asset-lib/views.ts";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../TransactionLeftMenuItems.tsx";
 import { ListPageTemplate } from "../../templates";
-import { usePropertyRequired } from "@alisa-lib/hooks/usePropertyRequired";
-import { PropertyRequiredSnackbar, useToast } from "../../alisa";
+import { usePropertyRequired } from "@asset-lib/hooks/usePropertyRequired";
+import { PropertyRequiredSnackbar, useAssetToast } from "../../asset";
 import TransactionCategoryChips from "../components/TransactionCategoryChips";
 
 const getDefaultFilter = (): TransactionFilterData => ({
@@ -72,7 +72,7 @@ function TransactionsPending({ t }: WithTranslation) {
 
   const { requireProperty, popoverOpen, popoverAnchorEl, closePopover, openPropertySelector } =
     usePropertyRequired(filter.propertyId);
-  const { showToast } = useToast();
+  const { showToast } = useAssetToast();
 
   const updateFilter = (newFilter: TransactionFilterData) => {
     setFilter(newFilter);
@@ -359,7 +359,7 @@ function TransactionsPending({ t }: WithTranslation) {
         ></TransactionsPendingActions>
 
         <Paper>
-          <AlisaDataTable<Transaction>
+          <AssetDataTable<Transaction>
             t={t}
             dataService={
               new DataService({ context: transactionContext, fetchOptions })

@@ -1,6 +1,6 @@
 # Backend Testing Guide
 
-This guide explains how to write tests for NestJS services in the Alisa backend.
+This guide explains how to write tests for NestJS services in the Asset backend.
 
 ## Overview
 
@@ -46,7 +46,7 @@ import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExpenseService } from './expense.service';
 import { Expense } from './entities/expense.entity';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   createMockRepository,
   createMockAuthService,
@@ -174,7 +174,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   closeAppGracefully,
   getBearerToken,

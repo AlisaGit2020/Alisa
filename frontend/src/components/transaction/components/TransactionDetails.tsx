@@ -1,5 +1,5 @@
-import { Transaction, TransactionType, transactionTypeNames } from "@alisa-types";
-import DataService from "@alisa-lib/data-service";
+import { Transaction, TransactionType, transactionTypeNames } from "@asset-types";
+import DataService from "@asset-lib/data-service";
 import { WithTranslation, withTranslation } from "react-i18next";
 import {
   Box,
@@ -11,13 +11,13 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
-import { transactionContext } from "@alisa-lib/alisa-contexts";
+import { transactionContext } from "@asset-lib/asset-contexts";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
 import DescriptionIcon from "@mui/icons-material/Description";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import { AlisaButton, AlisaDialog } from "../../alisa";
+import { AssetButton, AssetDialog } from "../../asset";
 
 interface DetailRowProps {
   icon?: React.ReactNode;
@@ -113,13 +113,13 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
   }
 
   return (
-    <AlisaDialog
+    <AssetDialog
       open={Boolean(id)}
       onClose={onClose}
       fullWidth={true}
       maxWidth="sm"
       title={t("detailsTitle")}
-      actions={<AlisaButton label={t("close")} variant="text" onClick={onClose} />}
+      actions={<AssetButton label={t("close")} variant="text" onClick={onClose} />}
     >
       <Stack spacing={3}>
         {/* Amount Section */}
@@ -340,7 +340,7 @@ function TransactionDetails({ t, id, onClose }: TransactionDetailsProps) {
           </>
         )}
       </Stack>
-    </AlisaDialog>
+    </AssetDialog>
   );
 }
 

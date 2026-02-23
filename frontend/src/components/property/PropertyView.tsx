@@ -2,11 +2,11 @@ import { Box, CircularProgress, Divider, Grid, Paper, Stack, Typography } from '
 import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { WithTranslation, withTranslation } from 'react-i18next';
-import { propertyContext } from '../../lib/alisa-contexts';
-import { Property } from '@alisa-types';
+import { propertyContext } from '../../lib/asset-contexts';
+import { Property } from '@asset-types';
 import ApiClient from '../../lib/api-client';
-import AlisaLoadingProgress from '../alisa/AlisaLoadingProgress';
-import AlisaButton from '../alisa/form/AlisaButton';
+import AssetLoadingProgress from '../asset/AssetLoadingProgress';
+import AssetButton from '../asset/form/AssetButton';
 import { VITE_BASE_URL } from '../../constants';
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -127,7 +127,7 @@ function PropertyView({ t }: WithTranslation) {
   if (loading) {
     return (
       <Paper sx={{ p: 2 }}>
-        <AlisaLoadingProgress />
+        <AssetLoadingProgress />
       </Paper>
     );
   }
@@ -178,7 +178,7 @@ function PropertyView({ t }: WithTranslation) {
 
       {/* Back button */}
       <Box sx={{ p: 2, pb: 0 }}>
-        <AlisaButton
+        <AssetButton
           label={t('back')}
           variant="text"
           startIcon={<ArrowBackIcon />}
@@ -200,13 +200,13 @@ function PropertyView({ t }: WithTranslation) {
             )}
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <AlisaButton
+            <AssetButton
               label={t('allocation:rules')}
               variant="outlined"
               startIcon={<RuleIcon />}
               onClick={() => setRulesModalOpen(true)}
             />
-            <AlisaButton
+            <AssetButton
               label={t('editProperty')}
               variant="contained"
               startIcon={<EditIcon />}

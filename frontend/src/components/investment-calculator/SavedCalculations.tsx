@@ -1,11 +1,11 @@
 import { WithTranslation, withTranslation } from "react-i18next";
 import { Box, Paper, Stack } from "@mui/material";
 import React from "react";
-import ApiClient from "@alisa-lib/api-client";
+import ApiClient from "@asset-lib/api-client";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../alisa";
-import AlisaDataTable from "../alisa/datatable/AlisaDataTable";
-import DataService from "@alisa-lib/data-service";
+import { useAssetToast } from "../asset";
+import AssetDataTable from "../asset/datatable/AssetDataTable";
+import DataService from "@asset-lib/data-service";
 import InvestmentCalculationViewDialog from "./InvestmentCalculationViewDialog";
 import InvestmentCalculationEditDialog from "./InvestmentCalculationEditDialog";
 import SavedCalculationsActions from "./SavedCalculationsActions";
@@ -39,7 +39,7 @@ function SavedCalculations({
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const navigate = useNavigate();
-  const { showToast } = useToast();
+  const { showToast } = useAssetToast();
 
   const dataService = React.useMemo(() => {
     const service = {
@@ -157,7 +157,7 @@ function SavedCalculations({
         />
 
         <Paper>
-          <AlisaDataTable<SavedCalculation>
+          <AssetDataTable<SavedCalculation>
             t={t}
             dataService={dataService}
             fields={[

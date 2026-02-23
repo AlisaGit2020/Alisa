@@ -7,9 +7,9 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
-import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
-import { columnOptionTwoDecimal } from '@alisa-backend/common/typeorm.column.definitions';
+import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
+import { columnOptionTwoDecimal } from '@asset-backend/common/typeorm.column.definitions';
 import { DepreciationRecord } from './depreciation-record.entity';
 
 @Entity()

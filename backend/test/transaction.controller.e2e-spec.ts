@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { OpImportService } from '@alisa-backend/import/op/op-import.service';
-import { MOCKS_PATH } from '@alisa-backend/constants';
-import { OpImportInput } from '@alisa-backend/import/op/dtos/op-import-input.dto';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { OpImportService } from '@asset-backend/import/op/op-import.service';
+import { MOCKS_PATH } from '@asset-backend/constants';
+import { OpImportInput } from '@asset-backend/import/op/dtos/op-import-input.dto';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   addIncomeAndExpenseTypes,
   addTransaction,
@@ -21,13 +21,13 @@ import * as http from 'http';
 import {
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 import {
   getTransactionExpense1,
   getTransactionIncome1,
   getTransactionDeposit1,
 } from './data/mocks/transaction.mock';
-import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
+import { TransactionInputDto } from '@asset-backend/accounting/transaction/dtos/transaction-input.dto';
 
 describe('TransactionController (e2e)', () => {
   let app: INestApplication;

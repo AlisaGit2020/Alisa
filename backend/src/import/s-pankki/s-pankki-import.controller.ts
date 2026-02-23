@@ -13,10 +13,10 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { SPankkiImportService } from './s-pankki-import.service';
 import { validate } from 'class-validator';
 import { SPankkiImportInput } from './dtos/s-pankki-import-input.dto';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { User } from '@alisa-backend/common/decorators/user.decorator';
-import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
-import { csvUploadConfig } from '@alisa-backend/common/multer/csv-upload.config';
+import { JWTUser } from '@asset-backend/auth/types';
+import { User } from '@asset-backend/common/decorators/user.decorator';
+import { JwtAuthGuard } from '@asset-backend/auth/jwt.auth.guard';
+import { csvUploadConfig } from '@asset-backend/common/multer/csv-upload.config';
 
 @UseGuards(JwtAuthGuard, ThrottlerGuard)
 @Controller('import/s-pankki')

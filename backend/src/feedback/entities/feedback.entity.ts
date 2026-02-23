@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { User } from '@asset-backend/people/user/entities/user.entity';
 
 export type FeedbackType = 'bug' | 'feature' | 'general';
 

@@ -1,10 +1,10 @@
 import { Typography, Stack } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
 import FacebookIcon from "@mui/icons-material/Facebook";
-import ApiClient from "@alisa-lib/api-client";
+import ApiClient from "@asset-lib/api-client";
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { AlisaButton, AlisaDialog } from "../alisa";
+import { AssetButton, AssetDialog } from "../asset";
 
 interface AuthProviders {
   google: boolean;
@@ -44,7 +44,7 @@ function LoginDialog({ open, onClose }: LoginDialogProps) {
   };
 
   return (
-    <AlisaDialog
+    <AssetDialog
       open={open}
       onClose={onClose}
       title={t("login:title")}
@@ -55,7 +55,7 @@ function LoginDialog({ open, onClose }: LoginDialogProps) {
         <Typography variant="body1" color="text.secondary" align="center">
           {t("login:loginWith")}
         </Typography>
-        <AlisaButton
+        <AssetButton
           label={t("login:continueWithGoogle")}
           variant="contained"
           size="large"
@@ -65,7 +65,7 @@ function LoginDialog({ open, onClose }: LoginDialogProps) {
           sx={{ py: 1.5 }}
         />
         {providers.facebook && (
-          <AlisaButton
+          <AssetButton
             label={t("login:continueWithFacebook")}
             variant="contained"
             size="large"
@@ -82,7 +82,7 @@ function LoginDialog({ open, onClose }: LoginDialogProps) {
           />
         )}
       </Stack>
-    </AlisaDialog>
+    </AssetDialog>
   );
 }
 

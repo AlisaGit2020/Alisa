@@ -5,9 +5,9 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/fi";
 import createStore from "react-auth-kit/createStore";
 import AuthProvider from "react-auth-kit";
-import { ThemeContextProvider, useThemeMode } from "@alisa-lib/theme-context";
+import { ThemeContextProvider, useThemeMode } from "@asset-lib/theme-context";
 import { DashboardProvider } from "./components/dashboard/context/DashboardContext";
-import { AlisaToastProvider } from "./components/alisa";
+import { AssetToastProvider } from "./components/asset";
 import { useMemo } from "react";
 import AppRoutes from "./components/AppRoutes";
 
@@ -54,13 +54,13 @@ function ThemedApp() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AlisaToastProvider>
+      <AssetToastProvider>
         <AuthProvider store={store}>
           <DashboardProvider>
             <AppRoutes />
           </DashboardProvider>
         </AuthProvider>
-      </AlisaToastProvider>
+      </AssetToastProvider>
     </ThemeProvider>
   );
 }

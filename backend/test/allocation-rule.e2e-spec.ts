@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   closeAppGracefully,
   getBearerToken,
@@ -16,9 +16,9 @@ import * as http from 'http';
 import {
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
-import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
+} from '@asset-backend/common/types';
+import { TransactionService } from '@asset-backend/accounting/transaction/transaction.service';
+import { TransactionInputDto } from '@asset-backend/accounting/transaction/dtos/transaction-input.dto';
 
 describe('AllocationRuleController (e2e)', () => {
   let app: INestApplication;

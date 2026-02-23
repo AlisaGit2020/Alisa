@@ -1,8 +1,8 @@
-import { AllocationRule } from '@alisa-backend/accounting/allocation-rule/entities/allocation-rule.entity';
+import { AllocationRule } from '@asset-backend/accounting/allocation-rule/entities/allocation-rule.entity';
 import {
   AllocationCondition,
   TransactionType,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 
 export interface CreateAllocationRuleOptions {
   id?: number;

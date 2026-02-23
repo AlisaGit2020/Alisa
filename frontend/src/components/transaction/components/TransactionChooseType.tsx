@@ -2,25 +2,25 @@ import { Stack, Box } from "@mui/material";
 import PaymentIcon from '@mui/icons-material/Payment';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { WithTranslation, withTranslation } from "react-i18next";
-import { transactionContext } from "@alisa-lib/alisa-contexts";
-import { AlisaButton, AlisaContent } from "../../alisa";
+import { transactionContext } from "@asset-lib/asset-contexts";
+import { AssetButton, AssetContent } from "../../asset";
 
 function TransactionChooseType({ t }: WithTranslation) {
     return (
-        <AlisaContent
+        <AssetContent
             headerText={t('add')}
         >
             <Stack spacing={2}>
                 <Box>{t('chooseTransactionType')}</Box>
                 <Stack direction={'row'} spacing={2}>
-                    <AlisaButton
+                    <AssetButton
                         label={t('expense')}
                         variant="outlined"
                         size="large"
                         startIcon={<PaymentIcon />}
                         href={`${transactionContext.routePath}/add/expense`}
                     />
-                    <AlisaButton
+                    <AssetButton
                         label={t('income')}
                         variant="outlined"
                         size="large"
@@ -29,7 +29,7 @@ function TransactionChooseType({ t }: WithTranslation) {
                     />
                 </Stack>
             </Stack>
-        </AlisaContent>
+        </AssetContent>
     )
 }
 

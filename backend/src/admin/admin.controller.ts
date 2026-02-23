@@ -9,11 +9,11 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
+import { JwtAuthGuard } from '@asset-backend/auth/jwt.auth.guard';
 import { AdminGuard } from './admin.guard';
 import { AdminService } from './admin.service';
 import { TierService } from './tier.service';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { User } from '@asset-backend/people/user/entities/user.entity';
 import { Tier } from './entities/tier.entity';
 import { TierInputDto } from './dtos/tier-input.dto';
 

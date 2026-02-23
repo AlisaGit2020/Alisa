@@ -1,6 +1,6 @@
 // frontend/src/components/accounting/incomes/IncomeForm.test.tsx
 import '@testing-library/jest-dom';
-import { IncomeInput } from '@alisa-types';
+import { IncomeInput } from '@asset-types';
 
 // Since Jest mock hoisting causes issues with ESM mode,
 // we test the data transformation logic separately from the React component

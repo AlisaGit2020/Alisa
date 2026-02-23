@@ -13,17 +13,17 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Property } from './entities/property.entity';
 import { PropertyInputDto } from './dtos/property-input.dto';
-import { Address } from '@alisa-backend/real-estate/address/entities/address.entity';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownership-input.dto';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
-import { TierService } from '@alisa-backend/admin/tier.service';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
-import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
+import { Address } from '@asset-backend/real-estate/address/entities/address.entity';
+import { JWTUser } from '@asset-backend/auth/types';
+import { OwnershipInputDto } from '@asset-backend/people/ownership/dtos/ownership-input.dto';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
+import { TierService } from '@asset-backend/admin/tier.service';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
+import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
+import { Income } from '@asset-backend/accounting/income/entities/income.entity';
 import { PropertyStatistics } from './entities/property-statistics.entity';
-import { DepreciationAsset } from '@alisa-backend/accounting/depreciation/entities/depreciation-asset.entity';
+import { DepreciationAsset } from '@asset-backend/accounting/depreciation/entities/depreciation-asset.entity';
 import {
   PropertyDeleteValidationDto,
   DependencyGroup,
@@ -31,7 +31,7 @@ import {
   DependencyType,
 } from './dtos/property-delete-validation.dto';
 import { PropertyTransactionSearchDto } from './dtos/property-transaction-search.dto';
-import { TransactionStatus } from '@alisa-backend/common/types';
+import { TransactionStatus } from '@asset-backend/common/types';
 
 @Injectable()
 export class PropertyService {

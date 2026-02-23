@@ -6,8 +6,8 @@ import {
   PrimaryColumn,
   Unique,
 } from 'typeorm';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
-import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
+import { User } from '@asset-backend/people/user/entities/user.entity';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
 
 @Entity()
 @Unique(['propertyId', 'userId'])

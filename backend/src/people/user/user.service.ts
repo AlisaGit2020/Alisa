@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
-import { UserInputDto } from '@alisa-backend/people/user/dtos/user-input.dto';
+import { User } from '@asset-backend/people/user/entities/user.entity';
+import { UserInputDto } from '@asset-backend/people/user/dtos/user-input.dto';
 
 @Injectable()
 export class UserService {

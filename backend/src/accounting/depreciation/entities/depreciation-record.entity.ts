@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { DepreciationAsset } from './depreciation-asset.entity';
-import { columnOptionTwoDecimal } from '@alisa-backend/common/typeorm.column.definitions';
+import { columnOptionTwoDecimal } from '@asset-backend/common/typeorm.column.definitions';
 
 @Entity()
 export class DepreciationRecord {

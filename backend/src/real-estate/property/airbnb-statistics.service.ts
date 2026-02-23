@@ -8,14 +8,14 @@ import {
   StandaloneIncomeUpdatedEvent,
   TransactionCreatedEvent,
   TransactionDeletedEvent,
-} from '@alisa-backend/common/events';
+} from '@asset-backend/common/events';
 import {
   IncomeTypeKey,
   StatisticKey,
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
-import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
+} from '@asset-backend/common/types';
+import { EventTrackerService } from '@asset-backend/common/event-tracker.service';
 
 @Injectable()
 export class AirbnbStatisticsService {

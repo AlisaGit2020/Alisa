@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import AllocationConditionRow from './AllocationConditionRow';
-import { AllocationCondition } from '@alisa-types';
+import { AllocationCondition } from '@asset-types';
 import { TFunction } from 'i18next';
 
 const mockT = ((key: string) => {

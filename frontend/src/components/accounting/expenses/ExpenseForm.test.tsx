@@ -1,6 +1,6 @@
 // frontend/src/components/accounting/expenses/ExpenseForm.test.tsx
 import '@testing-library/jest-dom';
-import { ExpenseInput } from '@alisa-types';
+import { ExpenseInput } from '@asset-types';
 
 // Since Jest mock hoisting causes issues with ESM mode,
 // we test the data transformation logic separately from the React component

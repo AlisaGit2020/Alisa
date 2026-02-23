@@ -1,4 +1,4 @@
-import { StatisticKey } from '@alisa-backend/common/types';
+import { StatisticKey } from '@asset-backend/common/types';
 import { IsNumber, IsOptional } from 'class-validator';
 
 export class PropertyStatisticsFilterDto {

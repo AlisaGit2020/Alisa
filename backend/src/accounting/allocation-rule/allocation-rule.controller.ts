@@ -9,9 +9,9 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { User } from '@alisa-backend/common/decorators/user.decorator';
+import { JwtAuthGuard } from '@asset-backend/auth/jwt.auth.guard';
+import { JWTUser } from '@asset-backend/auth/types';
+import { User } from '@asset-backend/common/decorators/user.decorator';
 import { AllocationRuleService } from './allocation-rule.service';
 import { AllocationRule } from './entities/allocation-rule.entity';
 import { AllocationRuleInputDto } from './dtos/allocation-rule-input.dto';

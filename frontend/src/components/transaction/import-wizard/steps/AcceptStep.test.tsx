@@ -3,7 +3,7 @@ import { renderWithProviders, screen, waitFor } from '@test-utils/test-wrapper';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import AcceptStep from './AcceptStep';
-import { Transaction, TransactionType, TransactionStatus } from '@alisa-types';
+import { Transaction, TransactionType, TransactionStatus } from '@asset-types';
 import { TFunction } from 'i18next';
 
 describe('AcceptStep', () => {

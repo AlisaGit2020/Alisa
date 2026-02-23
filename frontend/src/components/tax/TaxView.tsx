@@ -14,14 +14,14 @@ import {
 } from "@mui/material";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import { useTranslation } from "react-i18next";
-import { AlisaButton } from "../alisa";
+import { AssetButton } from "../asset";
 import axios from "axios";
-import ApiClient from "@alisa-lib/api-client";
+import ApiClient from "@asset-lib/api-client";
 import { VITE_API_URL } from "../../constants";
 import TaxSummaryCards from "./TaxSummaryCards";
 import TaxBreakdown from "./TaxBreakdown";
 import { ListPageTemplate } from "../templates";
-import { getTransactionPropertyId } from "@alisa-lib/initial-data";
+import { getTransactionPropertyId } from "@asset-lib/initial-data";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../transaction/TransactionLeftMenuItems";
 
 interface BreakdownItem {
@@ -196,7 +196,7 @@ function TaxView() {
           <Typography color="text.secondary" variant="body2" sx={{ mb: 3 }}>
             {t("noDataHint")}
           </Typography>
-          <AlisaButton
+          <AssetButton
             label={calculating ? t("calculating") : t("calculate")}
             startIcon={<CalculateIcon />}
             onClick={calculateTaxData}
@@ -219,7 +219,7 @@ function TaxView() {
             </Alert>
           )}
           <Box sx={{ mt: 3, mb: 2 }}>
-            <AlisaButton
+            <AssetButton
               label={calculating ? t("calculating") : t("calculate")}
               variant="outlined"
               startIcon={<CalculateIcon />}

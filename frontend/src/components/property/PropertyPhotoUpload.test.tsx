@@ -17,7 +17,7 @@ jest.mock('axios', () => ({
 }));
 
 // Mock ApiClient with static methods
-jest.mock('@alisa-lib/api-client', () => ({
+jest.mock('@asset-lib/api-client', () => ({
   __esModule: true,
   default: {
     getOptions: jest.fn().mockResolvedValue({

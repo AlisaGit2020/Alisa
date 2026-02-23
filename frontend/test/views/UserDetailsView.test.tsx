@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import { createMockUser } from '@test-utils/test-data';
-import ApiClient from '@alisa-lib/api-client';
+import ApiClient from '@asset-lib/api-client';
 
 // Mock the withTranslation HOC to avoid i18n namespace issues
 jest.mock('react-i18next', () => ({

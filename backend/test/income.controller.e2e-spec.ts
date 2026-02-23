@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   addTransaction,
   addTransactionsToTestUsers,
@@ -16,11 +16,11 @@ import {
   TestUsersSetup,
 } from './helper-functions';
 import { getTransactionIncome1 } from './data/mocks/transaction.mock';
-import { TransactionStatus, TransactionType } from '@alisa-backend/common/types';
+import { TransactionStatus, TransactionType } from '@asset-backend/common/types';
 import * as http from 'http';
-import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
-import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
-import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
+import { Income } from '@asset-backend/accounting/income/entities/income.entity';
+import { IncomeInputDto } from '@asset-backend/accounting/income/dtos/income-input.dto';
+import { TransactionInputDto } from '@asset-backend/accounting/transaction/dtos/transaction-input.dto';
 import { startOfDay } from 'date-fns';
 
 // Test data for income

@@ -1,6 +1,6 @@
-# Alisa
+# Asset
 
-Alisa is a financial and property management application designed to help property owners and investors track transactions, manage properties, analyze investment returns, and visualize financial data through an interactive dashboard.
+Asset is a financial and property management application designed to help property owners and investors track transactions, manage properties, analyze investment returns, and visualize financial data through an interactive dashboard.
 
 ## Features
 
@@ -57,7 +57,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
-DB_DATABASE=alisa
+DB_DATABASE=asset
 
 JWT_SECRET=your_jwt_secret
 GOOGLE_CLIENT_ID=your_google_client_id
@@ -120,13 +120,13 @@ This starts:
 ## Project Structure
 
 ```
-Alisa/
+Asset/
 ├── frontend/                 # React frontend application
 │   ├── src/
 │   │   ├── components/       # React components by domain
 │   │   │   ├── accounting/   # Accounting views
 │   │   │   ├── admin/        # Admin panel
-│   │   │   ├── alisa/        # Shared UI components (AlisaTextField, etc.)
+│   │   │   ├── asset/        # Shared UI components (AssetTextField, etc.)
 │   │   │   ├── dashboard/    # Dashboard and widgets
 │   │   │   ├── datatables/   # Reusable data table components
 │   │   │   ├── investment-calculator/ # Investment calculator

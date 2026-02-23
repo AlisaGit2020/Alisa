@@ -1,9 +1,9 @@
-import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
-import { Address } from '@alisa-backend/real-estate/address/entities/address.entity';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
+import { Address } from '@asset-backend/real-estate/address/entities/address.entity';
 import {
   PropertyExternalSource,
   PropertyStatus,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 
 export interface CreateAddressOptions {
   id?: number;

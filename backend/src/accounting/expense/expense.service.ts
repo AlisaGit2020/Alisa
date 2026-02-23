@@ -9,12 +9,12 @@ import { FindManyOptions, FindOneOptions, In, Repository } from 'typeorm';
 import { Expense } from './entities/expense.entity';
 import { ExpenseInputDto } from './dtos/expense-input.dto';
 import { ExpenseType } from './entities/expense-type.entity';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { typeormWhereTransformer } from '@alisa-backend/common/transformer/typeorm-where.transformer';
-import { DepreciationService } from '@alisa-backend/accounting/depreciation/depreciation.service';
-import { TransactionStatus } from '@alisa-backend/common/types';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
+import { JWTUser } from '@asset-backend/auth/types';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { typeormWhereTransformer } from '@asset-backend/common/transformer/typeorm-where.transformer';
+import { DepreciationService } from '@asset-backend/accounting/depreciation/depreciation.service';
+import { TransactionStatus } from '@asset-backend/common/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   Events,
@@ -22,14 +22,14 @@ import {
   StandaloneExpenseCreatedEvent,
   StandaloneExpenseDeletedEvent,
   StandaloneExpenseUpdatedEvent,
-} from '@alisa-backend/common/events';
-import { DataSaveResultDto } from '@alisa-backend/common/dtos/data-save-result.dto';
+} from '@asset-backend/common/events';
+import { DataSaveResultDto } from '@asset-backend/common/dtos/data-save-result.dto';
 import {
   buildBulkOperationResult,
   createSuccessResult,
   createUnauthorizedResult,
   createErrorResult,
-} from '@alisa-backend/common/utils/bulk-operation.util';
+} from '@asset-backend/common/utils/bulk-operation.util';
 
 @Injectable()
 export class ExpenseService {

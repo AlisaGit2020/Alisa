@@ -4,11 +4,11 @@ import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import { createMockUser } from '@test-utils/test-data';
 import TransactionForm from './TransactionForm';
-import { TransactionStatus, TransactionType } from '@alisa-types';
-import DataService from '@alisa-lib/data-service';
-import ApiClient from '@alisa-lib/api-client';
+import { TransactionStatus, TransactionType } from '@asset-types';
+import DataService from '@asset-lib/data-service';
+import ApiClient from '@asset-lib/api-client';
 
-jest.mock('@alisa-lib/data-service');
+jest.mock('@asset-lib/data-service');
 
 describe('TransactionForm', () => {
   const mockUser = createMockUser({

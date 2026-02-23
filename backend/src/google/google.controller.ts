@@ -1,6 +1,6 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { GoogleService } from './google.service';
-import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
+import { JwtAuthGuard } from '@asset-backend/auth/jwt.auth.guard';
 
 @UseGuards(JwtAuthGuard)
 @Controller('google')

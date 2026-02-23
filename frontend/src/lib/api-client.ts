@@ -2,7 +2,7 @@ import axios from "axios";
 import { TypeOrmFetchOptions, TypeOrmRelationOption } from "./types";
 import Logger from "./logger";
 import { VITE_API_URL } from "../constants";
-import { User, DataSaveResult, SupportedLanguage } from "@alisa-types";
+import { User, DataSaveResult, SupportedLanguage } from "@asset-types";
 import Cookies from "js-cookie";
 
 class ApiClient {

@@ -4,7 +4,7 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import { useState } from "react";
 import AdminUserList from "./users/AdminUserList";
 import AdminTierList from "./tiers/AdminTierList";
-import { adminContext } from "@alisa-lib/alisa-contexts";
+import { adminContext } from "@asset-lib/asset-contexts";
 import FullscreenDialogLayout, {
   MenuItem,
 } from "../layout/FullscreenDialogLayout";

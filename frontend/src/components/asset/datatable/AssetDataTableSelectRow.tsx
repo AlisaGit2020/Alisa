@@ -1,0 +1,46 @@
+import { Checkbox, Tooltip } from "@mui/material";
+import { TFunction } from "i18next";
+
+interface AssetDataTableSelectRowHeaderProps {
+  t: TFunction;
+  onSelectAll: () => void;
+  checked: boolean;
+  visible?: boolean;
+}
+export function AssetDataTableSelectHeaderRow(
+  props: AssetDataTableSelectRowHeaderProps,
+) {
+  const visible = props.visible === undefined ? true : props.visible;
+  if (!visible) {
+    return;
+  }
+  return (
+    <Tooltip title={props.t("selectAll")}>
+      <Checkbox checked={props.checked} onChange={props.onSelectAll}></Checkbox>
+    </Tooltip>
+  );
+}
+
+interface AssetDataTableSelectRowProps {
+  id: number;
+  onSelect: (id: number) => void;
+  selectedIds: number[];
+}
+function AssetDataTableSelectRow(props: AssetDataTableSelectRowProps) {
+  return (
+    <>
+      {props.onSelect && (
+        <Checkbox
+          checked={props.selectedIds.includes(props.id)}
+          onChange={() => {
+            if (props.onSelect) {
+              props.onSelect(props.id as number);
+            }
+          }}
+        ></Checkbox>
+      )}
+    </>
+  );
+}
+
+export default AssetDataTableSelectRow;

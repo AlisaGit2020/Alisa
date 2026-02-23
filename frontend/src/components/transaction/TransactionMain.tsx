@@ -1,5 +1,5 @@
 import { Stack } from "@mui/material";
-import { transactionContext } from "@alisa-lib/alisa-contexts";
+import { transactionContext } from "@asset-lib/asset-contexts";
 import Transactions from "./Transactions";
 import { withTranslation, WithTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
@@ -8,16 +8,16 @@ import TransactionFilter, {
   SearchField,
   TransactionFilterData,
 } from "./components/TransactionFilter";
-import { TransactionAcceptInput, TransactionType } from "@alisa-types";
+import { TransactionAcceptInput, TransactionType } from "@asset-types";
 import TransactionsAcceptedActions from "./accepted/TransactionsAcceptedActions";
-import ApiClient from "@alisa-lib/api-client";
-import { useToast } from "../alisa";
+import ApiClient from "@asset-lib/api-client";
+import { useToast } from "../asset";
 import {
   getStoredFilter,
   setStoredFilter,
   getTransactionPropertyId,
-} from "@alisa-lib/initial-data";
-import { View } from "@alisa-lib/views";
+} from "@asset-lib/initial-data";
+import { View } from "@asset-lib/views";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "./TransactionLeftMenuItems";
 
 const getDefaultFilter = (): TransactionFilterData => ({

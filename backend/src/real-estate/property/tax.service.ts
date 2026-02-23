@@ -3,16 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, IsNull, Repository } from 'typeorm';
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { PropertyService } from './property.service';
-import { JWTUser } from '@alisa-backend/auth/types';
+import { JWTUser } from '@asset-backend/auth/types';
 import { TaxCalculateInputDto } from './dtos/tax-calculate-input.dto';
 import {
   TaxResponseDto,
   TaxBreakdownItemDto,
   DepreciationAssetBreakdownDto,
 } from './dtos/tax-response.dto';
-import { StatisticKey, TransactionStatus } from '@alisa-backend/common/types';
-import { DepreciationService } from '@alisa-backend/accounting/depreciation/depreciation.service';
-import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
+import { StatisticKey, TransactionStatus } from '@asset-backend/common/types';
+import { DepreciationService } from '@asset-backend/accounting/depreciation/depreciation.service';
+import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
 
 @Injectable()
 export class TaxService {

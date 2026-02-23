@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
-import { IncomeTypeKey } from '@alisa-backend/common/types';
+import { Income } from '@asset-backend/accounting/income/entities/income.entity';
+import { IncomeTypeKey } from '@asset-backend/common/types';
 
 @Entity()
 export class IncomeType {

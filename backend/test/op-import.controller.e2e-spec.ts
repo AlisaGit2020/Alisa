@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { MOCKS_PATH } from '@alisa-backend/constants';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { MOCKS_PATH } from '@asset-backend/constants';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   addIncomeAndExpenseTypes,
   closeAppGracefully,

@@ -8,8 +8,8 @@ import {
   Typography,
 } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
-import { useThemeMode } from "@alisa-lib/theme-context";
-import { settingsContext } from "@alisa-lib/alisa-contexts";
+import { useThemeMode } from "@asset-lib/theme-context";
+import { settingsContext } from "@asset-lib/asset-contexts";
 
 function ThemeSettings({ t }: WithTranslation) {
   const { mode, setMode } = useThemeMode();

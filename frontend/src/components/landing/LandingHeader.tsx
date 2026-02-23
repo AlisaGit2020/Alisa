@@ -5,7 +5,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { AlisaButton } from "../alisa";
+import { AssetButton } from "../asset";
 
 interface LandingHeaderProps extends WithTranslation {
   onLoginClick: () => void;
@@ -162,7 +162,7 @@ function LandingHeader({ t, onLoginClick }: LandingHeaderProps) {
           </Box>
 
           {/* Login Button - Hidden on mobile */}
-          <AlisaButton
+          <AssetButton
             label={t('landing:nav.login')}
             variant="contained"
             onClick={onLoginClick}
@@ -261,7 +261,7 @@ function LandingHeader({ t, onLoginClick }: LandingHeaderProps) {
               EN
             </Link>
           </Box>
-          <AlisaButton
+          <AssetButton
             label={t('landing:nav.login')}
             variant="contained"
             fullWidth

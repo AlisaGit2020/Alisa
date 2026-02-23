@@ -6,17 +6,17 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, MoreThan, Repository } from 'typeorm';
 import { Transaction } from './entities/transaction.entity';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
+import { JWTUser } from '@asset-backend/auth/types';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { PropertyService } from '@asset-backend/real-estate/property/property.service';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import {
   Events,
   TransactionAcceptedEvent,
   TransactionDeletedEvent,
-} from '@alisa-backend/common/events';
-import { TransactionStatus } from '@alisa-backend/common/types';
-import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
+} from '@asset-backend/common/events';
+import { TransactionStatus } from '@asset-backend/common/types';
+import { EventTrackerService } from '@asset-backend/common/event-tracker.service';
 
 @Injectable()
 export class BalanceService {

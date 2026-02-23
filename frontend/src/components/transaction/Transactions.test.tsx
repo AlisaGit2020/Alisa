@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { TransactionStatus, TransactionType } from '@alisa-types';
+import { TransactionStatus, TransactionType } from '@asset-types';
 import { TransactionFilterData } from './components/TransactionFilter';
 import transactionEn from '../../translations/transaction/en';
 
@@ -250,7 +250,7 @@ describe('Transactions Component Logic', () => {
         calledWith = id;
       };
 
-      // In Transactions.tsx, onRowDeleted is passed as onDelete to AlisaDataTable
+      // In Transactions.tsx, onRowDeleted is passed as onDelete to AssetDataTable
       const onDelete = onRowDeleted;
       onDelete(7);
 

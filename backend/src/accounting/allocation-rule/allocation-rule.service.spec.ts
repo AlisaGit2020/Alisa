@@ -7,10 +7,10 @@ import {
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AllocationRuleService } from './allocation-rule.service';
 import { AllocationRule } from './entities/allocation-rule.entity';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { ExpenseTypeService } from '@alisa-backend/accounting/expense/expense-type.service';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { TransactionService } from '@asset-backend/accounting/transaction/transaction.service';
+import { ExpenseTypeService } from '@asset-backend/accounting/expense/expense-type.service';
 import {
   createMockRepository,
   createMockAuthService,
@@ -25,7 +25,7 @@ import {
 import {
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 
 describe('AllocationRuleService', () => {
   let service: AllocationRuleService;

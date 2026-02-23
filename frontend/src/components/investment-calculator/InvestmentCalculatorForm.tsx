@@ -2,12 +2,12 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import { Box, Divider, Grid, Typography } from "@mui/material";
 import { useState } from "react";
 import axios from "axios";
-import { AlisaNumberField, AlisaTextField, AlisaTextButton, useToast } from "../alisa";
+import { AssetNumberField, AssetTextField, AssetTextButton, useAssetToast } from "../asset";
 import { VITE_API_URL } from "../../constants";
-import AlisaFormHandler from "../alisa/form/AlisaFormHandler";
-import DataService from "@alisa-lib/data-service";
-import { investmentCalculationContext } from "@alisa-lib/alisa-contexts";
-import { getFieldErrorProps } from "@alisa-lib/form-utils";
+import AssetFormHandler from "../asset/form/AssetFormHandler";
+import DataService from "@asset-lib/data-service";
+import { investmentCalculationContext } from "@asset-lib/asset-contexts";
+import { getFieldErrorProps } from "@asset-lib/form-utils";
 
 export interface InvestmentInputData {
   id?: number;
@@ -45,7 +45,7 @@ interface InvestmentCalculatorFormProps extends WithTranslation {
 }
 
 function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmit }: InvestmentCalculatorFormProps) {
-  const { showToast } = useToast();
+  const { showToast } = useAssetToast();
   const [etuoviUrl, setEtuoviUrl] = useState('');
   const [isFetching, setIsFetching] = useState(false);
 
@@ -126,7 +126,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
           <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
             etuovi.com
           </Typography>
-          <AlisaTextButton
+          <AssetTextButton
             label={t('investment-calculator:etuoviUrl')}
             buttonLabel={t('common:search')}
             value={etuoviUrl}
@@ -146,7 +146,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         </Grid>
 
         <Grid size={{ xs: 12 }}>
-          <AlisaTextField
+          <AssetTextField
             label={t('investment-calculator:name')}
             value={data.name || ''}
             onChange={(e) => handleChange('name', e.target.value)}
@@ -155,7 +155,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
+          <AssetNumberField
             label={t('investment-calculator:deptFreePrice')}
             value={data.deptFreePrice}
             onChange={(e) => handleChange('deptFreePrice', Number(e.target.value) || 0)}
@@ -165,7 +165,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
+          <AssetNumberField
             label={t('investment-calculator:deptShare')}
             value={data.deptShare}
             onChange={(e) => handleChange('deptShare', Number(e.target.value) || 0)}
@@ -174,7 +174,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
+          <AssetNumberField
             label={t('investment-calculator:transferTaxPercent')}
             value={data.transferTaxPercent}
             onChange={(e) => handleChange('transferTaxPercent', Number(e.target.value) || 0)}
@@ -183,7 +183,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
+          <AssetNumberField
             label={t('investment-calculator:apartmentSize')}
             value={data.apartmentSize ?? 0}
             onChange={(e) => handleChange('apartmentSize', Number(e.target.value) || 0)}
@@ -200,7 +200,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
+          <AssetNumberField
             label={t('investment-calculator:maintenanceFee')}
             value={data.maintenanceFee}
             onChange={(e) => handleChange('maintenanceFee', Number(e.target.value) || 0)}
@@ -210,7 +210,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
+          <AssetNumberField
             label={t('investment-calculator:chargeForFinancialCosts')}
             value={data.chargeForFinancialCosts}
             onChange={(e) => handleChange('chargeForFinancialCosts', Number(e.target.value) || 0)}
@@ -219,7 +219,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
+          <AssetNumberField
             label={t('investment-calculator:waterCharge')}
             value={data.waterCharge ?? 0}
             onChange={(e) => handleChange('waterCharge', Number(e.target.value) || 0)}
@@ -236,7 +236,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
+          <AssetNumberField
             label={t('investment-calculator:rentPerMonth')}
             value={data.rentPerMonth}
             onChange={(e) => handleChange('rentPerMonth', Number(e.target.value) || 0)}
@@ -254,7 +254,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
+          <AssetNumberField
             label={t('investment-calculator:downPayment')}
             value={data.downPayment ?? 0}
             onChange={(e) => handleChange('downPayment', Number(e.target.value) || 0)}
@@ -263,7 +263,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
+          <AssetNumberField
             label={t('investment-calculator:loanInterestPercent')}
             value={data.loanInterestPercent ?? 0}
             onChange={(e) => handleChange('loanInterestPercent', Number(e.target.value) || 0)}
@@ -272,7 +272,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <AlisaNumberField
+          <AssetNumberField
             label={t('investment-calculator:loanPeriod')}
             value={data.loanPeriod ?? ''}
             onChange={(e) => handleChange('loanPeriod', e.target.value === '' ? undefined : Number(e.target.value))}
@@ -285,7 +285,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
   );
 
   return (
-    <AlisaFormHandler<InvestmentInputData>
+    <AssetFormHandler<InvestmentInputData>
       id={id}
       dataService={dataService}
       data={data}

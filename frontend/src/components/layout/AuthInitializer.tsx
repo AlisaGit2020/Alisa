@@ -1,7 +1,7 @@
 import { useEffect, useState, ReactNode } from "react";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
-import ApiClient from "@alisa-lib/api-client";
-import { setCurrentUserId } from "@alisa-lib/user-storage";
+import ApiClient from "@asset-lib/api-client";
+import { setCurrentUserId } from "@asset-lib/user-storage";
 
 interface AuthInitializerProps {
   children: ReactNode;

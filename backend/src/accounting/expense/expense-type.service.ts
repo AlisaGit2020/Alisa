@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Repository } from 'typeorm';
 import { ExpenseType } from './entities/expense-type.entity';
 import { Expense } from './entities/expense.entity';
-import { DeleteValidationDto } from '@alisa-backend/common/dtos/delete-validation.dto';
-import { ExpenseTypeKey } from '@alisa-backend/common/types';
+import { DeleteValidationDto } from '@asset-backend/common/dtos/delete-validation.dto';
+import { ExpenseTypeKey } from '@asset-backend/common/types';
 
 @Injectable()
 export class ExpenseTypeService {

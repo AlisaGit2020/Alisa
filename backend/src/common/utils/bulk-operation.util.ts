@@ -1,7 +1,7 @@
 import {
   DataSaveResultDto,
   DataSaveResultRowDto,
-} from '@alisa-backend/common/dtos/data-save-result.dto';
+} from '@asset-backend/common/dtos/data-save-result.dto';
 
 /**
  * Builds a DataSaveResultDto from an array of result row promises.

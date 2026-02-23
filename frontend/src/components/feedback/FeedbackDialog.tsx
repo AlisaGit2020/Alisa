@@ -1,8 +1,8 @@
 import { Stack } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { AlisaButton, AlisaDialog, AlisaSelectField, AlisaTextField, useToast } from "../alisa";
-import ApiClient from "@alisa-lib/api-client";
+import { AssetButton, AssetDialog, AssetSelectField, AssetTextField, useAssetToast } from "../asset";
+import ApiClient from "@asset-lib/api-client";
 
 interface FeedbackDialogProps {
   open: boolean;
@@ -25,7 +25,7 @@ const FEEDBACK_TYPE_MAP: Record<number, FeedbackType> = {
 
 export default function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
   const { t } = useTranslation();
-  const { showToast } = useToast();
+  const { showToast } = useAssetToast();
   const [typeId, setTypeId] = React.useState<number>(1);
   const [message, setMessage] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -69,13 +69,13 @@ export default function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
 
   const actions = (
     <>
-      <AlisaButton
+      <AssetButton
         label={t('common:cancel')}
         variant="text"
         onClick={handleClose}
         disabled={isSubmitting}
       />
-      <AlisaButton
+      <AssetButton
         label={t('common:feedback.submit')}
         variant="contained"
         onClick={handleSubmit}
@@ -85,7 +85,7 @@ export default function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
   );
 
   return (
-    <AlisaDialog
+    <AssetDialog
       open={open}
       onClose={handleClose}
       title={t('common:feedback.title')}
@@ -94,7 +94,7 @@ export default function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
       actions={actions}
     >
       <Stack spacing={3} sx={{ py: 1 }}>
-        <AlisaSelectField
+        <AssetSelectField
           label={t('common:feedback.typeLabel')}
           value={typeId}
           items={feedbackTypes}
@@ -102,7 +102,7 @@ export default function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
           disabled={isSubmitting}
           fullWidth
         />
-        <AlisaTextField
+        <AssetTextField
           label={t('common:feedback.messagePlaceholder')}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
@@ -111,6 +111,6 @@ export default function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
           disabled={isSubmitting}
         />
       </Stack>
-    </AlisaDialog>
+    </AssetDialog>
   );
 }

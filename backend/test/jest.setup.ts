@@ -2,7 +2,7 @@ process.env.DB_HOST = 'localhost'; //Tests must run against localhost because we
 process.env.DB_PORT = '5432';
 process.env.DB_USERNAME = 'postgres';
 process.env.DB_PASSWORD = 'mysecretpassword';
-process.env.DB_DATABASE = 'alisa_test';
+process.env.DB_DATABASE = 'asset_test';
 
 // Google OAuth test credentials (dummy values for testing)
 process.env.GOOGLE_CLIENT_ID = 'test-client-id';

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   closeAppGracefully,
   emptyTables,
@@ -14,9 +14,9 @@ import {
 } from './helper-functions';
 import * as http from 'http';
 import { DataSource } from 'typeorm';
-import { ExpenseType } from '@alisa-backend/accounting/expense/entities/expense-type.entity';
-import { IncomeType } from '@alisa-backend/accounting/income/entities/income-type.entity';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { ExpenseType } from '@asset-backend/accounting/expense/entities/expense-type.entity';
+import { IncomeType } from '@asset-backend/accounting/income/entities/income-type.entity';
+import { User } from '@asset-backend/people/user/entities/user.entity';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;

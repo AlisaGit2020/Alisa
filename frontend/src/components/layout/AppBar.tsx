@@ -15,7 +15,7 @@ import FeedbackMenuButton from "./FeedbackMenuButton";
 import AdminMenu from "../admin/AdminMenu";
 import PropertyBadge from "./PropertyBadge.tsx";
 import MobileMoreMenu from "./MobileMoreMenu";
-import { LOGO_WHITE, DRAWER_WIDTH, COLLAPSED_DRAWER_WIDTH } from "@alisa-lib/constants";
+import { LOGO_WHITE, DRAWER_WIDTH, COLLAPSED_DRAWER_WIDTH } from "@asset-lib/constants";
 
 interface StyledAppBarProps extends MuiAppBarProps {
   isMobile?: boolean;

@@ -1,5 +1,5 @@
 import { Box, Chip, Tooltip, Typography } from "@mui/material";
-import { Transaction } from "@alisa-types";
+import { Transaction } from "@asset-types";
 import { useTranslation } from "react-i18next";
 
 interface TransactionCategoryChipsProps {

@@ -7,7 +7,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './test-i18n';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
-import { AlisaToastProvider } from '../../src/components/alisa';
+import { AssetToastProvider } from '../../src/components/asset';
 
 // Create a default theme for testing
 const theme = createTheme();
@@ -25,9 +25,9 @@ function AllProviders({ children }: AllProvidersProps) {
       <ThemeProvider theme={theme}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <I18nextProvider i18n={i18n}>
-            <AlisaToastProvider>
+            <AssetToastProvider>
               {children}
-            </AlisaToastProvider>
+            </AssetToastProvider>
           </I18nextProvider>
         </LocalizationProvider>
       </ThemeProvider>
@@ -70,9 +70,9 @@ export function renderWithRouter(
         <ThemeProvider theme={theme}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <I18nextProvider i18n={i18n}>
-              <AlisaToastProvider>
+              <AssetToastProvider>
                 {children}
-              </AlisaToastProvider>
+              </AssetToastProvider>
             </I18nextProvider>
           </LocalizationProvider>
         </ThemeProvider>

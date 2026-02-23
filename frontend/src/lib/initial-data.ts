@@ -1,7 +1,7 @@
-import { User } from "@alisa-types";
-import { DataKey, View } from "@alisa-lib/views.ts";
-import { DATA_NOT_SELECTED_ID } from "@alisa-lib/constants.ts";
-import UserStorage from "@alisa-lib/user-storage";
+import { User } from "@asset-types";
+import { DataKey, View } from "@asset-lib/views.ts";
+import { DATA_NOT_SELECTED_ID } from "@asset-lib/constants.ts";
+import UserStorage from "@asset-lib/user-storage";
 
 export const emptyUser: User = {
   firstName: "",

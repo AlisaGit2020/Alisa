@@ -1,6 +1,6 @@
 # Frontend Testing Guide
 
-This guide explains how to write tests for React components and views in the Alisa frontend.
+This guide explains how to write tests for React components and views in the Asset frontend.
 
 ## Overview
 
@@ -30,9 +30,9 @@ npm test -- --coverage
 Component tests live next to the component file:
 
 ```
-src/components/alisa/form/
-├── AlisaTextField.tsx
-└── AlisaTextField.test.tsx
+src/components/asset/form/
+├── AssetTextField.tsx
+└── AssetTextField.test.tsx
 ```
 
 ### Basic Component Test Template
@@ -442,7 +442,7 @@ See these files for logic-based testing patterns:
 ## Examples
 
 See existing tests for examples:
-- Component: `src/components/alisa/form/AlisaTextField.test.tsx`
+- Component: `src/components/asset/form/AssetTextField.test.tsx`
 - View: `test/views/PropertyView.test.tsx`
 - Logic-based: `src/components/transaction/Transactions.test.tsx`
 - Translation: `test/translations.test.ts`
@@ -473,7 +473,7 @@ npm test -- --coverage
 For components that use `ApiClient` directly, mock API calls using `jest.spyOn`:
 
 ```typescript
-import ApiClient from '@alisa-lib/api-client';
+import ApiClient from '@asset-lib/api-client';
 
 let mockSearch: jest.SpyInstance;
 let mockDelete: jest.SpyInstance;

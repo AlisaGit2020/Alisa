@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import TransactionCategoryChips from './TransactionCategoryChips';
-import { Transaction, TransactionStatus, TransactionType } from '@alisa-types';
+import { Transaction, TransactionStatus, TransactionType } from '@asset-types';
 
 describe('TransactionCategoryChips', () => {
   const createTransaction = (overrides: Partial<Transaction> = {}): Transaction => ({

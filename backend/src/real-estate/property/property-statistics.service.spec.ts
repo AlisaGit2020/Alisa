@@ -3,16 +3,16 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { PropertyStatisticsService } from './property-statistics.service';
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { PropertyService } from './property.service';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import { createMockRepository, MockRepository } from 'test/mocks';
 import { createTransaction, createJWTUser, createExpense, createIncome } from 'test/factories';
 import {
   StatisticKey,
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 import { DataSource } from 'typeorm';
-import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
+import { EventTrackerService } from '@asset-backend/common/event-tracker.service';
 
 describe('PropertyStatisticsService', () => {
   let service: PropertyStatisticsService;

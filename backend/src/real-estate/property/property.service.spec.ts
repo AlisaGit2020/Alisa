@@ -9,9 +9,9 @@ import type { Express } from 'express';
 import * as fs from 'fs';
 import { PropertyService } from './property.service';
 import { Property } from './entities/property.entity';
-import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { TierService } from '@alisa-backend/admin/tier.service';
+import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { TierService } from '@asset-backend/admin/tier.service';
 import {
   createMockRepository,
   createMockAuthService,
@@ -25,18 +25,18 @@ import {
   createExpense,
   createIncome,
 } from 'test/factories';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
-import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
+import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
+import { Income } from '@asset-backend/accounting/income/entities/income.entity';
 import { PropertyStatistics } from './entities/property-statistics.entity';
-import { DepreciationAsset } from '@alisa-backend/accounting/depreciation/entities/depreciation-asset.entity';
-import { Address } from '@alisa-backend/real-estate/address/entities/address.entity';
+import { DepreciationAsset } from '@asset-backend/accounting/depreciation/entities/depreciation-asset.entity';
+import { Address } from '@asset-backend/real-estate/address/entities/address.entity';
 import {
   PropertyExternalSource,
   PropertyStatus,
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 
 describe('PropertyService', () => {
   let service: PropertyService;

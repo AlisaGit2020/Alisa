@@ -1,4 +1,4 @@
-import { settingsContext } from "@alisa-lib/alisa-contexts";
+import { settingsContext } from "@asset-lib/asset-contexts";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { Box, IconButton, Tooltip } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";

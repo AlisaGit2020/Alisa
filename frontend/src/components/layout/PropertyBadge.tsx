@@ -6,11 +6,11 @@ import { useTranslation } from "react-i18next";
 import {
   getTransactionPropertyId,
   setTransactionPropertyId,
-} from "@alisa-lib/initial-data";
+} from "@asset-lib/initial-data";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../transaction/TransactionLeftMenuItems";
-import DataService from "@alisa-lib/data-service";
-import { Property } from "@alisa-types";
-import { propertyContext } from "@alisa-lib/alisa-contexts";
+import DataService from "@asset-lib/data-service";
+import { Property } from "@asset-types";
+import { propertyContext } from "@asset-lib/asset-contexts";
 
 // Event constants for property selection required
 export const PROPERTY_SELECTION_REQUIRED_EVENT = "propertySelectionRequired";

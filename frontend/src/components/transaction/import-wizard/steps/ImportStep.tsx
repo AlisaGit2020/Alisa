@@ -1,13 +1,13 @@
 import { Box, Typography, Paper, Alert, Stack, Tooltip } from "@mui/material";
-import AlisaButton from "../../../alisa/form/AlisaButton";
+import AssetButton from "../../../asset/form/AssetButton";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useDropzone } from "react-dropzone";
 import { TFunction } from "i18next";
 import { useCallback, useEffect, useState } from "react";
-import { Property } from "@alisa-types";
-import ApiClient from "@alisa-lib/api-client";
-import { propertyContext } from "@alisa-lib/alisa-contexts";
+import { Property } from "@asset-types";
+import ApiClient from "@asset-lib/api-client";
+import { propertyContext } from "@asset-lib/asset-contexts";
 import { SUPPORTED_BANKS, BankId } from "../types";
 
 interface ImportStepProps {
@@ -238,7 +238,7 @@ export default function ImportStep({
 
       {/* Upload button */}
       <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-        <AlisaButton
+        <AssetButton
           label={isUploading ? t("importWizard.uploading") : t("importWizard.uploadAndContinue")}
           variant="contained"
           onClick={handleUpload}

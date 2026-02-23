@@ -4,24 +4,24 @@ import * as request from 'supertest';
 import * as path from 'path';
 import * as fs from 'fs';
 import { AppModule } from '../src/app.module';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { UserService } from '@alisa-backend/people/user/user.service';
-import { TierService } from '@alisa-backend/admin/tier.service';
-import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
-import { PropertyStatisticsService } from '@alisa-backend/real-estate/property/property-statistics.service';
-import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { UserService } from '@asset-backend/people/user/user.service';
+import { TierService } from '@asset-backend/admin/tier.service';
+import { EventTrackerService } from '@asset-backend/common/event-tracker.service';
+import { PropertyStatisticsService } from '@asset-backend/real-estate/property/property-statistics.service';
+import { TransactionService } from '@asset-backend/accounting/transaction/transaction.service';
 import {
   PropertyExternalSource,
   PropertyStatus,
   StatisticKey,
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
-import { UserInputDto } from '@alisa-backend/people/user/dtos/user-input.dto';
+} from '@asset-backend/common/types';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
+import { JWTUser } from '@asset-backend/auth/types';
+import { User } from '@asset-backend/people/user/entities/user.entity';
+import { UserInputDto } from '@asset-backend/people/user/dtos/user-input.dto';
 import { DataSource } from 'typeorm';
 import {
   addIncomeAndExpenseTypes,

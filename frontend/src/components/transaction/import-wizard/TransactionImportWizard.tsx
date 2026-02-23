@@ -1,7 +1,7 @@
 import { Box, Stepper, Step, StepLabel, Typography, Paper, Alert } from "@mui/material";
-import AlisaButton from "../../alisa/form/AlisaButton";
+import AssetButton from "../../asset/form/AssetButton";
 import { WithTranslation, withTranslation } from "react-i18next";
-import { transactionContext } from "@alisa-lib/alisa-contexts";
+import { transactionContext } from "@asset-lib/asset-contexts";
 import { useImportWizard } from "./hooks/useImportWizard";
 import { WIZARD_STEPS, getBankById } from "./types";
 import ImportStep from "./steps/ImportStep";
@@ -13,7 +13,7 @@ import {
   PROPERTY_SELECTION_REQUIRED_EVENT,
 } from "../../layout/PropertyBadge";
 import { useEffect, useState } from "react";
-import { getTransactionPropertyId } from "@alisa-lib/initial-data";
+import { getTransactionPropertyId } from "@asset-lib/initial-data";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../TransactionLeftMenuItems";
 
 function TransactionImportWizard({ t }: WithTranslation) {
@@ -151,7 +151,7 @@ function TransactionImportWizard({ t }: WithTranslation) {
         <Alert
           severity="warning"
           action={
-            <AlisaButton
+            <AssetButton
               label={t("common:selectProperty")}
               variant="text"
               size="small"

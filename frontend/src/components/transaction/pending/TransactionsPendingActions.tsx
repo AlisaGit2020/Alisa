@@ -3,8 +3,8 @@ import {
   expenseTypeContext,
   incomeTypeContext,
   transactionContext,
-} from "@alisa-lib/alisa-contexts.ts";
-import { TransactionType, ExpenseType, IncomeType } from "@alisa-types";
+} from "@asset-lib/asset-contexts.ts";
+import { TransactionType, ExpenseType, IncomeType } from "@asset-types";
 import { Box, Button, ButtonGroup, Chip, Paper, Stack, Tooltip } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -13,16 +13,16 @@ import SaveIcon from "@mui/icons-material/Save";
 import RuleIcon from "@mui/icons-material/Rule";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import { AlisaCloseIcon } from "../../alisa/AlisaIcons.tsx";
+import { AssetCloseIcon } from "../../asset/AssetIcons.tsx";
 import Typography from "@mui/material/Typography";
 import {
-  AlisaButton,
-  AlisaConfirmDialog,
-  AlisaTransactionTypeSelect,
-  AlisaSelect,
-} from "../../alisa";
+  AssetButton,
+  AssetConfirmDialog,
+  AssetTransactionTypeSelect,
+  AssetSelect,
+} from "../../asset";
 import React from "react";
-import DataService from "@alisa-lib/data-service.ts";
+import DataService from "@asset-lib/data-service.ts";
 
 interface TransactionsPendingActionsProps extends WithTranslation {
   marginTop?: number;
@@ -187,7 +187,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
           </Typography>
 
           {/* Type buttons - exclude Unknown (0) */}
-          <AlisaTransactionTypeSelect
+          <AssetTransactionTypeSelect
             onSelect={handleTypeChange}
             selectedValue={transactionType}
             t={props.t}
@@ -205,7 +205,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
             <Stack direction="row" spacing={2} alignItems="flex-end" sx={{ mt: 2 }}>
               {transactionType === TransactionType.EXPENSE && (
                 <Box sx={{ width: CATEGORY_DROPDOWN_WIDTH }}>
-                  <AlisaSelect<CategoryTypeData, ExpenseType>
+                  <AssetSelect<CategoryTypeData, ExpenseType>
                     label={props.t("expenseType")}
                     dataService={
                       new DataService<ExpenseType>({
@@ -226,7 +226,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
 
               {transactionType === TransactionType.INCOME && (
                 <Box sx={{ width: CATEGORY_DROPDOWN_WIDTH }}>
-                  <AlisaSelect<CategoryTypeData, IncomeType>
+                  <AssetSelect<CategoryTypeData, IncomeType>
                     label={props.t("incomeType")}
                     dataService={
                       new DataService<IncomeType>({
@@ -249,7 +249,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
 
           {/* Save button - always visible, disabled when no type selected */}
           <Box sx={{ mt: 2 }}>
-            <AlisaButton
+            <AssetButton
               label={props.t("save")}
               variant="text"
               color="primary"
@@ -299,7 +299,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
                 </ButtonGroup>
               )}
               {!props.onAutoAllocate && props.onOpenAllocationRules && (
-                <AlisaButton
+                <AssetButton
                   label={props.t("allocation:rules")}
                   variant="outlined"
                   size="small"
@@ -308,7 +308,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
                 />
               )}
               {!props.hideSplitLoanPayment && supportsLoanSplit && (
-                <AlisaButton
+                <AssetButton
                   label={props.t("splitLoanPayment")}
                   variant="text"
                   onClick={handleLoanSplit}
@@ -340,7 +340,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
           </Typography>
           <Stack direction="row" spacing={2}>
             {!props.hideApprove && (
-              <AlisaButton
+              <AssetButton
                 label={props.t("accept")}
                 variant="text"
                 color="success"
@@ -355,7 +355,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
               />
             )}
             {props.onResetAllocation && (
-              <AlisaButton
+              <AssetButton
                 label={props.t("resetAllocation")}
                 variant="text"
                 color="warning"
@@ -369,24 +369,24 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
                 endIcon={<RestartAltIcon />}
               />
             )}
-            <AlisaButton
+            <AssetButton
               label={props.t("delete")}
               variant="text"
               color="error"
               onClick={handleDeleteClick}
               endIcon={<DeleteIcon />}
             />
-            <AlisaButton
+            <AssetButton
               label={props.t("cancel")}
               variant="text"
               onClick={handleCancel}
-              endIcon={<AlisaCloseIcon />}
+              endIcon={<AssetCloseIcon />}
             />
           </Stack>
         </Box>
       </Stack>
 
-      <AlisaConfirmDialog
+      <AssetConfirmDialog
         title={props.t("confirm")}
         contentText={props.t("confirmDeleteTransactions", {
           count: props.selectedIds.length,

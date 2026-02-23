@@ -1,24 +1,24 @@
 import { Box, Stack } from '@mui/material';
 import { useState } from 'react';
 import { getNumber } from '../../lib/functions';
-import { PropertyInput, PropertyStatus } from '@alisa-types'
+import { PropertyInput, PropertyStatus } from '@asset-types'
 import { WithTranslation, withTranslation } from 'react-i18next';
-import AlisaNumberField from '../alisa/form/AlisaNumberField';
-import AlisaTextField from '../alisa/form/AlisaTextField';
-import { propertyContext } from '../../lib/alisa-contexts';
-import AlisaFormHandler from '../alisa/form/AlisaFormHandler';
+import AssetNumberField from '../asset/form/AssetNumberField';
+import AssetTextField from '../asset/form/AssetTextField';
+import { propertyContext } from '../../lib/asset-contexts';
+import AssetFormHandler from '../asset/form/AssetFormHandler';
 import { DTO } from '../../lib/types';
 import DataService from '../../lib/data-service';
-import { getFieldErrorProps } from '@alisa-lib/form-utils';
+import { getFieldErrorProps } from '@asset-lib/form-utils';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PropertyPhotoUpload from './PropertyPhotoUpload';
-import AlisaContent from '../alisa/AlisaContent';
-import { useToast } from '../alisa';
+import AssetContent from '../asset/AssetContent';
+import { useAssetToast } from '../asset';
 import axios from 'axios';
-import ApiClient from '@alisa-lib/api-client';
+import ApiClient from '@asset-lib/api-client';
 import { VITE_API_URL } from '../../constants';
 import { PROPERTY_LIST_CHANGE_EVENT } from '../layout/PropertyBadge';
-import { setTransactionPropertyId } from '@alisa-lib/initial-data';
+import { setTransactionPropertyId } from '@asset-lib/initial-data';
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from '../transaction/TransactionLeftMenuItems';
 
 
@@ -43,7 +43,7 @@ function PropertyForm({ t }: WithTranslation) {
     const { idParam } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const { showToast } = useToast();
+    const { showToast } = useAssetToast();
 
     const handleNavigateBack = () => {
         const returnTo = (location.state as { returnTo?: string })?.returnTo;
@@ -116,7 +116,7 @@ function PropertyForm({ t }: WithTranslation) {
                     formData,
                     options
                 );
-                // No separate toast - AlisaFormHandler already shows "save success"
+                // No separate toast - AssetFormHandler already shows "save success"
             } catch {
                 showToast({ message: t('property:photoUploadError'), severity: "error" });
             }
@@ -128,7 +128,7 @@ function PropertyForm({ t }: WithTranslation) {
             <Stack spacing={2} marginBottom={2}>
                 <Stack direction="row" spacing={2}>
                     <Box sx={{ flex: 2 }}>
-                        <AlisaTextField
+                        <AssetTextField
                             label={t('name')}
                             value={data.name}
                             autoFocus={true}
@@ -137,28 +137,28 @@ function PropertyForm({ t }: WithTranslation) {
                         />
                     </Box>
                     <Box sx={{ flex: 1, minWidth: 120 }}>
-                        <AlisaTextField
+                        <AssetTextField
                             label={t('apartmentType')}
                             value={data.apartmentType || ''}
                             onChange={(e) => handleChange('apartmentType', e.target.value)}
                         />
                     </Box>
                 </Stack>
-                <AlisaTextField
+                <AssetTextField
                     label={t('address')}
                     value={data.address?.street || ''}
                     onChange={(e) => handleAddressChange('street', e.target.value)}
                 />
                 <Stack direction="row" spacing={2}>
                     <Box sx={{ flex: 1 }}>
-                        <AlisaTextField
+                        <AssetTextField
                             label={t('postalCode')}
                             value={data.address?.postalCode || ''}
                             onChange={(e) => handleAddressChange('postalCode', e.target.value)}
                         />
                     </Box>
                     <Box sx={{ flex: 2 }}>
-                        <AlisaTextField
+                        <AssetTextField
                             label={t('city')}
                             value={data.address?.city || ''}
                             onChange={(e) => handleAddressChange('city', e.target.value)}
@@ -167,7 +167,7 @@ function PropertyForm({ t }: WithTranslation) {
                 </Stack>
                 <Stack direction="row" spacing={2}>
                     <Box sx={{ flex: 1 }}>
-                        <AlisaNumberField
+                        <AssetNumberField
                             label={t('size')}
                             value={data.size}
                             onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
@@ -176,7 +176,7 @@ function PropertyForm({ t }: WithTranslation) {
                         />
                     </Box>
                     <Box sx={{ flex: 1 }}>
-                        <AlisaNumberField
+                        <AssetNumberField
                             label={t('buildYear')}
                             value={data.buildYear || 0}
                             onChange={(e) => handleChange('buildYear', getNumber(e.target.value, 0) || undefined)}
@@ -184,7 +184,7 @@ function PropertyForm({ t }: WithTranslation) {
                         />
                     </Box>
                 </Stack>
-                <AlisaTextField
+                <AssetTextField
                     label={t('description')}
                     value={data.description || ''}
                     multiline
@@ -192,7 +192,7 @@ function PropertyForm({ t }: WithTranslation) {
                     onChange={(e) => handleChange('description', e.target.value)}
                 />
                 <Box sx={{ maxWidth: 200 }}>
-                    <AlisaNumberField
+                    <AssetNumberField
                         label={t('ownershipShare')}
                         value={data.ownerships?.[0]?.share ?? 100}
                         onChange={(e) => handleOwnershipChange(getNumber(e.target.value, 1))}
@@ -220,8 +220,8 @@ function PropertyForm({ t }: WithTranslation) {
     )
 
     return (
-        <AlisaContent>
-            <AlisaFormHandler<DTO<PropertyInput>>
+        <AssetContent>
+            <AssetFormHandler<DTO<PropertyInput>>
                 id={Number(idParam)}
                 dataService={dataService}
                 data={data}
@@ -241,7 +241,7 @@ function PropertyForm({ t }: WithTranslation) {
                 onAfterSubmit={handleNavigateBack}
                 onSaveResult={handleSaveResult}
             />
-        </AlisaContent>
+        </AssetContent>
     );
 }
 

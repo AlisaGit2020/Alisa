@@ -1,7 +1,7 @@
 //TypeOrm entity for transaction table.
-import { Income } from '@alisa-backend/accounting/income/entities/income.entity';
-import { Expense } from '@alisa-backend/accounting/expense/entities/expense.entity';
-import { columnOptionTwoDecimal } from '@alisa-backend/common/typeorm.column.definitions';
+import { Income } from '@asset-backend/accounting/income/entities/income.entity';
+import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
+import { columnOptionTwoDecimal } from '@asset-backend/common/typeorm.column.definitions';
 import {
   Column,
   Entity,
@@ -10,11 +10,11 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Property } from '@alisa-backend/real-estate/property/entities/property.entity';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
 import {
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 
 @Entity()
 export class Transaction {

@@ -7,8 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Not, Repository } from 'typeorm';
 import { Tier } from './entities/tier.entity';
 import { TierInputDto } from './dtos/tier-input.dto';
-import { UserService } from '@alisa-backend/people/user/user.service';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { UserService } from '@asset-backend/people/user/user.service';
+import { User } from '@asset-backend/people/user/entities/user.entity';
 
 @Injectable()
 export class TierService {

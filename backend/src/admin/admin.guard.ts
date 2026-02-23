@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { JWTUser } from '@alisa-backend/auth/types';
+import { JWTUser } from '@asset-backend/auth/types';
 
 @Injectable()
 export class AdminGuard implements CanActivate {

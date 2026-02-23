@@ -15,10 +15,10 @@ import { InvestmentDeleteInputDto } from './dtos/investment-delete-input.dto';
 import { InvestmentService } from './investment.service';
 import { Investment } from './entities/investment.entity';
 import { FindManyOptions } from 'typeorm';
-import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { User } from '@alisa-backend/common/decorators/user.decorator';
-import { DataSaveResultDto } from '@alisa-backend/common/dtos/data-save-result.dto';
+import { JwtAuthGuard } from '@asset-backend/auth/jwt.auth.guard';
+import { JWTUser } from '@asset-backend/auth/types';
+import { User } from '@asset-backend/common/decorators/user.decorator';
+import { DataSaveResultDto } from '@asset-backend/common/dtos/data-save-result.dto';
 
 @Controller('real-estate/investment')
 export class InvestmentController {

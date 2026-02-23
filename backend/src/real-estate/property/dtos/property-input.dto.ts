@@ -1,9 +1,9 @@
-import { OwnershipInputDto } from '@alisa-backend/people/ownership/dtos/ownership-input.dto';
-import { AddressInputDto } from '@alisa-backend/real-estate/address/dtos/address-input.dto';
+import { OwnershipInputDto } from '@asset-backend/people/ownership/dtos/ownership-input.dto';
+import { AddressInputDto } from '@asset-backend/real-estate/address/dtos/address-input.dto';
 import {
   PropertyExternalSource,
   PropertyStatus,
-} from '@alisa-backend/common/types';
+} from '@asset-backend/common/types';
 import {
   IsNotEmpty,
   IsNumber,

@@ -2,17 +2,17 @@ import { Stack, Box } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
-import { ExpenseInput, ExpenseType } from "@alisa-types";
-import AlisaTextField from "../../alisa/form/AlisaTextField";
-import AlisaNumberField from "../../alisa/form/AlisaNumberField";
-import AlisaDatePicker from "../../alisa/form/AlisaDatePicker";
-import AlisaSelect from "../../alisa/data/AlisaSelect";
-import { expenseContext, expenseTypeContext } from "@alisa-lib/alisa-contexts";
-import DataService from "@alisa-lib/data-service";
-import AlisaFormHandler from "../../alisa/form/AlisaFormHandler";
-import { AlisaAlert, AlisaButton, AlisaDialog, AlisaConfirmDialog, useToast } from "../../alisa";
-import { getNumber } from "@alisa-lib/functions";
-import { getFieldErrorProps } from "@alisa-lib/form-utils";
+import { ExpenseInput, ExpenseType } from "@asset-types";
+import AssetTextField from "../../asset/form/AssetTextField";
+import AssetNumberField from "../../asset/form/AssetNumberField";
+import AssetDatePicker from "../../asset/form/AssetDatePicker";
+import AssetSelect from "../../asset/data/AssetSelect";
+import { expenseContext, expenseTypeContext } from "@asset-lib/asset-contexts";
+import DataService from "@asset-lib/data-service";
+import AssetFormHandler from "../../asset/form/AssetFormHandler";
+import { AssetAlert, AssetButton, AssetDialog, AssetConfirmDialog, useAssetToast } from "../../asset";
+import { getNumber } from "@asset-lib/functions";
+import { getFieldErrorProps } from "@asset-lib/form-utils";
 
 interface ExpenseFormProps extends WithTranslation {
   id?: number;
@@ -43,7 +43,7 @@ function ExpenseForm({
     transactionId: null,
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const { showToast } = useToast();
+  const { showToast } = useAssetToast();
 
   const dataService = new DataService<ExpenseInput>({
     context: expenseContext,
@@ -89,10 +89,10 @@ function ExpenseForm({
   const renderFormContent = (fieldErrors: Partial<Record<keyof ExpenseInput, string>>) => (
     <Stack spacing={2} marginBottom={2}>
       {isLinkedToTransaction && (
-        <AlisaAlert severity="info" content={t("editNotAllowed")} />
+        <AssetAlert severity="info" content={t("editNotAllowed")} />
       )}
 
-      <AlisaDatePicker
+      <AssetDatePicker
         label={t("accountingDate")}
         value={data.accountingDate || new Date()}
         onChange={(value) =>
@@ -102,7 +102,7 @@ function ExpenseForm({
         {...getFieldErrorProps<ExpenseInput>(fieldErrors, "accountingDate")}
       />
 
-      <AlisaSelect<ExpenseInput, ExpenseType>
+      <AssetSelect<ExpenseInput, ExpenseType>
         label={t("expenseType")}
         dataService={
           new DataService<ExpenseType>({
@@ -119,7 +119,7 @@ function ExpenseForm({
         {...getFieldErrorProps<ExpenseInput>(fieldErrors, "expenseTypeId")}
       />
 
-      <AlisaTextField
+      <AssetTextField
         label={t("description")}
         value={data.description}
         autoComplete="off"
@@ -129,14 +129,14 @@ function ExpenseForm({
       />
 
       <Stack direction="row" spacing={2}>
-        <AlisaNumberField
+        <AssetNumberField
           label={t("quantity")}
           value={data.quantity}
           onChange={(e) => handleChange("quantity", getNumber(e.target.value, 0))}
           disabled={isLinkedToTransaction}
           {...getFieldErrorProps<ExpenseInput>(fieldErrors, "quantity")}
         />
-        <AlisaNumberField
+        <AssetNumberField
           label={t("amount")}
           value={data.amount}
           onChange={(e) => handleChange("amount", getNumber(e.target.value, 2))}
@@ -144,7 +144,7 @@ function ExpenseForm({
           disabled={isLinkedToTransaction}
           {...getFieldErrorProps<ExpenseInput>(fieldErrors, "amount")}
         />
-        <AlisaNumberField
+        <AssetNumberField
           label={t("totalAmount")}
           value={data.totalAmount}
           onChange={(e) => handleChange("totalAmount", getNumber(e.target.value, 2))}
@@ -156,7 +156,7 @@ function ExpenseForm({
 
       {id && (
         <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: "divider" }}>
-          <AlisaButton
+          <AssetButton
             label={t("delete")}
             variant="outlined"
             color="error"
@@ -171,13 +171,13 @@ function ExpenseForm({
 
   return (
     <>
-      <AlisaDialog
+      <AssetDialog
         open={true}
         title={t(id ? "editExpense" : "addExpense")}
         maxWidth="sm"
         onClose={onClose}
       >
-        <AlisaFormHandler<ExpenseInput>
+        <AssetFormHandler<ExpenseInput>
           id={id}
           dataService={dataService}
           data={data}
@@ -199,9 +199,9 @@ function ExpenseForm({
           onCancel={onCancel}
           onAfterSubmit={onAfterSubmit}
         />
-      </AlisaDialog>
+      </AssetDialog>
 
-      <AlisaConfirmDialog
+      <AssetConfirmDialog
         title={t("confirm")}
         contentText={t("confirmDeleteExpense")}
         buttonTextConfirm={t("delete")}

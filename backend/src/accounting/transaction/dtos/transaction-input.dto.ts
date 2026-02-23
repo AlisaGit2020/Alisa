@@ -1,14 +1,14 @@
 import { IsNotEmpty } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { ExpenseInputDto } from '@alisa-backend/accounting/expense/dtos/expense-input.dto';
-import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
+import { ExpenseInputDto } from '@asset-backend/accounting/expense/dtos/expense-input.dto';
+import { IncomeInputDto } from '@asset-backend/accounting/income/dtos/income-input.dto';
 import {
   TransactionStatus,
   TransactionType,
-} from '@alisa-backend/common/types';
-import { normalizeAccountingDate } from '@alisa-backend/common/utils/date-normalizer';
-import { IsValidDate } from '@alisa-backend/common/validators/is-valid-date.validator';
-import { toNumber } from '@alisa-backend/common/transformer/to-number.transformer';
+} from '@asset-backend/common/types';
+import { normalizeAccountingDate } from '@asset-backend/common/utils/date-normalizer';
+import { IsValidDate } from '@asset-backend/common/validators/is-valid-date.validator';
+import { toNumber } from '@asset-backend/common/transformer/to-number.transformer';
 
 export class TransactionInputDto {
   id?: number;

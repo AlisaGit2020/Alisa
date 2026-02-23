@@ -1,9 +1,9 @@
 import { Stack } from "@mui/material";
 import React, { useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
-import { expenseTypeContext, transactionContext } from "@alisa-lib/alisa-contexts";
-import AlisaFormHandler from "../alisa/form/AlisaFormHandler";
-import DataService from "@alisa-lib/data-service";
+import { expenseTypeContext, transactionContext } from "@asset-lib/asset-contexts";
+import AssetFormHandler from "../asset/form/AssetFormHandler";
+import DataService from "@asset-lib/data-service";
 import {
   TransactionInput,
   ExpenseInput,
@@ -13,17 +13,17 @@ import {
   TransactionTypeName,
   transactionTypeNames,
   ExpenseType,
-} from "@alisa-types";
-import AlisaLoadingProgress from "../alisa/AlisaLoadingProgress";
+} from "@asset-types";
+import AssetLoadingProgress from "../asset/AssetLoadingProgress";
 import TransactionFormFields from "./components/TransactionFormFields";
 import EditableRows from "./components/EditableRows.tsx";
-import ApiClient from "@alisa-lib/api-client.ts";
+import ApiClient from "@asset-lib/api-client.ts";
 import {
   isLoanPaymentMessage,
   parseLoanPaymentMessage,
-} from "@alisa-lib/loan-message-parser.ts";
+} from "@asset-lib/loan-message-parser.ts";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
-import { AlisaButton, AlisaDialog } from "../alisa";
+import { AssetButton, AssetDialog } from "../asset";
 
 interface TransactionFormProps extends WithTranslation {
   id?: number;
@@ -320,7 +320,7 @@ function TransactionForm({
           onAmountChange={(value) => handleAmountChange(value)}
         ></TransactionFormFields>
         {canSplitLoanPayment() && (
-          <AlisaButton
+          <AssetButton
             label={t("splitLoanPayment")}
             variant="outlined"
             startIcon={<CallSplitIcon />}
@@ -359,13 +359,13 @@ function TransactionForm({
 
   if (ready) {
     return (
-      <AlisaDialog
+      <AssetDialog
         open={open}
         title={`${t("transaction")} - ${t(getTypeName())}`}
         maxWidth="lg"
         onClose={onClose}
       >
-        <AlisaFormHandler<TransactionInput>
+        <AssetFormHandler<TransactionInput>
           id={id}
           dataService={dataService}
           data={data}
@@ -387,10 +387,10 @@ function TransactionForm({
           onCancel={onCancel}
           onAfterSubmit={onAfterSubmit}
         />
-      </AlisaDialog>
+      </AssetDialog>
     );
   } else {
-    return <AlisaLoadingProgress></AlisaLoadingProgress>;
+    return <AssetLoadingProgress></AssetLoadingProgress>;
   }
 }
 

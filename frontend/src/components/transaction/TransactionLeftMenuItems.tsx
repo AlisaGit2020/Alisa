@@ -5,7 +5,7 @@ import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import DoneIcon from "@mui/icons-material/Done";
 
 import { WithTranslation, withTranslation } from "react-i18next";
-import { transactionContext } from "@alisa-lib/alisa-contexts";
+import { transactionContext } from "@asset-lib/asset-contexts";
 
 export const TRANSACTION_PROPERTY_CHANGE_EVENT = "transactionPropertyChange";
 

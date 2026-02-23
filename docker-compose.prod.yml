@@ -2,7 +2,7 @@ services:
   database:
     image: postgres:16
     restart: always
-    container_name: alisa-postgres
+    container_name: asset-postgres
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -22,7 +22,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     restart: always
-    container_name: alisa-backend
+    container_name: asset-backend
     depends_on:
       database:
         condition: service_healthy
@@ -48,7 +48,7 @@ services:
       args:
         VITE_API_URL: ${VITE_API_URL}
     restart: always
-    container_name: alisa-nginx
+    container_name: asset-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -63,7 +63,7 @@ services:
 
   certbot:
     image: certbot/certbot
-    container_name: alisa-certbot
+    container_name: asset-certbot
     volumes:
       - certbot-conf:/etc/letsencrypt
       - certbot-www:/var/www/certbot

@@ -1,7 +1,7 @@
 // frontend/src/components/user/UserDetails.test.tsx
 import '@testing-library/jest-dom';
-import { User, Tier } from '@alisa-types';
-import { emptyUser } from '@alisa-lib/initial-data';
+import { User, Tier } from '@asset-types';
+import { emptyUser } from '@asset-lib/initial-data';
 
 // Since Jest mock hoisting causes issues with ESM mode in src/ directory,
 // we test the data transformation logic separately from the React component

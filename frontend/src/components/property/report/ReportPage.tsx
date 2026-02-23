@@ -4,14 +4,14 @@ import { useTranslation } from "react-i18next";
 import PropertySummaryCards from "./PropertySummaryCards";
 import PropertyReportCharts from "./PropertyReportCharts";
 import PageHeader from "../../templates/PageHeader";
-import { PropertyStatistics } from "@alisa-types";
-import ApiClient from "@alisa-lib/api-client";
+import { PropertyStatistics } from "@asset-types";
+import ApiClient from "@asset-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
 import axios from "axios";
-import { getTransactionPropertyId } from "@alisa-lib/initial-data";
+import { getTransactionPropertyId } from "@asset-lib/initial-data";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../../transaction/TransactionLeftMenuItems";
 import { calculateSummaryData } from "./report-utils";
-import { useToast } from "../../alisa/toast";
+import { useToast } from "../../asset/toast";
 
 function ReportPage() {
   const { t } = useTranslation("property");

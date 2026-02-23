@@ -5,10 +5,10 @@ import { UserService } from '../people/user/user.service';
 import { User } from '../people/user/entities/user.entity';
 import { JWTUser } from './types';
 import { FindOptionsWhere } from 'typeorm';
-import { Transaction } from '@alisa-backend/accounting/transaction/entities/transaction.entity';
-import { FindOptionsWhereWithUserId } from '@alisa-backend/common/types';
+import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
+import { FindOptionsWhereWithUserId } from '@asset-backend/common/types';
 import { UserSettingsInputDto } from './dtos/user-settings-input.dto';
-import { TierService } from '@alisa-backend/admin/tier.service';
+import { TierService } from '@asset-backend/admin/tier.service';
 
 @Injectable()
 export class AuthService {

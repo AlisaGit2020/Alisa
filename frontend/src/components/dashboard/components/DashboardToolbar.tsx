@@ -5,8 +5,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "../context/DashboardContext";
-import { useToast } from "../../alisa";
-import ApiClient from "@alisa-lib/api-client";
+import { useToast } from "../../asset";
+import ApiClient from "@asset-lib/api-client";
 import axios from "axios";
 import { VITE_API_URL } from "../../../constants";
 

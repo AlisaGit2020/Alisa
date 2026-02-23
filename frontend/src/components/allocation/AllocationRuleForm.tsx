@@ -2,23 +2,23 @@ import React from "react";
 import { Box, Typography } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import { TFunction } from "i18next";
-import AlisaTextField from "../alisa/form/AlisaTextField";
-import AlisaSelectField, {
-  AlisaSelectFieldItem,
-} from "../alisa/form/AlisaSelectField";
-import AlisaButton from "../alisa/form/AlisaButton";
-import AlisaSwitch from "../alisa/form/AlisaSwitch";
+import AssetTextField from "../asset/form/AssetTextField";
+import AssetSelectField, {
+  AssetSelectFieldItem,
+} from "../asset/form/AssetSelectField";
+import AssetButton from "../asset/form/AssetButton";
+import AssetSwitch from "../asset/form/AssetSwitch";
 import AllocationConditionRow from "./AllocationConditionRow";
 import {
   AllocationCondition,
   AllocationRule,
   TransactionType,
-} from "@alisa-types";
+} from "@asset-types";
 
 interface AllocationRuleFormProps {
   rule: Partial<AllocationRule>;
-  expenseTypes: AlisaSelectFieldItem[];
-  incomeTypes: AlisaSelectFieldItem[];
+  expenseTypes: AssetSelectFieldItem[];
+  incomeTypes: AssetSelectFieldItem[];
   t: TFunction;
   onChange: (rule: Partial<AllocationRule>) => void;
   errors?: {
@@ -27,7 +27,7 @@ interface AllocationRuleFormProps {
   };
 }
 
-const TRANSACTION_TYPES: AlisaSelectFieldItem[] = [
+const TRANSACTION_TYPES: AssetSelectFieldItem[] = [
   { id: TransactionType.EXPENSE, key: "expense" },
   { id: TransactionType.INCOME, key: "income" },
   { id: TransactionType.DEPOSIT, key: "deposit" },
@@ -103,7 +103,7 @@ function AllocationRuleForm({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <AlisaTextField
+      <AssetTextField
         label={t("allocation:ruleName")}
         value={rule.name || ""}
         onChange={handleNameChange}
@@ -111,7 +111,7 @@ function AllocationRuleForm({
         helperText={errors?.name}
       />
 
-      <AlisaSelectField
+      <AssetSelectField
         label={t("allocation:transactionType")}
         value={rule.transactionType ?? ""}
         items={TRANSACTION_TYPES}
@@ -121,7 +121,7 @@ function AllocationRuleForm({
       />
 
       {showExpenseType && (
-        <AlisaSelectField
+        <AssetSelectField
           label={t("allocation:expenseType")}
           value={rule.expenseTypeId ?? ""}
           items={expenseTypes}
@@ -132,7 +132,7 @@ function AllocationRuleForm({
       )}
 
       {showIncomeType && (
-        <AlisaSelectField
+        <AssetSelectField
           label={t("allocation:incomeType")}
           value={rule.incomeTypeId ?? ""}
           items={incomeTypes}
@@ -165,7 +165,7 @@ function AllocationRuleForm({
           />
         ))}
 
-        <AlisaButton
+        <AssetButton
           label={t("allocation:addCondition")}
           variant="outlined"
           size="small"
@@ -174,7 +174,7 @@ function AllocationRuleForm({
         />
       </Box>
 
-      <AlisaSwitch
+      <AssetSwitch
         label={t("allocation:active")}
         value={rule.isActive ?? true}
         onChange={handleActiveChange}

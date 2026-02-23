@@ -1,4 +1,4 @@
-import { Transaction, TransactionType } from "@alisa-types";
+import { Transaction, TransactionType } from "@asset-types";
 
 export type BankId = "op" | "s-pankki";
 

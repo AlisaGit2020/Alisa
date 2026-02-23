@@ -11,7 +11,7 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@alisa-backend/*": ["src/*"],      
+      "@asset-backend/*": ["src/*"],
     },
     "incremental": true,
     "skipLibCheck": true,

@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { UserService } from '../people/user/user.service';
-import { TierService } from '@alisa-backend/admin/tier.service';
+import { TierService } from '@asset-backend/admin/tier.service';
 import { createUser, createJWTUser } from 'test/factories';
-import { Ownership } from '@alisa-backend/people/ownership/entities/ownership.entity';
-import { FindOptionsWhereWithUserId } from '@alisa-backend/common/types';
+import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
+import { FindOptionsWhereWithUserId } from '@asset-backend/common/types';
 
 describe('AuthService', () => {
   let service: AuthService;

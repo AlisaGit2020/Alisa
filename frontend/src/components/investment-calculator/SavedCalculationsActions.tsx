@@ -1,9 +1,9 @@
 import { withTranslation, WithTranslation } from "react-i18next";
 import { Box, Paper, Stack } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { AlisaCloseIcon } from "../alisa/AlisaIcons";
+import { AssetCloseIcon } from "../asset/AssetIcons";
 import Typography from "@mui/material/Typography";
-import { AlisaButton, AlisaConfirmDialog } from "../alisa";
+import { AssetButton, AssetConfirmDialog } from "../asset";
 import React from "react";
 
 interface SavedCalculationsActionsProps extends WithTranslation {
@@ -45,7 +45,7 @@ function SavedCalculationsActions(props: SavedCalculationsActionsProps) {
         </Box>
 
         <Stack direction="row" spacing={2}>
-          <AlisaButton
+          <AssetButton
             label={props.t("common:delete")}
             variant="text"
             color="error"
@@ -57,17 +57,17 @@ function SavedCalculationsActions(props: SavedCalculationsActionsProps) {
             })}
             endIcon={<DeleteIcon />}
           />
-          <AlisaButton
+          <AssetButton
             label={props.t("common:cancel")}
             variant="text"
             onClick={props.onCancel}
             disabled={props.isDeleting}
-            endIcon={<AlisaCloseIcon />}
+            endIcon={<AssetCloseIcon />}
           />
         </Stack>
       </Stack>
 
-      <AlisaConfirmDialog
+      <AssetConfirmDialog
         title={props.t("common:confirm")}
         contentText={props.t("confirmDeleteSelected", {
           count: props.selectedIds.length,

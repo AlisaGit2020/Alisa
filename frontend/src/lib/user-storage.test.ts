@@ -27,20 +27,20 @@ describe("UserStorage", () => {
 
     it("should persist user ID in localStorage", () => {
       setCurrentUserId(123);
-      expect(localStorage.getItem("alisa-current-user-id")).toBe("123");
+      expect(localStorage.getItem("asset-current-user-id")).toBe("123");
     });
 
     it("should remove from localStorage when set to null", () => {
       setCurrentUserId(123);
       setCurrentUserId(null);
-      expect(localStorage.getItem("alisa-current-user-id")).toBeNull();
+      expect(localStorage.getItem("asset-current-user-id")).toBeNull();
     });
 
     it("should read user ID from localStorage when cache is empty", () => {
       // Simulate app startup with existing localStorage value
       // by directly setting localStorage before any setCurrentUserId call
       localStorage.clear();
-      localStorage.setItem("alisa-current-user-id", "999");
+      localStorage.setItem("asset-current-user-id", "999");
       // Reset the in-memory cache by re-importing the module
       // Since we can't do that easily in Jest, we test that
       // getCurrentUserId reads from localStorage after setCurrentUserId

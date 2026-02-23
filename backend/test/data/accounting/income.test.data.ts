@@ -4,7 +4,7 @@ import { TransactionInputDto } from 'src/accounting/transaction/dtos/transaction
 import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { Income } from 'src/accounting/income/entities/income.entity';
 import { startOfDay } from 'date-fns';
-import { TransactionStatus } from '@alisa-backend/common/types';
+import { TransactionStatus } from '@asset-backend/common/types';
 
 export const incomeTestData = {
   name: 'Income',

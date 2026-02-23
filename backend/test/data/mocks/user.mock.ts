@@ -1,4 +1,4 @@
-import { JWTUser } from '@alisa-backend/auth/types';
+import { JWTUser } from '@asset-backend/auth/types';
 
 export const getJWTUser = (
   id: number,

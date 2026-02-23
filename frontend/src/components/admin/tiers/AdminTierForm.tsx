@@ -2,12 +2,12 @@ import { Stack } from "@mui/material";
 import { useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { TFunction } from "i18next";
-import { adminContext } from "@alisa-lib/alisa-contexts";
-import AlisaTextField from "../../alisa/form/AlisaTextField";
-import AlisaNumberField from "../../alisa/form/AlisaNumberField";
-import AlisaSwitch from "../../alisa/form/AlisaSwitch";
-import { getNumber } from "@alisa-lib/functions";
-import { AlisaButton, AlisaDialog } from "../../alisa";
+import { adminContext } from "@asset-lib/asset-contexts";
+import AssetTextField from "../../asset/form/AssetTextField";
+import AssetNumberField from "../../asset/form/AssetNumberField";
+import AssetSwitch from "../../asset/form/AssetSwitch";
+import { getNumber } from "@asset-lib/functions";
+import { AssetButton, AssetDialog } from "../../asset";
 
 interface TierData {
   id?: number;
@@ -54,8 +54,8 @@ function AdminTierFormContent({
 
   const dialogActions = (
     <>
-      <AlisaButton label={t("tierCancel")} onClick={onClose} />
-      <AlisaButton
+      <AssetButton label={t("tierCancel")} onClick={onClose} />
+      <AssetButton
         label={t("tierSave")}
         onClick={handleSubmit}
         variant="contained"
@@ -64,7 +64,7 @@ function AdminTierFormContent({
   );
 
   return (
-    <AlisaDialog
+    <AssetDialog
       open={true}
       title={tier ? t("tierEdit") : t("tierAdd")}
       onClose={onClose}
@@ -73,13 +73,13 @@ function AdminTierFormContent({
       actions={dialogActions}
     >
       <Stack spacing={2} sx={{ mt: 1 }}>
-        <AlisaTextField
+        <AssetTextField
           label={t("tierName")}
           value={data.name}
           autoFocus
           onChange={(e) => setData({ ...data, name: e.target.value })}
         />
-        <AlisaNumberField
+        <AssetNumberField
           label={t("tierPrice")}
           value={data.price}
           adornment="€"
@@ -87,7 +87,7 @@ function AdminTierFormContent({
             setData({ ...data, price: getNumber(e.target.value, 2) })
           }
         />
-        <AlisaNumberField
+        <AssetNumberField
           label={t("tierMaxProperties")}
           value={data.maxProperties}
           onChange={(e) =>
@@ -97,20 +97,20 @@ function AdminTierFormContent({
             })
           }
         />
-        <AlisaNumberField
+        <AssetNumberField
           label={t("tierSortOrder")}
           value={data.sortOrder}
           onChange={(e) =>
             setData({ ...data, sortOrder: getNumber(e.target.value, 0) })
           }
         />
-        <AlisaSwitch
+        <AssetSwitch
           label={t("tierDefault")}
           value={data.isDefault}
           onChange={(e) => setData({ ...data, isDefault: e.target.checked })}
         />
       </Stack>
-    </AlisaDialog>
+    </AssetDialog>
   );
 }
 

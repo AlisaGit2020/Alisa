@@ -5,8 +5,8 @@ import { ReactNode } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 import { useImportWizard } from './useImportWizard';
-import { TransactionType, TransactionStatus } from '@alisa-types';
-import { AlisaToastProvider } from '../../../alisa';
+import { TransactionType, TransactionStatus } from '@asset-types';
+import { AssetToastProvider } from '../../../asset';
 import i18n from '../../../../../test/utils/test-i18n';
 
 // Mock localStorage
@@ -29,7 +29,7 @@ const localStorageMock = (() => {
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 // Mock getTransactionPropertyId
-jest.mock('@alisa-lib/initial-data', () => ({
+jest.mock('@asset-lib/initial-data', () => ({
   getTransactionPropertyId: () => 1,
 }));
 
@@ -37,9 +37,9 @@ jest.mock('@alisa-lib/initial-data', () => ({
 const wrapper = ({ children }: { children: ReactNode }) => (
   <BrowserRouter>
     <I18nextProvider i18n={i18n}>
-      <AlisaToastProvider>
+      <AssetToastProvider>
         {children}
-      </AlisaToastProvider>
+      </AssetToastProvider>
     </I18nextProvider>
   </BrowserRouter>
 );

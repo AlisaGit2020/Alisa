@@ -11,7 +11,7 @@ import {
 import { ExpenseTypeService } from './expense-type.service';
 import { ExpenseType } from './entities/expense-type.entity';
 import { FindManyOptions } from 'typeorm';
-import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
+import { JwtAuthGuard } from '@asset-backend/auth/jwt.auth.guard';
 
 @UseGuards(JwtAuthGuard)
 @Controller('accounting/expense/type')

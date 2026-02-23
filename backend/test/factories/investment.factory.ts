@@ -1,4 +1,4 @@
-import { Investment } from '@alisa-backend/real-estate/investment/entities/investment.entity';
+import { Investment } from '@asset-backend/real-estate/investment/entities/investment.entity';
 
 export interface CreateInvestmentOptions {
   id?: number;

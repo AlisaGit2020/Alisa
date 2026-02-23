@@ -1,17 +1,17 @@
 import { Box, Paper } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
-import AlisaDataTable from "../alisa/datatable/AlisaDataTable.tsx";
-import { transactionContext } from "@alisa-lib/alisa-contexts";
-import { Transaction, TransactionStatus, TransactionType } from "@alisa-types";
-import DataService from "@alisa-lib/data-service";
-import { TypeOrmFetchOptions } from "@alisa-lib/types";
+import AssetDataTable from "../asset/datatable/AssetDataTable.tsx";
+import { transactionContext } from "@asset-lib/asset-contexts";
+import { Transaction, TransactionStatus, TransactionType } from "@asset-types";
+import DataService from "@asset-lib/data-service";
+import { TypeOrmFetchOptions } from "@asset-lib/types";
 import React from "react";
 import TransactionAddMenu from "./components/TransactionAddMenu";
 import { TransactionFilterData } from "./components/TransactionFilter";
 import TransactionDetails from "./components/TransactionDetails";
 import TransactionForm from "./TransactionForm.tsx";
-import { usePropertyRequired } from "@alisa-lib/hooks/usePropertyRequired";
-import { PropertyRequiredSnackbar } from "../alisa/PropertyRequiredSnackbar";
+import { usePropertyRequired } from "@asset-lib/hooks/usePropertyRequired";
+import { PropertyRequiredSnackbar } from "../asset/PropertyRequiredSnackbar";
 import TransactionCategoryChips from "./components/TransactionCategoryChips";
 
 interface TransactionsProps extends WithTranslation {
@@ -117,7 +117,7 @@ function Transactions({
   return (
     <Box>
       <Paper sx={{ marginTop: 3 }}>
-        <AlisaDataTable<Transaction>
+        <AssetDataTable<Transaction>
           t={t}
           dataService={
             new DataService({ context: transactionContext, fetchOptions })

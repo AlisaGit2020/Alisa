@@ -1,10 +1,10 @@
 import { IsNotEmpty, IsNumber, IsObject, IsOptional, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { TransactionInputDto } from '@alisa-backend/accounting/transaction/dtos/transaction-input.dto';
-import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/property-input.dto';
-import { normalizeAccountingDate } from '@alisa-backend/common/utils/date-normalizer';
-import { IsValidDate } from '@alisa-backend/common/validators/is-valid-date.validator';
-import { toNumber } from '@alisa-backend/common/transformer/to-number.transformer';
+import { TransactionInputDto } from '@asset-backend/accounting/transaction/dtos/transaction-input.dto';
+import { PropertyInputDto } from '@asset-backend/real-estate/property/dtos/property-input.dto';
+import { normalizeAccountingDate } from '@asset-backend/common/utils/date-normalizer';
+import { IsValidDate } from '@asset-backend/common/validators/is-valid-date.validator';
+import { toNumber } from '@asset-backend/common/transformer/to-number.transformer';
 
 export class ExpenseInputDto {
   id?: number;

@@ -1,4 +1,4 @@
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 
 export type MockAuthService = Partial<Record<keyof AuthService, jest.Mock>>;
 

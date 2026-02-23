@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from '@alisa-backend/people/user/entities/user.entity';
+import { User } from '@asset-backend/people/user/entities/user.entity';
 
 @Entity()
 export class Tier {

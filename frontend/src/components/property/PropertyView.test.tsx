@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithRouter } from '@test-utils/test-wrapper';
 import { createMockProperty } from '@test-utils/test-data';
-import ApiClient from '@alisa-lib/api-client';
+import ApiClient from '@asset-lib/api-client';
 import { Routes, Route } from 'react-router-dom';
 
 // Mock the withTranslation HOC

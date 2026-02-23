@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { SPankkiImportService } from './s-pankki-import.service';
-import { TransactionService } from '@alisa-backend/accounting/transaction/transaction.service';
-import { PropertyService } from '@alisa-backend/real-estate/property/property.service';
-import { AuthService } from '@alisa-backend/auth/auth.service';
+import { TransactionService } from '@asset-backend/accounting/transaction/transaction.service';
+import { PropertyService } from '@asset-backend/real-estate/property/property.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import { createJWTUser, createProperty } from 'test/factories';
-import { MOCKS_PATH } from '@alisa-backend/constants';
+import { MOCKS_PATH } from '@asset-backend/constants';
 import { SPankkiImportInput } from './dtos/s-pankki-import-input.dto';
-import { TransactionStatus } from '@alisa-backend/common/types';
+import { TransactionStatus } from '@asset-backend/common/types';
 
 describe('SPankkiImportService', () => {
   let service: SPankkiImportService;

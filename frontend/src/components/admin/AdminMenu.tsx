@@ -1,10 +1,10 @@
-import { adminContext } from "@alisa-lib/alisa-contexts";
+import { adminContext } from "@asset-lib/asset-contexts";
 import AdminSharpIcon from "@mui/icons-material/AdminPanelSettings";
 import { Box, IconButton, Tooltip } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import AdminDialog from "./AdminDialog";
-import ApiClient from "@alisa-lib/api-client";
+import ApiClient from "@asset-lib/api-client";
 
 function AdminMenu({ t }: WithTranslation) {
   const [open, setOpen] = useState(false);

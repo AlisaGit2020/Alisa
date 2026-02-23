@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { AuthService } from '@alisa-backend/auth/auth.service';
-import { EventTrackerService } from '@alisa-backend/common/event-tracker.service';
+import { AuthService } from '@asset-backend/auth/auth.service';
+import { EventTrackerService } from '@asset-backend/common/event-tracker.service';
 import {
   closeAppGracefully,
   getBearerToken,
@@ -12,10 +12,10 @@ import {
   TestUser,
   TestUsersSetup,
 } from './helper-functions';
-import { IncomeTypeKey, StatisticKey } from '@alisa-backend/common/types';
-import { IncomeService } from '@alisa-backend/accounting/income/income.service';
-import { IncomeTypeService } from '@alisa-backend/accounting/income/income-type.service';
-import { IncomeInputDto } from '@alisa-backend/accounting/income/dtos/income-input.dto';
+import { IncomeTypeKey, StatisticKey } from '@asset-backend/common/types';
+import { IncomeService } from '@asset-backend/accounting/income/income.service';
+import { IncomeTypeService } from '@asset-backend/accounting/income/income-type.service';
+import { IncomeInputDto } from '@asset-backend/accounting/income/dtos/income-input.dto';
 import * as http from 'http';
 
 describe('AirbnbStatisticsService (e2e)', () => {

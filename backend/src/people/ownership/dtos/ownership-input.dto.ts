@@ -1,5 +1,5 @@
-import { UserInputDto } from '@alisa-backend/people/user/dtos/user-input.dto';
-import { PropertyInputDto } from '@alisa-backend/real-estate/property/dtos/property-input.dto';
+import { UserInputDto } from '@asset-backend/people/user/dtos/user-input.dto';
+import { PropertyInputDto } from '@asset-backend/real-estate/property/dtos/property-input.dto';
 import { IsNumber, Max, Min } from 'class-validator';
 
 export class OwnershipInputDto {

@@ -1,5 +1,5 @@
 import useSignOut from "react-auth-kit/hooks/useSignOut";
-import { setCurrentUserId } from "@alisa-lib/user-storage";
+import { setCurrentUserId } from "@asset-lib/user-storage";
 
 export function useSignOutWithCleanup() {
   const signOut = useSignOut();

@@ -1,6 +1,6 @@
 import ApiClient from "./api-client";
 import { DTO, TypeOrmFetchOptions, TypeOrmRelationOption } from "./types";
-import AlisaContext from "@alisa-lib/alisa-contexts";
+import AssetContext from "@asset-lib/asset-contexts";
 
 class DataService<T extends object> {
     private apiPath: string;
@@ -8,7 +8,7 @@ class DataService<T extends object> {
     private fetchOptions?: TypeOrmFetchOptions<T>;
 
     constructor(options: {
-        context: AlisaContext,
+        context: AssetContext,
         relations?: TypeOrmRelationOption,
         fetchOptions?: TypeOrmFetchOptions<T>,
     }) {

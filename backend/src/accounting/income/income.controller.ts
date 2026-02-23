@@ -14,11 +14,11 @@ import { IncomeService } from './income.service';
 import { Income } from './entities/income.entity';
 import { IncomeInputDto } from './dtos/income-input.dto';
 import { FindManyOptions } from 'typeorm';
-import { JwtAuthGuard } from '@alisa-backend/auth/jwt.auth.guard';
-import { User } from '@alisa-backend/common/decorators/user.decorator';
-import { JWTUser } from '@alisa-backend/auth/types';
-import { BulkDeleteInputDto } from '@alisa-backend/common/dtos/bulk-delete-input.dto';
-import { DataSaveResultDto } from '@alisa-backend/common/dtos/data-save-result.dto';
+import { JwtAuthGuard } from '@asset-backend/auth/jwt.auth.guard';
+import { User } from '@asset-backend/common/decorators/user.decorator';
+import { JWTUser } from '@asset-backend/auth/types';
+import { BulkDeleteInputDto } from '@asset-backend/common/dtos/bulk-delete-input.dto';
+import { DataSaveResultDto } from '@asset-backend/common/dtos/data-save-result.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('accounting/income')
