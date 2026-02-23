@@ -219,7 +219,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
                     size="small"
                     fullWidth
                     t={props.t}
-                    translateKeyPrefix="expenseTypes"
+                    translateKeyPrefix="expense-type"
                   />
                 </Box>
               )}
@@ -240,7 +240,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
                     size="small"
                     fullWidth
                     t={props.t}
-                    translateKeyPrefix="incomeTypes"
+                    translateKeyPrefix="income-type"
                   />
                 </Box>
               )}

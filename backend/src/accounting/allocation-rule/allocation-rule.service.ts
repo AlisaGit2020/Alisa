@@ -348,7 +348,8 @@ export class AllocationRuleService {
 
     if (condition.field === 'amount') {
       const numericValue = typeof fieldValue === 'number' ? fieldValue : 0;
-      const conditionValue = parseFloat(condition.value);
+      // Handle both comma and period as decimal separator (Finnish vs English locale)
+      const conditionValue = parseFloat(condition.value.replace(',', '.'));
 
       switch (condition.operator) {
         case 'equals':

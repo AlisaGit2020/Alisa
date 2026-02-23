@@ -5,44 +5,79 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import baseEn from '../src/translations/en';
 import baseFi from '../src/translations/fi';
+import baseSv from '../src/translations/sv';
 
-// Import all namespace translations
+// Import all namespace translations - English
 import accountingEn from '../src/translations/accounting/en';
-import accountingFi from '../src/translations/accounting/fi';
-import dashboardEn from '../src/translations/dashboard/en';
-import dashboardFi from '../src/translations/dashboard/fi';
-import propertyEn from '../src/translations/property/en';
-import propertyFi from '../src/translations/property/fi';
-import expenseEn from '../src/translations/expense/en';
-import expenseFi from '../src/translations/expense/fi';
-import expenseTypeEn from '../src/translations/expense-type/en';
-import expenseTypeFi from '../src/translations/expense-type/fi';
-import incomeTypeEn from '../src/translations/income-type/en';
-import incomeTypeFi from '../src/translations/income-type/fi';
-import loginEn from '../src/translations/login/en';
-import loginFi from '../src/translations/login/fi';
-import menuEn from '../src/translations/menu/en';
-import menuFi from '../src/translations/menu/fi';
-import routeEn from '../src/translations/route/en';
-import routeFi from '../src/translations/route/fi';
-import settingsEn from '../src/translations/settings/en';
-import settingsFi from '../src/translations/settings/fi';
-import taxEn from '../src/translations/tax/en';
-import taxFi from '../src/translations/tax/fi';
-import transactionEn from '../src/translations/transaction/en';
-import transactionFi from '../src/translations/transaction/fi';
-import userEn from '../src/translations/user/en';
-import userFi from '../src/translations/user/fi';
-import importWizardEn from '../src/translations/import-wizard/en';
-import importWizardFi from '../src/translations/import-wizard/fi';
-import investmentCalculatorEn from '../src/translations/investment-calculator/en';
-import investmentCalculatorFi from '../src/translations/investment-calculator/fi';
-import landingEn from '../src/translations/landing/en';
-import landingFi from '../src/translations/landing/fi';
 import adminEn from '../src/translations/admin/en';
-import adminFi from '../src/translations/admin/fi';
 import allocationEn from '../src/translations/allocation/en';
+import dashboardEn from '../src/translations/dashboard/en';
+import expenseEn from '../src/translations/expense/en';
+import expenseTypeEn from '../src/translations/expense-type/en';
+import financeEn from '../src/translations/finance/en';
+import importWizardEn from '../src/translations/import-wizard/en';
+import incomeTypeEn from '../src/translations/income-type/en';
+import investmentCalculatorEn from '../src/translations/investment-calculator/en';
+import landingEn from '../src/translations/landing/en';
+import loginEn from '../src/translations/login/en';
+import menuEn from '../src/translations/menu/en';
+import portfolioEn from '../src/translations/portfolio/en';
+import propertyEn from '../src/translations/property/en';
+import reportsEn from '../src/translations/reports/en';
+import routeEn from '../src/translations/route/en';
+import seoEn from '../src/translations/seo/en';
+import settingsEn from '../src/translations/settings/en';
+import taxEn from '../src/translations/tax/en';
+import transactionEn from '../src/translations/transaction/en';
+import userEn from '../src/translations/user/en';
+
+// Import all namespace translations - Finnish
+import accountingFi from '../src/translations/accounting/fi';
+import adminFi from '../src/translations/admin/fi';
 import allocationFi from '../src/translations/allocation/fi';
+import dashboardFi from '../src/translations/dashboard/fi';
+import expenseFi from '../src/translations/expense/fi';
+import expenseTypeFi from '../src/translations/expense-type/fi';
+import financeFi from '../src/translations/finance/fi';
+import importWizardFi from '../src/translations/import-wizard/fi';
+import incomeTypeFi from '../src/translations/income-type/fi';
+import investmentCalculatorFi from '../src/translations/investment-calculator/fi';
+import landingFi from '../src/translations/landing/fi';
+import loginFi from '../src/translations/login/fi';
+import menuFi from '../src/translations/menu/fi';
+import portfolioFi from '../src/translations/portfolio/fi';
+import propertyFi from '../src/translations/property/fi';
+import reportsFi from '../src/translations/reports/fi';
+import routeFi from '../src/translations/route/fi';
+import seoFi from '../src/translations/seo/fi';
+import settingsFi from '../src/translations/settings/fi';
+import taxFi from '../src/translations/tax/fi';
+import transactionFi from '../src/translations/transaction/fi';
+import userFi from '../src/translations/user/fi';
+
+// Import all namespace translations - Swedish
+import accountingSv from '../src/translations/accounting/sv';
+import adminSv from '../src/translations/admin/sv';
+import allocationSv from '../src/translations/allocation/sv';
+import dashboardSv from '../src/translations/dashboard/sv';
+import expenseSv from '../src/translations/expense/sv';
+import expenseTypeSv from '../src/translations/expense-type/sv';
+import financeSv from '../src/translations/finance/sv';
+import importWizardSv from '../src/translations/import-wizard/sv';
+import incomeTypeSv from '../src/translations/income-type/sv';
+import investmentCalculatorSv from '../src/translations/investment-calculator/sv';
+import landingSv from '../src/translations/landing/sv';
+import loginSv from '../src/translations/login/sv';
+import menuSv from '../src/translations/menu/sv';
+import portfolioSv from '../src/translations/portfolio/sv';
+import propertySv from '../src/translations/property/sv';
+import reportsSv from '../src/translations/reports/sv';
+import routeSv from '../src/translations/route/sv';
+import seoSv from '../src/translations/seo/sv';
+import settingsSv from '../src/translations/settings/sv';
+import taxSv from '../src/translations/tax/sv';
+import transactionSv from '../src/translations/transaction/sv';
+import userSv from '../src/translations/user/sv';
 
 // Combine all translations
 const en = {
@@ -51,16 +86,20 @@ const en = {
   admin: adminEn,
   allocation: allocationEn,
   dashboard: dashboardEn,
-  property: propertyEn,
   expense: expenseEn,
   'expense-type': expenseTypeEn,
-  'income-type': incomeTypeEn,
+  finance: financeEn,
   'import-wizard': importWizardEn,
+  'income-type': incomeTypeEn,
   'investment-calculator': investmentCalculatorEn,
   landing: landingEn,
   login: loginEn,
   menu: menuEn,
+  portfolio: portfolioEn,
+  property: propertyEn,
+  reports: reportsEn,
   route: routeEn,
+  seo: seoEn,
   settings: settingsEn,
   tax: taxEn,
   transaction: transactionEn,
@@ -73,20 +112,50 @@ const fi = {
   admin: adminFi,
   allocation: allocationFi,
   dashboard: dashboardFi,
-  property: propertyFi,
   expense: expenseFi,
   'expense-type': expenseTypeFi,
-  'income-type': incomeTypeFi,
+  finance: financeFi,
   'import-wizard': importWizardFi,
+  'income-type': incomeTypeFi,
   'investment-calculator': investmentCalculatorFi,
   landing: landingFi,
   login: loginFi,
   menu: menuFi,
+  portfolio: portfolioFi,
+  property: propertyFi,
+  reports: reportsFi,
   route: routeFi,
+  seo: seoFi,
   settings: settingsFi,
   tax: taxFi,
   transaction: transactionFi,
   user: userFi,
+};
+
+const sv = {
+  ...baseSv,
+  accounting: accountingSv,
+  admin: adminSv,
+  allocation: allocationSv,
+  dashboard: dashboardSv,
+  expense: expenseSv,
+  'expense-type': expenseTypeSv,
+  finance: financeSv,
+  'import-wizard': importWizardSv,
+  'income-type': incomeTypeSv,
+  'investment-calculator': investmentCalculatorSv,
+  landing: landingSv,
+  login: loginSv,
+  menu: menuSv,
+  portfolio: portfolioSv,
+  property: propertySv,
+  reports: reportsSv,
+  route: routeSv,
+  seo: seoSv,
+  settings: settingsSv,
+  tax: taxSv,
+  transaction: transactionSv,
+  user: userSv,
 };
 
 // ESM compatibility: Define __dirname
@@ -170,23 +239,36 @@ describe('Translation Coverage', () => {
     expect(componentFiles.length).toBeGreaterThan(0);
   });
 
-  it('should have matching keys between EN and FI translations', () => {
+  it('should have matching keys between EN, FI, and SV translations', () => {
     const enKeys = flattenTranslations(en);
     const fiKeys = flattenTranslations(fi);
+    const svKeys = flattenTranslations(sv);
 
     const missingInFi = [...enKeys].filter(key => !fiKeys.has(key));
+    const missingInSv = [...enKeys].filter(key => !svKeys.has(key));
     const missingInEn = [...fiKeys].filter(key => !enKeys.has(key));
+    const missingInEnFromSv = [...svKeys].filter(key => !enKeys.has(key));
 
     if (missingInFi.length > 0) {
       console.log('Keys missing in FI:', missingInFi);
     }
 
+    if (missingInSv.length > 0) {
+      console.log('Keys missing in SV:', missingInSv);
+    }
+
     if (missingInEn.length > 0) {
-      console.log('Keys missing in EN:', missingInEn);
+      console.log('Keys missing in EN (present in FI):', missingInEn);
+    }
+
+    if (missingInEnFromSv.length > 0) {
+      console.log('Keys missing in EN (present in SV):', missingInEnFromSv);
     }
 
     expect(missingInFi).toEqual([]);
+    expect(missingInSv).toEqual([]);
     expect(missingInEn).toEqual([]);
+    expect(missingInEnFromSv).toEqual([]);
   });
 
   it('should have all used translation keys defined', () => {
@@ -226,9 +308,10 @@ describe('Translation Coverage', () => {
       // Check if key exists in any namespace
       // Keys can be used without namespace prefix and i18n will search all namespaces
       const namespaces = [
-        'appBar', 'accounting', 'admin', 'dashboard', 'property', 'expense', 'expense-type',
-        'income-type', 'import-wizard', 'investment-calculator', 'landing', 'login', 'menu', 'route',
-        'settings', 'tax', 'transaction', 'user'
+        'accounting', 'admin', 'allocation', 'appBar', 'dashboard', 'expense', 'expense-type',
+        'finance', 'import-wizard', 'income-type', 'investment-calculator', 'landing', 'login',
+        'menu', 'portfolio', 'property', 'reports', 'route', 'seo', 'settings', 'tax',
+        'transaction', 'user'
       ];
 
       for (const ns of namespaces) {
@@ -306,24 +389,24 @@ describe('Translation Coverage', () => {
     }
 
     // Check that all segments have translations in route namespace
-    const routeFi = fi.route || {};
-    const routeEn = en.route || {};
+    const routeEnTranslations = en.route || {};
+    const routeFiTranslations = fi.route || {};
+    const routeSvTranslations = sv.route || {};
 
-    const missingInFi: string[] = [];
     const missingInEn: string[] = [];
+    const missingInFi: string[] = [];
+    const missingInSv: string[] = [];
 
     for (const segment of allSegments) {
-      if (!(segment in routeFi)) {
-        missingInFi.push(segment);
-      }
-      if (!(segment in routeEn)) {
+      if (!(segment in routeEnTranslations)) {
         missingInEn.push(segment);
       }
-    }
-
-    if (missingInFi.length > 0) {
-      console.log('\nRoute segments missing Finnish translations (route/fi.ts):');
-      missingInFi.forEach(key => console.log(`  - ${key}`));
+      if (!(segment in routeFiTranslations)) {
+        missingInFi.push(segment);
+      }
+      if (!(segment in routeSvTranslations)) {
+        missingInSv.push(segment);
+      }
     }
 
     if (missingInEn.length > 0) {
@@ -331,7 +414,18 @@ describe('Translation Coverage', () => {
       missingInEn.forEach(key => console.log(`  - ${key}`));
     }
 
-    expect(missingInFi).toEqual([]);
+    if (missingInFi.length > 0) {
+      console.log('\nRoute segments missing Finnish translations (route/fi.ts):');
+      missingInFi.forEach(key => console.log(`  - ${key}`));
+    }
+
+    if (missingInSv.length > 0) {
+      console.log('\nRoute segments missing Swedish translations (route/sv.ts):');
+      missingInSv.forEach(key => console.log(`  - ${key}`));
+    }
+
     expect(missingInEn).toEqual([]);
+    expect(missingInFi).toEqual([]);
+    expect(missingInSv).toEqual([]);
   });
 });

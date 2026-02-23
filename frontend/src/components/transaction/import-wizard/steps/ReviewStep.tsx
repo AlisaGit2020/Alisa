@@ -16,8 +16,6 @@ import AlisaButton from "../../../alisa/form/AlisaButton";
 import SearchIcon from "@mui/icons-material/Search";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-
-type SearchField = "all" | "sender" | "receiver" | "description" | "amount";
 import { TFunction } from "i18next";
 import { Transaction, TransactionType, AllocationResult } from "@alisa-types";
 import AlisaDataTable from "../../../alisa/datatable/AlisaDataTable";
@@ -28,6 +26,12 @@ import { useState, useMemo, useCallback } from "react";
 import axios from "axios";
 import ApiClient from "@alisa-lib/api-client";
 import { useToast } from "../../../alisa/toast/AlisaToastProvider";
+
+type SearchField = "all" | "sender" | "receiver" | "description" | "amount";
+
+interface TransactionRow extends Transaction {
+  categoryName: string;
+}
 
 interface ReviewStepProps {
   t: TFunction;
@@ -86,7 +90,18 @@ export default function ReviewStep({
   const [conflictingIds, setConflictingIds] = useState<Set<number>>(new Set());
 
   // Filter transactions based on unknown/allocated filter, search text, and selected field
-  const filteredTransactions = useMemo(() => {
+  const filteredTransactions = useMemo((): TransactionRow[] => {
+    // Helper function to get category name from transaction
+    const getCategoryName = (tx: Transaction): string => {
+      if (tx.type === TransactionType.EXPENSE && tx.expenses?.[0]?.expenseType) {
+        return t(`expense-type:${tx.expenses[0].expenseType.key}`);
+      }
+      if (tx.type === TransactionType.INCOME && tx.incomes?.[0]?.incomeType) {
+        return t(`income-type:${tx.incomes[0].incomeType.key}`);
+      }
+      return "";
+    };
+
     let filtered = transactions;
 
     // Filter by unknown/allocated toggle
@@ -127,8 +142,12 @@ export default function ReviewStep({
       });
     }
 
-    return filtered;
-  }, [transactions, searchText, searchField, showOnlyUnknown]);
+    // Add categoryName to each transaction
+    return filtered.map((tx) => ({
+      ...tx,
+      categoryName: getCategoryName(tx),
+    }));
+  }, [transactions, searchText, searchField, showOnlyUnknown, t]);
 
   // Count unknown transactions
   const unknownCount = useMemo(() => {
@@ -349,7 +368,7 @@ export default function ReviewStep({
 
       {/* Transaction table */}
       <Paper>
-        <AlisaDataTable<Transaction>
+        <AlisaDataTable<TransactionRow>
           t={t}
           data={filteredTransactions}
           sortable
@@ -359,6 +378,7 @@ export default function ReviewStep({
               format: "transactionType",
               label: "",
             },
+            { name: "categoryName", label: t("category"), hideOnMobile: true },
             { name: "transactionDate", format: "date" },
             { name: "sender", maxLength: 20, hideOnMobile: true },
             { name: "receiver", maxLength: 20, hideOnMobile: true },

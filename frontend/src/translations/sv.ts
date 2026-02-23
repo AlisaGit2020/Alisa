@@ -86,6 +86,8 @@ const sv = {
     rowsFailed: "Misslyckades",
     rowsSelected: "{{count}} rader valda",
     rowsSucceeded: "Lyckades",
+    confirmDeleteSelected: "Vill du verkligen ta bort {{count}} valda objekt?",
+    deleteSelectedAriaLabel: "Ta bort {{count}} valda objekt",
     save: "Spara",
     search: "Sök",
     selectAll: "Välj alla",

@@ -13,6 +13,7 @@ export default {
     "^@alisa-types/(.*)": "<rootDir>/src/types/$1",
     "^@alisa-mocks/(.*)": "<rootDir>/test/mocks/$1",
     "^@test-utils/(.*)": "<rootDir>/test/utils/$1",
+    "^@alisa-backend/(.*)": "<rootDir>/../backend/src/$1",
     // Map .js imports to .ts files (for ESM compatibility)
     "^(\\.{1,2}/.*)\\.js$": "$1",
     // Mock constants to provide test environment variables

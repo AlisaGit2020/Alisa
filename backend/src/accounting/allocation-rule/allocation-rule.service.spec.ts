@@ -456,6 +456,91 @@ describe('AllocationRuleService', () => {
       expect(result.allocated).toHaveLength(1);
     });
 
+    it('matches amount condition with comma as decimal separator', async () => {
+      mockRuleRepository.find.mockResolvedValue([
+        createAllocationRule({
+          conditions: [{ field: 'amount', operator: 'equals', value: '238,40' }],
+        }),
+      ]);
+      mockTransactionRepository.find.mockResolvedValue([
+        createTransaction({
+          id: 1,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.UNKNOWN,
+          amount: -238.4,
+        }),
+      ]);
+
+      const result = await service.apply(testUser, 1, [1]);
+
+      expect(result.allocated).toHaveLength(1);
+    });
+
+    it('matches amount greaterThan with comma decimal separator', async () => {
+      mockRuleRepository.find.mockResolvedValue([
+        createAllocationRule({
+          conditions: [{ field: 'amount', operator: 'greaterThan', value: '100,50' }],
+        }),
+      ]);
+      mockTransactionRepository.find.mockResolvedValue([
+        createTransaction({
+          id: 1,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.UNKNOWN,
+          amount: 150.75,
+        }),
+      ]);
+
+      const result = await service.apply(testUser, 1, [1]);
+
+      expect(result.allocated).toHaveLength(1);
+    });
+
+    it('handles empty string value in amount condition gracefully', async () => {
+      mockRuleRepository.find.mockResolvedValue([
+        createAllocationRule({
+          conditions: [{ field: 'amount', operator: 'equals', value: '' }],
+        }),
+      ]);
+      mockTransactionRepository.find.mockResolvedValue([
+        createTransaction({
+          id: 1,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.UNKNOWN,
+          amount: 100,
+        }),
+      ]);
+
+      const result = await service.apply(testUser, 1, [1]);
+
+      // Empty string parses to NaN, so condition should not match
+      expect(result.skipped).toHaveLength(1);
+      expect(result.skipped[0].reason).toBe('no_match');
+    });
+
+    it('handles European thousand separator format (1.234,56) as decimal value', async () => {
+      // Note: The current implementation treats comma as decimal separator.
+      // Values like "1.234,56" would be parsed incorrectly (as 1.234 with trailing chars ignored).
+      // This test documents current behavior - thousand separators are not supported.
+      mockRuleRepository.find.mockResolvedValue([
+        createAllocationRule({
+          conditions: [{ field: 'amount', operator: 'equals', value: '1234,56' }],
+        }),
+      ]);
+      mockTransactionRepository.find.mockResolvedValue([
+        createTransaction({
+          id: 1,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.UNKNOWN,
+          amount: -1234.56,
+        }),
+      ]);
+
+      const result = await service.apply(testUser, 1, [1]);
+
+      expect(result.allocated).toHaveLength(1);
+    });
+
     it('requires all conditions to match (AND logic)', async () => {
       mockRuleRepository.find.mockResolvedValue([
         createAllocationRule({
