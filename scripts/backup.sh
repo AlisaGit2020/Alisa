@@ -17,7 +17,7 @@ docker compose -f docker-compose.prod.yml exec -T database \
 echo "Backup saved to $BACKUP_FILE"
 
 echo "Removing backups older than ${KEEP_DAYS} days..."
-find "$BACKUP_DIR" -name "asset_*.sql.gz" -mtime +${KEEP_DAYS} -delete
+find "$BACKUP_DIR" \( -name "asset_*.sql.gz" -o -name "alisa_*.sql.gz" \) -mtime +${KEEP_DAYS} -delete
 
 echo "Current backups:"
 ls -lh "$BACKUP_DIR"
