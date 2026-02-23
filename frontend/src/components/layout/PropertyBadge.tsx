@@ -3,6 +3,7 @@ import HomeWorkIcon from "@mui/icons-material/HomeWork";
 import CheckIcon from "@mui/icons-material/Check";
 import { useEffect, useState, useRef, useCallback, MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { useToast } from "../asset";
 import {
   getTransactionPropertyId,
   setTransactionPropertyId,
@@ -19,6 +20,7 @@ export const PROPERTY_LIST_CHANGE_EVENT = "propertyListChange";
 
 function PropertyBadge() {
   const { t } = useTranslation("dashboard");
+  const { showToast } = useToast();
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [propertyId, setPropertyId] = useState<number>(getTransactionPropertyId());
@@ -64,10 +66,11 @@ function PropertyBadge() {
       setProperties(result);
     } catch {
       setProperties([]);
+      showToast({ message: t("common:toast.loadFailed"), severity: "error" });
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showToast, t]);
 
   // Initial fetch
   useEffect(() => {
@@ -150,8 +153,12 @@ function PropertyBadge() {
           fontSize: "0.95rem",
           padding: "4px 8px",
           height: "auto",
+          maxWidth: { xs: 150, sm: 200 },
           "& .MuiChip-label": {
             padding: "4px 8px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
           },
           "&:hover": {
             backgroundColor: "rgba(255, 255, 255, 0.1)",

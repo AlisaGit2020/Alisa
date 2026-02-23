@@ -1,11 +1,11 @@
-import { settingsContext } from "@asset-lib/asset-contexts";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { Box, IconButton, Tooltip } from "@mui/material";
-import { WithTranslation, withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import SettingsDialog from "../settings/SettingsDialog";
 
-function SettingsMenu({ t }: WithTranslation) {
+function SettingsMenu() {
+  const { t } = useTranslation("settings");
   const [open, setOpen] = useState(false);
 
   const handleOpen = () => {
@@ -28,4 +28,4 @@ function SettingsMenu({ t }: WithTranslation) {
   );
 }
 
-export default withTranslation(settingsContext.name)(SettingsMenu);
+export default SettingsMenu;

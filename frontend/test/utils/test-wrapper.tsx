@@ -8,6 +8,7 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './test-i18n';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { AssetToastProvider } from '../../src/components/asset';
+import { UserProvider } from '../../src/lib/user-context';
 
 // Create a default theme for testing
 const theme = createTheme();
@@ -26,7 +27,9 @@ function AllProviders({ children }: AllProvidersProps) {
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <I18nextProvider i18n={i18n}>
             <AssetToastProvider>
-              {children}
+              <UserProvider>
+                {children}
+              </UserProvider>
             </AssetToastProvider>
           </I18nextProvider>
         </LocalizationProvider>
@@ -71,7 +74,9 @@ export function renderWithRouter(
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <I18nextProvider i18n={i18n}>
               <AssetToastProvider>
-                {children}
+                <UserProvider>
+                  {children}
+                </UserProvider>
               </AssetToastProvider>
             </I18nextProvider>
           </LocalizationProvider>

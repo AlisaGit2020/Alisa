@@ -1,10 +1,10 @@
 import React from "react";
-import { WithTranslation, useTranslation, withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { Box, IconButton, Tooltip } from "@mui/material";
 import LanguageMenu, { getFlag } from "./LanguageMenu";
 
-function LanguageSelector({ t }: WithTranslation) {
-  const { i18n } = useTranslation();
+function LanguageSelector() {
+  const { t, i18n } = useTranslation("appBar");
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -35,4 +35,4 @@ function LanguageSelector({ t }: WithTranslation) {
   );
 }
 
-export default withTranslation("appBar")(LanguageSelector);
+export default LanguageSelector;

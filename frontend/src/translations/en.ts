@@ -130,6 +130,7 @@ const en = {
       calculationSaved: "Calculation saved",
       tierSaved: "Tier saved",
       error: "An error occurred",
+      loadFailed: "Failed to load data",
       partialSuccess: "{{success}} succeeded, {{failed}} failed",
     },
 

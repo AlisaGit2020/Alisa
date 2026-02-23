@@ -1,31 +1,24 @@
 import React from 'react';
-import { WithTranslation, withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { MenuItem, Box, Menu, Fade, IconButton, Tooltip, Avatar, ListItemIcon } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import { User } from '@asset-types';
-import ApiClient from '@asset-lib/api-client';
+import { useUser } from '@asset-lib/user-context';
 import { emptyUser } from '@asset-lib/initial-data';
 import UserDetails from '../user/UserDetails';
 import { useSignOutWithCleanup } from '@asset-lib/use-sign-out-with-cleanup';
 
-function UserMenu({ t }: WithTranslation) {
-    const signOut = useSignOutWithCleanup()
+function UserMenu() {
+    const { t } = useTranslation('appBar');
+    const signOut = useSignOutWithCleanup();
+    const { user } = useUser();
 
-    const [data, setData] = React.useState<User>(emptyUser);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const [openUserDetails, setOpenUserDetails] = React.useState<boolean>(false)
+    const [openUserDetails, setOpenUserDetails] = React.useState<boolean>(false);
     const open = Boolean(anchorEl);
 
-    React.useEffect(() => {
-        const fetchData = async () => {
-            const data = await ApiClient.me();
-            return data
-        }
-        fetchData()
-            .then(setData)
-
-    }, [])
+    // Use user from context, fallback to emptyUser while loading
+    const userData = user ?? emptyUser;
 
     const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -35,30 +28,31 @@ function UserMenu({ t }: WithTranslation) {
     };
 
     const openUserProfile = () => {
-        setOpenUserDetails(true)
-        handleClose()
+        setOpenUserDetails(true);
+        handleClose();
     };
 
     const handleSignOut = () => {
-        signOut()
+        signOut();
     };
 
-    const getFullName = (user: User) => {
-        return `${user.firstName} ${user.lastName}`
-    }
+    const getFullName = () => {
+        return `${userData.firstName} ${userData.lastName}`;
+    };
 
     return (
         <Box>
-            <Tooltip title={getFullName(data)}>
+            <Tooltip title={getFullName()}>
                 <IconButton
                     color="inherit"
                     aria-controls={open ? 'user-menu' : undefined}
                     aria-haspopup="true"
                     aria-expanded={open ? 'true' : undefined}
                     onClick={handleOpen}
-                ><Avatar
-                        alt={getFullName(data)}
-                        src={data.photo}
+                >
+                    <Avatar
+                        alt={getFullName()}
+                        src={userData.photo}
                     />
                 </IconButton>
             </Tooltip>
@@ -72,16 +66,15 @@ function UserMenu({ t }: WithTranslation) {
                 onClose={handleClose}
                 TransitionComponent={Fade}
             >
-
                 <MenuItem onClick={() => openUserProfile()}>
                     <ListItemIcon>
-                        <PersonOutlineIcon></PersonOutlineIcon>
+                        <PersonOutlineIcon />
                     </ListItemIcon>
                     {t('profile')}
                 </MenuItem>
                 <MenuItem onClick={() => handleSignOut()}>
                     <ListItemIcon>
-                        <LogoutIcon></LogoutIcon>
+                        <LogoutIcon />
                     </ListItemIcon>
                     {t('signOut')}
                 </MenuItem>
@@ -90,9 +83,9 @@ function UserMenu({ t }: WithTranslation) {
             <UserDetails
                 onClose={() => setOpenUserDetails(false)}
                 open={openUserDetails}
-            ></UserDetails>
+            />
         </Box>
     );
 }
 
-export default withTranslation('appBar')(UserMenu);
+export default UserMenu;

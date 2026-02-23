@@ -6,6 +6,7 @@ import "dayjs/locale/fi";
 import createStore from "react-auth-kit/createStore";
 import AuthProvider from "react-auth-kit";
 import { ThemeContextProvider, useThemeMode } from "@asset-lib/theme-context";
+import { UserProvider } from "@asset-lib/user-context";
 import { DashboardProvider } from "./components/dashboard/context/DashboardContext";
 import { AssetToastProvider } from "./components/asset";
 import { useMemo } from "react";
@@ -56,9 +57,11 @@ function ThemedApp() {
       <CssBaseline />
       <AssetToastProvider>
         <AuthProvider store={store}>
-          <DashboardProvider>
-            <AppRoutes />
-          </DashboardProvider>
+          <UserProvider>
+            <DashboardProvider>
+              <AppRoutes />
+            </DashboardProvider>
+          </UserProvider>
         </AuthProvider>
       </AssetToastProvider>
     </ThemeProvider>

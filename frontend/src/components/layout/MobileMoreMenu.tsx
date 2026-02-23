@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Box,
@@ -17,9 +17,7 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LanguageIcon from "@mui/icons-material/Language";
-import ApiClient from "@asset-lib/api-client";
-import { User } from "@asset-types";
-import { emptyUser } from "@asset-lib/initial-data";
+import { useUser } from "@asset-lib/user-context";
 import SettingsDialog from "../settings/SettingsDialog";
 import AdminDialog from "../admin/AdminDialog";
 import UserDetails from "../user/UserDetails";
@@ -30,12 +28,11 @@ import LanguageMenu from "./LanguageMenu";
 function MobileMoreMenu() {
   const { t } = useTranslation("appBar");
   const signOut = useSignOutWithCleanup();
+  const { user } = useUser();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [languageAnchorEl, setLanguageAnchorEl] =
     useState<null | HTMLElement>(null);
-  const [, setUser] = useState<User>(emptyUser);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [userDetailsOpen, setUserDetailsOpen] = useState(false);
@@ -43,19 +40,7 @@ function MobileMoreMenu() {
 
   const menuOpen = Boolean(anchorEl);
   const languageMenuOpen = Boolean(languageAnchorEl);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await ApiClient.me();
-        setUser(userData);
-        setIsAdmin(userData.isAdmin === true);
-      } catch {
-        setIsAdmin(false);
-      }
-    };
-    fetchUser();
-  }, []);
+  const isAdmin = user?.isAdmin === true;
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
