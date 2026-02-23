@@ -456,6 +456,46 @@ describe('AllocationRuleService', () => {
       expect(result.allocated).toHaveLength(1);
     });
 
+    it('matches amount condition with comma as decimal separator', async () => {
+      mockRuleRepository.find.mockResolvedValue([
+        createAllocationRule({
+          conditions: [{ field: 'amount', operator: 'equals', value: '238,40' }],
+        }),
+      ]);
+      mockTransactionRepository.find.mockResolvedValue([
+        createTransaction({
+          id: 1,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.UNKNOWN,
+          amount: -238.4,
+        }),
+      ]);
+
+      const result = await service.apply(testUser, 1, [1]);
+
+      expect(result.allocated).toHaveLength(1);
+    });
+
+    it('matches amount greaterThan with comma decimal separator', async () => {
+      mockRuleRepository.find.mockResolvedValue([
+        createAllocationRule({
+          conditions: [{ field: 'amount', operator: 'greaterThan', value: '100,50' }],
+        }),
+      ]);
+      mockTransactionRepository.find.mockResolvedValue([
+        createTransaction({
+          id: 1,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.UNKNOWN,
+          amount: 150.75,
+        }),
+      ]);
+
+      const result = await service.apply(testUser, 1, [1]);
+
+      expect(result.allocated).toHaveLength(1);
+    });
+
     it('requires all conditions to match (AND logic)', async () => {
       mockRuleRepository.find.mockResolvedValue([
         createAllocationRule({

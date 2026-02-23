@@ -288,8 +288,8 @@ export function useImportWizard() {
         "amount",
       ],
       relations: {
-        expenses: true,
-        incomes: true,
+        expenses: { expenseType: true },
+        incomes: { incomeType: true },
       },
       order: {
         transactionDate: "DESC",

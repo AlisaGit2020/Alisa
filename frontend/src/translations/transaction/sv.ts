@@ -26,6 +26,7 @@ const transaction = {
   add: "Ny transaktion",
   amount: "Belopp",
   balance: "Saldo",
+  category: "Kategori",
   chooseTransactionType: "Välj transaktionstyp",
   dateRange: "Datumintervall",
   defaultIncomeType: "Standard intäktstyp",
