@@ -516,6 +516,104 @@ describe('TransactionController (e2e)', () => {
       expect(response.body.allSuccess).toBe(true);
     });
 
+    it('returns expenseType when searching with nested relations', async () => {
+      // Create a pending expense transaction
+      const transaction = await addTransaction(
+        app,
+        mainUser.jwtUser,
+        {
+          sender: 'Nested Relation Test Sender',
+          receiver: 'Nested Relation Test Receiver',
+          description: 'Nested relation test',
+          transactionDate: new Date('2024-01-24'),
+          accountingDate: new Date('2024-01-24'),
+          amount: -300,
+          propertyId: mainUser.properties[0].id,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.EXPENSE,
+          externalId: `nested-relation-${Date.now()}`,
+        },
+      );
+
+      // Set category type to create expense with expenseTypeId
+      await request(server)
+        .post('/accounting/transaction/category-type')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          ids: [transaction.id],
+          expenseTypeId: 1,
+        })
+        .expect(201);
+
+      // Search with nested relations (as frontend does)
+      const searchResponse = await request(server)
+        .post('/accounting/transaction/search')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          select: ['id', 'type', 'transactionDate', 'sender', 'receiver', 'description', 'amount'],
+          relations: {
+            expenses: { expenseType: true },
+            incomes: { incomeType: true },
+          },
+          where: { id: transaction.id },
+        })
+        .expect(200);
+
+      expect(searchResponse.body).toHaveLength(1);
+      expect(searchResponse.body[0].expenses).toHaveLength(1);
+      expect(searchResponse.body[0].expenses[0].expenseType).toBeDefined();
+      expect(searchResponse.body[0].expenses[0].expenseType.key).toBeDefined();
+    });
+
+    it('returns incomeType when searching with nested relations', async () => {
+      // Create a pending income transaction
+      const transaction = await addTransaction(
+        app,
+        mainUser.jwtUser,
+        {
+          sender: 'Income Nested Relation Test Sender',
+          receiver: 'Income Nested Relation Test Receiver',
+          description: 'Income nested relation test',
+          transactionDate: new Date('2024-01-25'),
+          accountingDate: new Date('2024-01-25'),
+          amount: 400,
+          propertyId: mainUser.properties[0].id,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.INCOME,
+          externalId: `income-nested-relation-${Date.now()}`,
+        },
+      );
+
+      // Set category type to create income with incomeTypeId
+      await request(server)
+        .post('/accounting/transaction/category-type')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          ids: [transaction.id],
+          incomeTypeId: 1,
+        })
+        .expect(201);
+
+      // Search with nested relations (as frontend does)
+      const searchResponse = await request(server)
+        .post('/accounting/transaction/search')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({
+          select: ['id', 'type', 'transactionDate', 'sender', 'receiver', 'description', 'amount'],
+          relations: {
+            expenses: { expenseType: true },
+            incomes: { incomeType: true },
+          },
+          where: { id: transaction.id },
+        })
+        .expect(200);
+
+      expect(searchResponse.body).toHaveLength(1);
+      expect(searchResponse.body[0].incomes).toHaveLength(1);
+      expect(searchResponse.body[0].incomes[0].incomeType).toBeDefined();
+      expect(searchResponse.body[0].incomes[0].incomeType.key).toBeDefined();
+    });
+
     it('returns 400 when no ids provided', async () => {
       await request(server)
         .post('/accounting/transaction/category-type')

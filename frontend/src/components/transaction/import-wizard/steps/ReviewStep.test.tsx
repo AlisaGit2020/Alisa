@@ -28,16 +28,6 @@ jest.mock(
   { virtual: true }
 );
 
-// Mock AlisaDataTable
-jest.mock(
-  '@/components/alisa/datatable/AlisaDataTable',
-  () => ({
-    __esModule: true,
-    default: () => <div data-testid="data-table">Table</div>,
-  }),
-  { virtual: true }
-);
-
 // Mock AllocationRulesModal
 jest.mock(
   '@/components/allocation',
@@ -63,6 +53,8 @@ jest.mock(
   { virtual: true }
 );
 
+// Don't mock AlisaDataTable - we want to test actual rendering
+
 // Import ReviewStep after mocks are set up
 import ReviewStep from './ReviewStep';
 
@@ -87,6 +79,7 @@ describe('ReviewStep', () => {
       'description': 'Description',
       'amount': 'Amount',
       'search': 'Search',
+      'category': 'Category',
     };
     return translations[key] || key;
   }) as unknown as TFunction;
@@ -233,6 +226,197 @@ describe('ReviewStep', () => {
       renderWithProviders(<ReviewStep {...defaultProps} hasUnknownTypes={false} />);
 
       expect(screen.queryByText(/all transactions are allocated/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Category name display', () => {
+    it('renders Category column header in the data table', () => {
+      // Use a simple transaction to ensure the table renders
+      const unknownTx = createTransaction(1, TransactionType.UNKNOWN);
+      renderWithProviders(
+        <ReviewStep {...defaultProps} transactions={[unknownTx]} />
+      );
+
+      // Check that the Category column header is rendered
+      expect(screen.getByText('Category')).toBeInTheDocument();
+    });
+
+    it('displays expense type name for expense transactions', async () => {
+      const user = userEvent.setup();
+      const expenseTransaction: Transaction = {
+        id: 10,
+        externalId: 'ext-10',
+        status: TransactionStatus.PENDING,
+        type: TransactionType.EXPENSE,
+        sender: 'Test Sender',
+        receiver: 'Test Receiver',
+        description: 'Test expense',
+        transactionDate: new Date('2024-01-01'),
+        accountingDate: new Date('2024-01-01'),
+        amount: -100,
+        balance: 900,
+        propertyId: 1,
+        expenses: [{
+          id: 1,
+          description: 'Expense',
+          amount: 100,
+          quantity: 1,
+          totalAmount: 100,
+          accountingDate: new Date('2024-01-01'),
+          expenseType: { id: 1, key: 'maintenance', isTaxDeductible: true, isCapitalImprovement: false },
+          expenseTypeId: 1,
+          propertyId: 1,
+          transactionId: 10,
+        }],
+      };
+
+      renderWithProviders(
+        <ReviewStep
+          {...defaultProps}
+          transactions={[expenseTransaction]}
+          hasUnknownTypes={false}
+        />
+      );
+
+      // Click on "Allocated" toggle button to see allocated transactions
+      const allocatedToggle = screen.getByRole('button', { name: /^Allocated \(/i });
+      await user.click(allocatedToggle);
+
+      // Verify the expense type name is displayed in the table
+      // The translation key is expense-type:maintenance
+      expect(screen.getByText('expense-type:maintenance')).toBeInTheDocument();
+    });
+
+    it('displays income type name for income transactions', async () => {
+      const user = userEvent.setup();
+      const incomeTransaction: Transaction = {
+        id: 11,
+        externalId: 'ext-11',
+        status: TransactionStatus.PENDING,
+        type: TransactionType.INCOME,
+        sender: 'Tenant',
+        receiver: 'Owner',
+        description: 'Rent payment',
+        transactionDate: new Date('2024-01-01'),
+        accountingDate: new Date('2024-01-01'),
+        amount: 500,
+        balance: 1500,
+        propertyId: 1,
+        incomes: [{
+          id: 1,
+          description: 'Income',
+          amount: 500,
+          quantity: 1,
+          totalAmount: 500,
+          accountingDate: new Date('2024-01-01'),
+          incomeType: { id: 1, key: 'rent', isTaxable: true },
+          incomeTypeId: 1,
+          propertyId: 1,
+          transactionId: 11,
+        }],
+      };
+
+      renderWithProviders(
+        <ReviewStep
+          {...defaultProps}
+          transactions={[incomeTransaction]}
+          hasUnknownTypes={false}
+        />
+      );
+
+      // Click on "Allocated" toggle button
+      const allocatedToggle = screen.getByRole('button', { name: /^Allocated \(/i });
+      await user.click(allocatedToggle);
+
+      // Verify the income type name is displayed
+      expect(screen.getByText('income-type:rent')).toBeInTheDocument();
+    });
+
+    it('displays empty cell for transactions without expense/income type', async () => {
+      const user = userEvent.setup();
+      const allocatedTransaction: Transaction = {
+        id: 12,
+        externalId: 'ext-12',
+        status: TransactionStatus.PENDING,
+        type: TransactionType.EXPENSE,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'No category',
+        transactionDate: new Date('2024-01-01'),
+        accountingDate: new Date('2024-01-01'),
+        amount: -50,
+        balance: 950,
+        propertyId: 1,
+        // No expenses array
+      };
+
+      renderWithProviders(
+        <ReviewStep
+          {...defaultProps}
+          transactions={[allocatedTransaction]}
+          hasUnknownTypes={false}
+        />
+      );
+
+      // Click on "Allocated" toggle
+      const allocatedToggle = screen.getByRole('button', { name: /^Allocated \(/i });
+      await user.click(allocatedToggle);
+
+      // Verify the transaction row is displayed (by description)
+      expect(screen.getByText('No category')).toBeInTheDocument();
+
+      // Verify there's no expense-type or income-type text displayed
+      expect(screen.queryByText(/expense-type:/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/income-type:/)).not.toBeInTheDocument();
+    });
+
+    it('displays empty category when expense exists but has no expenseType object', async () => {
+      const user = userEvent.setup();
+      // This simulates what happens if the backend returns expenses without expenseType populated
+      const expenseWithoutType: Transaction = {
+        id: 13,
+        externalId: 'ext-13',
+        status: TransactionStatus.PENDING,
+        type: TransactionType.EXPENSE,
+        sender: 'Test',
+        receiver: 'Test',
+        description: 'Has expense but no type',
+        transactionDate: new Date('2024-01-01'),
+        accountingDate: new Date('2024-01-01'),
+        amount: -75,
+        balance: 925,
+        propertyId: 1,
+        expenses: [{
+          id: 1,
+          description: 'Expense',
+          amount: 75,
+          quantity: 1,
+          totalAmount: 75,
+          accountingDate: new Date('2024-01-01'),
+          // expenseType is missing - only expenseTypeId exists
+          expenseTypeId: 1,
+          propertyId: 1,
+          transactionId: 13,
+        }],
+      };
+
+      renderWithProviders(
+        <ReviewStep
+          {...defaultProps}
+          transactions={[expenseWithoutType]}
+          hasUnknownTypes={false}
+        />
+      );
+
+      // Click on "Allocated" toggle
+      const allocatedToggle = screen.getByRole('button', { name: /^Allocated \(/i });
+      await user.click(allocatedToggle);
+
+      // Verify the transaction row is displayed
+      expect(screen.getByText('Has expense but no type')).toBeInTheDocument();
+
+      // Should NOT have any expense-type text since expenseType object is missing
+      expect(screen.queryByText(/expense-type:/)).not.toBeInTheDocument();
     });
   });
 });
