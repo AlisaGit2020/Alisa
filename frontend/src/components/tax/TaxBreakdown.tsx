@@ -52,6 +52,7 @@ function TaxBreakdown({
   depreciationBreakdown,
 }: TaxBreakdownProps) {
   const { t } = useTranslation("tax");
+  const { t: tExpenseType } = useTranslation("expense-type");
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("fi-FI", {
@@ -123,7 +124,7 @@ function TaxBreakdown({
             {/* Deduction Items */}
             {deductionItems.map((item) => (
               <TableRow key={item.category}>
-                <TableCell sx={{ pl: 4 }}>{item.category}</TableCell>
+                <TableCell sx={{ pl: 4 }}>{tExpenseType(item.category)}</TableCell>
                 <TableCell align="right">{formatCurrency(item.amount)}</TableCell>
               </TableRow>
             ))}
