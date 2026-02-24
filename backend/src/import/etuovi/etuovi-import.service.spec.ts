@@ -162,6 +162,34 @@ describe('EtuoviImportService', () => {
       expect(result.postalCode).toBe('66400');
     });
 
+    it('parses default image URL from mock HTML', () => {
+      const result = service.parseHtml(testUrl, mockHtml);
+      // The MAIN image with ordinal 0 should be selected
+      expect(result.defaultImageUrl).toBe('https://d3ls91xgksobn.cloudfront.net/etuovimedia/images/property/import/123/abc123/ORIGINAL.jpeg');
+    });
+
+    it('selects image with lowest ordinal as default from __INITIAL_STATE__', () => {
+      // Image with ordinal 0 should be chosen even if it appears second in the JSON
+      const htmlWithMultipleImages = `
+        <html><script>
+        window.__INITIAL_STATE__ = {
+          "property": {
+            "debfFreePrice": 100000,
+            "livingArea": 50,
+            "periodicCharges": [{"periodicCharge": "HOUSING_COMPANY_MAINTENANCE_CHARGE", "price": 200}],
+            "images": {
+              "999": {"id": 999, "propertyImageType": "OTHER", "ordinal": 2, "image": {"uri": "//example.com/second.jpg"}},
+              "888": {"id": 888, "propertyImageType": "MAIN", "ordinal": 0, "image": {"uri": "//example.com/first.jpg"}}
+            }
+          }
+        };
+        </script></html>
+      `;
+
+      const result = service.parseHtml(testUrl, htmlWithMultipleImages);
+      expect(result.defaultImageUrl).toBe('https://example.com/first.jpg');
+    });
+
     it('includes the URL in result', () => {
       const result = service.parseHtml(testUrl, mockHtml);
       expect(result.url).toBe(testUrl);
@@ -221,6 +249,51 @@ describe('EtuoviImportService', () => {
       expect(result.propertyType).toBeUndefined();
       expect(result.condition).toBeUndefined();
       expect(result.energyClass).toBeUndefined();
+    });
+
+    it('parses default image URL correctly', () => {
+      // Etuovi uses an object with image IDs as keys, uri in nested image object
+      const htmlWithImage = `
+        <html><body>
+        "debfFreePrice":100000,"livingArea":50,"periodicCharges":[{"periodicCharge":"HOUSING_COMPANY_MAINTENANCE_CHARGE","price":200,"chargePeriod":"MONTH"}],"images":{"123":{"id":123,"propertyImageType":"MAIN","ordinal":0,"image":{"id":123,"uuid":"abc-123","uri":"//d3ls91xgksobn.cloudfront.net/etuovimedia/images/property/123/abc/ORIGINAL.jpeg"}}}
+        </body></html>
+      `;
+
+      const result = service.parseHtml(testUrl, htmlWithImage);
+      expect(result.defaultImageUrl).toBe('https://d3ls91xgksobn.cloudfront.net/etuovimedia/images/property/123/abc/ORIGINAL.jpeg');
+    });
+
+    it('replaces {imageParameters} placeholder with default size', () => {
+      const htmlWithPlaceholder = `
+        <html><body>
+        "debfFreePrice":100000,"livingArea":50,"periodicCharges":[{"periodicCharge":"HOUSING_COMPANY_MAINTENANCE_CHARGE","price":200,"chargePeriod":"MONTH"}],"images":{"123":{"id":123,"ordinal":0,"image":{"uri":"//d3ls91xgksobn.cloudfront.net/{imageParameters}/etuovimedia/images/test.jpeg"}}}
+        </body></html>
+      `;
+
+      const result = service.parseHtml(testUrl, htmlWithPlaceholder);
+      expect(result.defaultImageUrl).toBe('https://d3ls91xgksobn.cloudfront.net/1200x,q90/etuovimedia/images/test.jpeg');
+    });
+
+    it('unescapes unicode in image URI', () => {
+      const htmlWithUnicode = `
+        <html><body>
+        "debfFreePrice":100000,"livingArea":50,"periodicCharges":[{"periodicCharge":"HOUSING_COMPANY_MAINTENANCE_CHARGE","price":200,"chargePeriod":"MONTH"}],"images":{"123":{"id":123,"ordinal":0,"image":{"uri":"\\u002F\\u002Fd3ls91xgksobn.cloudfront.net\\u002F{imageParameters}\\u002Fetuovimedia\\u002Fimages\\u002Ftest.jpeg"}}}
+        </body></html>
+      `;
+
+      const result = service.parseHtml(testUrl, htmlWithUnicode);
+      expect(result.defaultImageUrl).toBe('https://d3ls91xgksobn.cloudfront.net/1200x,q90/etuovimedia/images/test.jpeg');
+    });
+
+    it('returns undefined for defaultImageUrl when no images present', () => {
+      const minimalHtml = `
+        <html><body>
+        "debfFreePrice":100000,"livingArea":50,"periodicCharges":[{"periodicCharge":"HOUSING_COMPANY_MAINTENANCE_CHARGE","price":200,"chargePeriod":"MONTH"}]
+        </body></html>
+      `;
+
+      const result = service.parseHtml(testUrl, minimalHtml);
+      expect(result.defaultImageUrl).toBeUndefined();
     });
 
     it('unescapes unicode characters in room structure', () => {
@@ -419,6 +492,47 @@ describe('EtuoviImportService', () => {
       const result = service.createPropertyInput(etuoviData);
 
       expect(result.address).toBeUndefined();
+    });
+
+    it('maps defaultImageUrl to photo', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        defaultImageUrl: 'https://d3ls91xgksobn.cloudfront.net/etuovimedia/images/property/123/abc/ORIGINAL.jpeg',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.photo).toBe('https://d3ls91xgksobn.cloudfront.net/etuovimedia/images/property/123/abc/ORIGINAL.jpeg');
+    });
+
+    it('stores full https URL for external image', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        defaultImageUrl: 'https://d3ls91xgksobn.cloudfront.net/image.jpg',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.photo).toMatch(/^https:\/\//);
+    });
+
+    it('does not set photo when defaultImageUrl is missing', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.photo).toBeUndefined();
     });
   });
 

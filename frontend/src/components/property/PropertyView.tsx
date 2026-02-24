@@ -7,7 +7,7 @@ import { Property, PropertyStatus } from '@asset-types';
 import ApiClient from '../../lib/api-client';
 import AssetLoadingProgress from '../asset/AssetLoadingProgress';
 import AssetButton from '../asset/form/AssetButton';
-import { VITE_BASE_URL } from '../../constants';
+import { getPhotoUrl } from '@asset-lib/functions';
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SquareFootIcon from '@mui/icons-material/SquareFoot';
@@ -169,9 +169,7 @@ function PropertyView({ t }: WithTranslation) {
     );
   }
 
-  const imageUrl = property.photo
-    ? `${VITE_BASE_URL}/${property.photo}`
-    : '/assets/properties/placeholder.svg';
+  const imageUrl = getPhotoUrl(property.photo);
 
   const ownershipShare = property.ownerships?.[0]?.share ?? 100;
 

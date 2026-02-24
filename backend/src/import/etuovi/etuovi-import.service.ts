@@ -23,6 +23,19 @@ interface PeriodicCharge {
   chargePeriod: string;
 }
 
+interface EtuoviImageData {
+  id?: number;
+  uuid?: string;
+  uri?: string;
+}
+
+interface EtuoviImageEntry {
+  id?: number;
+  propertyImageType?: string;
+  ordinal?: number;
+  image?: EtuoviImageData;
+}
+
 interface EtuoviPropertyData {
   debfFreePrice?: number;
   sellingPrice?: number;
@@ -47,6 +60,7 @@ interface EtuoviPropertyData {
     };
     postCode?: string;
   };
+  images?: Record<string, EtuoviImageEntry>;
 }
 
 @Injectable()
@@ -187,6 +201,11 @@ export class EtuoviImportService {
     // Parse city and postal code from location
     result.city = jsonData.location?.municipality?.defaultName || undefined;
     result.postalCode = jsonData.location?.postCode || undefined;
+
+    // Parse default image URL (image with lowest ordinal from object)
+    if (jsonData.images && typeof jsonData.images === 'object') {
+      result.defaultImageUrl = this.extractDefaultImageUrl(jsonData.images);
+    }
 
     // Validate required fields
     if (result.deptFreePrice === 0) {
@@ -357,6 +376,21 @@ export class EtuoviImportService {
       result.location.postCode = postCodeMatch[1];
     }
 
+    // Extract images object (Etuovi uses object with IDs as keys)
+    const imagesMatch = html.match(/"images":\{([^}]+(?:\{[^}]*\}[^}]*)*)\}/);
+    if (imagesMatch) {
+      try {
+        const imagesObj = JSON.parse(`{${imagesMatch[1]}}`) as Record<string, EtuoviImageEntry>;
+        result.images = imagesObj;
+      } catch {
+        // Try extracting first image URI directly from nested structure
+        const imageUriMatch = html.match(/"image":\{[^}]*"uri":"([^"]+)"/);
+        if (imageUriMatch) {
+          result.images = { '0': { ordinal: 0, image: { uri: imageUriMatch[1] } } };
+        }
+      }
+    }
+
     if (result.debfFreePrice || result.sellingPrice) {
       return result;
     }
@@ -392,6 +426,34 @@ export class EtuoviImportService {
     );
   }
 
+  private extractDefaultImageUrl(images: Record<string, EtuoviImageEntry>): string | undefined {
+    // Find image with lowest ordinal (typically the main/default image)
+    const entries = Object.values(images);
+    if (entries.length === 0) return undefined;
+
+    const sortedByOrdinal = entries
+      .filter((entry) => entry.image?.uri)
+      .sort((a, b) => (a.ordinal ?? 999) - (b.ordinal ?? 999));
+
+    if (sortedByOrdinal.length === 0) return undefined;
+
+    let uri = sortedByOrdinal[0].image?.uri;
+    if (!uri) return undefined;
+
+    // Unescape unicode characters (e.g., \u002F -> /)
+    uri = this.unescapeUnicode(uri);
+
+    // Replace {imageParameters} placeholder with default size parameters
+    // Etuovi uses this as a template that frontend replaces with size/quality
+    uri = uri.replace('{imageParameters}', '1200x,q90');
+
+    // Convert protocol-relative URL (//...) to https://
+    if (uri.startsWith('//')) {
+      return `https:${uri}`;
+    }
+    return uri;
+  }
+
   createPropertyInput(etuoviData: EtuoviPropertyDataDto): PropertyInputDto {
     const input = new PropertyInputDto();
 
@@ -403,6 +465,7 @@ export class EtuoviImportService {
     input.buildYear = etuoviData.buildingYear;
     input.apartmentType = etuoviData.propertyType;
     input.address = this.parseAddress(etuoviData);
+    input.photo = etuoviData.defaultImageUrl;
 
     return input;
   }

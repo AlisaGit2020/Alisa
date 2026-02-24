@@ -11,7 +11,8 @@ import { useTranslation } from 'react-i18next';
 import { AssetButton, useAssetToast } from '../asset';
 import axios from 'axios';
 import ApiClient from '@asset-lib/api-client';
-import { VITE_API_URL, VITE_BASE_URL } from '../../constants';
+import { VITE_API_URL } from '../../constants';
+import { getPhotoUrl } from '@asset-lib/functions';
 
 interface PropertyPhotoUploadProps {
   propertyId: number;
@@ -134,9 +135,7 @@ const PropertyPhotoUpload: React.FC<PropertyPhotoUploadProps> = ({
   // Determine which URL to show in the preview
   const photoUrl = pendingPreviewUrl
     ? pendingPreviewUrl
-    : photoPath
-      ? `${VITE_BASE_URL}/${photoPath}`
-      : '/assets/properties/placeholder.svg';
+    : getPhotoUrl(photoPath);
 
   const hasPhoto = pendingMode ? !!pendingFile : !!photoPath;
 

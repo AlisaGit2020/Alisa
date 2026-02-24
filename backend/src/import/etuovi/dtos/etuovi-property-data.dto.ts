@@ -13,4 +13,5 @@ export class EtuoviPropertyDataDto {
   propertyType?: string;
   condition?: string;
   energyClass?: string;
+  defaultImageUrl?: string;
 }
