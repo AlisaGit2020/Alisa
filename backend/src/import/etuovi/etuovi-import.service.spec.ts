@@ -20,6 +20,8 @@ describe('EtuoviImportService', () => {
 
   const mockPropertyService = {
     add: jest.fn(),
+    update: jest.fn(),
+    findByExternalSource: jest.fn(),
   };
 
   beforeAll(() => {
@@ -549,6 +551,8 @@ describe('EtuoviImportService', () => {
 
     beforeEach(() => {
       mockPropertyService.add.mockReset();
+      mockPropertyService.update.mockReset();
+      mockPropertyService.findByExternalSource.mockReset();
     });
 
     it('calls propertyService.add with converted property input', async () => {
@@ -614,6 +618,78 @@ describe('EtuoviImportService', () => {
           'https://www.etuovi.com/kohde/12345',
         ),
       ).rejects.toThrow('Fetch failed');
+    });
+
+    it('updates existing property when user already has property with same etuovi id', async () => {
+      const existingProperty = {
+        id: 99,
+        name: 'Old Name',
+        externalSource: PropertyExternalSource.ETUOVI,
+        externalSourceId: '12345',
+      };
+      const updatedProperty = { id: 99, name: 'Testikatu 1 - 2h + k' };
+
+      mockPropertyService.findByExternalSource.mockResolvedValue(existingProperty);
+      mockPropertyService.update.mockResolvedValue(updatedProperty);
+
+      jest.spyOn(service, 'fetchPropertyData').mockResolvedValue({
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        address: 'Testikatu 1 - 2h + k',
+        buildingYear: 1990,
+        propertyType: 'Kerrostalo',
+      });
+
+      const result = await service.createProspectProperty(
+        mockUser,
+        'https://www.etuovi.com/kohde/12345',
+      );
+
+      expect(mockPropertyService.findByExternalSource).toHaveBeenCalledWith(
+        mockUser,
+        PropertyExternalSource.ETUOVI,
+        '12345',
+      );
+      expect(mockPropertyService.update).toHaveBeenCalledWith(
+        mockUser,
+        99,
+        expect.objectContaining({
+          name: 'Testikatu 1 - 2h + k',
+          size: 65.5,
+        }),
+      );
+      expect(mockPropertyService.add).not.toHaveBeenCalled();
+      expect(result).toBe(updatedProperty);
+    });
+
+    it('creates new property when no existing property with same etuovi id', async () => {
+      const newProperty = { id: 1, name: 'Test Property' };
+
+      mockPropertyService.findByExternalSource.mockResolvedValue(null);
+      mockPropertyService.add.mockResolvedValue(newProperty);
+
+      jest.spyOn(service, 'fetchPropertyData').mockResolvedValue({
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+      });
+
+      const result = await service.createProspectProperty(
+        mockUser,
+        'https://www.etuovi.com/kohde/12345',
+      );
+
+      expect(mockPropertyService.findByExternalSource).toHaveBeenCalledWith(
+        mockUser,
+        PropertyExternalSource.ETUOVI,
+        '12345',
+      );
+      expect(mockPropertyService.add).toHaveBeenCalled();
+      expect(mockPropertyService.update).not.toHaveBeenCalled();
+      expect(result).toBe(newProperty);
     });
   });
 });

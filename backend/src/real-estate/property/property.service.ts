@@ -31,7 +31,7 @@ import {
   DependencyType,
 } from './dtos/property-delete-validation.dto';
 import { PropertyTransactionSearchDto } from './dtos/property-transaction-search.dto';
-import { PropertyStatus, TransactionStatus } from '@asset-backend/common/types';
+import { PropertyExternalSource, PropertyStatus, TransactionStatus } from '@asset-backend/common/types';
 
 @Injectable()
 export class PropertyService {
@@ -121,6 +121,21 @@ export class PropertyService {
     if (!(await this.authService.hasOwnership(user, id))) {
       throw new UnauthorizedException();
     }
+    return property;
+  }
+
+  async findByExternalSource(
+    user: JWTUser,
+    externalSource: PropertyExternalSource,
+    externalSourceId: string,
+  ): Promise<Property | null> {
+    const property = await this.repository.findOne({
+      where: {
+        externalSource,
+        externalSourceId,
+        ownerships: { userId: user.id },
+      },
+    });
     return property;
   }
 

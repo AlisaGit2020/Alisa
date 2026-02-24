@@ -381,5 +381,39 @@ describe('EtuoviImportController (e2e)', () => {
         testUsers.user1WithProperties.jwtUser.id,
       );
     });
+
+    it('updates existing property when user already has property with same etuovi id', async () => {
+      const etuoviId = '99999999';
+
+      // First request: create new property
+      nock('https://www.etuovi.com')
+        .get(`/kohde/${etuoviId}`)
+        .reply(200, mockHtml);
+
+      const firstResponse = await request(server)
+        .post('/import/etuovi/create-prospect')
+        .set('Authorization', getBearerToken(accessToken))
+        .send({ url: `https://www.etuovi.com/kohde/${etuoviId}` })
+        .expect(201);
+
+      const createdPropertyId = firstResponse.body.id;
+      expect(createdPropertyId).toBeDefined();
+      expect(firstResponse.body.externalSourceId).toBe(etuoviId);
+
+      // Second request with same etuovi id: should update existing property
+      nock('https://www.etuovi.com')
+        .get(`/kohde/${etuoviId}`)
+        .reply(200, mockHtml);
+
+      const secondResponse = await request(server)
+        .post('/import/etuovi/create-prospect')
+        .set('Authorization', getBearerToken(accessToken))
+        .send({ url: `https://www.etuovi.com/kohde/${etuoviId}` })
+        .expect(201);
+
+      // Should return the same property id (updated, not created new)
+      expect(secondResponse.body.id).toBe(createdPropertyId);
+      expect(secondResponse.body.externalSourceId).toBe(etuoviId);
+    });
   });
 });

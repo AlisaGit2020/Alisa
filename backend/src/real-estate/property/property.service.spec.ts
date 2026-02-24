@@ -156,6 +156,83 @@ describe('PropertyService', () => {
     });
   });
 
+  describe('findByExternalSource', () => {
+    it('returns property when user owns property with matching external source', async () => {
+      const property = createProperty({
+        id: 1,
+        name: 'Etuovi Property',
+        externalSource: PropertyExternalSource.ETUOVI,
+        externalSourceId: '12345',
+      });
+      mockRepository.findOne.mockResolvedValue(property);
+
+      const result = await service.findByExternalSource(
+        testUser,
+        PropertyExternalSource.ETUOVI,
+        '12345',
+      );
+
+      expect(result).toEqual(property);
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: {
+          externalSource: PropertyExternalSource.ETUOVI,
+          externalSourceId: '12345',
+          ownerships: { userId: testUser.id },
+        },
+      });
+    });
+
+    it('returns null when no matching property exists', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.findByExternalSource(
+        testUser,
+        PropertyExternalSource.ETUOVI,
+        'nonexistent',
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it('does not return property owned by another user', async () => {
+      // Property exists but owned by different user
+      mockRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.findByExternalSource(
+        testUser,
+        PropertyExternalSource.ETUOVI,
+        '12345',
+      );
+
+      expect(result).toBeNull();
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: {
+          externalSource: PropertyExternalSource.ETUOVI,
+          externalSourceId: '12345',
+          ownerships: { userId: testUser.id },
+        },
+      });
+    });
+
+    it('works with OIKOTIE external source', async () => {
+      const property = createProperty({
+        id: 2,
+        name: 'Oikotie Property',
+        externalSource: PropertyExternalSource.OIKOTIE,
+        externalSourceId: 'OT-67890',
+      });
+      mockRepository.findOne.mockResolvedValue(property);
+
+      const result = await service.findByExternalSource(
+        testUser,
+        PropertyExternalSource.OIKOTIE,
+        'OT-67890',
+      );
+
+      expect(result).toEqual(property);
+    });
+  });
+
   describe('add', () => {
     it('creates property with ownership', async () => {
       const input = {

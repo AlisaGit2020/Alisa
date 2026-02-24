@@ -81,6 +81,18 @@ export class EtuoviImportService {
   async createProspectProperty(user: JWTUser, url: string): Promise<Property> {
     const etuoviData = await this.fetchPropertyData(url);
     const propertyInput = this.createPropertyInput(etuoviData);
+
+    // Check if user already has a property with the same Etuovi ID
+    const existingProperty = await this.propertyService.findByExternalSource(
+      user,
+      PropertyExternalSource.ETUOVI,
+      propertyInput.externalSourceId,
+    );
+
+    if (existingProperty) {
+      return this.propertyService.update(user, existingProperty.id, propertyInput);
+    }
+
     return this.propertyService.add(user, propertyInput);
   }
 
