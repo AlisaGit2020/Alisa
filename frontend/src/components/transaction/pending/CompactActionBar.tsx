@@ -252,6 +252,29 @@ export default function CompactActionBar(props: CompactActionBarProps) {
           </Tooltip>
         )}
 
+        {/* Reset allocation - important action for allocated rows */}
+        {props.onResetAllocation && (
+          <Tooltip
+            title={
+              !props.hasAllocatedSelected
+                ? props.t("resetAllocationDisabledTooltip")
+                : props.t("resetAllocation")
+            }
+          >
+            <span>
+              <IconButton
+                color="warning"
+                onClick={props.onResetAllocation}
+                disabled={!props.hasAllocatedSelected}
+                size="small"
+                data-testid="reset-allocation-button"
+              >
+                <RestartAltIcon />
+              </IconButton>
+            </span>
+          </Tooltip>
+        )}
+
         <Divider orientation="vertical" flexItem />
 
         {/* Delete */}
@@ -303,22 +326,6 @@ export default function CompactActionBar(props: CompactActionBarProps) {
               size="small"
               onClick={handleLoanSplit}
               endIcon={<CallSplitIcon />}
-            />
-          )}
-
-          {/* Reset allocation */}
-          {props.onResetAllocation && (
-            <AssetButton
-              label={props.t("resetAllocation")}
-              variant="text"
-              size="small"
-              color="warning"
-              onClick={props.onResetAllocation}
-              disabled={!props.hasAllocatedSelected}
-              tooltip={
-                !props.hasAllocatedSelected ? props.t("resetAllocationDisabledTooltip") : undefined
-              }
-              endIcon={<RestartAltIcon />}
             />
           )}
 

@@ -72,29 +72,37 @@ describe("CompactActionBar", () => {
 
       expect(screen.getByTestId("rules-button")).toBeInTheDocument();
     });
+
+    it("renders reset allocation button in main bar when provided", () => {
+      renderWithProviders(
+        <CompactActionBar {...defaultProps} onResetAllocation={jest.fn()} />
+      );
+
+      expect(screen.getByTestId("reset-allocation-button")).toBeInTheDocument();
+    });
   });
 
   describe("Expand/collapse toggle", () => {
     it("expands when expand button is clicked", async () => {
       const user = userEvent.setup();
       renderWithProviders(
-        <CompactActionBar {...defaultProps} onResetAllocation={jest.fn()} />
+        <CompactActionBar {...defaultProps} supportsLoanSplit={true} />
       );
 
       // Click expand button
       const expandButton = screen.getByTestId("expand-button");
       await user.click(expandButton);
 
-      // Expanded section should show reset allocation button
+      // Expanded section should show split loan payment button
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /resetAllocation/i })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /splitLoanPayment/i })).toBeInTheDocument();
       });
     });
 
     it("collapses when clicked again", async () => {
       const user = userEvent.setup();
       renderWithProviders(
-        <CompactActionBar {...defaultProps} onResetAllocation={jest.fn()} />
+        <CompactActionBar {...defaultProps} supportsLoanSplit={true} />
       );
 
       const expandButton = screen.getByTestId("expand-button");
@@ -102,7 +110,7 @@ describe("CompactActionBar", () => {
       // Expand
       await user.click(expandButton);
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /resetAllocation/i })).toBeVisible();
+        expect(screen.getByRole("button", { name: /splitLoanPayment/i })).toBeVisible();
       });
 
       // Collapse - the Collapse component hides content, check for the collapsed state
@@ -287,8 +295,7 @@ describe("CompactActionBar", () => {
       expect(autoAllocateButton).toBeDisabled();
     });
 
-    it("disables reset allocation when hasAllocatedSelected is false", async () => {
-      const user = userEvent.setup();
+    it("disables reset allocation when hasAllocatedSelected is false", () => {
       renderWithProviders(
         <CompactActionBar
           {...defaultProps}
@@ -297,14 +304,9 @@ describe("CompactActionBar", () => {
         />
       );
 
-      // Expand to see reset button
-      const expandButton = screen.getByTestId("expand-button");
-      await user.click(expandButton);
-
-      await waitFor(() => {
-        const resetButton = screen.getByRole("button", { name: /resetAllocation/i });
-        expect(resetButton).toBeDisabled();
-      });
+      // Reset button is now in main bar
+      const resetButton = screen.getByTestId("reset-allocation-button");
+      expect(resetButton).toBeDisabled();
     });
 
     it("disables accept when hasUnallocatedSelected is true", async () => {
