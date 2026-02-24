@@ -222,6 +222,8 @@ describe('PropertyService', () => {
       });
     });
 
+    // Tests that findByExternalSource works with any PropertyExternalSource enum value.
+    // OIKOTIE import is not yet implemented, but the method should handle all enum values.
     it('works with OIKOTIE external source', async () => {
       const property = createProperty({
         id: 2,

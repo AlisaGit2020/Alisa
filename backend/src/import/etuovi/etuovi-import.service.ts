@@ -4,6 +4,7 @@ import {
   ServiceUnavailableException,
   NotFoundException,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import axios, { AxiosError } from 'axios';
 import { EtuoviPropertyDataDto } from './dtos/etuovi-property-data.dto';
@@ -65,6 +66,8 @@ interface EtuoviPropertyData {
 
 @Injectable()
 export class EtuoviImportService {
+  private readonly logger = new Logger(EtuoviImportService.name);
+
   /**
    * User-Agent header required for fetching etuovi.com pages.
    * Etuovi.com blocks requests without a standard browser User-Agent,
@@ -90,9 +93,15 @@ export class EtuoviImportService {
     );
 
     if (existingProperty) {
+      this.logger.debug(
+        `Updating existing property ${existingProperty.id} from Etuovi listing ${propertyInput.externalSourceId}`,
+      );
       return this.propertyService.update(user, existingProperty.id, propertyInput);
     }
 
+    this.logger.debug(
+      `Creating new prospect property from Etuovi listing ${propertyInput.externalSourceId}`,
+    );
     return this.propertyService.add(user, propertyInput);
   }
 

@@ -298,6 +298,31 @@ describe('EtuoviImportService', () => {
       expect(result.defaultImageUrl).toBeUndefined();
     });
 
+    it('falls back to direct URI extraction when images JSON is malformed', () => {
+      // Malformed images object that can't be parsed as JSON
+      const htmlWithMalformedImages = `
+        <html><body>
+        "debfFreePrice":100000,"livingArea":50,"periodicCharges":[{"periodicCharge":"HOUSING_COMPANY_MAINTENANCE_CHARGE","price":200,"chargePeriod":"MONTH"}],"images":{"invalid json here,"image":{"id":123,"uri":"//example.com/fallback.jpg"}}
+        </body></html>
+      `;
+
+      const result = service.parseHtml(testUrl, htmlWithMalformedImages);
+      // Falls back to extracting URI directly from text
+      expect(result.defaultImageUrl).toBe('https://example.com/fallback.jpg');
+    });
+
+    it('returns undefined when images JSON is malformed and no fallback URI found', () => {
+      // Completely broken images object with no extractable URI
+      const htmlWithBrokenImages = `
+        <html><body>
+        "debfFreePrice":100000,"livingArea":50,"periodicCharges":[{"periodicCharge":"HOUSING_COMPANY_MAINTENANCE_CHARGE","price":200,"chargePeriod":"MONTH"}],"images":{"broken": "data"
+        </body></html>
+      `;
+
+      const result = service.parseHtml(testUrl, htmlWithBrokenImages);
+      expect(result.defaultImageUrl).toBeUndefined();
+    });
+
     it('unescapes unicode characters in room structure', () => {
       const unicodeHtml = `
         <html><body>
