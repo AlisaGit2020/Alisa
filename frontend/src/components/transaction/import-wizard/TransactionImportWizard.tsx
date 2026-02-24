@@ -143,7 +143,7 @@ function TransactionImportWizard({ t }: WithTranslation) {
   // Show property required message if no property is selected
   if (!isPropertySelected) {
     return (
-      <Box sx={{ p: 3 }}>
+      <Box>
         <Typography variant="h5" gutterBottom>
           {t("importWizard.title")}
         </Typography>
@@ -166,7 +166,7 @@ function TransactionImportWizard({ t }: WithTranslation) {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box>
       <Typography variant="h5" gutterBottom>
         {t("importWizard.title")}
       </Typography>
