@@ -12,10 +12,15 @@ import {
   PropertyStatus,
 } from '@asset-backend/common/types';
 import { EtuoviPropertyDataDto } from './dtos/etuovi-property-data.dto';
+import { PropertyService } from '@asset-backend/real-estate/property/property.service';
 
 describe('EtuoviImportService', () => {
   let service: EtuoviImportService;
   let mockHtml: string;
+
+  const mockPropertyService = {
+    add: jest.fn(),
+  };
 
   beforeAll(() => {
     const mockHtmlPath = path.join(MOCKS_PATH, 'import', 'etuovi.property.html');
@@ -24,7 +29,10 @@ describe('EtuoviImportService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [EtuoviImportService],
+      providers: [
+        EtuoviImportService,
+        { provide: PropertyService, useValue: mockPropertyService },
+      ],
     }).compile();
 
     service = module.get<EtuoviImportService>(EtuoviImportService);
@@ -125,6 +133,16 @@ describe('EtuoviImportService', () => {
     it('parses energy class correctly', () => {
       const result = service.parseHtml(testUrl, mockHtml);
       expect(result.energyClass).toBe('C');
+    });
+
+    it('parses city from municipality.defaultName', () => {
+      const result = service.parseHtml(testUrl, mockHtml);
+      expect(result.city).toBe('Laihia');
+    });
+
+    it('parses postalCode from location.postCode', () => {
+      const result = service.parseHtml(testUrl, mockHtml);
+      expect(result.postalCode).toBe('66400');
     });
 
     it('includes the URL in result', () => {
@@ -341,6 +359,38 @@ describe('EtuoviImportService', () => {
       expect(result.address.street).toBe('Testikatu 5');
     });
 
+    it('maps city to address.city', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        address: 'Testikatu 5',
+        city: 'Helsinki',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.address).toBeDefined();
+      expect(result.address.city).toBe('Helsinki');
+    });
+
+    it('maps postalCode to address.postalCode', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        address: 'Testikatu 5',
+        postalCode: '00100',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.address).toBeDefined();
+      expect(result.address.postalCode).toBe('00100');
+    });
+
     it('does not create address when etuovi address is missing', () => {
       const etuoviData: EtuoviPropertyDataDto = {
         url: 'https://www.etuovi.com/kohde/12345',
@@ -352,6 +402,87 @@ describe('EtuoviImportService', () => {
       const result = service.createPropertyInput(etuoviData);
 
       expect(result.address).toBeUndefined();
+    });
+  });
+
+  describe('createProspectProperty', () => {
+    const mockUser = {
+      id: 1,
+      firstName: 'Test',
+      lastName: 'User',
+      email: 'test@example.com',
+      language: 'fi',
+      ownershipInProperties: [],
+      isAdmin: false,
+    };
+
+    beforeEach(() => {
+      mockPropertyService.add.mockReset();
+    });
+
+    it('calls propertyService.add with converted property input', async () => {
+      const mockProperty = { id: 1, name: 'Test Property' };
+      mockPropertyService.add.mockResolvedValue(mockProperty);
+
+      jest.spyOn(service, 'fetchPropertyData').mockResolvedValue({
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        address: 'Testikatu 1 - 2h + k',
+        buildingYear: 1990,
+        propertyType: 'Kerrostalo',
+      });
+
+      await service.createProspectProperty(
+        mockUser,
+        'https://www.etuovi.com/kohde/12345',
+      );
+
+      expect(mockPropertyService.add).toHaveBeenCalledWith(
+        mockUser,
+        expect.objectContaining({
+          status: PropertyStatus.PROSPECT,
+          externalSource: PropertyExternalSource.ETUOVI,
+          externalSourceId: '12345',
+          name: 'Testikatu 1 - 2h + k',
+          size: 65.5,
+          buildYear: 1990,
+          apartmentType: 'Kerrostalo',
+        }),
+      );
+    });
+
+    it('returns the created property', async () => {
+      const mockProperty = { id: 1, name: 'Test Property' };
+      mockPropertyService.add.mockResolvedValue(mockProperty);
+
+      jest.spyOn(service, 'fetchPropertyData').mockResolvedValue({
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+      });
+
+      const result = await service.createProspectProperty(
+        mockUser,
+        'https://www.etuovi.com/kohde/12345',
+      );
+
+      expect(result).toBe(mockProperty);
+    });
+
+    it('propagates errors from fetchPropertyData', async () => {
+      jest
+        .spyOn(service, 'fetchPropertyData')
+        .mockRejectedValue(new Error('Fetch failed'));
+
+      await expect(
+        service.createProspectProperty(
+          mockUser,
+          'https://www.etuovi.com/kohde/12345',
+        ),
+      ).rejects.toThrow('Fetch failed');
     });
   });
 });

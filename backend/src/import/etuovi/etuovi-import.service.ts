@@ -13,6 +13,9 @@ import {
   PropertyExternalSource,
   PropertyStatus,
 } from '@asset-backend/common/types';
+import { PropertyService } from '@asset-backend/real-estate/property/property.service';
+import { JWTUser } from '@asset-backend/auth/types';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
 
 interface PeriodicCharge {
   periodicCharge: string;
@@ -37,6 +40,12 @@ interface EtuoviPropertyData {
   condition?: string;
   energyClass?: string;
   periodicChargesAdditionalInfo?: string;
+  location?: {
+    municipality?: {
+      defaultName?: string;
+    };
+    postCode?: string;
+  };
 }
 
 @Injectable()
@@ -51,6 +60,14 @@ export class EtuoviImportService {
   private readonly USER_AGENT =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
   private readonly TIMEOUT = 15000;
+
+  constructor(private readonly propertyService: PropertyService) {}
+
+  async createProspectProperty(user: JWTUser, url: string): Promise<Property> {
+    const etuoviData = await this.fetchPropertyData(url);
+    const propertyInput = this.createPropertyInput(etuoviData);
+    return this.propertyService.add(user, propertyInput);
+  }
 
   async fetchPropertyData(url: string): Promise<EtuoviPropertyDataDto> {
     this.validateUrl(url);
@@ -165,6 +182,10 @@ export class EtuoviImportService {
     result.propertyType = this.translatePropertyType(jsonData.residentialPropertyType);
     result.condition = jsonData.condition || undefined;
     result.energyClass = jsonData.energyClass || undefined;
+
+    // Parse city and postal code from location
+    result.city = jsonData.location?.municipality?.defaultName || undefined;
+    result.postalCode = jsonData.location?.postCode || undefined;
 
     // Validate required fields
     if (result.deptFreePrice === 0) {
@@ -316,6 +337,20 @@ export class EtuoviImportService {
       result.roomStructure = this.unescapeUnicode(roomMatch[1]);
     }
 
+    // Extract city from municipality.defaultName
+    const cityMatch = html.match(/"municipality":\{[^}]*"defaultName":"([^"]+)"/);
+    if (cityMatch) {
+      result.location = result.location || {};
+      result.location.municipality = { defaultName: this.unescapeUnicode(cityMatch[1]) };
+    }
+
+    // Extract postalCode from location.postCode
+    const postCodeMatch = html.match(/"postCode":"(\d+)"/);
+    if (postCodeMatch) {
+      result.location = result.location || {};
+      result.location.postCode = postCodeMatch[1];
+    }
+
     if (result.debfFreePrice || result.sellingPrice) {
       return result;
     }
@@ -361,24 +396,27 @@ export class EtuoviImportService {
     input.size = etuoviData.apartmentSize;
     input.buildYear = etuoviData.buildingYear;
     input.apartmentType = etuoviData.propertyType;
-    input.address = this.parseAddress(etuoviData.address);
+    input.address = this.parseAddress(etuoviData);
 
     return input;
   }
 
-  private parseAddress(etuoviAddress?: string): AddressInputDto | undefined {
-    if (!etuoviAddress) {
+  private parseAddress(etuoviData: EtuoviPropertyDataDto): AddressInputDto | undefined {
+    if (!etuoviData.address) {
       return undefined;
     }
 
     const address = new AddressInputDto();
     // Etuovi address format: "Street 1 A 5 - 2h + k + kph"
     // The part before " - " is the street address
-    const separatorIndex = etuoviAddress.indexOf(' - ');
+    const separatorIndex = etuoviData.address.indexOf(' - ');
     address.street =
       separatorIndex > 0
-        ? etuoviAddress.substring(0, separatorIndex)
-        : etuoviAddress;
+        ? etuoviData.address.substring(0, separatorIndex)
+        : etuoviData.address;
+
+    address.city = etuoviData.city;
+    address.postalCode = etuoviData.postalCode;
 
     return address;
   }
