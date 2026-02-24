@@ -281,13 +281,6 @@ export default function ReviewStep({
         </Alert>
       )}
 
-      {/* Info about allocation requirement */}
-      {hasUnknownTypes && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          {t("importWizard.allocationRequired")}
-        </Alert>
-      )}
-
       {/* Bulk actions - compact floating action bar */}
       <TransactionsPendingActions
         compact
