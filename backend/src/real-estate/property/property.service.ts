@@ -157,6 +157,20 @@ export class PropertyService {
   ): Promise<Property> {
     const propertyEntity = await this.getEntityOrThrow(user, id);
 
+    // Check tier limit when converting from PROSPECT to non-PROSPECT status
+    if (
+      propertyEntity.status === PropertyStatus.PROSPECT &&
+      input.status !== undefined &&
+      input.status !== PropertyStatus.PROSPECT
+    ) {
+      const canCreate = await this.tierService.canCreateProperty(user.id);
+      if (!canCreate) {
+        throw new ForbiddenException(
+          'Property limit reached for your current tier',
+        );
+      }
+    }
+
     // If updating ownerships, delete existing ones first to avoid TypeORM cascade issues
     // with NOT NULL constraint on propertyId when orphaning records
     if (input.ownerships !== undefined) {

@@ -615,6 +615,73 @@ describe('PropertyService', () => {
       expect(result.externalSource).toBeNull();
       expect(result.externalSourceId).toBeNull();
     });
+
+    it('throws ForbiddenException when changing PROSPECT to OWN and tier limit reached', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Prospect Property',
+        status: PropertyStatus.PROSPECT,
+      });
+      const input = {
+        name: 'Prospect Property',
+        size: 50,
+        status: PropertyStatus.OWN,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTierService.canCreateProperty.mockResolvedValue(false);
+
+      await expect(service.update(testUser, 1, input)).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('allows changing PROSPECT to OWN when tier allows', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Prospect Property',
+        status: PropertyStatus.PROSPECT,
+      });
+      const input = {
+        name: 'Prospect Property',
+        size: 50,
+        status: PropertyStatus.OWN,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTierService.canCreateProperty.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...existingProperty, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.status).toBe(PropertyStatus.OWN);
+      expect(mockTierService.canCreateProperty).toHaveBeenCalledWith(testUser.id);
+    });
+
+    it('does not check tier when updating OWN to SOLD', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'My Property',
+        status: PropertyStatus.OWN,
+      });
+      const input = {
+        name: 'My Property',
+        size: 50,
+        status: PropertyStatus.SOLD,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTierService.canCreateProperty.mockResolvedValue(false); // Would fail if called
+      mockRepository.save.mockResolvedValue({ ...existingProperty, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.status).toBe(PropertyStatus.SOLD);
+      expect(mockTierService.canCreateProperty).not.toHaveBeenCalled();
+    });
   });
 
   describe('delete', () => {

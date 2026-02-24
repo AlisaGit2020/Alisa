@@ -1977,6 +1977,38 @@ describe('PropertyController (e2e)', () => {
         expect(prospectResponse.status).toBe(201);
         expect(prospectResponse.body.status).toBe(1);
       });
+
+      it('blocks converting prospect to OWN when tier limit is reached', async () => {
+        const { token, jwtUser } = await createUserWithTier(
+          'prospect-convert-user@test.com',
+          freeTierId,
+        );
+
+        // Create first OWN property (at limit now)
+        const createResponse = await createPropertyRequest(token, 'My Property');
+        expect(createResponse.status).toBe(201);
+
+        // Re-login
+        const token2 = await getUserAccessToken2(authService, jwtUser);
+
+        // Create a prospect property (should succeed, doesn't count)
+        const prospectResponse = await request(server)
+          .post('/real-estate/property')
+          .set('Authorization', getBearerToken(token2))
+          .send({ name: 'Prospect Property', size: 60, status: 1 }); // status: 1 = PROSPECT
+        expect(prospectResponse.status).toBe(201);
+        const prospectId = prospectResponse.body.id;
+
+        // Re-login
+        const token3 = await getUserAccessToken2(authService, jwtUser);
+
+        // Try to convert prospect to OWN - should fail due to tier limit
+        const convertResponse = await request(server)
+          .put(`/real-estate/property/${prospectId}`)
+          .set('Authorization', getBearerToken(token3))
+          .send({ name: 'Prospect Property', size: 60, status: 2 }); // status: 2 = OWN
+        expect(convertResponse.status).toBe(403);
+      });
     });
   });
 });
