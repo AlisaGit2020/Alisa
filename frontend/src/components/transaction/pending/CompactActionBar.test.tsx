@@ -49,7 +49,6 @@ describe("CompactActionBar", () => {
     it("renders action icon buttons", () => {
       renderWithProviders(<CompactActionBar {...defaultProps} />);
 
-      expect(screen.getByTestId("save-button")).toBeInTheDocument();
       expect(screen.getByTestId("delete-button")).toBeInTheDocument();
       expect(screen.getByTestId("cancel-button")).toBeInTheDocument();
       expect(screen.getByTestId("expand-button")).toBeInTheDocument();
@@ -213,58 +212,81 @@ describe("CompactActionBar", () => {
   });
 
   describe("Type selection", () => {
-    it("shows transaction type buttons", async () => {
+    it("shows transaction type buttons", () => {
       renderWithProviders(<CompactActionBar {...defaultProps} />);
 
+      expect(screen.getByTestId("income-button")).toBeInTheDocument();
+      expect(screen.getByTestId("expense-button")).toBeInTheDocument();
+      expect(screen.getByTestId("deposit-button")).toBeInTheDocument();
+      expect(screen.getByTestId("withdraw-button")).toBeInTheDocument();
+    });
+
+    it("opens income menu when income button is clicked", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<CompactActionBar {...defaultProps} />);
+
+      const incomeButton = screen.getByTestId("income-button");
+      await user.click(incomeButton);
+
+      // Menu should open
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /income/i })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /expense/i })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /deposit/i })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /withdraw/i })).toBeInTheDocument();
+        expect(screen.getByTestId("income-menu")).toBeVisible();
       });
     });
 
-    it("save button is disabled when no type selected", () => {
-      renderWithProviders(<CompactActionBar {...defaultProps} />);
-
-      const saveButton = screen.getByTestId("save-button");
-      expect(saveButton).toBeDisabled();
-    });
-
-    it("save button is enabled when DEPOSIT selected (no category required)", async () => {
+    it("opens expense menu when expense button is clicked", async () => {
       const user = userEvent.setup();
       renderWithProviders(<CompactActionBar {...defaultProps} />);
 
-      const depositButton = await screen.findByRole("button", { name: /deposit/i });
-      await user.click(depositButton);
-
-      const saveButton = screen.getByTestId("save-button");
-      expect(saveButton).not.toBeDisabled();
-    });
-
-    it("save button is disabled when EXPENSE selected without category", async () => {
-      const user = userEvent.setup();
-      renderWithProviders(<CompactActionBar {...defaultProps} />);
-
-      const expenseButton = await screen.findByRole("button", { name: /expense/i });
+      const expenseButton = screen.getByTestId("expense-button");
       await user.click(expenseButton);
 
-      const saveButton = screen.getByTestId("save-button");
-      expect(saveButton).toBeDisabled();
+      // Menu should open
+      await waitFor(() => {
+        expect(screen.getByTestId("expense-menu")).toBeVisible();
+      });
     });
 
-    it("calls onSetType when type selected and save clicked", async () => {
+    it("calls onSetType directly when deposit button is clicked", async () => {
       const user = userEvent.setup();
       const mockOnSetType = jest.fn().mockResolvedValue(undefined);
       renderWithProviders(<CompactActionBar {...defaultProps} onSetType={mockOnSetType} />);
 
-      const depositButton = await screen.findByRole("button", { name: /deposit/i });
+      const depositButton = screen.getByTestId("deposit-button");
       await user.click(depositButton);
 
-      const saveButton = screen.getByTestId("save-button");
-      await user.click(saveButton);
+      await waitFor(() => {
+        expect(mockOnSetType).toHaveBeenCalledWith(3); // DEPOSIT = 3
+      });
+    });
 
-      expect(mockOnSetType).toHaveBeenCalledWith(3); // DEPOSIT = 3
+    it("calls onSetType directly when withdraw button is clicked", async () => {
+      const user = userEvent.setup();
+      const mockOnSetType = jest.fn().mockResolvedValue(undefined);
+      renderWithProviders(<CompactActionBar {...defaultProps} onSetType={mockOnSetType} />);
+
+      const withdrawButton = screen.getByTestId("withdraw-button");
+      await user.click(withdrawButton);
+
+      await waitFor(() => {
+        expect(mockOnSetType).toHaveBeenCalledWith(4); // WITHDRAW = 4
+      });
+    });
+
+    it("calls onCancel after deposit selection to deselect rows", async () => {
+      const user = userEvent.setup();
+      const mockOnCancel = jest.fn();
+      const mockOnSetType = jest.fn().mockResolvedValue(undefined);
+      renderWithProviders(
+        <CompactActionBar {...defaultProps} onSetType={mockOnSetType} onCancel={mockOnCancel} />
+      );
+
+      const depositButton = screen.getByTestId("deposit-button");
+      await user.click(depositButton);
+
+      await waitFor(() => {
+        expect(mockOnCancel).toHaveBeenCalled();
+      });
     });
   });
 

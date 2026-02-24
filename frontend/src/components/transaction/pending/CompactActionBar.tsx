@@ -4,11 +4,14 @@ import {
 } from "@asset-lib/asset-contexts.ts";
 import { TransactionType, ExpenseType, IncomeType } from "@asset-types";
 import {
-  Box,
+  Button,
+  ButtonGroup,
   Chip,
   Collapse,
   Divider,
   IconButton,
+  Menu,
+  MenuItem,
   Paper,
   Stack,
   Tooltip,
@@ -16,27 +19,18 @@ import {
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
-import SaveIcon from "@mui/icons-material/Save";
 import RuleIcon from "@mui/icons-material/Rule";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { AssetCloseIcon } from "../../asset/AssetIcons.tsx";
 import Typography from "@mui/material/Typography";
-import {
-  AssetButton,
-  AssetTransactionTypeSelect,
-  AssetSelect,
-} from "../../asset";
-import React from "react";
+import { AssetButton } from "../../asset";
+import React, { useEffect } from "react";
 import DataService from "@asset-lib/data-service.ts";
 import { TFunction } from "i18next";
-
-interface CategoryTypeData {
-  expenseTypeId: number;
-  incomeTypeId: number;
-}
 
 export interface CompactActionBarProps {
   t: TFunction;
@@ -63,35 +57,68 @@ export interface CompactActionBarProps {
 }
 
 export default function CompactActionBar(props: CompactActionBarProps) {
-  const [transactionType, setTransactionType] = React.useState<number>(0);
   const [expanded, setExpanded] = React.useState<boolean>(false);
-  const [categoryTypeData, setCategoryTypeData] = React.useState<CategoryTypeData>({
-    expenseTypeId: 0,
-    incomeTypeId: 0,
-  });
+  const [expenseMenuAnchor, setExpenseMenuAnchor] = React.useState<null | HTMLElement>(null);
+  const [incomeMenuAnchor, setIncomeMenuAnchor] = React.useState<null | HTMLElement>(null);
+  const [expenseTypes, setExpenseTypes] = React.useState<ExpenseType[]>([]);
+  const [incomeTypes, setIncomeTypes] = React.useState<IncomeType[]>([]);
 
-  const handleSave = async () => {
-    if (transactionType > 0) {
-      await props.onSetType(transactionType);
+  // Load expense and income types
+  useEffect(() => {
+    const loadTypes = async () => {
+      const expenseService = new DataService<ExpenseType>({
+        context: expenseTypeContext,
+        fetchOptions: { order: { key: "ASC" } },
+      });
+      const incomeService = new DataService<IncomeType>({
+        context: incomeTypeContext,
+        fetchOptions: { order: { key: "ASC" } },
+      });
+
+      const [expenses, incomes] = await Promise.all([
+        expenseService.search(),
+        incomeService.search(),
+      ]);
+
+      setExpenseTypes(expenses);
+      setIncomeTypes(incomes);
+    };
+
+    if (props.open) {
+      loadTypes();
     }
-    if (categoryTypeData.expenseTypeId > 0 || categoryTypeData.incomeTypeId > 0) {
-      await props.onSetCategoryType(
-        categoryTypeData.expenseTypeId > 0 ? categoryTypeData.expenseTypeId : undefined,
-        categoryTypeData.incomeTypeId > 0 ? categoryTypeData.incomeTypeId : undefined,
-      );
-    }
-    setTransactionType(0);
-    setCategoryTypeData({ expenseTypeId: 0, incomeTypeId: 0 });
+  }, [props.open]);
+
+  const handleExpenseClick = (event: React.MouseEvent<HTMLElement>) => {
+    setExpenseMenuAnchor(event.currentTarget);
+  };
+
+  const handleIncomeClick = (event: React.MouseEvent<HTMLElement>) => {
+    setIncomeMenuAnchor(event.currentTarget);
+  };
+
+  const handleExpenseSelect = async (expenseTypeId: number) => {
+    setExpenseMenuAnchor(null);
+    await props.onSetType(TransactionType.EXPENSE);
+    await props.onSetCategoryType(expenseTypeId, undefined);
     props.onCancel();
   };
 
-  const handleTypeChange = (type: number) => {
-    setTransactionType(type);
-    setCategoryTypeData({ expenseTypeId: 0, incomeTypeId: 0 });
+  const handleIncomeSelect = async (incomeTypeId: number) => {
+    setIncomeMenuAnchor(null);
+    await props.onSetType(TransactionType.INCOME);
+    await props.onSetCategoryType(undefined, incomeTypeId);
+    props.onCancel();
   };
 
-  const handleCategoryTypeChange = (fieldName: keyof CategoryTypeData, value: number) => {
-    setCategoryTypeData({ ...categoryTypeData, [fieldName]: value });
+  const handleDepositClick = async () => {
+    await props.onSetType(TransactionType.DEPOSIT);
+    props.onCancel();
+  };
+
+  const handleWithdrawClick = async () => {
+    await props.onSetType(TransactionType.WITHDRAW);
+    props.onCancel();
   };
 
   const handleLoanSplit = async () => {
@@ -99,28 +126,7 @@ export default function CompactActionBar(props: CompactActionBarProps) {
   };
 
   const handleCancel = () => {
-    setTransactionType(0);
-    setCategoryTypeData({ expenseTypeId: 0, incomeTypeId: 0 });
     props.onCancel();
-  };
-
-  const isSaveDisabled =
-    transactionType <= 0 ||
-    (transactionType === TransactionType.EXPENSE && categoryTypeData.expenseTypeId <= 0) ||
-    (transactionType === TransactionType.INCOME && categoryTypeData.incomeTypeId <= 0);
-
-  const getSaveTooltip = (): string | undefined => {
-    if (!isSaveDisabled) return undefined;
-    if (transactionType <= 0) {
-      return props.t("saveAllocationTooltip");
-    }
-    if (
-      (transactionType === TransactionType.EXPENSE && categoryTypeData.expenseTypeId <= 0) ||
-      (transactionType === TransactionType.INCOME && categoryTypeData.incomeTypeId <= 0)
-    ) {
-      return props.t("saveAllocationCategoryTooltip");
-    }
-    return undefined;
   };
 
   const supportsLoanSplit = props.supportsLoanSplit ?? true;
@@ -149,76 +155,64 @@ export default function CompactActionBar(props: CompactActionBarProps) {
           data-testid="selection-count"
         />
 
-        {/* Type buttons - inline */}
-        <AssetTransactionTypeSelect
-          onSelect={handleTypeChange}
-          selectedValue={transactionType}
-          t={props.t}
-          variant="button"
-          direction="row"
-          showLabel={false}
-          visible={true}
-          showEmptyValue={false}
-          excludeTypes={[TransactionType.UNKNOWN]}
-        />
+        {/* Type buttons with dropdown for Income/Expense */}
+        <ButtonGroup variant="outlined" size="small">
+          {/* Income with dropdown */}
+          <Button
+            onClick={handleIncomeClick}
+            endIcon={<ArrowDropDownIcon />}
+            data-testid="income-button"
+          >
+            {props.t("income")}
+          </Button>
 
-        {/* Category dropdown - shows when type selected */}
-        {transactionType === TransactionType.EXPENSE && (
-          <Box sx={{ minWidth: 180 }}>
-            <AssetSelect<CategoryTypeData, ExpenseType>
-              label={props.t("expenseType")}
-              dataService={
-                new DataService<ExpenseType>({
-                  context: expenseTypeContext,
-                  fetchOptions: { order: { key: "ASC" } },
-                })
-              }
-              fieldName="expenseTypeId"
-              value={categoryTypeData.expenseTypeId}
-              onHandleChange={handleCategoryTypeChange}
-              size="small"
-              fullWidth
-              t={props.t}
-              translateKeyPrefix="expense-type"
-            />
-          </Box>
-        )}
+          {/* Expense with dropdown */}
+          <Button
+            onClick={handleExpenseClick}
+            endIcon={<ArrowDropDownIcon />}
+            data-testid="expense-button"
+          >
+            {props.t("expense")}
+          </Button>
 
-        {transactionType === TransactionType.INCOME && (
-          <Box sx={{ minWidth: 180 }}>
-            <AssetSelect<CategoryTypeData, IncomeType>
-              label={props.t("incomeType")}
-              dataService={
-                new DataService<IncomeType>({
-                  context: incomeTypeContext,
-                  fetchOptions: { order: { key: "ASC" } },
-                })
-              }
-              fieldName="incomeTypeId"
-              value={categoryTypeData.incomeTypeId}
-              onHandleChange={handleCategoryTypeChange}
-              size="small"
-              fullWidth
-              t={props.t}
-              translateKeyPrefix="income-type"
-            />
-          </Box>
-        )}
+          {/* Deposit - simple button */}
+          <Button onClick={handleDepositClick} data-testid="deposit-button">
+            {props.t("deposit")}
+          </Button>
 
-        {/* Save button */}
-        <Tooltip title={getSaveTooltip() || props.t("save")}>
-          <span>
-            <IconButton
-              color="primary"
-              onClick={handleSave}
-              disabled={isSaveDisabled}
-              size="small"
-              data-testid="save-button"
-            >
-              <SaveIcon />
-            </IconButton>
-          </span>
-        </Tooltip>
+          {/* Withdraw - simple button */}
+          <Button onClick={handleWithdrawClick} data-testid="withdraw-button">
+            {props.t("withdraw")}
+          </Button>
+        </ButtonGroup>
+
+        {/* Income categories menu */}
+        <Menu
+          anchorEl={incomeMenuAnchor}
+          open={Boolean(incomeMenuAnchor)}
+          onClose={() => setIncomeMenuAnchor(null)}
+          data-testid="income-menu"
+        >
+          {incomeTypes.map((type) => (
+            <MenuItem key={type.id} onClick={() => handleIncomeSelect(type.id)}>
+              {props.t(`income-type:${type.key}`)}
+            </MenuItem>
+          ))}
+        </Menu>
+
+        {/* Expense categories menu */}
+        <Menu
+          anchorEl={expenseMenuAnchor}
+          open={Boolean(expenseMenuAnchor)}
+          onClose={() => setExpenseMenuAnchor(null)}
+          data-testid="expense-menu"
+        >
+          {expenseTypes.map((type) => (
+            <MenuItem key={type.id} onClick={() => handleExpenseSelect(type.id)}>
+              {props.t(`expense-type:${type.key}`)}
+            </MenuItem>
+          ))}
+        </Menu>
 
         <Divider orientation="vertical" flexItem />
 
