@@ -7,6 +7,12 @@ import {
 } from '@nestjs/common';
 import axios, { AxiosError } from 'axios';
 import { EtuoviPropertyDataDto } from './dtos/etuovi-property-data.dto';
+import { PropertyInputDto } from '@asset-backend/real-estate/property/dtos/property-input.dto';
+import { AddressInputDto } from '@asset-backend/real-estate/address/dtos/address-input.dto';
+import {
+  PropertyExternalSource,
+  PropertyStatus,
+} from '@asset-backend/common/types';
 
 interface PeriodicCharge {
   periodicCharge: string;
@@ -343,5 +349,47 @@ export class EtuoviImportService {
     return str.replace(/\\u([0-9A-Fa-f]{4})/g, (_, hex) =>
       String.fromCharCode(parseInt(hex, 16)),
     );
+  }
+
+  createPropertyInput(etuoviData: EtuoviPropertyDataDto): PropertyInputDto {
+    const input = new PropertyInputDto();
+
+    input.status = PropertyStatus.PROSPECT;
+    input.externalSource = PropertyExternalSource.ETUOVI;
+    input.externalSourceId = this.extractIdFromUrl(etuoviData.url);
+    input.name = etuoviData.address || this.extractNameFromUrl(etuoviData.url);
+    input.size = etuoviData.apartmentSize;
+    input.buildYear = etuoviData.buildingYear;
+    input.apartmentType = etuoviData.propertyType;
+    input.address = this.parseAddress(etuoviData.address);
+
+    return input;
+  }
+
+  private parseAddress(etuoviAddress?: string): AddressInputDto | undefined {
+    if (!etuoviAddress) {
+      return undefined;
+    }
+
+    const address = new AddressInputDto();
+    // Etuovi address format: "Street 1 A 5 - 2h + k + kph"
+    // The part before " - " is the street address
+    const separatorIndex = etuoviAddress.indexOf(' - ');
+    address.street =
+      separatorIndex > 0
+        ? etuoviAddress.substring(0, separatorIndex)
+        : etuoviAddress;
+
+    return address;
+  }
+
+  private extractIdFromUrl(url: string): string {
+    const match = url.match(/\/kohde\/(\d+)/);
+    return match ? match[1] : url;
+  }
+
+  private extractNameFromUrl(url: string): string {
+    const id = this.extractIdFromUrl(url);
+    return `Etuovi ${id}`;
   }
 }

@@ -7,6 +7,11 @@ import { EtuoviImportService } from './etuovi-import.service';
 import { MOCKS_PATH } from '@asset-backend/constants';
 import * as fs from 'fs';
 import * as path from 'path';
+import {
+  PropertyExternalSource,
+  PropertyStatus,
+} from '@asset-backend/common/types';
+import { EtuoviPropertyDataDto } from './dtos/etuovi-property-data.dto';
 
 describe('EtuoviImportService', () => {
   let service: EtuoviImportService;
@@ -192,6 +197,161 @@ describe('EtuoviImportService', () => {
 
       const result = service.parseHtml(testUrl, unicodeHtml);
       expect(result.address).toBe('Test 1 - 1h + k + kph / wc');
+    });
+  });
+
+  describe('createPropertyInput', () => {
+    it('creates property input with PROSPECT status', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        address: 'Testikatu 1 A - 3h + k',
+        buildingYear: 1990,
+        propertyType: 'Kerrostalo',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.status).toBe(PropertyStatus.PROSPECT);
+    });
+
+    it('sets externalSource to ETUOVI', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.externalSource).toBe(PropertyExternalSource.ETUOVI);
+    });
+
+    it('sets externalSourceId to the parsed ID from URL', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.externalSourceId).toBe('12345');
+    });
+
+    it('uses address as property name', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        address: 'Testikatu 1 A - 3h + k',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.name).toBe('Testikatu 1 A - 3h + k');
+    });
+
+    it('uses apartmentSize as size', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.size).toBe(65.5);
+    });
+
+    it('maps buildingYear to buildYear', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        buildingYear: 1995,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.buildYear).toBe(1995);
+    });
+
+    it('maps propertyType to apartmentType', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        propertyType: 'Rivitalo',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.apartmentType).toBe('Rivitalo');
+    });
+
+    it('uses URL as fallback name when address is missing', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.name).toBe('Etuovi 12345');
+    });
+
+    it('parses street from address (part before " - ")', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        address: 'Laihiantie 10 A 5 - 2h + k + kph',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.address).toBeDefined();
+      expect(result.address.street).toBe('Laihiantie 10 A 5');
+    });
+
+    it('uses full address as street when no separator', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        address: 'Testikatu 5',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.address).toBeDefined();
+      expect(result.address.street).toBe('Testikatu 5');
+    });
+
+    it('does not create address when etuovi address is missing', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.address).toBeUndefined();
     });
   });
 });
