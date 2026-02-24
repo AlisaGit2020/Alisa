@@ -1,21 +1,10 @@
-import { Button, CircularProgress, SxProps, Theme, Tooltip } from "@mui/material";
+import { Button, ButtonProps, CircularProgress, Tooltip } from "@mui/material";
 import { ElementType, ReactNode } from "react";
 
-interface AssetButtonProps {
+interface AssetButtonProps extends Omit<ButtonProps, "children"> {
   label: string;
-  variant?: "contained" | "outlined" | "text";
-  color?: "primary" | "secondary" | "error" | "warning" | "info" | "success";
-  size?: "small" | "medium" | "large";
-  disabled?: boolean;
   loading?: boolean;
-  startIcon?: ReactNode;
-  endIcon?: ReactNode;
-  fullWidth?: boolean;
-  type?: "button" | "submit" | "reset";
-  href?: string;
-  sx?: SxProps<Theme>;
   ariaLabel?: string;
-  onClick?: () => void;
   component?: ElementType;
   children?: ReactNode;
   tooltip?: string;
@@ -39,6 +28,7 @@ function AssetButton({
   component,
   children,
   tooltip,
+  ...rest
 }: AssetButtonProps) {
   const button = (
     <Button
@@ -55,6 +45,7 @@ function AssetButton({
       onClick={onClick}
       {...(href && { href })}
       {...(component && { component })}
+      {...rest}
     >
       {label}
       {children}

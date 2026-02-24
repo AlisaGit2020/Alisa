@@ -23,6 +23,7 @@ import {
 } from "../../asset";
 import React from "react";
 import DataService from "@asset-lib/data-service.ts";
+import CompactActionBar from "./CompactActionBar.tsx";
 
 interface TransactionsPendingActionsProps extends WithTranslation {
   marginTop?: number;
@@ -47,6 +48,8 @@ interface TransactionsPendingActionsProps extends WithTranslation {
   isAllocating?: boolean;
   onResetAllocation?: () => void;
   hasAllocatedSelected?: boolean;
+  /** Compact floating action bar mode */
+  compact?: boolean;
 }
 
 interface CategoryTypeData {
@@ -59,11 +62,10 @@ const CATEGORY_DROPDOWN_WIDTH = 250;
 function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
   const [confirmOpen, setConfirmOpen] = React.useState<boolean>(false);
   const [transactionType, setTransactionType] = React.useState<number>(0);
-  const [categoryTypeData, setCategoryTypeData] =
-    React.useState<CategoryTypeData>({
-      expenseTypeId: 0,
-      incomeTypeId: 0,
-    });
+  const [categoryTypeData, setCategoryTypeData] = React.useState<CategoryTypeData>({
+    expenseTypeId: 0,
+    incomeTypeId: 0,
+  });
 
   const handleSave = async () => {
     if (transactionType > 0) {
@@ -148,6 +150,50 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
 
   const supportsLoanSplit = props.supportsLoanSplit ?? true;
 
+  // Compact floating action bar mode - extracted to separate component
+  if (props.compact) {
+    return (
+      <>
+        <CompactActionBar
+          t={props.t}
+          open={props.open}
+          marginTop={props.marginTop}
+          selectedIds={props.selectedIds}
+          hasUnallocatedSelected={props.hasUnallocatedSelected}
+          hideApprove={props.hideApprove}
+          hideSplitLoanPayment={props.hideSplitLoanPayment}
+          supportsLoanSplit={supportsLoanSplit}
+          bankName={props.bankName}
+          hasAllocatedSelected={props.hasAllocatedSelected}
+          onCancel={props.onCancel}
+          onApprove={props.onApprove}
+          onSetType={props.onSetType}
+          onSetCategoryType={props.onSetCategoryType}
+          onSplitLoanPayment={props.onSplitLoanPayment}
+          onDelete={handleDeleteClick}
+          onOpenAllocationRules={props.onOpenAllocationRules}
+          onAutoAllocate={props.onAutoAllocate}
+          autoAllocateDisabled={props.autoAllocateDisabled}
+          isAllocating={props.isAllocating}
+          onResetAllocation={props.onResetAllocation}
+        />
+
+        <AssetConfirmDialog
+          title={props.t("confirm")}
+          contentText={props.t("confirmDeleteTransactions", {
+            count: props.selectedIds.length,
+          })}
+          buttonTextConfirm={props.t("delete")}
+          buttonTextCancel={props.t("cancel")}
+          open={confirmOpen}
+          onConfirm={handleConfirmDelete}
+          onClose={handleConfirmClose}
+        />
+      </>
+    );
+  }
+
+  // Original full-size layout
   return (
     <Paper
       sx={{

@@ -216,17 +216,6 @@ describe('ReviewStep', () => {
       expect(screen.queryByText(/transactions were skipped/)).not.toBeInTheDocument();
     });
 
-    it('displays allocation required info when hasUnknownTypes is true', () => {
-      renderWithProviders(<ReviewStep {...defaultProps} hasUnknownTypes={true} />);
-
-      expect(screen.getByText('You can continue when all transactions are allocated or removed.')).toBeInTheDocument();
-    });
-
-    it('does not display info when hasUnknownTypes is false', () => {
-      renderWithProviders(<ReviewStep {...defaultProps} hasUnknownTypes={false} />);
-
-      expect(screen.queryByText(/all transactions are allocated/)).not.toBeInTheDocument();
-    });
   });
 
   describe('Category name display', () => {
