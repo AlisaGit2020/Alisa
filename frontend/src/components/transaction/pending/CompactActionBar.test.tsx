@@ -7,12 +7,29 @@ import i18n from "../../../../test/utils/test-i18n";
 
 // Mock DataService to prevent actual API calls
 jest.mock("@asset-lib/data-service.ts", () => {
-  return jest.fn().mockImplementation(() => ({
-    search: jest.fn().mockResolvedValue([
-      { id: 1, name: "Expense Type 1" },
-      { id: 2, name: "Expense Type 2" },
-    ]),
-  }));
+  const mockExpenseTypes = [
+    { id: 1, key: "MAINTENANCE" },
+    { id: 2, key: "UTILITIES" },
+  ];
+  const mockIncomeTypes = [
+    { id: 10, key: "RENT" },
+    { id: 11, key: "PARKING" },
+  ];
+
+  return jest.fn().mockImplementation((config: { context?: { apiPath?: string } }) => {
+    const apiPath = config?.context?.apiPath || "";
+    return {
+      search: jest.fn().mockImplementation(() => {
+        if (apiPath === "accounting/expense/type") {
+          return Promise.resolve(mockExpenseTypes);
+        }
+        if (apiPath === "accounting/income/type") {
+          return Promise.resolve(mockIncomeTypes);
+        }
+        return Promise.resolve([]);
+      }),
+    };
+  });
 });
 
 describe("CompactActionBar", () => {
@@ -314,6 +331,55 @@ describe("CompactActionBar", () => {
 
       await waitFor(() => {
         expect(mockOnCancel).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe("Category selection flow", () => {
+    // Note: Full menu item selection tests would require more complex async mock setup.
+    // The category selection UI is tested through:
+    // - "opens expense menu when expense button is clicked" (verifies menu opens)
+    // - "opens income menu when income button is clicked" (verifies menu opens)
+    // - "save button is disabled when expense selected but no category chosen" (verifies validation)
+    // The onSetCategoryType callback integration is verified through the parent component integration tests.
+
+    it("save button is disabled when expense selected but no category chosen", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<CompactActionBar {...defaultProps} />);
+
+      // Click expense button to open menu
+      const expenseButton = screen.getByTestId("expense-button");
+      await user.click(expenseButton);
+
+      // Close menu without selecting - click elsewhere
+      await user.keyboard("{Escape}");
+
+      // Save button should still be disabled (expense type without category)
+      const saveButton = screen.getByTestId("save-button");
+      expect(saveButton).toBeDisabled();
+    });
+  });
+
+  describe("State reset behavior", () => {
+    it("resets selection state when selectedIds changes", async () => {
+      const user = userEvent.setup();
+      const { rerender } = renderWithProviders(
+        <CompactActionBar {...defaultProps} selectedIds={[1, 2, 3]} />
+      );
+
+      // Select deposit type
+      const depositButton = screen.getByTestId("deposit-button");
+      await user.click(depositButton);
+
+      // Save button should be enabled
+      expect(screen.getByTestId("save-button")).not.toBeDisabled();
+
+      // Rerender with different selectedIds (simulating new row selection)
+      rerender(<CompactActionBar {...defaultProps} selectedIds={[4, 5]} />);
+
+      // Save button should be disabled again (selection was reset)
+      await waitFor(() => {
+        expect(screen.getByTestId("save-button")).toBeDisabled();
       });
     });
   });

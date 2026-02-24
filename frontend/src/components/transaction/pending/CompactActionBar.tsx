@@ -4,7 +4,6 @@ import {
 } from "@asset-lib/asset-contexts.ts";
 import { TransactionType, ExpenseType, IncomeType } from "@asset-types";
 import {
-  Button,
   ButtonGroup,
   Chip,
   Collapse,
@@ -64,12 +63,41 @@ export default function CompactActionBar(props: CompactActionBarProps) {
   const [expenseTypes, setExpenseTypes] = React.useState<ExpenseType[]>([]);
   const [incomeTypes, setIncomeTypes] = React.useState<IncomeType[]>([]);
 
-  // Selected type and category
-  const [selectedType, setSelectedType] = React.useState<TransactionType | null>(null);
-  const [selectedExpenseTypeId, setSelectedExpenseTypeId] = React.useState<number | null>(null);
-  const [selectedIncomeTypeId, setSelectedIncomeTypeId] = React.useState<number | null>(null);
+  // Selected type and category - track which selection these belong to
+  const selectedIdsKey = props.selectedIds.join(",");
+  const [selectionState, setSelectionState] = React.useState<{
+    key: string;
+    type: TransactionType | null;
+    expenseTypeId: number | null;
+    incomeTypeId: number | null;
+  }>({ key: selectedIdsKey, type: null, expenseTypeId: null, incomeTypeId: null });
 
-  // Load expense and income types
+  // Reset selection when selectedIds changes (derive new state if key changed)
+  const currentState =
+    selectionState.key === selectedIdsKey
+      ? selectionState
+      : { key: selectedIdsKey, type: null, expenseTypeId: null, incomeTypeId: null };
+
+  // Update state if key changed
+  if (currentState !== selectionState) {
+    setSelectionState(currentState);
+  }
+
+  const selectedType = currentState.type;
+  const selectedExpenseTypeId = currentState.expenseTypeId;
+  const selectedIncomeTypeId = currentState.incomeTypeId;
+
+  const setSelectedType = (type: TransactionType | null) => {
+    setSelectionState((prev) => ({ ...prev, type }));
+  };
+  const setSelectedExpenseTypeId = (expenseTypeId: number | null) => {
+    setSelectionState((prev) => ({ ...prev, expenseTypeId }));
+  };
+  const setSelectedIncomeTypeId = (incomeTypeId: number | null) => {
+    setSelectionState((prev) => ({ ...prev, incomeTypeId }));
+  };
+
+  // Load expense and income types when component opens
   useEffect(() => {
     const loadTypes = async () => {
       const expenseService = new DataService<ExpenseType>({
@@ -90,10 +118,11 @@ export default function CompactActionBar(props: CompactActionBarProps) {
       setIncomeTypes(incomes);
     };
 
-    if (props.open) {
+    if (props.open && expenseTypes.length === 0) {
       loadTypes();
     }
-  }, [props.open]);
+  }, [props.open, expenseTypes.length]);
+
 
   const handleExpenseClick = (event: React.MouseEvent<HTMLElement>) => {
     setExpenseMenuAnchor(event.currentTarget);
@@ -206,46 +235,50 @@ export default function CompactActionBar(props: CompactActionBarProps) {
         {/* Type buttons with dropdown for Income/Expense */}
         <ButtonGroup variant="outlined" size="small">
           {/* Income with dropdown */}
-          <Button
+          <AssetButton
+            label={
+              selectedType === TransactionType.INCOME && selectedCategoryName
+                ? selectedCategoryName
+                : props.t("income")
+            }
             onClick={handleIncomeClick}
             endIcon={<ArrowDropDownIcon />}
             variant={selectedType === TransactionType.INCOME ? "contained" : "outlined"}
+            size="small"
             data-testid="income-button"
-          >
-            {selectedType === TransactionType.INCOME && selectedCategoryName
-              ? selectedCategoryName
-              : props.t("income")}
-          </Button>
+          />
 
           {/* Expense with dropdown */}
-          <Button
+          <AssetButton
+            label={
+              selectedType === TransactionType.EXPENSE && selectedCategoryName
+                ? selectedCategoryName
+                : props.t("expense")
+            }
             onClick={handleExpenseClick}
             endIcon={<ArrowDropDownIcon />}
             variant={selectedType === TransactionType.EXPENSE ? "contained" : "outlined"}
+            size="small"
             data-testid="expense-button"
-          >
-            {selectedType === TransactionType.EXPENSE && selectedCategoryName
-              ? selectedCategoryName
-              : props.t("expense")}
-          </Button>
+          />
 
           {/* Deposit - simple button */}
-          <Button
+          <AssetButton
+            label={props.t("deposit")}
             onClick={handleDepositClick}
             variant={selectedType === TransactionType.DEPOSIT ? "contained" : "outlined"}
+            size="small"
             data-testid="deposit-button"
-          >
-            {props.t("deposit")}
-          </Button>
+          />
 
           {/* Withdraw - simple button */}
-          <Button
+          <AssetButton
+            label={props.t("withdraw")}
             onClick={handleWithdrawClick}
             variant={selectedType === TransactionType.WITHDRAW ? "contained" : "outlined"}
+            size="small"
             data-testid="withdraw-button"
-          >
-            {props.t("withdraw")}
-          </Button>
+          />
         </ButtonGroup>
 
         {/* Income categories menu */}
