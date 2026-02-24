@@ -390,6 +390,32 @@ describe('PropertyService', () => {
 
       expect(result.status).toBe(PropertyStatus.OWN);
     });
+
+    it('bypasses tier limit when creating PROSPECT property', async () => {
+      // Simulate tier limit reached
+      mockTierService.canCreateProperty.mockResolvedValue(false);
+
+      const input = {
+        name: 'Prospect Property',
+        size: 60,
+        status: PropertyStatus.PROSPECT,
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({
+        id: 1,
+        name: input.name,
+        size: input.size,
+        status: PropertyStatus.PROSPECT,
+      });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      // Should succeed even though tier limit is reached
+      const result = await service.add(testUser, input);
+
+      expect(result.status).toBe(PropertyStatus.PROSPECT);
+      // Tier check should NOT have been called for prospect properties
+      expect(mockTierService.canCreateProperty).not.toHaveBeenCalled();
+    });
   });
 
   describe('update', () => {

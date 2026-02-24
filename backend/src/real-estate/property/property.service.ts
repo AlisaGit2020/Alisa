@@ -31,7 +31,7 @@ import {
   DependencyType,
 } from './dtos/property-delete-validation.dto';
 import { PropertyTransactionSearchDto } from './dtos/property-transaction-search.dto';
-import { TransactionStatus } from '@asset-backend/common/types';
+import { PropertyStatus, TransactionStatus } from '@asset-backend/common/types';
 
 @Injectable()
 export class PropertyService {
@@ -136,11 +136,14 @@ export class PropertyService {
     // Determine the owner: use explicitly provided userId if set, otherwise the logged-in user
     const ownerId = input.ownerships[0]?.userId || user.id;
 
-    const canCreate = await this.tierService.canCreateProperty(ownerId);
-    if (!canCreate) {
-      throw new ForbiddenException(
-        'Property limit reached for your current tier',
-      );
+    // Prospect properties are not subject to tier limits
+    if (input.status !== PropertyStatus.PROSPECT) {
+      const canCreate = await this.tierService.canCreateProperty(ownerId);
+      if (!canCreate) {
+        throw new ForbiddenException(
+          'Property limit reached for your current tier',
+        );
+      }
     }
 
     this.mapData(user, propertyEntity, input);
