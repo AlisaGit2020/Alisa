@@ -28,6 +28,7 @@ const property = {
     photoDeleteError: 'Kunde inte ta bort bild. Försök igen.',
     savePropertyFirst: 'Spara fastigheten först för att lägga till bild',
     ownershipShare: 'Ägarandel',
+    prospectStatus: 'Prospekt',
     viewPageTitle: 'Fastighetsdetaljer',
     propertyInfo: 'Grundläggande information',
     locationInfo: 'Plats',

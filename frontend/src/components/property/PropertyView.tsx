@@ -3,7 +3,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { propertyContext } from '../../lib/asset-contexts';
-import { Property } from '@asset-types';
+import { Property, PropertyStatus } from '@asset-types';
 import ApiClient from '../../lib/api-client';
 import AssetLoadingProgress from '../asset/AssetLoadingProgress';
 import AssetButton from '../asset/form/AssetButton';
@@ -72,6 +72,35 @@ function OwnershipBadge({ percentage, label }: OwnershipBadgeProps) {
             {percentage}%
           </Typography>
         </Box>
+      </Box>
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+        {label}
+      </Typography>
+    </Box>
+  );
+}
+
+interface ProspectBadgeProps {
+  label: string;
+}
+
+function ProspectBadge({ label }: ProspectBadgeProps) {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Box
+        sx={{
+          width: 56,
+          height: 56,
+          borderRadius: '50%',
+          bgcolor: 'warning.light',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography variant="body2" component="div" sx={{ fontWeight: 600, color: 'warning.contrastText' }}>
+          ?
+        </Typography>
       </Box>
       <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
         {label}
@@ -160,7 +189,7 @@ function PropertyView({ t }: WithTranslation) {
             objectFit: 'cover',
           }}
         />
-        {/* Ownership badge floating over image */}
+        {/* Status badge floating over image */}
         <Box
           sx={{
             position: 'absolute',
@@ -172,7 +201,11 @@ function PropertyView({ t }: WithTranslation) {
             boxShadow: 2,
           }}
         >
-          <OwnershipBadge percentage={ownershipShare} label={t('ownershipShare')} />
+          {property.status === PropertyStatus.PROSPECT ? (
+            <ProspectBadge label={t('prospectStatus')} />
+          ) : (
+            <OwnershipBadge percentage={ownershipShare} label={t('ownershipShare')} />
+          )}
         </Box>
       </Box>
 
