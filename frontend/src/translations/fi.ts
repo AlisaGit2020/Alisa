@@ -150,6 +150,7 @@ const fi = {
       incomes: "Tulot",
       statistics: "Tilastot",
       depreciationAssets: "Poistot",
+      investments: "Sijoituslaskelmat",
       andMore: "...ja {{count}} muuta",
     },
 

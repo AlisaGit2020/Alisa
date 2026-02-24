@@ -150,6 +150,7 @@ const sv = {
       incomes: "Inkomster",
       statistics: "Statistik",
       depreciationAssets: "Avskrivningstillgångar",
+      investments: "Investeringsberäkningar",
       andMore: "...och {{count}} fler",
     },
 

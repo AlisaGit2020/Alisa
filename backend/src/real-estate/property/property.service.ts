@@ -24,6 +24,7 @@ import { Expense } from '@asset-backend/accounting/expense/entities/expense.enti
 import { Income } from '@asset-backend/accounting/income/entities/income.entity';
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { DepreciationAsset } from '@asset-backend/accounting/depreciation/entities/depreciation-asset.entity';
+import { Investment } from '@asset-backend/real-estate/investment/entities/investment.entity';
 import {
   PropertyDeleteValidationDto,
   DependencyGroup,
@@ -54,6 +55,8 @@ export class PropertyService {
     private depreciationAssetRepository: Repository<DepreciationAsset>,
     @InjectRepository(Address)
     private addressRepository: Repository<Address>,
+    @InjectRepository(Investment)
+    private investmentRepository: Repository<Investment>,
     private authService: AuthService,
     private tierService: TierService,
   ) {}
@@ -211,8 +214,8 @@ export class PropertyService {
       }
     });
 
-    // Delete photo file after successful database deletion
-    if (photoPath) {
+    // Delete photo file after successful database deletion (only for local files)
+    if (photoPath && !this.isExternalUrl(photoPath)) {
       await this.deletePhotoFile(photoPath);
     }
   }
@@ -232,12 +235,14 @@ export class PropertyService {
       incomeCount,
       statisticsCount,
       depreciationCount,
+      investmentCount,
     ] = await Promise.all([
       this.transactionRepository.count({ where: { propertyId: id } }),
       this.expenseRepository.count({ where: { propertyId: id } }),
       this.incomeRepository.count({ where: { propertyId: id } }),
       this.statisticsRepository.count({ where: { propertyId: id } }),
       this.depreciationAssetRepository.count({ where: { propertyId: id } }),
+      this.investmentRepository.count({ where: { propertyId: id } }),
     ]);
 
     // Fetch samples only for dependencies that exist (in parallel)
@@ -302,6 +307,18 @@ export class PropertyService {
             type: 'depreciationAsset' as DependencyType,
             count: depreciationCount,
             samples: samples.map((d): DependencyItem => ({ id: d.id, description: d.description })),
+          })),
+      );
+    }
+
+    if (investmentCount > 0) {
+      samplePromises.push(
+        this.investmentRepository
+          .find({ where: { propertyId: id }, take: sampleLimit, order: { id: 'DESC' } })
+          .then((samples): DependencyGroup => ({
+            type: 'investment' as DependencyType,
+            count: investmentCount,
+            samples: samples.map((i): DependencyItem => ({ id: i.id, description: i.name ?? `Investment #${i.id}` })),
           })),
       );
     }
@@ -431,7 +448,7 @@ export class PropertyService {
 
     this.validatePhotoFile(file);
 
-    if (property.photo) {
+    if (property.photo && !this.isExternalUrl(property.photo)) {
       await this.deletePhotoFile(property.photo);
     }
 
@@ -449,11 +466,18 @@ export class PropertyService {
       throw new NotFoundException('Property does not have a photo');
     }
 
-    await this.deletePhotoFile(property.photo);
+    // Only delete file for local photos, not external URLs
+    if (!this.isExternalUrl(property.photo)) {
+      await this.deletePhotoFile(property.photo);
+    }
     property.photo = null;
     await this.repository.save(property);
 
     return property;
+  }
+
+  private isExternalUrl(url: string): boolean {
+    return url.startsWith('http://') || url.startsWith('https://');
   }
 
   private async deletePhotoFile(photoPath: string): Promise<void> {

@@ -41,6 +41,7 @@ function AssetDependencyDialog({
       income: t("common:dependencies.incomes"),
       statistics: t("common:dependencies.statistics"),
       depreciationAsset: t("common:dependencies.depreciationAssets"),
+      investment: t("common:dependencies.investments"),
     };
     return labels[type];
   };

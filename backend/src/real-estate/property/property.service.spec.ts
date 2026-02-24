@@ -24,6 +24,7 @@ import {
   createTransaction,
   createExpense,
   createIncome,
+  createInvestment,
 } from 'test/factories';
 import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
 import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
@@ -31,6 +32,7 @@ import { Income } from '@asset-backend/accounting/income/entities/income.entity'
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { DepreciationAsset } from '@asset-backend/accounting/depreciation/entities/depreciation-asset.entity';
 import { Address } from '@asset-backend/real-estate/address/entities/address.entity';
+import { Investment } from '@asset-backend/real-estate/investment/entities/investment.entity';
 import {
   PropertyExternalSource,
   PropertyStatus,
@@ -48,6 +50,7 @@ describe('PropertyService', () => {
   let mockStatisticsRepository: MockRepository<PropertyStatistics>;
   let mockDepreciationAssetRepository: MockRepository<DepreciationAsset>;
   let mockAddressRepository: MockRepository<Address>;
+  let mockInvestmentRepository: MockRepository<Investment>;
   let mockAuthService: MockAuthService;
   let mockTierService: Partial<Record<keyof TierService, jest.Mock>>;
 
@@ -67,6 +70,7 @@ describe('PropertyService', () => {
     mockStatisticsRepository = createMockRepository<PropertyStatistics>();
     mockDepreciationAssetRepository = createMockRepository<DepreciationAsset>();
     mockAddressRepository = createMockRepository<Address>();
+    mockInvestmentRepository = createMockRepository<Investment>();
     mockAuthService = createMockAuthService();
     mockTierService = {
       canCreateProperty: jest.fn().mockResolvedValue(true),
@@ -103,6 +107,10 @@ describe('PropertyService', () => {
         {
           provide: getRepositoryToken(Address),
           useValue: mockAddressRepository,
+        },
+        {
+          provide: getRepositoryToken(Investment),
+          useValue: mockInvestmentRepository,
         },
         { provide: AuthService, useValue: mockAuthService },
         { provide: TierService, useValue: mockTierService },
@@ -769,6 +777,7 @@ describe('PropertyService', () => {
       mockIncomeRepository.count.mockResolvedValue(0);
       mockStatisticsRepository.count.mockResolvedValue(0);
       mockDepreciationAssetRepository.count.mockResolvedValue(0);
+      mockInvestmentRepository.count.mockResolvedValue(0);
     });
 
     it('deletes property using transaction', async () => {
@@ -861,6 +870,24 @@ describe('PropertyService', () => {
 
       unlinkSpy.mockRestore();
     });
+
+    it('does not attempt to delete external photo URL', async () => {
+      const externalPhotoUrl = 'https://example.com/images/property.jpg';
+      const property = createProperty({ id: 1, photo: externalPhotoUrl });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const unlinkSpy = jest
+        .spyOn(fs.promises, 'unlink')
+        .mockResolvedValue(undefined);
+
+      await service.delete(testUser, 1);
+
+      expect(mockRepository.manager.transaction).toHaveBeenCalled();
+      expect(unlinkSpy).not.toHaveBeenCalled();
+
+      unlinkSpy.mockRestore();
+    });
   });
 
   describe('validateDelete', () => {
@@ -871,6 +898,7 @@ describe('PropertyService', () => {
       mockIncomeRepository.count.mockResolvedValue(0);
       mockStatisticsRepository.count.mockResolvedValue(0);
       mockDepreciationAssetRepository.count.mockResolvedValue(0);
+      mockInvestmentRepository.count.mockResolvedValue(0);
     });
 
     it('returns canDelete: true for property without dependencies', async () => {
@@ -971,6 +999,50 @@ describe('PropertyService', () => {
 
       expect(validation.dependencies[0].count).toBe(10);
       expect(validation.dependencies[0].samples).toHaveLength(5);
+    });
+
+    it('returns investment dependencies when property has investments', async () => {
+      const property = createProperty({ id: 1 });
+      const investments = [
+        createInvestment({ id: 1, propertyId: 1, name: 'Investment 1' }),
+        createInvestment({ id: 2, propertyId: 1, name: 'Investment 2' }),
+      ];
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockInvestmentRepository.count.mockResolvedValue(2);
+      mockInvestmentRepository.find.mockResolvedValue(investments);
+
+      const { validation } = await service.validateDelete(testUser, 1);
+
+      expect(validation.canDelete).toBe(true);
+      expect(validation.dependencies).toHaveLength(1);
+      expect(validation.dependencies[0].type).toBe('investment');
+      expect(validation.dependencies[0].count).toBe(2);
+      expect(validation.dependencies[0].samples).toHaveLength(2);
+      expect(validation.dependencies[0].samples[0].description).toBe('Investment 1');
+    });
+
+    it('includes investment in multiple dependency types', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      mockTransactionRepository.count.mockResolvedValue(3);
+      mockTransactionRepository.find.mockResolvedValue([
+        createTransaction({ id: 1, propertyId: 1 }),
+      ]);
+
+      mockInvestmentRepository.count.mockResolvedValue(1);
+      mockInvestmentRepository.find.mockResolvedValue([
+        createInvestment({ id: 1, propertyId: 1, name: 'Test Investment' }),
+      ]);
+
+      const { validation } = await service.validateDelete(testUser, 1);
+
+      expect(validation.canDelete).toBe(true);
+      expect(validation.dependencies).toHaveLength(2);
+      expect(validation.dependencies.map((d) => d.type)).toContain('transaction');
+      expect(validation.dependencies.map((d) => d.type)).toContain('investment');
     });
   });
 

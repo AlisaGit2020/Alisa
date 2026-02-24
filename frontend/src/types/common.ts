@@ -127,7 +127,8 @@ export type DependencyType =
   | 'expense'
   | 'income'
   | 'statistics'
-  | 'depreciationAsset';
+  | 'depreciationAsset'
+  | 'investment';
 
 export interface DependencyGroup {
   type: DependencyType;
