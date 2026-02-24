@@ -3,11 +3,11 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { propertyContext } from '../../lib/asset-contexts';
-import { Property } from '@asset-types';
+import { Property, PropertyStatus } from '@asset-types';
 import ApiClient from '../../lib/api-client';
 import AssetLoadingProgress from '../asset/AssetLoadingProgress';
 import AssetButton from '../asset/form/AssetButton';
-import { VITE_BASE_URL } from '../../constants';
+import { getPhotoUrl } from '@asset-lib/functions';
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SquareFootIcon from '@mui/icons-material/SquareFoot';
@@ -80,6 +80,35 @@ function OwnershipBadge({ percentage, label }: OwnershipBadgeProps) {
   );
 }
 
+interface ProspectBadgeProps {
+  label: string;
+}
+
+function ProspectBadge({ label }: ProspectBadgeProps) {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Box
+        sx={{
+          width: 56,
+          height: 56,
+          borderRadius: '50%',
+          bgcolor: 'warning.light',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography variant="body2" component="div" sx={{ fontWeight: 600, color: 'warning.contrastText' }}>
+          ?
+        </Typography>
+      </Box>
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+        {label}
+      </Typography>
+    </Box>
+  );
+}
+
 function PropertyView({ t }: WithTranslation) {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
@@ -140,9 +169,7 @@ function PropertyView({ t }: WithTranslation) {
     );
   }
 
-  const imageUrl = property.photo
-    ? `${VITE_BASE_URL}/${property.photo}`
-    : '/assets/properties/placeholder.svg';
+  const imageUrl = getPhotoUrl(property.photo);
 
   const ownershipShare = property.ownerships?.[0]?.share ?? 100;
 
@@ -160,7 +187,7 @@ function PropertyView({ t }: WithTranslation) {
             objectFit: 'cover',
           }}
         />
-        {/* Ownership badge floating over image */}
+        {/* Status badge floating over image */}
         <Box
           sx={{
             position: 'absolute',
@@ -172,7 +199,11 @@ function PropertyView({ t }: WithTranslation) {
             boxShadow: 2,
           }}
         >
-          <OwnershipBadge percentage={ownershipShare} label={t('ownershipShare')} />
+          {property.status === PropertyStatus.PROSPECT ? (
+            <ProspectBadge label={t('prospectStatus')} />
+          ) : (
+            <OwnershipBadge percentage={ownershipShare} label={t('ownershipShare')} />
+          )}
         </Box>
       </Box>
 

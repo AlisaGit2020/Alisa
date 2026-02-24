@@ -4,14 +4,37 @@ import {
   ServiceUnavailableException,
   NotFoundException,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import axios, { AxiosError } from 'axios';
 import { EtuoviPropertyDataDto } from './dtos/etuovi-property-data.dto';
+import { PropertyInputDto } from '@asset-backend/real-estate/property/dtos/property-input.dto';
+import { AddressInputDto } from '@asset-backend/real-estate/address/dtos/address-input.dto';
+import {
+  PropertyExternalSource,
+  PropertyStatus,
+} from '@asset-backend/common/types';
+import { PropertyService } from '@asset-backend/real-estate/property/property.service';
+import { JWTUser } from '@asset-backend/auth/types';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
 
 interface PeriodicCharge {
   periodicCharge: string;
   price: number;
   chargePeriod: string;
+}
+
+interface EtuoviImageData {
+  id?: number;
+  uuid?: string;
+  uri?: string;
+}
+
+interface EtuoviImageEntry {
+  id?: number;
+  propertyImageType?: string;
+  ordinal?: number;
+  image?: EtuoviImageData;
 }
 
 interface EtuoviPropertyData {
@@ -27,14 +50,24 @@ interface EtuoviPropertyData {
   streetAddressFreeForm?: string;
   roomStructure?: string;
   buildingYear?: number;
+  constructionFinishedYear?: number;
   residentialPropertyType?: string;
   condition?: string;
   energyClass?: string;
   periodicChargesAdditionalInfo?: string;
+  location?: {
+    municipality?: {
+      defaultName?: string;
+    };
+    postCode?: string;
+  };
+  images?: Record<string, EtuoviImageEntry>;
 }
 
 @Injectable()
 export class EtuoviImportService {
+  private readonly logger = new Logger(EtuoviImportService.name);
+
   /**
    * User-Agent header required for fetching etuovi.com pages.
    * Etuovi.com blocks requests without a standard browser User-Agent,
@@ -45,6 +78,32 @@ export class EtuoviImportService {
   private readonly USER_AGENT =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
   private readonly TIMEOUT = 15000;
+
+  constructor(private readonly propertyService: PropertyService) {}
+
+  async createProspectProperty(user: JWTUser, url: string): Promise<Property> {
+    const etuoviData = await this.fetchPropertyData(url);
+    const propertyInput = this.createPropertyInput(etuoviData);
+
+    // Check if user already has a property with the same Etuovi ID
+    const existingProperty = await this.propertyService.findByExternalSource(
+      user,
+      PropertyExternalSource.ETUOVI,
+      propertyInput.externalSourceId,
+    );
+
+    if (existingProperty) {
+      this.logger.debug(
+        `Updating existing property ${existingProperty.id} from Etuovi listing ${propertyInput.externalSourceId}`,
+      );
+      return this.propertyService.update(user, existingProperty.id, propertyInput);
+    }
+
+    this.logger.debug(
+      `Creating new prospect property from Etuovi listing ${propertyInput.externalSourceId}`,
+    );
+    return this.propertyService.add(user, propertyInput);
+  }
 
   async fetchPropertyData(url: string): Promise<EtuoviPropertyDataDto> {
     this.validateUrl(url);
@@ -155,10 +214,19 @@ export class EtuoviImportService {
     result.address = addressParts.length > 0 ? addressParts.join(' - ') : undefined;
 
     // Parse other informational fields
-    result.buildingYear = jsonData.buildingYear || undefined;
+    result.buildingYear = jsonData.buildingYear || jsonData.constructionFinishedYear || undefined;
     result.propertyType = this.translatePropertyType(jsonData.residentialPropertyType);
     result.condition = jsonData.condition || undefined;
     result.energyClass = jsonData.energyClass || undefined;
+
+    // Parse city and postal code from location
+    result.city = jsonData.location?.municipality?.defaultName || undefined;
+    result.postalCode = jsonData.location?.postCode || undefined;
+
+    // Parse default image URL (image with lowest ordinal from object)
+    if (jsonData.images && typeof jsonData.images === 'object') {
+      result.defaultImageUrl = this.extractDefaultImageUrl(jsonData.images);
+    }
 
     // Validate required fields
     if (result.deptFreePrice === 0) {
@@ -286,10 +354,15 @@ export class EtuoviImportService {
       );
     }
 
-    // Extract buildingYear
+    // Extract buildingYear or constructionFinishedYear
     const yearMatch = html.match(/"buildingYear":(\d{4})/);
     if (yearMatch) {
       result.buildingYear = parseInt(yearMatch[1], 10);
+    } else {
+      const constructionYearMatch = html.match(/"constructionFinishedYear":(\d{4})/);
+      if (constructionYearMatch) {
+        result.constructionFinishedYear = parseInt(constructionYearMatch[1], 10);
+      }
     }
 
     // Extract residentialPropertyType
@@ -308,6 +381,35 @@ export class EtuoviImportService {
     const roomMatch = html.match(/"roomStructure":"([^"]+)"/);
     if (roomMatch) {
       result.roomStructure = this.unescapeUnicode(roomMatch[1]);
+    }
+
+    // Extract city from municipality.defaultName
+    const cityMatch = html.match(/"municipality":\{[^}]*"defaultName":"([^"]+)"/);
+    if (cityMatch) {
+      result.location = result.location || {};
+      result.location.municipality = { defaultName: this.unescapeUnicode(cityMatch[1]) };
+    }
+
+    // Extract postalCode from location.postCode
+    const postCodeMatch = html.match(/"postCode":"(\d+)"/);
+    if (postCodeMatch) {
+      result.location = result.location || {};
+      result.location.postCode = postCodeMatch[1];
+    }
+
+    // Extract images object (Etuovi uses object with IDs as keys)
+    const imagesMatch = html.match(/"images":\{([^}]+(?:\{[^}]*\}[^}]*)*)\}/);
+    if (imagesMatch) {
+      try {
+        const imagesObj = JSON.parse(`{${imagesMatch[1]}}`) as Record<string, EtuoviImageEntry>;
+        result.images = imagesObj;
+      } catch {
+        // Try extracting first image URI directly from nested structure
+        const imageUriMatch = html.match(/"image":\{[^}]*"uri":"([^"]+)"/);
+        if (imageUriMatch) {
+          result.images = { '0': { ordinal: 0, image: { uri: imageUriMatch[1] } } };
+        }
+      }
     }
 
     if (result.debfFreePrice || result.sellingPrice) {
@@ -343,5 +445,79 @@ export class EtuoviImportService {
     return str.replace(/\\u([0-9A-Fa-f]{4})/g, (_, hex) =>
       String.fromCharCode(parseInt(hex, 16)),
     );
+  }
+
+  private extractDefaultImageUrl(images: Record<string, EtuoviImageEntry>): string | undefined {
+    // Find image with lowest ordinal (typically the main/default image)
+    const entries = Object.values(images);
+    if (entries.length === 0) return undefined;
+
+    const sortedByOrdinal = entries
+      .filter((entry) => entry.image?.uri)
+      .sort((a, b) => (a.ordinal ?? 999) - (b.ordinal ?? 999));
+
+    if (sortedByOrdinal.length === 0) return undefined;
+
+    let uri = sortedByOrdinal[0].image?.uri;
+    if (!uri) return undefined;
+
+    // Unescape unicode characters (e.g., \u002F -> /)
+    uri = this.unescapeUnicode(uri);
+
+    // Replace {imageParameters} placeholder with default size parameters
+    // Etuovi uses this as a template that frontend replaces with size/quality
+    uri = uri.replace('{imageParameters}', '1200x,q90');
+
+    // Convert protocol-relative URL (//...) to https://
+    if (uri.startsWith('//')) {
+      return `https:${uri}`;
+    }
+    return uri;
+  }
+
+  createPropertyInput(etuoviData: EtuoviPropertyDataDto): PropertyInputDto {
+    const input = new PropertyInputDto();
+
+    input.status = PropertyStatus.PROSPECT;
+    input.externalSource = PropertyExternalSource.ETUOVI;
+    input.externalSourceId = this.extractIdFromUrl(etuoviData.url);
+    input.name = etuoviData.address || this.extractNameFromUrl(etuoviData.url);
+    input.size = etuoviData.apartmentSize;
+    input.buildYear = etuoviData.buildingYear;
+    input.apartmentType = etuoviData.propertyType;
+    input.address = this.parseAddress(etuoviData);
+    input.photo = etuoviData.defaultImageUrl;
+
+    return input;
+  }
+
+  private parseAddress(etuoviData: EtuoviPropertyDataDto): AddressInputDto | undefined {
+    if (!etuoviData.address) {
+      return undefined;
+    }
+
+    const address = new AddressInputDto();
+    // Etuovi address format: "Street 1 A 5 - 2h + k + kph"
+    // The part before " - " is the street address
+    const separatorIndex = etuoviData.address.indexOf(' - ');
+    address.street =
+      separatorIndex > 0
+        ? etuoviData.address.substring(0, separatorIndex)
+        : etuoviData.address;
+
+    address.city = etuoviData.city;
+    address.postalCode = etuoviData.postalCode;
+
+    return address;
+  }
+
+  private extractIdFromUrl(url: string): string {
+    const match = url.match(/\/kohde\/(\d+)/);
+    return match ? match[1] : url;
+  }
+
+  private extractNameFromUrl(url: string): string {
+    const id = this.extractIdFromUrl(url);
+    return `Etuovi ${id}`;
   }
 }

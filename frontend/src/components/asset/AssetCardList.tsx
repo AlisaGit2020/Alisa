@@ -27,7 +27,7 @@ import { useToast } from "./toast";
 import { TypeOrmFetchOptions } from "../../lib/types";
 import ApiClient from "../../lib/api-client";
 import AssetContext from "@asset-lib/asset-contexts";
-import { VITE_BASE_URL } from "../../constants";
+import { getPhotoUrl } from "@asset-lib/functions";
 import { Address, DeleteValidationResult } from "@asset-types";
 
 interface AlisCardListField<T> {
@@ -173,7 +173,7 @@ function AssetCardList<T extends { id: number }>({
                     component="img"
                     alt={item.name}
                     height="160"
-                    image={item.photo ? `${VITE_BASE_URL}/${item.photo}` : '/assets/properties/placeholder.svg'}
+                    image={getPhotoUrl(item.photo)}
                     sx={{ objectFit: 'cover' }}
                   />
                   <CardContent sx={{ flexGrow: 1 }}>

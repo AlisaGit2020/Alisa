@@ -73,4 +73,8 @@ export class InvestmentInputDto {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @IsOptional()
+  @IsString()
+  etuoviUrl?: string;
 }

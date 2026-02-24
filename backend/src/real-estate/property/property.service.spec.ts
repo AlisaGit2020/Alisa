@@ -24,6 +24,7 @@ import {
   createTransaction,
   createExpense,
   createIncome,
+  createInvestment,
 } from 'test/factories';
 import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
 import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
@@ -31,6 +32,7 @@ import { Income } from '@asset-backend/accounting/income/entities/income.entity'
 import { PropertyStatistics } from './entities/property-statistics.entity';
 import { DepreciationAsset } from '@asset-backend/accounting/depreciation/entities/depreciation-asset.entity';
 import { Address } from '@asset-backend/real-estate/address/entities/address.entity';
+import { Investment } from '@asset-backend/real-estate/investment/entities/investment.entity';
 import {
   PropertyExternalSource,
   PropertyStatus,
@@ -48,6 +50,7 @@ describe('PropertyService', () => {
   let mockStatisticsRepository: MockRepository<PropertyStatistics>;
   let mockDepreciationAssetRepository: MockRepository<DepreciationAsset>;
   let mockAddressRepository: MockRepository<Address>;
+  let mockInvestmentRepository: MockRepository<Investment>;
   let mockAuthService: MockAuthService;
   let mockTierService: Partial<Record<keyof TierService, jest.Mock>>;
 
@@ -67,6 +70,7 @@ describe('PropertyService', () => {
     mockStatisticsRepository = createMockRepository<PropertyStatistics>();
     mockDepreciationAssetRepository = createMockRepository<DepreciationAsset>();
     mockAddressRepository = createMockRepository<Address>();
+    mockInvestmentRepository = createMockRepository<Investment>();
     mockAuthService = createMockAuthService();
     mockTierService = {
       canCreateProperty: jest.fn().mockResolvedValue(true),
@@ -103,6 +107,10 @@ describe('PropertyService', () => {
         {
           provide: getRepositoryToken(Address),
           useValue: mockAddressRepository,
+        },
+        {
+          provide: getRepositoryToken(Investment),
+          useValue: mockInvestmentRepository,
         },
         { provide: AuthService, useValue: mockAuthService },
         { provide: TierService, useValue: mockTierService },
@@ -153,6 +161,85 @@ describe('PropertyService', () => {
       await expect(service.findOne(userWithoutProperties, 1)).rejects.toThrow(
         UnauthorizedException,
       );
+    });
+  });
+
+  describe('findByExternalSource', () => {
+    it('returns property when user owns property with matching external source', async () => {
+      const property = createProperty({
+        id: 1,
+        name: 'Etuovi Property',
+        externalSource: PropertyExternalSource.ETUOVI,
+        externalSourceId: '12345',
+      });
+      mockRepository.findOne.mockResolvedValue(property);
+
+      const result = await service.findByExternalSource(
+        testUser,
+        PropertyExternalSource.ETUOVI,
+        '12345',
+      );
+
+      expect(result).toEqual(property);
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: {
+          externalSource: PropertyExternalSource.ETUOVI,
+          externalSourceId: '12345',
+          ownerships: { userId: testUser.id },
+        },
+      });
+    });
+
+    it('returns null when no matching property exists', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.findByExternalSource(
+        testUser,
+        PropertyExternalSource.ETUOVI,
+        'nonexistent',
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it('does not return property owned by another user', async () => {
+      // Property exists but owned by different user
+      mockRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.findByExternalSource(
+        testUser,
+        PropertyExternalSource.ETUOVI,
+        '12345',
+      );
+
+      expect(result).toBeNull();
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: {
+          externalSource: PropertyExternalSource.ETUOVI,
+          externalSourceId: '12345',
+          ownerships: { userId: testUser.id },
+        },
+      });
+    });
+
+    // Tests that findByExternalSource works with any PropertyExternalSource enum value.
+    // OIKOTIE import is not yet implemented, but the method should handle all enum values.
+    it('works with OIKOTIE external source', async () => {
+      const property = createProperty({
+        id: 2,
+        name: 'Oikotie Property',
+        externalSource: PropertyExternalSource.OIKOTIE,
+        externalSourceId: 'OT-67890',
+      });
+      mockRepository.findOne.mockResolvedValue(property);
+
+      const result = await service.findByExternalSource(
+        testUser,
+        PropertyExternalSource.OIKOTIE,
+        'OT-67890',
+      );
+
+      expect(result).toEqual(property);
     });
   });
 
@@ -390,6 +477,32 @@ describe('PropertyService', () => {
 
       expect(result.status).toBe(PropertyStatus.OWN);
     });
+
+    it('bypasses tier limit when creating PROSPECT property', async () => {
+      // Simulate tier limit reached
+      mockTierService.canCreateProperty.mockResolvedValue(false);
+
+      const input = {
+        name: 'Prospect Property',
+        size: 60,
+        status: PropertyStatus.PROSPECT,
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({
+        id: 1,
+        name: input.name,
+        size: input.size,
+        status: PropertyStatus.PROSPECT,
+      });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      // Should succeed even though tier limit is reached
+      const result = await service.add(testUser, input);
+
+      expect(result.status).toBe(PropertyStatus.PROSPECT);
+      // Tier check should NOT have been called for prospect properties
+      expect(mockTierService.canCreateProperty).not.toHaveBeenCalled();
+    });
   });
 
   describe('update', () => {
@@ -589,6 +702,73 @@ describe('PropertyService', () => {
       expect(result.externalSource).toBeNull();
       expect(result.externalSourceId).toBeNull();
     });
+
+    it('throws ForbiddenException when changing PROSPECT to OWN and tier limit reached', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Prospect Property',
+        status: PropertyStatus.PROSPECT,
+      });
+      const input = {
+        name: 'Prospect Property',
+        size: 50,
+        status: PropertyStatus.OWN,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTierService.canCreateProperty.mockResolvedValue(false);
+
+      await expect(service.update(testUser, 1, input)).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('allows changing PROSPECT to OWN when tier allows', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Prospect Property',
+        status: PropertyStatus.PROSPECT,
+      });
+      const input = {
+        name: 'Prospect Property',
+        size: 50,
+        status: PropertyStatus.OWN,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTierService.canCreateProperty.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...existingProperty, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.status).toBe(PropertyStatus.OWN);
+      expect(mockTierService.canCreateProperty).toHaveBeenCalledWith(testUser.id);
+    });
+
+    it('does not check tier when updating OWN to SOLD', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'My Property',
+        status: PropertyStatus.OWN,
+      });
+      const input = {
+        name: 'My Property',
+        size: 50,
+        status: PropertyStatus.SOLD,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockTierService.canCreateProperty.mockResolvedValue(false); // Would fail if called
+      mockRepository.save.mockResolvedValue({ ...existingProperty, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.status).toBe(PropertyStatus.SOLD);
+      expect(mockTierService.canCreateProperty).not.toHaveBeenCalled();
+    });
   });
 
   describe('delete', () => {
@@ -599,6 +779,7 @@ describe('PropertyService', () => {
       mockIncomeRepository.count.mockResolvedValue(0);
       mockStatisticsRepository.count.mockResolvedValue(0);
       mockDepreciationAssetRepository.count.mockResolvedValue(0);
+      mockInvestmentRepository.count.mockResolvedValue(0);
     });
 
     it('deletes property using transaction', async () => {
@@ -691,6 +872,24 @@ describe('PropertyService', () => {
 
       unlinkSpy.mockRestore();
     });
+
+    it('does not attempt to delete external photo URL', async () => {
+      const externalPhotoUrl = 'https://example.com/images/property.jpg';
+      const property = createProperty({ id: 1, photo: externalPhotoUrl });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const unlinkSpy = jest
+        .spyOn(fs.promises, 'unlink')
+        .mockResolvedValue(undefined);
+
+      await service.delete(testUser, 1);
+
+      expect(mockRepository.manager.transaction).toHaveBeenCalled();
+      expect(unlinkSpy).not.toHaveBeenCalled();
+
+      unlinkSpy.mockRestore();
+    });
   });
 
   describe('validateDelete', () => {
@@ -701,6 +900,7 @@ describe('PropertyService', () => {
       mockIncomeRepository.count.mockResolvedValue(0);
       mockStatisticsRepository.count.mockResolvedValue(0);
       mockDepreciationAssetRepository.count.mockResolvedValue(0);
+      mockInvestmentRepository.count.mockResolvedValue(0);
     });
 
     it('returns canDelete: true for property without dependencies', async () => {
@@ -801,6 +1001,50 @@ describe('PropertyService', () => {
 
       expect(validation.dependencies[0].count).toBe(10);
       expect(validation.dependencies[0].samples).toHaveLength(5);
+    });
+
+    it('returns investment dependencies when property has investments', async () => {
+      const property = createProperty({ id: 1 });
+      const investments = [
+        createInvestment({ id: 1, propertyId: 1, name: 'Investment 1' }),
+        createInvestment({ id: 2, propertyId: 1, name: 'Investment 2' }),
+      ];
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockInvestmentRepository.count.mockResolvedValue(2);
+      mockInvestmentRepository.find.mockResolvedValue(investments);
+
+      const { validation } = await service.validateDelete(testUser, 1);
+
+      expect(validation.canDelete).toBe(true);
+      expect(validation.dependencies).toHaveLength(1);
+      expect(validation.dependencies[0].type).toBe('investment');
+      expect(validation.dependencies[0].count).toBe(2);
+      expect(validation.dependencies[0].samples).toHaveLength(2);
+      expect(validation.dependencies[0].samples[0].description).toBe('Investment 1');
+    });
+
+    it('includes investment in multiple dependency types', async () => {
+      const property = createProperty({ id: 1 });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      mockTransactionRepository.count.mockResolvedValue(3);
+      mockTransactionRepository.find.mockResolvedValue([
+        createTransaction({ id: 1, propertyId: 1 }),
+      ]);
+
+      mockInvestmentRepository.count.mockResolvedValue(1);
+      mockInvestmentRepository.find.mockResolvedValue([
+        createInvestment({ id: 1, propertyId: 1, name: 'Test Investment' }),
+      ]);
+
+      const { validation } = await service.validateDelete(testUser, 1);
+
+      expect(validation.canDelete).toBe(true);
+      expect(validation.dependencies).toHaveLength(2);
+      expect(validation.dependencies.map((d) => d.type)).toContain('transaction');
+      expect(validation.dependencies.map((d) => d.type)).toContain('investment');
     });
   });
 

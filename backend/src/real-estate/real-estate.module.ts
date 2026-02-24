@@ -1,4 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { EtuoviImportModule } from '@asset-backend/import/etuovi/etuovi-import.module';
 import { InvestmentController } from './investment/investment.controller';
 import { InvestmentService } from './investment/investment.service';
 import { Investment } from './investment/entities/investment.entity';
@@ -39,6 +40,7 @@ import { Address } from './address/entities/address.entity';
       DepreciationAsset,
     ]),
     forwardRef(() => AccountingModule),
+    forwardRef(() => EtuoviImportModule),
     AuthModule,
     PeopleModule,
     TierModule,

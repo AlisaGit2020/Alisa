@@ -28,6 +28,7 @@ const property = {
     photoDeleteError: 'Kuvan poisto epäonnistui. Yritä uudelleen.',
     savePropertyFirst: 'Tallenna kohde ensin lisätäksesi kuvan',
     ownershipShare: 'Omistusosuus',
+    prospectStatus: 'Harkinnassa',
     viewPageTitle: 'Kohteen tiedot',
     propertyInfo: 'Perustiedot',
     locationInfo: 'Sijainti',

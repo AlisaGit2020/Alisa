@@ -16,7 +16,7 @@ export class Investment {
   @Column()
   userId: number;
 
-  @ManyToOne(() => Property, { nullable: true })
+  @ManyToOne(() => Property, { nullable: true, onDelete: 'CASCADE' })
   property?: Property;
 
   @Column({ nullable: true })

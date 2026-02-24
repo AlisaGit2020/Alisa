@@ -150,6 +150,7 @@ const en = {
       incomes: "Incomes",
       statistics: "Statistics",
       depreciationAssets: "Depreciation Assets",
+      investments: "Investment Calculations",
       andMore: "...and {{count}} more",
     },
 

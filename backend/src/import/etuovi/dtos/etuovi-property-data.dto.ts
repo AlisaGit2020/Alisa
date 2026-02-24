@@ -7,8 +7,11 @@ export class EtuoviPropertyDataDto {
   waterCharge?: number;
   chargeForFinancialCosts?: number;
   address?: string;
+  city?: string;
+  postalCode?: string;
   buildingYear?: number;
   propertyType?: string;
   condition?: string;
   energyClass?: string;
+  defaultImageUrl?: string;
 }

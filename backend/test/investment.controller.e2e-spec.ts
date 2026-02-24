@@ -4,6 +4,7 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { AuthService } from '@asset-backend/auth/auth.service';
 import {
+  addTier,
   closeAppGracefully,
   getBearerToken,
   getTestUsers,
@@ -13,14 +14,25 @@ import {
 } from './helper-functions';
 import * as http from 'http';
 import { Investment } from '@asset-backend/real-estate/investment/entities/investment.entity';
+import * as nock from 'nock';
+import * as fs from 'fs';
+import * as path from 'path';
+import { MOCKS_PATH } from '@asset-backend/constants';
+import { PropertyStatus } from '@asset-backend/common/types';
 
 describe('InvestmentController (e2e)', () => {
   let app: INestApplication;
   let server: http.Server;
   let authService: AuthService;
   let testUsers: TestUsersSetup;
+  let mockHtml: string;
 
   beforeAll(async () => {
+    // Ensure nock is active (may have been restored by other tests)
+    if (!nock.isActive()) {
+      nock.activate();
+    }
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -32,11 +44,22 @@ describe('InvestmentController (e2e)', () => {
     authService = app.get(AuthService);
 
     await prepareDatabase(app);
+    await addTier(app, 'Free', 0, 100, true, 0);
     testUsers = await getTestUsers(app);
+
+    // Load mock HTML
+    const mockHtmlPath = path.join(MOCKS_PATH, 'import', 'etuovi.property.html');
+    mockHtml = fs.readFileSync(mockHtmlPath, 'utf-8');
   });
 
   afterAll(async () => {
+    nock.cleanAll();
+    nock.restore();
     await closeAppGracefully(app, server);
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
   });
 
   const validCalculationInput = {
@@ -136,6 +159,64 @@ describe('InvestmentController (e2e)', () => {
           propertyId: otherUserPropertyId,
         })
         .expect(401);
+    });
+
+    it('creates prospect property from etuoviUrl when no propertyId is set', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+
+      // Mock the etuovi.com response
+      nock('https://www.etuovi.com')
+        .get('/kohde/99999999')
+        .reply(200, mockHtml);
+
+      const response = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token))
+        .send({
+          ...validCalculationInput,
+          name: 'Investment with Etuovi',
+          etuoviUrl: 'https://www.etuovi.com/kohde/99999999',
+        })
+        .expect(201);
+
+      expect(response.body.id).toBeDefined();
+      expect(response.body.propertyId).toBeDefined();
+      expect(response.body.propertyId).toBeGreaterThan(0);
+
+      // Verify the property was created as PROSPECT
+      const propertyResponse = await request(server)
+        .get(`/real-estate/property/${response.body.propertyId}`)
+        .set('Authorization', getBearerToken(token))
+        .expect(200);
+
+      expect(propertyResponse.body.status).toBe(PropertyStatus.PROSPECT);
+    });
+
+    it('does not create prospect property when propertyId is already set', async () => {
+      const user = testUsers.user1WithProperties;
+      const token = await getUserAccessToken2(authService, user.jwtUser);
+      const propertyId = user.properties[0].id;
+
+      // If etuoviUrl was used, this mock would be called. We verify it's NOT called.
+      const scope = nock('https://www.etuovi.com')
+        .get('/kohde/88888888')
+        .reply(200, mockHtml);
+
+      const response = await request(server)
+        .post('/real-estate/investment')
+        .set('Authorization', getBearerToken(token))
+        .send({
+          ...validCalculationInput,
+          name: 'Investment with existing property',
+          propertyId,
+          etuoviUrl: 'https://www.etuovi.com/kohde/88888888',
+        })
+        .expect(201);
+
+      expect(response.body.propertyId).toBe(propertyId);
+      // Verify the etuovi fetch was NOT called
+      expect(scope.isDone()).toBe(false);
     });
   });
 
