@@ -24,6 +24,7 @@ export interface InvestmentInputData {
   loanPeriod?: number;
   propertyId?: number;
   name?: string;
+  etuoviUrl?: string;
 }
 
 interface EtuoviPropertyData {
@@ -107,6 +108,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
         waterCharge: fetchedData.waterCharge ?? prev.waterCharge,
         chargeForFinancialCosts: fetchedData.chargeForFinancialCosts ?? prev.chargeForFinancialCosts,
         name: fetchedData.address || prev.name,
+        etuoviUrl: fetchedData.url,
       }));
 
       showToast({ message: t('investment-calculator:fetchSuccess'), severity: 'success' });

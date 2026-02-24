@@ -36,6 +36,7 @@ interface EtuoviPropertyData {
   streetAddressFreeForm?: string;
   roomStructure?: string;
   buildingYear?: number;
+  constructionFinishedYear?: number;
   residentialPropertyType?: string;
   condition?: string;
   energyClass?: string;
@@ -178,7 +179,7 @@ export class EtuoviImportService {
     result.address = addressParts.length > 0 ? addressParts.join(' - ') : undefined;
 
     // Parse other informational fields
-    result.buildingYear = jsonData.buildingYear || undefined;
+    result.buildingYear = jsonData.buildingYear || jsonData.constructionFinishedYear || undefined;
     result.propertyType = this.translatePropertyType(jsonData.residentialPropertyType);
     result.condition = jsonData.condition || undefined;
     result.energyClass = jsonData.energyClass || undefined;
@@ -313,10 +314,15 @@ export class EtuoviImportService {
       );
     }
 
-    // Extract buildingYear
+    // Extract buildingYear or constructionFinishedYear
     const yearMatch = html.match(/"buildingYear":(\d{4})/);
     if (yearMatch) {
       result.buildingYear = parseInt(yearMatch[1], 10);
+    } else {
+      const constructionYearMatch = html.match(/"constructionFinishedYear":(\d{4})/);
+      if (constructionYearMatch) {
+        result.constructionFinishedYear = parseInt(constructionYearMatch[1], 10);
+      }
     }
 
     // Extract residentialPropertyType

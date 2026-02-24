@@ -146,3 +146,21 @@ export interface ReorderRulesInput {
   propertyId: number;
   ruleIds: number[];
 }
+
+// Investment input
+export interface InvestmentInput {
+  deptFreePrice: number;
+  deptShare: number;
+  transferTaxPercent?: number;
+  maintenanceFee: number;
+  chargeForFinancialCosts: number;
+  rentPerMonth: number;
+  apartmentSize?: number;
+  waterCharge?: number;
+  downPayment?: number;
+  loanInterestPercent?: number;
+  loanPeriod?: number;
+  propertyId?: number;
+  name?: string;
+  etuoviUrl?: string;
+}

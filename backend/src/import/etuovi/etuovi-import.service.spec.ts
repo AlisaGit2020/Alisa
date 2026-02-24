@@ -120,6 +120,23 @@ describe('EtuoviImportService', () => {
       expect(result.buildingYear).toBe(1985);
     });
 
+    it('parses constructionFinishedYear as buildingYear fallback', () => {
+      const htmlWithConstructionYear = `
+        <script>
+          window.__INITIAL_STATE__ = {
+            "debfFreePrice": 100000,
+            "livingArea": 50,
+            "constructionFinishedYear": 2018,
+            "periodicCharges": [
+              {"periodicCharge": "HOUSING_COMPANY_MAINTENANCE_CHARGE", "price": 200}
+            ]
+          };
+        </script>
+      `;
+      const result = service.parseHtml(testUrl, htmlWithConstructionYear);
+      expect(result.buildingYear).toBe(2018);
+    });
+
     it('parses property type correctly', () => {
       const result = service.parseHtml(testUrl, mockHtml);
       expect(result.propertyType).toBe('Kerrostalo');

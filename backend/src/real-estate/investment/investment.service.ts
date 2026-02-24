@@ -17,6 +17,7 @@ import {
   DataSaveResultDto,
   DataSaveResultRowDto,
 } from '@asset-backend/common/dtos/data-save-result.dto';
+import { EtuoviImportService } from '@asset-backend/import/etuovi/etuovi-import.service';
 
 @Injectable()
 export class InvestmentService {
@@ -24,6 +25,7 @@ export class InvestmentService {
     @InjectRepository(Investment)
     private repository: Repository<Investment>,
     private authService: AuthService,
+    private etuoviImportService: EtuoviImportService,
   ) {}
 
   calculate(investment: InvestmentInputDto): InvestmentCalculator {
@@ -62,6 +64,15 @@ export class InvestmentService {
     inputDto: InvestmentInputDto,
     id?: number,
   ): Promise<Investment> {
+    // Create prospect property from etuoviUrl if no propertyId is set
+    if (inputDto.etuoviUrl && !inputDto.propertyId) {
+      const prospectProperty = await this.etuoviImportService.createProspectProperty(
+        user,
+        inputDto.etuoviUrl,
+      );
+      inputDto.propertyId = prospectProperty.id;
+    }
+
     // Validate property ownership if propertyId is provided
     if (inputDto.propertyId) {
       const hasOwnership = await this.authService.hasOwnership(user, inputDto.propertyId);

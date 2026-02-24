@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { EtuoviImportService } from './etuovi-import.service';
 import { EtuoviImportController } from './etuovi-import.controller';
 import { RealEstateModule } from '@asset-backend/real-estate/real-estate.module';
 
 @Module({
-  imports: [RealEstateModule],
+  imports: [forwardRef(() => RealEstateModule)],
   controllers: [EtuoviImportController],
   providers: [EtuoviImportService],
   exports: [EtuoviImportService],

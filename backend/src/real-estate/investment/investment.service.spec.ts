@@ -17,11 +17,22 @@ import {
   MockAuthService,
 } from 'test/mocks';
 import { createJWTUser } from 'test/factories';
+import { EtuoviImportService } from '@asset-backend/import/etuovi/etuovi-import.service';
+import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
+
+type MockEtuoviImportService = {
+  createProspectProperty: jest.Mock;
+};
+
+const createMockEtuoviImportService = (): MockEtuoviImportService => ({
+  createProspectProperty: jest.fn(),
+});
 
 describe('InvestmentService', () => {
   let service: InvestmentService;
   let mockRepository: MockRepository<Investment>;
   let mockAuthService: MockAuthService;
+  let mockEtuoviImportService: MockEtuoviImportService;
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
   const otherUser = createJWTUser({ id: 2, ownershipInProperties: [3] });
@@ -78,12 +89,14 @@ describe('InvestmentService', () => {
   beforeEach(async () => {
     mockRepository = createMockRepository<Investment>();
     mockAuthService = createMockAuthService();
+    mockEtuoviImportService = createMockEtuoviImportService();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InvestmentService,
         { provide: getRepositoryToken(Investment), useValue: mockRepository },
         { provide: AuthService, useValue: mockAuthService },
+        { provide: EtuoviImportService, useValue: mockEtuoviImportService },
       ],
     }).compile();
 
@@ -356,6 +369,51 @@ describe('InvestmentService', () => {
       expect(result.rentalYieldPercent).toBe(calculator.rentalYieldPercent);
       expect(result.profitPerYear).toBe(calculator.profitPerYear);
       expect(result.cashFlowPerMonth).toBe(calculator.cashFlowPerMonth);
+    });
+
+    it('creates prospect property from etuoviUrl when no propertyId is set', async () => {
+      const input = { ...createTestInput(), etuoviUrl: 'https://www.etuovi.com/kohde/12345' };
+      const calculator = new InvestmentCalculator(input);
+      const createdProperty = { id: 42 } as Property;
+
+      mockEtuoviImportService.createProspectProperty.mockResolvedValue(createdProperty);
+      mockRepository.save.mockImplementation((entity) => Promise.resolve(entity));
+
+      const result = await service.saveCalculation(testUser, calculator, input);
+
+      expect(mockEtuoviImportService.createProspectProperty).toHaveBeenCalledWith(
+        testUser,
+        'https://www.etuovi.com/kohde/12345',
+      );
+      expect(result.propertyId).toBe(42);
+    });
+
+    it('does not create prospect property when propertyId is already set', async () => {
+      const input = {
+        ...createTestInput(),
+        propertyId: 1,
+        etuoviUrl: 'https://www.etuovi.com/kohde/12345',
+      };
+      const calculator = new InvestmentCalculator(input);
+
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) => Promise.resolve(entity));
+
+      const result = await service.saveCalculation(testUser, calculator, input);
+
+      expect(mockEtuoviImportService.createProspectProperty).not.toHaveBeenCalled();
+      expect(result.propertyId).toBe(1);
+    });
+
+    it('does not create prospect property when etuoviUrl is not provided', async () => {
+      const input = createTestInput();
+      const calculator = new InvestmentCalculator(input);
+
+      mockRepository.save.mockImplementation((entity) => Promise.resolve(entity));
+
+      await service.saveCalculation(testUser, calculator, input);
+
+      expect(mockEtuoviImportService.createProspectProperty).not.toHaveBeenCalled();
     });
   });
 
