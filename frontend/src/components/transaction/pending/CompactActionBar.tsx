@@ -19,6 +19,7 @@ import {
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
+import SaveIcon from "@mui/icons-material/Save";
 import RuleIcon from "@mui/icons-material/Rule";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
@@ -63,6 +64,11 @@ export default function CompactActionBar(props: CompactActionBarProps) {
   const [expenseTypes, setExpenseTypes] = React.useState<ExpenseType[]>([]);
   const [incomeTypes, setIncomeTypes] = React.useState<IncomeType[]>([]);
 
+  // Selected type and category
+  const [selectedType, setSelectedType] = React.useState<TransactionType | null>(null);
+  const [selectedExpenseTypeId, setSelectedExpenseTypeId] = React.useState<number | null>(null);
+  const [selectedIncomeTypeId, setSelectedIncomeTypeId] = React.useState<number | null>(null);
+
   // Load expense and income types
   useEffect(() => {
     const loadTypes = async () => {
@@ -97,28 +103,46 @@ export default function CompactActionBar(props: CompactActionBarProps) {
     setIncomeMenuAnchor(event.currentTarget);
   };
 
-  const handleExpenseSelect = async (expenseTypeId: number) => {
+  const handleExpenseSelect = (expenseTypeId: number) => {
     setExpenseMenuAnchor(null);
-    await props.onSetType(TransactionType.EXPENSE);
-    await props.onSetCategoryType(expenseTypeId, undefined);
-    props.onCancel();
+    setSelectedType(TransactionType.EXPENSE);
+    setSelectedExpenseTypeId(expenseTypeId);
+    setSelectedIncomeTypeId(null);
   };
 
-  const handleIncomeSelect = async (incomeTypeId: number) => {
+  const handleIncomeSelect = (incomeTypeId: number) => {
     setIncomeMenuAnchor(null);
-    await props.onSetType(TransactionType.INCOME);
-    await props.onSetCategoryType(undefined, incomeTypeId);
-    props.onCancel();
+    setSelectedType(TransactionType.INCOME);
+    setSelectedIncomeTypeId(incomeTypeId);
+    setSelectedExpenseTypeId(null);
   };
 
-  const handleDepositClick = async () => {
-    await props.onSetType(TransactionType.DEPOSIT);
-    props.onCancel();
+  const handleDepositClick = () => {
+    setSelectedType(TransactionType.DEPOSIT);
+    setSelectedExpenseTypeId(null);
+    setSelectedIncomeTypeId(null);
   };
 
-  const handleWithdrawClick = async () => {
-    await props.onSetType(TransactionType.WITHDRAW);
-    props.onCancel();
+  const handleWithdrawClick = () => {
+    setSelectedType(TransactionType.WITHDRAW);
+    setSelectedExpenseTypeId(null);
+    setSelectedIncomeTypeId(null);
+  };
+
+  const handleSave = async () => {
+    if (selectedType !== null) {
+      await props.onSetType(selectedType);
+      if (selectedExpenseTypeId) {
+        await props.onSetCategoryType(selectedExpenseTypeId, undefined);
+      } else if (selectedIncomeTypeId) {
+        await props.onSetCategoryType(undefined, selectedIncomeTypeId);
+      }
+      // Reset selection and deselect rows
+      setSelectedType(null);
+      setSelectedExpenseTypeId(null);
+      setSelectedIncomeTypeId(null);
+      props.onCancel();
+    }
   };
 
   const handleLoanSplit = async () => {
@@ -126,10 +150,34 @@ export default function CompactActionBar(props: CompactActionBarProps) {
   };
 
   const handleCancel = () => {
+    setSelectedType(null);
+    setSelectedExpenseTypeId(null);
+    setSelectedIncomeTypeId(null);
     props.onCancel();
   };
 
   const supportsLoanSplit = props.supportsLoanSplit ?? true;
+
+  // Get selected category name for display
+  const getSelectedCategoryName = (): string | null => {
+    if (selectedType === TransactionType.EXPENSE && selectedExpenseTypeId) {
+      const expenseType = expenseTypes.find((t) => t.id === selectedExpenseTypeId);
+      return expenseType ? props.t(`expense-type:${expenseType.key}`) : null;
+    }
+    if (selectedType === TransactionType.INCOME && selectedIncomeTypeId) {
+      const incomeType = incomeTypes.find((t) => t.id === selectedIncomeTypeId);
+      return incomeType ? props.t(`income-type:${incomeType.key}`) : null;
+    }
+    return null;
+  };
+
+  // Save is disabled if no type selected, or if EXPENSE/INCOME selected without category
+  const isSaveDisabled =
+    selectedType === null ||
+    (selectedType === TransactionType.EXPENSE && !selectedExpenseTypeId) ||
+    (selectedType === TransactionType.INCOME && !selectedIncomeTypeId);
+
+  const selectedCategoryName = getSelectedCategoryName();
 
   return (
     <Paper
@@ -161,27 +209,41 @@ export default function CompactActionBar(props: CompactActionBarProps) {
           <Button
             onClick={handleIncomeClick}
             endIcon={<ArrowDropDownIcon />}
+            variant={selectedType === TransactionType.INCOME ? "contained" : "outlined"}
             data-testid="income-button"
           >
-            {props.t("income")}
+            {selectedType === TransactionType.INCOME && selectedCategoryName
+              ? selectedCategoryName
+              : props.t("income")}
           </Button>
 
           {/* Expense with dropdown */}
           <Button
             onClick={handleExpenseClick}
             endIcon={<ArrowDropDownIcon />}
+            variant={selectedType === TransactionType.EXPENSE ? "contained" : "outlined"}
             data-testid="expense-button"
           >
-            {props.t("expense")}
+            {selectedType === TransactionType.EXPENSE && selectedCategoryName
+              ? selectedCategoryName
+              : props.t("expense")}
           </Button>
 
           {/* Deposit - simple button */}
-          <Button onClick={handleDepositClick} data-testid="deposit-button">
+          <Button
+            onClick={handleDepositClick}
+            variant={selectedType === TransactionType.DEPOSIT ? "contained" : "outlined"}
+            data-testid="deposit-button"
+          >
             {props.t("deposit")}
           </Button>
 
           {/* Withdraw - simple button */}
-          <Button onClick={handleWithdrawClick} data-testid="withdraw-button">
+          <Button
+            onClick={handleWithdrawClick}
+            variant={selectedType === TransactionType.WITHDRAW ? "contained" : "outlined"}
+            data-testid="withdraw-button"
+          >
             {props.t("withdraw")}
           </Button>
         </ButtonGroup>
@@ -194,7 +256,11 @@ export default function CompactActionBar(props: CompactActionBarProps) {
           data-testid="income-menu"
         >
           {incomeTypes.map((type) => (
-            <MenuItem key={type.id} onClick={() => handleIncomeSelect(type.id)}>
+            <MenuItem
+              key={type.id}
+              onClick={() => handleIncomeSelect(type.id)}
+              selected={selectedIncomeTypeId === type.id}
+            >
               {props.t(`income-type:${type.key}`)}
             </MenuItem>
           ))}
@@ -208,11 +274,30 @@ export default function CompactActionBar(props: CompactActionBarProps) {
           data-testid="expense-menu"
         >
           {expenseTypes.map((type) => (
-            <MenuItem key={type.id} onClick={() => handleExpenseSelect(type.id)}>
+            <MenuItem
+              key={type.id}
+              onClick={() => handleExpenseSelect(type.id)}
+              selected={selectedExpenseTypeId === type.id}
+            >
               {props.t(`expense-type:${type.key}`)}
             </MenuItem>
           ))}
         </Menu>
+
+        {/* Save button */}
+        <Tooltip title={isSaveDisabled ? props.t("saveAllocationTooltip") : props.t("save")}>
+          <span>
+            <IconButton
+              color="primary"
+              onClick={handleSave}
+              disabled={isSaveDisabled}
+              size="small"
+              data-testid="save-button"
+            >
+              <SaveIcon />
+            </IconButton>
+          </span>
+        </Tooltip>
 
         <Divider orientation="vertical" flexItem />
 

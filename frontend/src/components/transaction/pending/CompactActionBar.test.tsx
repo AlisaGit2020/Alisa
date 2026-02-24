@@ -49,6 +49,7 @@ describe("CompactActionBar", () => {
     it("renders action icon buttons", () => {
       renderWithProviders(<CompactActionBar {...defaultProps} />);
 
+      expect(screen.getByTestId("save-button")).toBeInTheDocument();
       expect(screen.getByTestId("delete-button")).toBeInTheDocument();
       expect(screen.getByTestId("cancel-button")).toBeInTheDocument();
       expect(screen.getByTestId("expand-button")).toBeInTheDocument();
@@ -247,7 +248,25 @@ describe("CompactActionBar", () => {
       });
     });
 
-    it("calls onSetType directly when deposit button is clicked", async () => {
+    it("save button is disabled when no type selected", () => {
+      renderWithProviders(<CompactActionBar {...defaultProps} />);
+
+      const saveButton = screen.getByTestId("save-button");
+      expect(saveButton).toBeDisabled();
+    });
+
+    it("save button is enabled when deposit is selected", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<CompactActionBar {...defaultProps} />);
+
+      const depositButton = screen.getByTestId("deposit-button");
+      await user.click(depositButton);
+
+      const saveButton = screen.getByTestId("save-button");
+      expect(saveButton).not.toBeDisabled();
+    });
+
+    it("calls onSetType when save is clicked after selecting deposit", async () => {
       const user = userEvent.setup();
       const mockOnSetType = jest.fn().mockResolvedValue(undefined);
       renderWithProviders(<CompactActionBar {...defaultProps} onSetType={mockOnSetType} />);
@@ -255,12 +274,15 @@ describe("CompactActionBar", () => {
       const depositButton = screen.getByTestId("deposit-button");
       await user.click(depositButton);
 
+      const saveButton = screen.getByTestId("save-button");
+      await user.click(saveButton);
+
       await waitFor(() => {
         expect(mockOnSetType).toHaveBeenCalledWith(3); // DEPOSIT = 3
       });
     });
 
-    it("calls onSetType directly when withdraw button is clicked", async () => {
+    it("calls onSetType when save is clicked after selecting withdraw", async () => {
       const user = userEvent.setup();
       const mockOnSetType = jest.fn().mockResolvedValue(undefined);
       renderWithProviders(<CompactActionBar {...defaultProps} onSetType={mockOnSetType} />);
@@ -268,12 +290,15 @@ describe("CompactActionBar", () => {
       const withdrawButton = screen.getByTestId("withdraw-button");
       await user.click(withdrawButton);
 
+      const saveButton = screen.getByTestId("save-button");
+      await user.click(saveButton);
+
       await waitFor(() => {
         expect(mockOnSetType).toHaveBeenCalledWith(4); // WITHDRAW = 4
       });
     });
 
-    it("calls onCancel after deposit selection to deselect rows", async () => {
+    it("calls onCancel after save to deselect rows", async () => {
       const user = userEvent.setup();
       const mockOnCancel = jest.fn();
       const mockOnSetType = jest.fn().mockResolvedValue(undefined);
@@ -283,6 +308,9 @@ describe("CompactActionBar", () => {
 
       const depositButton = screen.getByTestId("deposit-button");
       await user.click(depositButton);
+
+      const saveButton = screen.getByTestId("save-button");
+      await user.click(saveButton);
 
       await waitFor(() => {
         expect(mockOnCancel).toHaveBeenCalled();
