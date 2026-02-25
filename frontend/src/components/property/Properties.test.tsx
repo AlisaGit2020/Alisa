@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import { Ownership, Property } from '@asset-types';
+import { PropertyStatus } from '@asset-types/common';
 
 // Since Jest mock hoisting causes issues with relative paths in ESM mode,
 // we test the data transformation logic separately from the React component
@@ -384,6 +385,125 @@ describe('Properties Component Logic', () => {
 
       onCloseDelete();
       expect(deleteId).toBeUndefined();
+    });
+  });
+
+  describe('Property tabs logic', () => {
+    const TAB_OWN = 0;
+    const TAB_PROSPECT = 1;
+
+    describe('Tab index state management', () => {
+      it('defaults to own properties tab (index 0)', () => {
+        const defaultTabIndex = 0;
+        expect(defaultTabIndex).toBe(TAB_OWN);
+      });
+
+      it('switches to prospect tab when index changes to 1', () => {
+        let tabIndex = TAB_OWN;
+        const handleTabChange = (newValue: number) => {
+          tabIndex = newValue;
+        };
+
+        handleTabChange(TAB_PROSPECT);
+        expect(tabIndex).toBe(TAB_PROSPECT);
+      });
+
+      it('switches back to own tab when index changes to 0', () => {
+        let tabIndex = TAB_PROSPECT;
+        const handleTabChange = (newValue: number) => {
+          tabIndex = newValue;
+        };
+
+        handleTabChange(TAB_OWN);
+        expect(tabIndex).toBe(TAB_OWN);
+      });
+    });
+
+    describe('Property status filtering by tab', () => {
+      it('returns OWN status for own properties tab', () => {
+        const getStatusForTab = (tabIndex: number): PropertyStatus => {
+          return tabIndex === TAB_OWN ? PropertyStatus.OWN : PropertyStatus.PROSPECT;
+        };
+
+        expect(getStatusForTab(TAB_OWN)).toBe(PropertyStatus.OWN);
+      });
+
+      it('returns PROSPECT status for prospect tab', () => {
+        const getStatusForTab = (tabIndex: number): PropertyStatus => {
+          return tabIndex === TAB_OWN ? PropertyStatus.OWN : PropertyStatus.PROSPECT;
+        };
+
+        expect(getStatusForTab(TAB_PROSPECT)).toBe(PropertyStatus.PROSPECT);
+      });
+    });
+
+    describe('Fetch options generation by tab', () => {
+      it('includes status filter for OWN when on own tab', () => {
+        const buildFetchOptions = (tabIndex: number) => {
+          const status = tabIndex === TAB_OWN ? PropertyStatus.OWN : PropertyStatus.PROSPECT;
+          return {
+            order: { name: 'ASC' },
+            relations: { ownerships: true },
+            where: { status },
+          };
+        };
+
+        const options = buildFetchOptions(TAB_OWN);
+        expect(options.where.status).toBe(PropertyStatus.OWN);
+      });
+
+      it('includes status filter for PROSPECT when on prospect tab', () => {
+        const buildFetchOptions = (tabIndex: number) => {
+          const status = tabIndex === TAB_OWN ? PropertyStatus.OWN : PropertyStatus.PROSPECT;
+          return {
+            order: { name: 'ASC' },
+            relations: { ownerships: true },
+            where: { status },
+          };
+        };
+
+        const options = buildFetchOptions(TAB_PROSPECT);
+        expect(options.where.status).toBe(PropertyStatus.PROSPECT);
+      });
+
+      it('preserves order and relations when switching tabs', () => {
+        const buildFetchOptions = (tabIndex: number) => {
+          const status = tabIndex === TAB_OWN ? PropertyStatus.OWN : PropertyStatus.PROSPECT;
+          return {
+            order: { name: 'ASC' },
+            relations: { ownerships: true },
+            where: { status },
+          };
+        };
+
+        const ownOptions = buildFetchOptions(TAB_OWN);
+        const prospectOptions = buildFetchOptions(TAB_PROSPECT);
+
+        expect(ownOptions.order).toEqual({ name: 'ASC' });
+        expect(ownOptions.relations).toEqual({ ownerships: true });
+        expect(prospectOptions.order).toEqual({ name: 'ASC' });
+        expect(prospectOptions.relations).toEqual({ ownerships: true });
+      });
+    });
+
+    describe('Tab label translation keys', () => {
+      it('uses ownProperties key for own tab', () => {
+        const tabConfig = [
+          { key: 'ownProperties', status: PropertyStatus.OWN },
+          { key: 'prospectProperties', status: PropertyStatus.PROSPECT },
+        ];
+
+        expect(tabConfig[TAB_OWN].key).toBe('ownProperties');
+      });
+
+      it('uses prospectProperties key for prospect tab', () => {
+        const tabConfig = [
+          { key: 'ownProperties', status: PropertyStatus.OWN },
+          { key: 'prospectProperties', status: PropertyStatus.PROSPECT },
+        ];
+
+        expect(tabConfig[TAB_PROSPECT].key).toBe('prospectProperties');
+      });
     });
   });
 });

@@ -3,6 +3,10 @@ const property = {
     pageTitle: 'Asunnot',
     pageDescription: 'Näytä ja hallinnoi kiinteistösalkkuasi.',
 
+    // Property tabs
+    ownProperties: 'Omat asunnot',
+    prospectProperties: 'Harkinnassa',
+
     add: 'Lisää uusi asunto',
     properties: 'Asunnot',
     overviewTitle: 'Asunnot',

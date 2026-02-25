@@ -3,6 +3,10 @@ const property = {
     pageTitle: 'Fastigheter',
     pageDescription: 'Visa och hantera din fastighetsportfölj.',
 
+    // Property tabs
+    ownProperties: 'Mina fastigheter',
+    prospectProperties: 'Prospekt',
+
     add: 'Lägg till ny fastighet',
     properties: 'Fastigheter',
     overviewTitle: 'Fastigheter',

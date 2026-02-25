@@ -3,6 +3,10 @@ const property = {
     pageTitle: 'Properties',
     pageDescription: 'View and manage your real estate portfolio.',
 
+    // Property tabs
+    ownProperties: 'My Properties',
+    prospectProperties: 'Prospects',
+
     add: 'Add new property',
     properties: 'Properties',
     overviewTitle: 'Properties',
