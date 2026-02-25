@@ -7,69 +7,46 @@ import { PropertyStatus } from '@asset-types/common';
 import ApiClient from '@asset-lib/api-client';
 import React from 'react';
 
+// Shared translations for i18n mocks
+const mockTranslations: Record<string, string> = {
+  add: 'Add',
+  edit: 'Edit',
+  delete: 'Delete',
+  cancel: 'Cancel',
+  confirm: 'Confirm',
+  confirmDelete: 'Are you sure you want to delete the property?',
+  noRowsFound: 'No rows found',
+  noDescription: 'No description',
+  size: 'Size',
+  buildYear: 'Build year',
+  ownershipShare: 'Ownership share',
+  ownProperties: 'Own Properties',
+  prospectProperties: 'Prospect Properties',
+  addProspectTitle: 'Add Prospect Property',
+  addManually: 'Fill in form manually',
+  chooseAddMethod: 'Choose how to add prospect property',
+  importFromEtuovi: 'Import from Etuovi',
+  etuoviUrlPlaceholder: 'https://www.etuovi.com/kohde/...',
+  importButton: 'Import',
+  importSuccess: 'Property imported successfully',
+  importError: 'Failed to import property',
+  invalidEtuoviUrl: 'Invalid Etuovi URL',
+};
+
+const mockT = (key: string) => mockTranslations[key] || key;
+
 // Mock the withTranslation HOC to avoid i18n namespace issues
 jest.mock('react-i18next', () => ({
   ...jest.requireActual('react-i18next'),
   withTranslation: () => <P extends object>(Component: React.ComponentType<P>) => {
     const WrappedComponent = (props: Omit<P, 't'>) => {
-      const translations: Record<string, string> = {
-        add: 'Add',
-        edit: 'Edit',
-        delete: 'Delete',
-        cancel: 'Cancel',
-        confirm: 'Confirm',
-        confirmDelete: 'Are you sure you want to delete the property?',
-        noRowsFound: 'No rows found',
-        noDescription: 'No description',
-        size: 'Size',
-        buildYear: 'Build year',
-        ownershipShare: 'Ownership share',
-        ownProperties: 'Own Properties',
-        prospectProperties: 'Prospect Properties',
-        addProspectTitle: 'Add Prospect Property',
-        addManually: 'Fill in form manually',
-        chooseAddMethod: 'Choose how to add prospect property',
-        importFromEtuovi: 'Import from Etuovi',
-        etuoviUrlPlaceholder: 'https://www.etuovi.com/kohde/...',
-        importButton: 'Import',
-        importSuccess: 'Property imported successfully',
-        importError: 'Failed to import property',
-        invalidEtuoviUrl: 'Invalid Etuovi URL',
-      };
-      const t = (key: string) => translations[key] || key;
-      return <Component {...(props as P)} t={t} />;
+      return <Component {...(props as P)} t={mockT} />;
     };
     WrappedComponent.displayName = `withTranslation(${Component.displayName || Component.name})`;
     return WrappedComponent;
   },
   useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        add: 'Add',
-        edit: 'Edit',
-        delete: 'Delete',
-        cancel: 'Cancel',
-        confirm: 'Confirm',
-        confirmDelete: 'Are you sure you want to delete the property?',
-        noRowsFound: 'No rows found',
-        noDescription: 'No description',
-        size: 'Size',
-        buildYear: 'Build year',
-        ownershipShare: 'Ownership share',
-        ownProperties: 'Own Properties',
-        prospectProperties: 'Prospect Properties',
-        addProspectTitle: 'Add Prospect Property',
-        addManually: 'Fill in form manually',
-        chooseAddMethod: 'Choose how to add prospect property',
-        importFromEtuovi: 'Import from Etuovi',
-        etuoviUrlPlaceholder: 'https://www.etuovi.com/kohde/...',
-        importButton: 'Import',
-        importSuccess: 'Property imported successfully',
-        importError: 'Failed to import property',
-        invalidEtuoviUrl: 'Invalid Etuovi URL',
-      };
-      return translations[key] || key;
-    },
+    t: mockT,
     i18n: { language: 'en' },
   }),
 }));

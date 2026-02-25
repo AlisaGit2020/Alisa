@@ -52,8 +52,8 @@ function PropertyStatusRibbon({ status, ownershipShare = 100 }: PropertyStatusRi
       <Box
         sx={{
           position: 'absolute',
-          top: 24,
-          left: -32,
+          top: (theme) => theme.spacing(3),
+          left: (theme) => theme.spacing(-4),
           width: 150,
           transform: 'rotate(-45deg)',
           bgcolor: getStatusColor(status),

@@ -35,7 +35,11 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 }
 
 function getTabIndexFromRoute(pathname: string): number {
-  if (pathname.endsWith(`/${ROUTE_PROSPECT}`)) return TAB_PROSPECT;
+  const segments = pathname.split('/');
+  const propertiesIndex = segments.indexOf('properties');
+  if (propertiesIndex !== -1 && segments[propertiesIndex + 1] === ROUTE_PROSPECT) {
+    return TAB_PROSPECT;
+  }
   return TAB_OWN;
 }
 
