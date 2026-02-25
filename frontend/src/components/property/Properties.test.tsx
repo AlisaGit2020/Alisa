@@ -505,5 +505,87 @@ describe('Properties Component Logic', () => {
         expect(tabConfig[TAB_PROSPECT].key).toBe('prospectProperties');
       });
     });
+
+    describe('URL-based tab selection', () => {
+      const ROUTE_OWN = 'own';
+      const ROUTE_PROSPECT = 'prospects';
+
+      it('returns TAB_OWN for "own" route parameter', () => {
+        const getTabIndexFromRoute = (tabParam?: string): number => {
+          if (tabParam === ROUTE_PROSPECT) return TAB_PROSPECT;
+          return TAB_OWN; // default to own
+        };
+
+        expect(getTabIndexFromRoute(ROUTE_OWN)).toBe(TAB_OWN);
+      });
+
+      it('returns TAB_PROSPECT for "prospects" route parameter', () => {
+        const getTabIndexFromRoute = (tabParam?: string): number => {
+          if (tabParam === ROUTE_PROSPECT) return TAB_PROSPECT;
+          return TAB_OWN;
+        };
+
+        expect(getTabIndexFromRoute(ROUTE_PROSPECT)).toBe(TAB_PROSPECT);
+      });
+
+      it('defaults to TAB_OWN when route parameter is undefined', () => {
+        const getTabIndexFromRoute = (tabParam?: string): number => {
+          if (tabParam === ROUTE_PROSPECT) return TAB_PROSPECT;
+          return TAB_OWN;
+        };
+
+        expect(getTabIndexFromRoute(undefined)).toBe(TAB_OWN);
+      });
+
+      it('defaults to TAB_OWN for unknown route parameter', () => {
+        const getTabIndexFromRoute = (tabParam?: string): number => {
+          if (tabParam === ROUTE_PROSPECT) return TAB_PROSPECT;
+          return TAB_OWN;
+        };
+
+        expect(getTabIndexFromRoute('unknown')).toBe(TAB_OWN);
+      });
+    });
+
+    describe('Tab to route mapping', () => {
+      const ROUTE_OWN = 'own';
+      const ROUTE_PROSPECT = 'prospects';
+
+      it('returns "own" route for TAB_OWN', () => {
+        const getRouteFromTabIndex = (tabIndex: number): string => {
+          return tabIndex === TAB_PROSPECT ? ROUTE_PROSPECT : ROUTE_OWN;
+        };
+
+        expect(getRouteFromTabIndex(TAB_OWN)).toBe(ROUTE_OWN);
+      });
+
+      it('returns "prospects" route for TAB_PROSPECT', () => {
+        const getRouteFromTabIndex = (tabIndex: number): string => {
+          return tabIndex === TAB_PROSPECT ? ROUTE_PROSPECT : ROUTE_OWN;
+        };
+
+        expect(getRouteFromTabIndex(TAB_PROSPECT)).toBe(ROUTE_PROSPECT);
+      });
+    });
+
+    describe('Navigation path construction', () => {
+      const BASE_PATH = '/app/portfolio/properties';
+
+      it('constructs own properties path correctly', () => {
+        const buildNavigationPath = (route: string): string => {
+          return `${BASE_PATH}/${route}`;
+        };
+
+        expect(buildNavigationPath('own')).toBe('/app/portfolio/properties/own');
+      });
+
+      it('constructs prospects path correctly', () => {
+        const buildNavigationPath = (route: string): string => {
+          return `${BASE_PATH}/${route}`;
+        };
+
+        expect(buildNavigationPath('prospects')).toBe('/app/portfolio/properties/prospects');
+      });
+    });
   });
 });

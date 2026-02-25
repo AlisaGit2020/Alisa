@@ -41,6 +41,8 @@ export default function AppRoutes() {
             {/* Portfolio routes - nested under /app/portfolio */}
             <Route path="portfolio" element={<PortfolioHub />} />
             <Route path="portfolio/properties" element={<Properties />} />
+            <Route path="portfolio/properties/own" element={<Properties />} />
+            <Route path="portfolio/properties/prospects" element={<Properties />} />
             <Route path="portfolio/properties/add" element={<PropertyForm />} />
             <Route path="portfolio/properties/edit/:idParam" element={<PropertyForm />} />
             <Route path="portfolio/properties/:idParam" element={<PropertyView />} />

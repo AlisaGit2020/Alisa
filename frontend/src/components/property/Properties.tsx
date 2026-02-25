@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Box, Grid, Tab, Tabs } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
+import { useLocation, useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
 import { Property } from "@asset-types";
@@ -12,6 +13,11 @@ import { PROPERTY_LIST_CHANGE_EVENT } from "../layout/PropertyBadge";
 
 const TAB_OWN = 0;
 const TAB_PROSPECT = 1;
+
+const ROUTE_OWN = "own";
+const ROUTE_PROSPECT = "prospects";
+
+const BASE_PATH = "/app/portfolio/properties";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -27,11 +33,24 @@ function TabPanel({ children, value, index }: TabPanelProps) {
   );
 }
 
+function getTabIndexFromRoute(pathname: string): number {
+  if (pathname.endsWith(`/${ROUTE_PROSPECT}`)) return TAB_PROSPECT;
+  return TAB_OWN;
+}
+
+function getRouteFromTabIndex(tabIndex: number): string {
+  return tabIndex === TAB_PROSPECT ? ROUTE_PROSPECT : ROUTE_OWN;
+}
+
 function Properties({ t }: WithTranslation) {
-  const [tabIndex, setTabIndex] = useState(TAB_OWN);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const tabIndex = getTabIndexFromRoute(location.pathname);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setTabIndex(newValue);
+    const route = getRouteFromTabIndex(newValue);
+    navigate(`${BASE_PATH}/${route}`);
   };
 
   const handleAfterDelete = () => {
