@@ -35,6 +35,12 @@ export interface PropertyInput {
   status?: PropertyStatus;
   externalSource?: PropertyExternalSource;
   externalSourceId?: string;
+  rooms?: string;
+  purchasePrice?: number;
+  purchaseDate?: Date;
+  purchaseLoan?: number;
+  salePrice?: number;
+  saleDate?: Date;
   ownerships?: OwnershipInput[];
 }
 
