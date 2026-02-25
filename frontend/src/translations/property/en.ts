@@ -32,7 +32,10 @@ const property = {
     photoDeleteError: 'Failed to delete photo. Please try again.',
     savePropertyFirst: 'Save the property first to add a photo',
     ownershipShare: 'Ownership share',
+    ownershipStatus: 'Ownership {{percent}}%',
     prospectStatus: 'Prospect',
+    prospectStatusRibbon: 'Prospect',
+    soldStatus: 'Sold',
     viewPageTitle: 'Property Details',
     propertyInfo: 'Property Information',
     locationInfo: 'Location',
@@ -40,6 +43,12 @@ const property = {
     statisticsComingSoon: 'Financial statistics coming soon',
     editProperty: 'Edit',
     back: 'Back',
+    investmentAnalysis: 'Investment Analysis',
+    viewListing: 'Original Listing',
+    viewOnSource: 'View on {{source}}',
+    saleSummary: 'Sale Summary',
+    comingSoon: 'Coming Soon',
+    upcomingFeature: 'Upcoming feature',
 
     // Prospect add choice modal
     addProspectTitle: 'Add Prospect Property',

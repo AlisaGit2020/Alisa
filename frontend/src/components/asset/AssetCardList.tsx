@@ -28,7 +28,8 @@ import { TypeOrmFetchOptions } from "../../lib/types";
 import ApiClient from "../../lib/api-client";
 import AssetContext from "@asset-lib/asset-contexts";
 import { getPhotoUrl } from "@asset-lib/functions";
-import { Address, DeleteValidationResult } from "@asset-types";
+import { Address, DeleteValidationResult, PropertyStatus } from "@asset-types";
+import PropertyStatusRibbon from "../property/PropertyStatusRibbon";
 
 interface AlisCardListField<T> {
   name: keyof T;
@@ -174,6 +175,7 @@ function AssetCardList<T extends { id: number }>({
             buildYear?: number;
             apartmentType?: string;
             ownerships?: { share: number }[];
+            status?: PropertyStatus;
           }) => (
             <Grid key={item.name} size={{ xs: 12, sm: 6, md: 4 }}>
               <Card
@@ -192,13 +194,21 @@ function AssetCardList<T extends { id: number }>({
                   onClick={() => navigate(routePrefix ? `${assetContext.routePath}/${routePrefix}/${item.id}` : `${assetContext.routePath}/${item.id}`)}
                   sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
                 >
-                  <CardMedia
-                    component="img"
-                    alt={item.name}
-                    height="160"
-                    image={getPhotoUrl(item.photo)}
-                    sx={{ objectFit: 'cover' }}
-                  />
+                  <Box sx={{ position: 'relative' }}>
+                    <CardMedia
+                      component="img"
+                      alt={item.name}
+                      height="160"
+                      image={getPhotoUrl(item.photo)}
+                      sx={{ objectFit: 'cover' }}
+                    />
+                    {item.status !== undefined && (
+                      <PropertyStatusRibbon
+                        status={item.status}
+                        ownershipShare={item.ownerships?.[0]?.share ?? 100}
+                      />
+                    )}
+                  </Box>
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography gutterBottom variant="h6" component="div">
                       {item.name}

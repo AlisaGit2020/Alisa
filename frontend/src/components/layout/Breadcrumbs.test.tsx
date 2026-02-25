@@ -1,6 +1,7 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import Breadcrumbs from './Breadcrumbs';
 import { renderWithRouter } from '@test-utils/test-wrapper';
+import ApiClient from '@asset-lib/api-client';
 
 describe('Breadcrumbs', () => {
   it('should not display "app" in breadcrumb text for protected routes', () => {
@@ -118,5 +119,74 @@ describe('Breadcrumbs', () => {
 
     // Should have link with ID (links: portfolio, properties, own, edit/456, 456)
     expect(links[3]).toHaveAttribute('href', '/app/portfolio/properties/own/edit/456');
+  });
+
+  describe('Property name resolution', () => {
+    let mockGet: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockGet = jest.spyOn(ApiClient, 'get');
+    });
+
+    afterEach(() => {
+      mockGet.mockRestore();
+    });
+
+    it('should display property name instead of ID for prospect property view route', async () => {
+      mockGet.mockResolvedValue({ id: 20, name: 'Helsinki Apartment' });
+
+      renderWithRouter(<Breadcrumbs />, {
+        initialEntries: ['/app/portfolio/properties/prospects/20'],
+      });
+
+      // Wait for the property name to be fetched and displayed
+      await waitFor(() => {
+        expect(screen.getByText(/Helsinki Apartment/)).toBeInTheDocument();
+      });
+
+      // Should have called API to fetch property
+      expect(mockGet).toHaveBeenCalledWith('real-estate/property', 20);
+    });
+
+    it('should display property name instead of ID for own property view route', async () => {
+      mockGet.mockResolvedValue({ id: 15, name: 'Espoo Studio' });
+
+      renderWithRouter(<Breadcrumbs />, {
+        initialEntries: ['/app/portfolio/properties/own/15'],
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Espoo Studio/)).toBeInTheDocument();
+      });
+
+      expect(mockGet).toHaveBeenCalledWith('real-estate/property', 15);
+    });
+
+    it('should display property name instead of ID for prospect edit route', async () => {
+      mockGet.mockResolvedValue({ id: 25, name: 'Tampere Flat' });
+
+      renderWithRouter(<Breadcrumbs />, {
+        initialEntries: ['/app/portfolio/properties/prospects/edit/25'],
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Tampere Flat/)).toBeInTheDocument();
+      });
+
+      expect(mockGet).toHaveBeenCalledWith('real-estate/property', 25);
+    });
+
+    it('should fall back to ID when API fetch fails', async () => {
+      mockGet.mockRejectedValue(new Error('Network error'));
+
+      renderWithRouter(<Breadcrumbs />, {
+        initialEntries: ['/app/portfolio/properties/prospects/99'],
+      });
+
+      // Should still render the ID as fallback
+      await waitFor(() => {
+        expect(screen.getByText(/99/)).toBeInTheDocument();
+      });
+    });
   });
 });

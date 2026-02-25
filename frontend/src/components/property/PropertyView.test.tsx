@@ -145,7 +145,7 @@ describe('PropertyView', () => {
       expect(image).toHaveAttribute('src', '/assets/properties/placeholder.svg');
     });
 
-    it('shows ownership share with circular badge', async () => {
+    it('shows ownership status ribbon', async () => {
       const partialOwnership = createMockProperty({
         ...mockProperty,
         ownerships: [{ share: 75, userId: 1, propertyId: 1 }],
@@ -158,11 +158,11 @@ describe('PropertyView', () => {
         expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
 
-      expect(screen.getByText('75%')).toBeInTheDocument();
-      expect(screen.getByText('Ownership share')).toBeInTheDocument();
+      // Ribbon shows ownership status text with percentage
+      expect(screen.getByText(/75/)).toBeInTheDocument();
     });
 
-    it('shows 100% ownership share', async () => {
+    it('shows ownership status ribbon for full ownership', async () => {
       mockGet.mockResolvedValue(mockProperty);
 
       renderPropertyView();
@@ -171,7 +171,8 @@ describe('PropertyView', () => {
         expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
 
-      expect(screen.getByText('100%')).toBeInTheDocument();
+      // Ribbon shows ownership status text with percentage
+      expect(screen.getByText(/100/)).toBeInTheDocument();
     });
 
     it('hides location section when no address or city', async () => {

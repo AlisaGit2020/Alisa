@@ -32,7 +32,10 @@ const property = {
     photoDeleteError: 'Kunde inte ta bort bild. Försök igen.',
     savePropertyFirst: 'Spara fastigheten först för att lägga till bild',
     ownershipShare: 'Ägarandel',
+    ownershipStatus: 'Ägande {{percent}}%',
     prospectStatus: 'Prospekt',
+    prospectStatusRibbon: 'Prospekt',
+    soldStatus: 'Såld',
     viewPageTitle: 'Fastighetsdetaljer',
     propertyInfo: 'Grundläggande information',
     locationInfo: 'Plats',
@@ -40,6 +43,12 @@ const property = {
     statisticsComingSoon: 'Ekonomisk statistik kommer snart',
     editProperty: 'Redigera',
     back: 'Tillbaka',
+    investmentAnalysis: 'Investeringsanalys',
+    viewListing: 'Ursprunglig annons',
+    viewOnSource: 'Visa på {{source}}',
+    saleSummary: 'Försäljningssammanfattning',
+    comingSoon: 'Kommer snart',
+    upcomingFeature: 'Kommande funktion',
 
     // Prospect add choice modal
     addProspectTitle: 'Lägg till prospekt',

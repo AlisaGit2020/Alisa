@@ -7,6 +7,7 @@ import ApiClient from '@asset-lib/api-client';
 import { propertyContext } from '@asset-lib/asset-contexts';
 import { TFunction } from 'i18next';
 import { Routes, Route } from 'react-router-dom';
+import { PropertyStatus } from '@asset-types';
 
 // Mock ApiClient static methods
 jest.spyOn(ApiClient, 'search');
@@ -451,6 +452,103 @@ describe('AssetCardList', () => {
       await waitFor(() => {
         expect(screen.getByText('Prospect Property View')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('property status ribbon', () => {
+    it('displays ownership ribbon for OWN status properties', async () => {
+      const propertiesWithStatus = [
+        {
+          id: 1,
+          name: 'Helsinki Apartment',
+          size: 75,
+          description: 'A property I own',
+          ownerships: [{ share: 100 }],
+          status: PropertyStatus.OWN,
+        },
+      ];
+      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(propertiesWithStatus);
+
+      renderWithProviders(
+        <AssetCardList
+          t={mockT}
+          title="Properties"
+          assetContext={propertyContext}
+          fields={[{ name: 'name' as keyof TestProperty }]}
+          routePrefix="own"
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
+      });
+
+      // Should display ownership percentage in ribbon (ownershipStatus translation shows "100")
+      expect(screen.getByText(/100/)).toBeInTheDocument();
+    });
+
+    it('displays prospect ribbon for PROSPECT status properties', async () => {
+      const propertiesWithStatus = [
+        {
+          id: 2,
+          name: 'Espoo Studio',
+          size: 60,
+          description: 'A property under consideration',
+          ownerships: [],
+          status: PropertyStatus.PROSPECT,
+        },
+      ];
+      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(propertiesWithStatus);
+
+      renderWithProviders(
+        <AssetCardList
+          t={mockT}
+          title="Properties"
+          assetContext={propertyContext}
+          fields={[{ name: 'name' as keyof TestProperty }]}
+          routePrefix="prospects"
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Espoo Studio')).toBeInTheDocument();
+      });
+
+      // Should display prospect status ribbon text (prospectStatusRibbon translation)
+      expect(screen.getByText(/prospectStatusRibbon|prospect/i)).toBeInTheDocument();
+    });
+
+    it('displays sold ribbon for SOLD status properties', async () => {
+      const propertiesWithStatus = [
+        {
+          id: 3,
+          name: 'Tampere Flat',
+          size: 80,
+          description: 'A property that was sold',
+          ownerships: [{ share: 100 }],
+          status: PropertyStatus.SOLD,
+        },
+      ];
+      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(propertiesWithStatus);
+
+      renderWithProviders(
+        <AssetCardList
+          t={mockT}
+          title="Properties"
+          assetContext={propertyContext}
+          fields={[{ name: 'name' as keyof TestProperty }]}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Tampere Flat')).toBeInTheDocument();
+      });
+
+      // Should display sold status ribbon text (soldStatus translation renders in ribbon)
+      // The ribbon should be rendered - check for the ownership percentage which defaults to 100
+      // when ownerships exist, or check that the ribbon component is rendered
+      const ribbonTexts = screen.getAllByText(/soldStatus|sold/i);
+      expect(ribbonTexts.length).toBeGreaterThanOrEqual(1);
     });
   });
 });

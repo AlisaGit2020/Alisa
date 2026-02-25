@@ -32,7 +32,10 @@ const property = {
     photoDeleteError: 'Kuvan poisto epäonnistui. Yritä uudelleen.',
     savePropertyFirst: 'Tallenna kohde ensin lisätäksesi kuvan',
     ownershipShare: 'Omistusosuus',
+    ownershipStatus: 'Omistus {{percent}}%',
     prospectStatus: 'Harkinnassa',
+    prospectStatusRibbon: 'Harkinnassa',
+    soldStatus: 'Myyty',
     viewPageTitle: 'Kohteen tiedot',
     propertyInfo: 'Perustiedot',
     locationInfo: 'Sijainti',
@@ -40,6 +43,12 @@ const property = {
     statisticsComingSoon: 'Taloudelliset tilastot tulossa pian',
     editProperty: 'Muokkaa',
     back: 'Takaisin',
+    investmentAnalysis: 'Sijoituslaskelma',
+    viewListing: 'Alkuperäinen ilmoitus',
+    viewOnSource: 'Katso kohde sivustolla {{source}}',
+    saleSummary: 'Myyntiyhteenveto',
+    comingSoon: 'Tulossa pian',
+    upcomingFeature: 'Tuleva ominaisuus',
 
     // Prospect add choice modal
     addProspectTitle: 'Lisää seurattava kohde',
