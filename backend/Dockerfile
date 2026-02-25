@@ -12,8 +12,7 @@ RUN --mount=type=cache,target=/root/.npm \
 COPY backend/ .
 
 # Limit Node.js memory to prevent OOM on low-memory servers
-# SWC compiler uses much less memory than tsc
-ENV NODE_OPTIONS="--max-old-space-size=1024"
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN npm run build
 
 # Stage 2: Production
