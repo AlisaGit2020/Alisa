@@ -104,6 +104,7 @@ function Properties({ t }: WithTranslation) {
                 fields={[{ name: "name" }, { name: "size", format: "number" }]}
                 fetchOptions={buildFetchOptions(TAB_OWN)}
                 onAfterDelete={handleAfterDelete}
+                routePrefix={ROUTE_OWN}
               />
             </Grid>
           </Grid>
@@ -118,6 +119,7 @@ function Properties({ t }: WithTranslation) {
                 fields={[{ name: "name" }, { name: "size", format: "number" }]}
                 fetchOptions={buildFetchOptions(TAB_PROSPECT)}
                 onAfterDelete={handleAfterDelete}
+                routePrefix={ROUTE_PROSPECT}
               />
             </Grid>
           </Grid>

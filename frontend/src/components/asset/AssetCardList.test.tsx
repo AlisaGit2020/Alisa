@@ -284,7 +284,7 @@ describe('AssetCardList', () => {
     });
   });
 
-  it('displays add link', async () => {
+  it('displays add link without routePrefix', async () => {
     (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
 
     renderWithProviders(
@@ -302,6 +302,27 @@ describe('AssetCardList', () => {
 
     const addLink = screen.getByRole('link', { name: /add/i });
     expect(addLink).toHaveAttribute('href', `${propertyContext.routePath}/add`);
+  });
+
+  it('displays add link with routePrefix', async () => {
+    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
+
+    renderWithProviders(
+      <AssetCardList
+        t={mockT}
+        title="Properties"
+        assetContext={propertyContext}
+        fields={[{ name: 'name' as keyof TestProperty }]}
+        routePrefix="own"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Property 1')).toBeInTheDocument();
+    });
+
+    const addLink = screen.getByRole('link', { name: /add/i });
+    expect(addLink).toHaveAttribute('href', `${propertyContext.routePath}/own/add`);
   });
 
   it('displays title', async () => {

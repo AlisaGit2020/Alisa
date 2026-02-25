@@ -41,7 +41,7 @@ describe('Breadcrumbs', () => {
 
   it('should handle nested protected routes correctly', () => {
     renderWithRouter(<Breadcrumbs />, {
-      initialEntries: ['/app/portfolio/properties/edit/123'],
+      initialEntries: ['/app/portfolio/properties/own/edit/123'],
     });
 
     const links = screen.getAllByRole('link');
@@ -49,15 +49,16 @@ describe('Breadcrumbs', () => {
     // Check all links have /app prefix
     expect(links[0]).toHaveAttribute('href', '/app/portfolio');
     expect(links[1]).toHaveAttribute('href', '/app/portfolio/properties');
+    expect(links[2]).toHaveAttribute('href', '/app/portfolio/properties/own');
     // "edit" segment followed by ID should include the ID in the link
     // (navigating to /edit without ID is invalid)
-    expect(links[2]).toHaveAttribute('href', '/app/portfolio/properties/edit/123');
-    expect(links[3]).toHaveAttribute('href', '/app/portfolio/properties/edit/123');
+    expect(links[3]).toHaveAttribute('href', '/app/portfolio/properties/own/edit/123');
+    expect(links[4]).toHaveAttribute('href', '/app/portfolio/properties/own/edit/123');
   });
 
   it('should include ID in edit breadcrumb link when followed by numeric ID', () => {
     renderWithRouter(<Breadcrumbs />, {
-      initialEntries: ['/app/portfolio/properties/edit/456'],
+      initialEntries: ['/app/portfolio/properties/own/edit/456'],
     });
 
     const links = screen.getAllByRole('link');
@@ -67,7 +68,7 @@ describe('Breadcrumbs', () => {
     const editLink = links.find(link =>
       link.textContent?.toLowerCase().includes('edit')
     );
-    expect(editLink).toHaveAttribute('href', '/app/portfolio/properties/edit/456');
+    expect(editLink).toHaveAttribute('href', '/app/portfolio/properties/own/edit/456');
   });
 
   it('should include ID in add breadcrumb link when followed by numeric ID', () => {
@@ -110,12 +111,12 @@ describe('Breadcrumbs', () => {
 
   it('should filter out numeric IDs but keep them in links', () => {
     renderWithRouter(<Breadcrumbs />, {
-      initialEntries: ['/app/portfolio/properties/edit/456'],
+      initialEntries: ['/app/portfolio/properties/own/edit/456'],
     });
 
     const links = screen.getAllByRole('link');
 
-    // Should have link with ID
-    expect(links[3]).toHaveAttribute('href', '/app/portfolio/properties/edit/456');
+    // Should have link with ID (links: portfolio, properties, own, edit/456, 456)
+    expect(links[3]).toHaveAttribute('href', '/app/portfolio/properties/own/edit/456');
   });
 });

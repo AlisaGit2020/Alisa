@@ -47,8 +47,10 @@ function renderPropertyView(propertyId: string = '1') {
   return renderWithRouter(
     <Routes>
       <Route path="/app/portfolio/properties/:idParam" element={<PropertyView />} />
-      <Route path="/app/portfolio/properties/edit/:idParam" element={<div>Edit Page</div>} />
-      <Route path="/app/portfolio/properties" element={<div>Properties List</div>} />
+      <Route path="/app/portfolio/properties/own/edit/:idParam" element={<div>Edit Own Page</div>} />
+      <Route path="/app/portfolio/properties/prospects/edit/:idParam" element={<div>Edit Prospect Page</div>} />
+      <Route path="/app/portfolio/properties/own" element={<div>Own Properties List</div>} />
+      <Route path="/app/portfolio/properties/prospects" element={<div>Prospects List</div>} />
     </Routes>,
     { initialEntries: [`/app/portfolio/properties/${propertyId}`] }
   );
@@ -252,9 +254,9 @@ describe('PropertyView', () => {
   });
 
   describe('Navigation', () => {
-    it('Edit button navigates to edit page', async () => {
+    it('Edit button navigates to edit page for own property', async () => {
       const user = userEvent.setup();
-      mockGet.mockResolvedValue(mockProperty);
+      mockGet.mockResolvedValue({ ...mockProperty, status: 2 }); // PropertyStatus.OWN = 2
 
       renderPropertyView();
 
@@ -265,15 +267,34 @@ describe('PropertyView', () => {
       const editButton = screen.getByRole('button', { name: /edit/i });
       await user.click(editButton);
 
-      // After clicking edit, we should navigate to the edit page
+      // After clicking edit, we should navigate to the edit page for own properties
       await waitFor(() => {
-        expect(screen.getByText('Edit Page')).toBeInTheDocument();
+        expect(screen.getByText('Edit Own Page')).toBeInTheDocument();
       });
     });
 
-    it('Back button navigates to properties list', async () => {
+    it('Edit button navigates to edit page for prospect property', async () => {
       const user = userEvent.setup();
-      mockGet.mockResolvedValue(mockProperty);
+      mockGet.mockResolvedValue({ ...mockProperty, status: 1 }); // PropertyStatus.PROSPECT = 1
+
+      renderPropertyView();
+
+      await waitFor(() => {
+        expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
+      });
+
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      await user.click(editButton);
+
+      // After clicking edit, we should navigate to the edit page for prospects
+      await waitFor(() => {
+        expect(screen.getByText('Edit Prospect Page')).toBeInTheDocument();
+      });
+    });
+
+    it('Back button navigates to own properties list for own property', async () => {
+      const user = userEvent.setup();
+      mockGet.mockResolvedValue({ ...mockProperty, status: 2 }); // PropertyStatus.OWN = 2
 
       renderPropertyView();
 
@@ -284,9 +305,28 @@ describe('PropertyView', () => {
       const backButton = screen.getByRole('button', { name: /back/i });
       await user.click(backButton);
 
-      // After clicking back, we should navigate to the properties list
+      // After clicking back, we should navigate to the own properties list
       await waitFor(() => {
-        expect(screen.getByText('Properties List')).toBeInTheDocument();
+        expect(screen.getByText('Own Properties List')).toBeInTheDocument();
+      });
+    });
+
+    it('Back button navigates to prospects list for prospect property', async () => {
+      const user = userEvent.setup();
+      mockGet.mockResolvedValue({ ...mockProperty, status: 1 }); // PropertyStatus.PROSPECT = 1
+
+      renderPropertyView();
+
+      await waitFor(() => {
+        expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
+      });
+
+      const backButton = screen.getByRole('button', { name: /back/i });
+      await user.click(backButton);
+
+      // After clicking back, we should navigate to the prospects list
+      await waitFor(() => {
+        expect(screen.getByText('Prospects List')).toBeInTheDocument();
       });
     });
   });

@@ -17,6 +17,7 @@ import LocationCityIcon from '@mui/icons-material/LocationCity';
 import RuleIcon from '@mui/icons-material/Rule';
 import PropertyReportSection from './report/PropertyReportSection';
 import { AllocationRulesModal } from '../allocation';
+import { getReturnPathForStatus } from './property-form-utils';
 
 interface DetailRowProps {
   icon: ReactNode;
@@ -143,14 +144,20 @@ function PropertyView({ t }: WithTranslation) {
     fetchProperty();
   }, [idParam]);
 
+  const getRoutePrefix = () => {
+    return property?.status === PropertyStatus.PROSPECT ? 'prospects' : 'own';
+  };
+
   const handleEdit = () => {
-    navigate(`${propertyContext.routePath}/edit/${idParam}`, {
+    const prefix = getRoutePrefix();
+    navigate(`${propertyContext.routePath}/${prefix}/edit/${idParam}`, {
       state: { returnTo: 'view' },
     });
   };
 
   const handleBack = () => {
-    navigate(propertyContext.routePath);
+    const status = property?.status ?? PropertyStatus.OWN;
+    navigate(getReturnPathForStatus(status));
   };
 
   if (loading) {

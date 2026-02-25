@@ -20,9 +20,18 @@ import { VITE_API_URL } from '../../constants';
 import { PROPERTY_LIST_CHANGE_EVENT } from '../layout/PropertyBadge';
 import { setTransactionPropertyId } from '@asset-lib/initial-data';
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from '../transaction/TransactionLeftMenuItems';
+import { getPropertyStatusFromPath, getReturnPathForStatus } from './property-form-utils';
 
 
 function PropertyForm({ t }: WithTranslation) {
+    const { idParam } = useParams();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { showToast } = useAssetToast();
+
+    // Determine property status from URL path (e.g., /own/add vs /prospects/add)
+    const statusFromPath = getPropertyStatusFromPath(location.pathname);
+
     const [data, setData] = useState<DTO<PropertyInput>>({
         id: 0,
         name: '',
@@ -36,21 +45,18 @@ function PropertyForm({ t }: WithTranslation) {
         },
         buildYear: undefined,
         apartmentType: '',
-        status: PropertyStatus.OWN,
+        status: statusFromPath,
         ownerships: [{ userId: 0, share: 100 }]
     });
     const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
-    const { idParam } = useParams();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { showToast } = useAssetToast();
 
     const handleNavigateBack = () => {
         const returnTo = (location.state as { returnTo?: string })?.returnTo;
         if (returnTo === 'view' && idParam) {
             navigate(`${propertyContext.routePath}/${idParam}`);
         } else {
-            navigate(propertyContext.routePath);
+            // Navigate back to the appropriate tab based on property status
+            navigate(getReturnPathForStatus(data.status ?? PropertyStatus.OWN));
         }
     };
 

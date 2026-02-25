@@ -42,6 +42,8 @@ interface AssetCardListInputProps<T> {
   fields: AlisCardListField<T>[];
   fetchOptions?: TypeOrmFetchOptions<T>;
   onAfterDelete?: () => void;
+  /** Optional route prefix for add/edit links (e.g., "own" or "prospects") */
+  routePrefix?: string;
 }
 
 function AssetCardList<T extends { id: number }>({
@@ -50,7 +52,13 @@ function AssetCardList<T extends { id: number }>({
   assetContext,
   fetchOptions,
   onAfterDelete,
+  routePrefix,
 }: AssetCardListInputProps<T>) {
+  // Build route paths with optional prefix
+  const buildRoutePath = (suffix: string) => {
+    const base = assetContext.routePath;
+    return routePrefix ? `${base}/${routePrefix}/${suffix}` : `${base}/${suffix}`;
+  };
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState<number>(0);
@@ -139,7 +147,7 @@ function AssetCardList<T extends { id: number }>({
   return (
     <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
       <Title>{title}</Title>
-      <Link href={`${assetContext.routePath}/add`}>{t("add")}</Link>
+      <Link href={buildRoutePath("add")}>{t("add")}</Link>
       {data.length > 0 && (
         <Grid container spacing={2} marginTop={2}>
           {data.map((item: T & {
@@ -232,7 +240,7 @@ function AssetCardList<T extends { id: number }>({
                 <CardActions>
                   <Button
                     size="small"
-                    onClick={() => navigate(`${assetContext.routePath}/edit/${item.id}`)}
+                    onClick={() => navigate(buildRoutePath(`edit/${item.id}`))}
                     startIcon={<EditIcon></EditIcon>}
                   >
                     {t("edit")}
