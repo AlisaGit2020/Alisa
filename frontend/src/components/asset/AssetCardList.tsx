@@ -44,6 +44,8 @@ interface AssetCardListInputProps<T> {
   onAfterDelete?: () => void;
   /** Optional route prefix for add/edit links (e.g., "own" or "prospects") */
   routePrefix?: string;
+  /** Optional callback when add link is clicked (overrides default navigation) */
+  onAddClick?: () => void;
 }
 
 function AssetCardList<T extends { id: number }>({
@@ -53,6 +55,7 @@ function AssetCardList<T extends { id: number }>({
   fetchOptions,
   onAfterDelete,
   routePrefix,
+  onAddClick,
 }: AssetCardListInputProps<T>) {
   // Build route paths with optional prefix
   const buildRoutePath = (suffix: string) => {
@@ -147,7 +150,19 @@ function AssetCardList<T extends { id: number }>({
   return (
     <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
       <Title>{title}</Title>
-      <Link href={buildRoutePath("add")}>{t("add")}</Link>
+      {onAddClick ? (
+        <Link
+          href={buildRoutePath("add")}
+          onClick={(e) => {
+            e.preventDefault();
+            onAddClick();
+          }}
+        >
+          {t("add")}
+        </Link>
+      ) : (
+        <Link href={buildRoutePath("add")}>{t("add")}</Link>
+      )}
       {data.length > 0 && (
         <Grid container spacing={2} marginTop={2}>
           {data.map((item: T & {

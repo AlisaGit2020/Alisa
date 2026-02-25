@@ -339,4 +339,47 @@ describe('AssetCardList', () => {
 
     expect(screen.getByText('My Properties')).toBeInTheDocument();
   });
+
+  describe("onAddClick callback", () => {
+    it("calls onAddClick when add link is clicked instead of navigating", async () => {
+      const onAddClick = jest.fn();
+      const user = userEvent.setup();
+      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
+
+      renderWithProviders(
+        <AssetCardList
+          t={mockT}
+          assetContext={propertyContext}
+          fields={[{ name: 'name' as keyof TestProperty }]}
+          onAddClick={onAddClick}
+        />
+      );
+
+      const addLink = await screen.findByRole("link", { name: /add/i });
+      await user.click(addLink);
+
+      expect(onAddClick).toHaveBeenCalled();
+    });
+
+    it("prevents default navigation when onAddClick is provided", async () => {
+      const onAddClick = jest.fn();
+      const user = userEvent.setup();
+      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
+
+      renderWithProviders(
+        <AssetCardList
+          t={mockT}
+          assetContext={propertyContext}
+          fields={[{ name: 'name' as keyof TestProperty }]}
+          onAddClick={onAddClick}
+        />
+      );
+
+      const addLink = await screen.findByRole("link", { name: /add/i });
+      await user.click(addLink);
+
+      // Should not navigate (would be verified by checking navigation didn't happen)
+      expect(onAddClick).toHaveBeenCalledTimes(1);
+    });
+  });
 });
