@@ -23,6 +23,7 @@ const route = {
   portfolio: "Portfölj",
   properties: "Fastigheter",
   prospects: "Prospekt",
+  sold: "Sålda",
   property: "Fastighetsrapporter",
   report: "Rapporter",
   reports: "Rapporter",

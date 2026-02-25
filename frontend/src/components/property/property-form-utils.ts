@@ -1,6 +1,7 @@
 import { PropertyStatus } from '@asset-types/common';
 
 const ROUTE_PROSPECT = 'prospects';
+const ROUTE_SOLD = 'sold';
 const BASE_PATH = '/app/portfolio/properties';
 
 /**
@@ -10,6 +11,9 @@ const BASE_PATH = '/app/portfolio/properties';
 export function getPropertyStatusFromPath(pathname: string): PropertyStatus {
   if (pathname.includes(`/${ROUTE_PROSPECT}/`)) {
     return PropertyStatus.PROSPECT;
+  }
+  if (pathname.includes(`/${ROUTE_SOLD}/`)) {
+    return PropertyStatus.SOLD;
   }
   return PropertyStatus.OWN;
 }
@@ -21,6 +25,9 @@ export function getPropertyStatusFromPath(pathname: string): PropertyStatus {
 export function getReturnPathForStatus(status: PropertyStatus): string {
   if (status === PropertyStatus.PROSPECT) {
     return `${BASE_PATH}/${ROUTE_PROSPECT}`;
+  }
+  if (status === PropertyStatus.SOLD) {
+    return `${BASE_PATH}/${ROUTE_SOLD}`;
   }
   return `${BASE_PATH}/own`;
 }

@@ -4,6 +4,7 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
+import SellIcon from "@mui/icons-material/Sell";
 import { Property } from "@asset-types";
 import { PropertyStatus } from "@asset-types/common";
 import AssetCardList from "../asset/AssetCardList";
@@ -14,9 +15,11 @@ import ProspectAddChoiceDialog from "./ProspectAddChoiceDialog";
 
 const TAB_OWN = 0;
 const TAB_PROSPECT = 1;
+const TAB_SOLD = 2;
 
 const ROUTE_OWN = "own";
 const ROUTE_PROSPECT = "prospects";
+const ROUTE_SOLD = "sold";
 
 const BASE_PATH = "/app/portfolio/properties";
 
@@ -37,14 +40,16 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 function getTabIndexFromRoute(pathname: string): number {
   const segments = pathname.split('/');
   const propertiesIndex = segments.indexOf('properties');
-  if (propertiesIndex !== -1 && segments[propertiesIndex + 1] === ROUTE_PROSPECT) {
-    return TAB_PROSPECT;
-  }
+  const tabSegment = propertiesIndex !== -1 ? segments[propertiesIndex + 1] : undefined;
+  if (tabSegment === ROUTE_PROSPECT) return TAB_PROSPECT;
+  if (tabSegment === ROUTE_SOLD) return TAB_SOLD;
   return TAB_OWN;
 }
 
 function getRouteFromTabIndex(tabIndex: number): string {
-  return tabIndex === TAB_PROSPECT ? ROUTE_PROSPECT : ROUTE_OWN;
+  if (tabIndex === TAB_PROSPECT) return ROUTE_PROSPECT;
+  if (tabIndex === TAB_SOLD) return ROUTE_SOLD;
+  return ROUTE_OWN;
 }
 
 function Properties({ t }: WithTranslation) {
@@ -84,7 +89,9 @@ function Properties({ t }: WithTranslation) {
   };
 
   const getStatusForTab = (index: number): PropertyStatus => {
-    return index === TAB_OWN ? PropertyStatus.OWN : PropertyStatus.PROSPECT;
+    if (index === TAB_OWN) return PropertyStatus.OWN;
+    if (index === TAB_PROSPECT) return PropertyStatus.PROSPECT;
+    return PropertyStatus.SOLD;
   };
 
   const buildFetchOptions = (index: number) => ({
@@ -119,6 +126,12 @@ function Properties({ t }: WithTranslation) {
             label={t("prospectProperties")}
             sx={{ gap: 1 }}
           />
+          <Tab
+            icon={<SellIcon />}
+            iconPosition="start"
+            label={t("soldProperties")}
+            sx={{ gap: 1 }}
+          />
         </Tabs>
 
         <TabPanel value={tabIndex} index={TAB_OWN}>
@@ -148,6 +161,22 @@ function Properties({ t }: WithTranslation) {
                 onAfterDelete={handleAfterDelete}
                 routePrefix={ROUTE_PROSPECT}
                 onAddClick={handleProspectAddClick}
+              />
+            </Grid>
+          </Grid>
+        </TabPanel>
+
+        <TabPanel value={tabIndex} index={TAB_SOLD}>
+          <Grid container>
+            <Grid size={{ xs: 12, lg: 12 }}>
+              <AssetCardList<Property>
+                t={t}
+                assetContext={propertyContext}
+                fields={[{ name: "name" }, { name: "size", format: "number" }]}
+                fetchOptions={buildFetchOptions(TAB_SOLD)}
+                onAfterDelete={handleAfterDelete}
+                routePrefix={ROUTE_SOLD}
+                hideAddLink
               />
             </Grid>
           </Grid>
