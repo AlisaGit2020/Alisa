@@ -12,11 +12,8 @@ DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml --env-file .env.prod
 echo "Starting services..."
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d
 
-echo "Waiting for services to initialize..."
-sleep 10
-
-echo "Running database migrations..."
-docker compose -f docker-compose.prod.yml --env-file .env.production exec -T backend npm run migration:run:prod
+echo "Waiting for services to initialize (migrations run on container startup)..."
+sleep 15
 
 echo "Cleaning up old images..."
 docker image prune -f
