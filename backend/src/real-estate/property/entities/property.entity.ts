@@ -88,4 +88,22 @@ export class Property {
 
   @Column({ nullable: true })
   public externalSourceId?: string;
+
+  @Column({ nullable: true })
+  public rooms?: string;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
+  public purchasePrice?: number;
+
+  @Column({ type: 'date', nullable: true })
+  public purchaseDate?: Date;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
+  public purchaseLoan?: number;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
+  public salePrice?: number;
+
+  @Column({ type: 'date', nullable: true })
+  public saleDate?: Date;
 }

@@ -145,6 +145,32 @@ describe('PropertyService', () => {
       expect(result.description).toBe('A nice property with a view');
     });
 
+    it('returns property with all purchase and sale fields', async () => {
+      const purchaseDate = new Date('2020-06-15');
+      const saleDate = new Date('2024-03-20');
+      const property = createProperty({
+        id: 1,
+        name: 'Complete Property',
+        rooms: '2h + k',
+        purchasePrice: 250000,
+        purchaseDate,
+        purchaseLoan: 200000,
+        salePrice: 300000,
+        saleDate,
+      });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const result = await service.findOne(testUser, 1);
+
+      expect(result.rooms).toBe('2h + k');
+      expect(result.purchasePrice).toBe(250000);
+      expect(result.purchaseDate).toEqual(purchaseDate);
+      expect(result.purchaseLoan).toBe(200000);
+      expect(result.salePrice).toBe(300000);
+      expect(result.saleDate).toEqual(saleDate);
+    });
+
     it('returns null when property does not exist', async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
@@ -321,6 +347,82 @@ describe('PropertyService', () => {
       expect(result.address?.postalCode).toBe('00100');
       expect(result.buildYear).toBe(1985);
       expect(result.apartmentType).toBe('3h+k');
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
+
+    it('creates property with rooms field', async () => {
+      const input = {
+        name: 'Cozy Apartment',
+        size: 55,
+        rooms: '2h + k',
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({
+        id: 1,
+        name: input.name,
+        size: input.size,
+        rooms: '2h + k',
+      });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result.rooms).toBe('2h + k');
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
+
+    it('creates property with purchase details', async () => {
+      const purchaseDate = new Date('2020-06-15');
+      const input = {
+        name: 'Investment Property',
+        size: 75,
+        purchasePrice: 250000,
+        purchaseDate,
+        purchaseLoan: 200000,
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({
+        id: 1,
+        name: input.name,
+        size: input.size,
+        purchasePrice: 250000,
+        purchaseDate,
+        purchaseLoan: 200000,
+      });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result.purchasePrice).toBe(250000);
+      expect(result.purchaseDate).toEqual(purchaseDate);
+      expect(result.purchaseLoan).toBe(200000);
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
+
+    it('creates property with sale details', async () => {
+      const saleDate = new Date('2024-03-20');
+      const input = {
+        name: 'Sold Property',
+        size: 60,
+        salePrice: 300000,
+        saleDate,
+        status: PropertyStatus.SOLD,
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({
+        id: 1,
+        name: input.name,
+        size: input.size,
+        salePrice: 300000,
+        saleDate,
+        status: PropertyStatus.SOLD,
+      });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result.salePrice).toBe(300000);
+      expect(result.saleDate).toEqual(saleDate);
       expect(mockRepository.save).toHaveBeenCalled();
     });
 
@@ -652,6 +754,76 @@ describe('PropertyService', () => {
       const result = await service.update(testUser, 1, input);
 
       expect(result.status).toBe(PropertyStatus.SOLD);
+    });
+
+    it('updates property rooms field', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Test Property',
+      });
+      const input = {
+        name: 'Test Property',
+        size: 50,
+        rooms: '3h + k + s',
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...existingProperty, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.rooms).toBe('3h + k + s');
+    });
+
+    it('updates property purchase details', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Test Property',
+      });
+      const purchaseDate = new Date('2019-05-10');
+      const input = {
+        name: 'Test Property',
+        size: 50,
+        purchasePrice: 180000,
+        purchaseDate,
+        purchaseLoan: 150000,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...existingProperty, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.purchasePrice).toBe(180000);
+      expect(result.purchaseDate).toEqual(purchaseDate);
+      expect(result.purchaseLoan).toBe(150000);
+    });
+
+    it('updates property sale details', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Test Property',
+        status: PropertyStatus.OWN,
+      });
+      const saleDate = new Date('2025-01-15');
+      const input = {
+        name: 'Test Property',
+        size: 50,
+        salePrice: 220000,
+        saleDate,
+        status: PropertyStatus.SOLD,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...existingProperty, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.salePrice).toBe(220000);
+      expect(result.saleDate).toEqual(saleDate);
     });
 
     it('updates external source fields', async () => {

@@ -24,6 +24,12 @@ export interface CreatePropertyOptions {
   status?: PropertyStatus;
   externalSource?: PropertyExternalSource;
   externalSourceId?: string;
+  rooms?: string;
+  purchasePrice?: number;
+  purchaseDate?: Date;
+  purchaseLoan?: number;
+  salePrice?: number;
+  saleDate?: Date;
 }
 
 export const createAddress = (options: CreateAddressOptions = {}): Address => {
@@ -50,5 +56,11 @@ export const createProperty = (options: CreatePropertyOptions = {}): Property =>
   property.status = options.status ?? PropertyStatus.OWN;
   property.externalSource = options.externalSource;
   property.externalSourceId = options.externalSourceId;
+  property.rooms = options.rooms;
+  property.purchasePrice = options.purchasePrice;
+  property.purchaseDate = options.purchaseDate;
+  property.purchaseLoan = options.purchaseLoan;
+  property.salePrice = options.salePrice;
+  property.saleDate = options.saleDate;
   return property;
 };
