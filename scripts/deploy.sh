@@ -3,6 +3,14 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+# Prevent concurrent deploys using a lock file
+LOCKFILE="/tmp/asset-deploy.lock"
+exec 200>"$LOCKFILE"
+if ! flock -n 200; then
+    echo "ERROR: Another deploy is already running. Exiting."
+    exit 1
+fi
+
 echo "Pulling latest changes..."
 git pull
 
