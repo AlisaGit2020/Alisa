@@ -1,6 +1,81 @@
 import '@testing-library/jest-dom';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithRouter } from '../../../test/utils/test-wrapper';
 import { Ownership, Property } from '@asset-types';
 import { PropertyStatus } from '@asset-types/common';
+import ApiClient from '@asset-lib/api-client';
+import React from 'react';
+
+// Mock the withTranslation HOC to avoid i18n namespace issues
+jest.mock('react-i18next', () => ({
+  ...jest.requireActual('react-i18next'),
+  withTranslation: () => (Component: React.ComponentType) => {
+    const WrappedComponent = (props: object) => {
+      const translations: Record<string, string> = {
+        add: 'Add',
+        edit: 'Edit',
+        delete: 'Delete',
+        cancel: 'Cancel',
+        confirm: 'Confirm',
+        confirmDelete: 'Are you sure you want to delete the property?',
+        noRowsFound: 'No rows found',
+        noDescription: 'No description',
+        size: 'Size',
+        buildYear: 'Build year',
+        ownershipShare: 'Ownership share',
+        ownProperties: 'Own Properties',
+        prospectProperties: 'Prospect Properties',
+        addProspectTitle: 'Add Prospect Property',
+        addManually: 'Fill in form manually',
+        chooseAddMethod: 'Choose how to add prospect property',
+        importFromEtuovi: 'Import from Etuovi',
+        etuoviUrlPlaceholder: 'https://www.etuovi.com/kohde/...',
+        importButton: 'Import',
+        importSuccess: 'Property imported successfully',
+        importError: 'Failed to import property',
+        invalidEtuoviUrl: 'Invalid Etuovi URL',
+      };
+      const t = (key: string) => translations[key] || key;
+      return <Component {...props} t={t} />;
+    };
+    WrappedComponent.displayName = `withTranslation(${Component.displayName || Component.name})`;
+    return WrappedComponent;
+  },
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        add: 'Add',
+        edit: 'Edit',
+        delete: 'Delete',
+        cancel: 'Cancel',
+        confirm: 'Confirm',
+        confirmDelete: 'Are you sure you want to delete the property?',
+        noRowsFound: 'No rows found',
+        noDescription: 'No description',
+        size: 'Size',
+        buildYear: 'Build year',
+        ownershipShare: 'Ownership share',
+        ownProperties: 'Own Properties',
+        prospectProperties: 'Prospect Properties',
+        addProspectTitle: 'Add Prospect Property',
+        addManually: 'Fill in form manually',
+        chooseAddMethod: 'Choose how to add prospect property',
+        importFromEtuovi: 'Import from Etuovi',
+        etuoviUrlPlaceholder: 'https://www.etuovi.com/kohde/...',
+        importButton: 'Import',
+        importSuccess: 'Property imported successfully',
+        importError: 'Failed to import property',
+        invalidEtuoviUrl: 'Invalid Etuovi URL',
+      };
+      return translations[key] || key;
+    },
+    i18n: { language: 'en' },
+  }),
+}));
+
+// Import after mocking
+import Properties from './Properties';
 
 // Since Jest mock hoisting causes issues with relative paths in ESM mode,
 // we test the data transformation logic separately from the React component
@@ -587,5 +662,60 @@ describe('Properties Component Logic', () => {
         expect(buildNavigationPath('prospects')).toBe('/app/portfolio/properties/prospects');
       });
     });
+  });
+});
+
+describe('Prospect Add Choice Dialog', () => {
+  let mockSearch: jest.SpyInstance;
+  let mockPost: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockSearch = jest.spyOn(ApiClient, 'search').mockResolvedValue([]);
+    mockPost = jest.spyOn(ApiClient, 'post').mockResolvedValue({});
+  });
+
+  afterEach(() => {
+    mockSearch.mockRestore();
+    mockPost.mockRestore();
+  });
+
+  it('opens add dialog when clicking Add on Prospects tab', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/prospects'],
+    });
+
+    const addLink = await screen.findByRole('link', { name: /add/i });
+    await user.click(addLink);
+
+    expect(screen.getByText(/add prospect property/i)).toBeInTheDocument();
+  });
+
+  it('navigates to form when manual add is selected', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/prospects'],
+    });
+
+    const addLink = await screen.findByRole('link', { name: /add/i });
+    await user.click(addLink);
+
+    await user.click(screen.getByText(/fill in form manually/i));
+
+    // Check we navigated away (dialog should close)
+    await waitFor(() => {
+      expect(screen.queryByText(/add prospect property/i)).not.toBeInTheDocument();
+    });
+  });
+
+  it('does not show dialog for Own properties tab', async () => {
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/own'],
+    });
+
+    // On Own tab, clicking Add should navigate directly, not show dialog
+    const addLink = await screen.findByRole('link', { name: /add/i });
+    // Verify it's a normal link without the dialog behavior
+    expect(addLink).toHaveAttribute('href', '/app/portfolio/properties/own/add');
   });
 });

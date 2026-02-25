@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Grid, Tab, Tabs } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import AssetCardList from "../asset/AssetCardList";
 import { propertyContext } from "@asset-lib/asset-contexts";
 import { CardGridPageTemplate } from "../templates";
 import { PROPERTY_LIST_CHANGE_EVENT } from "../layout/PropertyBadge";
+import ProspectAddChoiceDialog from "./ProspectAddChoiceDialog";
 
 const TAB_OWN = 0;
 const TAB_PROSPECT = 1;
@@ -45,6 +46,8 @@ function getRouteFromTabIndex(tabIndex: number): string {
 function Properties({ t }: WithTranslation) {
   const location = useLocation();
   const navigate = useNavigate();
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const tabIndex = getTabIndexFromRoute(location.pathname);
 
@@ -55,6 +58,25 @@ function Properties({ t }: WithTranslation) {
 
   const handleAfterDelete = () => {
     window.dispatchEvent(new CustomEvent(PROPERTY_LIST_CHANGE_EVENT));
+  };
+
+  const handleProspectAddClick = () => {
+    setAddDialogOpen(true);
+  };
+
+  const handleAddDialogClose = () => {
+    setAddDialogOpen(false);
+  };
+
+  const handleAddDialogSuccess = () => {
+    setAddDialogOpen(false);
+    setRefreshKey((prev) => prev + 1);
+    window.dispatchEvent(new CustomEvent(PROPERTY_LIST_CHANGE_EVENT));
+  };
+
+  const handleManualAdd = () => {
+    setAddDialogOpen(false);
+    navigate(`${BASE_PATH}/${ROUTE_PROSPECT}/add`);
   };
 
   const getStatusForTab = (index: number): PropertyStatus => {
@@ -114,17 +136,26 @@ function Properties({ t }: WithTranslation) {
           <Grid container>
             <Grid size={{ xs: 12, lg: 12 }}>
               <AssetCardList<Property>
+                key={refreshKey}
                 t={t}
                 assetContext={propertyContext}
                 fields={[{ name: "name" }, { name: "size", format: "number" }]}
                 fetchOptions={buildFetchOptions(TAB_PROSPECT)}
                 onAfterDelete={handleAfterDelete}
                 routePrefix={ROUTE_PROSPECT}
+                onAddClick={handleProspectAddClick}
               />
             </Grid>
           </Grid>
         </TabPanel>
       </Box>
+
+      <ProspectAddChoiceDialog
+        open={addDialogOpen}
+        onClose={handleAddDialogClose}
+        onSuccess={handleAddDialogSuccess}
+        onManualAdd={handleManualAdd}
+      />
     </CardGridPageTemplate>
   );
 }
