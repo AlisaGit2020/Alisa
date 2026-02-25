@@ -43,14 +43,17 @@ jest.mock('react-i18next', () => ({
 import PropertyView from './PropertyView';
 
 // Helper to render PropertyView with route params
-function renderPropertyView(propertyId: string = '1') {
+function renderPropertyView(propertyId: string = '1', statusPrefix: 'own' | 'prospects' = 'own') {
   return renderWithRouter(
     <Routes>
-      <Route path="/app/portfolio/properties/:idParam" element={<PropertyView />} />
-      <Route path="/app/portfolio/properties/edit/:idParam" element={<div>Edit Page</div>} />
-      <Route path="/app/portfolio/properties" element={<div>Properties List</div>} />
+      <Route path="/app/portfolio/properties/own/:idParam" element={<PropertyView />} />
+      <Route path="/app/portfolio/properties/prospects/:idParam" element={<PropertyView />} />
+      <Route path="/app/portfolio/properties/own/edit/:idParam" element={<div>Edit Own Page</div>} />
+      <Route path="/app/portfolio/properties/prospects/edit/:idParam" element={<div>Edit Prospect Page</div>} />
+      <Route path="/app/portfolio/properties/own" element={<div>Own Properties List</div>} />
+      <Route path="/app/portfolio/properties/prospects" element={<div>Prospects List</div>} />
     </Routes>,
-    { initialEntries: [`/app/portfolio/properties/${propertyId}`] }
+    { initialEntries: [`/app/portfolio/properties/${statusPrefix}/${propertyId}`] }
   );
 }
 
@@ -142,7 +145,7 @@ describe('PropertyView', () => {
       expect(image).toHaveAttribute('src', '/assets/properties/placeholder.svg');
     });
 
-    it('shows ownership share with circular badge', async () => {
+    it('shows ownership status ribbon', async () => {
       const partialOwnership = createMockProperty({
         ...mockProperty,
         ownerships: [{ share: 75, userId: 1, propertyId: 1 }],
@@ -155,11 +158,11 @@ describe('PropertyView', () => {
         expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
 
-      expect(screen.getByText('75%')).toBeInTheDocument();
-      expect(screen.getByText('Ownership share')).toBeInTheDocument();
+      // Ribbon shows ownership status text with percentage
+      expect(screen.getByText(/75/)).toBeInTheDocument();
     });
 
-    it('shows 100% ownership share', async () => {
+    it('shows ownership status ribbon for full ownership', async () => {
       mockGet.mockResolvedValue(mockProperty);
 
       renderPropertyView();
@@ -168,7 +171,8 @@ describe('PropertyView', () => {
         expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
 
-      expect(screen.getByText('100%')).toBeInTheDocument();
+      // Ribbon shows ownership status text with percentage
+      expect(screen.getByText(/100/)).toBeInTheDocument();
     });
 
     it('hides location section when no address or city', async () => {
@@ -252,9 +256,9 @@ describe('PropertyView', () => {
   });
 
   describe('Navigation', () => {
-    it('Edit button navigates to edit page', async () => {
+    it('Edit button navigates to edit page for own property', async () => {
       const user = userEvent.setup();
-      mockGet.mockResolvedValue(mockProperty);
+      mockGet.mockResolvedValue({ ...mockProperty, status: 2 }); // PropertyStatus.OWN = 2
 
       renderPropertyView();
 
@@ -265,15 +269,34 @@ describe('PropertyView', () => {
       const editButton = screen.getByRole('button', { name: /edit/i });
       await user.click(editButton);
 
-      // After clicking edit, we should navigate to the edit page
+      // After clicking edit, we should navigate to the edit page for own properties
       await waitFor(() => {
-        expect(screen.getByText('Edit Page')).toBeInTheDocument();
+        expect(screen.getByText('Edit Own Page')).toBeInTheDocument();
       });
     });
 
-    it('Back button navigates to properties list', async () => {
+    it('Edit button navigates to edit page for prospect property', async () => {
       const user = userEvent.setup();
-      mockGet.mockResolvedValue(mockProperty);
+      mockGet.mockResolvedValue({ ...mockProperty, status: 1 }); // PropertyStatus.PROSPECT = 1
+
+      renderPropertyView();
+
+      await waitFor(() => {
+        expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
+      });
+
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      await user.click(editButton);
+
+      // After clicking edit, we should navigate to the edit page for prospects
+      await waitFor(() => {
+        expect(screen.getByText('Edit Prospect Page')).toBeInTheDocument();
+      });
+    });
+
+    it('Back button navigates to own properties list for own property', async () => {
+      const user = userEvent.setup();
+      mockGet.mockResolvedValue({ ...mockProperty, status: 2 }); // PropertyStatus.OWN = 2
 
       renderPropertyView();
 
@@ -284,9 +307,28 @@ describe('PropertyView', () => {
       const backButton = screen.getByRole('button', { name: /back/i });
       await user.click(backButton);
 
-      // After clicking back, we should navigate to the properties list
+      // After clicking back, we should navigate to the own properties list
       await waitFor(() => {
-        expect(screen.getByText('Properties List')).toBeInTheDocument();
+        expect(screen.getByText('Own Properties List')).toBeInTheDocument();
+      });
+    });
+
+    it('Back button navigates to prospects list for prospect property', async () => {
+      const user = userEvent.setup();
+      mockGet.mockResolvedValue({ ...mockProperty, status: 1 }); // PropertyStatus.PROSPECT = 1
+
+      renderPropertyView();
+
+      await waitFor(() => {
+        expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
+      });
+
+      const backButton = screen.getByRole('button', { name: /back/i });
+      await user.click(backButton);
+
+      // After clicking back, we should navigate to the prospects list
+      await waitFor(() => {
+        expect(screen.getByText('Prospects List')).toBeInTheDocument();
       });
     });
   });
@@ -299,6 +341,28 @@ describe('PropertyView', () => {
 
       await waitFor(() => {
         expect(mockGet).toHaveBeenCalledWith('real-estate/property', 42, { ownerships: true });
+      });
+    });
+  });
+
+  describe('Route-based navigation', () => {
+    it('renders correctly when accessed via own route', async () => {
+      mockGet.mockResolvedValue({ ...mockProperty, status: 2 }); // PropertyStatus.OWN = 2
+
+      renderPropertyView('1', 'own');
+
+      await waitFor(() => {
+        expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
+      });
+    });
+
+    it('renders correctly when accessed via prospects route', async () => {
+      mockGet.mockResolvedValue({ ...mockProperty, status: 1 }); // PropertyStatus.PROSPECT = 1
+
+      renderPropertyView('1', 'prospects');
+
+      await waitFor(() => {
+        expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
     });
   });
