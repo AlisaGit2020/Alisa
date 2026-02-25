@@ -41,6 +41,17 @@ const property = {
     editProperty: 'Muokkaa',
     back: 'Takaisin',
 
+    // Prospect add choice modal
+    addProspectTitle: 'Lisää seurattava kohde',
+    chooseAddMethod: 'Miten haluat lisätä kohteen?',
+    importFromEtuovi: 'Tuo Etuovista',
+    etuoviUrlPlaceholder: 'Liitä Etuovi-kohteen URL (esim. https://www.etuovi.com/kohde/12345)',
+    importButton: 'Tuo',
+    addManually: 'Täytä lomake manuaalisesti',
+    importSuccess: 'Kohde tuotu onnistuneesti',
+    importError: 'Kohteen tuonti epäonnistui',
+    invalidEtuoviUrl: 'Anna kelvollinen Etuovi-URL',
+
     // Report section
     report: {
         currentYearIncome: 'Kuluvan vuoden tulot',

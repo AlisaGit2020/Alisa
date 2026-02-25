@@ -41,6 +41,17 @@ const property = {
     editProperty: 'Edit',
     back: 'Back',
 
+    // Prospect add choice modal
+    addProspectTitle: 'Add Prospect Property',
+    chooseAddMethod: 'How would you like to add a property?',
+    importFromEtuovi: 'Import from Etuovi',
+    etuoviUrlPlaceholder: 'Paste Etuovi property URL (e.g., https://www.etuovi.com/kohde/12345)',
+    importButton: 'Import',
+    addManually: 'Fill in form manually',
+    importSuccess: 'Property imported successfully',
+    importError: 'Failed to import property',
+    invalidEtuoviUrl: 'Please enter a valid Etuovi URL',
+
     // Report section
     report: {
         currentYearIncome: 'Current Year Income',

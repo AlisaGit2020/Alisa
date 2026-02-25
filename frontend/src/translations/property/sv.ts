@@ -41,6 +41,17 @@ const property = {
     editProperty: 'Redigera',
     back: 'Tillbaka',
 
+    // Prospect add choice modal
+    addProspectTitle: 'Lägg till prospekt',
+    chooseAddMethod: 'Hur vill du lägga till en fastighet?',
+    importFromEtuovi: 'Importera från Etuovi',
+    etuoviUrlPlaceholder: 'Klistra in Etuovi-URL (t.ex. https://www.etuovi.com/kohde/12345)',
+    importButton: 'Importera',
+    addManually: 'Fyll i formuläret manuellt',
+    importSuccess: 'Fastighet importerad',
+    importError: 'Kunde inte importera fastighet',
+    invalidEtuoviUrl: 'Ange en giltig Etuovi-URL',
+
     // Report section
     report: {
         currentYearIncome: 'Årets intäkter',
