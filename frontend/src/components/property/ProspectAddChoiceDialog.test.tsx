@@ -1,15 +1,8 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { renderWithProviders } from "@test-utils/test-wrapper";
+import { renderWithProviders, server } from "@test-utils";
 import { http, HttpResponse } from "msw";
-import { setupServer } from "msw/node";
 import ProspectAddChoiceDialog from "./ProspectAddChoiceDialog";
-
-const server = setupServer();
-
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
 
 describe("ProspectAddChoiceDialog", () => {
   const mockOnClose = jest.fn();
