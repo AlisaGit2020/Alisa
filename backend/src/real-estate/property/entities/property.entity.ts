@@ -3,6 +3,7 @@
 import { Income } from '@asset-backend/accounting/income/entities/income.entity';
 import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
 import { columnOptionOneDecimal } from '@asset-backend/common/typeorm.column.definitions';
+import { DecimalToNumberTransformer } from '@asset-backend/common/transformer/entity.data.transformer';
 import {
   PropertyExternalSource,
   PropertyStatus,
@@ -88,4 +89,40 @@ export class Property {
 
   @Column({ nullable: true })
   public externalSourceId?: string;
+
+  @Column({ nullable: true })
+  public rooms?: string;
+
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    transformer: new DecimalToNumberTransformer(),
+  })
+  public purchasePrice?: number;
+
+  @Column({ type: 'date', nullable: true })
+  public purchaseDate?: Date;
+
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    transformer: new DecimalToNumberTransformer(),
+  })
+  public purchaseLoan?: number;
+
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    transformer: new DecimalToNumberTransformer(),
+  })
+  public salePrice?: number;
+
+  @Column({ type: 'date', nullable: true })
+  public saleDate?: Date;
 }

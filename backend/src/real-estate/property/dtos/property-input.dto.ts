@@ -61,5 +61,30 @@ export class PropertyInputDto {
   @IsString()
   externalSourceId?: string;
 
+  @IsOptional()
+  @IsString()
+  rooms?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  purchasePrice?: number;
+
+  @IsOptional()
+  purchaseDate?: Date;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  purchaseLoan?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  salePrice?: number;
+
+  @IsOptional()
+  saleDate?: Date;
+
   ownerships?: OwnershipInputDto[];
 }

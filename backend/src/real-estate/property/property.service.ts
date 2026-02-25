@@ -385,6 +385,15 @@ export class PropertyService {
       property.externalSource = input.externalSource;
     if (input.externalSourceId !== undefined)
       property.externalSourceId = input.externalSourceId;
+    if (input.rooms !== undefined) property.rooms = input.rooms;
+    if (input.purchasePrice !== undefined)
+      property.purchasePrice = input.purchasePrice;
+    if (input.purchaseDate !== undefined)
+      property.purchaseDate = input.purchaseDate;
+    if (input.purchaseLoan !== undefined)
+      property.purchaseLoan = input.purchaseLoan;
+    if (input.salePrice !== undefined) property.salePrice = input.salePrice;
+    if (input.saleDate !== undefined) property.saleDate = input.saleDate;
     if (input.ownerships !== undefined)
       property.ownerships = input.ownerships as unknown as Ownership[];
   }
