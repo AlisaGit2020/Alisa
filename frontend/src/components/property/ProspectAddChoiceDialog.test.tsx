@@ -2,7 +2,10 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders, server } from "@test-utils";
 import { http, HttpResponse } from "msw";
+import Cookies from "js-cookie";
 import ProspectAddChoiceDialog from "./ProspectAddChoiceDialog";
+
+const API_BASE = "http://localhost:3000";
 
 describe("ProspectAddChoiceDialog", () => {
   const mockOnClose = jest.fn();
@@ -11,6 +14,12 @@ describe("ProspectAddChoiceDialog", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Set up mock auth cookie for ApiClient.getToken()
+    Cookies.set("_auth", "mock-test-token");
+  });
+
+  afterEach(() => {
+    Cookies.remove("_auth");
   });
 
   const renderDialog = (open = true) => {
@@ -88,7 +97,7 @@ describe("ProspectAddChoiceDialog", () => {
 
   it("shows loading state during import", async () => {
     server.use(
-      http.post("/api/import/etuovi/create-prospect", async () => {
+      http.post(`${API_BASE}/api/import/etuovi/create-prospect`, async () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
         return HttpResponse.json({ id: 1, name: "Test Property" });
       })
@@ -108,7 +117,7 @@ describe("ProspectAddChoiceDialog", () => {
 
   it("calls onSuccess after successful import", async () => {
     server.use(
-      http.post("/api/import/etuovi/create-prospect", () => {
+      http.post(`${API_BASE}/api/import/etuovi/create-prospect`, () => {
         return HttpResponse.json({ id: 1, name: "Test Property" });
       })
     );
@@ -129,7 +138,7 @@ describe("ProspectAddChoiceDialog", () => {
 
   it("shows error toast on failed import", async () => {
     server.use(
-      http.post("/api/import/etuovi/create-prospect", () => {
+      http.post(`${API_BASE}/api/import/etuovi/create-prospect`, () => {
         return HttpResponse.json(
           { message: "Property listing not found" },
           { status: 404 }
