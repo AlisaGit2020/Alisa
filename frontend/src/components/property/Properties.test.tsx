@@ -10,8 +10,8 @@ import React from 'react';
 // Mock the withTranslation HOC to avoid i18n namespace issues
 jest.mock('react-i18next', () => ({
   ...jest.requireActual('react-i18next'),
-  withTranslation: () => (Component: React.ComponentType) => {
-    const WrappedComponent = (props: object) => {
+  withTranslation: () => <P extends object>(Component: React.ComponentType<P>) => {
+    const WrappedComponent = (props: Omit<P, 't'>) => {
       const translations: Record<string, string> = {
         add: 'Add',
         edit: 'Edit',
@@ -37,7 +37,7 @@ jest.mock('react-i18next', () => ({
         invalidEtuoviUrl: 'Invalid Etuovi URL',
       };
       const t = (key: string) => translations[key] || key;
-      return <Component {...props} t={t} />;
+      return <Component {...(props as P)} t={t} />;
     };
     WrappedComponent.displayName = `withTranslation(${Component.displayName || Component.name})`;
     return WrappedComponent;

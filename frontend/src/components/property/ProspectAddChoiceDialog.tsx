@@ -40,11 +40,11 @@ export default function ProspectAddChoiceDialog({
   const { showToast } = useToast();
   const [etuoviUrl, setEtuoviUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | undefined>(undefined);
 
   const handleUrlChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEtuoviUrl(e.target.value);
-    setValidationError(null);
+    setValidationError(undefined);
   };
 
   const validateUrl = (url: string): boolean => {
@@ -75,7 +75,7 @@ export default function ProspectAddChoiceDialog({
 
   const handleClose = () => {
     setEtuoviUrl("");
-    setValidationError(null);
+    setValidationError(undefined);
     onClose();
   };
 

@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { renderWithProviders, server } from "@test-utils";
+import { renderWithProviders, server } from "@test-utils/index";
 import { http, HttpResponse } from "msw";
 import Cookies from "js-cookie";
 import ProspectAddChoiceDialog from "./ProspectAddChoiceDialog";
