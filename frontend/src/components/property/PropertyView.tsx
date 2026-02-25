@@ -1,4 +1,4 @@
-import { Box, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
+import { Box, CircularProgress, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
 import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { WithTranslation, withTranslation } from 'react-i18next';
@@ -17,11 +17,6 @@ import LocationCityIcon from '@mui/icons-material/LocationCity';
 import RuleIcon from '@mui/icons-material/Rule';
 import PropertyReportSection from './report/PropertyReportSection';
 import { AllocationRulesModal } from '../allocation';
-import { getReturnPathForStatus } from './property-form-utils';
-import PropertyStatusRibbon from './PropertyStatusRibbon';
-import ProspectInvestmentSection from './sections/ProspectInvestmentSection';
-import ExternalListingLink from './sections/ExternalListingLink';
-import SoldSummarySection from './sections/SoldSummarySection';
 
 interface DetailRowProps {
   icon: ReactNode;
@@ -45,6 +40,74 @@ function DetailRow({ icon, label, value }: DetailRowProps) {
   );
 }
 
+interface OwnershipBadgeProps {
+  percentage: number;
+  label: string;
+}
+
+function OwnershipBadge({ percentage, label }: OwnershipBadgeProps) {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+        <CircularProgress
+          variant="determinate"
+          value={percentage}
+          size={56}
+          thickness={4}
+          sx={{ color: percentage === 100 ? 'success.main' : 'primary.main' }}
+        />
+        <Box
+          sx={{
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            position: 'absolute',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography variant="body1" component="div" sx={{ fontWeight: 600 }}>
+            {percentage}%
+          </Typography>
+        </Box>
+      </Box>
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+        {label}
+      </Typography>
+    </Box>
+  );
+}
+
+interface ProspectBadgeProps {
+  label: string;
+}
+
+function ProspectBadge({ label }: ProspectBadgeProps) {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Box
+        sx={{
+          width: 56,
+          height: 56,
+          borderRadius: '50%',
+          bgcolor: 'warning.light',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography variant="body2" component="div" sx={{ fontWeight: 600, color: 'warning.contrastText' }}>
+          ?
+        </Typography>
+      </Box>
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+        {label}
+      </Typography>
+    </Box>
+  );
+}
 
 function PropertyView({ t }: WithTranslation) {
   const [property, setProperty] = useState<Property | null>(null);
@@ -80,20 +143,14 @@ function PropertyView({ t }: WithTranslation) {
     fetchProperty();
   }, [idParam]);
 
-  const getRoutePrefix = () => {
-    return property?.status === PropertyStatus.PROSPECT ? 'prospects' : 'own';
-  };
-
   const handleEdit = () => {
-    const prefix = getRoutePrefix();
-    navigate(`${propertyContext.routePath}/${prefix}/edit/${idParam}`, {
+    navigate(`${propertyContext.routePath}/edit/${idParam}`, {
       state: { returnTo: 'view' },
     });
   };
 
   const handleBack = () => {
-    const status = property?.status ?? PropertyStatus.OWN;
-    navigate(getReturnPathForStatus(status));
+    navigate(propertyContext.routePath);
   };
 
   if (loading) {
@@ -118,7 +175,7 @@ function PropertyView({ t }: WithTranslation) {
 
   return (
     <Paper sx={{ overflow: 'hidden' }}>
-      {/* Hero image with status ribbon overlay */}
+      {/* Hero image with ownership badge overlay */}
       <Box sx={{ position: 'relative' }}>
         <Box
           component="img"
@@ -130,8 +187,24 @@ function PropertyView({ t }: WithTranslation) {
             objectFit: 'cover',
           }}
         />
-        {/* Status ribbon in top-left corner */}
-        <PropertyStatusRibbon status={property.status} ownershipShare={ownershipShare} />
+        {/* Status badge floating over image */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: -28,
+            right: 16,
+            bgcolor: 'background.paper',
+            borderRadius: '50%',
+            p: 0.5,
+            boxShadow: 2,
+          }}
+        >
+          {property.status === PropertyStatus.PROSPECT ? (
+            <ProspectBadge label={t('prospectStatus')} />
+          ) : (
+            <OwnershipBadge percentage={ownershipShare} label={t('ownershipShare')} />
+          )}
+        </Box>
       </Box>
 
       {/* Back button */}
@@ -158,15 +231,12 @@ function PropertyView({ t }: WithTranslation) {
             )}
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            {/* Allocation rules button - hidden for PROSPECT */}
-            {property.status !== PropertyStatus.PROSPECT && (
-              <AssetButton
-                label={t('allocation:rules')}
-                variant="outlined"
-                startIcon={<RuleIcon />}
-                onClick={() => setRulesModalOpen(true)}
-              />
-            )}
+            <AssetButton
+              label={t('allocation:rules')}
+              variant="outlined"
+              startIcon={<RuleIcon />}
+              onClick={() => setRulesModalOpen(true)}
+            />
             <AssetButton
               label={t('editProperty')}
               variant="contained"
@@ -243,35 +313,13 @@ function PropertyView({ t }: WithTranslation) {
         </>
       )}
 
-      {/* Statistics - only for OWN and SOLD */}
-      {property.status !== PropertyStatus.PROSPECT && (
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
-            {t('statisticsSection')}
-          </Typography>
-          <PropertyReportSection propertyId={property.id} />
-        </Box>
-      )}
-
-      {/* Investment Calculator - only for PROSPECT */}
-      {property.status === PropertyStatus.PROSPECT && (
-        <ProspectInvestmentSection property={property} />
-      )}
-
-      {/* External Listing Link - only for PROSPECT with external source */}
-      {property.status === PropertyStatus.PROSPECT &&
-       property.externalSource &&
-       property.externalSourceId && (
-        <ExternalListingLink
-          externalSource={property.externalSource}
-          externalSourceId={property.externalSourceId}
-        />
-      )}
-
-      {/* Sale Summary - only for SOLD */}
-      {property.status === PropertyStatus.SOLD && (
-        <SoldSummarySection property={property} />
-      )}
+      {/* Financial Statistics Section */}
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
+          {t('statisticsSection')}
+        </Typography>
+        <PropertyReportSection propertyId={property.id} />
+      </Box>
 
       {/* Allocation Rules Modal */}
       <AllocationRulesModal

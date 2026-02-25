@@ -1,10 +1,5 @@
 import '@testing-library/jest-dom';
 import { PropertyInput } from '@asset-types';
-import { PropertyStatus } from '@asset-types/common';
-import {
-  getPropertyStatusFromPath,
-  getReturnPathForStatus,
-} from './property-form-utils';
 
 // Since Jest mock hoisting causes issues with relative paths in ESM mode,
 // we test the data transformation logic separately from the React component
@@ -530,39 +525,6 @@ describe('PropertyForm Component Logic', () => {
       };
 
       expect(buildUploadEndpoint(123)).toBe('/real-estate/property/123/photo');
-    });
-  });
-
-  describe('Property status from URL path', () => {
-    it('returns OWN status for /own/add path', () => {
-      expect(getPropertyStatusFromPath('/app/portfolio/properties/own/add')).toBe(PropertyStatus.OWN);
-    });
-
-    it('returns OWN status for /own/edit/:id path', () => {
-      expect(getPropertyStatusFromPath('/app/portfolio/properties/own/edit/123')).toBe(PropertyStatus.OWN);
-    });
-
-    it('returns PROSPECT status for /prospects/add path', () => {
-      expect(getPropertyStatusFromPath('/app/portfolio/properties/prospects/add')).toBe(PropertyStatus.PROSPECT);
-    });
-
-    it('returns PROSPECT status for /prospects/edit/:id path', () => {
-      expect(getPropertyStatusFromPath('/app/portfolio/properties/prospects/edit/456')).toBe(PropertyStatus.PROSPECT);
-    });
-
-    it('defaults to OWN status for unknown paths', () => {
-      // Any path that doesn't contain /prospects/ defaults to OWN
-      expect(getPropertyStatusFromPath('/app/portfolio/properties/unknown/add')).toBe(PropertyStatus.OWN);
-    });
-  });
-
-  describe('Return path based on property status', () => {
-    it('returns /own path for OWN status', () => {
-      expect(getReturnPathForStatus(PropertyStatus.OWN)).toBe('/app/portfolio/properties/own');
-    });
-
-    it('returns /prospects path for PROSPECT status', () => {
-      expect(getReturnPathForStatus(PropertyStatus.PROSPECT)).toBe('/app/portfolio/properties/prospects');
     });
   });
 });

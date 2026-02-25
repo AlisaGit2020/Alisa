@@ -1,5 +1,5 @@
 // frontend/test/utils/msw-handlers.ts
-import { http, HttpResponse, JsonBodyType } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 const API_BASE = 'http://localhost:3000';
 
@@ -10,7 +10,7 @@ export const handlers = {
   /**
    * Mock GET request with success response
    */
-  get: <T extends JsonBodyType>(endpoint: string, data: T) => {
+  get: <T>(endpoint: string, data: T) => {
     return http.get(`${API_BASE}${endpoint}`, () => {
       return HttpResponse.json(data);
     });
@@ -19,7 +19,7 @@ export const handlers = {
   /**
    * Mock POST request with success response
    */
-  post: <T extends JsonBodyType>(endpoint: string, data: T) => {
+  post: <T>(endpoint: string, data: T) => {
     return http.post(`${API_BASE}${endpoint}`, () => {
       return HttpResponse.json(data, { status: 201 });
     });
@@ -28,7 +28,7 @@ export const handlers = {
   /**
    * Mock PUT request with success response
    */
-  put: <T extends JsonBodyType>(endpoint: string, data: T) => {
+  put: <T>(endpoint: string, data: T) => {
     return http.put(`${API_BASE}${endpoint}`, () => {
       return HttpResponse.json(data);
     });

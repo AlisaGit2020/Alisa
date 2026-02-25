@@ -1,13 +1,11 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { renderWithProviders, renderWithRouter } from '@test-utils/test-wrapper';
+import { renderWithProviders } from '@test-utils/test-wrapper';
 import AssetCardList from './AssetCardList';
 import ApiClient from '@asset-lib/api-client';
 import { propertyContext } from '@asset-lib/asset-contexts';
 import { TFunction } from 'i18next';
-import { Routes, Route } from 'react-router-dom';
-import { PropertyStatus } from '@asset-types';
 
 // Mock ApiClient static methods
 jest.spyOn(ApiClient, 'search');
@@ -286,7 +284,7 @@ describe('AssetCardList', () => {
     });
   });
 
-  it('displays add link without routePrefix', async () => {
+  it('displays add link', async () => {
     (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
 
     renderWithProviders(
@@ -306,27 +304,6 @@ describe('AssetCardList', () => {
     expect(addLink).toHaveAttribute('href', `${propertyContext.routePath}/add`);
   });
 
-  it('displays add link with routePrefix', async () => {
-    (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
-
-    renderWithProviders(
-      <AssetCardList
-        t={mockT}
-        title="Properties"
-        assetContext={propertyContext}
-        fields={[{ name: 'name' as keyof TestProperty }]}
-        routePrefix="own"
-      />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Test Property 1')).toBeInTheDocument();
-    });
-
-    const addLink = screen.getByRole('link', { name: /add/i });
-    expect(addLink).toHaveAttribute('href', `${propertyContext.routePath}/own/add`);
-  });
-
   it('displays title', async () => {
     (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue([]);
 
@@ -340,215 +317,5 @@ describe('AssetCardList', () => {
     );
 
     expect(screen.getByText('My Properties')).toBeInTheDocument();
-  });
-
-  describe("onAddClick callback", () => {
-    it("calls onAddClick when add link is clicked instead of navigating", async () => {
-      const onAddClick = jest.fn();
-      const user = userEvent.setup();
-      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
-
-      renderWithProviders(
-        <AssetCardList
-          t={mockT}
-          assetContext={propertyContext}
-          fields={[{ name: 'name' as keyof TestProperty }]}
-          onAddClick={onAddClick}
-        />
-      );
-
-      const addLink = await screen.findByRole("link", { name: /add/i });
-      await user.click(addLink);
-
-      expect(onAddClick).toHaveBeenCalled();
-    });
-
-    it("prevents default navigation when onAddClick is provided", async () => {
-      const onAddClick = jest.fn();
-      const user = userEvent.setup();
-      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
-
-      renderWithProviders(
-        <AssetCardList
-          t={mockT}
-          assetContext={propertyContext}
-          fields={[{ name: 'name' as keyof TestProperty }]}
-          onAddClick={onAddClick}
-        />
-      );
-
-      const addLink = await screen.findByRole("link", { name: /add/i });
-      await user.click(addLink);
-
-      // Should not navigate (would be verified by checking navigation didn't happen)
-      expect(onAddClick).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe("card click view navigation", () => {
-    it("navigates to view path with routePrefix when card is clicked", async () => {
-      const user = userEvent.setup();
-      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
-
-      renderWithRouter(
-        <Routes>
-          <Route path="/app/portfolio/properties/own" element={
-            <AssetCardList
-              t={mockT}
-              assetContext={propertyContext}
-              fields={[{ name: 'name' as keyof TestProperty }]}
-              routePrefix="own"
-            />
-          } />
-          <Route path="/app/portfolio/properties/own/:id" element={<div>Own Property View</div>} />
-        </Routes>,
-        { initialEntries: ['/app/portfolio/properties/own'] }
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('Test Property 1')).toBeInTheDocument();
-      });
-
-      // Click the first card - find the CardActionArea button
-      const card = screen.getByText('Test Property 1').closest('button');
-      expect(card).not.toBeNull();
-      await user.click(card!);
-
-      // Should navigate to view path WITH routePrefix and show the view page
-      await waitFor(() => {
-        expect(screen.getByText('Own Property View')).toBeInTheDocument();
-      });
-    });
-
-    it("navigates to view path with prospects routePrefix when card is clicked", async () => {
-      const user = userEvent.setup();
-      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
-
-      renderWithRouter(
-        <Routes>
-          <Route path="/app/portfolio/properties/prospects" element={
-            <AssetCardList
-              t={mockT}
-              assetContext={propertyContext}
-              fields={[{ name: 'name' as keyof TestProperty }]}
-              routePrefix="prospects"
-            />
-          } />
-          <Route path="/app/portfolio/properties/prospects/:id" element={<div>Prospect Property View</div>} />
-        </Routes>,
-        { initialEntries: ['/app/portfolio/properties/prospects'] }
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('Test Property 1')).toBeInTheDocument();
-      });
-
-      // Click the first card - find the CardActionArea button
-      const card = screen.getByText('Test Property 1').closest('button');
-      expect(card).not.toBeNull();
-      await user.click(card!);
-
-      // Should navigate to view path WITH routePrefix and show the view page
-      await waitFor(() => {
-        expect(screen.getByText('Prospect Property View')).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('property status ribbon', () => {
-    it('displays ownership ribbon for OWN status properties', async () => {
-      const propertiesWithStatus = [
-        {
-          id: 1,
-          name: 'Helsinki Apartment',
-          size: 75,
-          description: 'A property I own',
-          ownerships: [{ share: 100 }],
-          status: PropertyStatus.OWN,
-        },
-      ];
-      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(propertiesWithStatus);
-
-      renderWithProviders(
-        <AssetCardList
-          t={mockT}
-          title="Properties"
-          assetContext={propertyContext}
-          fields={[{ name: 'name' as keyof TestProperty }]}
-          routePrefix="own"
-        />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
-      });
-
-      // Should display ownership percentage in ribbon (ownershipStatus translation shows "100")
-      expect(screen.getByText(/100/)).toBeInTheDocument();
-    });
-
-    it('displays prospect ribbon for PROSPECT status properties', async () => {
-      const propertiesWithStatus = [
-        {
-          id: 2,
-          name: 'Espoo Studio',
-          size: 60,
-          description: 'A property under consideration',
-          ownerships: [],
-          status: PropertyStatus.PROSPECT,
-        },
-      ];
-      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(propertiesWithStatus);
-
-      renderWithProviders(
-        <AssetCardList
-          t={mockT}
-          title="Properties"
-          assetContext={propertyContext}
-          fields={[{ name: 'name' as keyof TestProperty }]}
-          routePrefix="prospects"
-        />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('Espoo Studio')).toBeInTheDocument();
-      });
-
-      // Should display prospect status ribbon text (prospectStatusRibbon translation)
-      expect(screen.getByText(/prospectStatusRibbon|prospect/i)).toBeInTheDocument();
-    });
-
-    it('displays sold ribbon for SOLD status properties', async () => {
-      const propertiesWithStatus = [
-        {
-          id: 3,
-          name: 'Tampere Flat',
-          size: 80,
-          description: 'A property that was sold',
-          ownerships: [{ share: 100 }],
-          status: PropertyStatus.SOLD,
-        },
-      ];
-      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(propertiesWithStatus);
-
-      renderWithProviders(
-        <AssetCardList
-          t={mockT}
-          title="Properties"
-          assetContext={propertyContext}
-          fields={[{ name: 'name' as keyof TestProperty }]}
-        />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('Tampere Flat')).toBeInTheDocument();
-      });
-
-      // Should display sold status ribbon text (soldStatus translation renders in ribbon)
-      // The ribbon should be rendered - check for the ownership percentage which defaults to 100
-      // when ownerships exist, or check that the ribbon component is rendered
-      const ribbonTexts = screen.getAllByText(/soldStatus|sold/i);
-      expect(ribbonTexts.length).toBeGreaterThanOrEqual(1);
-    });
   });
 });

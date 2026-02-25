@@ -3,10 +3,6 @@ const property = {
     pageTitle: 'Asunnot',
     pageDescription: 'Näytä ja hallinnoi kiinteistösalkkuasi.',
 
-    // Property tabs
-    ownProperties: 'Omat asunnot',
-    prospectProperties: 'Harkinnassa',
-
     add: 'Lisää uusi asunto',
     properties: 'Asunnot',
     overviewTitle: 'Asunnot',
@@ -32,10 +28,7 @@ const property = {
     photoDeleteError: 'Kuvan poisto epäonnistui. Yritä uudelleen.',
     savePropertyFirst: 'Tallenna kohde ensin lisätäksesi kuvan',
     ownershipShare: 'Omistusosuus',
-    ownershipStatus: 'Omistus {{percent}}%',
     prospectStatus: 'Harkinnassa',
-    prospectStatusRibbon: 'Harkinnassa',
-    soldStatus: 'Myyty',
     viewPageTitle: 'Kohteen tiedot',
     propertyInfo: 'Perustiedot',
     locationInfo: 'Sijainti',
@@ -43,23 +36,6 @@ const property = {
     statisticsComingSoon: 'Taloudelliset tilastot tulossa pian',
     editProperty: 'Muokkaa',
     back: 'Takaisin',
-    investmentAnalysis: 'Sijoituslaskelma',
-    viewListing: 'Alkuperäinen ilmoitus',
-    viewOnSource: 'Katso kohde sivustolla {{source}}',
-    saleSummary: 'Myyntiyhteenveto',
-    comingSoon: 'Tulossa pian',
-    upcomingFeature: 'Tuleva ominaisuus',
-
-    // Prospect add choice modal
-    addProspectTitle: 'Lisää seurattava kohde',
-    chooseAddMethod: 'Miten haluat lisätä kohteen?',
-    importFromEtuovi: 'Tuo Etuovista',
-    etuoviUrlPlaceholder: 'Liitä Etuovi-kohteen URL (esim. https://www.etuovi.com/kohde/12345)',
-    importButton: 'Tuo',
-    addManually: 'Täytä lomake manuaalisesti',
-    importSuccess: 'Kohde tuotu onnistuneesti',
-    importError: 'Kohteen tuonti epäonnistui',
-    invalidEtuoviUrl: 'Anna kelvollinen Etuovi-URL',
 
     // Report section
     report: {

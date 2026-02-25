@@ -12,7 +12,6 @@ export default {
     "^@asset-types$": "<rootDir>/src/types/index.ts",
     "^@asset-types/(.*)": "<rootDir>/src/types/$1",
     "^@asset-mocks/(.*)": "<rootDir>/test/mocks/$1",
-    "^@test-utils$": "<rootDir>/test/utils/index.ts",
     "^@test-utils/(.*)": "<rootDir>/test/utils/$1",
     "^@asset-backend/(.*)": "<rootDir>/../backend/src/$1",
     // Map .js imports to .ts files (for ESM compatibility)

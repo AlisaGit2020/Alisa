@@ -28,8 +28,7 @@ import { TypeOrmFetchOptions } from "../../lib/types";
 import ApiClient from "../../lib/api-client";
 import AssetContext from "@asset-lib/asset-contexts";
 import { getPhotoUrl } from "@asset-lib/functions";
-import { Address, DeleteValidationResult, PropertyStatus } from "@asset-types";
-import PropertyStatusRibbon from "../property/PropertyStatusRibbon";
+import { Address, DeleteValidationResult } from "@asset-types";
 
 interface AlisCardListField<T> {
   name: keyof T;
@@ -43,10 +42,6 @@ interface AssetCardListInputProps<T> {
   fields: AlisCardListField<T>[];
   fetchOptions?: TypeOrmFetchOptions<T>;
   onAfterDelete?: () => void;
-  /** Optional route prefix for add/edit links (e.g., "own" or "prospects") */
-  routePrefix?: string;
-  /** Optional callback when add link is clicked (overrides default navigation) */
-  onAddClick?: () => void;
 }
 
 function AssetCardList<T extends { id: number }>({
@@ -55,14 +50,7 @@ function AssetCardList<T extends { id: number }>({
   assetContext,
   fetchOptions,
   onAfterDelete,
-  routePrefix,
-  onAddClick,
 }: AssetCardListInputProps<T>) {
-  // Build route paths with optional prefix
-  const buildRoutePath = (suffix: string) => {
-    const base = assetContext.routePath;
-    return routePrefix ? `${base}/${routePrefix}/${suffix}` : `${base}/${suffix}`;
-  };
   const [data, setData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState<number>(0);
@@ -151,19 +139,7 @@ function AssetCardList<T extends { id: number }>({
   return (
     <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
       <Title>{title}</Title>
-      {onAddClick ? (
-        <Link
-          href={buildRoutePath("add")}
-          onClick={(e) => {
-            e.preventDefault();
-            onAddClick();
-          }}
-        >
-          {t("add")}
-        </Link>
-      ) : (
-        <Link href={buildRoutePath("add")}>{t("add")}</Link>
-      )}
+      <Link href={`${assetContext.routePath}/add`}>{t("add")}</Link>
       {data.length > 0 && (
         <Grid container spacing={2} marginTop={2}>
           {data.map((item: T & {
@@ -175,7 +151,6 @@ function AssetCardList<T extends { id: number }>({
             buildYear?: number;
             apartmentType?: string;
             ownerships?: { share: number }[];
-            status?: PropertyStatus;
           }) => (
             <Grid key={item.name} size={{ xs: 12, sm: 6, md: 4 }}>
               <Card
@@ -191,24 +166,16 @@ function AssetCardList<T extends { id: number }>({
                 }}
               >
                 <CardActionArea
-                  onClick={() => navigate(routePrefix ? `${assetContext.routePath}/${routePrefix}/${item.id}` : `${assetContext.routePath}/${item.id}`)}
+                  onClick={() => navigate(`${assetContext.routePath}/${item.id}`)}
                   sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
                 >
-                  <Box sx={{ position: 'relative' }}>
-                    <CardMedia
-                      component="img"
-                      alt={item.name}
-                      height="160"
-                      image={getPhotoUrl(item.photo)}
-                      sx={{ objectFit: 'cover' }}
-                    />
-                    {item.status !== undefined && (
-                      <PropertyStatusRibbon
-                        status={item.status}
-                        ownershipShare={item.ownerships?.[0]?.share ?? 100}
-                      />
-                    )}
-                  </Box>
+                  <CardMedia
+                    component="img"
+                    alt={item.name}
+                    height="160"
+                    image={getPhotoUrl(item.photo)}
+                    sx={{ objectFit: 'cover' }}
+                  />
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography gutterBottom variant="h6" component="div">
                       {item.name}
@@ -265,7 +232,7 @@ function AssetCardList<T extends { id: number }>({
                 <CardActions>
                   <Button
                     size="small"
-                    onClick={() => navigate(buildRoutePath(`edit/${item.id}`))}
+                    onClick={() => navigate(`${assetContext.routePath}/edit/${item.id}`)}
                     startIcon={<EditIcon></EditIcon>}
                   >
                     {t("edit")}
