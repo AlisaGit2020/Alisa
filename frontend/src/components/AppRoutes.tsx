@@ -44,10 +44,11 @@ export default function AppRoutes() {
             <Route path="portfolio/properties/own" element={<Properties />} />
             <Route path="portfolio/properties/own/add" element={<PropertyForm />} />
             <Route path="portfolio/properties/own/edit/:idParam" element={<PropertyForm />} />
+            <Route path="portfolio/properties/own/:idParam" element={<PropertyView />} />
             <Route path="portfolio/properties/prospects" element={<Properties />} />
             <Route path="portfolio/properties/prospects/add" element={<PropertyForm />} />
             <Route path="portfolio/properties/prospects/edit/:idParam" element={<PropertyForm />} />
-            <Route path="portfolio/properties/:idParam" element={<PropertyView />} />
+            <Route path="portfolio/properties/prospects/:idParam" element={<PropertyView />} />
             <Route path="portfolio/investment-calculations" element={<InvestmentCalculatorProtected />} />
 
             {/* Finance routes - nested under /app/finance */}

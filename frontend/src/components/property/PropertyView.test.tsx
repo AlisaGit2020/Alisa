@@ -43,16 +43,17 @@ jest.mock('react-i18next', () => ({
 import PropertyView from './PropertyView';
 
 // Helper to render PropertyView with route params
-function renderPropertyView(propertyId: string = '1') {
+function renderPropertyView(propertyId: string = '1', statusPrefix: 'own' | 'prospects' = 'own') {
   return renderWithRouter(
     <Routes>
-      <Route path="/app/portfolio/properties/:idParam" element={<PropertyView />} />
+      <Route path="/app/portfolio/properties/own/:idParam" element={<PropertyView />} />
+      <Route path="/app/portfolio/properties/prospects/:idParam" element={<PropertyView />} />
       <Route path="/app/portfolio/properties/own/edit/:idParam" element={<div>Edit Own Page</div>} />
       <Route path="/app/portfolio/properties/prospects/edit/:idParam" element={<div>Edit Prospect Page</div>} />
       <Route path="/app/portfolio/properties/own" element={<div>Own Properties List</div>} />
       <Route path="/app/portfolio/properties/prospects" element={<div>Prospects List</div>} />
     </Routes>,
-    { initialEntries: [`/app/portfolio/properties/${propertyId}`] }
+    { initialEntries: [`/app/portfolio/properties/${statusPrefix}/${propertyId}`] }
   );
 }
 
@@ -339,6 +340,28 @@ describe('PropertyView', () => {
 
       await waitFor(() => {
         expect(mockGet).toHaveBeenCalledWith('real-estate/property', 42, { ownerships: true });
+      });
+    });
+  });
+
+  describe('Route-based navigation', () => {
+    it('renders correctly when accessed via own route', async () => {
+      mockGet.mockResolvedValue({ ...mockProperty, status: 2 }); // PropertyStatus.OWN = 2
+
+      renderPropertyView('1', 'own');
+
+      await waitFor(() => {
+        expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
+      });
+    });
+
+    it('renders correctly when accessed via prospects route', async () => {
+      mockGet.mockResolvedValue({ ...mockProperty, status: 1 }); // PropertyStatus.PROSPECT = 1
+
+      renderPropertyView('1', 'prospects');
+
+      await waitFor(() => {
+        expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
     });
   });

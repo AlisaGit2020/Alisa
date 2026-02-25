@@ -662,6 +662,26 @@ describe('Properties Component Logic', () => {
         expect(buildNavigationPath('prospects')).toBe('/app/portfolio/properties/prospects');
       });
     });
+
+    describe('View path construction', () => {
+      const BASE_PATH = '/app/portfolio/properties';
+
+      it('constructs own property view path with id', () => {
+        const buildViewPath = (routePrefix: string, id: number): string => {
+          return `${BASE_PATH}/${routePrefix}/${id}`;
+        };
+
+        expect(buildViewPath('own', 123)).toBe('/app/portfolio/properties/own/123');
+      });
+
+      it('constructs prospect property view path with id', () => {
+        const buildViewPath = (routePrefix: string, id: number): string => {
+          return `${BASE_PATH}/${routePrefix}/${id}`;
+        };
+
+        expect(buildViewPath('prospects', 456)).toBe('/app/portfolio/properties/prospects/456');
+      });
+    });
   });
 });
 

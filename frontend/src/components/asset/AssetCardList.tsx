@@ -189,7 +189,7 @@ function AssetCardList<T extends { id: number }>({
                 }}
               >
                 <CardActionArea
-                  onClick={() => navigate(`${assetContext.routePath}/${item.id}`)}
+                  onClick={() => navigate(routePrefix ? `${assetContext.routePath}/${routePrefix}/${item.id}` : `${assetContext.routePath}/${item.id}`)}
                   sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
                 >
                   <CardMedia

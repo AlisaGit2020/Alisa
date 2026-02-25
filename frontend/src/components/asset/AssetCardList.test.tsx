@@ -1,11 +1,12 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { renderWithProviders } from '@test-utils/test-wrapper';
+import { renderWithProviders, renderWithRouter } from '@test-utils/test-wrapper';
 import AssetCardList from './AssetCardList';
 import ApiClient from '@asset-lib/api-client';
 import { propertyContext } from '@asset-lib/asset-contexts';
 import { TFunction } from 'i18next';
+import { Routes, Route } from 'react-router-dom';
 
 // Mock ApiClient static methods
 jest.spyOn(ApiClient, 'search');
@@ -380,6 +381,76 @@ describe('AssetCardList', () => {
 
       // Should not navigate (would be verified by checking navigation didn't happen)
       expect(onAddClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("card click view navigation", () => {
+    it("navigates to view path with routePrefix when card is clicked", async () => {
+      const user = userEvent.setup();
+      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
+
+      renderWithRouter(
+        <Routes>
+          <Route path="/app/portfolio/properties/own" element={
+            <AssetCardList
+              t={mockT}
+              assetContext={propertyContext}
+              fields={[{ name: 'name' as keyof TestProperty }]}
+              routePrefix="own"
+            />
+          } />
+          <Route path="/app/portfolio/properties/own/:id" element={<div>Own Property View</div>} />
+        </Routes>,
+        { initialEntries: ['/app/portfolio/properties/own'] }
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Property 1')).toBeInTheDocument();
+      });
+
+      // Click the first card - find the CardActionArea button
+      const card = screen.getByText('Test Property 1').closest('button');
+      expect(card).not.toBeNull();
+      await user.click(card!);
+
+      // Should navigate to view path WITH routePrefix and show the view page
+      await waitFor(() => {
+        expect(screen.getByText('Own Property View')).toBeInTheDocument();
+      });
+    });
+
+    it("navigates to view path with prospects routePrefix when card is clicked", async () => {
+      const user = userEvent.setup();
+      (ApiClient.search as unknown as jest.SpyInstance).mockResolvedValue(mockProperties);
+
+      renderWithRouter(
+        <Routes>
+          <Route path="/app/portfolio/properties/prospects" element={
+            <AssetCardList
+              t={mockT}
+              assetContext={propertyContext}
+              fields={[{ name: 'name' as keyof TestProperty }]}
+              routePrefix="prospects"
+            />
+          } />
+          <Route path="/app/portfolio/properties/prospects/:id" element={<div>Prospect Property View</div>} />
+        </Routes>,
+        { initialEntries: ['/app/portfolio/properties/prospects'] }
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Property 1')).toBeInTheDocument();
+      });
+
+      // Click the first card - find the CardActionArea button
+      const card = screen.getByText('Test Property 1').closest('button');
+      expect(card).not.toBeNull();
+      await user.click(card!);
+
+      // Should navigate to view path WITH routePrefix and show the view page
+      await waitFor(() => {
+        expect(screen.getByText('Prospect Property View')).toBeInTheDocument();
+      });
     });
   });
 });
