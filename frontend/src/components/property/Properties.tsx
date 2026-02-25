@@ -176,7 +176,7 @@ function Properties({ t }: WithTranslation) {
                 fetchOptions={buildFetchOptions(TAB_SOLD)}
                 onAfterDelete={handleAfterDelete}
                 routePrefix={ROUTE_SOLD}
-                hideAddLink
+                hideAddLink={true}
               />
             </Grid>
           </Grid>
