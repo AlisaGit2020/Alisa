@@ -6,6 +6,7 @@ import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import { createMockProperty } from '@test-utils/test-data';
 import ApiClient from '@asset-lib/api-client';
+import { PropertyStatus } from '@asset-types/common';
 
 // Mock the withTranslation HOC to avoid i18n namespace issues
 jest.mock('react-i18next', () => ({
@@ -125,10 +126,10 @@ describe('Properties Integration', () => {
         expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
 
-      // Verify add link is present
+      // Verify add link is present (defaults to own tab)
       const addLink = screen.getByRole('link', { name: /add new property/i });
       expect(addLink).toBeInTheDocument();
-      expect(addLink).toHaveAttribute('href', '/app/portfolio/properties/add');
+      expect(addLink).toHaveAttribute('href', '/app/portfolio/properties/own/add');
     });
 
     it('opens delete confirmation dialog when delete button clicked', async () => {
@@ -236,7 +237,7 @@ describe('Properties Integration', () => {
       expect(screen.getByText('Tampere House')).toBeInTheDocument();
     });
 
-    it('calls search API with correct parameters', async () => {
+    it('calls search API with correct parameters including status filter', async () => {
       mockSearch.mockResolvedValue([]);
 
       renderWithProviders(<Properties />);
@@ -245,6 +246,7 @@ describe('Properties Integration', () => {
         expect(mockSearch).toHaveBeenCalledWith('real-estate/property', {
           order: { name: 'ASC' },
           relations: { ownerships: true },
+          where: { status: PropertyStatus.OWN },
         });
       });
     });

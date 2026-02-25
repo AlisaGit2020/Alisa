@@ -3,6 +3,10 @@ const property = {
     pageTitle: 'Fastigheter',
     pageDescription: 'Visa och hantera din fastighetsportfölj.',
 
+    // Property tabs
+    ownProperties: 'Mina fastigheter',
+    prospectProperties: 'Prospekt',
+
     add: 'Lägg till ny fastighet',
     properties: 'Fastigheter',
     overviewTitle: 'Fastigheter',
@@ -28,7 +32,10 @@ const property = {
     photoDeleteError: 'Kunde inte ta bort bild. Försök igen.',
     savePropertyFirst: 'Spara fastigheten först för att lägga till bild',
     ownershipShare: 'Ägarandel',
+    ownershipStatus: 'Ägande {{percent}}%',
     prospectStatus: 'Prospekt',
+    prospectStatusRibbon: 'Prospekt',
+    soldStatus: 'Såld',
     viewPageTitle: 'Fastighetsdetaljer',
     propertyInfo: 'Grundläggande information',
     locationInfo: 'Plats',
@@ -36,6 +43,23 @@ const property = {
     statisticsComingSoon: 'Ekonomisk statistik kommer snart',
     editProperty: 'Redigera',
     back: 'Tillbaka',
+    investmentAnalysis: 'Investeringsanalys',
+    viewListing: 'Ursprunglig annons',
+    viewOnSource: 'Visa på {{source}}',
+    saleSummary: 'Försäljningssammanfattning',
+    comingSoon: 'Kommer snart',
+    upcomingFeature: 'Kommande funktion',
+
+    // Prospect add choice modal
+    addProspectTitle: 'Lägg till prospekt',
+    chooseAddMethod: 'Hur vill du lägga till en fastighet?',
+    importFromEtuovi: 'Importera från Etuovi',
+    etuoviUrlPlaceholder: 'Klistra in Etuovi-URL (t.ex. https://www.etuovi.com/kohde/12345)',
+    importButton: 'Importera',
+    addManually: 'Fyll i formuläret manuellt',
+    importSuccess: 'Fastighet importerad',
+    importError: 'Kunde inte importera fastighet',
+    invalidEtuoviUrl: 'Ange en giltig Etuovi-URL',
 
     // Report section
     report: {

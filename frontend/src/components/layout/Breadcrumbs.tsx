@@ -30,8 +30,11 @@ function AssetBreadcrumbs({ t }: WithTranslation) {
                     const id = parseInt(segment);
                     const cacheKey = `${prevSegment}-${id}`;
 
+                    // Property status prefixes that indicate a property ID follows
+                    const propertyContextSegments = ['edit', 'properties', 'own', 'prospects'];
+
                     // Determine which entity to fetch based on context
-                    if (prevSegment === 'edit' || prevSegment === 'properties') {
+                    if (prevSegment && propertyContextSegments.includes(prevSegment)) {
                         // Look for properties context
                         const contextSegment = pathSegments.find(s => s === 'properties');
                         if (contextSegment) {
