@@ -6,6 +6,7 @@ const property = {
     // Property tabs
     ownProperties: 'Omat asunnot',
     prospectProperties: 'Harkinnassa',
+    soldProperties: 'Myydyt',
 
     add: 'Lisää uusi asunto',
     properties: 'Asunnot',

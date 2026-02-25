@@ -22,6 +22,7 @@ const mockTranslations: Record<string, string> = {
   ownershipShare: 'Ownership share',
   ownProperties: 'Own Properties',
   prospectProperties: 'Prospect Properties',
+  soldProperties: 'Sold',
   addProspectTitle: 'Add Prospect Property',
   addManually: 'Fill in form manually',
   chooseAddMethod: 'Choose how to add prospect property',
@@ -443,6 +444,7 @@ describe('Properties Component Logic', () => {
   describe('Property tabs logic', () => {
     const TAB_OWN = 0;
     const TAB_PROSPECT = 1;
+    const TAB_SOLD = 2;
 
     describe('Tab index state management', () => {
       it('defaults to own properties tab (index 0)', () => {
@@ -469,12 +471,24 @@ describe('Properties Component Logic', () => {
         handleTabChange(TAB_OWN);
         expect(tabIndex).toBe(TAB_OWN);
       });
+
+      it('switches to sold tab when index changes to 2', () => {
+        let tabIndex = TAB_OWN;
+        const handleTabChange = (newValue: number) => {
+          tabIndex = newValue;
+        };
+
+        handleTabChange(TAB_SOLD);
+        expect(tabIndex).toBe(TAB_SOLD);
+      });
     });
 
     describe('Property status filtering by tab', () => {
       it('returns OWN status for own properties tab', () => {
         const getStatusForTab = (tabIndex: number): PropertyStatus => {
-          return tabIndex === TAB_OWN ? PropertyStatus.OWN : PropertyStatus.PROSPECT;
+          if (tabIndex === TAB_OWN) return PropertyStatus.OWN;
+          if (tabIndex === TAB_PROSPECT) return PropertyStatus.PROSPECT;
+          return PropertyStatus.SOLD;
         };
 
         expect(getStatusForTab(TAB_OWN)).toBe(PropertyStatus.OWN);
@@ -482,59 +496,66 @@ describe('Properties Component Logic', () => {
 
       it('returns PROSPECT status for prospect tab', () => {
         const getStatusForTab = (tabIndex: number): PropertyStatus => {
-          return tabIndex === TAB_OWN ? PropertyStatus.OWN : PropertyStatus.PROSPECT;
+          if (tabIndex === TAB_OWN) return PropertyStatus.OWN;
+          if (tabIndex === TAB_PROSPECT) return PropertyStatus.PROSPECT;
+          return PropertyStatus.SOLD;
         };
 
         expect(getStatusForTab(TAB_PROSPECT)).toBe(PropertyStatus.PROSPECT);
       });
+
+      it('returns SOLD status for sold tab', () => {
+        const getStatusForTab = (tabIndex: number): PropertyStatus => {
+          if (tabIndex === TAB_OWN) return PropertyStatus.OWN;
+          if (tabIndex === TAB_PROSPECT) return PropertyStatus.PROSPECT;
+          return PropertyStatus.SOLD;
+        };
+
+        expect(getStatusForTab(TAB_SOLD)).toBe(PropertyStatus.SOLD);
+      });
     });
 
     describe('Fetch options generation by tab', () => {
-      it('includes status filter for OWN when on own tab', () => {
-        const buildFetchOptions = (tabIndex: number) => {
-          const status = tabIndex === TAB_OWN ? PropertyStatus.OWN : PropertyStatus.PROSPECT;
-          return {
-            order: { name: 'ASC' },
-            relations: { ownerships: true },
-            where: { status },
-          };
-        };
+      const getStatusForTab = (tabIndex: number): PropertyStatus => {
+        if (tabIndex === TAB_OWN) return PropertyStatus.OWN;
+        if (tabIndex === TAB_PROSPECT) return PropertyStatus.PROSPECT;
+        return PropertyStatus.SOLD;
+      };
 
+      const buildFetchOptions = (tabIndex: number) => {
+        return {
+          order: { name: 'ASC' },
+          relations: { ownerships: true },
+          where: { status: getStatusForTab(tabIndex) },
+        };
+      };
+
+      it('includes status filter for OWN when on own tab', () => {
         const options = buildFetchOptions(TAB_OWN);
         expect(options.where.status).toBe(PropertyStatus.OWN);
       });
 
       it('includes status filter for PROSPECT when on prospect tab', () => {
-        const buildFetchOptions = (tabIndex: number) => {
-          const status = tabIndex === TAB_OWN ? PropertyStatus.OWN : PropertyStatus.PROSPECT;
-          return {
-            order: { name: 'ASC' },
-            relations: { ownerships: true },
-            where: { status },
-          };
-        };
-
         const options = buildFetchOptions(TAB_PROSPECT);
         expect(options.where.status).toBe(PropertyStatus.PROSPECT);
       });
 
-      it('preserves order and relations when switching tabs', () => {
-        const buildFetchOptions = (tabIndex: number) => {
-          const status = tabIndex === TAB_OWN ? PropertyStatus.OWN : PropertyStatus.PROSPECT;
-          return {
-            order: { name: 'ASC' },
-            relations: { ownerships: true },
-            where: { status },
-          };
-        };
+      it('includes status filter for SOLD when on sold tab', () => {
+        const options = buildFetchOptions(TAB_SOLD);
+        expect(options.where.status).toBe(PropertyStatus.SOLD);
+      });
 
+      it('preserves order and relations when switching tabs', () => {
         const ownOptions = buildFetchOptions(TAB_OWN);
         const prospectOptions = buildFetchOptions(TAB_PROSPECT);
+        const soldOptions = buildFetchOptions(TAB_SOLD);
 
         expect(ownOptions.order).toEqual({ name: 'ASC' });
         expect(ownOptions.relations).toEqual({ ownerships: true });
         expect(prospectOptions.order).toEqual({ name: 'ASC' });
         expect(prospectOptions.relations).toEqual({ ownerships: true });
+        expect(soldOptions.order).toEqual({ name: 'ASC' });
+        expect(soldOptions.relations).toEqual({ ownerships: true });
       });
     });
 
@@ -561,40 +582,31 @@ describe('Properties Component Logic', () => {
     describe('URL-based tab selection', () => {
       const ROUTE_OWN = 'own';
       const ROUTE_PROSPECT = 'prospects';
+      const ROUTE_SOLD = 'sold';
+
+      const getTabIndexFromRoute = (tabParam?: string): number => {
+        if (tabParam === ROUTE_PROSPECT) return TAB_PROSPECT;
+        if (tabParam === ROUTE_SOLD) return TAB_SOLD;
+        return TAB_OWN; // default to own
+      };
 
       it('returns TAB_OWN for "own" route parameter', () => {
-        const getTabIndexFromRoute = (tabParam?: string): number => {
-          if (tabParam === ROUTE_PROSPECT) return TAB_PROSPECT;
-          return TAB_OWN; // default to own
-        };
-
         expect(getTabIndexFromRoute(ROUTE_OWN)).toBe(TAB_OWN);
       });
 
       it('returns TAB_PROSPECT for "prospects" route parameter', () => {
-        const getTabIndexFromRoute = (tabParam?: string): number => {
-          if (tabParam === ROUTE_PROSPECT) return TAB_PROSPECT;
-          return TAB_OWN;
-        };
-
         expect(getTabIndexFromRoute(ROUTE_PROSPECT)).toBe(TAB_PROSPECT);
       });
 
-      it('defaults to TAB_OWN when route parameter is undefined', () => {
-        const getTabIndexFromRoute = (tabParam?: string): number => {
-          if (tabParam === ROUTE_PROSPECT) return TAB_PROSPECT;
-          return TAB_OWN;
-        };
+      it('returns TAB_SOLD for "sold" route parameter', () => {
+        expect(getTabIndexFromRoute(ROUTE_SOLD)).toBe(TAB_SOLD);
+      });
 
+      it('defaults to TAB_OWN when route parameter is undefined', () => {
         expect(getTabIndexFromRoute(undefined)).toBe(TAB_OWN);
       });
 
       it('defaults to TAB_OWN for unknown route parameter', () => {
-        const getTabIndexFromRoute = (tabParam?: string): number => {
-          if (tabParam === ROUTE_PROSPECT) return TAB_PROSPECT;
-          return TAB_OWN;
-        };
-
         expect(getTabIndexFromRoute('unknown')).toBe(TAB_OWN);
       });
     });
@@ -602,63 +614,106 @@ describe('Properties Component Logic', () => {
     describe('Tab to route mapping', () => {
       const ROUTE_OWN = 'own';
       const ROUTE_PROSPECT = 'prospects';
+      const ROUTE_SOLD = 'sold';
+
+      const getRouteFromTabIndex = (tabIndex: number): string => {
+        if (tabIndex === TAB_PROSPECT) return ROUTE_PROSPECT;
+        if (tabIndex === TAB_SOLD) return ROUTE_SOLD;
+        return ROUTE_OWN;
+      };
 
       it('returns "own" route for TAB_OWN', () => {
-        const getRouteFromTabIndex = (tabIndex: number): string => {
-          return tabIndex === TAB_PROSPECT ? ROUTE_PROSPECT : ROUTE_OWN;
-        };
-
         expect(getRouteFromTabIndex(TAB_OWN)).toBe(ROUTE_OWN);
       });
 
       it('returns "prospects" route for TAB_PROSPECT', () => {
-        const getRouteFromTabIndex = (tabIndex: number): string => {
-          return tabIndex === TAB_PROSPECT ? ROUTE_PROSPECT : ROUTE_OWN;
-        };
-
         expect(getRouteFromTabIndex(TAB_PROSPECT)).toBe(ROUTE_PROSPECT);
+      });
+
+      it('returns "sold" route for TAB_SOLD', () => {
+        expect(getRouteFromTabIndex(TAB_SOLD)).toBe(ROUTE_SOLD);
       });
     });
 
     describe('Navigation path construction', () => {
       const BASE_PATH = '/app/portfolio/properties';
 
-      it('constructs own properties path correctly', () => {
-        const buildNavigationPath = (route: string): string => {
-          return `${BASE_PATH}/${route}`;
-        };
+      const buildNavigationPath = (route: string): string => {
+        return `${BASE_PATH}/${route}`;
+      };
 
+      it('constructs own properties path correctly', () => {
         expect(buildNavigationPath('own')).toBe('/app/portfolio/properties/own');
       });
 
       it('constructs prospects path correctly', () => {
-        const buildNavigationPath = (route: string): string => {
-          return `${BASE_PATH}/${route}`;
-        };
-
         expect(buildNavigationPath('prospects')).toBe('/app/portfolio/properties/prospects');
+      });
+
+      it('constructs sold properties path correctly', () => {
+        expect(buildNavigationPath('sold')).toBe('/app/portfolio/properties/sold');
       });
     });
 
     describe('View path construction', () => {
       const BASE_PATH = '/app/portfolio/properties';
 
-      it('constructs own property view path with id', () => {
-        const buildViewPath = (routePrefix: string, id: number): string => {
-          return `${BASE_PATH}/${routePrefix}/${id}`;
-        };
+      const buildViewPath = (routePrefix: string, id: number): string => {
+        return `${BASE_PATH}/${routePrefix}/${id}`;
+      };
 
+      it('constructs own property view path with id', () => {
         expect(buildViewPath('own', 123)).toBe('/app/portfolio/properties/own/123');
       });
 
       it('constructs prospect property view path with id', () => {
-        const buildViewPath = (routePrefix: string, id: number): string => {
-          return `${BASE_PATH}/${routePrefix}/${id}`;
-        };
-
         expect(buildViewPath('prospects', 456)).toBe('/app/portfolio/properties/prospects/456');
       });
+
+      it('constructs sold property view path with id', () => {
+        expect(buildViewPath('sold', 789)).toBe('/app/portfolio/properties/sold/789');
+      });
     });
+
+    describe('Tab label translation keys', () => {
+      it('uses soldProperties key for sold tab', () => {
+        const tabConfig = [
+          { key: 'ownProperties', status: PropertyStatus.OWN },
+          { key: 'prospectProperties', status: PropertyStatus.PROSPECT },
+          { key: 'soldProperties', status: PropertyStatus.SOLD },
+        ];
+
+        expect(tabConfig[TAB_SOLD].key).toBe('soldProperties');
+      });
+    });
+  });
+});
+
+describe('Sold properties tab behavior', () => {
+  let mockSearch: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockSearch = jest.spyOn(ApiClient, 'search').mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    mockSearch.mockRestore();
+  });
+
+  it('does not show add link on Sold tab', async () => {
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/sold'],
+    });
+
+    // Wait for the component to render
+    await waitFor(() => {
+      // Verify we're on the sold tab (tab should be visible)
+      expect(screen.getByRole('tab', { name: /sold/i })).toBeInTheDocument();
+    });
+
+    // The add link should not be present
+    const addLink = screen.queryByRole('link', { name: /add/i });
+    expect(addLink).not.toBeInTheDocument();
   });
 });
 

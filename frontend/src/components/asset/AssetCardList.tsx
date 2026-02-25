@@ -47,6 +47,8 @@ interface AssetCardListInputProps<T> {
   routePrefix?: string;
   /** Optional callback when add link is clicked (overrides default navigation) */
   onAddClick?: () => void;
+  /** Hide the add link entirely (e.g., for sold properties) */
+  hideAddLink?: boolean;
 }
 
 function AssetCardList<T extends { id: number }>({
@@ -57,6 +59,7 @@ function AssetCardList<T extends { id: number }>({
   onAfterDelete,
   routePrefix,
   onAddClick,
+  hideAddLink,
 }: AssetCardListInputProps<T>) {
   // Build route paths with optional prefix
   const buildRoutePath = (suffix: string) => {
@@ -151,18 +154,20 @@ function AssetCardList<T extends { id: number }>({
   return (
     <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
       <Title>{title}</Title>
-      {onAddClick ? (
-        <Link
-          href={buildRoutePath("add")}
-          onClick={(e) => {
-            e.preventDefault();
-            onAddClick();
-          }}
-        >
-          {t("add")}
-        </Link>
-      ) : (
-        <Link href={buildRoutePath("add")}>{t("add")}</Link>
+      {!hideAddLink && (
+        onAddClick ? (
+          <Link
+            href={buildRoutePath("add")}
+            onClick={(e) => {
+              e.preventDefault();
+              onAddClick();
+            }}
+          >
+            {t("add")}
+          </Link>
+        ) : (
+          <Link href={buildRoutePath("add")}>{t("add")}</Link>
+        )
       )}
       {data.length > 0 && (
         <Grid container spacing={2} marginTop={2}>

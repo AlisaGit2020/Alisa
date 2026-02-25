@@ -6,6 +6,7 @@ const property = {
     // Property tabs
     ownProperties: 'My Properties',
     prospectProperties: 'Prospects',
+    soldProperties: 'Sold',
 
     add: 'Add new property',
     properties: 'Properties',

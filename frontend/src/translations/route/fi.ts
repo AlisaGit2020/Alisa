@@ -23,6 +23,7 @@ const route = {
   portfolio: "Salkku",
   properties: "Asunnot",
   prospects: "Harkinnassa",
+  sold: "Myydyt",
   property: "Asuntoraportit",
   report: "Raportit",
   reports: "Raportit",
