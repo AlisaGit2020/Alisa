@@ -50,6 +50,10 @@ const property = {
     saleSummary: 'Myyntiyhteenveto',
     comingSoon: 'Tulossa pian',
     upcomingFeature: 'Tuleva ominaisuus',
+    addCalculation: 'Lisää laskelma',
+    noCalculations: 'Ei laskelmia. Lisää ensimmäinen sijoituslaskelmasi.',
+    deleteCalculationConfirm: 'Haluatko varmasti poistaa tämän laskelman?',
+    inputFields: 'Syöttökentät',
 
     // Prospect add choice modal
     addProspectTitle: 'Lisää seurattava kohde',

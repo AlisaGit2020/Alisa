@@ -50,6 +50,10 @@ const property = {
     saleSummary: 'Försäljningssammanfattning',
     comingSoon: 'Kommer snart',
     upcomingFeature: 'Kommande funktion',
+    addCalculation: 'Lägg till kalkyl',
+    noCalculations: 'Inga kalkyler ännu. Lägg till din första investeringskalkyl.',
+    deleteCalculationConfirm: 'Är du säker på att du vill ta bort denna kalkyl?',
+    inputFields: 'Inmatningsfält',
 
     // Prospect add choice modal
     addProspectTitle: 'Lägg till prospekt',

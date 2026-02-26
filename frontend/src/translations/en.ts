@@ -108,6 +108,7 @@ const en = {
       minLength: "Must be at least {{min}} characters",
       maxLength: "Must be at most {{max}} characters",
       invalidDate: "Please enter a valid date",
+      mustBePositive: "Value must be greater than 0",
     },
 
     toast: {

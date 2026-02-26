@@ -50,6 +50,10 @@ const property = {
     saleSummary: 'Sale Summary',
     comingSoon: 'Coming Soon',
     upcomingFeature: 'Upcoming feature',
+    addCalculation: 'Add Calculation',
+    noCalculations: 'No calculations yet. Add your first investment calculation.',
+    deleteCalculationConfirm: 'Are you sure you want to delete this calculation?',
+    inputFields: 'Input Fields',
 
     // Prospect add choice modal
     addProspectTitle: 'Add Prospect Property',
