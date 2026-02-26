@@ -90,6 +90,8 @@ const property = {
     pricePerSqm: 'Price/m\u00B2',
     totalMonthlyCosts: 'Total Monthly Costs',
     perMonth: '/mo',
+    netRent: 'Net',
+    grossYield: 'Gross Yield',
 
     // Prospect add choice modal
     addProspectTitle: 'Add Prospect Property',

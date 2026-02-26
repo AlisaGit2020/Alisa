@@ -90,6 +90,8 @@ const property = {
     pricePerSqm: 'Hinta/m\u00B2',
     totalMonthlyCosts: 'Kuukausikulut yhteensä',
     perMonth: '/kk',
+    netRent: 'Netto',
+    grossYield: 'Bruttovuokratuotto',
 
     // Prospect add choice modal
     addProspectTitle: 'Lisää seurattava kohde',

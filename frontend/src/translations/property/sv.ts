@@ -90,6 +90,8 @@ const property = {
     pricePerSqm: 'Pris/m\u00B2',
     totalMonthlyCosts: 'Totala månadskostnader',
     perMonth: '/mån',
+    netRent: 'Netto',
+    grossYield: 'Bruttoavkastning',
 
     // Prospect add choice modal
     addProspectTitle: 'Lägg till prospekt',
