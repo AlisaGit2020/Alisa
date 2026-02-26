@@ -85,6 +85,36 @@ export const propertyExternalSourceNames = new Map<PropertyExternalSource, Prope
   [PropertyExternalSource.ETUOVI, PropertyExternalSourceName.ETUOVI],
 ]);
 
+export enum PropertyType {
+  APARTMENT = 1,
+  ROW_HOUSE = 2,
+  SEMI_DETACHED = 3,
+  DETACHED = 4,
+  SEPARATE_HOUSE = 5,
+  GALLERY_ACCESS = 6,
+  WOODEN_HOUSE = 7,
+}
+
+export enum PropertyTypeName {
+  APARTMENT = 'apartment',
+  ROW_HOUSE = 'row-house',
+  SEMI_DETACHED = 'semi-detached',
+  DETACHED = 'detached',
+  SEPARATE_HOUSE = 'separate-house',
+  GALLERY_ACCESS = 'gallery-access',
+  WOODEN_HOUSE = 'wooden-house',
+}
+
+export const propertyTypeNames = new Map<PropertyType, PropertyTypeName>([
+  [PropertyType.APARTMENT, PropertyTypeName.APARTMENT],
+  [PropertyType.ROW_HOUSE, PropertyTypeName.ROW_HOUSE],
+  [PropertyType.SEMI_DETACHED, PropertyTypeName.SEMI_DETACHED],
+  [PropertyType.DETACHED, PropertyTypeName.DETACHED],
+  [PropertyType.SEPARATE_HOUSE, PropertyTypeName.SEPARATE_HOUSE],
+  [PropertyType.GALLERY_ACCESS, PropertyTypeName.GALLERY_ACCESS],
+  [PropertyType.WOODEN_HOUSE, PropertyTypeName.WOODEN_HOUSE],
+]);
+
 // Dashboard config types
 export type WidgetSize = '1/1' | '1/2' | '1/3' | '1/4';
 

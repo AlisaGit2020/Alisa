@@ -11,6 +11,7 @@ export class EtuoviPropertyDataDto {
   postalCode?: string;
   buildingYear?: number;
   propertyType?: string;
+  roomStructure?: string;
   condition?: string;
   energyClass?: string;
   defaultImageUrl?: string;

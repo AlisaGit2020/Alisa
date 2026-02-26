@@ -36,6 +36,7 @@ import { Investment } from '@asset-backend/real-estate/investment/entities/inves
 import {
   PropertyExternalSource,
   PropertyStatus,
+  PropertyType,
   TransactionStatus,
   TransactionType,
 } from '@asset-backend/common/types';
@@ -349,7 +350,7 @@ describe('PropertyService', () => {
           postalCode: '00100',
         },
         buildYear: 1985,
-        apartmentType: '3h+k',
+        apartmentType: PropertyType.APARTMENT,
         ownerships: [{ share: 100, userId: testUser.id }],
       };
       const savedProperty = createProperty({
@@ -368,7 +369,7 @@ describe('PropertyService', () => {
       expect(result.address?.city).toBe('Helsinki');
       expect(result.address?.postalCode).toBe('00100');
       expect(result.buildYear).toBe(1985);
-      expect(result.apartmentType).toBe('3h+k');
+      expect(result.apartmentType).toBe(PropertyType.APARTMENT);
       expect(mockRepository.save).toHaveBeenCalled();
     });
 

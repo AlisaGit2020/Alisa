@@ -7,6 +7,7 @@ import { DecimalToNumberTransformer } from '@asset-backend/common/transformer/en
 import {
   PropertyExternalSource,
   PropertyStatus,
+  PropertyType,
 } from '@asset-backend/common/types';
 import {
   Column,
@@ -78,8 +79,8 @@ export class Property {
   @Column({ nullable: true })
   public buildYear?: number;
 
-  @Column({ nullable: true })
-  public apartmentType?: string;
+  @Column({ type: 'int', nullable: true })
+  public apartmentType?: PropertyType;
 
   @Column({ type: 'int', default: PropertyStatus.OWN })
   public status: PropertyStatus = PropertyStatus.OWN;

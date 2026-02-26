@@ -3,6 +3,7 @@ import { Address } from '@asset-backend/real-estate/address/entities/address.ent
 import {
   PropertyExternalSource,
   PropertyStatus,
+  PropertyType,
 } from '@asset-backend/common/types';
 
 export interface CreateAddressOptions {
@@ -20,7 +21,7 @@ export interface CreatePropertyOptions {
   description?: string;
   address?: CreateAddressOptions;
   buildYear?: number;
-  apartmentType?: string;
+  apartmentType?: PropertyType;
   status?: PropertyStatus;
   externalSource?: PropertyExternalSource;
   externalSourceId?: string;
