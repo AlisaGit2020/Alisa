@@ -4,6 +4,7 @@ import {
   AllocationCondition,
   PropertyExternalSource,
   PropertyStatus,
+  PropertyType,
   TransactionStatus,
   TransactionType,
 } from './common';
@@ -31,7 +32,7 @@ export interface PropertyInput {
   description?: string;
   address?: AddressInput;
   buildYear?: number;
-  apartmentType?: string;
+  apartmentType?: PropertyType;
   status?: PropertyStatus;
   externalSource?: PropertyExternalSource;
   externalSourceId?: string;

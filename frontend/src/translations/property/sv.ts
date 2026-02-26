@@ -1,4 +1,15 @@
 const property = {
+    // Property types
+    propertyTypes: {
+        apartment: 'Lägenhet',
+        'row-house': 'Radhus',
+        'semi-detached': 'Parhus',
+        detached: 'Villa',
+        'separate-house': 'Fristående hus',
+        'gallery-access': 'Loftgångshus',
+        'wooden-house': 'Trähus',
+    },
+
     // Page template
     pageTitle: 'Fastigheter',
     pageDescription: 'Visa och hantera din fastighetsportfölj.',
@@ -50,6 +61,37 @@ const property = {
     saleSummary: 'Försäljningssammanfattning',
     comingSoon: 'Kommer snart',
     upcomingFeature: 'Kommande funktion',
+    addCalculation: 'Lägg till kalkyl',
+    noCalculations: 'Inga kalkyler ännu. Lägg till din första investeringskalkyl.',
+    deleteCalculationConfirm: 'Är du säker på att du vill ta bort denna kalkyl?',
+    inputFields: 'Inmatningsfält',
+
+    // Property field sections
+    monthlyCostsSection: 'Månadskostnader',
+    purchaseInfoSection: 'Köpinformation',
+    saleInfoSection: 'Försäljningsinformation',
+    viewOriginalListing: 'Visa ursprunglig annons',
+    profitLoss: 'Vinst/Förlust',
+
+    // Property fields
+    maintenanceFee: 'Underhållsavgift',
+    financialCharge: 'Finansieringsavgift',
+    waterCharge: 'Vattenavgift',
+    debtShare: 'Skulddel',
+    monthlyRent: 'Månadshyra',
+    expectedRent: 'Förväntad hyra',
+    purchasePrice: 'Köpeskilling',
+    askingPrice: 'Begärt pris',
+    purchaseDate: 'Köpdatum',
+    purchaseLoan: 'Köplån',
+    salePrice: 'Försäljningspris',
+    saleDate: 'Försäljningsdatum',
+    rooms: 'Rum',
+    pricePerSqm: 'Pris/m\u00B2',
+    totalMonthlyCosts: 'Totalt',
+    perMonth: '/mån',
+    netRent: 'Netto',
+    grossYield: 'Bruttoavkastning',
 
     // Prospect add choice modal
     addProspectTitle: 'Lägg till prospekt',

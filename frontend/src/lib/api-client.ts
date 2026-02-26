@@ -188,6 +188,22 @@ class ApiClient {
     }
   }
 
+  /**
+   * Fetch property statistics with configurable options.
+   */
+  public static async propertyStatistics<T>(
+    propertyId: number,
+    options?: { includeYearly?: boolean },
+  ): Promise<T[]> {
+    const url = ApiClient.getApiUrl(`real-estate/property/${propertyId}/statistics/search`);
+    try {
+      return (await axios.post<T[]>(url, options, await ApiClient.getOptions()))
+        .data;
+    } catch {
+      ApiClient.handleError(`Error fetching property statistics: ${url}`);
+    }
+  }
+
   private static getApiUrl(path: string) {
     return `${VITE_API_URL}/${path}`;
   }

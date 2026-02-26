@@ -20,6 +20,7 @@ import { AuthService } from '@asset-backend/auth/auth.service';
 import {
   PropertyExternalSource,
   PropertyStatus,
+  PropertyType,
 } from '@asset-backend/common/types';
 
 describe('EtuoviImportController (e2e)', () => {
@@ -311,8 +312,8 @@ describe('EtuoviImportController (e2e)', () => {
         .send({ url: 'https://www.etuovi.com/kohde/80481682' })
         .expect(201);
 
-      // From mock HTML: residentialPropertyType APARTMENT_HOUSE -> Kerrostalo
-      expect(response.body.apartmentType).toBe('Kerrostalo');
+      // From mock HTML: residentialPropertyType APARTMENT_HOUSE -> PropertyType.APARTMENT
+      expect(response.body.apartmentType).toBe(PropertyType.APARTMENT);
     });
 
     it('parses address street correctly', async () => {
@@ -380,6 +381,25 @@ describe('EtuoviImportController (e2e)', () => {
       expect(response.body.ownerships[0].userId).toBe(
         testUsers.user1WithProperties.jwtUser.id,
       );
+    });
+
+    it('sets financial fields from etuovi data', async () => {
+      nock('https://www.etuovi.com')
+        .get('/kohde/80481690')
+        .reply(200, mockHtml);
+
+      const response = await request(server)
+        .post('/import/etuovi/create-prospect')
+        .set('Authorization', getBearerToken(accessToken))
+        .send({ url: 'https://www.etuovi.com/kohde/80481690' })
+        .expect(201);
+
+      // From mock HTML: deptFreePrice 125000, debtShareAmount 25000, maintenanceFee 180, financialCharge 75, waterCharge 25
+      expect(response.body.purchasePrice).toBe(125000);
+      expect(response.body.debtShare).toBe(25000);
+      expect(response.body.maintenanceFee).toBe(180);
+      expect(response.body.financialCharge).toBe(75);
+      expect(response.body.waterCharge).toBe(25);
     });
 
     it('updates existing property when user already has property with same etuovi id', async () => {

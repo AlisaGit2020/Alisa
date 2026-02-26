@@ -1,10 +1,12 @@
-import { Box, Stack } from '@mui/material';
+import { Box, Divider, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
-import { getNumber } from '../../lib/functions';
-import { PropertyInput, PropertyStatus } from '@asset-types'
+import { getNumber, getNumberOrUndefined } from '../../lib/functions';
+import { PropertyInput, PropertyStatus, PropertyType, propertyTypeNames } from '@asset-types'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AssetNumberField from '../asset/form/AssetNumberField';
+import AssetSelectField from '../asset/form/AssetSelectField';
 import AssetTextField from '../asset/form/AssetTextField';
+import AssetDatePicker from '../asset/form/AssetDatePicker';
 import { propertyContext } from '../../lib/asset-contexts';
 import AssetFormHandler from '../asset/form/AssetFormHandler';
 import { DTO } from '../../lib/types';
@@ -20,8 +22,13 @@ import { VITE_API_URL } from '../../constants';
 import { PROPERTY_LIST_CHANGE_EVENT } from '../layout/PropertyBadge';
 import { setTransactionPropertyId } from '@asset-lib/initial-data';
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from '../transaction/TransactionLeftMenuItems';
-import { getPropertyStatusFromPath, getReturnPathForStatus } from './property-form-utils';
+import { getPropertyStatusFromPath, getPropertyViewPath, getReturnPathForStatus } from './property-form-utils';
 
+// Property type select items
+const propertyTypeItems = Array.from(propertyTypeNames.entries()).map(([id, key]) => ({
+    id,
+    key,
+}));
 
 function PropertyForm({ t }: WithTranslation) {
     const { idParam } = useParams();
@@ -44,7 +51,7 @@ function PropertyForm({ t }: WithTranslation) {
             postalCode: '',
         },
         buildYear: undefined,
-        apartmentType: '',
+        apartmentType: undefined,
         status: statusFromPath,
         ownerships: [{ userId: 0, share: 100 }]
     });
@@ -53,7 +60,8 @@ function PropertyForm({ t }: WithTranslation) {
     const handleNavigateBack = () => {
         const returnTo = (location.state as { returnTo?: string })?.returnTo;
         if (returnTo === 'view' && idParam) {
-            navigate(`${propertyContext.routePath}/${idParam}`);
+            // Navigate back to property view with correct status prefix
+            navigate(getPropertyViewPath(data.status ?? PropertyStatus.OWN, idParam));
         } else {
             // Navigate back to the appropriate tab based on property status
             navigate(getReturnPathForStatus(data.status ?? PropertyStatus.OWN));
@@ -142,11 +150,14 @@ function PropertyForm({ t }: WithTranslation) {
                             {...getFieldErrorProps<PropertyInput>(fieldErrors, 'name')}
                         />
                     </Box>
-                    <Box sx={{ flex: 1, minWidth: 120 }}>
-                        <AssetTextField
+                    <Box sx={{ flex: 1, minWidth: 150 }}>
+                        <AssetSelectField
                             label={t('apartmentType')}
-                            value={data.apartmentType || ''}
-                            onChange={(e) => handleChange('apartmentType', e.target.value)}
+                            value={data.apartmentType ?? ''}
+                            items={propertyTypeItems}
+                            t={t}
+                            translateKeyPrefix="propertyTypes"
+                            onChange={(e) => handleChange('apartmentType', e.target.value ? Number(e.target.value) as PropertyType : undefined)}
                         />
                     </Box>
                 </Stack>
@@ -185,7 +196,7 @@ function PropertyForm({ t }: WithTranslation) {
                         <AssetNumberField
                             label={t('buildYear')}
                             value={data.buildYear || 0}
-                            onChange={(e) => handleChange('buildYear', getNumber(e.target.value, 0) || undefined)}
+                            onChange={(e) => handleChange('buildYear', getNumberOrUndefined(e.target.value, 0))}
                             {...getFieldErrorProps<PropertyInput>(fieldErrors, 'buildYear')}
                         />
                     </Box>
@@ -197,6 +208,124 @@ function PropertyForm({ t }: WithTranslation) {
                     rows={4}
                     onChange={(e) => handleChange('description', e.target.value)}
                 />
+
+                {/* Monthly Costs Section */}
+                <Divider sx={{ my: 1 }} />
+                <Typography variant="subtitle2" color="text.secondary" sx={{ textTransform: 'uppercase' }}>
+                    {t('monthlyCostsSection')}
+                </Typography>
+                <Stack direction="row" spacing={2}>
+                    <Box sx={{ flex: 1 }}>
+                        <AssetNumberField
+                            label={t('maintenanceFee')}
+                            value={data.maintenanceFee ?? 0}
+                            onChange={(e) => handleChange('maintenanceFee', getNumberOrUndefined(e.target.value, 0))}
+                            adornment='€'
+                        />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                        <AssetNumberField
+                            label={t('waterCharge')}
+                            value={data.waterCharge ?? 0}
+                            onChange={(e) => handleChange('waterCharge', getNumberOrUndefined(e.target.value, 0))}
+                            adornment='€'
+                        />
+                    </Box>
+                </Stack>
+                <Stack direction="row" spacing={2}>
+                    <Box sx={{ flex: 1 }}>
+                        <AssetNumberField
+                            label={t('financialCharge')}
+                            value={data.financialCharge ?? 0}
+                            onChange={(e) => handleChange('financialCharge', getNumberOrUndefined(e.target.value, 0))}
+                            adornment='€'
+                        />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                        <AssetNumberField
+                            label={data.status === PropertyStatus.PROSPECT ? t('expectedRent') : t('monthlyRent')}
+                            value={data.monthlyRent ?? 0}
+                            onChange={(e) => handleChange('monthlyRent', getNumberOrUndefined(e.target.value, 0))}
+                            adornment='€'
+                        />
+                    </Box>
+                </Stack>
+
+                {/* Purchase Info Section - for OWN and PROSPECT */}
+                {(data.status === PropertyStatus.OWN || data.status === PropertyStatus.PROSPECT) && (
+                    <>
+                        <Divider sx={{ my: 1 }} />
+                        <Typography variant="subtitle2" color="text.secondary" sx={{ textTransform: 'uppercase' }}>
+                            {t('purchaseInfoSection')}
+                        </Typography>
+                        <Stack direction="row" spacing={2}>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetNumberField
+                                    label={data.status === PropertyStatus.PROSPECT ? t('askingPrice') : t('purchasePrice')}
+                                    value={data.purchasePrice ?? 0}
+                                    onChange={(e) => handleChange('purchasePrice', getNumberOrUndefined(e.target.value, 0))}
+                                    adornment='€'
+                                />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetNumberField
+                                    label={t('debtShare')}
+                                    value={data.debtShare ?? 0}
+                                    onChange={(e) => handleChange('debtShare', getNumberOrUndefined(e.target.value, 0))}
+                                    adornment='€'
+                                />
+                            </Box>
+                        </Stack>
+                        {data.status === PropertyStatus.OWN && (
+                            <Stack direction="row" spacing={2}>
+                                <Box sx={{ flex: 1 }}>
+                                    <AssetDatePicker
+                                        label={t('purchaseDate')}
+                                        value={data.purchaseDate ? new Date(data.purchaseDate) : null}
+                                        onChange={(date) => handleChange('purchaseDate', date?.toDate() ?? undefined)}
+                                    />
+                                </Box>
+                                <Box sx={{ flex: 1 }}>
+                                    <AssetNumberField
+                                        label={t('purchaseLoan')}
+                                        value={data.purchaseLoan ?? 0}
+                                        onChange={(e) => handleChange('purchaseLoan', getNumberOrUndefined(e.target.value, 0))}
+                                        adornment='€'
+                                    />
+                                </Box>
+                            </Stack>
+                        )}
+                    </>
+                )}
+
+                {/* Sale Info Section - for SOLD */}
+                {data.status === PropertyStatus.SOLD && (
+                    <>
+                        <Divider sx={{ my: 1 }} />
+                        <Typography variant="subtitle2" color="text.secondary" sx={{ textTransform: 'uppercase' }}>
+                            {t('saleInfoSection')}
+                        </Typography>
+                        <Stack direction="row" spacing={2}>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetNumberField
+                                    label={t('salePrice')}
+                                    value={data.salePrice ?? 0}
+                                    onChange={(e) => handleChange('salePrice', getNumberOrUndefined(e.target.value, 0))}
+                                    adornment='€'
+                                />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetDatePicker
+                                    label={t('saleDate')}
+                                    value={data.saleDate ? new Date(data.saleDate) : null}
+                                    onChange={(date) => handleChange('saleDate', date?.toDate() ?? undefined)}
+                                />
+                            </Box>
+                        </Stack>
+                    </>
+                )}
+
+                <Divider sx={{ my: 1 }} />
                 <Box sx={{ maxWidth: 200 }}>
                     <AssetNumberField
                         label={t('ownershipShare')}

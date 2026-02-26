@@ -4,6 +4,7 @@ import {
   DashboardConfig,
   PropertyExternalSource,
   PropertyStatus,
+  PropertyType,
   TransactionStatus,
   TransactionType,
 } from './common';
@@ -64,7 +65,7 @@ export interface Property {
   description?: string;
   address?: Address;
   buildYear?: number;
-  apartmentType?: string;
+  apartmentType?: PropertyType;
   status: PropertyStatus;
   externalSource?: PropertyExternalSource;
   externalSourceId?: string;

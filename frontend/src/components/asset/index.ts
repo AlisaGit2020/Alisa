@@ -3,6 +3,7 @@ export { default as AssetButton } from "./form/AssetButton";
 export { default as AssetTextField } from "./form/AssetTextField";
 export { default as AssetTextButton } from "./form/AssetTextButton";
 export { default as AssetNumberField } from "./form/AssetNumberField";
+export { default as AssetEditableNumber } from "./form/AssetEditableNumber";
 export { default as AssetDatePicker } from "./form/AssetDatePicker";
 export { default as AssetSelectField } from "./form/AssetSelectField";
 export { default as AssetRadioGroup } from "./form/AssetRadioGroup";

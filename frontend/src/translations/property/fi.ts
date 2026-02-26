@@ -1,4 +1,15 @@
 const property = {
+    // Property types
+    propertyTypes: {
+        apartment: 'Kerrostalo',
+        'row-house': 'Rivitalo',
+        'semi-detached': 'Paritalo',
+        detached: 'Omakotitalo',
+        'separate-house': 'Erillistalo',
+        'gallery-access': 'Luhtitalo',
+        'wooden-house': 'Puutalo',
+    },
+
     // Page template
     pageTitle: 'Asunnot',
     pageDescription: 'Näytä ja hallinnoi kiinteistösalkkuasi.',
@@ -50,6 +61,37 @@ const property = {
     saleSummary: 'Myyntiyhteenveto',
     comingSoon: 'Tulossa pian',
     upcomingFeature: 'Tuleva ominaisuus',
+    addCalculation: 'Lisää laskelma',
+    noCalculations: 'Ei laskelmia. Lisää ensimmäinen sijoituslaskelmasi.',
+    deleteCalculationConfirm: 'Haluatko varmasti poistaa tämän laskelman?',
+    inputFields: 'Syöttökentät',
+
+    // Property field sections
+    monthlyCostsSection: 'Kuukausikulut',
+    purchaseInfoSection: 'Ostotiedot',
+    saleInfoSection: 'Myyntitiedot',
+    viewOriginalListing: 'Näytä alkuperäinen ilmoitus',
+    profitLoss: 'Voitto/Tappio',
+
+    // Property fields
+    maintenanceFee: 'Hoitovastike',
+    financialCharge: 'Rahoitusvastike',
+    waterCharge: 'Vesimaksu',
+    debtShare: 'Yhtiölainaosuus',
+    monthlyRent: 'Kuukausivuokra',
+    expectedRent: 'Arvioitu vuokra',
+    purchasePrice: 'Kauppahinta',
+    askingPrice: 'Pyyntihinta',
+    purchaseDate: 'Ostopäivä',
+    purchaseLoan: 'Ostolaina',
+    salePrice: 'Myyntihinta',
+    saleDate: 'Myyntipäivä',
+    rooms: 'Huoneet',
+    pricePerSqm: 'Hinta/m\u00B2',
+    totalMonthlyCosts: 'Yhteensä',
+    perMonth: '/kk',
+    netRent: 'Netto',
+    grossYield: 'Bruttovuokratuotto',
 
     // Prospect add choice modal
     addProspectTitle: 'Lisää seurattava kohde',

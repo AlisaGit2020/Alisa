@@ -10,6 +10,7 @@ import * as path from 'path';
 import {
   PropertyExternalSource,
   PropertyStatus,
+  PropertyType,
 } from '@asset-backend/common/types';
 import { EtuoviPropertyDataDto } from './dtos/etuovi-property-data.dto';
 import { PropertyService } from '@asset-backend/real-estate/property/property.service';
@@ -141,7 +142,8 @@ describe('EtuoviImportService', () => {
 
     it('parses property type correctly', () => {
       const result = service.parseHtml(testUrl, mockHtml);
-      expect(result.propertyType).toBe('Kerrostalo');
+      // parseHtml now returns raw etuovi type, translation happens in createPropertyInput
+      expect(result.propertyType).toBe('APARTMENT_HOUSE');
     });
 
     it('parses condition correctly', () => {
@@ -419,18 +421,74 @@ describe('EtuoviImportService', () => {
       expect(result.buildYear).toBe(1995);
     });
 
-    it('maps propertyType to apartmentType', () => {
+    it('maps propertyType to apartmentType enum', () => {
       const etuoviData: EtuoviPropertyDataDto = {
         url: 'https://www.etuovi.com/kohde/12345',
         deptFreePrice: 150000,
         apartmentSize: 65.5,
         maintenanceFee: 200,
-        propertyType: 'Rivitalo',
+        propertyType: 'APARTMENT_HOUSE',
       };
 
       const result = service.createPropertyInput(etuoviData);
 
-      expect(result.apartmentType).toBe('Rivitalo');
+      expect(result.apartmentType).toBe(PropertyType.APARTMENT);
+    });
+
+    it('maps ROW_HOUSE to PropertyType.ROW_HOUSE', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        propertyType: 'ROW_HOUSE',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.apartmentType).toBe(PropertyType.ROW_HOUSE);
+    });
+
+    it('maps DETACHED_HOUSE to PropertyType.DETACHED', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        propertyType: 'DETACHED_HOUSE',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.apartmentType).toBe(PropertyType.DETACHED);
+    });
+
+    it('returns undefined apartmentType for unknown property type', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        propertyType: 'UNKNOWN_TYPE',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.apartmentType).toBeUndefined();
+    });
+
+    it('maps roomStructure to rooms', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        roomStructure: '2h + k + kph',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.rooms).toBe('2h + k + kph');
     });
 
     it('uses URL as fallback name when address is missing', () => {
@@ -561,6 +619,102 @@ describe('EtuoviImportService', () => {
 
       expect(result.photo).toBeUndefined();
     });
+
+    it('maps deptFreePrice to purchasePrice', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.purchasePrice).toBe(150000);
+    });
+
+    it('maps deptShare to debtShare', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        deptShare: 25000,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.debtShare).toBe(25000);
+    });
+
+    it('maps maintenanceFee to maintenanceFee', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 180.50,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.maintenanceFee).toBe(180.50);
+    });
+
+    it('maps chargeForFinancialCosts to financialCharge', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        chargeForFinancialCosts: 75.25,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.financialCharge).toBe(75.25);
+    });
+
+    it('maps waterCharge to waterCharge', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        waterCharge: 18,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.waterCharge).toBe(18);
+    });
+
+    it('does not set financial fields when not provided', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 0,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.debtShare).toBeUndefined();
+      expect(result.financialCharge).toBeUndefined();
+      expect(result.waterCharge).toBeUndefined();
+    });
+
+    it('sets maintenanceFee to 0 when etuovi maintenanceFee is 0', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 0,
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.maintenanceFee).toBe(0);
+    });
   });
 
   describe('createProspectProperty', () => {
@@ -591,7 +745,8 @@ describe('EtuoviImportService', () => {
         maintenanceFee: 200,
         address: 'Testikatu 1 - 2h + k',
         buildingYear: 1990,
-        propertyType: 'Kerrostalo',
+        propertyType: 'APARTMENT_HOUSE',
+        roomStructure: '2h + k',
       });
 
       await service.createProspectProperty(
@@ -608,7 +763,8 @@ describe('EtuoviImportService', () => {
           name: 'Testikatu 1 - 2h + k',
           size: 65.5,
           buildYear: 1990,
-          apartmentType: 'Kerrostalo',
+          apartmentType: PropertyType.APARTMENT,
+          rooms: '2h + k',
         }),
       );
     });

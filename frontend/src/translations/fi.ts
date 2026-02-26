@@ -108,6 +108,13 @@ const fi = {
       minLength: "Vähintään {{min}} merkkiä",
       maxLength: "Enintään {{max}} merkkiä",
       invalidDate: "Syötä kelvollinen päivämäärä",
+      mustBePositive: "Arvon tulee olla suurempi kuin 0",
+    },
+
+    suffix: {
+      euroPerMonth: "€/kk",
+      squareMeters: "m²",
+      years: "v",
     },
 
     toast: {

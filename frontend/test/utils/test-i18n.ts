@@ -15,6 +15,24 @@ import en from '../../src/translations/en';
 const partialCommon = {
   readMore: 'Read more',
   showLess: 'Show less',
+  delete: 'Delete',
+  cancel: 'Cancel',
+  confirm: 'Confirm',
+  confirmDelete: 'Confirm Delete',
+  save: 'Save',
+  toast: {
+    error: 'An error occurred',
+    updateError: 'Failed to update',
+  },
+  validation: {
+    required: 'This field is required',
+    mustBePositive: 'Value must be greater than 0',
+  },
+  suffix: {
+    euroPerMonth: '€/mo',
+    squareMeters: 'm²',
+    years: 'yrs',
+  },
 };
 
 // Create a simple i18n instance for testing

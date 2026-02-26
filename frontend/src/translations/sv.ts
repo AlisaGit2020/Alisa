@@ -108,6 +108,13 @@ const sv = {
       minLength: "Minst {{min}} tecken",
       maxLength: "Högst {{max}} tecken",
       invalidDate: "Ange ett giltigt datum",
+      mustBePositive: "Värdet måste vara större än 0",
+    },
+
+    suffix: {
+      euroPerMonth: "€/mån",
+      squareMeters: "m²",
+      years: "år",
     },
 
     toast: {

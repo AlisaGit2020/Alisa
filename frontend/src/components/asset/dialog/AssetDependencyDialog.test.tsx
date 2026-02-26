@@ -147,7 +147,7 @@ describe('AssetDependencyDialog', () => {
       />
     );
 
-    const cancelButton = screen.getByRole('button', { name: 'cancel' });
+    const cancelButton = screen.getByRole('button', { name: 'Cancel' });
     await user.click(cancelButton);
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);

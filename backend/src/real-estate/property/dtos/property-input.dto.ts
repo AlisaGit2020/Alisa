@@ -3,6 +3,7 @@ import { AddressInputDto } from '@asset-backend/real-estate/address/dtos/address
 import {
   PropertyExternalSource,
   PropertyStatus,
+  PropertyType,
 } from '@asset-backend/common/types';
 import {
   IsNotEmpty,
@@ -46,8 +47,8 @@ export class PropertyInputDto {
   buildYear?: number;
 
   @IsOptional()
-  @IsString()
-  apartmentType?: string;
+  @IsEnum(PropertyType)
+  apartmentType?: PropertyType;
 
   @IsOptional()
   @IsEnum(PropertyStatus)

@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { PropertyInput } from '@asset-types';
+import { PropertyInput, PropertyType } from '@asset-types';
 import { PropertyStatus } from '@asset-types/common';
 import {
   getPropertyStatusFromPath,
@@ -28,7 +28,7 @@ describe('PropertyForm Component Logic', () => {
       postalCode: '',
     },
     buildYear: undefined,
-    apartmentType: '',
+    apartmentType: undefined,
     ownerships: [{ userId: 0, share: 100 }],
   };
 
@@ -164,8 +164,8 @@ describe('PropertyForm Component Logic', () => {
         return { ...data, [field]: value };
       };
 
-      const result = updateField(defaultPropertyInput, 'apartmentType', '2h+k');
-      expect(result.apartmentType).toBe('2h+k');
+      const result = updateField(defaultPropertyInput, 'apartmentType', PropertyType.APARTMENT);
+      expect(result.apartmentType).toBe(PropertyType.APARTMENT);
     });
 
     it('updates description field correctly', () => {

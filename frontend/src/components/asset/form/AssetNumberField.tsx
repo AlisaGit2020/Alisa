@@ -14,11 +14,13 @@ function AssetNumberField(props: {
   placeholder?: string;
   width?: string;
   required?: boolean;
+  readOnly?: boolean;
   step?: number;
   onChange?:
     | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
     | undefined;
   onBlur?: () => void;
+  onClick?: () => void;
 }) {
   // Shrink label when value is a number (including 0) to prevent label overlap
   const hasValue = typeof props.value === 'number';
@@ -41,8 +43,10 @@ function AssetNumberField(props: {
       onChange={props.onChange}
       onBlur={props.onBlur}
       onFocus={(e) => e.target.select()}
+      onClick={props.onClick}
       slotProps={{
         input: {
+          readOnly: props.readOnly,
           endAdornment: props.adornment ? (
             <InputAdornment position="end">{props.adornment}</InputAdornment>
           ) : null,

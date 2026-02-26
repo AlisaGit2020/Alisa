@@ -31,3 +31,26 @@ export function getReturnPathForStatus(status: PropertyStatus): string {
   }
   return `${BASE_PATH}/own`;
 }
+
+/**
+ * Returns the route prefix segment based on the property status.
+ * Used for constructing view/edit paths.
+ */
+export function getRouteSegmentForStatus(status: PropertyStatus): string {
+  if (status === PropertyStatus.PROSPECT) {
+    return ROUTE_PROSPECT;
+  }
+  if (status === PropertyStatus.SOLD) {
+    return ROUTE_SOLD;
+  }
+  return 'own';
+}
+
+/**
+ * Returns the view path for a specific property.
+ * Used for navigation to property detail view.
+ */
+export function getPropertyViewPath(status: PropertyStatus, propertyId: number | string): string {
+  const segment = getRouteSegmentForStatus(status);
+  return `${BASE_PATH}/${segment}/${propertyId}`;
+}

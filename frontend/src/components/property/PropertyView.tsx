@@ -1,56 +1,33 @@
-import { Box, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
-import { ReactNode, useEffect, useState } from 'react';
+import { Box, Grid, Paper, Stack, Typography } from '@mui/material';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { propertyContext } from '../../lib/asset-contexts';
-import { Property, PropertyStatus } from '@asset-types';
+import { Property, PropertyStatus, propertyTypeNames, PropertyStatistics } from '@asset-types';
 import ApiClient from '../../lib/api-client';
 import AssetLoadingProgress from '../asset/AssetLoadingProgress';
 import AssetButton from '../asset/form/AssetButton';
 import { getPhotoUrl } from '@asset-lib/functions';
-import EditIcon from '@mui/icons-material/Edit';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SquareFootIcon from '@mui/icons-material/SquareFoot';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import LocationCityIcon from '@mui/icons-material/LocationCity';
-import RuleIcon from '@mui/icons-material/Rule';
 import PropertyReportSection from './report/PropertyReportSection';
 import { AllocationRulesModal } from '../allocation';
 import { getReturnPathForStatus } from './property-form-utils';
 import PropertyStatusRibbon from './PropertyStatusRibbon';
 import ProspectInvestmentSection from './sections/ProspectInvestmentSection';
 import ExternalListingLink from './sections/ExternalListingLink';
-import SoldSummarySection from './sections/SoldSummarySection';
-
-interface DetailRowProps {
-  icon: ReactNode;
-  label: string;
-  value: ReactNode;
-}
-
-function DetailRow({ icon, label, value }: DetailRowProps) {
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', py: 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', mr: 2, minWidth: 24 }}>
-        {icon}
-      </Box>
-      <Typography sx={{ color: 'text.secondary', minWidth: 150 }}>
-        {label}
-      </Typography>
-      <Typography sx={{ fontWeight: 500 }}>
-        {value}
-      </Typography>
-    </Box>
-  );
-}
-
+import PropertyActionsMenu from './sections/PropertyActionsMenu';
+import PropertyKpiSection from './sections/PropertyKpiSection';
+import PropertyInfoSection from './sections/PropertyInfoSection';
+import PropertyInfoCard from './shared/PropertyInfoCard';
+import { calculateSummaryData } from './report/report-utils';
 
 function PropertyView({ t }: WithTranslation) {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rulesModalOpen, setRulesModalOpen] = useState(false);
+  const [showAdvancedReports, setShowAdvancedReports] = useState(false);
+  const [statistics, setStatistics] = useState<PropertyStatistics[]>([]);
   const { idParam } = useParams();
   const navigate = useNavigate();
 
@@ -69,6 +46,15 @@ function PropertyView({ t }: WithTranslation) {
           { ownerships: true }
         );
         setProperty(data);
+
+        // Fetch statistics for OWN/SOLD properties
+        if (data && (data.status === PropertyStatus.OWN || data.status === PropertyStatus.SOLD)) {
+          const statsData = await ApiClient.propertyStatistics<PropertyStatistics>(
+            Number(idParam),
+            { includeYearly: true }
+          );
+          setStatistics(statsData);
+        }
       } catch (err) {
         setError('Failed to load property');
         console.error(err);
@@ -79,6 +65,11 @@ function PropertyView({ t }: WithTranslation) {
 
     fetchProperty();
   }, [idParam]);
+
+  const summaryData = useMemo(
+    () => calculateSummaryData(statistics, new Date().getFullYear()),
+    [statistics]
+  );
 
   const getRoutePrefix = () => {
     return property?.status === PropertyStatus.PROSPECT ? 'prospects' : 'own';
@@ -113,12 +104,11 @@ function PropertyView({ t }: WithTranslation) {
   }
 
   const imageUrl = getPhotoUrl(property.photo);
-
   const ownershipShare = property.ownerships?.[0]?.share ?? 100;
 
   return (
     <Paper sx={{ overflow: 'hidden' }}>
-      {/* Hero image with status ribbon overlay */}
+      {/* Hero image with status ribbon - reduced height */}
       <Box sx={{ position: 'relative' }}>
         <Box
           component="img"
@@ -126,131 +116,97 @@ function PropertyView({ t }: WithTranslation) {
           alt={property.name}
           sx={{
             width: '100%',
-            height: { xs: 200, sm: 250, md: 300 },
+            height: { xs: 150, sm: 180 },
             objectFit: 'cover',
           }}
         />
-        {/* Status ribbon in top-left corner */}
         <PropertyStatusRibbon status={property.status} ownershipShare={ownershipShare} />
       </Box>
 
-      {/* Back button */}
-      <Box sx={{ p: 2, pb: 0 }}>
-        <AssetButton
-          label={t('back')}
-          variant="text"
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
-        />
-      </Box>
-
-      {/* Header with name and edit button */}
-      <Box sx={{ p: 2, pt: 1 }}>
+      {/* Header: Back + Name + Menu */}
+      <Box sx={{ px: 2, pt: 1.5, pb: 1 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
           <Box>
-            <Typography variant="h5" component="h1" gutterBottom>
+            <AssetButton
+              label={t('back')}
+              variant="text"
+              size="small"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBack}
+              sx={{ ml: -1, mb: 0.5 }}
+            />
+            <Typography variant="h6" component="h1" sx={{ fontWeight: 600 }}>
               {property.name}
             </Typography>
-            {property.apartmentType && (
-              <Typography variant="body1" color="text.secondary">
-                {property.apartmentType}
+            {(property.apartmentType || property.rooms) && (
+              <Typography variant="body2" color="text.secondary">
+                {[
+                  property.apartmentType ? t(`propertyTypes.${propertyTypeNames.get(property.apartmentType)}`) : null,
+                  property.rooms,
+                ].filter(Boolean).join(' · ')}
               </Typography>
             )}
           </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            {/* Allocation rules button - hidden for PROSPECT */}
-            {property.status !== PropertyStatus.PROSPECT && (
-              <AssetButton
-                label={t('allocation:rules')}
-                variant="outlined"
-                startIcon={<RuleIcon />}
-                onClick={() => setRulesModalOpen(true)}
-              />
-            )}
-            <AssetButton
-              label={t('editProperty')}
-              variant="contained"
-              startIcon={<EditIcon />}
-              onClick={handleEdit}
-            />
-          </Box>
+          <PropertyActionsMenu
+            property={property}
+            onEdit={handleEdit}
+            onOpenAllocationRules={() => setRulesModalOpen(true)}
+            onToggleAdvancedReports={() => setShowAdvancedReports((prev) => !prev)}
+          />
         </Stack>
       </Box>
 
-      <Divider />
-
-      {/* Property Information and Location - side by side on larger screens */}
-      <Box sx={{ p: 2 }}>
-        <Grid container spacing={4}>
-          {/* Property Information */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
-              {t('propertyInfo')}
-            </Typography>
-            <DetailRow
-              icon={<SquareFootIcon fontSize="small" />}
-              label={t('size')}
-              value={`${property.size} m²`}
-            />
-            {property.buildYear && (
-              <DetailRow
-                icon={<CalendarTodayIcon fontSize="small" />}
-                label={t('buildYear')}
-                value={property.buildYear}
-              />
-            )}
-          </Grid>
-
-          {/* Location */}
-          {(property.address?.street || property.address?.city) && (
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
-                {t('locationInfo')}
-              </Typography>
-              {property.address?.street && (
-                <DetailRow
-                  icon={<LocationOnIcon fontSize="small" />}
-                  label={t('address')}
-                  value={property.address.street}
-                />
-              )}
-              {property.address?.city && (
-                <DetailRow
-                  icon={<LocationCityIcon fontSize="small" />}
-                  label={t('city')}
-                  value={`${property.address.postalCode ? property.address.postalCode + ' ' : ''}${property.address.city}`}
-                />
-              )}
-            </Grid>
-          )}
-        </Grid>
+      {/* KPI Cards Section */}
+      <Box sx={{ px: 2, py: 1.5 }}>
+        <PropertyKpiSection property={property} allTimeBalance={summaryData.allTimeBalance} />
       </Box>
 
-      <Divider />
+      {/* Info Cards Grid */}
+      <Box sx={{ px: 2, py: 1.5 }}>
+        <PropertyInfoSection property={property} />
+      </Box>
 
-      {/* Description */}
+      {/* Description Card */}
       {property.description && (
-        <>
-          <Box sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
-              {t('description')}
-            </Typography>
-            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-              {property.description}
-            </Typography>
-          </Box>
-          <Divider />
-        </>
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Grid container>
+            <Grid size={{ xs: 12 }}>
+              <PropertyInfoCard title={t('description')}>
+                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                  {property.description}
+                </Typography>
+              </PropertyInfoCard>
+            </Grid>
+          </Grid>
+        </Box>
       )}
 
-      {/* Statistics - only for OWN and SOLD */}
-      {property.status !== PropertyStatus.PROSPECT && (
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
+      {/* Statistics - only for OWN */}
+      {property.status === PropertyStatus.OWN && (
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              color: 'text.secondary',
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              mb: 1.5,
+            }}
+          >
             {t('statisticsSection')}
           </Typography>
-          <PropertyReportSection propertyId={property.id} />
+          <PropertyReportSection propertyId={property.id} showAdvancedReports={showAdvancedReports} statistics={statistics} />
         </Box>
+      )}
+
+      {/* External Listing Link - only for PROSPECT with external source */}
+      {property.status === PropertyStatus.PROSPECT && property.externalSource && property.externalSourceId && (
+        <ExternalListingLink
+          externalSource={property.externalSource}
+          externalSourceId={property.externalSourceId}
+        />
       )}
 
       {/* Investment Calculator - only for PROSPECT */}
@@ -258,19 +214,24 @@ function PropertyView({ t }: WithTranslation) {
         <ProspectInvestmentSection property={property} />
       )}
 
-      {/* External Listing Link - only for PROSPECT with external source */}
-      {property.status === PropertyStatus.PROSPECT &&
-       property.externalSource &&
-       property.externalSourceId && (
-        <ExternalListingLink
-          externalSource={property.externalSource}
-          externalSourceId={property.externalSourceId}
-        />
-      )}
-
-      {/* Sale Summary - only for SOLD */}
+      {/* Statistics - for SOLD */}
       {property.status === PropertyStatus.SOLD && (
-        <SoldSummarySection property={property} />
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              color: 'text.secondary',
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              mb: 1.5,
+            }}
+          >
+            {t('statisticsSection')}
+          </Typography>
+          <PropertyReportSection propertyId={property.id} showAdvancedReports={showAdvancedReports} statistics={statistics} />
+        </Box>
       )}
 
       {/* Allocation Rules Modal */}

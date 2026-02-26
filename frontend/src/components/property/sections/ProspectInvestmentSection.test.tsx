@@ -1,49 +1,86 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { renderWithProviders } from '@test-utils/test-wrapper';
+import { renderWithProviders, createMockProperty } from '@test-utils';
 import ProspectInvestmentSection from './ProspectInvestmentSection';
-import { Property, PropertyStatus } from '@asset-types';
-
-const createMockProperty = (overrides: Partial<Property> = {}): Property => ({
-  id: 1,
-  name: 'Test Property',
-  size: 55,
-  status: PropertyStatus.PROSPECT,
-  ...overrides,
-});
+import { PropertyStatus } from '@asset-types';
 
 describe('ProspectInvestmentSection', () => {
-  it('renders section header', () => {
-    const property = createMockProperty();
+  describe('rendering', () => {
+    it('renders section header with investment analysis title', () => {
+      const property = createMockProperty({
+        id: 1,
+        status: PropertyStatus.PROSPECT,
+      });
 
-    renderWithProviders(
-      <ProspectInvestmentSection property={property} />
-    );
+      renderWithProviders(<ProspectInvestmentSection property={property} />);
 
-    // Should render the investmentAnalysis translation key
-    expect(screen.getByText(/investment/i)).toBeInTheDocument();
+      expect(screen.getByText(/investment analysis/i)).toBeInTheDocument();
+    });
+
+    it('renders Add Calculation button', () => {
+      const property = createMockProperty({
+        id: 1,
+        status: PropertyStatus.PROSPECT,
+      });
+
+      renderWithProviders(<ProspectInvestmentSection property={property} />);
+
+      expect(screen.getByRole('button', { name: /add calculation/i })).toBeInTheDocument();
+    });
   });
 
-  it('renders upcoming feature placeholder', () => {
-    const property = createMockProperty();
+  describe('data fetching', () => {
+    it('shows loading state initially', () => {
+      const property = createMockProperty({
+        id: 1,
+        status: PropertyStatus.PROSPECT,
+      });
 
-    renderWithProviders(
-      <ProspectInvestmentSection property={property} />
-    );
+      renderWithProviders(<ProspectInvestmentSection property={property} />);
 
-    // Should show upcoming feature message
-    expect(screen.getByText(/upcoming/i)).toBeInTheDocument();
+      // Should show loading indicator
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
   });
 
-  it('does not render investment calculator form', () => {
-    const property = createMockProperty();
+  describe('add calculation', () => {
+    it('opens add dialog when Add Calculation button is clicked', async () => {
+      const user = userEvent.setup();
+      const property = createMockProperty({
+        id: 1,
+        status: PropertyStatus.PROSPECT,
+      });
 
-    renderWithProviders(
-      <ProspectInvestmentSection property={property} />
-    );
+      renderWithProviders(<ProspectInvestmentSection property={property} />);
 
-    // Should NOT have form inputs (no spinbuttons for number fields)
-    const spinbuttons = screen.queryAllByRole('spinbutton');
-    expect(spinbuttons.length).toBe(0);
+      // The Add Calculation button should be visible even during loading
+      const addButton = screen.getByRole('button', { name: /add calculation/i });
+      await user.click(addButton);
+
+      // Should open dialog
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+      });
+    });
+
+    it('dialog has property size pre-filled', async () => {
+      const user = userEvent.setup();
+      const property = createMockProperty({
+        id: 1,
+        size: 75,
+        status: PropertyStatus.PROSPECT,
+      });
+
+      renderWithProviders(<ProspectInvestmentSection property={property} />);
+
+      const addButton = screen.getByRole('button', { name: /add calculation/i });
+      await user.click(addButton);
+
+      // Dialog should open with property size displayed as text
+      await waitFor(() => {
+        expect(screen.getByText('75 m²')).toBeInTheDocument();
+      });
+    });
   });
 });

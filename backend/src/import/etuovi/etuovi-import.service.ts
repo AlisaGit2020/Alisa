@@ -13,6 +13,7 @@ import { AddressInputDto } from '@asset-backend/real-estate/address/dtos/address
 import {
   PropertyExternalSource,
   PropertyStatus,
+  PropertyType,
 } from '@asset-backend/common/types';
 import { PropertyService } from '@asset-backend/real-estate/property/property.service';
 import { JWTUser } from '@asset-backend/auth/types';
@@ -215,7 +216,8 @@ export class EtuoviImportService {
 
     // Parse other informational fields
     result.buildingYear = jsonData.buildingYear || jsonData.constructionFinishedYear || undefined;
-    result.propertyType = this.translatePropertyType(jsonData.residentialPropertyType);
+    result.propertyType = jsonData.residentialPropertyType || undefined;
+    result.roomStructure = jsonData.roomStructure || undefined;
     result.condition = jsonData.condition || undefined;
     result.energyClass = jsonData.energyClass || undefined;
 
@@ -419,19 +421,21 @@ export class EtuoviImportService {
     return null;
   }
 
-  private translatePropertyType(type?: string): string | undefined {
+  private translatePropertyType(type?: string): PropertyType | undefined {
     if (!type) return undefined;
 
-    const translations: Record<string, string> = {
-      APARTMENT_HOUSE: 'Kerrostalo',
-      ROW_HOUSE: 'Rivitalo',
-      SEMI_DETACHED_HOUSE: 'Paritalo',
-      DETACHED_HOUSE: 'Omakotitalo',
-      CHAIN_HOUSE: 'Ketjutalo',
-      HOLIDAY_HOME: 'Loma-asunto',
+    const typeMap: Record<string, PropertyType> = {
+      APARTMENT_HOUSE: PropertyType.APARTMENT,
+      ROW_HOUSE: PropertyType.ROW_HOUSE,
+      SEMI_DETACHED_HOUSE: PropertyType.SEMI_DETACHED,
+      DETACHED_HOUSE: PropertyType.DETACHED,
+      CHAIN_HOUSE: PropertyType.ROW_HOUSE, // Chain house is similar to row house
+      HOLIDAY_HOME: PropertyType.DETACHED, // Holiday homes are typically detached
+      GALLERY_APARTMENT: PropertyType.GALLERY_ACCESS,
+      WOODEN_APARTMENT: PropertyType.WOODEN_HOUSE,
     };
 
-    return translations[type] || type;
+    return typeMap[type];
   }
 
   private parseNumber(value: string): number {
@@ -484,9 +488,17 @@ export class EtuoviImportService {
     input.name = etuoviData.address || this.extractNameFromUrl(etuoviData.url);
     input.size = etuoviData.apartmentSize;
     input.buildYear = etuoviData.buildingYear;
-    input.apartmentType = etuoviData.propertyType;
+    input.apartmentType = this.translatePropertyType(etuoviData.propertyType);
+    input.rooms = etuoviData.roomStructure;
     input.address = this.parseAddress(etuoviData);
     input.photo = etuoviData.defaultImageUrl;
+
+    // Financial fields
+    input.purchasePrice = etuoviData.deptFreePrice;
+    input.debtShare = etuoviData.deptShare;
+    input.maintenanceFee = etuoviData.maintenanceFee;
+    input.financialCharge = etuoviData.chargeForFinancialCosts;
+    input.waterCharge = etuoviData.waterCharge;
 
     return input;
   }
