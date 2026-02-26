@@ -18,6 +18,19 @@ export function getNumber(value: string, decimals: number): number {
 }
 
 /**
+ * Converts a string to number, returning undefined for empty/whitespace strings.
+ * Unlike getNumber() || undefined, this preserves 0 as a valid value.
+ * Use this for optional numeric fields where 0 is meaningful (e.g., "no fee").
+ */
+export function getNumberOrUndefined(value: string, decimals: number): number | undefined {
+    const trimmed = value.trim();
+    if (trimmed === '') {
+        return undefined;
+    }
+    return getNumber(value, decimals);
+}
+
+/**
  * Returns a properly formatted photo URL.
  * - External URLs (https://, http://) are returned as-is
  * - Local paths are prefixed with VITE_BASE_URL

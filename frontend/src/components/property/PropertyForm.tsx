@@ -1,9 +1,10 @@
 import { Box, Divider, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
-import { getNumber } from '../../lib/functions';
-import { PropertyInput, PropertyStatus } from '@asset-types'
+import { getNumber, getNumberOrUndefined } from '../../lib/functions';
+import { PropertyInput, PropertyStatus, PropertyType, propertyTypeNames } from '@asset-types'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AssetNumberField from '../asset/form/AssetNumberField';
+import AssetSelectField from '../asset/form/AssetSelectField';
 import AssetTextField from '../asset/form/AssetTextField';
 import AssetDatePicker from '../asset/form/AssetDatePicker';
 import { propertyContext } from '../../lib/asset-contexts';
@@ -23,6 +24,11 @@ import { setTransactionPropertyId } from '@asset-lib/initial-data';
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from '../transaction/TransactionLeftMenuItems';
 import { getPropertyStatusFromPath, getPropertyViewPath, getReturnPathForStatus } from './property-form-utils';
 
+// Property type select items
+const propertyTypeItems = Array.from(propertyTypeNames.entries()).map(([id, key]) => ({
+    id,
+    key,
+}));
 
 function PropertyForm({ t }: WithTranslation) {
     const { idParam } = useParams();
@@ -45,7 +51,7 @@ function PropertyForm({ t }: WithTranslation) {
             postalCode: '',
         },
         buildYear: undefined,
-        apartmentType: '',
+        apartmentType: undefined,
         status: statusFromPath,
         ownerships: [{ userId: 0, share: 100 }]
     });
@@ -144,11 +150,14 @@ function PropertyForm({ t }: WithTranslation) {
                             {...getFieldErrorProps<PropertyInput>(fieldErrors, 'name')}
                         />
                     </Box>
-                    <Box sx={{ flex: 1, minWidth: 120 }}>
-                        <AssetTextField
+                    <Box sx={{ flex: 1, minWidth: 150 }}>
+                        <AssetSelectField
                             label={t('apartmentType')}
-                            value={data.apartmentType || ''}
-                            onChange={(e) => handleChange('apartmentType', e.target.value)}
+                            value={data.apartmentType ?? ''}
+                            items={propertyTypeItems}
+                            t={t}
+                            translateKeyPrefix="propertyTypes"
+                            onChange={(e) => handleChange('apartmentType', e.target.value ? Number(e.target.value) as PropertyType : undefined)}
                         />
                     </Box>
                 </Stack>
@@ -187,7 +196,7 @@ function PropertyForm({ t }: WithTranslation) {
                         <AssetNumberField
                             label={t('buildYear')}
                             value={data.buildYear || 0}
-                            onChange={(e) => handleChange('buildYear', getNumber(e.target.value, 0) || undefined)}
+                            onChange={(e) => handleChange('buildYear', getNumberOrUndefined(e.target.value, 0))}
                             {...getFieldErrorProps<PropertyInput>(fieldErrors, 'buildYear')}
                         />
                     </Box>
@@ -210,7 +219,7 @@ function PropertyForm({ t }: WithTranslation) {
                         <AssetNumberField
                             label={t('maintenanceFee')}
                             value={data.maintenanceFee ?? 0}
-                            onChange={(e) => handleChange('maintenanceFee', getNumber(e.target.value, 0) || undefined)}
+                            onChange={(e) => handleChange('maintenanceFee', getNumberOrUndefined(e.target.value, 0))}
                             adornment='€'
                         />
                     </Box>
@@ -218,7 +227,7 @@ function PropertyForm({ t }: WithTranslation) {
                         <AssetNumberField
                             label={t('waterCharge')}
                             value={data.waterCharge ?? 0}
-                            onChange={(e) => handleChange('waterCharge', getNumber(e.target.value, 0) || undefined)}
+                            onChange={(e) => handleChange('waterCharge', getNumberOrUndefined(e.target.value, 0))}
                             adornment='€'
                         />
                     </Box>
@@ -228,7 +237,7 @@ function PropertyForm({ t }: WithTranslation) {
                         <AssetNumberField
                             label={t('financialCharge')}
                             value={data.financialCharge ?? 0}
-                            onChange={(e) => handleChange('financialCharge', getNumber(e.target.value, 0) || undefined)}
+                            onChange={(e) => handleChange('financialCharge', getNumberOrUndefined(e.target.value, 0))}
                             adornment='€'
                         />
                     </Box>
@@ -236,7 +245,7 @@ function PropertyForm({ t }: WithTranslation) {
                         <AssetNumberField
                             label={data.status === PropertyStatus.PROSPECT ? t('expectedRent') : t('monthlyRent')}
                             value={data.monthlyRent ?? 0}
-                            onChange={(e) => handleChange('monthlyRent', getNumber(e.target.value, 0) || undefined)}
+                            onChange={(e) => handleChange('monthlyRent', getNumberOrUndefined(e.target.value, 0))}
                             adornment='€'
                         />
                     </Box>
@@ -254,7 +263,7 @@ function PropertyForm({ t }: WithTranslation) {
                                 <AssetNumberField
                                     label={data.status === PropertyStatus.PROSPECT ? t('askingPrice') : t('purchasePrice')}
                                     value={data.purchasePrice ?? 0}
-                                    onChange={(e) => handleChange('purchasePrice', getNumber(e.target.value, 0) || undefined)}
+                                    onChange={(e) => handleChange('purchasePrice', getNumberOrUndefined(e.target.value, 0))}
                                     adornment='€'
                                 />
                             </Box>
@@ -262,7 +271,7 @@ function PropertyForm({ t }: WithTranslation) {
                                 <AssetNumberField
                                     label={t('debtShare')}
                                     value={data.debtShare ?? 0}
-                                    onChange={(e) => handleChange('debtShare', getNumber(e.target.value, 0) || undefined)}
+                                    onChange={(e) => handleChange('debtShare', getNumberOrUndefined(e.target.value, 0))}
                                     adornment='€'
                                 />
                             </Box>
@@ -280,7 +289,7 @@ function PropertyForm({ t }: WithTranslation) {
                                     <AssetNumberField
                                         label={t('purchaseLoan')}
                                         value={data.purchaseLoan ?? 0}
-                                        onChange={(e) => handleChange('purchaseLoan', getNumber(e.target.value, 0) || undefined)}
+                                        onChange={(e) => handleChange('purchaseLoan', getNumberOrUndefined(e.target.value, 0))}
                                         adornment='€'
                                     />
                                 </Box>
@@ -301,7 +310,7 @@ function PropertyForm({ t }: WithTranslation) {
                                 <AssetNumberField
                                     label={t('salePrice')}
                                     value={data.salePrice ?? 0}
-                                    onChange={(e) => handleChange('salePrice', getNumber(e.target.value, 0) || undefined)}
+                                    onChange={(e) => handleChange('salePrice', getNumberOrUndefined(e.target.value, 0))}
                                     adornment='€'
                                 />
                             </Box>

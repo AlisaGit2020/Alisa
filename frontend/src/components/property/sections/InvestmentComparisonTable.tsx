@@ -146,7 +146,7 @@ function InvestmentComparisonTable({
       }
     } catch {
       // Show error toast when API recalculation fails
-      showToast(t('common:toast.updateError'), 'error');
+      showToast({ message: t('common:toast.updateError'), severity: 'error' });
       // Still update with local changes if API fails
       onUpdate(localUpdate);
     }
