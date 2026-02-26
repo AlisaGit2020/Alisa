@@ -40,10 +40,8 @@ describe('InvestmentAddDialog', () => {
     it('renders investment fields', () => {
       renderWithProviders(<InvestmentAddDialog {...defaultProps} />);
 
-      // All fields are displayed as text (AssetEditableNumber)
-      // Section headers are displayed
+      // Section headers are displayed (cost fields removed from form)
       expect(screen.getByText('Property Details')).toBeInTheDocument();
-      expect(screen.getByText('Monthly Costs')).toBeInTheDocument();
       expect(screen.getByText('Rental Income')).toBeInTheDocument();
       expect(screen.getByText('Financing')).toBeInTheDocument();
     });
@@ -152,80 +150,6 @@ describe('InvestmentAddDialog', () => {
   });
 
   describe('auto-fill from property data', () => {
-    it('auto-fills debtShare from property', () => {
-      const property = createMockProperty({
-        debtShare: 15000,
-        status: PropertyStatus.PROSPECT,
-      });
-
-      renderWithProviders(
-        <InvestmentAddDialog
-          open={true}
-          property={property}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
-        />
-      );
-
-      // Pre-filled fields display as text, not inputs
-      expect(screen.getByText('15000 €')).toBeInTheDocument();
-    });
-
-    it('auto-fills maintenanceFee from property', () => {
-      const property = createMockProperty({
-        maintenanceFee: 250,
-        status: PropertyStatus.PROSPECT,
-      });
-
-      renderWithProviders(
-        <InvestmentAddDialog
-          open={true}
-          property={property}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
-        />
-      );
-
-      // Pre-filled fields display as text with suffix
-      expect(screen.getByText('250 €/mo')).toBeInTheDocument();
-    });
-
-    it('auto-fills financialCharge from property', () => {
-      const property = createMockProperty({
-        financialCharge: 75,
-        status: PropertyStatus.PROSPECT,
-      });
-
-      renderWithProviders(
-        <InvestmentAddDialog
-          open={true}
-          property={property}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
-        />
-      );
-
-      expect(screen.getByText('75 €/mo')).toBeInTheDocument();
-    });
-
-    it('auto-fills waterCharge from property', () => {
-      const property = createMockProperty({
-        waterCharge: 30,
-        status: PropertyStatus.PROSPECT,
-      });
-
-      renderWithProviders(
-        <InvestmentAddDialog
-          open={true}
-          property={property}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
-        />
-      );
-
-      expect(screen.getByText('30 €/mo')).toBeInTheDocument();
-    });
-
     it('auto-fills rentPerMonth from property', () => {
       const property = createMockProperty({
         monthlyRent: 950,
@@ -262,35 +186,31 @@ describe('InvestmentAddDialog', () => {
       // Purchase price displayed as text
       expect(screen.getByText('150000 €')).toBeInTheDocument();
     });
+
+    it('auto-fills size from property', () => {
+      const property = createMockProperty({
+        size: 75,
+        status: PropertyStatus.PROSPECT,
+      });
+
+      renderWithProviders(
+        <InvestmentAddDialog
+          open={true}
+          property={property}
+          onClose={jest.fn()}
+          onSave={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText('75 m²')).toBeInTheDocument();
+    });
   });
 
   describe('read-only display for pre-filled fields', () => {
-    it('shows pre-filled fields as text (not input) initially', () => {
-      const property = createMockProperty({
-        maintenanceFee: 250,
-        debtShare: 15000,
-        status: PropertyStatus.PROSPECT,
-      });
-
-      renderWithProviders(
-        <InvestmentAddDialog
-          open={true}
-          property={property}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
-        />
-      );
-
-      // Pre-filled fields should display as text, not inputs
-      expect(screen.getByText('250 €/mo')).toBeInTheDocument();
-      expect(screen.getByText('15000 €')).toBeInTheDocument();
-      // Should not have inputs for pre-filled fields (they display as text)
-    });
-
     it('pre-filled fields do not become editable when clicked (readOnly)', async () => {
       const user = userEvent.setup();
       const property = createMockProperty({
-        maintenanceFee: 250,
+        monthlyRent: 950,
         status: PropertyStatus.PROSPECT,
       });
 
@@ -303,12 +223,12 @@ describe('InvestmentAddDialog', () => {
         />
       );
 
-      const displayText = screen.getByText('250 €/mo');
+      const displayText = screen.getByText('950 €/mo');
       await user.click(displayText);
 
       // Should remain as text since it's readOnly (pre-filled)
       await waitFor(() => {
-        expect(screen.getByText('250 €/mo')).toBeInTheDocument();
+        expect(screen.getByText('950 €/mo')).toBeInTheDocument();
       });
     });
 
@@ -346,9 +266,8 @@ describe('InvestmentAddDialog', () => {
         />
       );
 
-      // Default values displayed as text
-      expect(screen.getByText('200 €/mo')).toBeInTheDocument(); // default maintenanceFee
-      expect(screen.getByText('800 €/mo')).toBeInTheDocument(); // default rentPerMonth
+      // Default values displayed as text (rentPerMonth default is 800)
+      expect(screen.getByText('800 €/mo')).toBeInTheDocument();
     });
   });
 });

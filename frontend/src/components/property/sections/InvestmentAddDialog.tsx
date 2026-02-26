@@ -27,11 +27,7 @@ interface InvestmentAddDialogProps {
 interface FormData {
   name: string;
   deptFreePrice: number;
-  deptShare: number;
   transferTaxPercent: number;
-  maintenanceFee: number;
-  chargeForFinancialCosts: number;
-  waterCharge: number;
   rentPerMonth: number;
   apartmentSize: number;
   downPayment: number;
@@ -48,11 +44,7 @@ interface FormErrors {
 const getDefaultFormData = (property: Property): FormData => ({
   name: '',
   deptFreePrice: property.purchasePrice ?? 100000,
-  deptShare: property.debtShare ?? 0,
   transferTaxPercent: 2,
-  maintenanceFee: property.maintenanceFee ?? 200,
-  chargeForFinancialCosts: property.financialCharge ?? 50,
-  waterCharge: property.waterCharge ?? 20,
   rentPerMonth: property.monthlyRent ?? 800,
   apartmentSize: property.size || 50,
   downPayment: 0,
@@ -60,16 +52,12 @@ const getDefaultFormData = (property: Property): FormData => ({
   loanPeriod: 25,
 });
 
-// Fields that can be pre-filled from property data (excluding deptFreePrice which is always editable)
-type PreFillableField = 'maintenanceFee' | 'chargeForFinancialCosts' | 'waterCharge' | 'rentPerMonth' | 'deptShare' | 'apartmentSize';
+// Fields that can be pre-filled from property data
+type PreFillableField = 'rentPerMonth' | 'apartmentSize';
 
 const getPreFilledFields = (property: Property): Set<PreFillableField> => {
   const fields = new Set<PreFillableField>();
-  if (property.maintenanceFee !== undefined && property.maintenanceFee !== null) fields.add('maintenanceFee');
-  if (property.financialCharge !== undefined && property.financialCharge !== null) fields.add('chargeForFinancialCosts');
-  if (property.waterCharge !== undefined && property.waterCharge !== null) fields.add('waterCharge');
   if (property.monthlyRent !== undefined && property.monthlyRent !== null) fields.add('rentPerMonth');
-  if (property.debtShare !== undefined && property.debtShare !== null) fields.add('deptShare');
   if (property.size !== undefined && property.size !== null) fields.add('apartmentSize');
   return fields;
 };
@@ -139,11 +127,19 @@ function InvestmentAddDialog({
     setSubmitError(null);
 
     try {
-      // ApiClient.post returns axios response (type mismatch in ApiClient)
-      const response = await ApiClient.post('real-estate/investment', {
+      // Include property cost fields in the submission
+      const submissionData = {
         ...formData,
         propertyId: property.id,
-      }) as unknown as AxiosResponse<SavedInvestmentCalculation>;
+        // Cost fields come from property
+        deptShare: property.debtShare ?? 0,
+        maintenanceFee: property.maintenanceFee ?? 0,
+        chargeForFinancialCosts: property.financialCharge ?? 0,
+        waterCharge: property.waterCharge ?? 0,
+      };
+
+      // ApiClient.post returns axios response (type mismatch in ApiClient)
+      const response = await ApiClient.post('real-estate/investment', submissionData) as unknown as AxiosResponse<SavedInvestmentCalculation>;
       onSave(response.data);
       onClose();
     } catch (error) {
@@ -152,7 +148,7 @@ function InvestmentAddDialog({
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, property.id, validate, onSave, onClose, t]);
+  }, [formData, property, validate, onSave, onClose, t]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -198,17 +194,6 @@ function InvestmentAddDialog({
 
             <Grid size={{ xs: 12, sm: 6 }}>
               <AssetEditableNumber
-                label={t('investment-calculator:deptShare')}
-                value={formData.deptShare}
-                onChange={(e) => handleChange('deptShare', Number(e.target.value) || 0)}
-                step={1000}
-                suffix="€"
-                readOnly={isFieldReadOnly('deptShare')}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetEditableNumber
                 label={t('investment-calculator:apartmentSize')}
                 value={formData.apartmentSize}
                 onChange={(e) => handleChange('apartmentSize', Number(e.target.value) || 0)}
@@ -225,47 +210,6 @@ function InvestmentAddDialog({
                 onChange={(e) => handleChange('transferTaxPercent', Number(e.target.value) || 0)}
                 step={0.1}
                 suffix="%"
-              />
-            </Grid>
-
-            {/* Monthly Costs Section */}
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                {t('investment-calculator:sectionMonthlyCosts')}
-              </Typography>
-              <Divider />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetEditableNumber
-                label={t('investment-calculator:maintenanceFee')}
-                value={formData.maintenanceFee}
-                onChange={(e) => handleChange('maintenanceFee', Number(e.target.value) || 0)}
-                step={10}
-                suffix={t('common:suffix.euroPerMonth')}
-                readOnly={isFieldReadOnly('maintenanceFee')}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetEditableNumber
-                label={t('investment-calculator:chargeForFinancialCosts')}
-                value={formData.chargeForFinancialCosts}
-                onChange={(e) => handleChange('chargeForFinancialCosts', Number(e.target.value) || 0)}
-                step={10}
-                suffix={t('common:suffix.euroPerMonth')}
-                readOnly={isFieldReadOnly('chargeForFinancialCosts')}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetEditableNumber
-                label={t('investment-calculator:waterCharge')}
-                value={formData.waterCharge}
-                onChange={(e) => handleChange('waterCharge', Number(e.target.value) || 0)}
-                step={5}
-                suffix={t('common:suffix.euroPerMonth')}
-                readOnly={isFieldReadOnly('waterCharge')}
               />
             </Grid>
 

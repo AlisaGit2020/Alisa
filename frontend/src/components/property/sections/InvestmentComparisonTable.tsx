@@ -25,14 +25,10 @@ interface InvestmentComparisonTableProps {
   onDelete: (id: number) => void;
 }
 
-// Input fields that are editable
+// Input fields that are editable (cost fields come from property, not editable here)
 const INPUT_FIELDS: (keyof SavedInvestmentCalculation)[] = [
   'deptFreePrice',
-  'deptShare',
   'transferTaxPercent',
-  'maintenanceFee',
-  'chargeForFinancialCosts',
-  'waterCharge',
   'rentPerMonth',
   'downPayment',
   'loanInterestPercent',

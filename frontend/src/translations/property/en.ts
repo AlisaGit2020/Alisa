@@ -1,4 +1,15 @@
 const property = {
+    // Property types
+    propertyTypes: {
+        apartment: 'Apartment',
+        'row-house': 'Row House',
+        'semi-detached': 'Semi-Detached',
+        detached: 'Detached',
+        'separate-house': 'Separate House',
+        'gallery-access': 'Gallery Access',
+        'wooden-house': 'Wooden House',
+    },
+
     // Page template
     pageTitle: 'Properties',
     pageDescription: 'View and manage your real estate portfolio.',
@@ -54,6 +65,27 @@ const property = {
     noCalculations: 'No calculations yet. Add your first investment calculation.',
     deleteCalculationConfirm: 'Are you sure you want to delete this calculation?',
     inputFields: 'Input Fields',
+
+    // Property field sections
+    monthlyCostsSection: 'Monthly Costs',
+    purchaseInfoSection: 'Purchase Info',
+    saleInfoSection: 'Sale Info',
+    viewOriginalListing: 'View Original Listing',
+    profitLoss: 'Profit/Loss',
+
+    // Property fields
+    maintenanceFee: 'Maintenance Fee',
+    financialCharge: 'Financial Charge',
+    waterCharge: 'Water Charge',
+    debtShare: 'Debt Share',
+    monthlyRent: 'Monthly Rent',
+    purchasePrice: 'Purchase Price',
+    askingPrice: 'Asking Price',
+    purchaseDate: 'Purchase Date',
+    purchaseLoan: 'Purchase Loan',
+    salePrice: 'Sale Price',
+    saleDate: 'Sale Date',
+    rooms: 'Rooms',
 
     // Prospect add choice modal
     addProspectTitle: 'Add Prospect Property',

@@ -1,4 +1,15 @@
 const property = {
+    // Property types
+    propertyTypes: {
+        apartment: 'Lägenhet',
+        'row-house': 'Radhus',
+        'semi-detached': 'Parhus',
+        detached: 'Villa',
+        'separate-house': 'Fristående hus',
+        'gallery-access': 'Loftgångshus',
+        'wooden-house': 'Trähus',
+    },
+
     // Page template
     pageTitle: 'Fastigheter',
     pageDescription: 'Visa och hantera din fastighetsportfölj.',
@@ -54,6 +65,27 @@ const property = {
     noCalculations: 'Inga kalkyler ännu. Lägg till din första investeringskalkyl.',
     deleteCalculationConfirm: 'Är du säker på att du vill ta bort denna kalkyl?',
     inputFields: 'Inmatningsfält',
+
+    // Property field sections
+    monthlyCostsSection: 'Månadskostnader',
+    purchaseInfoSection: 'Köpinformation',
+    saleInfoSection: 'Försäljningsinformation',
+    viewOriginalListing: 'Visa ursprunglig annons',
+    profitLoss: 'Vinst/Förlust',
+
+    // Property fields
+    maintenanceFee: 'Underhållsavgift',
+    financialCharge: 'Finansieringsavgift',
+    waterCharge: 'Vattenavgift',
+    debtShare: 'Skulddel',
+    monthlyRent: 'Månadshyra',
+    purchasePrice: 'Köpeskilling',
+    askingPrice: 'Begärt pris',
+    purchaseDate: 'Köpdatum',
+    purchaseLoan: 'Köplån',
+    salePrice: 'Försäljningspris',
+    saleDate: 'Försäljningsdatum',
+    rooms: 'Rum',
 
     // Prospect add choice modal
     addProspectTitle: 'Lägg till prospekt',

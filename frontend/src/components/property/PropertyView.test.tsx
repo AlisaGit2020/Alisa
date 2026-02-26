@@ -7,6 +7,7 @@ import { renderWithRouter } from '@test-utils/test-wrapper';
 import { createMockProperty } from '@test-utils/test-data';
 import ApiClient from '@asset-lib/api-client';
 import { Routes, Route } from 'react-router-dom';
+import { PropertyType } from '@asset-types';
 
 // Mock the withTranslation HOC
 jest.mock('react-i18next', () => ({
@@ -30,6 +31,24 @@ jest.mock('react-i18next', () => ({
         buildYear: 'Build year',
         apartmentType: 'Apartment type',
         ownershipShare: 'Ownership share',
+        monthlyCostsSection: 'Monthly Costs',
+        purchaseInfoSection: 'Purchase Info',
+        maintenanceFee: 'Maintenance Fee',
+        financialCharge: 'Financial Charge',
+        waterCharge: 'Water Charge',
+        debtShare: 'Debt Share',
+        monthlyRent: 'Monthly Rent',
+        purchasePrice: 'Purchase Price',
+        purchaseDate: 'Purchase Date',
+        purchaseLoan: 'Purchase Loan',
+        // Property types
+        'propertyTypes.apartment': 'Apartment',
+        'propertyTypes.row-house': 'Row House',
+        'propertyTypes.semi-detached': 'Semi-Detached',
+        'propertyTypes.detached': 'Detached',
+        'propertyTypes.separate-house': 'Separate House',
+        'propertyTypes.gallery-access': 'Gallery Access',
+        'propertyTypes.wooden-house': 'Wooden House',
       };
       const t = (key: string) => translations[key] || key;
       return <Component {...(props as P)} t={t} />;
@@ -71,10 +90,12 @@ describe('PropertyView', () => {
     },
     size: 75,
     buildYear: 2010,
-    apartmentType: '2h+k',
+    apartmentType: PropertyType.APARTMENT,
+    rooms: '2h+k',
     description: 'A beautiful apartment in the city center.',
     photo: 'uploads/properties/photo1.jpg',
     ownerships: [{ share: 100, userId: 1, propertyId: 1 }],
+    status: 2, // PropertyStatus.OWN
   });
 
   beforeEach(() => {
@@ -95,8 +116,8 @@ describe('PropertyView', () => {
         expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
 
-      // Verify basic info
-      expect(screen.getByText('2h+k')).toBeInTheDocument();
+      // Verify basic info (property type + rooms in subtitle)
+      expect(screen.getByText('Apartment - 2h+k')).toBeInTheDocument();
       expect(screen.getByText('75 m²')).toBeInTheDocument();
       expect(screen.getByText('2010')).toBeInTheDocument();
 
@@ -159,7 +180,7 @@ describe('PropertyView', () => {
       });
 
       // Ribbon shows ownership status text with percentage
-      expect(screen.getByText(/75/)).toBeInTheDocument();
+      expect(screen.getByText(/Ownership 75%/)).toBeInTheDocument();
     });
 
     it('shows ownership status ribbon for full ownership', async () => {
@@ -172,7 +193,7 @@ describe('PropertyView', () => {
       });
 
       // Ribbon shows ownership status text with percentage
-      expect(screen.getByText(/100/)).toBeInTheDocument();
+      expect(screen.getByText(/Ownership 100%/)).toBeInTheDocument();
     });
 
     it('hides location section when no address or city', async () => {
@@ -256,7 +277,7 @@ describe('PropertyView', () => {
   });
 
   describe('Navigation', () => {
-    it('Edit button navigates to edit page for own property', async () => {
+    it('Edit menu item navigates to edit page for own property', async () => {
       const user = userEvent.setup();
       mockGet.mockResolvedValue({ ...mockProperty, status: 2 }); // PropertyStatus.OWN = 2
 
@@ -266,8 +287,13 @@ describe('PropertyView', () => {
         expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
 
-      const editButton = screen.getByRole('button', { name: /edit/i });
-      await user.click(editButton);
+      // Open the actions menu
+      const menuButton = screen.getByRole('button', { name: /property actions/i });
+      await user.click(menuButton);
+
+      // Click Edit in the menu
+      const editMenuItem = screen.getByRole('menuitem', { name: /edit/i });
+      await user.click(editMenuItem);
 
       // After clicking edit, we should navigate to the edit page for own properties
       await waitFor(() => {
@@ -275,7 +301,7 @@ describe('PropertyView', () => {
       });
     });
 
-    it('Edit button navigates to edit page for prospect property', async () => {
+    it('Edit menu item navigates to edit page for prospect property', async () => {
       const user = userEvent.setup();
       mockGet.mockResolvedValue({ ...mockProperty, status: 1 }); // PropertyStatus.PROSPECT = 1
 
@@ -285,8 +311,13 @@ describe('PropertyView', () => {
         expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
 
-      const editButton = screen.getByRole('button', { name: /edit/i });
-      await user.click(editButton);
+      // Open the actions menu
+      const menuButton = screen.getByRole('button', { name: /property actions/i });
+      await user.click(menuButton);
+
+      // Click Edit in the menu
+      const editMenuItem = screen.getByRole('menuitem', { name: /edit/i });
+      await user.click(editMenuItem);
 
       // After clicking edit, we should navigate to the edit page for prospects
       await waitFor(() => {

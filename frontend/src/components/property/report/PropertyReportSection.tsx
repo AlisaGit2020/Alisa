@@ -1,12 +1,8 @@
 import { Box, Collapse } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useMemo } from "react";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import AssessmentIcon from "@mui/icons-material/Assessment";
 import PropertySummaryCards from "./PropertySummaryCards";
 import PropertyReportCharts from "./PropertyReportCharts";
-import AssetButton from "../../asset/form/AssetButton";
 import { PropertyStatistics } from "@asset-types";
 import ApiClient from "@asset-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
@@ -16,12 +12,12 @@ import { useAssetToast } from "../../asset/toast";
 
 interface PropertyReportSectionProps {
   propertyId: number;
+  showAdvancedReports?: boolean;
 }
 
-function PropertyReportSection({ propertyId }: PropertyReportSectionProps) {
+function PropertyReportSection({ propertyId, showAdvancedReports = false }: PropertyReportSectionProps) {
   const { t } = useTranslation("property");
   const { showToast } = useAssetToast();
-  const [expanded, setExpanded] = useState(false);
   const [statistics, setStatistics] = useState<PropertyStatistics[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -61,10 +57,6 @@ function PropertyReportSection({ propertyId }: PropertyReportSectionProps) {
     [statistics, currentYear]
   );
 
-  const handleToggle = () => {
-    setExpanded((prev) => !prev);
-  };
-
   return (
     <Box>
       {/* Summary Cards */}
@@ -76,19 +68,8 @@ function PropertyReportSection({ propertyId }: PropertyReportSectionProps) {
         loading={loading}
       />
 
-      {/* Advanced Reports Toggle Button */}
-      <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
-        <AssetButton
-          label={t("report.advancedReports")}
-          variant="outlined"
-          startIcon={<AssessmentIcon />}
-          endIcon={expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          onClick={handleToggle}
-        />
-      </Box>
-
-      {/* Collapsible Charts Section */}
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
+      {/* Collapsible Charts Section - controlled by parent via showAdvancedReports prop */}
+      <Collapse in={showAdvancedReports} timeout="auto" unmountOnExit>
         <Box sx={{ mt: 3 }}>
           <PropertyReportCharts propertyId={propertyId} />
         </Box>
