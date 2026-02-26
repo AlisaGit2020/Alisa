@@ -6,8 +6,10 @@ import '@testing-library/jest-dom';
 import { renderWithRouter } from '@test-utils/test-wrapper';
 import { createMockProperty } from '@test-utils/test-data';
 import ApiClient from '@asset-lib/api-client';
+import axios from 'axios';
 import { Routes, Route } from 'react-router-dom';
 import { PropertyType } from '@asset-types';
+
 
 // Mock the withTranslation HOC
 jest.mock('react-i18next', () => ({
@@ -78,6 +80,8 @@ function renderPropertyView(propertyId: string = '1', statusPrefix: 'own' | 'pro
 
 describe('PropertyView', () => {
   let mockGet: jest.SpyInstance;
+  let mockGetOptions: jest.SpyInstance;
+  let mockAxiosPost: jest.SpyInstance;
 
   const mockProperty = createMockProperty({
     id: 1,
@@ -100,10 +104,15 @@ describe('PropertyView', () => {
 
   beforeEach(() => {
     mockGet = jest.spyOn(ApiClient, 'get');
+    mockGetOptions = jest.spyOn(ApiClient, 'getOptions').mockResolvedValue({});
+    // Mock statistics API call
+    mockAxiosPost = jest.spyOn(axios, 'post').mockResolvedValue({ data: [] });
   });
 
   afterEach(() => {
     mockGet.mockRestore();
+    mockGetOptions.mockRestore();
+    mockAxiosPost.mockRestore();
   });
 
   describe('Rendering', () => {
@@ -117,7 +126,7 @@ describe('PropertyView', () => {
       });
 
       // Verify basic info (property type + rooms in subtitle)
-      expect(screen.getByText('Apartment - 2h+k')).toBeInTheDocument();
+      expect(screen.getByText('Apartment · 2h+k')).toBeInTheDocument();
       expect(screen.getByText('75 m²')).toBeInTheDocument();
       expect(screen.getByText('2010')).toBeInTheDocument();
 

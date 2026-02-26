@@ -1,33 +1,26 @@
-import { Box, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Box, Grid, Paper, Stack, Typography } from '@mui/material';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { propertyContext } from '../../lib/asset-contexts';
-import { Property, PropertyStatus, propertyTypeNames } from '@asset-types';
+import { Property, PropertyStatus, propertyTypeNames, PropertyStatistics } from '@asset-types';
 import ApiClient from '../../lib/api-client';
 import AssetLoadingProgress from '../asset/AssetLoadingProgress';
 import AssetButton from '../asset/form/AssetButton';
 import { getPhotoUrl } from '@asset-lib/functions';
-import { formatCurrency, formatDate } from '@asset-lib/format-utils';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SquareFootIcon from '@mui/icons-material/SquareFoot';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import LocationCityIcon from '@mui/icons-material/LocationCity';
-import PaymentsIcon from '@mui/icons-material/Payments';
-import HomeWorkIcon from '@mui/icons-material/HomeWork';
-import WaterDropIcon from '@mui/icons-material/WaterDrop';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import CalculateIcon from '@mui/icons-material/Calculate';
 import PropertyReportSection from './report/PropertyReportSection';
 import { AllocationRulesModal } from '../allocation';
 import { getReturnPathForStatus } from './property-form-utils';
 import PropertyStatusRibbon from './PropertyStatusRibbon';
 import ProspectInvestmentSection from './sections/ProspectInvestmentSection';
 import PropertyActionsMenu from './sections/PropertyActionsMenu';
-import SoldSummarySection from './sections/SoldSummarySection';
-import DetailRow from './shared/DetailRow';
+import PropertyKpiSection from './sections/PropertyKpiSection';
+import PropertyInfoSection from './sections/PropertyInfoSection';
+import PropertyInfoCard from './shared/PropertyInfoCard';
+import { VITE_API_URL } from '../../constants';
+import axios from 'axios';
+import { calculateSummaryData } from './report/report-utils';
 
 function PropertyView({ t }: WithTranslation) {
   const [property, setProperty] = useState<Property | null>(null);
@@ -35,6 +28,7 @@ function PropertyView({ t }: WithTranslation) {
   const [error, setError] = useState<string | null>(null);
   const [rulesModalOpen, setRulesModalOpen] = useState(false);
   const [showAdvancedReports, setShowAdvancedReports] = useState(false);
+  const [statistics, setStatistics] = useState<PropertyStatistics[]>([]);
   const { idParam } = useParams();
   const navigate = useNavigate();
 
@@ -53,6 +47,18 @@ function PropertyView({ t }: WithTranslation) {
           { ownerships: true }
         );
         setProperty(data);
+
+        // Fetch statistics for OWN/SOLD properties
+        if (data && (data.status === PropertyStatus.OWN || data.status === PropertyStatus.SOLD)) {
+          const url = `${VITE_API_URL}/real-estate/property/${idParam}/statistics/search`;
+          const options = await ApiClient.getOptions();
+          const statsResponse = await axios.post<PropertyStatistics[]>(
+            url,
+            { includeYearly: true },
+            options
+          );
+          setStatistics(statsResponse.data);
+        }
       } catch (err) {
         setError('Failed to load property');
         console.error(err);
@@ -63,6 +69,11 @@ function PropertyView({ t }: WithTranslation) {
 
     fetchProperty();
   }, [idParam]);
+
+  const summaryData = useMemo(
+    () => calculateSummaryData(statistics, new Date().getFullYear()),
+    [statistics]
+  );
 
   const getRoutePrefix = () => {
     return property?.status === PropertyStatus.PROSPECT ? 'prospects' : 'own';
@@ -97,12 +108,11 @@ function PropertyView({ t }: WithTranslation) {
   }
 
   const imageUrl = getPhotoUrl(property.photo);
-
   const ownershipShare = property.ownerships?.[0]?.share ?? 100;
 
   return (
     <Paper sx={{ overflow: 'hidden' }}>
-      {/* Hero image with status ribbon overlay */}
+      {/* Hero image with status ribbon - reduced height */}
       <Box sx={{ position: 'relative' }}>
         <Box
           component="img"
@@ -110,37 +120,34 @@ function PropertyView({ t }: WithTranslation) {
           alt={property.name}
           sx={{
             width: '100%',
-            height: { xs: 200, sm: 250, md: 300 },
+            height: { xs: 150, sm: 180 },
             objectFit: 'cover',
           }}
         />
-        {/* Status ribbon in top-left corner */}
         <PropertyStatusRibbon status={property.status} ownershipShare={ownershipShare} />
       </Box>
 
-      {/* Back button */}
-      <Box sx={{ p: 2, pb: 0 }}>
-        <AssetButton
-          label={t('back')}
-          variant="text"
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
-        />
-      </Box>
-
-      {/* Header with name, subtitle and actions menu */}
-      <Box sx={{ p: 2, pt: 1 }}>
+      {/* Header: Back + Name + Menu */}
+      <Box sx={{ px: 2, pt: 1.5, pb: 1 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
           <Box>
-            <Typography variant="h5" component="h1" gutterBottom>
+            <AssetButton
+              label={t('back')}
+              variant="text"
+              size="small"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBack}
+              sx={{ ml: -1, mb: 0.5 }}
+            />
+            <Typography variant="h6" component="h1" sx={{ fontWeight: 600 }}>
               {property.name}
             </Typography>
             {(property.apartmentType || property.rooms) && (
-              <Typography variant="body1" color="text.secondary">
+              <Typography variant="body2" color="text.secondary">
                 {[
                   property.apartmentType ? t(`propertyTypes.${propertyTypeNames.get(property.apartmentType)}`) : null,
                   property.rooms,
-                ].filter(Boolean).join(' - ')}
+                ].filter(Boolean).join(' · ')}
               </Typography>
             )}
           </Box>
@@ -153,264 +160,45 @@ function PropertyView({ t }: WithTranslation) {
         </Stack>
       </Box>
 
-      <Divider />
-
-      {/* Property Information and Location - side by side on larger screens */}
-      <Box sx={{ p: 2 }}>
-        <Grid container spacing={4}>
-          {/* Property Information */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
-              {t('propertyInfo')}
-            </Typography>
-            <DetailRow
-              icon={<SquareFootIcon fontSize="small" />}
-              label={t('size')}
-              value={`${property.size} m²`}
-            />
-            {property.buildYear && (
-              <DetailRow
-                icon={<CalendarTodayIcon fontSize="small" />}
-                label={t('buildYear')}
-                value={property.buildYear}
-              />
-            )}
-            {property.purchasePrice && property.size > 0 && (
-              <DetailRow
-                icon={<CalculateIcon fontSize="small" />}
-                label={t('pricePerSqm')}
-                value={formatCurrency(Math.round(property.purchasePrice / property.size))}
-              />
-            )}
-          </Grid>
-
-          {/* Location */}
-          {(property.address?.street || property.address?.city) && (
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
-                {t('locationInfo')}
-              </Typography>
-              {property.address?.street && (
-                <DetailRow
-                  icon={<LocationOnIcon fontSize="small" />}
-                  label={t('address')}
-                  value={property.address.street}
-                />
-              )}
-              {property.address?.city && (
-                <DetailRow
-                  icon={<LocationCityIcon fontSize="small" />}
-                  label={t('city')}
-                  value={`${property.address.postalCode ? property.address.postalCode + ' ' : ''}${property.address.city}`}
-                />
-              )}
-            </Grid>
-          )}
-        </Grid>
+      {/* KPI Cards Section */}
+      <Box sx={{ px: 2, py: 1.5 }}>
+        <PropertyKpiSection property={property} allTimeBalance={summaryData.allTimeBalance} />
       </Box>
 
-      <Divider />
+      {/* Info Cards Grid */}
+      <Box sx={{ px: 2, py: 1.5 }}>
+        <PropertyInfoSection property={property} />
+      </Box>
 
-      {/* Description */}
+      {/* Description Card */}
       {property.description && (
-        <>
-          <Box sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
-              {t('description')}
-            </Typography>
-            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-              {property.description}
-            </Typography>
-          </Box>
-          <Divider />
-        </>
-      )}
-
-      {/* Monthly Costs Section - all statuses */}
-      {(property.maintenanceFee !== undefined ||
-        property.waterCharge !== undefined ||
-        property.financialCharge !== undefined ||
-        ((property.status === PropertyStatus.OWN || property.status === PropertyStatus.PROSPECT) && property.monthlyRent !== undefined)) && (
-        <>
-          <Box sx={{ p: 2 }}>
-            <Grid container spacing={4}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
-                  {t('monthlyCostsSection')}
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Grid container>
+            <Grid size={{ xs: 12 }}>
+              <PropertyInfoCard title={t('description')}>
+                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                  {property.description}
                 </Typography>
-                {property.maintenanceFee !== undefined && property.maintenanceFee !== null && (
-                  <DetailRow
-                    icon={<HomeWorkIcon fontSize="small" />}
-                    label={t('maintenanceFee')}
-                    value={`${formatCurrency(property.maintenanceFee)}${t('perMonth')}`}
-                  />
-                )}
-                {property.waterCharge !== undefined && property.waterCharge !== null && (
-                  <DetailRow
-                    icon={<WaterDropIcon fontSize="small" />}
-                    label={t('waterCharge')}
-                    value={`${formatCurrency(property.waterCharge)}${t('perMonth')}`}
-                  />
-                )}
-                {property.financialCharge !== undefined && property.financialCharge !== null && (
-                  <DetailRow
-                    icon={<AccountBalanceIcon fontSize="small" />}
-                    label={t('financialCharge')}
-                    value={`${formatCurrency(property.financialCharge)}${t('perMonth')}`}
-                  />
-                )}
-                {/* Total monthly costs (calculated) */}
-                {((property.maintenanceFee ?? 0) + (property.waterCharge ?? 0) + (property.financialCharge ?? 0)) > 0 && (
-                  <DetailRow
-                    icon={<CalculateIcon fontSize="small" />}
-                    label={t('totalMonthlyCosts')}
-                    value={`${formatCurrency((property.maintenanceFee ?? 0) + (property.waterCharge ?? 0) + (property.financialCharge ?? 0))}${t('perMonth')}`}
-                  />
-                )}
-                {property.status === PropertyStatus.OWN && property.monthlyRent !== undefined && property.monthlyRent !== null && (
-                  <DetailRow
-                    icon={<AttachMoneyIcon fontSize="small" />}
-                    label={t('monthlyRent')}
-                    value={`${formatCurrency(property.monthlyRent)}${t('perMonth')}`}
-                  />
-                )}
-                {property.status === PropertyStatus.PROSPECT && property.monthlyRent !== undefined && property.monthlyRent !== null && (
-                  <DetailRow
-                    icon={<AttachMoneyIcon fontSize="small" />}
-                    label={t('expectedRent')}
-                    value={`${formatCurrency(property.monthlyRent)}${t('perMonth')}`}
-                  />
-                )}
-              </Grid>
+              </PropertyInfoCard>
             </Grid>
-          </Box>
-          <Divider />
-        </>
-      )}
-
-      {/* Price Info Section - PROSPECT only (Asking Price + Debt Share) */}
-      {property.status === PropertyStatus.PROSPECT &&
-        (property.purchasePrice !== undefined || property.debtShare !== undefined) && (
-        <>
-          <Box sx={{ p: 2 }}>
-            <Grid container spacing={4}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
-                  {t('purchaseInfoSection')}
-                </Typography>
-                {property.purchasePrice !== undefined && property.purchasePrice !== null && (
-                  <DetailRow
-                    icon={<PaymentsIcon fontSize="small" />}
-                    label={t('askingPrice')}
-                    value={formatCurrency(property.purchasePrice)}
-                  />
-                )}
-                {property.debtShare !== undefined && property.debtShare !== null && (
-                  <DetailRow
-                    icon={<AccountBalanceIcon fontSize="small" />}
-                    label={t('debtShare')}
-                    value={formatCurrency(property.debtShare)}
-                  />
-                )}
-              </Grid>
-            </Grid>
-          </Box>
-          <Divider />
-        </>
-      )}
-
-      {/* Purchase Info Section - OWN only (Purchase Price + Debt Share + Date + Loan) */}
-      {property.status === PropertyStatus.OWN &&
-        (property.purchasePrice !== undefined ||
-          property.debtShare !== undefined ||
-          property.purchaseDate !== undefined ||
-          property.purchaseLoan !== undefined) && (
-        <>
-          <Box sx={{ p: 2 }}>
-            <Grid container spacing={4}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
-                  {t('purchaseInfoSection')}
-                </Typography>
-                {property.purchasePrice !== undefined && property.purchasePrice !== null && (
-                  <DetailRow
-                    icon={<PaymentsIcon fontSize="small" />}
-                    label={t('purchasePrice')}
-                    value={formatCurrency(property.purchasePrice)}
-                  />
-                )}
-                {property.debtShare !== undefined && property.debtShare !== null && (
-                  <DetailRow
-                    icon={<AccountBalanceIcon fontSize="small" />}
-                    label={t('debtShare')}
-                    value={formatCurrency(property.debtShare)}
-                  />
-                )}
-                {property.purchaseDate !== undefined && property.purchaseDate !== null && (
-                  <DetailRow
-                    icon={<CalendarTodayIcon fontSize="small" />}
-                    label={t('purchaseDate')}
-                    value={formatDate(property.purchaseDate)}
-                  />
-                )}
-                {property.purchaseLoan !== undefined && property.purchaseLoan !== null && (
-                  <DetailRow
-                    icon={<AccountBalanceIcon fontSize="small" />}
-                    label={t('purchaseLoan')}
-                    value={formatCurrency(property.purchaseLoan)}
-                  />
-                )}
-              </Grid>
-            </Grid>
-          </Box>
-          <Divider />
-        </>
-      )}
-
-      {/* Purchase Info Section - SOLD only (Purchase Price + Date + Loan, NO Debt Share) */}
-      {property.status === PropertyStatus.SOLD &&
-        (property.purchasePrice !== undefined ||
-          property.purchaseDate !== undefined ||
-          property.purchaseLoan !== undefined) && (
-        <>
-          <Box sx={{ p: 2 }}>
-            <Grid container spacing={4}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
-                  {t('purchaseInfoSection')}
-                </Typography>
-                {property.purchasePrice !== undefined && property.purchasePrice !== null && (
-                  <DetailRow
-                    icon={<PaymentsIcon fontSize="small" />}
-                    label={t('purchasePrice')}
-                    value={formatCurrency(property.purchasePrice)}
-                  />
-                )}
-                {property.purchaseDate !== undefined && property.purchaseDate !== null && (
-                  <DetailRow
-                    icon={<CalendarTodayIcon fontSize="small" />}
-                    label={t('purchaseDate')}
-                    value={formatDate(property.purchaseDate)}
-                  />
-                )}
-                {property.purchaseLoan !== undefined && property.purchaseLoan !== null && (
-                  <DetailRow
-                    icon={<AccountBalanceIcon fontSize="small" />}
-                    label={t('purchaseLoan')}
-                    value={formatCurrency(property.purchaseLoan)}
-                  />
-                )}
-              </Grid>
-            </Grid>
-          </Box>
-          <Divider />
-        </>
+          </Grid>
+        </Box>
       )}
 
       {/* Statistics - only for OWN */}
       {property.status === PropertyStatus.OWN && (
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              color: 'text.secondary',
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              mb: 1.5,
+            }}
+          >
             {t('statisticsSection')}
           </Typography>
           <PropertyReportSection propertyId={property.id} showAdvancedReports={showAdvancedReports} />
@@ -422,15 +210,20 @@ function PropertyView({ t }: WithTranslation) {
         <ProspectInvestmentSection property={property} />
       )}
 
-      {/* Sale Summary - only for SOLD */}
+      {/* Statistics - for SOLD */}
       {property.status === PropertyStatus.SOLD && (
-        <SoldSummarySection property={property} />
-      )}
-
-      {/* Statistics - for SOLD (at the bottom) */}
-      {property.status === PropertyStatus.SOLD && (
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}>
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              color: 'text.secondary',
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              mb: 1.5,
+            }}
+          >
             {t('statisticsSection')}
           </Typography>
           <PropertyReportSection propertyId={property.id} showAdvancedReports={showAdvancedReports} />
