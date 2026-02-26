@@ -68,6 +68,17 @@ export interface Property {
   status: PropertyStatus;
   externalSource?: PropertyExternalSource;
   externalSourceId?: string;
+  rooms?: string;
+  purchasePrice?: number;
+  purchaseDate?: Date;
+  purchaseLoan?: number;
+  salePrice?: number;
+  saleDate?: Date;
+  debtShare?: number;
+  maintenanceFee?: number;
+  financialCharge?: number;
+  monthlyRent?: number;
+  waterCharge?: number;
 }
 
 // PropertyStatistics

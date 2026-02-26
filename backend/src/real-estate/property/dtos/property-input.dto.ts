@@ -86,5 +86,30 @@ export class PropertyInputDto {
   @IsOptional()
   saleDate?: Date;
 
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  debtShare?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  maintenanceFee?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  financialCharge?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  monthlyRent?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  waterCharge?: number;
+
   ownerships?: OwnershipInputDto[];
 }

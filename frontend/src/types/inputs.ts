@@ -41,6 +41,11 @@ export interface PropertyInput {
   purchaseLoan?: number;
   salePrice?: number;
   saleDate?: Date;
+  debtShare?: number;
+  maintenanceFee?: number;
+  financialCharge?: number;
+  monthlyRent?: number;
+  waterCharge?: number;
   ownerships?: OwnershipInput[];
 }
 

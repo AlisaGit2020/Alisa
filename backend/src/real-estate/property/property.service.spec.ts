@@ -171,6 +171,28 @@ describe('PropertyService', () => {
       expect(result.saleDate).toEqual(saleDate);
     });
 
+    it('returns property with financial fields', async () => {
+      const property = createProperty({
+        id: 1,
+        name: 'Investment Property',
+        debtShare: 50000,
+        maintenanceFee: 250,
+        financialCharge: 150,
+        monthlyRent: 1200,
+        waterCharge: 25,
+      });
+      mockRepository.findOneBy.mockResolvedValue(property);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const result = await service.findOne(testUser, 1);
+
+      expect(result.debtShare).toBe(50000);
+      expect(result.maintenanceFee).toBe(250);
+      expect(result.financialCharge).toBe(150);
+      expect(result.monthlyRent).toBe(1200);
+      expect(result.waterCharge).toBe(25);
+    });
+
     it('returns null when property does not exist', async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
@@ -423,6 +445,39 @@ describe('PropertyService', () => {
 
       expect(result.salePrice).toBe(300000);
       expect(result.saleDate).toEqual(saleDate);
+      expect(mockRepository.save).toHaveBeenCalled();
+    });
+
+    it('creates property with financial fields', async () => {
+      const input = {
+        name: 'Investment Property',
+        size: 55,
+        debtShare: 45000,
+        maintenanceFee: 200,
+        financialCharge: 120,
+        monthlyRent: 950,
+        waterCharge: 20,
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      const savedProperty = createProperty({
+        id: 1,
+        name: input.name,
+        size: input.size,
+        debtShare: 45000,
+        maintenanceFee: 200,
+        financialCharge: 120,
+        monthlyRent: 950,
+        waterCharge: 20,
+      });
+      mockRepository.save.mockResolvedValue(savedProperty);
+
+      const result = await service.add(testUser, input);
+
+      expect(result.debtShare).toBe(45000);
+      expect(result.maintenanceFee).toBe(200);
+      expect(result.financialCharge).toBe(120);
+      expect(result.monthlyRent).toBe(950);
+      expect(result.waterCharge).toBe(20);
       expect(mockRepository.save).toHaveBeenCalled();
     });
 
@@ -824,6 +879,34 @@ describe('PropertyService', () => {
 
       expect(result.salePrice).toBe(220000);
       expect(result.saleDate).toEqual(saleDate);
+    });
+
+    it('updates property financial fields', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Test Property',
+      });
+      const input = {
+        name: 'Test Property',
+        size: 50,
+        debtShare: 35000,
+        maintenanceFee: 180,
+        financialCharge: 100,
+        monthlyRent: 850,
+        waterCharge: 18,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockResolvedValue({ ...existingProperty, ...input });
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.debtShare).toBe(35000);
+      expect(result.maintenanceFee).toBe(180);
+      expect(result.financialCharge).toBe(100);
+      expect(result.monthlyRent).toBe(850);
+      expect(result.waterCharge).toBe(18);
     });
 
     it('updates external source fields', async () => {
