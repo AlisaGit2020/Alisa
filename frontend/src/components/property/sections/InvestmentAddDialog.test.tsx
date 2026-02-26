@@ -187,7 +187,7 @@ describe('InvestmentAddDialog', () => {
       );
 
       // Pre-filled fields display as text with suffix
-      expect(screen.getByText('250 €/kk')).toBeInTheDocument();
+      expect(screen.getByText('250 €/mo')).toBeInTheDocument();
     });
 
     it('auto-fills financialCharge from property', () => {
@@ -205,7 +205,7 @@ describe('InvestmentAddDialog', () => {
         />
       );
 
-      expect(screen.getByText('75 €/kk')).toBeInTheDocument();
+      expect(screen.getByText('75 €/mo')).toBeInTheDocument();
     });
 
     it('auto-fills waterCharge from property', () => {
@@ -223,7 +223,7 @@ describe('InvestmentAddDialog', () => {
         />
       );
 
-      expect(screen.getByText('30 €/kk')).toBeInTheDocument();
+      expect(screen.getByText('30 €/mo')).toBeInTheDocument();
     });
 
     it('auto-fills rentPerMonth from property', () => {
@@ -241,7 +241,7 @@ describe('InvestmentAddDialog', () => {
         />
       );
 
-      expect(screen.getByText('950 €/kk')).toBeInTheDocument();
+      expect(screen.getByText('950 €/mo')).toBeInTheDocument();
     });
 
     it('auto-fills purchasePrice from property', () => {
@@ -282,7 +282,7 @@ describe('InvestmentAddDialog', () => {
       );
 
       // Pre-filled fields should display as text, not inputs
-      expect(screen.getByText('250 €/kk')).toBeInTheDocument();
+      expect(screen.getByText('250 €/mo')).toBeInTheDocument();
       expect(screen.getByText('15000 €')).toBeInTheDocument();
       // Should not have inputs for pre-filled fields (they display as text)
     });
@@ -303,12 +303,12 @@ describe('InvestmentAddDialog', () => {
         />
       );
 
-      const displayText = screen.getByText('250 €/kk');
+      const displayText = screen.getByText('250 €/mo');
       await user.click(displayText);
 
       // Should remain as text since it's readOnly (pre-filled)
       await waitFor(() => {
-        expect(screen.getByText('250 €/kk')).toBeInTheDocument();
+        expect(screen.getByText('250 €/mo')).toBeInTheDocument();
       });
     });
 
@@ -347,8 +347,8 @@ describe('InvestmentAddDialog', () => {
       );
 
       // Default values displayed as text
-      expect(screen.getByText('200 €/kk')).toBeInTheDocument(); // default maintenanceFee
-      expect(screen.getByText('800 €/kk')).toBeInTheDocument(); // default rentPerMonth
+      expect(screen.getByText('200 €/mo')).toBeInTheDocument(); // default maintenanceFee
+      expect(screen.getByText('800 €/mo')).toBeInTheDocument(); // default rentPerMonth
     });
   });
 });

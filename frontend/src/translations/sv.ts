@@ -111,6 +111,12 @@ const sv = {
       mustBePositive: "Värdet måste vara större än 0",
     },
 
+    suffix: {
+      euroPerMonth: "€/mån",
+      squareMeters: "m²",
+      years: "år",
+    },
+
     toast: {
       saveSuccess: "Ändringar sparade",
       saveError: "Kunde inte spara ändringar",

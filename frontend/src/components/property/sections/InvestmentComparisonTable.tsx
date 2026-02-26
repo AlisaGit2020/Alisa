@@ -16,8 +16,8 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import { SavedInvestmentCalculation } from '../../investment-calculator/InvestmentCalculatorResults';
 import AssetConfirmDialog from '../../asset/dialog/AssetConfirmDialog';
-import axios from 'axios';
-import { VITE_API_URL } from '../../../constants';
+import { useToast } from '../../asset';
+import ApiClient from '@asset-lib/api-client';
 
 interface InvestmentComparisonTableProps {
   calculations: SavedInvestmentCalculation[];
@@ -98,6 +98,7 @@ function InvestmentComparisonTable({
   onDelete,
 }: InvestmentComparisonTableProps) {
   const { t } = useTranslation(['investment-calculator', 'property', 'common']);
+  const { showToast } = useToast();
   const [editingCell, setEditingCell] = useState<{ id: number; field: string } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -129,15 +130,17 @@ function InvestmentComparisonTable({
 
     try {
       // Recalculate using the API
-      const response = await axios.post<SavedInvestmentCalculation>(
-        `${VITE_API_URL}/real-estate/investment/calculate`,
+      const response = await ApiClient.post<SavedInvestmentCalculation>(
+        'real-estate/investment/calculate',
         { ...localUpdate }
       );
+      // ApiClient.post returns axios response, extract data
+      const data = (response as unknown as { data: SavedInvestmentCalculation }).data;
 
       // Merge with original id and name if API succeeds
-      if (response.data && typeof response.data === 'object' && Object.keys(response.data).length > 0) {
+      if (data && typeof data === 'object' && Object.keys(data).length > 0) {
         onUpdate({
-          ...response.data,
+          ...data,
           id: calc.id,
           name: calc.name,
         });
@@ -146,13 +149,15 @@ function InvestmentComparisonTable({
         onUpdate(localUpdate);
       }
     } catch {
+      // Show error toast when API recalculation fails
+      showToast(t('common:toast.updateError'), 'error');
       // Still update with local changes if API fails
       onUpdate(localUpdate);
     }
 
     setEditingCell(null);
     setEditValue('');
-  }, [editingCell, editValue, calculations, onUpdate]);
+  }, [editingCell, editValue, calculations, onUpdate, showToast, t]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

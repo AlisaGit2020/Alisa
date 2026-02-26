@@ -111,6 +111,12 @@ const fi = {
       mustBePositive: "Arvon tulee olla suurempi kuin 0",
     },
 
+    suffix: {
+      euroPerMonth: "€/kk",
+      squareMeters: "m²",
+      years: "v",
+    },
+
     toast: {
       saveSuccess: "Muutokset tallennettu",
       saveError: "Tallennus epäonnistui",

@@ -11,6 +11,7 @@ import {
   Divider,
   Alert,
 } from '@mui/material';
+import { AxiosResponse } from 'axios';
 import { Property } from '@asset-types';
 import { SavedInvestmentCalculation } from '../../investment-calculator/InvestmentCalculatorResults';
 import { AssetButton, AssetTextField, AssetEditableNumber } from '../../asset';
@@ -138,14 +139,12 @@ function InvestmentAddDialog({
     setSubmitError(null);
 
     try {
-      // POST returns the saved Investment directly, not DataSaveResult
+      // ApiClient.post returns axios response (type mismatch in ApiClient)
       const response = await ApiClient.post('real-estate/investment', {
         ...formData,
         propertyId: property.id,
-      });
-      // ApiClient.post returns axios response, extract data
-      const saved = (response as unknown as { data: SavedInvestmentCalculation }).data;
-      onSave(saved);
+      }) as unknown as AxiosResponse<SavedInvestmentCalculation>;
+      onSave(response.data);
       onClose();
     } catch (error) {
       console.error('Failed to save calculation:', error);
@@ -214,7 +213,7 @@ function InvestmentAddDialog({
                 value={formData.apartmentSize}
                 onChange={(e) => handleChange('apartmentSize', Number(e.target.value) || 0)}
                 step={1}
-                suffix="m²"
+                suffix={t('common:suffix.squareMeters')}
                 readOnly={isFieldReadOnly('apartmentSize')}
               />
             </Grid>
@@ -243,7 +242,7 @@ function InvestmentAddDialog({
                 value={formData.maintenanceFee}
                 onChange={(e) => handleChange('maintenanceFee', Number(e.target.value) || 0)}
                 step={10}
-                suffix="€/kk"
+                suffix={t('common:suffix.euroPerMonth')}
                 readOnly={isFieldReadOnly('maintenanceFee')}
               />
             </Grid>
@@ -254,7 +253,7 @@ function InvestmentAddDialog({
                 value={formData.chargeForFinancialCosts}
                 onChange={(e) => handleChange('chargeForFinancialCosts', Number(e.target.value) || 0)}
                 step={10}
-                suffix="€/kk"
+                suffix={t('common:suffix.euroPerMonth')}
                 readOnly={isFieldReadOnly('chargeForFinancialCosts')}
               />
             </Grid>
@@ -265,7 +264,7 @@ function InvestmentAddDialog({
                 value={formData.waterCharge}
                 onChange={(e) => handleChange('waterCharge', Number(e.target.value) || 0)}
                 step={5}
-                suffix="€/kk"
+                suffix={t('common:suffix.euroPerMonth')}
                 readOnly={isFieldReadOnly('waterCharge')}
               />
             </Grid>
@@ -284,7 +283,7 @@ function InvestmentAddDialog({
                 value={formData.rentPerMonth}
                 onChange={(e) => handleChange('rentPerMonth', Number(e.target.value) || 0)}
                 step={50}
-                suffix="€/kk"
+                suffix={t('common:suffix.euroPerMonth')}
                 readOnly={isFieldReadOnly('rentPerMonth')}
               />
             </Grid>
@@ -323,7 +322,7 @@ function InvestmentAddDialog({
                 value={formData.loanPeriod}
                 onChange={(e) => handleChange('loanPeriod', Number(e.target.value) || 0)}
                 step={1}
-                suffix="v"
+                suffix={t('common:suffix.years')}
               />
             </Grid>
           </Grid>

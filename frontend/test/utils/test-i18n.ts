@@ -22,10 +22,16 @@ const partialCommon = {
   save: 'Save',
   toast: {
     error: 'An error occurred',
+    updateError: 'Failed to update',
   },
   validation: {
     required: 'This field is required',
     mustBePositive: 'Value must be greater than 0',
+  },
+  suffix: {
+    euroPerMonth: '€/mo',
+    squareMeters: 'm²',
+    years: 'yrs',
   },
 };
 

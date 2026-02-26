@@ -4,6 +4,12 @@ import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils';
 import InvestmentComparisonTable from './InvestmentComparisonTable';
 import { SavedInvestmentCalculation } from '../../investment-calculator/InvestmentCalculatorResults';
+import ApiClient from '@asset-lib/api-client';
+
+// Mock ApiClient
+jest.spyOn(ApiClient, 'post').mockResolvedValue({
+  data: {},
+} as unknown as ReturnType<typeof ApiClient.post>);
 
 const createMockCalculation = (
   overrides: Partial<SavedInvestmentCalculation> = {}

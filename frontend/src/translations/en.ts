@@ -111,6 +111,12 @@ const en = {
       mustBePositive: "Value must be greater than 0",
     },
 
+    suffix: {
+      euroPerMonth: "€/mo",
+      squareMeters: "m²",
+      years: "yrs",
+    },
+
     toast: {
       saveSuccess: "Changes saved successfully",
       saveError: "Failed to save changes",
