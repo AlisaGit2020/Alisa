@@ -88,7 +88,7 @@ const property = {
     saleDate: 'Myyntipäivä',
     rooms: 'Huoneet',
     pricePerSqm: 'Hinta/m\u00B2',
-    totalMonthlyCosts: 'Kuukausikulut yhteensä',
+    totalMonthlyCosts: 'Yhteensä',
     perMonth: '/kk',
     netRent: 'Netto',
     grossYield: 'Bruttovuokratuotto',

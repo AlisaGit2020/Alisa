@@ -88,7 +88,7 @@ const property = {
     saleDate: 'Försäljningsdatum',
     rooms: 'Rum',
     pricePerSqm: 'Pris/m\u00B2',
-    totalMonthlyCosts: 'Totala månadskostnader',
+    totalMonthlyCosts: 'Totalt',
     perMonth: '/mån',
     netRent: 'Netto',
     grossYield: 'Bruttoavkastning',

@@ -88,7 +88,7 @@ const property = {
     saleDate: 'Sale Date',
     rooms: 'Rooms',
     pricePerSqm: 'Price/m\u00B2',
-    totalMonthlyCosts: 'Total Monthly Costs',
+    totalMonthlyCosts: 'Total',
     perMonth: '/mo',
     netRent: 'Net',
     grossYield: 'Gross Yield',
