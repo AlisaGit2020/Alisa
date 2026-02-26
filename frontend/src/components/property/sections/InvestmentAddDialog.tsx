@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { Property } from '@asset-types';
 import { SavedInvestmentCalculation } from '../../investment-calculator/InvestmentCalculatorResults';
-import { AssetButton, AssetTextField, AssetNumberField } from '../../asset';
+import { AssetButton, AssetTextField, AssetEditableNumber } from '../../asset';
 import ApiClient from '@asset-lib/api-client';
 
 interface InvestmentAddDialogProps {
@@ -46,18 +46,32 @@ interface FormErrors {
 
 const getDefaultFormData = (property: Property): FormData => ({
   name: '',
-  deptFreePrice: 100000,
-  deptShare: 0,
+  deptFreePrice: property.purchasePrice ?? 100000,
+  deptShare: property.debtShare ?? 0,
   transferTaxPercent: 2,
-  maintenanceFee: 200,
-  chargeForFinancialCosts: 50,
-  waterCharge: 20,
-  rentPerMonth: 800,
+  maintenanceFee: property.maintenanceFee ?? 200,
+  chargeForFinancialCosts: property.financialCharge ?? 50,
+  waterCharge: property.waterCharge ?? 20,
+  rentPerMonth: property.monthlyRent ?? 800,
   apartmentSize: property.size || 50,
   downPayment: 0,
   loanInterestPercent: 4,
   loanPeriod: 25,
 });
+
+// Fields that can be pre-filled from property data (excluding deptFreePrice which is always editable)
+type PreFillableField = 'maintenanceFee' | 'chargeForFinancialCosts' | 'waterCharge' | 'rentPerMonth' | 'deptShare' | 'apartmentSize';
+
+const getPreFilledFields = (property: Property): Set<PreFillableField> => {
+  const fields = new Set<PreFillableField>();
+  if (property.maintenanceFee !== undefined && property.maintenanceFee !== null) fields.add('maintenanceFee');
+  if (property.financialCharge !== undefined && property.financialCharge !== null) fields.add('chargeForFinancialCosts');
+  if (property.waterCharge !== undefined && property.waterCharge !== null) fields.add('waterCharge');
+  if (property.monthlyRent !== undefined && property.monthlyRent !== null) fields.add('rentPerMonth');
+  if (property.debtShare !== undefined && property.debtShare !== null) fields.add('deptShare');
+  if (property.size !== undefined && property.size !== null) fields.add('apartmentSize');
+  return fields;
+};
 
 function InvestmentAddDialog({
   open,
@@ -70,6 +84,8 @@ function InvestmentAddDialog({
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Track which fields were pre-filled from property
+  const [preFilledFields, setPreFilledFields] = useState<Set<PreFillableField>>(new Set());
 
   // Reset form when dialog opens
   useEffect(() => {
@@ -77,8 +93,14 @@ function InvestmentAddDialog({
       setFormData(getDefaultFormData(property));
       setErrors({});
       setSubmitError(null);
+      setPreFilledFields(getPreFilledFields(property));
     }
   }, [open, property]);
+
+  // Check if a field should be read-only (pre-filled from property data)
+  const isFieldReadOnly = useCallback((field: PreFillableField): boolean => {
+    return preFilledFields.has(field);
+  }, [preFilledFields]);
 
   const handleChange = useCallback((field: keyof FormData, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -116,22 +138,15 @@ function InvestmentAddDialog({
     setSubmitError(null);
 
     try {
-      const result = await ApiClient.postSaveTask('real-estate/investment', {
+      // POST returns the saved Investment directly, not DataSaveResult
+      const response = await ApiClient.post('real-estate/investment', {
         ...formData,
         propertyId: property.id,
       });
-
-      if (result.allSuccess && result.results.length > 0) {
-        // Fetch the saved calculation to get full data
-        const saved = await ApiClient.get<SavedInvestmentCalculation>(
-          'real-estate/investment',
-          result.results[0].id
-        );
-        onSave(saved);
-        onClose();
-      } else {
-        setSubmitError(t('common:toast.error'));
-      }
+      // ApiClient.post returns axios response, extract data
+      const saved = (response as unknown as { data: SavedInvestmentCalculation }).data;
+      onSave(saved);
+      onClose();
     } catch (error) {
       console.error('Failed to save calculation:', error);
       setSubmitError(t('common:toast.error'));
@@ -173,40 +188,44 @@ function InvestmentAddDialog({
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetNumberField
+              <AssetEditableNumber
                 label={t('investment-calculator:deptFreePrice')}
                 value={formData.deptFreePrice}
                 onChange={(e) => handleChange('deptFreePrice', Number(e.target.value) || 0)}
                 step={1000}
-                error={!!errors.deptFreePrice}
-                helperText={errors.deptFreePrice}
+                suffix="€"
               />
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetNumberField
+              <AssetEditableNumber
                 label={t('investment-calculator:deptShare')}
                 value={formData.deptShare}
                 onChange={(e) => handleChange('deptShare', Number(e.target.value) || 0)}
                 step={1000}
+                suffix="€"
+                readOnly={isFieldReadOnly('deptShare')}
               />
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetNumberField
+              <AssetEditableNumber
                 label={t('investment-calculator:apartmentSize')}
                 value={formData.apartmentSize}
                 onChange={(e) => handleChange('apartmentSize', Number(e.target.value) || 0)}
                 step={1}
+                suffix="m²"
+                readOnly={isFieldReadOnly('apartmentSize')}
               />
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetNumberField
+              <AssetEditableNumber
                 label={t('investment-calculator:transferTaxPercent')}
                 value={formData.transferTaxPercent}
                 onChange={(e) => handleChange('transferTaxPercent', Number(e.target.value) || 0)}
                 step={0.1}
+                suffix="%"
               />
             </Grid>
 
@@ -219,29 +238,35 @@ function InvestmentAddDialog({
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetNumberField
+              <AssetEditableNumber
                 label={t('investment-calculator:maintenanceFee')}
                 value={formData.maintenanceFee}
                 onChange={(e) => handleChange('maintenanceFee', Number(e.target.value) || 0)}
                 step={10}
+                suffix="€/kk"
+                readOnly={isFieldReadOnly('maintenanceFee')}
               />
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetNumberField
+              <AssetEditableNumber
                 label={t('investment-calculator:chargeForFinancialCosts')}
                 value={formData.chargeForFinancialCosts}
                 onChange={(e) => handleChange('chargeForFinancialCosts', Number(e.target.value) || 0)}
                 step={10}
+                suffix="€/kk"
+                readOnly={isFieldReadOnly('chargeForFinancialCosts')}
               />
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetNumberField
+              <AssetEditableNumber
                 label={t('investment-calculator:waterCharge')}
                 value={formData.waterCharge}
                 onChange={(e) => handleChange('waterCharge', Number(e.target.value) || 0)}
                 step={5}
+                suffix="€/kk"
+                readOnly={isFieldReadOnly('waterCharge')}
               />
             </Grid>
 
@@ -254,13 +279,13 @@ function InvestmentAddDialog({
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetNumberField
+              <AssetEditableNumber
                 label={t('investment-calculator:rentPerMonth')}
                 value={formData.rentPerMonth}
                 onChange={(e) => handleChange('rentPerMonth', Number(e.target.value) || 0)}
                 step={50}
-                error={!!errors.rentPerMonth}
-                helperText={errors.rentPerMonth}
+                suffix="€/kk"
+                readOnly={isFieldReadOnly('rentPerMonth')}
               />
             </Grid>
 
@@ -273,29 +298,32 @@ function InvestmentAddDialog({
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetNumberField
+              <AssetEditableNumber
                 label={t('investment-calculator:downPayment')}
                 value={formData.downPayment}
                 onChange={(e) => handleChange('downPayment', Number(e.target.value) || 0)}
                 step={1000}
+                suffix="€"
               />
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetNumberField
+              <AssetEditableNumber
                 label={t('investment-calculator:loanInterestPercent')}
                 value={formData.loanInterestPercent}
                 onChange={(e) => handleChange('loanInterestPercent', Number(e.target.value) || 0)}
                 step={0.1}
+                suffix="%"
               />
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetNumberField
+              <AssetEditableNumber
                 label={t('investment-calculator:loanPeriod')}
                 value={formData.loanPeriod}
                 onChange={(e) => handleChange('loanPeriod', Number(e.target.value) || 0)}
                 step={1}
+                suffix="v"
               />
             </Grid>
           </Grid>

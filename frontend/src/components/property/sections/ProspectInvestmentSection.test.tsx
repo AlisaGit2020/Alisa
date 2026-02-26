@@ -77,10 +77,9 @@ describe('ProspectInvestmentSection', () => {
       const addButton = screen.getByRole('button', { name: /add calculation/i });
       await user.click(addButton);
 
-      // Dialog should open with property size
+      // Dialog should open with property size displayed as text
       await waitFor(() => {
-        const sizeInput = screen.getByLabelText(/apartment size/i);
-        expect(sizeInput).toHaveValue(75);
+        expect(screen.getByText('75 m²')).toBeInTheDocument();
       });
     });
   });
