@@ -42,6 +42,7 @@ function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProp
       <Grid size={{ xs: 12, sm: 4 }}>
         <PropertyKpiCard
           icon={<PaymentsIcon fontSize="small" />}
+          iconColor="primary.main"
           label={t('purchasePrice')}
           value={formatCurrency(property.purchasePrice ?? 0)}
           subtitle={property.debtShare ? `+ ${formatCurrency(property.debtShare)} ${t('debtShare').toLowerCase()}` : undefined}
@@ -50,6 +51,7 @@ function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProp
       <Grid size={{ xs: 12, sm: 4 }}>
         <PropertyKpiCard
           icon={<AttachMoneyIcon fontSize="small" />}
+          iconColor="success.main"
           label={t('monthlyRent')}
           value={`${formatCurrency(property.monthlyRent ?? 0)}${t('perMonth')}`}
           subtitle={totalMonthlyCosts > 0 ? `${t('netRent')}: ${formatCurrency(netRent)}${t('perMonth')}` : undefined}
@@ -58,6 +60,7 @@ function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProp
       <Grid size={{ xs: 12, sm: 4 }}>
         <PropertyKpiCard
           icon={<AccountBalanceIcon fontSize="small" />}
+          iconColor="secondary.main"
           label={t('report.allTimeBalance')}
           value={formatCurrency(allTimeBalance ?? 0)}
         />
@@ -70,6 +73,7 @@ function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProp
       <Grid size={{ xs: 12, sm: 4 }}>
         <PropertyKpiCard
           icon={<PaymentsIcon fontSize="small" />}
+          iconColor="primary.main"
           label={t('askingPrice')}
           value={formatCurrency(property.purchasePrice ?? 0)}
           subtitle={property.debtShare ? `+ ${formatCurrency(property.debtShare)} ${t('debtShare').toLowerCase()}` : undefined}
@@ -78,6 +82,7 @@ function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProp
       <Grid size={{ xs: 12, sm: 4 }}>
         <PropertyKpiCard
           icon={<AttachMoneyIcon fontSize="small" />}
+          iconColor="success.main"
           label={t('expectedRent')}
           value={`${formatCurrency(property.monthlyRent ?? 0)}${t('perMonth')}`}
         />
@@ -85,6 +90,7 @@ function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProp
       <Grid size={{ xs: 12, sm: 4 }}>
         <PropertyKpiCard
           icon={<TrendingUpIcon fontSize="small" />}
+          iconColor="warning.main"
           label={t('grossYield')}
           value={grossYield !== null ? `${grossYield.toFixed(1)}%` : '-'}
         />
@@ -99,6 +105,7 @@ function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProp
         <Grid size={{ xs: 12, sm: 4 }}>
           <PropertyKpiCard
             icon={<PaymentsIcon fontSize="small" />}
+            iconColor="primary.main"
             label={t('purchasePrice')}
             value={formatCurrency(property.purchasePrice ?? 0)}
           />
@@ -106,6 +113,7 @@ function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProp
         <Grid size={{ xs: 12, sm: 4 }}>
           <PropertyKpiCard
             icon={<AttachMoneyIcon fontSize="small" />}
+            iconColor="success.main"
             label={t('salePrice')}
             value={formatCurrency(property.salePrice ?? 0)}
           />
@@ -113,6 +121,7 @@ function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProp
         <Grid size={{ xs: 12, sm: 4 }}>
           <PropertyKpiCard
             icon={isProfit ? <TrendingUpIcon fontSize="small" /> : <TrendingDownIcon fontSize="small" />}
+            iconColor={isProfit ? 'success.main' : 'error.main'}
             label={t('profitLoss')}
             value={profitLoss !== null ? `${isProfit ? '+' : ''}${formatCurrency(profitLoss)}` : '-'}
             valueColor={profitLoss !== null ? (isProfit ? 'success.main' : 'error.main') : 'text.primary'}

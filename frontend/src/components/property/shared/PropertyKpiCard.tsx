@@ -7,6 +7,7 @@ export interface PropertyKpiCardProps {
   value: string;
   subtitle?: string;
   valueColor?: 'success.main' | 'error.main' | 'text.primary';
+  iconColor?: string;
 }
 
 function PropertyKpiCard({
@@ -15,6 +16,7 @@ function PropertyKpiCard({
   value,
   subtitle,
   valueColor = 'text.primary',
+  iconColor = 'text.secondary',
 }: PropertyKpiCardProps) {
   return (
     <Paper
@@ -27,7 +29,7 @@ function PropertyKpiCard({
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-        <Box sx={{ color: 'text.secondary', mr: 1, display: 'flex' }}>
+        <Box sx={{ color: iconColor, mr: 1, display: 'flex' }}>
           {icon}
         </Box>
         <Typography
