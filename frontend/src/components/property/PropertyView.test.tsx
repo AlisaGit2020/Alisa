@@ -104,7 +104,10 @@ describe('PropertyView', () => {
 
   beforeEach(() => {
     mockGet = jest.spyOn(ApiClient, 'get');
-    mockGetOptions = jest.spyOn(ApiClient, 'getOptions').mockResolvedValue({});
+    mockGetOptions = jest.spyOn(ApiClient, 'getOptions').mockResolvedValue({
+      withCredentials: true,
+      headers: { Authorization: 'Bearer test-token' },
+    });
     // Mock statistics API call
     mockAxiosPost = jest.spyOn(axios, 'post').mockResolvedValue({ data: [] });
   });

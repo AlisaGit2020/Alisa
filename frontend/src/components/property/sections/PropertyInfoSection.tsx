@@ -28,6 +28,10 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
   const hasPurchaseDetails =
     (property.status === PropertyStatus.OWN || property.status === PropertyStatus.SOLD) &&
     (property.purchaseDate !== undefined || property.purchaseLoan !== undefined);
+  const hasSaleDetails =
+    property.status === PropertyStatus.SOLD &&
+    property.saleDate !== undefined &&
+    property.saleDate !== null;
 
   const totalMonthlyCosts =
     (property.maintenanceFee ?? 0) +
@@ -142,6 +146,19 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
                 value={formatCurrency(property.purchaseLoan)}
               />
             )}
+          </PropertyInfoCard>
+        </Grid>
+      )}
+
+      {/* Sale Details Card - only for SOLD */}
+      {hasSaleDetails && (
+        <Grid size={{ xs: 12, md: 6 }}>
+          <PropertyInfoCard title={t('saleInfoSection')}>
+            <DetailRow
+              icon={<CalendarTodayIcon fontSize="small" />}
+              label={t('saleDate')}
+              value={formatDate(property.saleDate!)}
+            />
           </PropertyInfoCard>
         </Grid>
       )}

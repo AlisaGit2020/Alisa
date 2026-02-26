@@ -5,41 +5,49 @@ import PropertySummaryCards from "./PropertySummaryCards";
 import PropertyReportCharts from "./PropertyReportCharts";
 import { PropertyStatistics } from "@asset-types";
 import ApiClient from "@asset-lib/api-client";
-import { VITE_API_URL } from "../../../constants";
-import axios from "axios";
 import { calculateSummaryData } from "./report-utils";
 import { useAssetToast } from "../../asset/toast";
 
 interface PropertyReportSectionProps {
   propertyId: number;
   showAdvancedReports?: boolean;
+  /** Pre-fetched statistics to avoid duplicate API calls */
+  statistics?: PropertyStatistics[];
 }
 
-function PropertyReportSection({ propertyId, showAdvancedReports = false }: PropertyReportSectionProps) {
+function PropertyReportSection({
+  propertyId,
+  showAdvancedReports = false,
+  statistics: externalStatistics,
+}: PropertyReportSectionProps) {
   const { t } = useTranslation("property");
   const { showToast } = useAssetToast();
-  const [statistics, setStatistics] = useState<PropertyStatistics[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [internalStatistics, setInternalStatistics] = useState<PropertyStatistics[]>([]);
+  const [loading, setLoading] = useState(!externalStatistics);
+
+  // Use external statistics if provided, otherwise use internal state
+  const statistics = externalStatistics ?? internalStatistics;
 
   const currentYear = new Date().getFullYear();
 
-  // Fetch statistics for summary cards (current year + all-time)
+  // Only fetch statistics if not provided externally
   useEffect(() => {
+    // Skip fetching if statistics are provided externally
+    if (externalStatistics) {
+      return;
+    }
+
     const fetchStatistics = async () => {
       setLoading(true);
       try {
-        const url = `${VITE_API_URL}/real-estate/property/${propertyId}/statistics/search`;
-        const options = await ApiClient.getOptions();
-        // Fetch both yearly and monthly stats
-        const response = await axios.post<PropertyStatistics[]>(
-          url,
-          { includeYearly: true },
-          options
+        const data = await ApiClient.propertyStatistics<PropertyStatistics>(
+          propertyId,
+          { includeYearly: true }
         );
-        setStatistics(response.data);
+        setInternalStatistics(data);
       } catch (error) {
         console.error("Failed to fetch statistics:", error);
-        setStatistics([]);
+        setInternalStatistics([]);
         showToast({ message: t("report.fetchError"), severity: "error" });
       } finally {
         setLoading(false);
@@ -49,7 +57,7 @@ function PropertyReportSection({ propertyId, showAdvancedReports = false }: Prop
     if (propertyId) {
       fetchStatistics();
     }
-  }, [propertyId, showToast, t]);
+  }, [propertyId, externalStatistics, showToast, t]);
 
   // Calculate summary values
   const summaryData = useMemo(

@@ -14,12 +14,11 @@ import { AllocationRulesModal } from '../allocation';
 import { getReturnPathForStatus } from './property-form-utils';
 import PropertyStatusRibbon from './PropertyStatusRibbon';
 import ProspectInvestmentSection from './sections/ProspectInvestmentSection';
+import ExternalListingLink from './sections/ExternalListingLink';
 import PropertyActionsMenu from './sections/PropertyActionsMenu';
 import PropertyKpiSection from './sections/PropertyKpiSection';
 import PropertyInfoSection from './sections/PropertyInfoSection';
 import PropertyInfoCard from './shared/PropertyInfoCard';
-import { VITE_API_URL } from '../../constants';
-import axios from 'axios';
 import { calculateSummaryData } from './report/report-utils';
 
 function PropertyView({ t }: WithTranslation) {
@@ -50,14 +49,11 @@ function PropertyView({ t }: WithTranslation) {
 
         // Fetch statistics for OWN/SOLD properties
         if (data && (data.status === PropertyStatus.OWN || data.status === PropertyStatus.SOLD)) {
-          const url = `${VITE_API_URL}/real-estate/property/${idParam}/statistics/search`;
-          const options = await ApiClient.getOptions();
-          const statsResponse = await axios.post<PropertyStatistics[]>(
-            url,
-            { includeYearly: true },
-            options
+          const statsData = await ApiClient.propertyStatistics<PropertyStatistics>(
+            Number(idParam),
+            { includeYearly: true }
           );
-          setStatistics(statsResponse.data);
+          setStatistics(statsData);
         }
       } catch (err) {
         setError('Failed to load property');
@@ -201,8 +197,16 @@ function PropertyView({ t }: WithTranslation) {
           >
             {t('statisticsSection')}
           </Typography>
-          <PropertyReportSection propertyId={property.id} showAdvancedReports={showAdvancedReports} />
+          <PropertyReportSection propertyId={property.id} showAdvancedReports={showAdvancedReports} statistics={statistics} />
         </Box>
+      )}
+
+      {/* External Listing Link - only for PROSPECT with external source */}
+      {property.status === PropertyStatus.PROSPECT && property.externalSource && property.externalSourceId && (
+        <ExternalListingLink
+          externalSource={property.externalSource}
+          externalSourceId={property.externalSourceId}
+        />
       )}
 
       {/* Investment Calculator - only for PROSPECT */}
@@ -226,7 +230,7 @@ function PropertyView({ t }: WithTranslation) {
           >
             {t('statisticsSection')}
           </Typography>
-          <PropertyReportSection propertyId={property.id} showAdvancedReports={showAdvancedReports} />
+          <PropertyReportSection propertyId={property.id} showAdvancedReports={showAdvancedReports} statistics={statistics} />
         </Box>
       )}
 

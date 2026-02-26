@@ -53,7 +53,7 @@ describe('PropertyInfoSection', () => {
   it('renders purchase details for OWN status', () => {
     const property = createMockProperty({
       status: PropertyStatus.OWN,
-      purchaseDate: '2020-05-15',
+      purchaseDate: new Date('2020-05-15'),
       purchaseLoan: 150000,
     });
 
