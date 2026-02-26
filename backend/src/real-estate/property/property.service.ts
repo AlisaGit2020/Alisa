@@ -394,6 +394,15 @@ export class PropertyService {
       property.purchaseLoan = input.purchaseLoan;
     if (input.salePrice !== undefined) property.salePrice = input.salePrice;
     if (input.saleDate !== undefined) property.saleDate = input.saleDate;
+    if (input.debtShare !== undefined) property.debtShare = input.debtShare;
+    if (input.maintenanceFee !== undefined)
+      property.maintenanceFee = input.maintenanceFee;
+    if (input.financialCharge !== undefined)
+      property.financialCharge = input.financialCharge;
+    if (input.monthlyRent !== undefined)
+      property.monthlyRent = input.monthlyRent;
+    if (input.waterCharge !== undefined)
+      property.waterCharge = input.waterCharge;
     if (input.ownerships !== undefined)
       property.ownerships = input.ownerships as unknown as Ownership[];
   }

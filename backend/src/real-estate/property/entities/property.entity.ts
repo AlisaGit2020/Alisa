@@ -125,4 +125,49 @@ export class Property {
 
   @Column({ type: 'date', nullable: true })
   public saleDate?: Date;
+
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    transformer: new DecimalToNumberTransformer(),
+  })
+  public debtShare?: number;
+
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    transformer: new DecimalToNumberTransformer(),
+  })
+  public maintenanceFee?: number;
+
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    transformer: new DecimalToNumberTransformer(),
+  })
+  public financialCharge?: number;
+
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    transformer: new DecimalToNumberTransformer(),
+  })
+  public monthlyRent?: number;
+
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    transformer: new DecimalToNumberTransformer(),
+  })
+  public waterCharge?: number;
 }
