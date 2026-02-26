@@ -1,5 +1,5 @@
 import { Box, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
-import { ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { propertyContext } from '../../lib/asset-contexts';
@@ -8,6 +8,7 @@ import ApiClient from '../../lib/api-client';
 import AssetLoadingProgress from '../asset/AssetLoadingProgress';
 import AssetButton from '../asset/form/AssetButton';
 import { getPhotoUrl } from '@asset-lib/functions';
+import { formatCurrency, formatDate } from '@asset-lib/format-utils';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SquareFootIcon from '@mui/icons-material/SquareFoot';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -18,6 +19,7 @@ import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import CalculateIcon from '@mui/icons-material/Calculate';
 import PropertyReportSection from './report/PropertyReportSection';
 import { AllocationRulesModal } from '../allocation';
 import { getReturnPathForStatus } from './property-form-utils';
@@ -25,44 +27,7 @@ import PropertyStatusRibbon from './PropertyStatusRibbon';
 import ProspectInvestmentSection from './sections/ProspectInvestmentSection';
 import PropertyActionsMenu from './sections/PropertyActionsMenu';
 import SoldSummarySection from './sections/SoldSummarySection';
-
-interface DetailRowProps {
-  icon: ReactNode;
-  label: string;
-  value: ReactNode;
-}
-
-function DetailRow({ icon, label, value }: DetailRowProps) {
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', py: 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', mr: 2, minWidth: 24 }}>
-        {icon}
-      </Box>
-      <Typography sx={{ color: 'text.secondary', minWidth: 150 }}>
-        {label}
-      </Typography>
-      <Typography sx={{ fontWeight: 500 }}>
-        {value}
-      </Typography>
-    </Box>
-  );
-}
-
-const formatCurrency = (value: number | undefined | null): string => {
-  if (value === undefined || value === null) return '-';
-  return new Intl.NumberFormat('fi-FI', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
-};
-
-const formatDate = (date: Date | string | undefined | null): string => {
-  if (!date) return '-';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  return d.toLocaleDateString('fi-FI');
-};
+import DetailRow from './shared/DetailRow';
 
 function PropertyView({ t }: WithTranslation) {
   const [property, setProperty] = useState<Property | null>(null);
@@ -210,6 +175,13 @@ function PropertyView({ t }: WithTranslation) {
                 value={property.buildYear}
               />
             )}
+            {property.purchasePrice && property.size > 0 && (
+              <DetailRow
+                icon={<CalculateIcon fontSize="small" />}
+                label={t('pricePerSqm')}
+                value={formatCurrency(Math.round(property.purchasePrice / property.size))}
+              />
+            )}
           </Grid>
 
           {/* Location */}
@@ -258,7 +230,7 @@ function PropertyView({ t }: WithTranslation) {
       {(property.maintenanceFee !== undefined ||
         property.waterCharge !== undefined ||
         property.financialCharge !== undefined ||
-        (property.status === PropertyStatus.OWN && property.monthlyRent !== undefined)) && (
+        ((property.status === PropertyStatus.OWN || property.status === PropertyStatus.PROSPECT) && property.monthlyRent !== undefined)) && (
         <>
           <Box sx={{ p: 2 }}>
             <Grid container spacing={4}>
@@ -270,28 +242,43 @@ function PropertyView({ t }: WithTranslation) {
                   <DetailRow
                     icon={<HomeWorkIcon fontSize="small" />}
                     label={t('maintenanceFee')}
-                    value={`${formatCurrency(property.maintenanceFee)}/kk`}
+                    value={`${formatCurrency(property.maintenanceFee)}${t('perMonth')}`}
                   />
                 )}
                 {property.waterCharge !== undefined && property.waterCharge !== null && (
                   <DetailRow
                     icon={<WaterDropIcon fontSize="small" />}
                     label={t('waterCharge')}
-                    value={`${formatCurrency(property.waterCharge)}/kk`}
+                    value={`${formatCurrency(property.waterCharge)}${t('perMonth')}`}
                   />
                 )}
                 {property.financialCharge !== undefined && property.financialCharge !== null && (
                   <DetailRow
                     icon={<AccountBalanceIcon fontSize="small" />}
                     label={t('financialCharge')}
-                    value={`${formatCurrency(property.financialCharge)}/kk`}
+                    value={`${formatCurrency(property.financialCharge)}${t('perMonth')}`}
+                  />
+                )}
+                {/* Total monthly costs (calculated) */}
+                {((property.maintenanceFee ?? 0) + (property.waterCharge ?? 0) + (property.financialCharge ?? 0)) > 0 && (
+                  <DetailRow
+                    icon={<CalculateIcon fontSize="small" />}
+                    label={t('totalMonthlyCosts')}
+                    value={`${formatCurrency((property.maintenanceFee ?? 0) + (property.waterCharge ?? 0) + (property.financialCharge ?? 0))}${t('perMonth')}`}
                   />
                 )}
                 {property.status === PropertyStatus.OWN && property.monthlyRent !== undefined && property.monthlyRent !== null && (
                   <DetailRow
                     icon={<AttachMoneyIcon fontSize="small" />}
                     label={t('monthlyRent')}
-                    value={`${formatCurrency(property.monthlyRent)}/kk`}
+                    value={`${formatCurrency(property.monthlyRent)}${t('perMonth')}`}
+                  />
+                )}
+                {property.status === PropertyStatus.PROSPECT && property.monthlyRent !== undefined && property.monthlyRent !== null && (
+                  <DetailRow
+                    icon={<AttachMoneyIcon fontSize="small" />}
+                    label={t('expectedRent')}
+                    value={`${formatCurrency(property.monthlyRent)}${t('perMonth')}`}
                   />
                 )}
               </Grid>

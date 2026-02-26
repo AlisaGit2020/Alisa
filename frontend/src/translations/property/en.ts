@@ -79,6 +79,7 @@ const property = {
     waterCharge: 'Water Charge',
     debtShare: 'Debt Share',
     monthlyRent: 'Monthly Rent',
+    expectedRent: 'Expected Rent',
     purchasePrice: 'Purchase Price',
     askingPrice: 'Asking Price',
     purchaseDate: 'Purchase Date',
@@ -86,6 +87,9 @@ const property = {
     salePrice: 'Sale Price',
     saleDate: 'Sale Date',
     rooms: 'Rooms',
+    pricePerSqm: 'Price/m\u00B2',
+    totalMonthlyCosts: 'Total Monthly Costs',
+    perMonth: '/mo',
 
     // Prospect add choice modal
     addProspectTitle: 'Add Prospect Property',

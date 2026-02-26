@@ -79,6 +79,7 @@ const property = {
     waterCharge: 'Vesimaksu',
     debtShare: 'Yhtiölainaosuus',
     monthlyRent: 'Kuukausivuokra',
+    expectedRent: 'Arvioitu vuokra',
     purchasePrice: 'Kauppahinta',
     askingPrice: 'Pyyntihinta',
     purchaseDate: 'Ostopäivä',
@@ -86,6 +87,9 @@ const property = {
     salePrice: 'Myyntihinta',
     saleDate: 'Myyntipäivä',
     rooms: 'Huoneet',
+    pricePerSqm: 'Hinta/m\u00B2',
+    totalMonthlyCosts: 'Kuukausikulut yhteensä',
+    perMonth: '/kk',
 
     // Prospect add choice modal
     addProspectTitle: 'Lisää seurattava kohde',

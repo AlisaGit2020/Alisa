@@ -79,6 +79,7 @@ const property = {
     waterCharge: 'Vattenavgift',
     debtShare: 'Skulddel',
     monthlyRent: 'Månadshyra',
+    expectedRent: 'Förväntad hyra',
     purchasePrice: 'Köpeskilling',
     askingPrice: 'Begärt pris',
     purchaseDate: 'Köpdatum',
@@ -86,6 +87,9 @@ const property = {
     salePrice: 'Försäljningspris',
     saleDate: 'Försäljningsdatum',
     rooms: 'Rum',
+    pricePerSqm: 'Pris/m\u00B2',
+    totalMonthlyCosts: 'Totala månadskostnader',
+    perMonth: '/mån',
 
     // Prospect add choice modal
     addProspectTitle: 'Lägg till prospekt',

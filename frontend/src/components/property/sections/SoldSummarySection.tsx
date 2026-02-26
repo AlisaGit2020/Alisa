@@ -5,49 +5,12 @@ import PaymentsIcon from '@mui/icons-material/Payments';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import { Property } from '@asset-types';
-import { ReactNode } from 'react';
+import DetailRow from '../shared/DetailRow';
+import { formatCurrency, formatDate } from '@asset-lib/format-utils';
 
 interface SoldSummarySectionProps {
   property: Property;
 }
-
-interface DetailRowProps {
-  icon: ReactNode;
-  label: string;
-  value: ReactNode;
-}
-
-function DetailRow({ icon, label, value }: DetailRowProps) {
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', py: 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', mr: 2, minWidth: 24 }}>
-        {icon}
-      </Box>
-      <Typography sx={{ color: 'text.secondary', minWidth: 150 }}>
-        {label}
-      </Typography>
-      <Typography sx={{ fontWeight: 500 }}>
-        {value}
-      </Typography>
-    </Box>
-  );
-}
-
-const formatCurrency = (value: number | undefined | null): string => {
-  if (value === undefined || value === null) return '-';
-  return new Intl.NumberFormat('fi-FI', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
-};
-
-const formatDate = (date: Date | string | undefined | null): string => {
-  if (!date) return '-';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  return d.toLocaleDateString('fi-FI');
-};
 
 function SoldSummarySection({ property }: SoldSummarySectionProps) {
   const { t } = useTranslation('property');
