@@ -2,24 +2,39 @@ import { Box, Typography } from '@mui/material';
 import { ReactNode } from 'react';
 
 export interface DetailRowProps {
-  icon: ReactNode;
+  icon?: ReactNode;
   label: string;
   value: ReactNode;
 }
 
 /**
- * A reusable row component for displaying property details with an icon, label, and value.
+ * A compact row component for displaying property details with optional icon.
  */
 function DetailRow({ icon, label, value }: DetailRowProps) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', py: 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', mr: 2, minWidth: 24 }}>
-        {icon}
-      </Box>
-      <Typography sx={{ color: 'text.secondary', minWidth: 150 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', py: 0.5 }}>
+      {icon && (
+        <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', mr: 1.5, minWidth: 20 }}>
+          {icon}
+        </Box>
+      )}
+      <Typography
+        variant="caption"
+        sx={{
+          color: 'text.secondary',
+          minWidth: 120,
+          fontSize: '0.75rem',
+        }}
+      >
         {label}
       </Typography>
-      <Typography sx={{ fontWeight: 500 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 500,
+          fontSize: '0.875rem',
+        }}
+      >
         {value}
       </Typography>
     </Box>
