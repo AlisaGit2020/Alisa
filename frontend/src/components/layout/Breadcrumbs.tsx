@@ -2,7 +2,7 @@ import { Breadcrumbs, Link, Stack, Tooltip, IconButton, Menu, MenuItem } from "@
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom"
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import ApiClient from "@asset-lib/api-client";
 import { useIsMobile } from "@asset-lib/hooks/useIsMobile";
 
@@ -28,9 +28,9 @@ function AssetBreadcrumbs({ t, testIsMobile }: AssetBreadcrumbsProps) {
     const isMobile = testIsMobile !== undefined ? testIsMobile : isMobileHook;
     const menuOpen = Boolean(menuAnchorEl);
 
-    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    const handleMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
         setMenuAnchorEl(event.currentTarget);
-    };
+    }, []);
 
     const handleMenuClose = () => {
         setMenuAnchorEl(null);
@@ -124,13 +124,13 @@ function AssetBreadcrumbs({ t, testIsMobile }: AssetBreadcrumbsProps) {
         });
     }, [pathSegments, entityNames, t, location.pathname]);
 
-    const truncationStyle = {
+    const truncationStyle = useMemo(() => ({
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
         maxWidth: `${maxWidth}px`,
         display: 'inline-block'
-    };
+    }), [maxWidth]);
 
     // Mobile collapsing logic
     const shouldCollapse = isMobile && crumbs.length > MOBILE_COLLAPSE_THRESHOLD;
