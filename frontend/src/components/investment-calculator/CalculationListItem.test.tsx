@@ -102,9 +102,9 @@ describe('CalculationListItem', () => {
       expect(screen.getByText('Investment Option A')).toBeInTheDocument();
     });
 
-    it('shows property name when property is linked', () => {
-      const property = createMockProperty({ name: 'Downtown Condo' });
-      const calculation = createMockCalculation();
+    it('shows street name with calculation name when property is linked', () => {
+      const property = createMockProperty({ address: { id: 1, street: 'Kauppapuistikko 24', city: 'Vaasa', postalCode: '65100' } });
+      const calculation = createMockCalculation({ name: 'Laskelma 1' });
 
       renderWithProviders(
         <CalculationListItem
@@ -114,13 +114,15 @@ describe('CalculationListItem', () => {
         />
       );
 
-      expect(screen.getByText('Downtown Condo')).toBeInTheDocument();
+      // Should show "Street - Calculation Name" format
+      expect(screen.getByText('Kauppapuistikko 24 - Laskelma 1')).toBeInTheDocument();
     });
 
-    it('shows placeholder text when no property is linked', () => {
+    it('shows only calculation name when no property is linked', () => {
       renderWithProviders(<CalculationListItem {...defaultProps} />);
 
-      expect(screen.getByText('No property linked')).toBeInTheDocument();
+      // Should show just the calculation name when no property/street
+      expect(screen.getByText('Test Calculation')).toBeInTheDocument();
     });
 
     it('shows property image as avatar when property has photo', () => {
@@ -151,17 +153,19 @@ describe('CalculationListItem', () => {
         />
       );
 
-      // When no image, the implementation uses a placeholder image
+      // When no image, the avatar uses the placeholder image
       const avatar = screen.getByRole('img');
       expect(avatar).toHaveAttribute('src', expect.stringContaining('placeholder'));
+      expect(avatar).toHaveAttribute('alt', 'Mannerheimintie 1');
     });
 
     it('shows placeholder avatar when no property is linked', () => {
       renderWithProviders(<CalculationListItem {...defaultProps} />);
 
-      // When no property, the implementation uses a placeholder image
+      // When no property, uses placeholder image with translated alt text
       const avatar = screen.getByRole('img');
       expect(avatar).toHaveAttribute('src', expect.stringContaining('placeholder'));
+      expect(avatar).toHaveAttribute('alt', 'No property linked');
     });
 
     it('shows rental yield as key metric', () => {

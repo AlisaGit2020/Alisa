@@ -125,7 +125,7 @@ describe('ProspectCompareView', () => {
         expect(mockSearch).toHaveBeenCalledWith(
           'real-estate/investment',
           expect.objectContaining({
-            relations: { property: true },
+            relations: { property: { address: true } },
           })
         );
       });
@@ -157,11 +157,12 @@ describe('ProspectCompareView', () => {
       renderWithProviders(<ProspectCompareView />);
 
       // Wait for loading to complete and calculations to display
+      // Display format is "Street - Calculation Name"
       await waitFor(() => {
-        expect(screen.getByText('Linked Calc')).toBeInTheDocument();
+        expect(screen.getByText('Mannerheimintie 1 - Linked Calc')).toBeInTheDocument();
       });
 
-      // Property name should appear (in header and/or list item)
+      // Property name should appear in the group header
       expect(screen.getAllByText('Test Property').length).toBeGreaterThan(0);
     });
 
