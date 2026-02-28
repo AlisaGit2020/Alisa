@@ -1,12 +1,15 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Typography, IconButton, Chip, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
+import {
+  SavedInvestmentCalculation,
+  CalculationWithProperty,
+  getCalculationDisplayName,
+} from './InvestmentCalculatorResults';
 import InvestmentComparisonTable from '../property/sections/InvestmentComparisonTable';
 
 interface ComparisonDropZoneProps {
-  calculations: SavedInvestmentCalculation[];
+  calculations: CalculationWithProperty[];
   onRemove: (id: number) => void;
   onUpdate: (calculation: SavedInvestmentCalculation) => void;
   isDragOver?: boolean;
@@ -67,12 +70,12 @@ function ComparisonDropZone({
             {safeCalculations.map((calc) => (
               <Chip
                 key={calc.id}
-                label={calc.name || `#${calc.id}`}
+                label={getCalculationDisplayName(calc)}
                 onDelete={() => handleDelete(calc.id)}
                 deleteIcon={
                   <IconButton
                     size="small"
-                    aria-label={`${t('investment-calculator:removeFromComparison')} ${calc.name || `#${calc.id}`}`}
+                    aria-label={`${t('investment-calculator:removeFromComparison')} ${getCalculationDisplayName(calc)}`}
                   >
                     <CloseIcon fontSize="small" />
                   </IconButton>

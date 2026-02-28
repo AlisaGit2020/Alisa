@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils';
 import InvestmentComparisonTable from './InvestmentComparisonTable';
 import { SavedInvestmentCalculation } from '../../investment-calculator/InvestmentCalculatorResults';
+import { PropertyStatus } from '@asset-types';
 import ApiClient from '@asset-lib/api-client';
 
 // Mock ApiClient
@@ -376,6 +377,70 @@ describe('InvestmentComparisonTable', () => {
       await waitFor(() => {
         expect(screen.getByDisplayValue('150000')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('field formatting', () => {
+    it('displays loanPeriod in years, not currency', () => {
+      const calculations = [createMockCalculation({ id: 1, loanPeriod: 25 })];
+
+      renderWithProviders(
+        <InvestmentComparisonTable
+          calculations={calculations}
+          onUpdate={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+
+      // Should display "25 yrs" (years), NOT "25 €"
+      expect(screen.getByText('25 yrs')).toBeInTheDocument();
+      expect(screen.queryByText('25 €')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('header display with property', () => {
+    it('displays street name with calculation name when property is linked', () => {
+      const calcWithProperty = {
+        ...createMockCalculation({ id: 1, name: 'Laskelma 1' }),
+        property: {
+          id: 1,
+          name: 'Test Property',
+          size: 55,
+          status: PropertyStatus.PROSPECT,
+          address: {
+            id: 1,
+            street: 'Kauppapuistikko 45',
+            city: 'Vaasa',
+            postalCode: '65100',
+          },
+        },
+      };
+
+      renderWithProviders(
+        <InvestmentComparisonTable
+          calculations={[calcWithProperty]}
+          onUpdate={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+
+      // Should show "Kauppapuistikko 45 - Laskelma 1" in header
+      expect(screen.getByText('Kauppapuistikko 45 - Laskelma 1')).toBeInTheDocument();
+    });
+
+    it('displays only calculation name when property is not linked', () => {
+      const calculations = [createMockCalculation({ id: 1, name: 'Standalone Calc' })];
+
+      renderWithProviders(
+        <InvestmentComparisonTable
+          calculations={calculations}
+          onUpdate={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+
+      // Should show just the calculation name
+      expect(screen.getByText('Standalone Calc')).toBeInTheDocument();
     });
   });
 

@@ -1,6 +1,7 @@
 import { WithTranslation, withTranslation } from "react-i18next";
 import { Box, Card, CardContent, Divider, Grid, Typography } from "@mui/material";
 import { AssetButton } from "../asset";
+import { Property } from "@asset-types";
 
 // Base calculation results without database fields
 export interface InvestmentResults {
@@ -45,6 +46,18 @@ export interface InvestmentResults {
 export interface SavedInvestmentCalculation extends InvestmentResults {
   id: number;
   name?: string;
+}
+
+// Extended calculation type that includes optional property info (for comparison views)
+export interface CalculationWithProperty extends SavedInvestmentCalculation {
+  property?: Property;
+}
+
+// Utility function for display name in comparison views
+export function getCalculationDisplayName(calc: CalculationWithProperty): string {
+  const calcName = calc.name || `#${calc.id}`;
+  const streetName = calc.property?.address?.street;
+  return streetName ? `${streetName} - ${calcName}` : calcName;
 }
 
 interface InvestmentCalculatorResultsProps extends WithTranslation {

@@ -1,49 +1,15 @@
-import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { renderWithProviders } from '@test-utils/test-wrapper';
 import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
+import { PropertyStatus } from '@asset-types';
 import ApiClient from '@asset-lib/api-client';
 
 // Mock ApiClient
 jest.spyOn(ApiClient, 'post').mockResolvedValue({
   data: {},
 } as unknown as ReturnType<typeof ApiClient.post>);
-
-// Mock translations
-jest.mock('react-i18next', () => ({
-  ...jest.requireActual('react-i18next'),
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'investment-calculator:dropHereToCompare': 'Drop here to compare',
-        'investment-calculator:emptyComparisonMessage': 'Select calculations from the list to compare',
-        'investment-calculator:removeFromComparison': 'Remove from comparison',
-        'investment-calculator:noCalculations': 'No calculations to compare',
-        'common:delete': 'Delete',
-        'common:remove': 'Remove',
-      };
-      return translations[key] || key;
-    },
-  }),
-  withTranslation: () => (Component: React.ComponentType) => {
-    const WrappedComponent = (props: object) => {
-      const translations: Record<string, string> = {
-        noCalculations: 'No calculations to compare',
-        'input-fields': 'Input Fields',
-        'purchase-costs': 'Purchase Costs',
-        'loan-details': 'Loan Details',
-        'income-expenses': 'Income & Expenses',
-        returns: 'Returns',
-      };
-      const t = (key: string) => translations[key] || key;
-      return <Component {...props} t={t} />;
-    };
-    WrappedComponent.displayName = `withTranslation(${Component.displayName || Component.name})`;
-    return WrappedComponent;
-  },
-}));
 
 // Import after mocking
 import ComparisonDropZone from './ComparisonDropZone';
@@ -324,6 +290,50 @@ describe('ComparisonDropZone', () => {
       await user.keyboard('{Enter}');
 
       expect(onRemove).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('Display with Property Info', () => {
+    it('displays street name with calculation name in chip when property is linked', () => {
+      const calcWithProperty = {
+        ...createMockCalculation({ id: 1, name: 'Laskelma 1' }),
+        property: {
+          id: 1,
+          name: 'Test Property',
+          size: 55,
+          status: PropertyStatus.PROSPECT,
+          address: {
+            id: 1,
+            street: 'Kauppapuistikko 45',
+            city: 'Vaasa',
+            postalCode: '65100',
+          },
+        },
+      };
+
+      renderWithProviders(
+        <ComparisonDropZone
+          {...defaultProps}
+          calculations={[calcWithProperty]}
+        />
+      );
+
+      // The chip should show "Kauppapuistikko 45 - Laskelma 1" - appears in chip and table header
+      const elements = screen.getAllByText('Kauppapuistikko 45 - Laskelma 1');
+      expect(elements.length).toBeGreaterThan(0);
+    });
+
+    it('displays only calculation name in chip when property is not linked', () => {
+      const calculations = [createMockCalculation({ id: 1, name: 'Standalone Calc' })];
+
+      renderWithProviders(
+        <ComparisonDropZone {...defaultProps} calculations={calculations} />
+      );
+
+      // Should show just the calculation name - appears in chip and table
+      // Using getAllByText since it appears in multiple places
+      const elements = screen.getAllByText('Standalone Calc');
+      expect(elements.length).toBeGreaterThan(0);
     });
   });
 
