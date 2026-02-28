@@ -2,7 +2,7 @@ import { PropertyStatus } from '@asset-types/common';
 
 const ROUTE_PROSPECT = 'prospects';
 const ROUTE_SOLD = 'sold';
-const BASE_PATH = '/app/portfolio/properties';
+const BASE_PATH = '/app/portfolio';
 
 /**
  * Determines the PropertyStatus based on the current URL path.

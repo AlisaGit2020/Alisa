@@ -392,7 +392,7 @@ describe('AssetCardList', () => {
 
       renderWithRouter(
         <Routes>
-          <Route path="/app/portfolio/properties/own" element={
+          <Route path="/app/portfolio/own" element={
             <AssetCardList
               t={mockT}
               assetContext={propertyContext}
@@ -400,9 +400,9 @@ describe('AssetCardList', () => {
               routePrefix="own"
             />
           } />
-          <Route path="/app/portfolio/properties/own/:id" element={<div>Own Property View</div>} />
+          <Route path="/app/portfolio/own/:id" element={<div>Own Property View</div>} />
         </Routes>,
-        { initialEntries: ['/app/portfolio/properties/own'] }
+        { initialEntries: ['/app/portfolio/own'] }
       );
 
       await waitFor(() => {
@@ -426,7 +426,7 @@ describe('AssetCardList', () => {
 
       renderWithRouter(
         <Routes>
-          <Route path="/app/portfolio/properties/prospects" element={
+          <Route path="/app/portfolio/prospects" element={
             <AssetCardList
               t={mockT}
               assetContext={propertyContext}
@@ -434,9 +434,9 @@ describe('AssetCardList', () => {
               routePrefix="prospects"
             />
           } />
-          <Route path="/app/portfolio/properties/prospects/:id" element={<div>Prospect Property View</div>} />
+          <Route path="/app/portfolio/prospects/:id" element={<div>Prospect Property View</div>} />
         </Routes>,
-        { initialEntries: ['/app/portfolio/properties/prospects'] }
+        { initialEntries: ['/app/portfolio/prospects'] }
       );
 
       await waitFor(() => {

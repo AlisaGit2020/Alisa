@@ -38,22 +38,22 @@ export default function AppRoutes() {
             <Route path="dashboard" element={<Dashboard />} />
 
             {/* Portfolio routes - nested under /app/portfolio */}
-            <Route path="portfolio" element={<Navigate to="/app/portfolio/properties/own" replace />} />
-            <Route path="portfolio/properties" element={<Navigate to="/app/portfolio/properties/own" replace />} />
-            <Route path="portfolio/properties/own" element={<Properties />} />
-            <Route path="portfolio/properties/own/add" element={<PropertyForm />} />
-            <Route path="portfolio/properties/own/edit/:idParam" element={<PropertyForm />} />
-            <Route path="portfolio/properties/own/:idParam" element={<PropertyView />} />
-            <Route path="portfolio/properties/prospects" element={<Properties />} />
-            <Route path="portfolio/properties/prospects/add" element={<PropertyForm />} />
-            <Route path="portfolio/properties/prospects/edit/:idParam" element={<PropertyForm />} />
-            <Route path="portfolio/properties/prospects/:idParam" element={<PropertyView />} />
-            <Route path="portfolio/properties/sold" element={<Properties />} />
-            <Route path="portfolio/properties/sold/edit/:idParam" element={<PropertyForm />} />
-            <Route path="portfolio/properties/sold/:idParam" element={<PropertyView />} />
-            <Route path="portfolio/properties/investment-calculator" element={<Properties />} />
-            {/* Backward compatibility: old investment-calculations route */}
-            <Route path="portfolio/investment-calculations" element={<Navigate to="/app/portfolio/properties/investment-calculator" replace />} />
+            <Route path="portfolio" element={<Navigate to="/app/portfolio/own" replace />} />
+            <Route path="portfolio/own" element={<Properties />} />
+            <Route path="portfolio/own/add" element={<PropertyForm />} />
+            <Route path="portfolio/own/edit/:idParam" element={<PropertyForm />} />
+            <Route path="portfolio/own/:idParam" element={<PropertyView />} />
+            <Route path="portfolio/prospects" element={<Properties />} />
+            <Route path="portfolio/prospects/add" element={<PropertyForm />} />
+            <Route path="portfolio/prospects/edit/:idParam" element={<PropertyForm />} />
+            <Route path="portfolio/prospects/:idParam" element={<PropertyView />} />
+            <Route path="portfolio/sold" element={<Properties />} />
+            <Route path="portfolio/sold/edit/:idParam" element={<PropertyForm />} />
+            <Route path="portfolio/sold/:idParam" element={<PropertyView />} />
+            <Route path="portfolio/investment-calculator" element={<Properties />} />
+            {/* Backward compatibility: old routes */}
+            <Route path="portfolio/investment-calculations" element={<Navigate to="/app/portfolio/investment-calculator" replace />} />
+            <Route path="portfolio/properties/*" element={<Navigate to="/app/portfolio/own" replace />} />
 
             {/* Finance routes - nested under /app/finance */}
             <Route path="finance" element={<FinanceHub />} />
@@ -73,9 +73,9 @@ export default function AppRoutes() {
             <Route path="accounting" element={<Navigate to="/app/finance" replace />} />
             <Route path="accounting/*" element={<Navigate to="/app/finance" replace />} />
             <Route path="transactions/*" element={<Navigate to="/app/finance/transactions" replace />} />
-            <Route path="properties" element={<Navigate to="/app/portfolio/properties" replace />} />
-            <Route path="properties/*" element={<Navigate to="/app/portfolio/properties" replace />} />
-            <Route path="investment-calculations" element={<Navigate to="/app/portfolio/investment-calculations" replace />} />
+            <Route path="properties" element={<Navigate to="/app/portfolio/own" replace />} />
+            <Route path="properties/*" element={<Navigate to="/app/portfolio/own" replace />} />
+            <Route path="investment-calculations" element={<Navigate to="/app/portfolio/investment-calculator" replace />} />
             <Route path="report" element={<Navigate to="/app/reports/property" replace />} />
             <Route path="tax" element={<Navigate to="/app/reports/tax" replace />} />
 

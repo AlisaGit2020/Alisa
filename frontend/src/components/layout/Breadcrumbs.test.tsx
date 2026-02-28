@@ -42,24 +42,23 @@ describe('Breadcrumbs', () => {
 
   it('should handle nested protected routes correctly', () => {
     renderWithRouter(<Breadcrumbs />, {
-      initialEntries: ['/app/portfolio/properties/own/edit/123'],
+      initialEntries: ['/app/portfolio/own/edit/123'],
     });
 
     const links = screen.getAllByRole('link');
 
-    // Check all links have /app prefix
+    // Path segments: portfolio, own, edit, 123 (4 links)
     expect(links[0]).toHaveAttribute('href', '/app/portfolio');
-    expect(links[1]).toHaveAttribute('href', '/app/portfolio/properties');
-    expect(links[2]).toHaveAttribute('href', '/app/portfolio/properties/own');
+    expect(links[1]).toHaveAttribute('href', '/app/portfolio/own');
     // "edit" segment followed by ID should include the ID in the link
     // (navigating to /edit without ID is invalid)
-    expect(links[3]).toHaveAttribute('href', '/app/portfolio/properties/own/edit/123');
-    expect(links[4]).toHaveAttribute('href', '/app/portfolio/properties/own/edit/123');
+    expect(links[2]).toHaveAttribute('href', '/app/portfolio/own/edit/123');
+    expect(links[3]).toHaveAttribute('href', '/app/portfolio/own/edit/123');
   });
 
   it('should include ID in edit breadcrumb link when followed by numeric ID', () => {
     renderWithRouter(<Breadcrumbs />, {
-      initialEntries: ['/app/portfolio/properties/own/edit/456'],
+      initialEntries: ['/app/portfolio/own/edit/456'],
     });
 
     const links = screen.getAllByRole('link');
@@ -69,7 +68,7 @@ describe('Breadcrumbs', () => {
     const editLink = links.find(link =>
       link.textContent?.toLowerCase().includes('edit')
     );
-    expect(editLink).toHaveAttribute('href', '/app/portfolio/properties/own/edit/456');
+    expect(editLink).toHaveAttribute('href', '/app/portfolio/own/edit/456');
   });
 
   it('should include ID in add breadcrumb link when followed by numeric ID', () => {
@@ -112,13 +111,13 @@ describe('Breadcrumbs', () => {
 
   it('should filter out numeric IDs but keep them in links', () => {
     renderWithRouter(<Breadcrumbs />, {
-      initialEntries: ['/app/portfolio/properties/own/edit/456'],
+      initialEntries: ['/app/portfolio/own/edit/456'],
     });
 
     const links = screen.getAllByRole('link');
 
     // Should have link with ID (links: portfolio, properties, own, edit/456, 456)
-    expect(links[3]).toHaveAttribute('href', '/app/portfolio/properties/own/edit/456');
+    expect(links[3]).toHaveAttribute('href', '/app/portfolio/own/edit/456');
   });
 
   describe('Property name resolution', () => {
@@ -136,7 +135,7 @@ describe('Breadcrumbs', () => {
       mockGet.mockResolvedValue({ id: 20, name: 'Helsinki Apartment' });
 
       renderWithRouter(<Breadcrumbs />, {
-        initialEntries: ['/app/portfolio/properties/prospects/20'],
+        initialEntries: ['/app/portfolio/prospects/20'],
       });
 
       // Wait for the property name to be fetched and displayed
@@ -152,7 +151,7 @@ describe('Breadcrumbs', () => {
       mockGet.mockResolvedValue({ id: 15, name: 'Espoo Studio' });
 
       renderWithRouter(<Breadcrumbs />, {
-        initialEntries: ['/app/portfolio/properties/own/15'],
+        initialEntries: ['/app/portfolio/own/15'],
       });
 
       await waitFor(() => {
@@ -166,7 +165,7 @@ describe('Breadcrumbs', () => {
       mockGet.mockResolvedValue({ id: 25, name: 'Tampere Flat' });
 
       renderWithRouter(<Breadcrumbs />, {
-        initialEntries: ['/app/portfolio/properties/prospects/edit/25'],
+        initialEntries: ['/app/portfolio/prospects/edit/25'],
       });
 
       await waitFor(() => {
@@ -180,7 +179,7 @@ describe('Breadcrumbs', () => {
       mockGet.mockRejectedValue(new Error('Network error'));
 
       renderWithRouter(<Breadcrumbs />, {
-        initialEntries: ['/app/portfolio/properties/prospects/99'],
+        initialEntries: ['/app/portfolio/prospects/99'],
       });
 
       // Should still render the ID as fallback

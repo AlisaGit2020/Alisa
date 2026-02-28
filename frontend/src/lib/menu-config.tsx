@@ -47,7 +47,7 @@ export const menuConfig: MenuItemConfig[] = [
     id: "portfolio",
     titleKey: "portfolio",
     icon: <WorkIcon />,
-    routePath: "/app/portfolio/properties/own",
+    routePath: "/app/portfolio/own",
     color: "secondary.main",
   },
   {

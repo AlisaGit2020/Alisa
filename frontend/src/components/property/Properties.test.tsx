@@ -642,42 +642,42 @@ describe('Properties Component Logic', () => {
     });
 
     describe('Navigation path construction', () => {
-      const BASE_PATH = '/app/portfolio/properties';
+      const BASE_PATH = '/app/portfolio';
 
       const buildNavigationPath = (route: string): string => {
         return `${BASE_PATH}/${route}`;
       };
 
       it('constructs own properties path correctly', () => {
-        expect(buildNavigationPath('own')).toBe('/app/portfolio/properties/own');
+        expect(buildNavigationPath('own')).toBe('/app/portfolio/own');
       });
 
       it('constructs prospects path correctly', () => {
-        expect(buildNavigationPath('prospects')).toBe('/app/portfolio/properties/prospects');
+        expect(buildNavigationPath('prospects')).toBe('/app/portfolio/prospects');
       });
 
       it('constructs sold properties path correctly', () => {
-        expect(buildNavigationPath('sold')).toBe('/app/portfolio/properties/sold');
+        expect(buildNavigationPath('sold')).toBe('/app/portfolio/sold');
       });
     });
 
     describe('View path construction', () => {
-      const BASE_PATH = '/app/portfolio/properties';
+      const BASE_PATH = '/app/portfolio';
 
       const buildViewPath = (routePrefix: string, id: number): string => {
         return `${BASE_PATH}/${routePrefix}/${id}`;
       };
 
       it('constructs own property view path with id', () => {
-        expect(buildViewPath('own', 123)).toBe('/app/portfolio/properties/own/123');
+        expect(buildViewPath('own', 123)).toBe('/app/portfolio/own/123');
       });
 
       it('constructs prospect property view path with id', () => {
-        expect(buildViewPath('prospects', 456)).toBe('/app/portfolio/properties/prospects/456');
+        expect(buildViewPath('prospects', 456)).toBe('/app/portfolio/prospects/456');
       });
 
       it('constructs sold property view path with id', () => {
-        expect(buildViewPath('sold', 789)).toBe('/app/portfolio/properties/sold/789');
+        expect(buildViewPath('sold', 789)).toBe('/app/portfolio/sold/789');
       });
     });
 
@@ -708,7 +708,7 @@ describe('Sold properties tab behavior', () => {
 
   it('does not show add link on Sold tab', async () => {
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/sold'],
+      initialEntries: ['/app/portfolio/sold'],
     });
 
     // Wait for the component to render
@@ -740,7 +740,7 @@ describe('Prospect Add Choice Dialog', () => {
   it('opens add dialog when clicking Add on Prospects tab', async () => {
     const user = userEvent.setup();
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/prospects'],
+      initialEntries: ['/app/portfolio/prospects'],
     });
 
     const addLink = await screen.findByRole('link', { name: /add/i });
@@ -752,7 +752,7 @@ describe('Prospect Add Choice Dialog', () => {
   it('navigates to form when manual add is selected', async () => {
     const user = userEvent.setup();
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/prospects'],
+      initialEntries: ['/app/portfolio/prospects'],
     });
 
     const addLink = await screen.findByRole('link', { name: /add/i });
@@ -768,13 +768,13 @@ describe('Prospect Add Choice Dialog', () => {
 
   it('does not show dialog for Own properties tab', async () => {
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/own'],
+      initialEntries: ['/app/portfolio/own'],
     });
 
     // On Own tab, clicking Add should navigate directly, not show dialog
     const addLink = await screen.findByRole('link', { name: /add/i });
     // Verify it's a normal link without the dialog behavior
-    expect(addLink).toHaveAttribute('href', '/app/portfolio/properties/own/add');
+    expect(addLink).toHaveAttribute('href', '/app/portfolio/own/add');
   });
 });
 
@@ -817,8 +817,8 @@ describe('Investment Calculator Tab', () => {
     // This function should be exported or we test its behavior via component
     const getTabIndexFromRoute = (pathname: string): number => {
       const segments = pathname.split('/');
-      const propertiesIndex = segments.indexOf('properties');
-      const tabSegment = propertiesIndex !== -1 ? segments[propertiesIndex + 1] : undefined;
+      const portfolioIndex = segments.indexOf('portfolio');
+      const tabSegment = portfolioIndex !== -1 ? segments[portfolioIndex + 1] : undefined;
       if (tabSegment === ROUTE_PROSPECT) return TAB_PROSPECT;
       if (tabSegment === ROUTE_SOLD) return TAB_SOLD;
       if (tabSegment === ROUTE_CALCULATOR) return TAB_CALCULATOR;
@@ -826,27 +826,27 @@ describe('Investment Calculator Tab', () => {
     };
 
     it('returns TAB_CALCULATOR (3) for "investment-calculator" route', () => {
-      expect(getTabIndexFromRoute('/app/portfolio/properties/investment-calculator')).toBe(TAB_CALCULATOR);
+      expect(getTabIndexFromRoute('/app/portfolio/investment-calculator')).toBe(TAB_CALCULATOR);
     });
 
     it('returns TAB_OWN (0) for "own" route', () => {
-      expect(getTabIndexFromRoute('/app/portfolio/properties/own')).toBe(TAB_OWN);
+      expect(getTabIndexFromRoute('/app/portfolio/own')).toBe(TAB_OWN);
     });
 
     it('returns TAB_PROSPECT (1) for "prospects" route', () => {
-      expect(getTabIndexFromRoute('/app/portfolio/properties/prospects')).toBe(TAB_PROSPECT);
+      expect(getTabIndexFromRoute('/app/portfolio/prospects')).toBe(TAB_PROSPECT);
     });
 
     it('returns TAB_SOLD (2) for "sold" route', () => {
-      expect(getTabIndexFromRoute('/app/portfolio/properties/sold')).toBe(TAB_SOLD);
+      expect(getTabIndexFromRoute('/app/portfolio/sold')).toBe(TAB_SOLD);
     });
 
     it('defaults to TAB_OWN for unknown route', () => {
-      expect(getTabIndexFromRoute('/app/portfolio/properties/unknown')).toBe(TAB_OWN);
+      expect(getTabIndexFromRoute('/app/portfolio/unknown')).toBe(TAB_OWN);
     });
 
     it('defaults to TAB_OWN when no tab segment', () => {
-      expect(getTabIndexFromRoute('/app/portfolio/properties')).toBe(TAB_OWN);
+      expect(getTabIndexFromRoute('/app/portfolio')).toBe(TAB_OWN);
     });
   });
 
@@ -880,14 +880,14 @@ describe('Investment Calculator Tab', () => {
   });
 
   describe('Navigation path construction for calculator', () => {
-    const BASE_PATH = '/app/portfolio/properties';
+    const BASE_PATH = '/app/portfolio';
 
     const buildNavigationPath = (route: string): string => {
       return `${BASE_PATH}/${route}`;
     };
 
     it('constructs investment calculator path correctly', () => {
-      expect(buildNavigationPath(ROUTE_CALCULATOR)).toBe('/app/portfolio/properties/investment-calculator');
+      expect(buildNavigationPath(ROUTE_CALCULATOR)).toBe('/app/portfolio/investment-calculator');
     });
   });
 
@@ -922,7 +922,7 @@ describe('Investment Calculator Tab Component Rendering', () => {
 
   it('renders Investment Calculator tab with correct label', async () => {
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/own'],
+      initialEntries: ['/app/portfolio/own'],
     });
 
     // Wait for tabs to render
@@ -938,7 +938,7 @@ describe('Investment Calculator Tab Component Rendering', () => {
 
   it('selects Investment Calculator tab when on calculator route', async () => {
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/investment-calculator'],
+      initialEntries: ['/app/portfolio/investment-calculator'],
     });
 
     await waitFor(() => {
@@ -949,7 +949,7 @@ describe('Investment Calculator Tab Component Rendering', () => {
 
   it('renders InvestmentCalculatorProtected when calculator tab is active', async () => {
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/investment-calculator'],
+      initialEntries: ['/app/portfolio/investment-calculator'],
     });
 
     // Wait for the tab panel content to render
@@ -963,7 +963,7 @@ describe('Investment Calculator Tab Component Rendering', () => {
   it('navigates to calculator route when clicking calculator tab', async () => {
     const user = userEvent.setup();
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/own'],
+      initialEntries: ['/app/portfolio/own'],
     });
 
     await waitFor(() => {
@@ -981,7 +981,7 @@ describe('Investment Calculator Tab Component Rendering', () => {
 
   it('does not show property cards when on calculator tab', async () => {
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/investment-calculator'],
+      initialEntries: ['/app/portfolio/investment-calculator'],
     });
 
     await waitFor(() => {
@@ -1009,7 +1009,7 @@ describe('Investment Calculator Tab - Edge Cases', () => {
   it('maintains tab state when navigating between property tabs and calculator', async () => {
     const user = userEvent.setup();
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/own'],
+      initialEntries: ['/app/portfolio/own'],
     });
 
     await waitFor(() => {
@@ -1036,7 +1036,7 @@ describe('Investment Calculator Tab - Edge Cases', () => {
 
   it('calculator tab index is correctly identified as 3', async () => {
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/investment-calculator'],
+      initialEntries: ['/app/portfolio/investment-calculator'],
     });
 
     await waitFor(() => {
@@ -1050,7 +1050,7 @@ describe('Investment Calculator Tab - Edge Cases', () => {
 
   it('shows correct tabpanel for calculator tab', async () => {
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/investment-calculator'],
+      initialEntries: ['/app/portfolio/investment-calculator'],
     });
 
     await waitFor(() => {
@@ -1063,7 +1063,7 @@ describe('Investment Calculator Tab - Edge Cases', () => {
 
   it('hides property tabpanels when calculator tab is active', async () => {
     renderWithRouter(<Properties />, {
-      initialEntries: ['/app/portfolio/properties/investment-calculator'],
+      initialEntries: ['/app/portfolio/investment-calculator'],
     });
 
     await waitFor(() => {

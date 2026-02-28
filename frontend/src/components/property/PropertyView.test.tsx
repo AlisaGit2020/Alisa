@@ -67,14 +67,14 @@ import PropertyView from './PropertyView';
 function renderPropertyView(propertyId: string = '1', statusPrefix: 'own' | 'prospects' = 'own') {
   return renderWithRouter(
     <Routes>
-      <Route path="/app/portfolio/properties/own/:idParam" element={<PropertyView />} />
-      <Route path="/app/portfolio/properties/prospects/:idParam" element={<PropertyView />} />
-      <Route path="/app/portfolio/properties/own/edit/:idParam" element={<div>Edit Own Page</div>} />
-      <Route path="/app/portfolio/properties/prospects/edit/:idParam" element={<div>Edit Prospect Page</div>} />
-      <Route path="/app/portfolio/properties/own" element={<div>Own Properties List</div>} />
-      <Route path="/app/portfolio/properties/prospects" element={<div>Prospects List</div>} />
+      <Route path="/app/portfolio/own/:idParam" element={<PropertyView />} />
+      <Route path="/app/portfolio/prospects/:idParam" element={<PropertyView />} />
+      <Route path="/app/portfolio/own/edit/:idParam" element={<div>Edit Own Page</div>} />
+      <Route path="/app/portfolio/prospects/edit/:idParam" element={<div>Edit Prospect Page</div>} />
+      <Route path="/app/portfolio/own" element={<div>Own Properties List</div>} />
+      <Route path="/app/portfolio/prospects" element={<div>Prospects List</div>} />
     </Routes>,
-    { initialEntries: [`/app/portfolio/properties/${statusPrefix}/${propertyId}`] }
+    { initialEntries: [`/app/portfolio/${statusPrefix}/${propertyId}`] }
   );
 }
 

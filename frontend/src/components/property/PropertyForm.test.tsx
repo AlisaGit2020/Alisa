@@ -380,13 +380,13 @@ describe('PropertyForm Component Logic', () => {
 
   describe('Navigation paths', () => {
     it('returns to properties list after save', () => {
-      const getNavigationPath = (): string => '/app/portfolio/properties';
-      expect(getNavigationPath()).toBe('/app/portfolio/properties');
+      const getNavigationPath = (): string => '/app/portfolio';
+      expect(getNavigationPath()).toBe('/app/portfolio');
     });
 
     it('returns to properties list after cancel', () => {
-      const getNavigationPath = (): string => '/app/portfolio/properties';
-      expect(getNavigationPath()).toBe('/app/portfolio/properties');
+      const getNavigationPath = (): string => '/app/portfolio';
+      expect(getNavigationPath()).toBe('/app/portfolio');
     });
   });
 
@@ -535,34 +535,34 @@ describe('PropertyForm Component Logic', () => {
 
   describe('Property status from URL path', () => {
     it('returns OWN status for /own/add path', () => {
-      expect(getPropertyStatusFromPath('/app/portfolio/properties/own/add')).toBe(PropertyStatus.OWN);
+      expect(getPropertyStatusFromPath('/app/portfolio/own/add')).toBe(PropertyStatus.OWN);
     });
 
     it('returns OWN status for /own/edit/:id path', () => {
-      expect(getPropertyStatusFromPath('/app/portfolio/properties/own/edit/123')).toBe(PropertyStatus.OWN);
+      expect(getPropertyStatusFromPath('/app/portfolio/own/edit/123')).toBe(PropertyStatus.OWN);
     });
 
     it('returns PROSPECT status for /prospects/add path', () => {
-      expect(getPropertyStatusFromPath('/app/portfolio/properties/prospects/add')).toBe(PropertyStatus.PROSPECT);
+      expect(getPropertyStatusFromPath('/app/portfolio/prospects/add')).toBe(PropertyStatus.PROSPECT);
     });
 
     it('returns PROSPECT status for /prospects/edit/:id path', () => {
-      expect(getPropertyStatusFromPath('/app/portfolio/properties/prospects/edit/456')).toBe(PropertyStatus.PROSPECT);
+      expect(getPropertyStatusFromPath('/app/portfolio/prospects/edit/456')).toBe(PropertyStatus.PROSPECT);
     });
 
     it('defaults to OWN status for unknown paths', () => {
       // Any path that doesn't contain /prospects/ defaults to OWN
-      expect(getPropertyStatusFromPath('/app/portfolio/properties/unknown/add')).toBe(PropertyStatus.OWN);
+      expect(getPropertyStatusFromPath('/app/portfolio/unknown/add')).toBe(PropertyStatus.OWN);
     });
   });
 
   describe('Return path based on property status', () => {
     it('returns /own path for OWN status', () => {
-      expect(getReturnPathForStatus(PropertyStatus.OWN)).toBe('/app/portfolio/properties/own');
+      expect(getReturnPathForStatus(PropertyStatus.OWN)).toBe('/app/portfolio/own');
     });
 
     it('returns /prospects path for PROSPECT status', () => {
-      expect(getReturnPathForStatus(PropertyStatus.PROSPECT)).toBe('/app/portfolio/properties/prospects');
+      expect(getReturnPathForStatus(PropertyStatus.PROSPECT)).toBe('/app/portfolio/prospects');
     });
   });
 });

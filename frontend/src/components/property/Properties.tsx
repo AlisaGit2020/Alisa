@@ -25,7 +25,7 @@ const ROUTE_PROSPECT = "prospects";
 const ROUTE_SOLD = "sold";
 const ROUTE_CALCULATOR = "investment-calculator";
 
-const BASE_PATH = "/app/portfolio/properties";
+const BASE_PATH = "/app/portfolio";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -43,8 +43,8 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 
 function getTabIndexFromRoute(pathname: string): number {
   const segments = pathname.split('/');
-  const propertiesIndex = segments.indexOf('properties');
-  const tabSegment = propertiesIndex !== -1 ? segments[propertiesIndex + 1] : undefined;
+  const portfolioIndex = segments.indexOf('portfolio');
+  const tabSegment = portfolioIndex !== -1 ? segments[portfolioIndex + 1] : undefined;
   if (tabSegment === ROUTE_PROSPECT) return TAB_PROSPECT;
   if (tabSegment === ROUTE_SOLD) return TAB_SOLD;
   if (tabSegment === ROUTE_CALCULATOR) return TAB_CALCULATOR;
