@@ -1,4 +1,3 @@
-import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
@@ -11,40 +10,6 @@ import ApiClient from '@asset-lib/api-client';
 jest.spyOn(ApiClient, 'post').mockResolvedValue({
   data: {},
 } as unknown as ReturnType<typeof ApiClient.post>);
-
-// Mock translations
-jest.mock('react-i18next', () => ({
-  ...jest.requireActual('react-i18next'),
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'investment-calculator:dropHereToCompare': 'Drop here to compare',
-        'investment-calculator:emptyComparisonMessage': 'Select calculations from the list to compare',
-        'investment-calculator:removeFromComparison': 'Remove from comparison',
-        'investment-calculator:noCalculations': 'No calculations to compare',
-        'common:delete': 'Delete',
-        'common:remove': 'Remove',
-      };
-      return translations[key] || key;
-    },
-  }),
-  withTranslation: () => (Component: React.ComponentType) => {
-    const WrappedComponent = (props: object) => {
-      const translations: Record<string, string> = {
-        noCalculations: 'No calculations to compare',
-        'input-fields': 'Input Fields',
-        'purchase-costs': 'Purchase Costs',
-        'loan-details': 'Loan Details',
-        'income-expenses': 'Income & Expenses',
-        returns: 'Returns',
-      };
-      const t = (key: string) => translations[key] || key;
-      return <Component {...props} t={t} />;
-    };
-    WrappedComponent.displayName = `withTranslation(${Component.displayName || Component.name})`;
-    return WrappedComponent;
-  },
-}));
 
 // Import after mocking
 import ComparisonDropZone from './ComparisonDropZone';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Typography, IconButton, Chip, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
