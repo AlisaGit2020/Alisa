@@ -16,7 +16,7 @@ Run a 4-agent team that follows TDD principles: plan first, write tests, then im
     │
     ▼
 ┌─────────────────┐
-│  1. Setup       │ → Create worktree + branch feat/team-<slug>
+│  1. Setup       │ → Create branch feat/team-<slug>
 └─────────────────┘
     │
     ▼
@@ -45,25 +45,37 @@ Run a 4-agent team that follows TDD principles: plan first, write tests, then im
 └─────────────────┘
 ```
 
+## Autonomous Execution
+
+**This pipeline runs fully autonomously from start to PR creation.**
+
+- Execute ALL commands without asking for confirmation
+- Do NOT pause for user approval between steps
+- Do NOT ask "Should I proceed?" or similar questions
+- If a step fails, attempt to fix it automatically before asking for help
+- Only interrupt the flow if there's an unrecoverable error
+
+The user has authorized all operations by invoking `/team`. This includes:
+- Git operations (branch, commit, push)
+- File creation and modification
+- Running tests
+- Creating PRs via GitHub CLI
+
 ## Instructions
 
 When this skill is invoked with a task, execute these steps IN ORDER:
 
-### Step 1: Setup - Create Worktree and Branch
+### Step 1: Setup - Create Branch
 
 1. Generate a branch slug from the task (lowercase, hyphens, max 30 chars)
-2. Create a git worktree for isolation:
-   ```bash
-   # Create worktree directory
-   WORKTREE_DIR="../team-$(date +%s)"
-   git worktree add -b feat/team-<slug> "$WORKTREE_DIR"
-   cd "$WORKTREE_DIR"
-   ```
-3. If worktrees are not available, fall back to creating a branch:
+2. Ensure working directory is clean (stash or commit pending changes)
+3. Create a feature branch in the current directory:
    ```bash
    git checkout -b feat/team-<slug>
    ```
 4. Announce the branch name to the user
+
+**Important:** Work directly in the project folder - do NOT create a worktree or change directories.
 
 ### Step 2: Dispatch Architect Agent
 
@@ -178,13 +190,6 @@ IF iteration >= 3 AND verdict != "APPROVED":
 
 4. Report the PR URL to the user
 
-5. If using a worktree, inform the user:
-   ```
-   Worktree location: <path>
-   To return to main: cd <original-dir>
-   To clean up after merge: git worktree remove <path>
-   ```
-
 ---
 
 ## Agent System Prompts
@@ -193,6 +198,8 @@ IF iteration >= 3 AND verdict != "APPROVED":
 
 ```
 You are a senior software architect creating an implementation plan.
+
+AUTONOMOUS MODE: Execute all actions without asking for confirmation. Read files, explore code, do not ask "Should I proceed?" - just do it.
 
 FIRST: Read CLAUDE.md in the project root to understand:
 - Project structure and conventions
@@ -242,6 +249,8 @@ How data moves through the system
 ```
 You are a test engineering expert following TDD principles.
 
+AUTONOMOUS MODE: Execute all actions without asking for confirmation. Write files directly, run commands, do not ask "Should I proceed?" - just do it.
+
 FIRST: Read CLAUDE.md to understand testing requirements:
 - Backend: *.spec.ts (unit) + *.e2e-spec.ts (e2e)
 - Frontend: *.test.tsx colocated with components
@@ -278,6 +287,8 @@ The Developer will implement code to make them pass.
 
 ```
 You are an expert developer implementing features using TDD.
+
+AUTONOMOUS MODE: Execute all actions without asking for confirmation. Write files directly, run tests, do not ask "Should I proceed?" - just do it.
 
 FIRST: Read CLAUDE.md to understand required patterns:
 - Use AssetComponents (AssetButton, AssetTextField, etc.) NOT raw MUI
@@ -318,6 +329,8 @@ After implementing, verify tests pass:
 
 ```
 You are a senior code reviewer ensuring quality and compliance.
+
+AUTONOMOUS MODE: Execute all actions without asking for confirmation. Read files, analyze code, do not ask "Should I proceed?" - just do it.
 
 FIRST: Read CLAUDE.md to understand project standards.
 
@@ -406,14 +419,15 @@ Claude:
 
 PR created: https://github.com/org/repo/pull/123
 
-Worktree location: ../team-1234567890
-To return to main workspace: cd /original/path
+Branch: feat/team-property-notes
+To return to master: git checkout master
 ```
 
 ---
 
 ## Notes
 
+- **Fully autonomous** - runs from start to PR without user intervention
 - Each agent runs sequentially (Architect → Tester → Developer → Reviewer)
 - The Tester writes tests BEFORE the Developer implements (TDD)
 - Review loop runs maximum 3 times to prevent infinite loops
