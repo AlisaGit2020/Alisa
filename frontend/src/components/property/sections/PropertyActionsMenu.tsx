@@ -124,6 +124,8 @@ function PropertyActionsMenu({
     setLoading(true);
     try {
       const updatedProperty = await ApiClient.put<Partial<Property>>('real-estate/property', property.id, {
+        name: property.name,
+        size: property.size,
         status: PropertyStatus.OWN,
         purchaseDate: purchaseForm.purchaseDate ?? undefined,
         purchasePrice: purchaseForm.purchasePrice || undefined,
@@ -143,6 +145,8 @@ function PropertyActionsMenu({
     setLoading(true);
     try {
       const updatedProperty = await ApiClient.put<Partial<Property>>('real-estate/property', property.id, {
+        name: property.name,
+        size: property.size,
         status: PropertyStatus.SOLD,
         saleDate: saleForm.saleDate ?? undefined,
         salePrice: saleForm.salePrice || undefined,
