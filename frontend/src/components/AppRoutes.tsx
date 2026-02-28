@@ -17,6 +17,7 @@ import Expenses from "./accounting/expenses/Expenses.tsx";
 import Incomes from "./accounting/incomes/Incomes.tsx";
 import LandingPageRouter from "./landing/LandingPageRouter";
 import InvestmentCalculatorPublic from "./investment-calculator/InvestmentCalculatorPublic";
+import ProspectCompareView from "./investment-calculator/ProspectCompareView";
 import PublicLayout from "./layout/PublicLayout";
 import ProtectedLayout from "./layout/ProtectedLayout";
 import { FinanceHub, ReportsHub } from "./hub";
@@ -43,6 +44,7 @@ export default function AppRoutes() {
             <Route path="portfolio/own/add" element={<PropertyForm />} />
             <Route path="portfolio/own/edit/:idParam" element={<PropertyForm />} />
             <Route path="portfolio/own/:idParam" element={<PropertyView />} />
+            <Route path="portfolio/prospect" element={<ProspectCompareView />} />
             <Route path="portfolio/prospects" element={<Properties />} />
             <Route path="portfolio/prospects/add" element={<PropertyForm />} />
             <Route path="portfolio/prospects/edit/:idParam" element={<PropertyForm />} />
