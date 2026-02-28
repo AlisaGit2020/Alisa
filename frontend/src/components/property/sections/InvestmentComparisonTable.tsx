@@ -14,14 +14,12 @@ import {
   Paper,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { SavedInvestmentCalculation } from '../../investment-calculator/InvestmentCalculatorResults';
-import { Property } from '@asset-types';
+import {
+  SavedInvestmentCalculation,
+  CalculationWithProperty,
+  getCalculationDisplayName,
+} from '../../investment-calculator/InvestmentCalculatorResults';
 import AssetConfirmDialog from '../../asset/dialog/AssetConfirmDialog';
-
-// Extended calculation type that includes optional property info
-interface CalculationWithProperty extends SavedInvestmentCalculation {
-  property?: Property;
-}
 import { useToast } from '../../asset';
 import ApiClient from '@asset-lib/api-client';
 
@@ -199,13 +197,6 @@ function InvestmentComparisonTable({
     return t(`investment-calculator:${field}`);
   };
 
-  // Build display name: "Street - Calculation" when property linked, just calculation name otherwise
-  const getDisplayName = (calc: CalculationWithProperty) => {
-    const calcName = calc.name || `#${calc.id}`;
-    const streetName = calc.property?.address?.street;
-    return streetName ? `${streetName} - ${calcName}` : calcName;
-  };
-
   const formatValue = (field: string, value: number) => {
     if (PERCENT_FIELDS.includes(field)) {
       return formatPercent(value);
@@ -328,7 +319,7 @@ function InvestmentComparisonTable({
                   sx={{ minWidth: 150 }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
-                    <Typography fontWeight="bold">{getDisplayName(calc)}</Typography>
+                    <Typography fontWeight="bold">{getCalculationDisplayName(calc)}</Typography>
                     <IconButton
                       size="small"
                       onClick={() => handleDeleteClick(calc.id)}

@@ -1,14 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { Box, Typography, IconButton, Chip, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
-import { Property } from '@asset-types';
+import {
+  SavedInvestmentCalculation,
+  CalculationWithProperty,
+  getCalculationDisplayName,
+} from './InvestmentCalculatorResults';
 import InvestmentComparisonTable from '../property/sections/InvestmentComparisonTable';
-
-// Extended calculation type that includes optional property info
-interface CalculationWithProperty extends SavedInvestmentCalculation {
-  property?: Property;
-}
 
 interface ComparisonDropZoneProps {
   calculations: CalculationWithProperty[];
@@ -27,13 +25,6 @@ function ComparisonDropZone({
 
   const handleDelete = (id: number) => {
     onRemove(id);
-  };
-
-  // Build display name: "Street - Calculation" when property linked, just calculation name otherwise
-  const getDisplayName = (calc: CalculationWithProperty) => {
-    const calcName = calc.name || `#${calc.id}`;
-    const streetName = calc.property?.address?.street;
-    return streetName ? `${streetName} - ${calcName}` : calcName;
   };
 
   const safeCalculations = calculations || [];
@@ -79,12 +70,12 @@ function ComparisonDropZone({
             {safeCalculations.map((calc) => (
               <Chip
                 key={calc.id}
-                label={getDisplayName(calc)}
+                label={getCalculationDisplayName(calc)}
                 onDelete={() => handleDelete(calc.id)}
                 deleteIcon={
                   <IconButton
                     size="small"
-                    aria-label={`${t('investment-calculator:removeFromComparison')} ${getDisplayName(calc)}`}
+                    aria-label={`${t('investment-calculator:removeFromComparison')} ${getCalculationDisplayName(calc)}`}
                   >
                     <CloseIcon fontSize="small" />
                   </IconButton>
