@@ -6,6 +6,8 @@ import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
 import SellIcon from "@mui/icons-material/Sell";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
+import ListIcon from "@mui/icons-material/List";
 import { Property } from "@asset-types";
 import { PropertyStatus } from "@asset-types/common";
 import AssetCardList from "../asset/AssetCardList";
@@ -14,6 +16,7 @@ import { CardGridPageTemplate } from "../templates";
 import { PROPERTY_LIST_CHANGE_EVENT } from "../layout/PropertyBadge";
 import ProspectAddChoiceDialog from "./ProspectAddChoiceDialog";
 import InvestmentCalculatorProtected from "../investment-calculator/InvestmentCalculatorProtected";
+import ProspectCompareView from "../investment-calculator/ProspectCompareView";
 
 const TAB_OWN = 0;
 const TAB_PROSPECT = 1;
@@ -58,11 +61,15 @@ function getRouteFromTabIndex(tabIndex: number): string {
   return ROUTE_OWN;
 }
 
+const PROSPECT_VIEW_LIST = 0;
+const PROSPECT_VIEW_COMPARE = 1;
+
 function Properties({ t }: WithTranslation) {
   const location = useLocation();
   const navigate = useNavigate();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [prospectView, setProspectView] = useState(PROSPECT_VIEW_LIST);
 
   const tabIndex = getTabIndexFromRoute(location.pathname);
 
@@ -162,20 +169,45 @@ function Properties({ t }: WithTranslation) {
         </TabPanel>
 
         <TabPanel value={tabIndex} index={TAB_PROSPECT}>
-          <Grid container>
-            <Grid size={{ xs: 12, lg: 12 }}>
-              <AssetCardList<Property>
-                key={refreshKey}
-                t={t}
-                assetContext={propertyContext}
-                fields={[{ name: "name" }, { name: "size", format: "number" }]}
-                fetchOptions={buildFetchOptions(TAB_PROSPECT)}
-                onAfterDelete={handleAfterDelete}
-                routePrefix={ROUTE_PROSPECT}
-                onAddClick={handleProspectAddClick}
-              />
+          <Tabs
+            value={prospectView}
+            onChange={(_e, v) => setProspectView(v)}
+            sx={{ mb: 2 }}
+          >
+            <Tab
+              icon={<ListIcon />}
+              iconPosition="start"
+              label={t("properties")}
+              sx={{ gap: 1 }}
+            />
+            <Tab
+              icon={<CompareArrowsIcon />}
+              iconPosition="start"
+              label={t("compare")}
+              sx={{ gap: 1 }}
+            />
+          </Tabs>
+
+          {prospectView === PROSPECT_VIEW_LIST && (
+            <Grid container>
+              <Grid size={{ xs: 12, lg: 12 }}>
+                <AssetCardList<Property>
+                  key={refreshKey}
+                  t={t}
+                  assetContext={propertyContext}
+                  fields={[{ name: "name" }, { name: "size", format: "number" }]}
+                  fetchOptions={buildFetchOptions(TAB_PROSPECT)}
+                  onAfterDelete={handleAfterDelete}
+                  routePrefix={ROUTE_PROSPECT}
+                  onAddClick={handleProspectAddClick}
+                />
+              </Grid>
             </Grid>
-          </Grid>
+          )}
+
+          {prospectView === PROSPECT_VIEW_COMPARE && (
+            <ProspectCompareView />
+          )}
         </TabPanel>
 
         <TabPanel value={tabIndex} index={TAB_SOLD}>

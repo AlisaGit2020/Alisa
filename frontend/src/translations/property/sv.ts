@@ -22,6 +22,7 @@ const property = {
 
     add: 'Lägg till ny fastighet',
     properties: 'Fastigheter',
+    compare: 'Jämför',
     overviewTitle: 'Fastigheter',
     overviewDescription: 'Hantera dina hyresfastigheter härifrån. Lägg till nya fastigheter, redigera information och följ varje fastighets ekonomiska situation.',
     confirmDelete: 'Vill du ta bort fastigheten?',

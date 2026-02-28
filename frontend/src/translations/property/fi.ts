@@ -22,6 +22,7 @@ const property = {
 
     add: 'Lisää uusi asunto',
     properties: 'Asunnot',
+    compare: 'Vertaile',
     overviewTitle: 'Asunnot',
     overviewDescription: 'Hallinnoi vuokra-asuntojasi täältä. Lisää uusia asuntoja, muokkaa tietoja ja seuraa jokaisen asunnon taloudellista tilannetta.',
     confirmDelete: 'Poistetaanko asunto?',
