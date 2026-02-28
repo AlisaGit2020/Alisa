@@ -85,6 +85,22 @@ const investmentCalculator = {
   confirmDeleteSelected_other: 'Are you sure you want to delete {{count}} calculations?',
   deleteAriaLabel: 'Delete {{count}} selected calculation',
   deleteAriaLabel_other: 'Delete {{count}} selected calculations',
+
+  // Prospect Compare View
+  prospectCompare: 'Compare Prospects',
+  calculations: 'Calculations',
+  comparison: 'Comparison',
+  loading: 'Loading...',
+  errorLoading: 'Error loading calculations',
+  noCalculationsMessage: 'Create calculations to compare investment opportunities',
+  unlinkedCalculations: 'Unlinked',
+  maxCalculationsWarning: 'Maximum 5 calculations can be compared at once',
+  duplicateWarning: 'This calculation is already in the comparison',
+  dropHereToCompare: 'Drop here to compare',
+  emptyComparisonMessage: 'Select calculations from the list to compare',
+  removeFromComparison: 'Remove from comparison',
+  unlinkedProperty: 'No property linked',
+  rentalYield: 'Rental yield',
 }
 
 export default investmentCalculator

@@ -142,6 +142,7 @@ const en = {
     },
 
     close: "Close",
+    retry: "Retry",
     readMore: "Read more",
     showLess: "Show less",
     showMore: "Show more",

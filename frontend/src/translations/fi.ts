@@ -142,6 +142,7 @@ const fi = {
     },
 
     close: "Sulje",
+    retry: "Yrita uudelleen",
     readMore: "Lue lisää",
     showLess: "Näytä vähemmän",
     showMore: "Näytä lisää",

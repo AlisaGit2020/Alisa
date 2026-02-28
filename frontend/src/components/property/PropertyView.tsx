@@ -206,6 +206,7 @@ function PropertyView({ t }: WithTranslation) {
       {/* Investment Calculator - only for PROSPECT */}
       {property.status === PropertyStatus.PROSPECT && (
         <ProspectInvestmentSection property={property} />
+
       )}
 
       {/* Statistics - for SOLD */}

@@ -142,6 +142,7 @@ const sv = {
     },
 
     close: "Stäng",
+    retry: "Forsok igen",
     readMore: "Läs mer",
     showLess: "Visa mindre",
     showMore: "Visa mer",

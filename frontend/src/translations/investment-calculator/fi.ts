@@ -85,6 +85,22 @@ const investmentCalculator = {
   confirmDeleteSelected_other: 'Haluatko varmasti poistaa {{count}} laskelmaa?',
   deleteAriaLabel: 'Poista {{count}} valittu laskelma',
   deleteAriaLabel_other: 'Poista {{count}} valittua laskelmaa',
+
+  // Prospect Compare View
+  prospectCompare: 'Vertaa kohteita',
+  calculations: 'Laskelmat',
+  comparison: 'Vertailu',
+  loading: 'Ladataan...',
+  errorLoading: 'Laskelmien lataus epaonnistui',
+  noCalculationsMessage: 'Luo laskelmia vertaillaksesi sijoitusmahdollisuuksia',
+  unlinkedCalculations: 'Ilman kohdetta',
+  maxCalculationsWarning: 'Enintaan 5 laskelmaa voidaan vertailla kerralla',
+  duplicateWarning: 'Tama laskelma on jo vertailussa',
+  dropHereToCompare: 'Pudota tahan vertaillaksesi',
+  emptyComparisonMessage: 'Valitse laskelmia listasta vertailtavaksi',
+  removeFromComparison: 'Poista vertailusta',
+  unlinkedProperty: 'Ei liitetyä kohdetta',
+  rentalYield: 'Vuokratuotto',
 }
 
 export default investmentCalculator

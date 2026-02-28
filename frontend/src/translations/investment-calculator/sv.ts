@@ -85,6 +85,22 @@ const investmentCalculator = {
   confirmDeleteSelected_other: 'Vill du verkligen ta bort {{count}} beräkningar?',
   deleteAriaLabel: 'Ta bort {{count}} vald beräkning',
   deleteAriaLabel_other: 'Ta bort {{count}} valda beräkningar',
+
+  // Prospect Compare View
+  prospectCompare: 'Jamfor prospekt',
+  calculations: 'Berakningar',
+  comparison: 'Jamforelse',
+  loading: 'Laddar...',
+  errorLoading: 'Fel vid laddning av berakningar',
+  noCalculationsMessage: 'Skapa berakningar for att jamfora investeringsmojligheter',
+  unlinkedCalculations: 'Olankade',
+  maxCalculationsWarning: 'Maximalt 5 berakningar kan jamforas samtidigt',
+  duplicateWarning: 'Denna berakning finns redan i jamforelsen',
+  dropHereToCompare: 'Slapp har for att jamfora',
+  emptyComparisonMessage: 'Valj berakningar fran listan for att jamfora',
+  removeFromComparison: 'Ta bort fran jamforelse',
+  unlinkedProperty: 'Ingen fastighet lankad',
+  rentalYield: 'Hyresavkastning',
 }
 
 export default investmentCalculator
