@@ -38,7 +38,7 @@ function ProspectCompareView() {
     setError(false);
     try {
       const data = await ApiClient.search<CalculationWithProperty>('real-estate/investment', {
-        relations: { property: true },
+        relations: { property: { address: true } },
         order: { name: 'ASC' },
       });
       setCalculations(data);

@@ -6,7 +6,6 @@ import {
   ListItemText,
   Avatar,
   Typography,
-  Box,
 } from '@mui/material';
 import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
 import { Property } from '@asset-types';
@@ -29,8 +28,13 @@ function CalculationListItem({
 }: CalculationListItemProps) {
   const { t } = useTranslation(['investment-calculator', 'property']);
 
-  const propertyName = property?.name || t('investment-calculator:unlinkedProperty');
   const photoUrl = getPhotoUrl(property?.photo);
+  const calcName = calculation.name || `#${calculation.id}`;
+
+  // Build display name: "Street - Calculation" when property linked, just calculation name otherwise
+  const streetName = property?.address?.street;
+  const displayName = streetName ? `${streetName} - ${calcName}` : calcName;
+  const avatarAlt = streetName || t('investment-calculator:unlinkedProperty');
 
   return (
     <ListItem
@@ -49,20 +53,15 @@ function CalculationListItem({
       }}
     >
       <ListItemAvatar>
-        <Avatar src={photoUrl} alt={propertyName}>
-          {propertyName.charAt(0).toUpperCase()}
+        <Avatar src={photoUrl} alt={avatarAlt}>
+          {avatarAlt.charAt(0).toUpperCase()}
         </Avatar>
       </ListItemAvatar>
       <ListItemText
         primary={
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="body2" color="text.secondary">
-              {propertyName}
-            </Typography>
-            <Typography variant="body1" fontWeight="medium">
-              {calculation.name || `#${calculation.id}`}
-            </Typography>
-          </Box>
+          <Typography variant="body1" fontWeight="medium">
+            {displayName}
+          </Typography>
         }
         secondary={
           <Typography variant="body2" color="text.secondary">
