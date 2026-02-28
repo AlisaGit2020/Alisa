@@ -82,9 +82,18 @@ export class EtuoviImportService {
 
   constructor(private readonly propertyService: PropertyService) {}
 
-  async createProspectProperty(user: JWTUser, url: string): Promise<Property> {
+  async createProspectProperty(
+    user: JWTUser,
+    url: string,
+    monthlyRent?: number,
+  ): Promise<Property> {
     const etuoviData = await this.fetchPropertyData(url);
     const propertyInput = this.createPropertyInput(etuoviData);
+
+    // Add monthly rent if provided by user
+    if (monthlyRent !== undefined) {
+      propertyInput.monthlyRent = monthlyRent;
+    }
 
     // Check if user already has a property with the same Etuovi ID
     const existingProperty = await this.propertyService.findByExternalSource(

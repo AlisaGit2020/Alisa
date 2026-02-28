@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsUrl, Matches } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsUrl, Matches } from 'class-validator';
 
 export class EtuoviFetchInputDto {
   @IsNotEmpty()
@@ -7,4 +7,8 @@ export class EtuoviFetchInputDto {
     message: 'URL must be a valid etuovi.com property listing URL',
   })
   url: string;
+
+  @IsOptional()
+  @IsNumber()
+  monthlyRent?: number;
 }

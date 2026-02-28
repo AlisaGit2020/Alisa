@@ -435,5 +435,36 @@ describe('EtuoviImportController (e2e)', () => {
       expect(secondResponse.body.id).toBe(createdPropertyId);
       expect(secondResponse.body.externalSourceId).toBe(etuoviId);
     });
+
+    it('sets monthlyRent when provided', async () => {
+      nock('https://www.etuovi.com')
+        .get('/kohde/80481691')
+        .reply(200, mockHtml);
+
+      const response = await request(server)
+        .post('/import/etuovi/create-prospect')
+        .set('Authorization', getBearerToken(accessToken))
+        .send({
+          url: 'https://www.etuovi.com/kohde/80481691',
+          monthlyRent: 850,
+        })
+        .expect(201);
+
+      expect(response.body.monthlyRent).toBe(850);
+    });
+
+    it('does not set monthlyRent when not provided', async () => {
+      nock('https://www.etuovi.com')
+        .get('/kohde/80481692')
+        .reply(200, mockHtml);
+
+      const response = await request(server)
+        .post('/import/etuovi/create-prospect')
+        .set('Authorization', getBearerToken(accessToken))
+        .send({ url: 'https://www.etuovi.com/kohde/80481692' })
+        .expect(201);
+
+      expect(response.body.monthlyRent).toBeNull();
+    });
   });
 });

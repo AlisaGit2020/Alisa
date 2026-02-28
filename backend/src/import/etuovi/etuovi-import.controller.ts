@@ -36,6 +36,6 @@ export class EtuoviImportController {
     @User() user: JWTUser,
     @Body() input: EtuoviFetchInputDto,
   ): Promise<Property> {
-    return this.service.createProspectProperty(user, input.url);
+    return this.service.createProspectProperty(user, input.url, input.monthlyRent);
   }
 }

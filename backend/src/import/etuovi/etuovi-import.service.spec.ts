@@ -872,5 +872,56 @@ describe('EtuoviImportService', () => {
       expect(mockPropertyService.update).not.toHaveBeenCalled();
       expect(result).toBe(newProperty);
     });
+
+    it('sets monthlyRent when provided', async () => {
+      const mockProperty = { id: 1, name: 'Test Property' };
+      mockPropertyService.add.mockResolvedValue(mockProperty);
+      mockPropertyService.findByExternalSource.mockResolvedValue(null);
+
+      jest.spyOn(service, 'fetchPropertyData').mockResolvedValue({
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+      });
+
+      await service.createProspectProperty(
+        mockUser,
+        'https://www.etuovi.com/kohde/12345',
+        850,
+      );
+
+      expect(mockPropertyService.add).toHaveBeenCalledWith(
+        mockUser,
+        expect.objectContaining({
+          monthlyRent: 850,
+        }),
+      );
+    });
+
+    it('does not set monthlyRent when not provided', async () => {
+      const mockProperty = { id: 1, name: 'Test Property' };
+      mockPropertyService.add.mockResolvedValue(mockProperty);
+      mockPropertyService.findByExternalSource.mockResolvedValue(null);
+
+      jest.spyOn(service, 'fetchPropertyData').mockResolvedValue({
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+      });
+
+      await service.createProspectProperty(
+        mockUser,
+        'https://www.etuovi.com/kohde/12345',
+      );
+
+      expect(mockPropertyService.add).toHaveBeenCalledWith(
+        mockUser,
+        expect.not.objectContaining({
+          monthlyRent: expect.anything(),
+        }),
+      );
+    });
   });
 });

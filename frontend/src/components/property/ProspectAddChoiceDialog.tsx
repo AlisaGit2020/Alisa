@@ -17,6 +17,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import EditIcon from "@mui/icons-material/Edit";
 import { useTranslation } from "react-i18next";
 import AssetTextField from "../asset/form/AssetTextField";
+import AssetNumberField from "../asset/form/AssetNumberField";
 import AssetButton from "../asset/form/AssetButton";
 import { useToast } from "../asset/toast";
 import ApiClient from "@asset-lib/api-client";
@@ -39,6 +40,7 @@ export default function ProspectAddChoiceDialog({
   const { t } = useTranslation("property");
   const { showToast } = useToast();
   const [etuoviUrl, setEtuoviUrl] = useState("");
+  const [monthlyRent, setMonthlyRent] = useState<number | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [validationError, setValidationError] = useState<string | undefined>(undefined);
 
@@ -62,9 +64,14 @@ export default function ProspectAddChoiceDialog({
 
     setLoading(true);
     try {
-      await ApiClient.post("import/etuovi/create-prospect", { url: etuoviUrl });
+      const payload: { url: string; monthlyRent?: number } = { url: etuoviUrl };
+      if (monthlyRent !== undefined && monthlyRent > 0) {
+        payload.monthlyRent = monthlyRent;
+      }
+      await ApiClient.post("import/etuovi/create-prospect", payload);
       showToast({ message: t("importSuccess"), severity: "success" });
       setEtuoviUrl("");
+      setMonthlyRent(undefined);
       onSuccess();
     } catch {
       showToast({ message: t("importError"), severity: "error" });
@@ -75,6 +82,7 @@ export default function ProspectAddChoiceDialog({
 
   const handleClose = () => {
     setEtuoviUrl("");
+    setMonthlyRent(undefined);
     setValidationError(undefined);
     onClose();
   };
@@ -119,6 +127,17 @@ export default function ProspectAddChoiceDialog({
                   error={!!validationError}
                   helperText={validationError}
                   disabled={loading}
+                  fullWidth
+                />
+                <AssetNumberField
+                  label={t("expectedRent")}
+                  value={monthlyRent ?? ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setMonthlyRent(value ? Number(value) : undefined);
+                  }}
+                  disabled={loading}
+                  adornment="€"
                   fullWidth
                 />
                 <Box>

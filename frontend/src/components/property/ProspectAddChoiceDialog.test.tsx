@@ -173,4 +173,67 @@ describe("ProspectAddChoiceDialog", () => {
     expect(screen.getByText(/valid etuovi url/i)).toBeInTheDocument();
     expect(mockOnSuccess).not.toHaveBeenCalled();
   });
+
+  it("shows rent estimation input field below Etuovi URL input", () => {
+    renderDialog();
+    expect(screen.getByLabelText(/expected rent/i)).toBeInTheDocument();
+  });
+
+  it("sends rent estimation with import request", async () => {
+    let capturedBody: { url: string; monthlyRent?: number } | null = null;
+    server.use(
+      http.post(`${API_BASE}/api/import/etuovi/create-prospect`, async ({ request }) => {
+        capturedBody = await request.json() as { url: string; monthlyRent?: number };
+        return HttpResponse.json({ id: 1, name: "Test Property" });
+      })
+    );
+
+    const user = userEvent.setup();
+    renderDialog();
+
+    const urlInput = screen.getByPlaceholderText(/paste etuovi/i);
+    await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
+
+    const rentInput = screen.getByLabelText(/expected rent/i);
+    await user.type(rentInput, "850");
+
+    const importButton = screen.getByRole("button", { name: /^import$/i });
+    await user.click(importButton);
+
+    await waitFor(() => {
+      expect(mockOnSuccess).toHaveBeenCalled();
+    });
+
+    expect(capturedBody).toEqual({
+      url: "https://www.etuovi.com/kohde/12345",
+      monthlyRent: 850,
+    });
+  });
+
+  it("sends import request without rent when rent field is empty", async () => {
+    let capturedBody: { url: string; monthlyRent?: number } | null = null;
+    server.use(
+      http.post(`${API_BASE}/api/import/etuovi/create-prospect`, async ({ request }) => {
+        capturedBody = await request.json() as { url: string; monthlyRent?: number };
+        return HttpResponse.json({ id: 1, name: "Test Property" });
+      })
+    );
+
+    const user = userEvent.setup();
+    renderDialog();
+
+    const urlInput = screen.getByPlaceholderText(/paste etuovi/i);
+    await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
+
+    const importButton = screen.getByRole("button", { name: /^import$/i });
+    await user.click(importButton);
+
+    await waitFor(() => {
+      expect(mockOnSuccess).toHaveBeenCalled();
+    });
+
+    expect(capturedBody).toEqual({
+      url: "https://www.etuovi.com/kohde/12345",
+    });
+  });
 });
