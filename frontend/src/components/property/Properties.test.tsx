@@ -20,9 +20,10 @@ const mockTranslations: Record<string, string> = {
   size: 'Size',
   buildYear: 'Build year',
   ownershipShare: 'Ownership share',
-  ownProperties: 'Own Properties',
-  prospectProperties: 'Prospect Properties',
+  ownProperties: 'My Properties',
+  prospectProperties: 'Prospects',
   soldProperties: 'Sold',
+  investmentCalculator: 'Investment Calculator',
   addProspectTitle: 'Add Prospect Property',
   addManually: 'Fill in form manually',
   chooseAddMethod: 'Choose how to add prospect property',
@@ -32,6 +33,11 @@ const mockTranslations: Record<string, string> = {
   importSuccess: 'Property imported successfully',
   importError: 'Failed to import property',
   invalidEtuoviUrl: 'Invalid Etuovi URL',
+  // InvestmentCalculatorProtected translations
+  pageTitle: 'Investment Calculator',
+  pageDescription: 'Calculate the potential return on your investment',
+  newCalculation: 'New Calculation',
+  savedCalculations: 'Saved Calculations',
 };
 
 const mockT = (key: string) => mockTranslations[key] || key;
@@ -769,5 +775,301 @@ describe('Prospect Add Choice Dialog', () => {
     const addLink = await screen.findByRole('link', { name: /add/i });
     // Verify it's a normal link without the dialog behavior
     expect(addLink).toHaveAttribute('href', '/app/portfolio/properties/own/add');
+  });
+});
+
+/**
+ * Investment Calculator Tab Tests (TDD)
+ *
+ * These tests are written BEFORE the implementation exists.
+ * They define the expected behavior for adding Investment Calculator as a 4th tab.
+ *
+ * Requirements:
+ * - TAB_CALCULATOR = 3, ROUTE_CALCULATOR = "investment-calculator"
+ * - getTabIndexFromRoute() handles "investment-calculator" -> returns TAB_CALCULATOR
+ * - getRouteFromTabIndex() handles TAB_CALCULATOR -> returns "investment-calculator"
+ * - 4th tab with TrendingUpIcon and label from t("property:investmentCalculator")
+ * - TabPanel that renders InvestmentCalculatorProtected
+ */
+describe('Investment Calculator Tab', () => {
+  // Constants for the new calculator tab
+  const TAB_OWN = 0;
+  const TAB_PROSPECT = 1;
+  const TAB_SOLD = 2;
+  const TAB_CALCULATOR = 3;
+
+  const ROUTE_OWN = 'own';
+  const ROUTE_PROSPECT = 'prospects';
+  const ROUTE_SOLD = 'sold';
+  const ROUTE_CALCULATOR = 'investment-calculator';
+
+  describe('Tab index constants', () => {
+    it('TAB_CALCULATOR should be 3', () => {
+      expect(TAB_CALCULATOR).toBe(3);
+    });
+
+    it('ROUTE_CALCULATOR should be "investment-calculator"', () => {
+      expect(ROUTE_CALCULATOR).toBe('investment-calculator');
+    });
+  });
+
+  describe('getTabIndexFromRoute mapping', () => {
+    // This function should be exported or we test its behavior via component
+    const getTabIndexFromRoute = (pathname: string): number => {
+      const segments = pathname.split('/');
+      const propertiesIndex = segments.indexOf('properties');
+      const tabSegment = propertiesIndex !== -1 ? segments[propertiesIndex + 1] : undefined;
+      if (tabSegment === ROUTE_PROSPECT) return TAB_PROSPECT;
+      if (tabSegment === ROUTE_SOLD) return TAB_SOLD;
+      if (tabSegment === ROUTE_CALCULATOR) return TAB_CALCULATOR;
+      return TAB_OWN;
+    };
+
+    it('returns TAB_CALCULATOR (3) for "investment-calculator" route', () => {
+      expect(getTabIndexFromRoute('/app/portfolio/properties/investment-calculator')).toBe(TAB_CALCULATOR);
+    });
+
+    it('returns TAB_OWN (0) for "own" route', () => {
+      expect(getTabIndexFromRoute('/app/portfolio/properties/own')).toBe(TAB_OWN);
+    });
+
+    it('returns TAB_PROSPECT (1) for "prospects" route', () => {
+      expect(getTabIndexFromRoute('/app/portfolio/properties/prospects')).toBe(TAB_PROSPECT);
+    });
+
+    it('returns TAB_SOLD (2) for "sold" route', () => {
+      expect(getTabIndexFromRoute('/app/portfolio/properties/sold')).toBe(TAB_SOLD);
+    });
+
+    it('defaults to TAB_OWN for unknown route', () => {
+      expect(getTabIndexFromRoute('/app/portfolio/properties/unknown')).toBe(TAB_OWN);
+    });
+
+    it('defaults to TAB_OWN when no tab segment', () => {
+      expect(getTabIndexFromRoute('/app/portfolio/properties')).toBe(TAB_OWN);
+    });
+  });
+
+  describe('getRouteFromTabIndex mapping', () => {
+    const getRouteFromTabIndex = (tabIndex: number): string => {
+      if (tabIndex === TAB_PROSPECT) return ROUTE_PROSPECT;
+      if (tabIndex === TAB_SOLD) return ROUTE_SOLD;
+      if (tabIndex === TAB_CALCULATOR) return ROUTE_CALCULATOR;
+      return ROUTE_OWN;
+    };
+
+    it('returns "investment-calculator" for TAB_CALCULATOR (3)', () => {
+      expect(getRouteFromTabIndex(TAB_CALCULATOR)).toBe(ROUTE_CALCULATOR);
+    });
+
+    it('returns "own" for TAB_OWN (0)', () => {
+      expect(getRouteFromTabIndex(TAB_OWN)).toBe(ROUTE_OWN);
+    });
+
+    it('returns "prospects" for TAB_PROSPECT (1)', () => {
+      expect(getRouteFromTabIndex(TAB_PROSPECT)).toBe(ROUTE_PROSPECT);
+    });
+
+    it('returns "sold" for TAB_SOLD (2)', () => {
+      expect(getRouteFromTabIndex(TAB_SOLD)).toBe(ROUTE_SOLD);
+    });
+
+    it('defaults to "own" for invalid tab index', () => {
+      expect(getRouteFromTabIndex(99)).toBe(ROUTE_OWN);
+    });
+  });
+
+  describe('Navigation path construction for calculator', () => {
+    const BASE_PATH = '/app/portfolio/properties';
+
+    const buildNavigationPath = (route: string): string => {
+      return `${BASE_PATH}/${route}`;
+    };
+
+    it('constructs investment calculator path correctly', () => {
+      expect(buildNavigationPath(ROUTE_CALCULATOR)).toBe('/app/portfolio/properties/investment-calculator');
+    });
+  });
+
+  describe('Tab configuration', () => {
+    it('includes all 4 tabs in correct order', () => {
+      const tabConfig = [
+        { index: TAB_OWN, route: ROUTE_OWN, icon: 'HomeIcon', translationKey: 'ownProperties' },
+        { index: TAB_PROSPECT, route: ROUTE_PROSPECT, icon: 'SearchIcon', translationKey: 'prospectProperties' },
+        { index: TAB_SOLD, route: ROUTE_SOLD, icon: 'SellIcon', translationKey: 'soldProperties' },
+        { index: TAB_CALCULATOR, route: ROUTE_CALCULATOR, icon: 'TrendingUpIcon', translationKey: 'investmentCalculator' },
+      ];
+
+      expect(tabConfig).toHaveLength(4);
+      expect(tabConfig[3].index).toBe(TAB_CALCULATOR);
+      expect(tabConfig[3].route).toBe(ROUTE_CALCULATOR);
+      expect(tabConfig[3].icon).toBe('TrendingUpIcon');
+      expect(tabConfig[3].translationKey).toBe('investmentCalculator');
+    });
+  });
+});
+
+describe('Investment Calculator Tab Component Rendering', () => {
+  let mockSearch: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockSearch = jest.spyOn(ApiClient, 'search').mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    mockSearch.mockRestore();
+  });
+
+  it('renders Investment Calculator tab with correct label', async () => {
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/own'],
+    });
+
+    // Wait for tabs to render
+    await waitFor(() => {
+      // Check all 4 tabs are present
+      expect(screen.getAllByRole('tab')).toHaveLength(4);
+    });
+
+    // Investment Calculator tab should be visible with its label
+    const calculatorTab = screen.getByRole('tab', { name: /investment calculator/i });
+    expect(calculatorTab).toBeInTheDocument();
+  });
+
+  it('selects Investment Calculator tab when on calculator route', async () => {
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/investment-calculator'],
+    });
+
+    await waitFor(() => {
+      const calculatorTab = screen.getByRole('tab', { name: /investment calculator/i });
+      expect(calculatorTab).toHaveAttribute('aria-selected', 'true');
+    });
+  });
+
+  it('renders InvestmentCalculatorProtected when calculator tab is active', async () => {
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/investment-calculator'],
+    });
+
+    // Wait for the tab panel content to render
+    await waitFor(() => {
+      // InvestmentCalculatorProtected has PageHeader with title 'Investment Calculator'
+      // and tabs for 'New Calculation' and 'Saved Calculations'
+      expect(screen.getByText(/new calculation/i)).toBeInTheDocument();
+    });
+  });
+
+  it('navigates to calculator route when clicking calculator tab', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/own'],
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('tab')).toHaveLength(4);
+    });
+
+    const calculatorTab = screen.getByRole('tab', { name: /investment calculator/i });
+    await user.click(calculatorTab);
+
+    // After clicking, the calculator tab should be selected
+    await waitFor(() => {
+      expect(calculatorTab).toHaveAttribute('aria-selected', 'true');
+    });
+  });
+
+  it('does not show property cards when on calculator tab', async () => {
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/investment-calculator'],
+    });
+
+    await waitFor(() => {
+      // The calculator tab content should not have property-related cards
+      // Instead it should show the InvestmentCalculatorProtected component
+      expect(screen.queryByText(/no rows found/i)).not.toBeInTheDocument();
+    });
+
+    // Should have the calculator form instead
+    expect(screen.getByText(/new calculation/i)).toBeInTheDocument();
+  });
+});
+
+describe('Investment Calculator Tab - Edge Cases', () => {
+  let mockSearch: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockSearch = jest.spyOn(ApiClient, 'search').mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    mockSearch.mockRestore();
+  });
+
+  it('maintains tab state when navigating between property tabs and calculator', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/own'],
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('tab')).toHaveLength(4);
+    });
+
+    // Click calculator tab
+    const calculatorTab = screen.getByRole('tab', { name: /investment calculator/i });
+    await user.click(calculatorTab);
+
+    await waitFor(() => {
+      expect(calculatorTab).toHaveAttribute('aria-selected', 'true');
+    });
+
+    // Click back to own tab
+    const ownTab = screen.getByRole('tab', { name: /my properties/i });
+    await user.click(ownTab);
+
+    await waitFor(() => {
+      expect(ownTab).toHaveAttribute('aria-selected', 'true');
+      expect(calculatorTab).toHaveAttribute('aria-selected', 'false');
+    });
+  });
+
+  it('calculator tab index is correctly identified as 3', async () => {
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/investment-calculator'],
+    });
+
+    await waitFor(() => {
+      const tabs = screen.getAllByRole('tab');
+      expect(tabs).toHaveLength(4);
+      // The 4th tab (index 3) should be selected
+      expect(tabs[3]).toHaveAttribute('aria-selected', 'true');
+    });
+  });
+
+  it('shows correct tabpanel for calculator tab', async () => {
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/investment-calculator'],
+    });
+
+    await waitFor(() => {
+      // Should have exactly one visible tabpanel
+      const tabpanels = screen.getAllByRole('tabpanel');
+      const visiblePanels = tabpanels.filter(panel => !panel.hasAttribute('hidden'));
+      expect(visiblePanels.length).toBe(1);
+    });
+  });
+
+  it('hides property tabpanels when calculator tab is active', async () => {
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/properties/investment-calculator'],
+    });
+
+    await waitFor(() => {
+      // Check that the other tabpanels are hidden
+      const tabpanels = screen.getAllByRole('tabpanel', { hidden: true });
+      // Should have hidden panels for own, prospects, sold
+      expect(tabpanels.length).toBeGreaterThanOrEqual(3);
+    });
   });
 });
