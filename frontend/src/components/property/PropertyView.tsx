@@ -151,6 +151,7 @@ function PropertyView({ t }: WithTranslation) {
             onEdit={handleEdit}
             onOpenAllocationRules={() => setRulesModalOpen(true)}
             onToggleAdvancedReports={() => setShowAdvancedReports((prev) => !prev)}
+            onPropertyUpdated={(updated) => setProperty(updated)}
           />
         </Stack>
       </Box>

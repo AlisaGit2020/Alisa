@@ -106,6 +106,16 @@ const property = {
     importError: 'Kunde inte importera fastighet',
     invalidEtuoviUrl: 'Ange en giltig Etuovi-URL',
 
+    // Status change dialogs
+    markAsPurchased: 'Lägenhet köpt',
+    markAsSold: 'Lägenhet såld',
+    purchaseDialogTitle: 'Markera som köpt',
+    saleDialogTitle: 'Markera som såld',
+    confirmPurchase: 'Bekräfta köp',
+    confirmSale: 'Bekräfta försäljning',
+    congratulationsPurchase: 'Grattis till din nya fastighet!',
+    congratulationsSale: 'Grattis till försäljningen!',
+
     // Report section
     report: {
         currentYearIncome: 'Årets intäkter',

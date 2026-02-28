@@ -106,6 +106,16 @@ const property = {
     importError: 'Failed to import property',
     invalidEtuoviUrl: 'Please enter a valid Etuovi URL',
 
+    // Status change dialogs
+    markAsPurchased: 'Apartment purchased',
+    markAsSold: 'Apartment sold',
+    purchaseDialogTitle: 'Mark as Purchased',
+    saleDialogTitle: 'Mark as Sold',
+    confirmPurchase: 'Confirm Purchase',
+    confirmSale: 'Confirm Sale',
+    congratulationsPurchase: 'Congratulations on your new property!',
+    congratulationsSale: 'Congratulations on the sale!',
+
     // Report section
     report: {
         currentYearIncome: 'Current Year Income',

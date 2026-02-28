@@ -106,6 +106,16 @@ const property = {
     importError: 'Kohteen tuonti epäonnistui',
     invalidEtuoviUrl: 'Anna kelvollinen Etuovi-URL',
 
+    // Status change dialogs
+    markAsPurchased: 'Asunto ostettu',
+    markAsSold: 'Asunto myyty',
+    purchaseDialogTitle: 'Merkitse ostetuksi',
+    saleDialogTitle: 'Merkitse myydyksi',
+    confirmPurchase: 'Vahvista osto',
+    confirmSale: 'Vahvista myynti',
+    congratulationsPurchase: 'Onneksi olkoon uudesta asunnostasi!',
+    congratulationsSale: 'Onneksi olkoon kaupasta!',
+
     // Report section
     report: {
         currentYearIncome: 'Kuluvan vuoden tulot',
