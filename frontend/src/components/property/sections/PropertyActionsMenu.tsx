@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Box, IconButton, Menu, MenuItem, ListItemIcon, Stack, Alert } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -54,6 +55,7 @@ function PropertyActionsMenu({
   onPropertyUpdated,
 }: PropertyActionsMenuProps) {
   const { t } = useTranslation('property');
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -344,11 +346,17 @@ function PropertyActionsMenu({
       <AssetDialog
         open={showPurchaseCongrats}
         title={t('markAsPurchased')}
-        onClose={() => setShowPurchaseCongrats(false)}
+        onClose={() => {
+          setShowPurchaseCongrats(false);
+          navigate('/app/portfolio/own');
+        }}
         actions={
           <AssetButton
             label={t('common:close')}
-            onClick={() => setShowPurchaseCongrats(false)}
+            onClick={() => {
+              setShowPurchaseCongrats(false);
+              navigate('/app/portfolio/own');
+            }}
           />
         }
       >
@@ -361,11 +369,17 @@ function PropertyActionsMenu({
       <AssetDialog
         open={showSaleCongrats}
         title={t('markAsSold')}
-        onClose={() => setShowSaleCongrats(false)}
+        onClose={() => {
+          setShowSaleCongrats(false);
+          navigate('/app/portfolio/sold');
+        }}
         actions={
           <AssetButton
             label={t('common:close')}
-            onClick={() => setShowSaleCongrats(false)}
+            onClick={() => {
+              setShowSaleCongrats(false);
+              navigate('/app/portfolio/sold');
+            }}
           />
         }
       >
