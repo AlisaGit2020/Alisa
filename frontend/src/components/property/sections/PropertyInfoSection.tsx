@@ -100,28 +100,28 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
               <DetailRow
                 icon={<HomeWorkIcon fontSize="small" />}
                 label={t('maintenanceFee')}
-                value={`${formatCurrency(property.maintenanceFee)}${t('perMonth')}`}
+                value={`${formatCurrency(property.maintenanceFee, 2)}${t('perMonth')}`}
               />
             )}
             {property.waterCharge !== undefined && property.waterCharge !== null && (
               <DetailRow
                 icon={<WaterDropIcon fontSize="small" />}
                 label={t('waterCharge')}
-                value={`${formatCurrency(property.waterCharge)}${t('perMonth')}`}
+                value={`${formatCurrency(property.waterCharge, 2)}${t('perMonth')}`}
               />
             )}
             {property.financialCharge !== undefined && property.financialCharge !== null && (
               <DetailRow
                 icon={<AccountBalanceIcon fontSize="small" />}
                 label={t('financialCharge')}
-                value={`${formatCurrency(property.financialCharge)}${t('perMonth')}`}
+                value={`${formatCurrency(property.financialCharge, 2)}${t('perMonth')}`}
               />
             )}
             {totalMonthlyCosts > 0 && (
               <DetailRow
                 icon={<CalculateIcon fontSize="small" />}
                 label={t('totalMonthlyCosts')}
-                value={`${formatCurrency(totalMonthlyCosts)}${t('perMonth')}`}
+                value={`${formatCurrency(totalMonthlyCosts, 2)}${t('perMonth')}`}
               />
             )}
           </PropertyInfoCard>

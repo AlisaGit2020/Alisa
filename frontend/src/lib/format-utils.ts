@@ -1,14 +1,18 @@
 /**
  * Format a number as currency (EUR) using Finnish locale formatting.
  * Returns '-' for undefined/null values.
+ * @param decimals - Number of decimal places (default: 0)
  */
-export const formatCurrency = (value: number | undefined | null): string => {
+export const formatCurrency = (
+  value: number | undefined | null,
+  decimals: number = 0
+): string => {
   if (value === undefined || value === null) return '-';
   return new Intl.NumberFormat('fi-FI', {
     style: 'currency',
     currency: 'EUR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   }).format(value);
 };
 
