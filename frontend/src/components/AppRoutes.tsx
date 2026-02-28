@@ -17,7 +17,6 @@ import Expenses from "./accounting/expenses/Expenses.tsx";
 import Incomes from "./accounting/incomes/Incomes.tsx";
 import LandingPageRouter from "./landing/LandingPageRouter";
 import InvestmentCalculatorPublic from "./investment-calculator/InvestmentCalculatorPublic";
-import InvestmentCalculatorProtected from "./investment-calculator/InvestmentCalculatorProtected";
 import PublicLayout from "./layout/PublicLayout";
 import ProtectedLayout from "./layout/ProtectedLayout";
 import { FinanceHub, ReportsHub } from "./hub";
