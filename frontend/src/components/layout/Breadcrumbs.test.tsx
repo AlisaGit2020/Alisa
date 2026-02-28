@@ -3,15 +3,8 @@ import userEvent from '@testing-library/user-event';
 import Breadcrumbs from './Breadcrumbs';
 import { renderWithRouter } from '@test-utils/test-wrapper';
 import ApiClient from '@asset-lib/api-client';
-import { useMediaQuery } from '@mui/material';
 
-// Mock useMediaQuery for mobile testing
-jest.mock('@mui/material', () => ({
-  ...jest.requireActual('@mui/material'),
-  useMediaQuery: jest.fn(),
-}));
-
-const mockUseMediaQuery = useMediaQuery as jest.MockedFunction<typeof useMediaQuery>;
+// For mobile tests, we use the testIsMobile prop instead of mocking
 
 describe('Breadcrumbs', () => {
   it('should not display "app" in breadcrumb text for protected routes', () => {
@@ -204,7 +197,6 @@ describe('Breadcrumbs', () => {
 
     beforeEach(() => {
       mockGet = jest.spyOn(ApiClient, 'get');
-      mockUseMediaQuery.mockReturnValue(false); // Desktop by default
     });
 
     afterEach(() => {
@@ -215,7 +207,7 @@ describe('Breadcrumbs', () => {
       const longName = 'This Is A Very Long Property Name That Should Be Truncated With Ellipsis';
       mockGet.mockResolvedValue({ id: 1, name: longName });
 
-      renderWithRouter(<Breadcrumbs />, {
+      renderWithRouter(<Breadcrumbs testIsMobile={false} />, {
         initialEntries: ['/app/portfolio/own/1'],
       });
 
@@ -231,14 +223,14 @@ describe('Breadcrumbs', () => {
       const longName = 'Super Long Property Name For Testing Maximum Width';
       mockGet.mockResolvedValue({ id: 1, name: longName });
 
-      renderWithRouter(<Breadcrumbs />, {
+      renderWithRouter(<Breadcrumbs testIsMobile={false} />, {
         initialEntries: ['/app/portfolio/own/1'],
       });
 
       await waitFor(() => {
         const link = screen.getByText(new RegExp(longName.substring(0, 10)));
-        // Check that maxWidth is set (specific value tested in implementation)
-        expect(link).toHaveStyle({ maxWidth: expect.any(String) });
+        // Check that maxWidth is set to desktop width (180px)
+        expect(link).toHaveStyle({ maxWidth: '180px' });
       });
     });
 
@@ -246,7 +238,7 @@ describe('Breadcrumbs', () => {
       const longName = 'Helsinki Downtown Penthouse Apartment';
       mockGet.mockResolvedValue({ id: 1, name: longName });
 
-      renderWithRouter(<Breadcrumbs />, {
+      renderWithRouter(<Breadcrumbs testIsMobile={false} />, {
         initialEntries: ['/app/portfolio/own/1'],
       });
 
@@ -270,7 +262,6 @@ describe('Breadcrumbs', () => {
 
     beforeEach(() => {
       mockGet = jest.spyOn(ApiClient, 'get');
-      mockUseMediaQuery.mockReturnValue(true); // Mobile viewport
     });
 
     afterEach(() => {
@@ -278,7 +269,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('should show all items when breadcrumb has 3 or fewer items on mobile', () => {
-      renderWithRouter(<Breadcrumbs />, {
+      renderWithRouter(<Breadcrumbs testIsMobile={true} />, {
         initialEntries: ['/app/portfolio/own'],
       });
 
@@ -291,7 +282,7 @@ describe('Breadcrumbs', () => {
     it('should collapse middle items when breadcrumb has more than 3 items on mobile', async () => {
       mockGet.mockResolvedValue({ id: 1, name: 'Test Property' });
 
-      renderWithRouter(<Breadcrumbs />, {
+      renderWithRouter(<Breadcrumbs testIsMobile={true} />, {
         initialEntries: ['/app/portfolio/own/edit/1'],
       });
 
@@ -304,7 +295,7 @@ describe('Breadcrumbs', () => {
     it('should open menu with collapsed items when ellipsis button is clicked', async () => {
       mockGet.mockResolvedValue({ id: 1, name: 'Test Property' });
 
-      renderWithRouter(<Breadcrumbs />, {
+      renderWithRouter(<Breadcrumbs testIsMobile={true} />, {
         initialEntries: ['/app/portfolio/own/edit/1'],
       });
 
@@ -323,10 +314,9 @@ describe('Breadcrumbs', () => {
     });
 
     it('should not collapse items on desktop regardless of item count', async () => {
-      mockUseMediaQuery.mockReturnValue(false); // Desktop
       mockGet.mockResolvedValue({ id: 1, name: 'Test Property' });
 
-      renderWithRouter(<Breadcrumbs />, {
+      renderWithRouter(<Breadcrumbs testIsMobile={false} />, {
         initialEntries: ['/app/portfolio/own/edit/1'],
       });
 
@@ -339,7 +329,7 @@ describe('Breadcrumbs', () => {
     it('should close menu when clicking outside', async () => {
       mockGet.mockResolvedValue({ id: 1, name: 'Test Property' });
 
-      renderWithRouter(<Breadcrumbs />, {
+      renderWithRouter(<Breadcrumbs testIsMobile={true} />, {
         initialEntries: ['/app/portfolio/own/edit/1'],
       });
 

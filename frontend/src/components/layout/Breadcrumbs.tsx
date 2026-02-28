@@ -1,16 +1,42 @@
-import { Breadcrumbs, Link, Stack } from "@mui/material"
+import { Breadcrumbs, Link, Stack, Tooltip, IconButton, Menu, MenuItem } from "@mui/material"
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { WithTranslation, withTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom"
 import { useEffect, useState, useMemo } from "react";
 import ApiClient from "@asset-lib/api-client";
+import { useIsMobile } from "@asset-lib/hooks/useIsMobile";
+
+// Constants for truncation
+const DESKTOP_MAX_WIDTH = 180;
+const MOBILE_MAX_WIDTH = 120;
+const MOBILE_COLLAPSE_THRESHOLD = 3;
 
 interface EntityNameCache {
     [key: string]: string;
 }
 
-function AssetBreadcrumbs({ t }: WithTranslation) {
+interface AssetBreadcrumbsProps extends WithTranslation {
+    /** Override mobile detection for testing */
+    testIsMobile?: boolean;
+}
+
+function AssetBreadcrumbs({ t, testIsMobile }: AssetBreadcrumbsProps) {
     const location = useLocation()
     const [entityNames, setEntityNames] = useState<EntityNameCache>({});
+    const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+    const isMobileHook = useIsMobile();
+    const isMobile = testIsMobile !== undefined ? testIsMobile : isMobileHook;
+    const menuOpen = Boolean(menuAnchorEl);
+
+    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setMenuAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setMenuAnchorEl(null);
+    };
+
+    const maxWidth = isMobile ? MOBILE_MAX_WIDTH : DESKTOP_MAX_WIDTH;
 
     const pathSegments = useMemo(() =>
         location.pathname.split('/').filter(crumb => crumb !== '' && crumb !== '0' && crumb !== 'app'),
@@ -90,16 +116,90 @@ function AssetBreadcrumbs({ t }: WithTranslation) {
                 }
             }
 
-            return (
-                <Link key={index} href={linkPath}>{displayText + ' / '}</Link>
-            );
+            return {
+                linkPath,
+                displayText,
+                key: index
+            };
         });
     }, [pathSegments, entityNames, t, location.pathname]);
 
+    const truncationStyle = {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        maxWidth: `${maxWidth}px`,
+        display: 'inline-block'
+    };
+
+    const renderBreadcrumbLink = (crumb: { linkPath: string; displayText: string; key: number }, appendSeparator = true) => (
+        <Tooltip key={crumb.key} title={crumb.displayText}>
+            <Link
+                href={crumb.linkPath}
+                sx={truncationStyle}
+            >
+                {crumb.displayText + (appendSeparator ? ' / ' : '')}
+            </Link>
+        </Tooltip>
+    );
+
+    // Mobile collapsing logic
+    const shouldCollapse = isMobile && crumbs.length > MOBILE_COLLAPSE_THRESHOLD;
+
+    const visibleCrumbs = useMemo(() => {
+        if (!shouldCollapse) {
+            return crumbs.map(crumb => renderBreadcrumbLink(crumb));
+        }
+
+        // Show first item, ellipsis button, then last 2 items
+        const firstItem = crumbs[0];
+        const lastTwoItems = crumbs.slice(-2);
+
+        return [
+            renderBreadcrumbLink(firstItem),
+            <IconButton
+                key="ellipsis"
+                size="small"
+                aria-label="show more breadcrumbs"
+                onClick={handleMenuOpen}
+                sx={{ padding: 0, mx: 0.5 }}
+            >
+                <MoreHorizIcon fontSize="small" />
+            </IconButton>,
+            ...lastTwoItems.map(crumb => renderBreadcrumbLink(crumb))
+        ];
+    }, [crumbs, shouldCollapse, maxWidth]);
+
+    const collapsedItems = useMemo(() => {
+        if (!shouldCollapse) return [];
+        // Middle items (exclude first and last 2)
+        return crumbs.slice(1, -2);
+    }, [crumbs, shouldCollapse]);
+
     return (
-        <Breadcrumbs aria-label="breadcrumb">
-            <Stack spacing={1} marginBottom={2} direction={'row'}>{crumbs}</Stack>
-        </Breadcrumbs>
+        <>
+            <Breadcrumbs aria-label="breadcrumb">
+                <Stack spacing={1} marginBottom={2} direction={'row'} alignItems="center">
+                    {visibleCrumbs}
+                </Stack>
+            </Breadcrumbs>
+            <Menu
+                anchorEl={menuAnchorEl}
+                open={menuOpen}
+                onClose={handleMenuClose}
+            >
+                {collapsedItems.map((crumb) => (
+                    <MenuItem
+                        key={crumb.key}
+                        component="a"
+                        href={crumb.linkPath}
+                        onClick={handleMenuClose}
+                    >
+                        {crumb.displayText}
+                    </MenuItem>
+                ))}
+            </Menu>
+        </>
     )
 }
 
