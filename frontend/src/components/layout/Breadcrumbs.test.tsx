@@ -1,7 +1,10 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import Breadcrumbs from './Breadcrumbs';
 import { renderWithRouter } from '@test-utils/test-wrapper';
 import ApiClient from '@asset-lib/api-client';
+
+// For mobile tests, we use the testIsMobile prop instead of mocking
 
 describe('Breadcrumbs', () => {
   it('should not display "app" in breadcrumb text for protected routes', () => {
@@ -185,6 +188,166 @@ describe('Breadcrumbs', () => {
       // Should still render the ID as fallback
       await waitFor(() => {
         expect(screen.getByText(/99/)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Long property name truncation', () => {
+    let mockGet: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockGet = jest.spyOn(ApiClient, 'get');
+    });
+
+    afterEach(() => {
+      mockGet.mockRestore();
+    });
+
+    it('should truncate long property names with ellipsis on desktop', async () => {
+      const longName = 'This Is A Very Long Property Name That Should Be Truncated With Ellipsis';
+      mockGet.mockResolvedValue({ id: 1, name: longName });
+
+      renderWithRouter(<Breadcrumbs testIsMobile={false} />, {
+        initialEntries: ['/app/portfolio/own/1'],
+      });
+
+      await waitFor(() => {
+        const link = screen.getByText(new RegExp(longName.substring(0, 10)));
+        expect(link).toHaveStyle({ overflow: 'hidden' });
+        expect(link).toHaveStyle({ textOverflow: 'ellipsis' });
+        expect(link).toHaveStyle({ whiteSpace: 'nowrap' });
+      });
+    });
+
+    it('should apply max-width constraint to breadcrumb items', async () => {
+      const longName = 'Super Long Property Name For Testing Maximum Width';
+      mockGet.mockResolvedValue({ id: 1, name: longName });
+
+      renderWithRouter(<Breadcrumbs testIsMobile={false} />, {
+        initialEntries: ['/app/portfolio/own/1'],
+      });
+
+      await waitFor(() => {
+        const link = screen.getByText(new RegExp(longName.substring(0, 10)));
+        // Check that maxWidth is set to desktop width (180px)
+        expect(link).toHaveStyle({ maxWidth: '180px' });
+      });
+    });
+
+    it('should show tooltip with full text on hover for breadcrumb items', async () => {
+      const longName = 'Helsinki Downtown Penthouse Apartment';
+      mockGet.mockResolvedValue({ id: 1, name: longName });
+
+      renderWithRouter(<Breadcrumbs testIsMobile={false} />, {
+        initialEntries: ['/app/portfolio/own/1'],
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(new RegExp(longName.substring(0, 10)))).toBeInTheDocument();
+      });
+
+      // Hover over the link
+      const link = screen.getByText(new RegExp(longName.substring(0, 10)));
+      await userEvent.hover(link);
+
+      // Tooltip should appear with full text
+      await waitFor(() => {
+        expect(screen.getByRole('tooltip')).toHaveTextContent(longName);
+      });
+    });
+  });
+
+  describe('Mobile responsiveness - collapsible middle items', () => {
+    let mockGet: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockGet = jest.spyOn(ApiClient, 'get');
+    });
+
+    afterEach(() => {
+      mockGet.mockRestore();
+    });
+
+    it('should show all items when breadcrumb has 3 or fewer items on mobile', () => {
+      renderWithRouter(<Breadcrumbs testIsMobile={true} />, {
+        initialEntries: ['/app/portfolio/own'],
+      });
+
+      // Should show all items, no ellipsis button
+      expect(screen.queryByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i)).not.toBeInTheDocument();
+      expect(screen.getByText(/portfolio/i)).toBeInTheDocument();
+      expect(screen.getByText(/own/i)).toBeInTheDocument();
+    });
+
+    it('should collapse middle items when breadcrumb has more than 3 items on mobile', async () => {
+      mockGet.mockResolvedValue({ id: 1, name: 'Test Property' });
+
+      renderWithRouter(<Breadcrumbs testIsMobile={true} />, {
+        initialEntries: ['/app/portfolio/own/edit/1'],
+      });
+
+      // Should show ellipsis button for collapsed items
+      await waitFor(() => {
+        expect(screen.getByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should open menu with collapsed items when ellipsis button is clicked', async () => {
+      mockGet.mockResolvedValue({ id: 1, name: 'Test Property' });
+
+      renderWithRouter(<Breadcrumbs testIsMobile={true} />, {
+        initialEntries: ['/app/portfolio/own/edit/1'],
+      });
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i)).toBeInTheDocument();
+      });
+
+      // Click ellipsis button
+      const ellipsisButton = screen.getByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i);
+      await userEvent.click(ellipsisButton);
+
+      // Menu should open with collapsed items
+      await waitFor(() => {
+        expect(screen.getByRole('menu')).toBeInTheDocument();
+      });
+    });
+
+    it('should not collapse items on desktop regardless of item count', async () => {
+      mockGet.mockResolvedValue({ id: 1, name: 'Test Property' });
+
+      renderWithRouter(<Breadcrumbs testIsMobile={false} />, {
+        initialEntries: ['/app/portfolio/own/edit/1'],
+      });
+
+      // Should not show ellipsis button on desktop
+      await waitFor(() => {
+        expect(screen.queryByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i)).not.toBeInTheDocument();
+      });
+    });
+
+    it('should close menu when clicking outside', async () => {
+      mockGet.mockResolvedValue({ id: 1, name: 'Test Property' });
+
+      renderWithRouter(<Breadcrumbs testIsMobile={true} />, {
+        initialEntries: ['/app/portfolio/own/edit/1'],
+      });
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i)).toBeInTheDocument();
+      });
+
+      // Open menu
+      await userEvent.click(screen.getByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i));
+      await waitFor(() => {
+        expect(screen.getByRole('menu')).toBeInTheDocument();
+      });
+
+      // Press escape to close
+      fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' });
+
+      await waitFor(() => {
+        expect(screen.queryByRole('menu')).not.toBeInTheDocument();
       });
     });
   });
