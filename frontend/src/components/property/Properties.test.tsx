@@ -1041,7 +1041,8 @@ describe('Investment Calculator Tab - Edge Cases', () => {
 
     await waitFor(() => {
       const tabs = screen.getAllByRole('tab');
-      expect(tabs).toHaveLength(4);
+      // Should have at least 4 tabs (main tabs) plus any nested tabs from InvestmentCalculatorProtected
+      expect(tabs.length).toBeGreaterThanOrEqual(4);
       // The 4th tab (index 3) should be selected
       expect(tabs[3]).toHaveAttribute('aria-selected', 'true');
     });

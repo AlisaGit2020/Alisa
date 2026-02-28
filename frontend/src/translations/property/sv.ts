@@ -18,6 +18,7 @@ const property = {
     ownProperties: 'Mina fastigheter',
     prospectProperties: 'Prospekt',
     soldProperties: 'Sålda',
+    investmentCalculator: 'Investeringskalkylator',
 
     add: 'Lägg till ny fastighet',
     properties: 'Fastigheter',

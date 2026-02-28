@@ -20,7 +20,7 @@ import InvestmentCalculatorPublic from "./investment-calculator/InvestmentCalcul
 import InvestmentCalculatorProtected from "./investment-calculator/InvestmentCalculatorProtected";
 import PublicLayout from "./layout/PublicLayout";
 import ProtectedLayout from "./layout/ProtectedLayout";
-import { PortfolioHub, FinanceHub, ReportsHub } from "./hub";
+import { FinanceHub, ReportsHub } from "./hub";
 
 export default function AppRoutes() {
   return (
@@ -39,7 +39,7 @@ export default function AppRoutes() {
             <Route path="dashboard" element={<Dashboard />} />
 
             {/* Portfolio routes - nested under /app/portfolio */}
-            <Route path="portfolio" element={<PortfolioHub />} />
+            <Route path="portfolio" element={<Navigate to="/app/portfolio/properties/own" replace />} />
             <Route path="portfolio/properties" element={<Navigate to="/app/portfolio/properties/own" replace />} />
             <Route path="portfolio/properties/own" element={<Properties />} />
             <Route path="portfolio/properties/own/add" element={<PropertyForm />} />
@@ -52,7 +52,9 @@ export default function AppRoutes() {
             <Route path="portfolio/properties/sold" element={<Properties />} />
             <Route path="portfolio/properties/sold/edit/:idParam" element={<PropertyForm />} />
             <Route path="portfolio/properties/sold/:idParam" element={<PropertyView />} />
-            <Route path="portfolio/investment-calculations" element={<InvestmentCalculatorProtected />} />
+            <Route path="portfolio/properties/investment-calculator" element={<Properties />} />
+            {/* Backward compatibility: old investment-calculations route */}
+            <Route path="portfolio/investment-calculations" element={<Navigate to="/app/portfolio/properties/investment-calculator" replace />} />
 
             {/* Finance routes - nested under /app/finance */}
             <Route path="finance" element={<FinanceHub />} />

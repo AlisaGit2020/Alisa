@@ -18,6 +18,7 @@ const property = {
     ownProperties: 'My Properties',
     prospectProperties: 'Prospects',
     soldProperties: 'Sold',
+    investmentCalculator: 'Investment Calculator',
 
     add: 'Add new property',
     properties: 'Properties',
