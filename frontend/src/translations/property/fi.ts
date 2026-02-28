@@ -18,6 +18,7 @@ const property = {
     ownProperties: 'Omat asunnot',
     prospectProperties: 'Harkinnassa',
     soldProperties: 'Myydyt',
+    investmentCalculator: 'Sijoituslaskuri',
 
     add: 'Lisää uusi asunto',
     properties: 'Asunnot',

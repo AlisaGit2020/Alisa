@@ -129,7 +129,7 @@ describe('Properties Integration', () => {
       // Verify add link is present (defaults to own tab)
       const addLink = screen.getByRole('link', { name: /add new property/i });
       expect(addLink).toBeInTheDocument();
-      expect(addLink).toHaveAttribute('href', '/app/portfolio/properties/own/add');
+      expect(addLink).toHaveAttribute('href', '/app/portfolio/own/add');
     });
 
     it('opens delete confirmation dialog when delete button clicked', async () => {

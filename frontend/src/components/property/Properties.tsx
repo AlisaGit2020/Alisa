@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
 import SellIcon from "@mui/icons-material/Sell";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { Property } from "@asset-types";
 import { PropertyStatus } from "@asset-types/common";
 import AssetCardList from "../asset/AssetCardList";
@@ -12,16 +13,19 @@ import { propertyContext } from "@asset-lib/asset-contexts";
 import { CardGridPageTemplate } from "../templates";
 import { PROPERTY_LIST_CHANGE_EVENT } from "../layout/PropertyBadge";
 import ProspectAddChoiceDialog from "./ProspectAddChoiceDialog";
+import InvestmentCalculatorProtected from "../investment-calculator/InvestmentCalculatorProtected";
 
 const TAB_OWN = 0;
 const TAB_PROSPECT = 1;
 const TAB_SOLD = 2;
+const TAB_CALCULATOR = 3;
 
 const ROUTE_OWN = "own";
 const ROUTE_PROSPECT = "prospects";
 const ROUTE_SOLD = "sold";
+const ROUTE_CALCULATOR = "investment-calculator";
 
-const BASE_PATH = "/app/portfolio/properties";
+const BASE_PATH = "/app/portfolio";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -39,16 +43,18 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 
 function getTabIndexFromRoute(pathname: string): number {
   const segments = pathname.split('/');
-  const propertiesIndex = segments.indexOf('properties');
-  const tabSegment = propertiesIndex !== -1 ? segments[propertiesIndex + 1] : undefined;
+  const portfolioIndex = segments.indexOf('portfolio');
+  const tabSegment = portfolioIndex !== -1 ? segments[portfolioIndex + 1] : undefined;
   if (tabSegment === ROUTE_PROSPECT) return TAB_PROSPECT;
   if (tabSegment === ROUTE_SOLD) return TAB_SOLD;
+  if (tabSegment === ROUTE_CALCULATOR) return TAB_CALCULATOR;
   return TAB_OWN;
 }
 
 function getRouteFromTabIndex(tabIndex: number): string {
   if (tabIndex === TAB_PROSPECT) return ROUTE_PROSPECT;
   if (tabIndex === TAB_SOLD) return ROUTE_SOLD;
+  if (tabIndex === TAB_CALCULATOR) return ROUTE_CALCULATOR;
   return ROUTE_OWN;
 }
 
@@ -132,6 +138,12 @@ function Properties({ t }: WithTranslation) {
             label={t("soldProperties")}
             sx={{ gap: 1 }}
           />
+          <Tab
+            icon={<TrendingUpIcon />}
+            iconPosition="start"
+            label={t("investmentCalculator")}
+            sx={{ gap: 1 }}
+          />
         </Tabs>
 
         <TabPanel value={tabIndex} index={TAB_OWN}>
@@ -180,6 +192,10 @@ function Properties({ t }: WithTranslation) {
               />
             </Grid>
           </Grid>
+        </TabPanel>
+
+        <TabPanel value={tabIndex} index={TAB_CALCULATOR}>
+          <InvestmentCalculatorProtected />
         </TabPanel>
       </Box>
 

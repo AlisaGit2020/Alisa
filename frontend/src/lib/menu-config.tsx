@@ -1,9 +1,7 @@
 import { ReactNode } from "react";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import ApartmentIcon from "@mui/icons-material/Apartment";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import CalculateIcon from "@mui/icons-material/Calculate";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
@@ -48,28 +46,9 @@ export const menuConfig: MenuItemConfig[] = [
   {
     id: "portfolio",
     titleKey: "portfolio",
-    descriptionKey: "portfolioDescription",
     icon: <WorkIcon />,
-    routePath: "/app/portfolio",
+    routePath: "/app/portfolio/own",
     color: "secondary.main",
-    subPages: [
-      {
-        id: "properties",
-        titleKey: "properties",
-        descriptionKey: "propertiesDescription",
-        icon: <ApartmentIcon sx={{ fontSize: 48 }} />,
-        routePath: "/app/portfolio/properties",
-        color: "secondary.main",
-      },
-      {
-        id: "investmentCalculator",
-        titleKey: "investmentCalculator",
-        descriptionKey: "investmentCalculatorDescription",
-        icon: <TrendingUpIcon sx={{ fontSize: 48 }} />,
-        routePath: "/app/portfolio/investment-calculations",
-        color: "success.main",
-      },
-    ],
   },
   {
     id: "finance",

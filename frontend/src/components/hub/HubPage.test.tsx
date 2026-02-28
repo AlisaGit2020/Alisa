@@ -6,12 +6,27 @@ import HubPage from "./HubPage";
 describe("HubPage", () => {
   it("renders sub-pages from menu config", () => {
     renderWithProviders(
+      <HubPage menuId="finance" translationNamespace="finance" />
+    );
+
+    // Finance has 3 sub-pages: Bank Transactions, Incomes, Expenses
+    const cards = screen.getAllByRole("link");
+    expect(cards.length).toBe(3);
+  });
+
+  it("returns null for portfolio (no subPages after simplification)", () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+
+    const { container } = renderWithProviders(
       <HubPage menuId="portfolio" translationNamespace="portfolio" />
     );
 
-    // Portfolio has 2 sub-pages: Properties and Investment Calculator
-    const cards = screen.getAllByRole("link");
-    expect(cards.length).toBe(2);
+    expect(container.firstChild).toBeNull();
+    expect(warnSpy).toHaveBeenCalledWith(
+      'HubPage: No menu item or subPages found for menuId "portfolio"'
+    );
+
+    warnSpy.mockRestore();
   });
 
   it("renders cards with correct links", () => {

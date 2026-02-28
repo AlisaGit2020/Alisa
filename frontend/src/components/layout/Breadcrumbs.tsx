@@ -31,12 +31,12 @@ function AssetBreadcrumbs({ t }: WithTranslation) {
                     const cacheKey = `${prevSegment}-${id}`;
 
                     // Property status prefixes that indicate a property ID follows
-                    const propertyContextSegments = ['edit', 'properties', 'own', 'prospects'];
+                    const propertyContextSegments = ['edit', 'own', 'prospects', 'sold'];
 
                     // Determine which entity to fetch based on context
                     if (prevSegment && propertyContextSegments.includes(prevSegment)) {
-                        // Look for properties context
-                        const contextSegment = pathSegments.find(s => s === 'properties');
+                        // Look for portfolio context (properties are under /app/portfolio/own|prospects|sold)
+                        const contextSegment = pathSegments.find(s => s === 'portfolio');
                         if (contextSegment) {
                             try {
                                 const property = await ApiClient.get<{ id: number; name: string }>('real-estate/property', id);

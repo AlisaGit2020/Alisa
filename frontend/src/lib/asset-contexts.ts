@@ -15,7 +15,7 @@ export const adminContext: AssetContext = {
 export const propertyContext: AssetContext = {
     name: 'property',
     apiPath: 'real-estate/property',
-    routePath: '/app/portfolio/properties',
+    routePath: '/app/portfolio',
 }
 
 export const financeContext: AssetContext = {
