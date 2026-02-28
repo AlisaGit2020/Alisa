@@ -52,6 +52,7 @@ function PropertyForm({ t }: WithTranslation) {
         },
         buildYear: undefined,
         apartmentType: undefined,
+        rooms: undefined,
         status: statusFromPath,
         ownerships: [{ userId: 0, share: 100 }]
     });
@@ -156,7 +157,7 @@ function PropertyForm({ t }: WithTranslation) {
                             value={data.apartmentType ?? ''}
                             items={propertyTypeItems}
                             t={t}
-                            translateKeyPrefix="propertyTypes"
+                            translateKeyPrefix="property-type"
                             onChange={(e) => handleChange('apartmentType', e.target.value ? Number(e.target.value) as PropertyType : undefined)}
                         />
                     </Box>
@@ -190,6 +191,13 @@ function PropertyForm({ t }: WithTranslation) {
                             onChange={(e) => handleChange('size', getNumber(e.target.value, 1))}
                             adornment='m2'
                             {...getFieldErrorProps<PropertyInput>(fieldErrors, 'size')}
+                        />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                        <AssetTextField
+                            label={t('rooms')}
+                            value={data.rooms || ''}
+                            onChange={(e) => handleChange('rooms', e.target.value || undefined)}
                         />
                     </Box>
                     <Box sx={{ flex: 1 }}>

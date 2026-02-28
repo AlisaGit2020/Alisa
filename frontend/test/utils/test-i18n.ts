@@ -2,6 +2,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import property from '../../src/translations/property/en';
+import propertyType from '../../src/translations/property-type/en';
 import settings from '../../src/translations/settings/en';
 import expenseType from '../../src/translations/expense-type/en';
 import incomeType from '../../src/translations/income-type/en';
@@ -39,7 +40,7 @@ const partialCommon = {
 i18n.use(initReactI18next).init({
   lng: 'en',
   fallbackLng: 'en',
-  ns: ['translation', 'property', 'settings', 'expense-type', 'income-type', 'admin', 'investment-calculator', 'landing', 'common', 'expenseTypes', 'incomeTypes'],
+  ns: ['translation', 'property', 'property-type', 'settings', 'expense-type', 'income-type', 'admin', 'investment-calculator', 'landing', 'common', 'expenseTypes', 'incomeTypes'],
   defaultNS: 'translation',
   debug: false,
   interpolation: {
@@ -53,6 +54,7 @@ i18n.use(initReactI18next).init({
         incomeTypes: en.incomeTypes,
       },
       property,
+      'property-type': propertyType,
       settings,
       'expense-type': expenseType,
       'income-type': incomeType,

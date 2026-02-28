@@ -21,6 +21,7 @@ const namespaces = [
     'menu',
     'portfolio',
     'property',
+    'property-type',
     'reports',
     'route',
     'seo',
