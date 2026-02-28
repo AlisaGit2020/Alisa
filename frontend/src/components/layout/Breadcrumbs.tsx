@@ -132,21 +132,21 @@ function AssetBreadcrumbs({ t, testIsMobile }: AssetBreadcrumbsProps) {
         display: 'inline-block'
     };
 
-    const renderBreadcrumbLink = (crumb: { linkPath: string; displayText: string; key: number }, appendSeparator = true) => (
-        <Tooltip key={crumb.key} title={crumb.displayText}>
-            <Link
-                href={crumb.linkPath}
-                sx={truncationStyle}
-            >
-                {crumb.displayText + (appendSeparator ? ' / ' : '')}
-            </Link>
-        </Tooltip>
-    );
-
     // Mobile collapsing logic
     const shouldCollapse = isMobile && crumbs.length > MOBILE_COLLAPSE_THRESHOLD;
 
     const visibleCrumbs = useMemo(() => {
+        const renderBreadcrumbLink = (crumb: { linkPath: string; displayText: string; key: number }, appendSeparator = true) => (
+            <Tooltip key={crumb.key} title={crumb.displayText}>
+                <Link
+                    href={crumb.linkPath}
+                    sx={truncationStyle}
+                >
+                    {crumb.displayText + (appendSeparator ? ' / ' : '')}
+                </Link>
+            </Tooltip>
+        );
+
         if (!shouldCollapse) {
             return crumbs.map(crumb => renderBreadcrumbLink(crumb));
         }
@@ -160,7 +160,7 @@ function AssetBreadcrumbs({ t, testIsMobile }: AssetBreadcrumbsProps) {
             <IconButton
                 key="ellipsis"
                 size="small"
-                aria-label="show more breadcrumbs"
+                aria-label={t('showMoreBreadcrumbs')}
                 onClick={handleMenuOpen}
                 sx={{ padding: 0, mx: 0.5 }}
             >
@@ -168,7 +168,7 @@ function AssetBreadcrumbs({ t, testIsMobile }: AssetBreadcrumbsProps) {
             </IconButton>,
             ...lastTwoItems.map(crumb => renderBreadcrumbLink(crumb))
         ];
-    }, [crumbs, shouldCollapse, maxWidth]);
+    }, [crumbs, shouldCollapse, truncationStyle, t, handleMenuOpen]);
 
     const collapsedItems = useMemo(() => {
         if (!shouldCollapse) return [];

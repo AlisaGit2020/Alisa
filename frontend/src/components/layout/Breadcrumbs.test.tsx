@@ -274,7 +274,7 @@ describe('Breadcrumbs', () => {
       });
 
       // Should show all items, no ellipsis button
-      expect(screen.queryByLabelText(/show more/i)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i)).not.toBeInTheDocument();
       expect(screen.getByText(/portfolio/i)).toBeInTheDocument();
       expect(screen.getByText(/own/i)).toBeInTheDocument();
     });
@@ -288,7 +288,7 @@ describe('Breadcrumbs', () => {
 
       // Should show ellipsis button for collapsed items
       await waitFor(() => {
-        expect(screen.getByLabelText(/show more/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i)).toBeInTheDocument();
       });
     });
 
@@ -300,11 +300,11 @@ describe('Breadcrumbs', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/show more/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i)).toBeInTheDocument();
       });
 
       // Click ellipsis button
-      const ellipsisButton = screen.getByLabelText(/show more/i);
+      const ellipsisButton = screen.getByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i);
       await userEvent.click(ellipsisButton);
 
       // Menu should open with collapsed items
@@ -322,7 +322,7 @@ describe('Breadcrumbs', () => {
 
       // Should not show ellipsis button on desktop
       await waitFor(() => {
-        expect(screen.queryByLabelText(/show more/i)).not.toBeInTheDocument();
+        expect(screen.queryByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i)).not.toBeInTheDocument();
       });
     });
 
@@ -334,11 +334,11 @@ describe('Breadcrumbs', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/show more/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i)).toBeInTheDocument();
       });
 
       // Open menu
-      await userEvent.click(screen.getByLabelText(/show more/i));
+      await userEvent.click(screen.getByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i));
       await waitFor(() => {
         expect(screen.getByRole('menu')).toBeInTheDocument();
       });
