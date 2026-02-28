@@ -40,6 +40,38 @@ describe('PropertyKpiSection', () => {
     expect(screen.getByText(/6.*%/)).toBeInTheDocument();
   });
 
+  it('renders PROSPECT status with no debt share message when debtShare is missing', () => {
+    const property = createMockProperty({
+      status: PropertyStatus.PROSPECT,
+      purchasePrice: 200000,
+      debtShare: undefined,
+      monthlyRent: 1000,
+    });
+
+    renderWithProviders(<PropertyKpiSection property={property} />);
+
+    // Should show "No Housing Company Loan" text
+    expect(screen.getByText(/No Housing Company Loan/i)).toBeInTheDocument();
+  });
+
+  it('renders PROSPECT status with separated selling price and debt share', () => {
+    const property = createMockProperty({
+      status: PropertyStatus.PROSPECT,
+      purchasePrice: 200000, // Pyyntihinta (asking price)
+      debtShare: 50000, // Yhtiölainaosuus
+      monthlyRent: 1000,
+    });
+
+    renderWithProviders(<PropertyKpiSection property={property} />);
+
+    // Myyntihinta (selling price) = 200000 - 50000 = 150000
+    expect(screen.getByText(/150.*000/)).toBeInTheDocument();
+    // Yhtiölainaosuus (debt share) = 50000
+    expect(screen.getByText(/50.*000/)).toBeInTheDocument();
+    // Pyyntihinta (asking price / total) = 200000
+    expect(screen.getByText(/200.*000/)).toBeInTheDocument();
+  });
+
   it('renders SOLD status KPIs with profit/loss', () => {
     const property = createMockProperty({
       status: PropertyStatus.SOLD,

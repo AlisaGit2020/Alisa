@@ -68,6 +68,11 @@ function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProp
     </>
   );
 
+  const sellingPrice =
+    property.purchasePrice && property.debtShare
+      ? property.purchasePrice - property.debtShare
+      : null;
+
   const renderProspectKpis = () => (
     <>
       <Grid size={{ xs: 12, sm: 4 }}>
@@ -76,7 +81,11 @@ function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProp
           iconColor="primary.main"
           label={t('askingPrice')}
           value={formatCurrency(property.purchasePrice ?? 0)}
-          subtitle={property.debtShare ? `+ ${formatCurrency(property.debtShare)} ${t('debtShare').toLowerCase()}` : undefined}
+          subtitle={
+            property.debtShare && sellingPrice !== null
+              ? `${t('sellingPrice')}: ${formatCurrency(sellingPrice)} + ${t('debtShare')}: ${formatCurrency(property.debtShare)}`
+              : t('noHousingCompanyLoan')
+          }
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
