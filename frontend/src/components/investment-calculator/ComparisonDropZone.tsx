@@ -35,7 +35,7 @@ function ComparisonDropZone({
       className={isDragOver ? 'drag-over' : ''}
       sx={{
         border: '2px dashed',
-        borderColor: isDragOver ? 'primary.main' : 'grey.300',
+        borderColor: isDragOver ? 'primary.main' : 'divider',
         borderRadius: 2,
         p: 3,
         minHeight: 200,
