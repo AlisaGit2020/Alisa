@@ -8,7 +8,7 @@ import { createMockProperty } from '@test-utils/test-data';
 import ApiClient from '@asset-lib/api-client';
 import axios from 'axios';
 import { Routes, Route } from 'react-router-dom';
-import { PropertyType } from '@asset-types';
+import { PropertyType, PropertyExternalSource } from '@asset-types';
 
 
 // Mock the withTranslation HOC
@@ -407,6 +407,33 @@ describe('PropertyView', () => {
       await waitFor(() => {
         expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('External listing link', () => {
+    it('does NOT show external listing link in view content for prospect properties', async () => {
+      const prospectProperty = createMockProperty({
+        id: 1,
+        name: 'Prospect Property',
+        status: 1, // PropertyStatus.PROSPECT = 1
+        externalSource: PropertyExternalSource.ETUOVI,
+        externalSourceId: '12345',
+      });
+
+      mockGet.mockResolvedValue(prospectProperty);
+
+      renderPropertyView('1', 'prospects');
+
+      // Wait for property to load
+      await waitFor(() => {
+        expect(screen.getByText('Prospect Property')).toBeInTheDocument();
+      });
+
+      // The external listing link should NOT be in the view content
+      // It should only be accessible via the actions menu
+      // Check for the actual link to etuovi.com
+      const externalLink = document.querySelector('a[href*="etuovi.com/kohde/12345"]');
+      expect(externalLink).not.toBeInTheDocument();
     });
   });
 });

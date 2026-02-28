@@ -77,7 +77,7 @@ describe('InvestmentComparisonTable', () => {
       expect(screen.getByText('Conservative')).toBeInTheDocument();
     });
 
-    it('renders input fields section with editable values', () => {
+    it('renders input fields section with editable values displayed as text', () => {
       const calculations = [createMockCalculation({ deptFreePrice: 150000 })];
 
       renderWithProviders(
@@ -90,8 +90,9 @@ describe('InvestmentComparisonTable', () => {
 
       // Should show the input field label
       expect(screen.getByText(/debt-free price/i)).toBeInTheDocument();
-      // Should show formatted currency value
-      expect(screen.getByDisplayValue('150000')).toBeInTheDocument();
+      // Should show formatted currency value as text (displayed twice - input and output have same value)
+      const valueElements = screen.getAllByText('150 000 €');
+      expect(valueElements.length).toBeGreaterThanOrEqual(1);
     });
 
     it('renders calculated results section with read-only values', () => {
@@ -107,8 +108,8 @@ describe('InvestmentComparisonTable', () => {
 
       // Should show the calculated field label
       expect(screen.getByText(/purchase price/i)).toBeInTheDocument();
-      // Should show the value (not editable)
-      expect(screen.getByText(/150.*000/)).toBeInTheDocument();
+      // Should show the value (not editable) with data-testid
+      expect(screen.getByTestId('output-sellingPrice-1')).toHaveTextContent('150 000 €');
     });
 
     it('renders section sub-headers for field groups', () => {
@@ -178,12 +179,12 @@ describe('InvestmentComparisonTable', () => {
         />
       );
 
-      // Click on the parent box to make input editable (input has pointer-events: none)
-      const input = screen.getByDisplayValue('150000');
-      const parentBox = input.closest('.MuiBox-root') as HTMLElement;
-      await user.click(parentBox);
+      // Click on the text value to make input editable
+      const valueTexts = screen.getAllByText('150 000 €');
+      // First one should be the input field (deptFreePrice), second is the output (sellingPrice)
+      await user.click(valueTexts[0]);
 
-      // After clicking, the input becomes editable
+      // After clicking, an input becomes editable
       const editableInput = await screen.findByDisplayValue('150000');
       await user.clear(editableInput);
       await user.type(editableInput, '160000');
@@ -213,12 +214,11 @@ describe('InvestmentComparisonTable', () => {
         />
       );
 
-      // Find the rent input by its value
-      const input = screen.getByDisplayValue('850');
-      const parentBox = input.closest('.MuiBox-root') as HTMLElement;
-      await user.click(parentBox);
+      // Find the rent value as text
+      const rentText = screen.getByText('850 €');
+      await user.click(rentText);
 
-      // After clicking, the input becomes editable
+      // After clicking, an input becomes editable
       const editableInput = await screen.findByDisplayValue('850');
       await user.clear(editableInput);
       await user.type(editableInput, '900');
@@ -333,6 +333,116 @@ describe('InvestmentComparisonTable', () => {
 
       const labelColumn = screen.getByTestId('label-column');
       expect(labelColumn).toHaveStyle({ position: 'sticky' });
+    });
+  });
+
+  describe('input field display', () => {
+    it('displays input values as text when not editing (not as TextField)', () => {
+      const calculations = [createMockCalculation({ deptFreePrice: 150000 })];
+
+      renderWithProviders(
+        <InvestmentComparisonTable
+          calculations={calculations}
+          onUpdate={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+
+      // Should display as formatted text, not as a TextField input
+      // deptFreePrice appears once as input and once as sellingPrice output
+      const valueElements = screen.getAllByText('150 000 €');
+      expect(valueElements.length).toBeGreaterThanOrEqual(1);
+      // Should NOT have a visible input until clicked
+      expect(screen.queryByDisplayValue('150000')).not.toBeInTheDocument();
+    });
+
+    it('shows input field only after clicking on value', async () => {
+      const user = userEvent.setup();
+      const calculations = [createMockCalculation({ deptFreePrice: 150000 })];
+
+      renderWithProviders(
+        <InvestmentComparisonTable
+          calculations={calculations}
+          onUpdate={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+
+      // Click on the first text value (input field)
+      const valueTexts = screen.getAllByText('150 000 €');
+      await user.click(valueTexts[0]);
+
+      // Now input should appear
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('150000')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('table styling', () => {
+    it('does not have hover effect on table rows', () => {
+      const calculations = [createMockCalculation()];
+
+      const { container } = renderWithProviders(
+        <InvestmentComparisonTable
+          calculations={calculations}
+          onUpdate={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+
+      // TableRow elements should not have the hover class
+      const tableRows = container.querySelectorAll('tr.MuiTableRow-hover');
+      expect(tableRows).toHaveLength(0);
+    });
+
+    it('aligns calculation column values to the right', () => {
+      const calculations = [createMockCalculation({ id: 1 })];
+
+      renderWithProviders(
+        <InvestmentComparisonTable
+          calculations={calculations}
+          onUpdate={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+
+      // Get output cells and verify they are right-aligned
+      const outputCell = screen.getByTestId('output-sellingPrice-1').closest('td');
+      expect(outputCell).toHaveStyle({ textAlign: 'right' });
+    });
+
+    it('aligns calculation column headers to the right', () => {
+      const calculations = [createMockCalculation({ id: 1, name: 'Test Calc' })];
+
+      const { container } = renderWithProviders(
+        <InvestmentComparisonTable
+          calculations={calculations}
+          onUpdate={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+
+      // Get the header cell for calculation column (not the first label column)
+      const headerCells = container.querySelectorAll('thead th');
+      const calculationHeaderCell = headerCells[1]; // Second header cell is the calculation column
+      expect(calculationHeaderCell).toHaveStyle({ textAlign: 'right' });
+    });
+
+    it('first column header is empty (no text)', () => {
+      const calculations = [createMockCalculation()];
+
+      renderWithProviders(
+        <InvestmentComparisonTable
+          calculations={calculations}
+          onUpdate={jest.fn()}
+          onDelete={jest.fn()}
+        />
+      );
+
+      // First column header should be empty
+      const labelColumn = screen.getByTestId('label-column');
+      expect(labelColumn).toBeEmptyDOMElement();
     });
   });
 });

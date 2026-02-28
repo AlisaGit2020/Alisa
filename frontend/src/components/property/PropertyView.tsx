@@ -14,7 +14,6 @@ import { AllocationRulesModal } from '../allocation';
 import { getReturnPathForStatus } from './property-form-utils';
 import PropertyStatusRibbon from './PropertyStatusRibbon';
 import ProspectInvestmentSection from './sections/ProspectInvestmentSection';
-import ExternalListingLink from './sections/ExternalListingLink';
 import PropertyActionsMenu from './sections/PropertyActionsMenu';
 import PropertyKpiSection from './sections/PropertyKpiSection';
 import PropertyInfoSection from './sections/PropertyInfoSection';
@@ -201,13 +200,7 @@ function PropertyView({ t }: WithTranslation) {
         </Box>
       )}
 
-      {/* External Listing Link - only for PROSPECT with external source */}
-      {property.status === PropertyStatus.PROSPECT && property.externalSource && property.externalSourceId && (
-        <ExternalListingLink
-          externalSource={property.externalSource}
-          externalSourceId={property.externalSourceId}
-        />
-      )}
+      {/* External listing link moved to PropertyActionsMenu */}
 
       {/* Investment Calculator - only for PROSPECT */}
       {property.status === PropertyStatus.PROSPECT && (

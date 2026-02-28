@@ -13,6 +13,7 @@ interface AssetTextFieldProps {
   error?: boolean;
   fullWidth?: boolean;
   helperText?: string;
+  inputRef?: React.Ref<HTMLInputElement>;
   multiline?: boolean;
   placeholder?: string;
   rows?: number;
@@ -78,6 +79,7 @@ function AssetTextField(props: AssetTextFieldProps) {
       value={props.value}
       placeholder={props.placeholder}
       sx={props.sx}
+      inputRef={props.inputRef}
       autoFocus={props.autoFocus !== undefined ? props.autoFocus : false}
       autoComplete={
         props.autoComplete !== undefined ? props.autoComplete : "off"

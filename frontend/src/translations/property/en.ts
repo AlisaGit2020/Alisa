@@ -57,6 +57,7 @@ const property = {
     editProperty: 'Edit',
     back: 'Back',
     investmentAnalysis: 'Investment Analysis',
+    investmentCalculations: 'Investment Calculations',
     viewListing: 'Original Listing',
     viewOnSource: 'View on {{source}}',
     saleSummary: 'Sale Summary',

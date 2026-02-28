@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -52,16 +52,6 @@ const getDefaultFormData = (property: Property): FormData => ({
   loanPeriod: 25,
 });
 
-// Fields that can be pre-filled from property data
-type PreFillableField = 'rentPerMonth' | 'apartmentSize';
-
-const getPreFilledFields = (property: Property): Set<PreFillableField> => {
-  const fields = new Set<PreFillableField>();
-  if (property.monthlyRent !== undefined && property.monthlyRent !== null) fields.add('rentPerMonth');
-  if (property.size !== undefined && property.size !== null) fields.add('apartmentSize');
-  return fields;
-};
-
 function InvestmentAddDialog({
   open,
   property,
@@ -73,23 +63,21 @@ function InvestmentAddDialog({
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Track which fields were pre-filled from property
-  const [preFilledFields, setPreFilledFields] = useState<Set<PreFillableField>>(new Set());
+  // Ref for name input to handle autofocus
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
-  // Reset form when dialog opens
+  // Reset form when dialog opens and focus name field
   useEffect(() => {
     if (open) {
       setFormData(getDefaultFormData(property));
       setErrors({});
       setSubmitError(null);
-      setPreFilledFields(getPreFilledFields(property));
+      // Focus name input after dialog animation completes
+      setTimeout(() => {
+        nameInputRef.current?.focus();
+      }, 100);
     }
   }, [open, property]);
-
-  // Check if a field should be read-only (pre-filled from property data)
-  const isFieldReadOnly = useCallback((field: PreFillableField): boolean => {
-    return preFilledFields.has(field);
-  }, [preFilledFields]);
 
   const handleChange = useCallback((field: keyof FormData, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -171,6 +159,7 @@ function InvestmentAddDialog({
                 error={!!errors.name}
                 helperText={errors.name}
                 required
+                inputRef={nameInputRef}
               />
             </Grid>
 
@@ -189,17 +178,6 @@ function InvestmentAddDialog({
                 onChange={(e) => handleChange('deptFreePrice', Number(e.target.value) || 0)}
                 step={1000}
                 suffix="€"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <AssetEditableNumber
-                label={t('investment-calculator:apartmentSize')}
-                value={formData.apartmentSize}
-                onChange={(e) => handleChange('apartmentSize', Number(e.target.value) || 0)}
-                step={1}
-                suffix={t('common:suffix.squareMeters')}
-                readOnly={isFieldReadOnly('apartmentSize')}
               />
             </Grid>
 
@@ -228,7 +206,6 @@ function InvestmentAddDialog({
                 onChange={(e) => handleChange('rentPerMonth', Number(e.target.value) || 0)}
                 step={50}
                 suffix={t('common:suffix.euroPerMonth')}
-                readOnly={isFieldReadOnly('rentPerMonth')}
               />
             </Grid>
 

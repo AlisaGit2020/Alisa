@@ -86,42 +86,78 @@ function ProspectInvestmentSection({ property }: ProspectInvestmentSectionProps)
     setAddDialogOpen(false);
   }, []);
 
+  // Calculate responsive width based on number of calculations
+  // 1 calc = 50%, 2 = 75%, 3+ = 100%
+  const getTableMaxWidth = () => {
+    if (calculations.length === 0) return '100%';
+    if (calculations.length === 1) return { xs: '100%', md: '50%' };
+    if (calculations.length === 2) return { xs: '100%', md: '75%' };
+    return '100%';
+  };
+
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography
-          variant="h6"
-          sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.875rem' }}
-        >
-          {t('property:investmentAnalysis')} - {property.name}
-        </Typography>
-        <AssetButton
-          label={t('property:addCalculation')}
-          startIcon={<AddIcon />}
-          onClick={handleAddDialogOpen}
-          variant="outlined"
-          size="small"
-        />
-      </Box>
-
       {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <CircularProgress role="progressbar" />
+        <Box>
+          <Box data-testid="add-calculation-container" sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+            <AssetButton
+              label={t('property:addCalculation')}
+              startIcon={<AddIcon />}
+              onClick={handleAddDialogOpen}
+              variant="outlined"
+              size="small"
+            />
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <CircularProgress role="progressbar" />
+          </Box>
         </Box>
       )}
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
+        <Box>
+          <Box data-testid="add-calculation-container" sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+            <AssetButton
+              label={t('property:addCalculation')}
+              startIcon={<AddIcon />}
+              onClick={handleAddDialogOpen}
+              variant="outlined"
+              size="small"
+            />
+          </Box>
+          <Alert severity="error">
+            {error}
+          </Alert>
+        </Box>
       )}
 
       {!loading && !error && (
-        <InvestmentComparisonTable
-          calculations={calculations}
-          onUpdate={handleUpdate}
-          onDelete={handleDelete}
-        />
+        <Box data-testid="table-wrapper" sx={{ maxWidth: getTableMaxWidth() }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+          >
+            <Typography
+              variant="subtitle2"
+              sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 500 }}
+            >
+              {t('property:investmentCalculations')}
+            </Typography>
+            <Box data-testid="add-calculation-container">
+              <AssetButton
+                label={t('property:addCalculation')}
+                startIcon={<AddIcon />}
+                onClick={handleAddDialogOpen}
+                variant="outlined"
+                size="small"
+              />
+            </Box>
+          </Box>
+          <InvestmentComparisonTable
+            calculations={calculations}
+            onUpdate={handleUpdate}
+            onDelete={handleDelete}
+          />
+        </Box>
       )}
 
       <InvestmentAddDialog

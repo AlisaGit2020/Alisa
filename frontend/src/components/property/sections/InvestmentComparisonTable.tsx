@@ -219,24 +219,19 @@ function InvestmentComparisonTable({
       );
     }
 
+    // Display as formatted text when not editing
     return (
-      <Box
+      <Typography
         onClick={() => handleStartEdit(calc.id, field, value)}
-        sx={{ cursor: 'pointer' }}
+        sx={{
+          cursor: 'pointer',
+          '&:hover': {
+            textDecoration: 'underline',
+          },
+        }}
       >
-        <TextField
-          size="small"
-          type="number"
-          value={value}
-          sx={{ width: 120, pointerEvents: 'none' }}
-          slotProps={{
-            input: {
-              readOnly: true,
-              sx: { fontSize: '0.875rem' },
-            },
-          }}
-        />
-      </Box>
+        {formatValue(field, value)}
+      </Typography>
     );
   };
 
@@ -303,15 +298,15 @@ function InvestmentComparisonTable({
                   minWidth: 180,
                 }}
               >
-                {/* Empty header for label column */}
+                {/* Empty header - title is in parent section */}
               </TableCell>
               {calculations.map((calc) => (
                 <TableCell
                   key={calc.id}
-                  align="center"
+                  align="right"
                   sx={{ minWidth: 150 }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
                     <Typography fontWeight="bold">{calc.name || `#${calc.id}`}</Typography>
                     <IconButton
                       size="small"
@@ -338,12 +333,12 @@ function InvestmentComparisonTable({
               </TableCell>
             </TableRow>
             {INPUT_FIELDS.map((field) => (
-              <TableRow key={field} hover>
+              <TableRow key={field}>
                 <TableCell sx={stickyColumnStyle}>
                   {getFieldLabel(field)}
                 </TableCell>
                 {calculations.map((calc) => (
-                  <TableCell key={calc.id} align="center">
+                  <TableCell key={calc.id} align="right">
                     {renderInputCell(calc, field)}
                   </TableCell>
                 ))}
@@ -362,12 +357,12 @@ function InvestmentComparisonTable({
               </TableCell>
             </TableRow>
             {OUTPUT_FIELDS_PURCHASE.map((field) => (
-              <TableRow key={field} hover>
+              <TableRow key={field}>
                 <TableCell sx={stickyColumnStyle}>
                   {getFieldLabel(field)}
                 </TableCell>
                 {calculations.map((calc) => (
-                  <TableCell key={calc.id} align="center">
+                  <TableCell key={calc.id} align="right">
                     {renderOutputCell(calc, field)}
                   </TableCell>
                 ))}
@@ -386,12 +381,12 @@ function InvestmentComparisonTable({
               </TableCell>
             </TableRow>
             {OUTPUT_FIELDS_LOAN.map((field) => (
-              <TableRow key={field} hover>
+              <TableRow key={field}>
                 <TableCell sx={stickyColumnStyle}>
                   {getFieldLabel(field)}
                 </TableCell>
                 {calculations.map((calc) => (
-                  <TableCell key={calc.id} align="center">
+                  <TableCell key={calc.id} align="right">
                     {renderOutputCell(calc, field)}
                   </TableCell>
                 ))}
@@ -410,12 +405,12 @@ function InvestmentComparisonTable({
               </TableCell>
             </TableRow>
             {OUTPUT_FIELDS_INCOME.map((field) => (
-              <TableRow key={field} hover>
+              <TableRow key={field}>
                 <TableCell sx={stickyColumnStyle}>
                   {getFieldLabel(field)}
                 </TableCell>
                 {calculations.map((calc) => (
-                  <TableCell key={calc.id} align="center">
+                  <TableCell key={calc.id} align="right">
                     {renderOutputCell(calc, field)}
                   </TableCell>
                 ))}
@@ -434,12 +429,12 @@ function InvestmentComparisonTable({
               </TableCell>
             </TableRow>
             {OUTPUT_FIELDS_RETURNS.map((field) => (
-              <TableRow key={field} hover>
+              <TableRow key={field}>
                 <TableCell sx={stickyColumnStyle}>
                   {getFieldLabel(field)}
                 </TableCell>
                 {calculations.map((calc) => (
-                  <TableCell key={calc.id} align="center">
+                  <TableCell key={calc.id} align="right">
                     {field === 'cashFlowPerMonth' ? renderCashFlowCell(calc) : renderOutputCell(calc, field)}
                   </TableCell>
                 ))}

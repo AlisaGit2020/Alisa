@@ -57,6 +57,7 @@ const property = {
     editProperty: 'Muokkaa',
     back: 'Takaisin',
     investmentAnalysis: 'Sijoituslaskelma',
+    investmentCalculations: 'Sijoituslaskelmat',
     viewListing: 'Alkuperäinen ilmoitus',
     viewOnSource: 'Katso kohde sivustolla {{source}}',
     saleSummary: 'Myyntiyhteenveto',

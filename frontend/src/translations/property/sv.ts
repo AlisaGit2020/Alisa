@@ -57,6 +57,7 @@ const property = {
     editProperty: 'Redigera',
     back: 'Tillbaka',
     investmentAnalysis: 'Investeringsanalys',
+    investmentCalculations: 'Investeringskalkyler',
     viewListing: 'Ursprunglig annons',
     viewOnSource: 'Visa på {{source}}',
     saleSummary: 'Försäljningssammanfattning',

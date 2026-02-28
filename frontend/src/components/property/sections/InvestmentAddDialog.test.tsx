@@ -37,6 +37,17 @@ describe('InvestmentAddDialog', () => {
       expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
     });
 
+    it('autofocuses on name field when dialog opens', async () => {
+      renderWithProviders(<InvestmentAddDialog {...defaultProps} />);
+
+      const nameInput = screen.getByLabelText(/name/i);
+
+      // Wait for autofocus to be applied
+      await waitFor(() => {
+        expect(document.activeElement).toBe(nameInput);
+      });
+    });
+
     it('renders investment fields', () => {
       renderWithProviders(<InvestmentAddDialog {...defaultProps} />);
 
@@ -46,11 +57,12 @@ describe('InvestmentAddDialog', () => {
       expect(screen.getByText('Financing')).toBeInTheDocument();
     });
 
-    it('pre-fills apartment size from property', () => {
+    it('does NOT show apartment size field', () => {
       renderWithProviders(<InvestmentAddDialog {...defaultProps} />);
 
-      // Apartment size is displayed as text with suffix
-      expect(screen.getByText('55 m²')).toBeInTheDocument();
+      // Apartment size should NOT be in the form
+      expect(screen.queryByText(/apartment size/i)).not.toBeInTheDocument();
+      expect(screen.queryByText('55 m²')).not.toBeInTheDocument();
     });
 
     it('renders save and cancel buttons', () => {
@@ -187,27 +199,10 @@ describe('InvestmentAddDialog', () => {
       expect(screen.getByText('150000 €')).toBeInTheDocument();
     });
 
-    it('auto-fills size from property', () => {
-      const property = createMockProperty({
-        size: 75,
-        status: PropertyStatus.PROSPECT,
-      });
-
-      renderWithProviders(
-        <InvestmentAddDialog
-          open={true}
-          property={property}
-          onClose={jest.fn()}
-          onSave={jest.fn()}
-        />
-      );
-
-      expect(screen.getByText('75 m²')).toBeInTheDocument();
-    });
   });
 
-  describe('read-only display for pre-filled fields', () => {
-    it('pre-filled fields do not become editable when clicked (readOnly)', async () => {
+  describe('editable fields', () => {
+    it('rent field is editable even when pre-filled from property', async () => {
       const user = userEvent.setup();
       const property = createMockProperty({
         monthlyRent: 950,
@@ -223,16 +218,19 @@ describe('InvestmentAddDialog', () => {
         />
       );
 
+      // Click on rent field to edit
       const displayText = screen.getByText('950 €/mo');
       await user.click(displayText);
 
-      // Should remain as text since it's readOnly (pre-filled)
+      // Should show input field for editing (not remain as read-only text)
       await waitFor(() => {
-        expect(screen.getByText('950 €/mo')).toBeInTheDocument();
+        const input = screen.getByRole('spinbutton');
+        expect(input).toBeInTheDocument();
+        expect(input).toHaveValue(950);
       });
     });
 
-    it('purchase price is displayed as text and is editable (not readOnly)', () => {
+    it('purchase price is displayed as text and is editable', () => {
       const property = createMockProperty({
         purchasePrice: 150000,
         status: PropertyStatus.PROSPECT,
