@@ -15,12 +15,18 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { SavedInvestmentCalculation } from '../../investment-calculator/InvestmentCalculatorResults';
+import { Property } from '@asset-types';
 import AssetConfirmDialog from '../../asset/dialog/AssetConfirmDialog';
+
+// Extended calculation type that includes optional property info
+interface CalculationWithProperty extends SavedInvestmentCalculation {
+  property?: Property;
+}
 import { useToast } from '../../asset';
 import ApiClient from '@asset-lib/api-client';
 
 interface InvestmentComparisonTableProps {
-  calculations: SavedInvestmentCalculation[];
+  calculations: CalculationWithProperty[];
   onUpdate: (calculation: SavedInvestmentCalculation) => void;
   onDelete: (id: number) => void;
 }
@@ -64,6 +70,7 @@ const OUTPUT_FIELDS_RETURNS: (keyof SavedInvestmentCalculation)[] = [
 ];
 
 const PERCENT_FIELDS = ['transferTaxPercent', 'loanInterestPercent', 'rentalYieldPercent'];
+const YEAR_FIELDS = ['loanPeriod'];
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('fi-FI', {
@@ -76,6 +83,10 @@ const formatCurrency = (value: number) => {
 
 const formatPercent = (value: number) => {
   return `${value.toFixed(2)} %`;
+};
+
+const formatYears = (value: number, t: (key: string) => string) => {
+  return `${value} ${t('common:suffix.years')}`;
 };
 
 const getCashFlowColor = (value: number): string => {
@@ -188,9 +199,19 @@ function InvestmentComparisonTable({
     return t(`investment-calculator:${field}`);
   };
 
+  // Build display name: "Street - Calculation" when property linked, just calculation name otherwise
+  const getDisplayName = (calc: CalculationWithProperty) => {
+    const calcName = calc.name || `#${calc.id}`;
+    const streetName = calc.property?.address?.street;
+    return streetName ? `${streetName} - ${calcName}` : calcName;
+  };
+
   const formatValue = (field: string, value: number) => {
     if (PERCENT_FIELDS.includes(field)) {
       return formatPercent(value);
+    }
+    if (YEAR_FIELDS.includes(field)) {
+      return formatYears(value, t);
     }
     return formatCurrency(value);
   };
@@ -307,7 +328,7 @@ function InvestmentComparisonTable({
                   sx={{ minWidth: 150 }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
-                    <Typography fontWeight="bold">{calc.name || `#${calc.id}`}</Typography>
+                    <Typography fontWeight="bold">{getDisplayName(calc)}</Typography>
                     <IconButton
                       size="small"
                       onClick={() => handleDeleteClick(calc.id)}

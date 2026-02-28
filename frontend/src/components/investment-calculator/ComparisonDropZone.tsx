@@ -3,10 +3,16 @@ import { useTranslation } from 'react-i18next';
 import { Box, Typography, IconButton, Chip, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
+import { Property } from '@asset-types';
 import InvestmentComparisonTable from '../property/sections/InvestmentComparisonTable';
 
+// Extended calculation type that includes optional property info
+interface CalculationWithProperty extends SavedInvestmentCalculation {
+  property?: Property;
+}
+
 interface ComparisonDropZoneProps {
-  calculations: SavedInvestmentCalculation[];
+  calculations: CalculationWithProperty[];
   onRemove: (id: number) => void;
   onUpdate: (calculation: SavedInvestmentCalculation) => void;
   isDragOver?: boolean;
@@ -22,6 +28,13 @@ function ComparisonDropZone({
 
   const handleDelete = (id: number) => {
     onRemove(id);
+  };
+
+  // Build display name: "Street - Calculation" when property linked, just calculation name otherwise
+  const getDisplayName = (calc: CalculationWithProperty) => {
+    const calcName = calc.name || `#${calc.id}`;
+    const streetName = calc.property?.address?.street;
+    return streetName ? `${streetName} - ${calcName}` : calcName;
   };
 
   const safeCalculations = calculations || [];
@@ -67,12 +80,12 @@ function ComparisonDropZone({
             {safeCalculations.map((calc) => (
               <Chip
                 key={calc.id}
-                label={calc.name || `#${calc.id}`}
+                label={getDisplayName(calc)}
                 onDelete={() => handleDelete(calc.id)}
                 deleteIcon={
                   <IconButton
                     size="small"
-                    aria-label={`${t('investment-calculator:removeFromComparison')} ${calc.name || `#${calc.id}`}`}
+                    aria-label={`${t('investment-calculator:removeFromComparison')} ${getDisplayName(calc)}`}
                   >
                     <CloseIcon fontSize="small" />
                   </IconButton>
