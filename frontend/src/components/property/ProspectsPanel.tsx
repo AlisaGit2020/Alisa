@@ -19,7 +19,7 @@ import { propertyContext } from '@asset-lib/asset-contexts';
 import AssetCardList from '../asset/AssetCardList';
 import { PROPERTY_LIST_CHANGE_EVENT } from '../layout/PropertyBadge';
 import ProspectCompareView from '../investment-calculator/ProspectCompareView';
-import { AssetButton } from '../asset';
+import { AssetButton, AssetAlert } from '../asset';
 
 const VIEW_LIST = 'list';
 const VIEW_COMPARE = 'compare';
@@ -39,18 +39,18 @@ function ProspectsPanel({ onAddClick, refreshKey = 0 }: ProspectsPanelProps) {
   const [error, setError] = useState(false);
 
   // Get view mode from URL params
-  const getViewFromParam = (): ViewMode => {
+  const getViewFromParam = useCallback((): ViewMode => {
     const viewParam = searchParams.get('view');
     if (viewParam === VIEW_COMPARE) return VIEW_COMPARE;
     return VIEW_LIST;
-  };
+  }, [searchParams]);
 
   const [view, setView] = useState<ViewMode>(getViewFromParam());
 
   // Sync view with URL params on mount and URL changes
   useEffect(() => {
     setView(getViewFromParam());
-  }, [searchParams]);
+  }, [getViewFromParam]);
 
   const fetchProperties = useCallback(async () => {
     setLoading(true);
@@ -165,7 +165,11 @@ function ProspectsPanel({ onAddClick, refreshKey = 0 }: ProspectsPanelProps) {
       {/* Content based on view mode */}
       {view === VIEW_LIST && (
         <>
-          {properties.length === 0 && !loading ? (
+          {error ? (
+            <Box sx={{ mb: 2 }}>
+              <AssetAlert severity="error" content={t('common:toast.loadFailed')} />
+            </Box>
+          ) : properties.length === 0 && !loading ? (
             <Box
               sx={{
                 display: 'flex',

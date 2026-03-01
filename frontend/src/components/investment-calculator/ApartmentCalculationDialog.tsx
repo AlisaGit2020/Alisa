@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
   Divider,
   Grid,
-  Alert,
   Avatar,
+  useTheme,
 } from '@mui/material';
 import { Property } from '@asset-types';
 import ApiClient from '@asset-lib/api-client';
-import { AssetDialog, AssetTextField, AssetButton } from '../asset';
+import { AssetDialog, AssetTextField, AssetButton, AssetAlert } from '../asset';
 import { getPhotoUrl } from '@asset-lib/functions';
 
 interface InvestmentCalculationInput {
@@ -45,6 +45,7 @@ interface EditableFieldProps {
 }
 
 function EditableField({ value, onSave, suffix = '' }: EditableFieldProps) {
+  const theme = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
 
@@ -82,7 +83,7 @@ function EditableField({ value, onSave, suffix = '' }: EditableFieldProps) {
           width: '100%',
           padding: '4px 8px',
           fontSize: 'inherit',
-          border: '1px solid #ccc',
+          border: `1px solid ${theme.palette.divider}`,
           borderRadius: '4px',
         }}
       />
@@ -123,7 +124,7 @@ function ApartmentCalculationDialog({
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Default values
-  const getDefaultData = (): InvestmentCalculationInput => ({
+  const getDefaultData = useCallback((): InvestmentCalculationInput => ({
     name: '',
     deptFreePrice: property?.purchasePrice ?? 100000,
     deptShare: 0,
@@ -137,7 +138,7 @@ function ApartmentCalculationDialog({
     loanInterestPercent: 4,
     loanPeriod: 25,
     propertyId: property?.id,
-  });
+  }), [property?.purchasePrice, property?.maintenanceFee, property?.chargeForFinancialCosts, property?.monthlyRent, property?.size, property?.id]);
 
   const [data, setData] = useState<InvestmentCalculationInput>(getDefaultData());
   const [saving, setSaving] = useState(false);
@@ -155,7 +156,7 @@ function ApartmentCalculationDialog({
         nameInputRef.current?.focus();
       }, 100);
     }
-  }, [open, property?.id]);
+  }, [open, property?.id, getDefaultData]);
 
   const handleChange = <K extends keyof InvestmentCalculationInput>(
     field: K,
@@ -250,11 +251,9 @@ function ApartmentCalculationDialog({
           </Box>
         )}
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
+        <Box sx={{ mb: error ? 2 : 0 }}>
+          <AssetAlert severity="error" content={error ?? undefined} />
+        </Box>
 
         {/* Name field */}
         <AssetTextField

@@ -52,28 +52,6 @@ const createMockProperty = (overrides: object = {}) => ({
   ...overrides,
 });
 
-// Helper to create mock calculation
-const createMockCalculation = (overrides: object = {}) => ({
-  id: 1,
-  name: 'Test Calculation',
-  deptFreePrice: 150000,
-  deptShare: 0,
-  transferTaxPercent: 2,
-  maintenanceFee: 200,
-  chargeForFinancialCosts: 50,
-  rentPerMonth: 850,
-  apartmentSize: 55,
-  waterCharge: 20,
-  downPayment: 30000,
-  loanInterestPercent: 4,
-  loanPeriod: 25,
-  sellingPrice: 150000,
-  rentalYieldPercent: 6.8,
-  propertyId: null,
-  property: null,
-  ...overrides,
-});
-
 describe('ProspectsPanel', () => {
   let mockSearch: jest.SpyInstance;
 
@@ -560,8 +538,6 @@ describe('Properties Mobile-Friendly Tabs', () => {
     });
 
     it('tab state persists on navigation', async () => {
-      const user = userEvent.setup();
-
       renderWithRouter(<Properties />, {
         initialEntries: ['/app/portfolio/prospects'],
       });
