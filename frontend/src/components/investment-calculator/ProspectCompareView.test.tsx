@@ -265,6 +265,50 @@ describe('ProspectCompareView', () => {
       });
       expect(screen.getByText(/new calculation/i)).toBeInTheDocument();
     });
+
+    it('auto-adds new calculation to comparison after save', async () => {
+      const user = userEvent.setup();
+      const prospect = createMockProperty({ id: 1, name: 'Test Prospect' });
+      setupMocks({ calculations: [], prospects: [prospect] });
+
+      // Mock the post call for saving calculation
+      const mockPost = jest.spyOn(ApiClient, 'post').mockResolvedValue({
+        data: createMockCalculation({ id: 100, name: 'New Calc', propertyId: 1 }),
+      });
+
+      renderWithProviders(<ProspectCompareView />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /add calculation/i })).toBeInTheDocument();
+      });
+
+      // Click add button
+      await user.click(screen.getByRole('button', { name: /add calculation/i }));
+
+      // Fill in the form
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+      });
+
+      const nameInput = screen.getByLabelText(/calculation name/i);
+      await user.type(nameInput, 'New Calc');
+
+      // Submit the form
+      await user.click(screen.getByRole('button', { name: /^save$/i }));
+
+      // Verify API was called
+      await waitFor(() => {
+        expect(mockPost).toHaveBeenCalled();
+      });
+
+      // Verify calculation appears in comparison zone (appears in both chip and table header)
+      const comparisonZone = screen.getByTestId('comparison-drop-zone');
+      await waitFor(() => {
+        expect(within(comparisonZone).getAllByText('New Calc').length).toBeGreaterThan(0);
+      });
+
+      mockPost.mockRestore();
+    });
   });
 
   describe('Selection and Comparison', () => {
