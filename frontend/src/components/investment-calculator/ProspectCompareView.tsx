@@ -7,6 +7,9 @@ import {
   Paper,
   List,
   ListSubheader,
+  ListItemButton,
+  ListItemText,
+  ListItemIcon,
   CircularProgress,
   Divider,
   Grid,
@@ -15,6 +18,7 @@ import {
 } from '@mui/material';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import AddIcon from '@mui/icons-material/Add';
 import { AssetButton, useToast } from '../asset';
 import ApiClient from '@asset-lib/api-client';
 import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
@@ -44,6 +48,9 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
   const [comparisonCalculations, setComparisonCalculations] = useState<SavedInvestmentCalculation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  // TODO: Used in Task 8 for dialog integration
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [addDialogProperty, setAddDialogProperty] = useState<Property | null>(null);
 
   const fetchCalculations = useCallback(async () => {
     setLoading(true);
@@ -107,6 +114,16 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
     setComparisonCalculations((prev) =>
       prev.map((c) => (c.id === updated.id ? updated : c))
     );
+  }, []);
+
+  const handleOpenAddDialog = useCallback((property: Property) => {
+    setAddDialogProperty(property);
+  }, []);
+
+  // TODO: Used in Task 8 for dialog integration
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleCloseAddDialog = useCallback(() => {
+    setAddDialogProperty(null);
   }, []);
 
   // Group calculations by property AND include all prospects
@@ -271,6 +288,18 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
                       onClick={() => handleAddToComparison(calc)}
                     />
                   ))}
+                  <ListItemButton
+                    sx={{ pl: 4 }}
+                    onClick={() => handleOpenAddDialog(property)}
+                  >
+                    <ListItemIcon sx={{ minWidth: 36 }}>
+                      <AddIcon color="primary" fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={t('investment-calculator:addCalculation')}
+                      primaryTypographyProps={{ color: 'primary', variant: 'body2' }}
+                    />
+                  </ListItemButton>
                 </React.Fragment>
               ))}
 
