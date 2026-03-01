@@ -88,6 +88,7 @@ function ComparisonDropZone({
             calculations={safeCalculations}
             onUpdate={onUpdate}
             onDelete={handleDelete}
+            showDeleteButton={false}
           />
         </Box>
       )}

@@ -3,9 +3,12 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
+  ListItemSecondaryAction,
   Avatar,
   Typography,
+  IconButton,
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
 import { Property } from '@asset-types';
 import { getPhotoUrl } from '@asset-lib/functions';
@@ -16,6 +19,7 @@ interface CalculationListItemProps {
   isDragging?: boolean;
   isSelected?: boolean;
   onClick?: () => void;
+  onDelete?: () => void;
 }
 
 function CalculationListItem({
@@ -24,8 +28,9 @@ function CalculationListItem({
   isDragging = false,
   isSelected = false,
   onClick,
+  onDelete,
 }: CalculationListItemProps) {
-  const { t } = useTranslation(['investment-calculator', 'property']);
+  const { t } = useTranslation(['investment-calculator', 'property', 'common']);
 
   const photoUrl = getPhotoUrl(property?.photo);
   const calcName = calculation.name || `#${calculation.id}`;
@@ -68,6 +73,21 @@ function CalculationListItem({
           </Typography>
         }
       />
+      {onDelete && (
+        <ListItemSecondaryAction>
+          <IconButton
+            edge="end"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            aria-label={t('common:delete')}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </ListItemSecondaryAction>
+      )}
     </ListItem>
   );
 }

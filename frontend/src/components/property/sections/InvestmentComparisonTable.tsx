@@ -27,6 +27,7 @@ interface InvestmentComparisonTableProps {
   calculations: CalculationWithProperty[];
   onUpdate: (calculation: SavedInvestmentCalculation) => void;
   onDelete: (id: number) => void;
+  showDeleteButton?: boolean;
 }
 
 // Input fields that are editable (cost fields come from property, not editable here)
@@ -101,6 +102,7 @@ function InvestmentComparisonTable({
   calculations,
   onUpdate,
   onDelete,
+  showDeleteButton = true,
 }: InvestmentComparisonTableProps) {
   const { t } = useTranslation(['investment-calculator', 'property', 'common']);
   const { showToast } = useToast();
@@ -320,13 +322,15 @@ function InvestmentComparisonTable({
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
                     <Typography fontWeight="bold">{getCalculationDisplayName(calc)}</Typography>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteClick(calc.id)}
-                      aria-label={t('common:delete')}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
+                    {showDeleteButton && (
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteClick(calc.id)}
+                        aria-label={t('common:delete')}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    )}
                   </Box>
                 </TableCell>
               ))}

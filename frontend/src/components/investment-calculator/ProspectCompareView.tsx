@@ -19,7 +19,7 @@ import {
 import ViewListIcon from '@mui/icons-material/ViewList';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AddIcon from '@mui/icons-material/Add';
-import { AssetButton, useToast } from '../asset';
+import { AssetButton, AssetConfirmDialog, useToast } from '../asset';
 import ApiClient from '@asset-lib/api-client';
 import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
 import { Property } from '@asset-types';
@@ -50,6 +50,7 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [addDialogProperty, setAddDialogProperty] = useState<Property | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
 
   const fetchCalculations = useCallback(async () => {
     setLoading(true);
@@ -139,6 +140,32 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
 
     handleCloseAddDialog();
   }, [fetchCalculations, comparisonCalculations.length, addDialogProperty, handleCloseAddDialog]);
+
+  const handleDeleteClick = useCallback((id: number) => {
+    setDeleteTargetId(id);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (deleteTargetId === null) return;
+
+    try {
+      await ApiClient.delete('real-estate/investment', deleteTargetId);
+      // Remove from comparison if present
+      setComparisonCalculations((prev) => prev.filter((c) => c.id !== deleteTargetId));
+      // Refresh list
+      fetchCalculations();
+      showToast({ message: t('common:deleted'), severity: 'success' });
+    } catch (err) {
+      console.error('Failed to delete calculation:', err);
+      showToast({ message: t('common:toast.error'), severity: 'error' });
+    } finally {
+      setDeleteTargetId(null);
+    }
+  }, [deleteTargetId, fetchCalculations, showToast, t]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteTargetId(null);
+  }, []);
 
   // Group calculations by property AND include all prospects
   const groupedByProperty = React.useMemo(() => {
@@ -300,6 +327,7 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
                       property={calc.property}
                       isSelected={comparisonCalculations.some((c) => c.id === calc.id)}
                       onClick={() => handleAddToComparison(calc)}
+                      onDelete={() => handleDeleteClick(calc.id)}
                     />
                   ))}
                   <ListItemButton
@@ -329,6 +357,7 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
                       calculation={calc}
                       isSelected={comparisonCalculations.some((c) => c.id === calc.id)}
                       onClick={() => handleAddToComparison(calc)}
+                      onDelete={() => handleDeleteClick(calc.id)}
                     />
                   ))}
                 </>
@@ -361,6 +390,17 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
           onSave={handleCalculationSaved}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AssetConfirmDialog
+        open={deleteTargetId !== null}
+        title={t('common:confirmDelete')}
+        contentText={t('investment-calculator:deleteConfirm')}
+        buttonTextCancel={t('common:cancel')}
+        buttonTextConfirm={t('common:confirm')}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </Box>
   );
 }
