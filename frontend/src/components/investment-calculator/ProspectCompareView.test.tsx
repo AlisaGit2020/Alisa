@@ -130,6 +130,21 @@ describe('ProspectCompareView', () => {
       });
     });
 
+    it('fetches prospect properties on mount', async () => {
+      mockSearch.mockResolvedValue([]);
+
+      renderWithProviders(<ProspectCompareView />);
+
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledWith(
+          'real-estate/property/search',
+          expect.objectContaining({
+            where: { status: PropertyStatus.PROSPECT },
+          })
+        );
+      });
+    });
+
     it('displays calculations in list', async () => {
       const calculations = [
         createMockCalculation({ id: 1, name: 'Investment A' }),
