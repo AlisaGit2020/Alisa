@@ -120,8 +120,6 @@ const mockTranslations: Record<string, string> = {
   'common:retry': 'Retry',
 };
 
-const mockT = (key: string) => mockTranslations[key] || key;
-
 // Import the main route component
 // This test verifies the route configuration and component rendering
 // Use AppRoutesContent to avoid double router issue (MemoryRouter from test-wrapper + BrowserRouter in AppRoutes)
@@ -174,6 +172,22 @@ describe('Prospects Compare Route', () => {
   let mockGet: jest.SpyInstance;
   let mockMe: jest.SpyInstance;
 
+  // Helper to setup mocks for both calculations and prospects endpoints
+  const setupMocks = (options: {
+    calculations?: object[];
+    prospects?: object[];
+  }) => {
+    mockSearch.mockImplementation(async (endpoint: string) => {
+      if (endpoint === 'real-estate/investment') {
+        return options.calculations ?? [];
+      }
+      if (endpoint === 'real-estate/property/search') {
+        return options.prospects ?? [];
+      }
+      return [];
+    });
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockSearch = jest.spyOn(ApiClient, 'search');
@@ -181,6 +195,8 @@ describe('Prospects Compare Route', () => {
     // Mock the me() call that AuthInitializer uses
     mockMe = jest.spyOn(ApiClient, 'me');
     mockMe.mockResolvedValue({ id: 1, email: 'test@example.com' });
+    // Default: return empty arrays for both endpoints
+    setupMocks({ calculations: [], prospects: [] });
   });
 
   afterEach(() => {
@@ -192,7 +208,10 @@ describe('Prospects Compare Route', () => {
   describe('Route Configuration', () => {
     it('compare route exists at /app/portfolio/prospects/compare', async () => {
       // Provide a calculation so the full view renders with comparison-panel
-      mockSearch.mockResolvedValue([createMockCalculation()]);
+      setupMocks({
+        calculations: [createMockCalculation()],
+        prospects: [],
+      });
 
       renderWithRouter(<AppRoutes />, {
         initialEntries: ['/app/portfolio/prospects/compare'],
@@ -206,7 +225,10 @@ describe('Prospects Compare Route', () => {
     });
 
     it('renders ProspectCompareView component at compare route', async () => {
-      mockSearch.mockResolvedValue([createMockCalculation()]);
+      setupMocks({
+        calculations: [createMockCalculation()],
+        prospects: [],
+      });
 
       renderWithRouter(<AppRoutes />, {
         initialEntries: ['/app/portfolio/prospects/compare'],
@@ -220,7 +242,7 @@ describe('Prospects Compare Route', () => {
     });
 
     it('renders within protected layout (requires auth)', async () => {
-      mockSearch.mockResolvedValue([]);
+      setupMocks({ calculations: [], prospects: [] });
 
       renderWithRouter(<AppRoutes />, {
         initialEntries: ['/app/portfolio/prospects/compare'],
@@ -300,7 +322,10 @@ describe('Prospects Compare Route', () => {
 
   describe('Translation: Click to Add vs Drop Here', () => {
     it('shows "Click to add to comparison" instead of "Drop here to compare"', async () => {
-      mockSearch.mockResolvedValue([createMockCalculation()]);
+      setupMocks({
+        calculations: [createMockCalculation()],
+        prospects: [],
+      });
 
       renderWithRouter(<ProspectCompareView />, {
         initialEntries: ['/app/portfolio/prospects/compare'],
@@ -320,7 +345,10 @@ describe('Prospects Compare Route', () => {
     });
 
     it('empty comparison zone has correct instructional text', async () => {
-      mockSearch.mockResolvedValue([createMockCalculation({ id: 1, name: 'Calc 1' })]);
+      setupMocks({
+        calculations: [createMockCalculation({ id: 1, name: 'Calc 1' })],
+        prospects: [],
+      });
 
       renderWithRouter(<ProspectCompareView />, {
         initialEntries: ['/app/portfolio/prospects/compare'],
@@ -342,7 +370,10 @@ describe('Prospects Compare Route', () => {
   describe('Navigation Between List and Compare', () => {
     it('navigates from prospects list to compare route', async () => {
       const user = userEvent.setup();
-      mockSearch.mockResolvedValue([createMockProperty()]);
+      setupMocks({
+        calculations: [],
+        prospects: [createMockProperty()],
+      });
 
       // Start at prospects list page
       renderWithRouter(<AppRoutes />, {
@@ -365,7 +396,10 @@ describe('Prospects Compare Route', () => {
 
     it('navigates from compare route back to list', async () => {
       const user = userEvent.setup();
-      mockSearch.mockResolvedValue([createMockCalculation()]);
+      setupMocks({
+        calculations: [createMockCalculation()],
+        prospects: [],
+      });
 
       // Start at compare page
       renderWithRouter(<AppRoutes />, {
@@ -390,10 +424,13 @@ describe('Prospects Compare Route', () => {
 
   describe('Compare View Functionality', () => {
     it('displays calculation list panel', async () => {
-      mockSearch.mockResolvedValue([
-        createMockCalculation({ id: 1, name: 'Investment A' }),
-        createMockCalculation({ id: 2, name: 'Investment B' }),
-      ]);
+      setupMocks({
+        calculations: [
+          createMockCalculation({ id: 1, name: 'Investment A' }),
+          createMockCalculation({ id: 2, name: 'Investment B' }),
+        ],
+        prospects: [],
+      });
 
       renderWithRouter(<ProspectCompareView />, {
         initialEntries: ['/app/portfolio/prospects/compare'],
@@ -410,9 +447,10 @@ describe('Prospects Compare Route', () => {
 
     it('clicking calculation adds it to comparison', async () => {
       const user = userEvent.setup();
-      mockSearch.mockResolvedValue([
-        createMockCalculation({ id: 1, name: 'Clickable Calc' }),
-      ]);
+      setupMocks({
+        calculations: [createMockCalculation({ id: 1, name: 'Clickable Calc' })],
+        prospects: [],
+      });
 
       renderWithRouter(<ProspectCompareView />, {
         initialEntries: ['/app/portfolio/prospects/compare'],
@@ -449,7 +487,7 @@ describe('Prospects Compare Route', () => {
           property,
         }),
       ];
-      mockSearch.mockResolvedValue(calculations);
+      setupMocks({ calculations, prospects: [property] });
 
       renderWithRouter(<ProspectCompareView />, {
         initialEntries: ['/app/portfolio/prospects/compare'],
@@ -462,9 +500,10 @@ describe('Prospects Compare Route', () => {
     });
 
     it('shows unlinked section for calculations without property', async () => {
-      mockSearch.mockResolvedValue([
-        createMockCalculation({ id: 1, name: 'Unlinked Calc', propertyId: null }),
-      ]);
+      setupMocks({
+        calculations: [createMockCalculation({ id: 1, name: 'Unlinked Calc', propertyId: null })],
+        prospects: [],
+      });
 
       renderWithRouter(<ProspectCompareView />, {
         initialEntries: ['/app/portfolio/prospects/compare'],
@@ -552,7 +591,10 @@ describe('Prospects Compare Route', () => {
 
   describe('Mobile Responsiveness', () => {
     it('renders layout correctly in mobile viewport', async () => {
-      mockSearch.mockResolvedValue([createMockCalculation()]);
+      setupMocks({
+        calculations: [createMockCalculation()],
+        prospects: [],
+      });
 
       renderWithRouter(<ProspectCompareView />, {
         initialEntries: ['/app/portfolio/prospects/compare'],
@@ -569,7 +611,10 @@ describe('Prospects Compare Route', () => {
   describe('Removing from Comparison', () => {
     it('can remove calculation from comparison', async () => {
       const user = userEvent.setup();
-      mockSearch.mockResolvedValue([createMockCalculation({ id: 1, name: 'Removable' })]);
+      setupMocks({
+        calculations: [createMockCalculation({ id: 1, name: 'Removable' })],
+        prospects: [],
+      });
 
       renderWithRouter(<ProspectCompareView />, {
         initialEntries: ['/app/portfolio/prospects/compare'],
