@@ -175,7 +175,7 @@ describe('ProspectCompareView', () => {
         createMockCalculation({ id: 1, name: 'Investment A' }),
         createMockCalculation({ id: 2, name: 'Investment B' }),
       ];
-      mockSearch.mockResolvedValue(calculations);
+      setupMocks({ calculations, prospects: [] });
 
       renderWithProviders(<ProspectCompareView />);
 
@@ -191,7 +191,7 @@ describe('ProspectCompareView', () => {
       const calculations = [
         createMockCalculation({ id: 1, name: 'Linked Calc', propertyId: 1, property: property1 }),
       ];
-      mockSearch.mockResolvedValue(calculations);
+      setupMocks({ calculations, prospects: [property1] });
 
       renderWithProviders(<ProspectCompareView />);
 
@@ -209,7 +209,7 @@ describe('ProspectCompareView', () => {
       const calculations = [
         createMockCalculation({ id: 1, name: 'Unlinked Calc', propertyId: null, property: null }),
       ];
-      mockSearch.mockResolvedValue(calculations);
+      setupMocks({ calculations, prospects: [] });
 
       renderWithProviders(<ProspectCompareView />);
 
@@ -240,7 +240,7 @@ describe('ProspectCompareView', () => {
       const calculations = [
         createMockCalculation({ id: 1, name: 'Selectable Calc' }),
       ];
-      mockSearch.mockResolvedValue(calculations);
+      setupMocks({ calculations, prospects: [] });
 
       renderWithProviders(<ProspectCompareView />);
 
@@ -260,7 +260,7 @@ describe('ProspectCompareView', () => {
     it('can remove calculation from comparison', async () => {
       const user = userEvent.setup();
       const calculations = [createMockCalculation({ id: 1, name: 'Removable Calc' })];
-      mockSearch.mockResolvedValue(calculations);
+      setupMocks({ calculations, prospects: [] });
 
       renderWithProviders(<ProspectCompareView />);
 
@@ -290,7 +290,7 @@ describe('ProspectCompareView', () => {
 
   describe('Layout', () => {
     it('renders two-panel layout', async () => {
-      mockSearch.mockResolvedValue([createMockCalculation()]);
+      setupMocks({ calculations: [createMockCalculation()], prospects: [] });
 
       renderWithProviders(<ProspectCompareView />);
 

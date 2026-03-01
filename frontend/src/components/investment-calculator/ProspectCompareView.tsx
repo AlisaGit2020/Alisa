@@ -40,8 +40,6 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
   const navigate = useNavigate();
 
   const [calculations, setCalculations] = useState<CalculationWithProperty[]>([]);
-  // TODO: prospects will be used in Task 4 to display all prospects grouped with calculations
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [prospects, setProspects] = useState<Property[]>([]);
   const [comparisonCalculations, setComparisonCalculations] = useState<SavedInvestmentCalculation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -111,25 +109,34 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
     );
   }, []);
 
-  // Group calculations by property
-  const groupedCalculations = React.useMemo(() => {
-    const groups: Record<string, CalculationWithProperty[]> = {};
-    const unlinked: CalculationWithProperty[] = [];
+  // Group calculations by property AND include all prospects
+  const groupedByProperty = React.useMemo(() => {
+    // Start with all prospects
+    const propertyMap = new Map<number, { property: Property; calculations: CalculationWithProperty[] }>();
 
+    // Add all prospects to the map
+    prospects.forEach((property) => {
+      propertyMap.set(property.id, { property, calculations: [] });
+    });
+
+    // Group calculations by property
+    const unlinked: CalculationWithProperty[] = [];
     calculations.forEach((calc) => {
-      if (calc.propertyId && calc.property) {
-        const key = String(calc.propertyId);
-        if (!groups[key]) {
-          groups[key] = [];
-        }
-        groups[key].push(calc);
+      if (calc.propertyId && propertyMap.has(calc.propertyId)) {
+        propertyMap.get(calc.propertyId)!.calculations.push(calc);
+      } else if (calc.propertyId && calc.property) {
+        // Property exists but wasn't in prospects list (e.g., OWN status)
+        propertyMap.set(calc.propertyId, { property: calc.property, calculations: [calc] });
       } else {
         unlinked.push(calc);
       }
     });
 
-    return { groups, unlinked };
-  }, [calculations]);
+    return {
+      properties: Array.from(propertyMap.values()),
+      unlinked,
+    };
+  }, [calculations, prospects]);
 
   if (loading) {
     return (
@@ -167,7 +174,7 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
     );
   }
 
-  if (calculations.length === 0) {
+  if (calculations.length === 0 && prospects.length === 0) {
     return (
       <Box
         sx={{
@@ -250,33 +257,30 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
             <Divider />
             <List>
               {/* Grouped by property */}
-              {Object.entries(groupedCalculations.groups).map(([propertyId, calcs]) => {
-                const property = calcs[0]?.property;
-                return (
-                  <React.Fragment key={propertyId}>
-                    <ListSubheader sx={{ backgroundColor: 'background.paper' }}>
-                      {property?.name || `Property ${propertyId}`}
-                    </ListSubheader>
-                    {calcs.map((calc) => (
-                      <CalculationListItem
-                        key={calc.id}
-                        calculation={calc}
-                        property={calc.property}
-                        isSelected={comparisonCalculations.some((c) => c.id === calc.id)}
-                        onClick={() => handleAddToComparison(calc)}
-                      />
-                    ))}
-                  </React.Fragment>
-                );
-              })}
+              {groupedByProperty.properties.map(({ property, calculations: calcs }) => (
+                <React.Fragment key={property.id}>
+                  <ListSubheader sx={{ backgroundColor: 'background.paper' }}>
+                    {property.name || property.address?.street || `Property ${property.id}`}
+                  </ListSubheader>
+                  {calcs.map((calc) => (
+                    <CalculationListItem
+                      key={calc.id}
+                      calculation={calc}
+                      property={calc.property}
+                      isSelected={comparisonCalculations.some((c) => c.id === calc.id)}
+                      onClick={() => handleAddToComparison(calc)}
+                    />
+                  ))}
+                </React.Fragment>
+              ))}
 
               {/* Unlinked calculations */}
-              {groupedCalculations.unlinked.length > 0 && (
+              {groupedByProperty.unlinked.length > 0 && (
                 <>
                   <ListSubheader sx={{ backgroundColor: 'background.paper' }}>
                     {t('investment-calculator:unlinkedCalculations')}
                   </ListSubheader>
-                  {groupedCalculations.unlinked.map((calc) => (
+                  {groupedByProperty.unlinked.map((calc) => (
                     <CalculationListItem
                       key={calc.id}
                       calculation={calc}
