@@ -26,6 +26,7 @@ import { Property } from '@asset-types';
 import { PropertyStatus } from '@asset-types/common';
 import CalculationListItem from './CalculationListItem';
 import ComparisonDropZone from './ComparisonDropZone';
+import InvestmentAddDialog from '../property/sections/InvestmentAddDialog';
 
 interface CalculationWithProperty extends SavedInvestmentCalculation {
   property?: Property;
@@ -48,8 +49,6 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
   const [comparisonCalculations, setComparisonCalculations] = useState<SavedInvestmentCalculation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  // TODO: Used in Task 8 for dialog integration
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [addDialogProperty, setAddDialogProperty] = useState<Property | null>(null);
 
   const fetchCalculations = useCallback(async () => {
@@ -120,11 +119,21 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
     setAddDialogProperty(property);
   }, []);
 
-  // TODO: Used in Task 8 for dialog integration
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleCloseAddDialog = useCallback(() => {
     setAddDialogProperty(null);
   }, []);
+
+  const handleCalculationSaved = useCallback((calculation: SavedInvestmentCalculation) => {
+    // Refresh the list
+    fetchCalculations();
+
+    // Auto-add to comparison if under limit
+    if (comparisonCalculations.length < MAX_CALCULATIONS) {
+      setComparisonCalculations((prev) => [...prev, calculation]);
+    }
+
+    handleCloseAddDialog();
+  }, [fetchCalculations, comparisonCalculations.length, handleCloseAddDialog]);
 
   // Group calculations by property AND include all prospects
   const groupedByProperty = React.useMemo(() => {
@@ -337,6 +346,16 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Add Calculation Dialog */}
+      {addDialogProperty && (
+        <InvestmentAddDialog
+          open={!!addDialogProperty}
+          property={addDialogProperty}
+          onClose={handleCloseAddDialog}
+          onSave={handleCalculationSaved}
+        />
+      )}
     </Box>
   );
 }
