@@ -3,7 +3,7 @@ const investmentCalculator = {
   pageTitle: 'Sijoitustuottolaskuri',
   pageDescription: 'Laske sijoitusasuntosi kannattavuus ja vertaile eri vaihtoehtoja. Tallenna laskelmat ja seuraa sijoitustesi kehitystä.',
   subtitle: 'Laske sijoitusasuntosi kannattavuus ilmaiseksi',
-  newCalculation: 'Uusi laskenta',
+  newCalculation: 'Uusi laskelma',
   savedCalculations: 'Tallennetut laskelmat',
   calculate: 'Laske',
   save: 'Tallenna',

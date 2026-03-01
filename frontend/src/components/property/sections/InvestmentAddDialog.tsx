@@ -140,7 +140,11 @@ function InvestmentAddDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{t('investment-calculator:newCalculation')}</DialogTitle>
+      <DialogTitle>
+        {property.address?.street
+          ? `${property.address.street} - ${t('investment-calculator:newCalculation')}`
+          : t('investment-calculator:newCalculation')}
+      </DialogTitle>
       <DialogContent dividers>
         <Box sx={{ mt: 1 }}>
           {submitError && (

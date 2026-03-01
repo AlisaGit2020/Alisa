@@ -127,13 +127,18 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
     // Refresh the list
     fetchCalculations();
 
-    // Auto-add to comparison if under limit
-    if (comparisonCalculations.length < MAX_CALCULATIONS) {
-      setComparisonCalculations((prev) => [...prev, calculation]);
+    // Auto-add to comparison if under limit, including property data for display
+    if (comparisonCalculations.length < MAX_CALCULATIONS && addDialogProperty) {
+      const calculationWithProperty: CalculationWithProperty = {
+        ...calculation,
+        property: addDialogProperty,
+        propertyId: addDialogProperty.id,
+      };
+      setComparisonCalculations((prev) => [...prev, calculationWithProperty]);
     }
 
     handleCloseAddDialog();
-  }, [fetchCalculations, comparisonCalculations.length, handleCloseAddDialog]);
+  }, [fetchCalculations, comparisonCalculations.length, addDialogProperty, handleCloseAddDialog]);
 
   // Group calculations by property AND include all prospects
   const groupedByProperty = React.useMemo(() => {

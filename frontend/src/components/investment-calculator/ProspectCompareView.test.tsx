@@ -301,10 +301,11 @@ describe('ProspectCompareView', () => {
         expect(mockPost).toHaveBeenCalled();
       });
 
-      // Verify calculation appears in comparison zone (appears in both chip and table header)
+      // Verify calculation appears in comparison zone with street name (appears in both chip and table header)
       const comparisonZone = screen.getByTestId('comparison-drop-zone');
       await waitFor(() => {
-        expect(within(comparisonZone).getAllByText('New Calc').length).toBeGreaterThan(0);
+        // Display name is "Street - Calculation Name"
+        expect(within(comparisonZone).getAllByText(/Mannerheimintie 1 - New Calc/i).length).toBeGreaterThan(0);
       });
 
       mockPost.mockRestore();
