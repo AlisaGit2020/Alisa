@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -9,7 +10,11 @@ import {
   CircularProgress,
   Divider,
   Grid,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import { AssetButton, useToast } from '../asset';
 import ApiClient from '@asset-lib/api-client';
 import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
@@ -24,9 +29,14 @@ interface CalculationWithProperty extends SavedInvestmentCalculation {
 
 const MAX_CALCULATIONS = 5;
 
-function ProspectCompareView() {
-  const { t } = useTranslation(['investment-calculator', 'common']);
+interface ProspectCompareViewProps {
+  standalone?: boolean;
+}
+
+function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
+  const { t } = useTranslation(['investment-calculator', 'common', 'property']);
   const { showToast } = useToast();
+  const navigate = useNavigate();
 
   const [calculations, setCalculations] = useState<CalculationWithProperty[]>([]);
   const [comparisonCalculations, setComparisonCalculations] = useState<SavedInvestmentCalculation[]>([]);
@@ -165,11 +175,53 @@ function ProspectCompareView() {
     );
   }
 
+  const handleViewChange = (
+    _event: React.MouseEvent<HTMLElement>,
+    newView: 'list' | 'compare' | null
+  ) => {
+    if (newView === 'list') {
+      navigate('/app/portfolio/prospects');
+    }
+    // If compare is selected or null, stay on current page
+  };
+
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom>
-        {t('investment-calculator:prospectCompare')}
-      </Typography>
+    <Box sx={{ p: standalone ? 2 : 0 }}>
+      {/* Toolbar with toggle buttons - only shown in standalone mode */}
+      {standalone && (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 2,
+          }}
+        >
+          <Typography variant="h5">
+            {t('investment-calculator:prospectCompare')}
+          </Typography>
+          <ToggleButtonGroup
+            value="compare"
+            exclusive
+            onChange={handleViewChange}
+            aria-label="view mode"
+            size="small"
+          >
+            <ToggleButton value="list" aria-label={t('property:listView')}>
+              <ViewListIcon data-testid="ViewListIcon" sx={{ mr: { xs: 0, sm: 1 } }} />
+              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                {t('property:listView')}
+              </Box>
+            </ToggleButton>
+            <ToggleButton value="compare" aria-label={t('property:compareView')}>
+              <CompareArrowsIcon data-testid="CompareArrowsIcon" sx={{ mr: { xs: 0, sm: 1 } }} />
+              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                {t('property:compareView')}
+              </Box>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+      )}
 
       <Grid container spacing={3}>
         {/* Left panel - Calculations list */}

@@ -226,9 +226,9 @@ describe('ProspectCompareView', () => {
       expect(closeIcons.length).toBeGreaterThan(0);
       await user.click(closeIcons[0]);
 
-      // Should no longer be in comparison - check for drop placeholder
+      // Should no longer be in comparison - check for empty state placeholder
       await waitFor(() => {
-        expect(within(comparisonZone).queryByText(/drop here/i)).toBeInTheDocument();
+        expect(within(comparisonZone).queryByText(/click to add to comparison/i)).toBeInTheDocument();
       });
     });
   });

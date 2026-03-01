@@ -7,14 +7,19 @@ interface PageMetaProps {
   path: string;
 }
 
-const BASE_URL =
-  import.meta.env.VITE_BASE_URL || 'https://sijoitusasuntoni.fi';
+const getBaseUrl = () => {
+  try {
+    return import.meta.env?.VITE_BASE_URL || 'https://sijoitusasuntoni.fi';
+  } catch {
+    return 'https://sijoitusasuntoni.fi';
+  }
+};
 
 export function PageMeta({ titleKey, descriptionKey, path }: PageMetaProps) {
   const { t, i18n } = useTranslation('seo');
   const title = t(titleKey);
   const description = t(descriptionKey);
-  const url = `${BASE_URL}${path}`;
+  const url = `${getBaseUrl()}${path}`;
 
   return (
     <Helmet>

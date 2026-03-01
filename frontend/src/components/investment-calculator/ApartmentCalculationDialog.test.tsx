@@ -29,7 +29,7 @@ const mockTranslations: Record<string, string> = {
   'investment-calculator:addCalculationError': 'Failed to add calculation',
   'common:save': 'Save',
   'common:cancel': 'Cancel',
-  'common:required': 'Required',
+  'common:validation.required': 'Required',
 };
 
 const mockT = (key: string) => mockTranslations[key] || key;

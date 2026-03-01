@@ -23,6 +23,14 @@ export default {
     "^\\.\\./\\.\\./constants$": "<rootDir>/test/mocks/constants.ts",
     "^\\.\\./\\.\\./\\.\\./constants$": "<rootDir>/test/mocks/constants.ts",
     "^\\.\\./\\.\\./\\.\\./\\.\\./constants$": "<rootDir>/test/mocks/constants.ts",
+    // Mock react-helmet-async for testing
+    "^react-helmet-async$": "<rootDir>/test/mocks/react-helmet-async.tsx",
+    // Mock PageMeta to avoid import.meta.env issues in tests
+    "^(.*)/components/seo/PageMeta(.*)$": "<rootDir>/test/mocks/PageMeta.tsx",
+    // Mock react-auth-kit for testing
+    "^react-auth-kit/hooks/useIsAuthenticated$": "<rootDir>/test/mocks/react-auth-kit.tsx",
+    "^react-auth-kit/hooks/useSignOut$": "<rootDir>/test/mocks/use-sign-out.tsx",
+    "^@auth-kit/react-router/AuthOutlet$": "<rootDir>/test/mocks/auth-outlet.tsx",
   },
   setupFiles: ['<rootDir>/test/jest.polyfills.ts'],
   setupFilesAfterEnv: ['<rootDir>/test/jest.setup.ts'],

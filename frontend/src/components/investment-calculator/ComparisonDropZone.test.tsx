@@ -64,14 +64,14 @@ describe('ComparisonDropZone', () => {
     it('shows empty state placeholder when no calculations are provided', () => {
       renderWithProviders(<ComparisonDropZone {...defaultProps} />);
 
-      expect(screen.getByText('Drop here to compare')).toBeInTheDocument();
+      expect(screen.getByText('Click to add to comparison')).toBeInTheDocument();
     });
 
     it('shows instructional message when empty', () => {
       renderWithProviders(<ComparisonDropZone {...defaultProps} />);
 
       expect(
-        screen.getByText('Select calculations from the list to compare')
+        screen.getByText('Select calculations from the list to compare them')
       ).toBeInTheDocument();
     });
 
@@ -114,7 +114,7 @@ describe('ComparisonDropZone', () => {
         <ComparisonDropZone {...defaultProps} calculations={calculations} />
       );
 
-      expect(screen.queryByText('Drop here to compare')).not.toBeInTheDocument();
+      expect(screen.queryByText('Click to add to comparison')).not.toBeInTheDocument();
     });
 
     it('renders remove button for each calculation', () => {
@@ -259,7 +259,7 @@ describe('ComparisonDropZone', () => {
       );
 
       // When dragging over, may show different text like "Release to add"
-      expect(screen.getByText('Drop here to compare')).toBeInTheDocument();
+      expect(screen.getByText('Click to add to comparison')).toBeInTheDocument();
     });
   });
 
@@ -341,7 +341,7 @@ describe('ComparisonDropZone', () => {
     it('handles empty calculations array', () => {
       renderWithProviders(<ComparisonDropZone {...defaultProps} calculations={[]} />);
 
-      expect(screen.getByText('Drop here to compare')).toBeInTheDocument();
+      expect(screen.getByText('Click to add to comparison')).toBeInTheDocument();
     });
 
     it('handles undefined calculations gracefully', () => {

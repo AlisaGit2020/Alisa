@@ -27,8 +27,8 @@ const investmentCalculator = {
   apartmentSize: 'Asunnon koko (m²)',
   waterCharge: 'Vesimaksu (€/kk)',
   downPayment: 'Käsiraha (€)',
-  loanInterestPercent: 'Lainan korko (%)',
-  loanPeriod: 'Laina-aika (vuotta)',
+  loanInterestPercent: 'Lainan korko',
+  loanPeriod: 'Laina-aika',
 
   // Result section headers
   purchaseCosts: 'Hankintakulut',
@@ -52,7 +52,7 @@ const investmentCalculator = {
   expensesPerMonth: 'Kulut yhteensä/kk',
 
   // Result fields - Returns
-  rentalYieldPercent: 'Bruttotuotto-%',
+  rentalYieldPercent: 'Bruttotuotto',
   cashFlowPerMonth: 'Kassavirta/kk',
   cashFlowAfterTaxPerMonth: 'Kassavirta verojen jälkeen/kk',
   profitPerYear: 'Voitto/vuosi',
@@ -93,14 +93,26 @@ const investmentCalculator = {
   loading: 'Ladataan...',
   errorLoading: 'Laskelmien lataus epäonnistui',
   noCalculationsMessage: 'Luo laskelmia vertaillaksesi sijoitusmahdollisuuksia',
-  unlinkedCalculations: 'Ilman kohdetta',
+  unlinkedCalculations: 'Muut laskelmat',
   maxCalculationsWarning: 'Enintään 5 laskelmaa voidaan vertailla kerralla',
   duplicateWarning: 'Tämä laskelma on jo vertailussa',
   dropHereToCompare: 'Pudota tähän vertaillaksesi',
+  clickToAddToComparison: 'Lisää vertailuun klikkaamalla',
   emptyComparisonMessage: 'Valitse laskelmia listasta vertailtavaksi',
   removeFromComparison: 'Poista vertailusta',
   unlinkedProperty: 'Ei liitettyä kohdetta',
   rentalYield: 'Vuokratuotto',
+
+  // Add calculation dialog
+  addCalculation: 'Lisää laskelma',
+  calculationName: 'Laskelman nimi',
+  calculationNamePlaceholder: 'esim. Skenaario 1',
+  propertyDetails: 'Kohteen tiedot',
+  rentalIncome: 'Vuokratuotto',
+  financing: 'Rahoitus',
+  loanPeriodYears: 'vuotta',
+  addCalculationSuccess: 'Laskelma lisätty onnistuneesti',
+  addCalculationError: 'Laskelman lisäys epäonnistui',
 }
 
 export default investmentCalculator

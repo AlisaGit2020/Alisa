@@ -2,6 +2,7 @@ const route = {
   accepted: "Accepted",
   add: "Add",
   accounting: "Accounting",
+  compare: "Compare",
   showMoreBreadcrumbs: "Show more breadcrumbs",
   own: "My Properties",
   calculations: "Calculations",

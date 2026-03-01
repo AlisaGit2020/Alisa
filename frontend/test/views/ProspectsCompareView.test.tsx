@@ -22,15 +22,84 @@ import { renderWithRouter } from '@test-utils/test-wrapper';
 import ApiClient from '@asset-lib/api-client';
 import { PropertyStatus } from '@asset-types/common';
 
-// Mock translations including the new "click to add" text
+// Mock i18n - define translations inline to avoid hoisting issues
+jest.mock('react-i18next', () => {
+  // Mock translations including the new "click to add" text
+  const translations: Record<string, string> = {
+    // Route translations
+    'route:portfolio': 'Portfolio',
+    'route:prospects': 'Prospects',
+    'route:compare': 'Compare',
+    'route:own': 'My Properties',
+    'route:sold': 'Sold',
+    // Property translations
+    'property:prospectProperties': 'Prospects',
+    'property:ownProperties': 'My Properties',
+    'property:soldProperties': 'Sold',
+    'property:listView': 'List',
+    'property:compareView': 'Compare',
+    'property:noProspects': 'No prospects',
+    'property:add': 'Add',
+    // Investment calculator translations
+    'investment-calculator:prospectCompare': 'Prospect Compare',
+    'investment-calculator:clickToAddToComparison': 'Click to add to comparison',
+    'investment-calculator:emptyComparisonMessage': 'Select calculations from the list to compare them',
+    'investment-calculator:comparison': 'Comparison',
+    'investment-calculator:calculations': 'Calculations',
+    'investment-calculator:noCalculations': 'No saved calculations',
+    'investment-calculator:noCalculationsMessage': 'Create calculations to compare them here',
+    'investment-calculator:unlinkedCalculations': 'Other Calculations',
+    'investment-calculator:errorLoading': 'Error loading calculations',
+    // Common
+    'common:loading': 'Loading...',
+    'common:retry': 'Retry',
+  };
+
+  // Try full key first, then try adding common namespace prefixes
+  const createT = (boundNamespace?: string) => (key: string) => {
+    if (translations[key]) return translations[key];
+    // Try with the bound namespace
+    if (boundNamespace) {
+      const nsKey = `${boundNamespace}:${key}`;
+      if (translations[nsKey]) return translations[nsKey];
+    }
+    // Try with common namespace prefixes
+    const routeKey = `route:${key}`;
+    if (translations[routeKey]) return translations[routeKey];
+    return key;
+  };
+
+  const Trans = ({ children }: { children?: React.ReactNode }) => <>{children}</>;
+  const I18nextProvider = ({ children }: { children?: React.ReactNode }) => <>{children}</>;
+
+  return {
+    useTranslation: (namespace?: string | string[]) => ({
+      t: createT(Array.isArray(namespace) ? namespace[0] : namespace),
+      i18n: {
+        language: 'en',
+        changeLanguage: () => Promise.resolve(),
+      },
+    }),
+    withTranslation: (namespace?: string) => <P extends object>(Component: React.ComponentType<P>) => {
+      const WrappedComponent = (props: Omit<P, 't'>) => {
+        return <Component {...(props as P)} t={createT(namespace)} />;
+      };
+      WrappedComponent.displayName = `withTranslation(${Component.displayName || Component.name})`;
+      return WrappedComponent;
+    },
+    Trans,
+    I18nextProvider,
+    initReactI18next: { type: '3rdParty', init: () => {} },
+  };
+});
+
+// Export translations for use in test assertions
 const mockTranslations: Record<string, string> = {
-  // Route translations
   'route:portfolio': 'Portfolio',
   'route:prospects': 'Prospects',
   'route:compare': 'Compare',
   'route:own': 'My Properties',
   'route:sold': 'Sold',
-  // Property translations
   'property:prospectProperties': 'Prospects',
   'property:ownProperties': 'My Properties',
   'property:soldProperties': 'Sold',
@@ -38,7 +107,6 @@ const mockTranslations: Record<string, string> = {
   'property:compareView': 'Compare',
   'property:noProspects': 'No prospects',
   'property:add': 'Add',
-  // Investment calculator translations
   'investment-calculator:prospectCompare': 'Prospect Compare',
   'investment-calculator:clickToAddToComparison': 'Click to add to comparison',
   'investment-calculator:emptyComparisonMessage': 'Select calculations from the list to compare them',
@@ -48,33 +116,16 @@ const mockTranslations: Record<string, string> = {
   'investment-calculator:noCalculationsMessage': 'Create calculations to compare them here',
   'investment-calculator:unlinkedCalculations': 'Other Calculations',
   'investment-calculator:errorLoading': 'Error loading calculations',
-  // Common
   'common:loading': 'Loading...',
   'common:retry': 'Retry',
 };
 
 const mockT = (key: string) => mockTranslations[key] || key;
 
-// Mock i18n
-jest.mock('react-i18next', () => ({
-  ...jest.requireActual('react-i18next'),
-  useTranslation: () => ({
-    t: mockT,
-    i18n: { language: 'en' },
-  }),
-  withTranslation: () => <P extends object>(Component: React.ComponentType<P>) => {
-    const WrappedComponent = (props: Omit<P, 't'>) => {
-      return <Component {...(props as P)} t={mockT} />;
-    };
-    WrappedComponent.displayName = `withTranslation(${Component.displayName || Component.name})`;
-    return WrappedComponent;
-  },
-}));
-
 // Import the main route component
 // This test verifies the route configuration and component rendering
-// TODO: Import actual route components after implementation
-import AppRoutes from '../../src/components/AppRoutes';
+// Use AppRoutesContent to avoid double router issue (MemoryRouter from test-wrapper + BrowserRouter in AppRoutes)
+import { AppRoutesContent as AppRoutes } from '../../src/components/AppRoutes';
 import ProspectCompareView from '../../src/components/investment-calculator/ProspectCompareView';
 import Breadcrumbs from '../../src/components/layout/Breadcrumbs';
 
@@ -121,21 +172,27 @@ const createMockProperty = (overrides: object = {}) => ({
 describe('Prospects Compare Route', () => {
   let mockSearch: jest.SpyInstance;
   let mockGet: jest.SpyInstance;
+  let mockMe: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockSearch = jest.spyOn(ApiClient, 'search');
     mockGet = jest.spyOn(ApiClient, 'get');
+    // Mock the me() call that AuthInitializer uses
+    mockMe = jest.spyOn(ApiClient, 'me');
+    mockMe.mockResolvedValue({ id: 1, email: 'test@example.com' });
   });
 
   afterEach(() => {
     mockSearch.mockRestore();
     mockGet.mockRestore();
+    mockMe.mockRestore();
   });
 
   describe('Route Configuration', () => {
     it('compare route exists at /app/portfolio/prospects/compare', async () => {
-      mockSearch.mockResolvedValue([]);
+      // Provide a calculation so the full view renders with comparison-panel
+      mockSearch.mockResolvedValue([createMockCalculation()]);
 
       renderWithRouter(<AppRoutes />, {
         initialEntries: ['/app/portfolio/prospects/compare'],
@@ -144,10 +201,7 @@ describe('Prospects Compare Route', () => {
       // Should render the compare view, not a 404 or redirect
       await waitFor(() => {
         // Look for comparison-related content
-        expect(
-          screen.getByTestId('comparison-panel') ||
-          screen.getByText(/comparison/i)
-        ).toBeInTheDocument();
+        expect(screen.getByTestId('comparison-panel')).toBeInTheDocument();
       });
     });
 
@@ -238,7 +292,8 @@ describe('Prospects Compare Route', () => {
 
       await waitFor(() => {
         // Should show translated text "Compare" (from route:compare)
-        expect(screen.getByText('Compare')).toBeInTheDocument();
+        // Note: breadcrumb text includes " / " separator
+        expect(screen.getByText(/Compare/)).toBeInTheDocument();
       });
     });
   });
@@ -325,9 +380,10 @@ describe('Prospects Compare Route', () => {
       const listButton = screen.getByRole('button', { name: /list/i });
       await user.click(listButton);
 
-      // Should switch to list view
+      // Should switch to list view - need to re-query as navigation changes the DOM
       await waitFor(() => {
-        expect(listButton).toHaveAttribute('aria-pressed', 'true');
+        const newListButton = screen.getByRole('button', { name: /list/i });
+        expect(newListButton).toHaveAttribute('aria-pressed', 'true');
       });
     });
   });
@@ -416,7 +472,8 @@ describe('Prospects Compare Route', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Unlinked Calc')).toBeInTheDocument();
-        expect(screen.getByText(/other calculations|unlinked/i)).toBeInTheDocument();
+        // Check for the section header "Other Calculations"
+        expect(screen.getByText('Other Calculations')).toBeInTheDocument();
       });
     });
   });

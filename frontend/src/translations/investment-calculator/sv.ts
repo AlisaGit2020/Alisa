@@ -27,8 +27,8 @@ const investmentCalculator = {
   apartmentSize: 'Bostadens storlek (m²)',
   waterCharge: 'Vattenavgift (€/mån)',
   downPayment: 'Kontantinsats (€)',
-  loanInterestPercent: 'Låneränta (%)',
-  loanPeriod: 'Lånetid (år)',
+  loanInterestPercent: 'Låneränta',
+  loanPeriod: 'Lånetid',
 
   // Result section headers
   purchaseCosts: 'Förvärvskostnader',
@@ -52,7 +52,7 @@ const investmentCalculator = {
   expensesPerMonth: 'Totala kostnader/mån',
 
   // Result fields - Returns
-  rentalYieldPercent: 'Bruttoavkastning %',
+  rentalYieldPercent: 'Bruttoavkastning',
   cashFlowPerMonth: 'Kassaflöde/mån',
   cashFlowAfterTaxPerMonth: 'Kassaflöde efter skatt/mån',
   profitPerYear: 'Vinst/år',
@@ -93,14 +93,26 @@ const investmentCalculator = {
   loading: 'Laddar...',
   errorLoading: 'Fel vid laddning av beräkningar',
   noCalculationsMessage: 'Skapa beräkningar för att jämföra investeringsmöjligheter',
-  unlinkedCalculations: 'Olänkade',
+  unlinkedCalculations: 'Andra beräkningar',
   maxCalculationsWarning: 'Maximalt 5 beräkningar kan jämföras samtidigt',
   duplicateWarning: 'Denna beräkning finns redan i jämförelsen',
   dropHereToCompare: 'Släpp här för att jämföra',
-  emptyComparisonMessage: 'Välj beräkningar från listan för att jämföra',
+  clickToAddToComparison: 'Klicka för att lägga till i jämförelsen',
+  emptyComparisonMessage: 'Välj beräkningar från listan för att jämföra dem',
   removeFromComparison: 'Ta bort från jämförelse',
   unlinkedProperty: 'Ingen fastighet länkad',
   rentalYield: 'Hyresavkastning',
+
+  // Add calculation dialog
+  addCalculation: 'Lägg till beräkning',
+  calculationName: 'Beräkningsnamn',
+  calculationNamePlaceholder: 't.ex. Scenario 1',
+  propertyDetails: 'Fastighetsdetaljer',
+  rentalIncome: 'Hyresintäkter',
+  financing: 'Finansiering',
+  loanPeriodYears: 'år',
+  addCalculationSuccess: 'Beräkning tillagd',
+  addCalculationError: 'Kunde inte lägga till beräkning',
 }
 
 export default investmentCalculator
