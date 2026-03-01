@@ -62,8 +62,33 @@ describe('ProspectCompareView', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSearch = jest.spyOn(ApiClient, 'search');
+    mockSearch = jest.spyOn(ApiClient, 'search').mockImplementation(
+      async (endpoint: string) => {
+        if (endpoint === 'real-estate/investment') {
+          return [];
+        }
+        if (endpoint === 'real-estate/property/search') {
+          return [];
+        }
+        return [];
+      }
+    );
   });
+
+  const setupMocks = (options: {
+    calculations?: object[];
+    prospects?: object[];
+  }) => {
+    mockSearch.mockImplementation(async (endpoint: string) => {
+      if (endpoint === 'real-estate/investment') {
+        return options.calculations ?? [];
+      }
+      if (endpoint === 'real-estate/property/search') {
+        return options.prospects ?? [];
+      }
+      return [];
+    });
+  };
 
   afterEach(() => {
     mockSearch.mockRestore();
@@ -190,6 +215,21 @@ describe('ProspectCompareView', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Unlinked Calc')).toBeInTheDocument();
+      });
+    });
+
+    it('shows prospects without calculations', async () => {
+      const prospect = createMockProperty({
+        id: 99,
+        name: 'Empty Prospect',
+        address: { street: 'Empty Street 1', city: 'Helsinki', postalCode: '00100' },
+      });
+      setupMocks({ calculations: [], prospects: [prospect] });
+
+      renderWithProviders(<ProspectCompareView />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Empty Prospect')).toBeInTheDocument();
       });
     });
   });
