@@ -245,6 +245,26 @@ describe('ProspectCompareView', () => {
         expect(screen.getByRole('button', { name: /add calculation/i })).toBeInTheDocument();
       });
     });
+
+    it('opens InvestmentAddDialog when Add Calculation clicked', async () => {
+      const user = userEvent.setup();
+      const prospect = createMockProperty({ id: 1, name: 'Test Prospect' });
+      setupMocks({ calculations: [], prospects: [prospect] });
+
+      renderWithProviders(<ProspectCompareView />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /add calculation/i })).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByRole('button', { name: /add calculation/i }));
+
+      // Dialog should open with the property name in title or form
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+      });
+      expect(screen.getByText(/new calculation/i)).toBeInTheDocument();
+    });
   });
 
   describe('Selection and Comparison', () => {
