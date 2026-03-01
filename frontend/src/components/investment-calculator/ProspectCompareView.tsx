@@ -19,6 +19,7 @@ import { AssetButton, useToast } from '../asset';
 import ApiClient from '@asset-lib/api-client';
 import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
 import { Property } from '@asset-types';
+import { PropertyStatus } from '@asset-types/common';
 import CalculationListItem from './CalculationListItem';
 import ComparisonDropZone from './ComparisonDropZone';
 
@@ -39,6 +40,9 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
   const navigate = useNavigate();
 
   const [calculations, setCalculations] = useState<CalculationWithProperty[]>([]);
+  // TODO: prospects will be used in Task 4 to display all prospects grouped with calculations
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [prospects, setProspects] = useState<Property[]>([]);
   const [comparisonCalculations, setComparisonCalculations] = useState<SavedInvestmentCalculation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -47,13 +51,21 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
     setLoading(true);
     setError(false);
     try {
-      const data = await ApiClient.search<CalculationWithProperty>('real-estate/investment', {
-        relations: { property: { address: true } },
-        order: { name: 'ASC' },
-      });
-      setCalculations(data);
+      const [calculationsData, prospectsData] = await Promise.all([
+        ApiClient.search<CalculationWithProperty>('real-estate/investment', {
+          relations: { property: { address: true } },
+          order: { name: 'ASC' },
+        }),
+        ApiClient.search<Property>('real-estate/property/search', {
+          where: { status: PropertyStatus.PROSPECT },
+          relations: { address: true },
+          order: { name: 'ASC' },
+        }),
+      ]);
+      setCalculations(calculationsData);
+      setProspects(prospectsData);
     } catch (err) {
-      console.error('Failed to fetch calculations:', err);
+      console.error('Failed to fetch data:', err);
       setError(true);
     } finally {
       setLoading(false);
