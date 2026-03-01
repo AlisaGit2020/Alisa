@@ -743,8 +743,8 @@ describe('Prospect Add Choice Dialog', () => {
       initialEntries: ['/app/portfolio/prospects'],
     });
 
-    const addLink = await screen.findByRole('link', { name: /add/i });
-    await user.click(addLink);
+    const addButton = await screen.findByRole('button', { name: /add/i });
+    await user.click(addButton);
 
     expect(screen.getByText(/add prospect property/i)).toBeInTheDocument();
   });
@@ -755,8 +755,8 @@ describe('Prospect Add Choice Dialog', () => {
       initialEntries: ['/app/portfolio/prospects'],
     });
 
-    const addLink = await screen.findByRole('link', { name: /add/i });
-    await user.click(addLink);
+    const addButton = await screen.findByRole('button', { name: /add/i });
+    await user.click(addButton);
 
     await user.click(screen.getByText(/fill in form manually/i));
 
@@ -766,15 +766,30 @@ describe('Prospect Add Choice Dialog', () => {
     });
   });
 
-  it('does not show dialog for Own properties tab', async () => {
+  it('Own tab has Add button that navigates directly to form', async () => {
     renderWithRouter(<Properties />, {
       initialEntries: ['/app/portfolio/own'],
     });
 
-    // On Own tab, clicking Add should navigate directly, not show dialog
-    const addLink = await screen.findByRole('link', { name: /add/i });
-    // Verify it's a normal link without the dialog behavior
-    expect(addLink).toHaveAttribute('href', '/app/portfolio/own/add');
+    // Should have an AssetButton (not a link inside card list)
+    const addButton = await screen.findByRole('button', { name: /add/i });
+    expect(addButton).toBeInTheDocument();
+
+    // Should NOT have an "Add" link inside the card list
+    expect(screen.queryByRole('link', { name: /add/i })).not.toBeInTheDocument();
+  });
+
+  it('clicking Add on Own tab navigates to form without dialog', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<Properties />, {
+      initialEntries: ['/app/portfolio/own'],
+    });
+
+    const addButton = await screen.findByRole('button', { name: /add/i });
+    await user.click(addButton);
+
+    // Should NOT show the choice dialog
+    expect(screen.queryByText(/add prospect property/i)).not.toBeInTheDocument();
   });
 });
 

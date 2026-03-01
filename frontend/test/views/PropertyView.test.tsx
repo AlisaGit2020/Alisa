@@ -116,7 +116,7 @@ describe('Properties Integration', () => {
       expect(deleteButtons).toHaveLength(2);
     });
 
-    it('displays add property link', async () => {
+    it('displays add property button', async () => {
       mockSearch.mockResolvedValue(mockProperties);
 
       renderWithProviders(<Properties />);
@@ -126,10 +126,9 @@ describe('Properties Integration', () => {
         expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
 
-      // Verify add link is present (defaults to own tab)
-      const addLink = screen.getByRole('link', { name: /add new property/i });
-      expect(addLink).toBeInTheDocument();
-      expect(addLink).toHaveAttribute('href', '/app/portfolio/own/add');
+      // Verify add button is present (defaults to own tab)
+      const addButton = screen.getByRole('button', { name: /add/i });
+      expect(addButton).toBeInTheDocument();
     });
 
     it('opens delete confirmation dialog when delete button clicked', async () => {
@@ -264,9 +263,9 @@ describe('Properties Integration', () => {
         expect(screen.getByText(/no.*rows.*found|noRowsFound/i)).toBeInTheDocument();
       });
 
-      // Verify add link is still present
-      const addLink = screen.getByRole('link', { name: /add new property/i });
-      expect(addLink).toBeInTheDocument();
+      // Verify add button is still present
+      const addButton = screen.getByRole('button', { name: /add/i });
+      expect(addButton).toBeInTheDocument();
     });
   });
 

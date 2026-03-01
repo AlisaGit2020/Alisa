@@ -5,9 +5,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
 import SellIcon from "@mui/icons-material/Sell";
+import AddIcon from "@mui/icons-material/Add";
 import { Property } from "@asset-types";
 import { PropertyStatus } from "@asset-types/common";
 import AssetCardList from "../asset/AssetCardList";
+import { AssetButton } from "../asset";
 import { propertyContext } from "@asset-lib/asset-contexts";
 import { CardGridPageTemplate } from "../templates";
 import { PROPERTY_LIST_CHANGE_EVENT } from "../layout/PropertyBadge";
@@ -75,6 +77,10 @@ function Properties({ t }: WithTranslation) {
     setAddDialogOpen(true);
   };
 
+  const handleOwnAddClick = () => {
+    navigate(`${BASE_PATH}/${ROUTE_OWN}/add`);
+  };
+
   const handleAddDialogClose = () => {
     setAddDialogOpen(false);
   };
@@ -87,7 +93,8 @@ function Properties({ t }: WithTranslation) {
 
   const handleManualAdd = () => {
     setAddDialogOpen(false);
-    navigate(`${BASE_PATH}/${ROUTE_PROSPECT}/add`);
+    const route = getRouteFromTabIndex(tabIndex);
+    navigate(`${BASE_PATH}/${route}/add`);
   };
 
   const getStatusForTab = (index: number): PropertyStatus => {
@@ -158,6 +165,13 @@ function Properties({ t }: WithTranslation) {
         {!loading && (
           <>
             <TabPanel value={tabIndex} index={TAB_OWN}>
+              <Box sx={{ mb: 2 }}>
+                <AssetButton
+                  label={t("add")}
+                  startIcon={<AddIcon />}
+                  onClick={handleOwnAddClick}
+                />
+              </Box>
               <Grid container>
                 <Grid size={{ xs: 12, lg: 12 }}>
                   <AssetCardList<Property>
@@ -167,6 +181,7 @@ function Properties({ t }: WithTranslation) {
                     fetchOptions={buildFetchOptions(TAB_OWN)}
                     onAfterDelete={handleAfterDelete}
                     routePrefix={ROUTE_OWN}
+                    hideAddLink={true}
                   />
                 </Grid>
               </Grid>

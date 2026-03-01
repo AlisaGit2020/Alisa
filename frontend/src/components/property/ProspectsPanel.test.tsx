@@ -4,7 +4,6 @@ import '@testing-library/jest-dom';
 import { renderWithRouter } from '@test-utils/test-wrapper';
 import ApiClient from '@asset-lib/api-client';
 import { PropertyStatus } from '@asset-types/common';
-import React from 'react';
 
 // Mock translations
 const mockTranslations: Record<string, string> = {
@@ -174,8 +173,29 @@ describe('ProspectsPanel', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByRole('link', { name: /add/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /add/i })).toBeInTheDocument();
       });
+    });
+
+    it('calls onAddClick when Add button is clicked without navigating', async () => {
+      const user = userEvent.setup();
+      const mockOnAddClick = jest.fn();
+      mockSearch.mockResolvedValue([]);
+
+      renderWithRouter(<ProspectsPanel onAddClick={mockOnAddClick} />, {
+        initialEntries: ['/app/portfolio/prospects'],
+      });
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /add/i })).toBeInTheDocument();
+      });
+
+      const addButton = screen.getByRole('button', { name: /add/i });
+      await user.click(addButton);
+
+      expect(mockOnAddClick).toHaveBeenCalledTimes(1);
+      // Should NOT have navigated - we should still be on the same page
+      expect(screen.getByRole('button', { name: /add/i })).toBeInTheDocument();
     });
   });
 

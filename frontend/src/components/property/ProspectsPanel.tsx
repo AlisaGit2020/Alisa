@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams, Link as RouterLink } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
   Box,
   Grid,
@@ -132,8 +132,6 @@ function ProspectsPanel({ onAddClick, refreshKey = 0 }: ProspectsPanelProps) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {view === VIEW_LIST && (
             <AssetButton
-              component={RouterLink}
-              to="/app/portfolio/prospects/add"
               label={t('property:add')}
               startIcon={<AddIcon />}
               onClick={handleAddClick}
