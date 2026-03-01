@@ -17,13 +17,14 @@ import Expenses from "./accounting/expenses/Expenses.tsx";
 import Incomes from "./accounting/incomes/Incomes.tsx";
 import LandingPageRouter from "./landing/LandingPageRouter";
 import InvestmentCalculatorPublic from "./investment-calculator/InvestmentCalculatorPublic";
+import ProspectCompareView from "./investment-calculator/ProspectCompareView";
 import PublicLayout from "./layout/PublicLayout";
 import ProtectedLayout from "./layout/ProtectedLayout";
 import { FinanceHub, ReportsHub } from "./hub";
 
-export default function AppRoutes() {
+// Export AppRoutesContent for testing (use with MemoryRouter in tests)
+export function AppRoutesContent() {
   return (
-    <BrowserRouter>
       <Routes>
         {/* Public routes - no app chrome */}
         <Route element={<PublicLayout />}>
@@ -44,15 +45,16 @@ export default function AppRoutes() {
             <Route path="portfolio/own/edit/:idParam" element={<PropertyForm />} />
             <Route path="portfolio/own/:idParam" element={<PropertyView />} />
             <Route path="portfolio/prospects" element={<Properties />} />
+            <Route path="portfolio/prospects/compare" element={<ProspectCompareView standalone />} />
             <Route path="portfolio/prospects/add" element={<PropertyForm />} />
             <Route path="portfolio/prospects/edit/:idParam" element={<PropertyForm />} />
             <Route path="portfolio/prospects/:idParam" element={<PropertyView />} />
             <Route path="portfolio/sold" element={<Properties />} />
             <Route path="portfolio/sold/edit/:idParam" element={<PropertyForm />} />
             <Route path="portfolio/sold/:idParam" element={<PropertyView />} />
-            <Route path="portfolio/investment-calculator" element={<Properties />} />
             {/* Backward compatibility: old routes */}
-            <Route path="portfolio/investment-calculations" element={<Navigate to="/app/portfolio/investment-calculator" replace />} />
+            <Route path="portfolio/investment-calculator" element={<Navigate to="/app/portfolio/prospects" replace />} />
+            <Route path="portfolio/investment-calculations" element={<Navigate to="/app/portfolio/prospects" replace />} />
             <Route path="portfolio/properties/*" element={<Navigate to="/app/portfolio/own" replace />} />
 
             {/* Finance routes - nested under /app/finance */}
@@ -75,7 +77,7 @@ export default function AppRoutes() {
             <Route path="transactions/*" element={<Navigate to="/app/finance/transactions" replace />} />
             <Route path="properties" element={<Navigate to="/app/portfolio/own" replace />} />
             <Route path="properties/*" element={<Navigate to="/app/portfolio/own" replace />} />
-            <Route path="investment-calculations" element={<Navigate to="/app/portfolio/investment-calculator" replace />} />
+            <Route path="investment-calculations" element={<Navigate to="/app/portfolio/prospects" replace />} />
             <Route path="report" element={<Navigate to="/app/reports/property" replace />} />
             <Route path="tax" element={<Navigate to="/app/reports/tax" replace />} />
 
@@ -83,6 +85,13 @@ export default function AppRoutes() {
           </Route>
         </Route>
       </Routes>
+  );
+}
+
+export default function AppRoutes() {
+  return (
+    <BrowserRouter>
+      <AppRoutesContent />
     </BrowserRouter>
   );
 }

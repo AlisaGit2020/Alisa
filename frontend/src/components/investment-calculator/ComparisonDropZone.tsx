@@ -58,7 +58,7 @@ function ComparisonDropZone({
           }}
         >
           <Typography variant="h6" color="text.secondary" gutterBottom>
-            {t('investment-calculator:dropHereToCompare')}
+            {t('investment-calculator:clickToAddToComparison')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {t('investment-calculator:emptyComparisonMessage')}

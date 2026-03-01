@@ -2,6 +2,7 @@ const route = {
   accepted: "Hyväksytyt",
   add: "Uusi",
   accounting: "Kirjanpito",
+  compare: "Vertailu",
   showMoreBreadcrumbs: "Näytä lisää polkuja",
   own: "Omat asunnot",
   calculations: "Laskelmat",

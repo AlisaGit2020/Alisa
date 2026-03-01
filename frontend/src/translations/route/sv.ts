@@ -2,6 +2,7 @@ const route = {
   accepted: "Godkända",
   add: "Ny",
   accounting: "Bokföring",
+  compare: "Jämför",
   showMoreBreadcrumbs: "Visa fler sökvägar",
   own: "Mina fastigheter",
   calculations: "Beräkningar",

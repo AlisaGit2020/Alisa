@@ -27,8 +27,8 @@ const investmentCalculator = {
   apartmentSize: 'Apartment size (m²)',
   waterCharge: 'Water charge (€/month)',
   downPayment: 'Down payment (€)',
-  loanInterestPercent: 'Loan interest (%)',
-  loanPeriod: 'Loan period (years)',
+  loanInterestPercent: 'Loan interest',
+  loanPeriod: 'Loan period',
 
   // Result section headers
   purchaseCosts: 'Purchase costs',
@@ -52,7 +52,7 @@ const investmentCalculator = {
   expensesPerMonth: 'Total expenses/month',
 
   // Result fields - Returns
-  rentalYieldPercent: 'Gross yield %',
+  rentalYieldPercent: 'Gross yield',
   cashFlowPerMonth: 'Cash flow/month',
   cashFlowAfterTaxPerMonth: 'Cash flow after tax/month',
   profitPerYear: 'Profit/year',
@@ -93,14 +93,26 @@ const investmentCalculator = {
   loading: 'Loading...',
   errorLoading: 'Error loading calculations',
   noCalculationsMessage: 'Create calculations to compare investment opportunities',
-  unlinkedCalculations: 'Unlinked',
+  unlinkedCalculations: 'Other Calculations',
   maxCalculationsWarning: 'Maximum 5 calculations can be compared at once',
   duplicateWarning: 'This calculation is already in the comparison',
   dropHereToCompare: 'Drop here to compare',
-  emptyComparisonMessage: 'Select calculations from the list to compare',
+  clickToAddToComparison: 'Click to add to comparison',
+  emptyComparisonMessage: 'Select calculations from the list to compare them',
   removeFromComparison: 'Remove from comparison',
   unlinkedProperty: 'No property linked',
   rentalYield: 'Rental yield',
+
+  // Add calculation dialog
+  addCalculation: 'Add Calculation',
+  calculationName: 'Calculation Name',
+  calculationNamePlaceholder: 'e.g., Scenario 1',
+  propertyDetails: 'Property Details',
+  rentalIncome: 'Rental Income',
+  financing: 'Financing',
+  loanPeriodYears: 'years',
+  addCalculationSuccess: 'Calculation added successfully',
+  addCalculationError: 'Failed to add calculation',
 }
 
 export default investmentCalculator

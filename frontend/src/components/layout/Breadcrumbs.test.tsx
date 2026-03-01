@@ -12,9 +12,10 @@ describe('Breadcrumbs', () => {
       initialEntries: ['/app/dashboard'],
     });
 
-    // Should show "Dashboard" but not "app"
+    // Should show translated text (e.g., "Overview") but not "app"
     expect(screen.queryByText(/app/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/Dashboard/i)).toBeInTheDocument();
+    // The translation for "dashboard" is "Overview" in the route translations
+    expect(screen.getByText(/Overview/i)).toBeInTheDocument();
   });
 
   it('should construct breadcrumb links with /app prefix for protected routes', () => {
@@ -276,7 +277,8 @@ describe('Breadcrumbs', () => {
       // Should show all items, no ellipsis button
       expect(screen.queryByLabelText(/showMoreBreadcrumbs|show more breadcrumbs/i)).not.toBeInTheDocument();
       expect(screen.getByText(/portfolio/i)).toBeInTheDocument();
-      expect(screen.getByText(/own/i)).toBeInTheDocument();
+      // "own" is translated to "My Properties" in route translations
+      expect(screen.getByText(/My Properties/i)).toBeInTheDocument();
     });
 
     it('should collapse middle items when breadcrumb has more than 3 items on mobile', async () => {
