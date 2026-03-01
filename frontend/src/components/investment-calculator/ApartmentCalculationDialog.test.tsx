@@ -17,7 +17,7 @@ const mockTranslations: Record<string, string> = {
   'investment-calculator:deptFreePrice': 'Debt-free Price',
   'investment-calculator:rentPerMonth': 'Monthly Rent',
   'investment-calculator:maintenanceFee': 'Maintenance Fee',
-  'investment-calculator:chargeForFinancialCosts': 'Financial Costs',
+  'investment-calculator:financialCharge': 'Financial Costs',
   'investment-calculator:downPayment': 'Down Payment',
   'investment-calculator:loanInterestPercent': 'Loan Interest',
   'investment-calculator:loanPeriod': 'Loan Period',
@@ -63,7 +63,7 @@ const createMockProperty = (overrides: Partial<Property> = {}): Property => ({
   purchasePrice: 150000,
   monthlyRent: 850,
   maintenanceFee: 200,
-  chargeForFinancialCosts: 50,
+  financialCharge: 50,
   ...overrides,
 });
 
@@ -174,7 +174,7 @@ describe('ApartmentCalculationDialog', () => {
     });
 
     it('pre-fills financial costs charge from property', () => {
-      const property = createMockProperty({ chargeForFinancialCosts: 75 });
+      const property = createMockProperty({ financialCharge: 75 });
 
       renderWithProviders(
         <ApartmentCalculationDialog {...defaultProps} property={property} />
@@ -643,7 +643,7 @@ describe('ApartmentCalculationDialog - Property Group Integration', () => {
       purchasePrice: 150000,
       monthlyRent: 850,
       maintenanceFee: 200,
-      chargeForFinancialCosts: 50,
+      financialCharge: 50,
     },
     onClose: jest.fn(),
     onSave: jest.fn(),

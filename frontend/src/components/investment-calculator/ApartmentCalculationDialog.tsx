@@ -130,7 +130,7 @@ function ApartmentCalculationDialog({
     deptShare: 0,
     transferTaxPercent: 2,
     maintenanceFee: property?.maintenanceFee ?? 200,
-    chargeForFinancialCosts: property?.chargeForFinancialCosts ?? 50,
+    chargeForFinancialCosts: property?.financialCharge ?? 50,
     rentPerMonth: property?.monthlyRent ?? 800,
     apartmentSize: property?.size ?? 50,
     waterCharge: 20,
@@ -138,7 +138,7 @@ function ApartmentCalculationDialog({
     loanInterestPercent: 4,
     loanPeriod: 25,
     propertyId: property?.id,
-  }), [property?.purchasePrice, property?.maintenanceFee, property?.chargeForFinancialCosts, property?.monthlyRent, property?.size, property?.id]);
+  }), [property?.purchasePrice, property?.maintenanceFee, property?.financialCharge, property?.monthlyRent, property?.size, property?.id]);
 
   const [data, setData] = useState<InvestmentCalculationInput>(getDefaultData());
   const [saving, setSaving] = useState(false);
@@ -186,11 +186,13 @@ function ApartmentCalculationDialog({
     setNameError(false);
 
     try {
-      const result = await ApiClient.post<SavedCalculation>('real-estate/investment', {
+      const requestData = {
         ...data,
         propertyId: property?.id,
-      });
-      onSave(result);
+      };
+      const result = await ApiClient.post<typeof requestData>('real-estate/investment', requestData);
+      // The API returns the saved calculation with id
+      onSave(result as unknown as SavedCalculation);
       onClose();
     } catch (err) {
       console.error('Failed to save calculation:', err);
