@@ -24,6 +24,7 @@ import ApiClient from '@asset-lib/api-client';
 import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
 import { Property } from '@asset-types';
 import { PropertyStatus } from '@asset-types/common';
+import { useUser } from '@asset-lib/user-context';
 import CalculationListItem from './CalculationListItem';
 import ComparisonDropZone from './ComparisonDropZone';
 import InvestmentAddDialog from '../property/sections/InvestmentAddDialog';
@@ -39,18 +40,25 @@ interface ProspectCompareViewProps {
   standalone?: boolean;
 }
 
+const STORAGE_KEY_PREFIX = 'prospect-compare-selections-';
+
 function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
   const { t } = useTranslation(['investment-calculator', 'common', 'property']);
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const { user } = useUser();
 
   const [calculations, setCalculations] = useState<CalculationWithProperty[]>([]);
   const [prospects, setProspects] = useState<Property[]>([]);
-  const [comparisonCalculations, setComparisonCalculations] = useState<SavedInvestmentCalculation[]>([]);
+  const [comparisonCalculations, setComparisonCalculations] = useState<CalculationWithProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [addDialogProperty, setAddDialogProperty] = useState<Property | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const [selectionsLoaded, setSelectionsLoaded] = useState(false);
+
+  // Get user-specific storage key
+  const storageKey = user?.id ? `${STORAGE_KEY_PREFIX}${user.id}` : null;
 
   const fetchCalculations = useCallback(async () => {
     setLoading(true);
@@ -80,6 +88,39 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
   useEffect(() => {
     fetchCalculations();
   }, [fetchCalculations]);
+
+  // Load saved selections from localStorage when calculations are fetched
+  useEffect(() => {
+    if (!storageKey || loading || selectionsLoaded || calculations.length === 0) return;
+
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const savedIds: number[] = JSON.parse(saved);
+        // Map saved IDs back to full calculation objects
+        const restoredCalculations = savedIds
+          .map((id) => calculations.find((c) => c.id === id))
+          .filter((c): c is CalculationWithProperty => c !== undefined)
+          .slice(0, MAX_CALCULATIONS);
+        setComparisonCalculations(restoredCalculations);
+      }
+    } catch (err) {
+      console.error('Failed to load saved selections:', err);
+    }
+    setSelectionsLoaded(true);
+  }, [storageKey, loading, calculations, selectionsLoaded]);
+
+  // Save selections to localStorage when they change
+  useEffect(() => {
+    if (!storageKey || !selectionsLoaded) return;
+
+    try {
+      const ids = comparisonCalculations.map((c) => c.id);
+      localStorage.setItem(storageKey, JSON.stringify(ids));
+    } catch (err) {
+      console.error('Failed to save selections:', err);
+    }
+  }, [storageKey, comparisonCalculations, selectionsLoaded]);
 
   const handleAddToComparison = useCallback(
     (calculation: CalculationWithProperty) => {
@@ -399,7 +440,7 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
         buttonTextCancel={t('common:cancel')}
         buttonTextConfirm={t('common:confirm')}
         onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
+        onClose={handleDeleteCancel}
       />
     </Box>
   );

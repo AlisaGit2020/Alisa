@@ -72,6 +72,7 @@ const en = {
     confirmDeleteMessage: "This action cannot be undone.",
     dataNotSelected: "Select",
     delete: "Delete",
+    deleted: "Deleted",
     description: "Description",
     edit: "Edit",
     externalId: "External id",

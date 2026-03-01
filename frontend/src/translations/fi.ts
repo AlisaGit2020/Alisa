@@ -73,6 +73,7 @@ const fi = {
     dataNotSelected: "Valitse",
     description: "Kuvaus",
     delete: "Poista",
+    deleted: "Poistettu",
     edit: "Muokkaa",
     externalId: "Ulkoinen tunniste",
     id: "Tunniste",

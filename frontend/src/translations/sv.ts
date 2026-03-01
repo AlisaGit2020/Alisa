@@ -72,6 +72,7 @@ const sv = {
     confirmDeleteMessage: "Denna åtgärd kan inte ångras.",
     dataNotSelected: "Välj",
     delete: "Ta bort",
+    deleted: "Borttagen",
     description: "Beskrivning",
     edit: "Redigera",
     externalId: "Externt id",
