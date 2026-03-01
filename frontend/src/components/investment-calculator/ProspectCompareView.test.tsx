@@ -234,6 +234,19 @@ describe('ProspectCompareView', () => {
     });
   });
 
+  describe('Add Calculation', () => {
+    it('shows Add Calculation button for each prospect', async () => {
+      const prospect = createMockProperty({ id: 1, name: 'Test Prospect' });
+      setupMocks({ calculations: [], prospects: [prospect] });
+
+      renderWithProviders(<ProspectCompareView />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /add calculation/i })).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('Selection and Comparison', () => {
     it('selecting a calculation adds it to comparison', async () => {
       const user = userEvent.setup();
