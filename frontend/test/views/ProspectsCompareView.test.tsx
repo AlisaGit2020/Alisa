@@ -181,7 +181,7 @@ describe('Prospects Compare Route', () => {
       if (endpoint === 'real-estate/investment') {
         return options.calculations ?? [];
       }
-      if (endpoint === 'real-estate/property/search') {
+      if (endpoint === 'real-estate/property') {
         return options.prospects ?? [];
       }
       return [];

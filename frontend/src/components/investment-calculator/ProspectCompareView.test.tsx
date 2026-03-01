@@ -67,7 +67,7 @@ describe('ProspectCompareView', () => {
         if (endpoint === 'real-estate/investment') {
           return [];
         }
-        if (endpoint === 'real-estate/property/search') {
+        if (endpoint === 'real-estate/property') {
           return [];
         }
         return [];
@@ -83,7 +83,7 @@ describe('ProspectCompareView', () => {
       if (endpoint === 'real-estate/investment') {
         return options.calculations ?? [];
       }
-      if (endpoint === 'real-estate/property/search') {
+      if (endpoint === 'real-estate/property') {
         return options.prospects ?? [];
       }
       return [];
@@ -162,7 +162,7 @@ describe('ProspectCompareView', () => {
 
       await waitFor(() => {
         expect(mockSearch).toHaveBeenCalledWith(
-          'real-estate/property/search',
+          'real-estate/property',
           expect.objectContaining({
             where: { status: PropertyStatus.PROSPECT },
           })

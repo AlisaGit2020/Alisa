@@ -60,7 +60,7 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
           relations: { property: { address: true } },
           order: { name: 'ASC' },
         }),
-        ApiClient.search<Property>('real-estate/property/search', {
+        ApiClient.search<Property>('real-estate/property', {
           where: { status: PropertyStatus.PROSPECT },
           relations: { address: true },
           order: { name: 'ASC' },
