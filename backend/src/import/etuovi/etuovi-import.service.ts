@@ -61,7 +61,11 @@ interface EtuoviPropertyData {
       defaultName?: string;
     };
     postCode?: string;
+    district?: {
+      defaultName?: string;
+    };
   };
+  districtNameFreeForm?: string;
   images?: Record<string, EtuoviImageEntry>;
 }
 
@@ -230,9 +234,11 @@ export class EtuoviImportService {
     result.condition = jsonData.condition || undefined;
     result.energyClass = jsonData.energyClass || undefined;
 
-    // Parse city and postal code from location
+    // Parse city, postal code and district from location
     result.city = jsonData.location?.municipality?.defaultName || undefined;
     result.postalCode = jsonData.location?.postCode || undefined;
+    // Parse district: prefer location.district.defaultName, fallback to districtNameFreeForm
+    result.district = jsonData.location?.district?.defaultName || jsonData.districtNameFreeForm || undefined;
 
     // Parse default image URL (image with lowest ordinal from object)
     if (jsonData.images && typeof jsonData.images === 'object') {
@@ -408,6 +414,21 @@ export class EtuoviImportService {
       result.location.postCode = postCodeMatch[1];
     }
 
+    // Extract district from location.district.defaultName
+    const districtMatch = html.match(/"district":\{[^}]*"defaultName":"([^"]+)"/);
+    if (districtMatch) {
+      result.location = result.location || {};
+      result.location.district = { defaultName: this.unescapeUnicode(districtMatch[1]) };
+    }
+
+    // Extract districtNameFreeForm as fallback
+    if (!result.location?.district?.defaultName) {
+      const districtFreeFormMatch = html.match(/"districtNameFreeForm":"([^"]+)"/);
+      if (districtFreeFormMatch) {
+        result.districtNameFreeForm = this.unescapeUnicode(districtFreeFormMatch[1]);
+      }
+    }
+
     // Extract images object (Etuovi uses object with IDs as keys)
     const imagesMatch = html.match(/"images":\{([^}]+(?:\{[^}]*\}[^}]*)*)\}/);
     if (imagesMatch) {
@@ -528,6 +549,7 @@ export class EtuoviImportService {
 
     address.city = etuoviData.city;
     address.postalCode = etuoviData.postalCode;
+    address.district = etuoviData.district;
 
     return address;
   }
