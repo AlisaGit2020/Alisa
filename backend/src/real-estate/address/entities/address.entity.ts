@@ -13,4 +13,7 @@ export class Address {
 
   @Column({ nullable: true })
   public postalCode?: string;
+
+  @Column({ nullable: true })
+  public district?: string;
 }

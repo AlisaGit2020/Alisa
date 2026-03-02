@@ -355,6 +355,7 @@ export class PropertyService {
     if (input.address !== undefined && input.address !== null) {
       if (
         input.address.street ||
+        input.address.district ||
         input.address.city ||
         input.address.postalCode
       ) {
@@ -363,6 +364,7 @@ export class PropertyService {
           address.id = property.address.id;
         }
         address.street = input.address.street;
+        address.district = input.address.district;
         address.city = input.address.city;
         address.postalCode = input.address.postalCode;
         property.address = address;

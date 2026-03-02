@@ -22,6 +22,7 @@ export interface AddressInput {
   street?: string;
   city?: string;
   postalCode?: string;
+  district?: string;
 }
 
 // Property input

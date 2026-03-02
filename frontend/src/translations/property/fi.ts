@@ -36,6 +36,7 @@ const property = {
     address: 'Osoite',
     city: 'Kaupunki',
     postalCode: 'Postinumero',
+    district: 'Kaupunginosa',
     buildYear: 'Rakennusvuosi',
     apartmentType: 'Huoneistotyyppi',
     noDescription: 'Ei kuvausta',

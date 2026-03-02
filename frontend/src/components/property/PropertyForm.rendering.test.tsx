@@ -100,4 +100,52 @@ describe('PropertyForm rendering', () => {
       });
     });
   });
+
+  // District field tests (TDD - implementation does not exist yet)
+  describe('district field', () => {
+    it('renders district input field in the form', async () => {
+      renderWithRouter(<PropertyForm />, { initialEntries: ['/app/portfolio/own/add'] });
+
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
+      });
+
+      // Should have a district field
+      // This test should FAIL because district field doesn't exist yet
+      expect(screen.getByLabelText(/district/i)).toBeInTheDocument();
+    });
+
+    it('updates district when user types', async () => {
+      const user = userEvent.setup();
+      renderWithRouter(<PropertyForm />, { initialEntries: ['/app/portfolio/own/add'] });
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
+      });
+
+      // Find and interact with district field
+      // This test should FAIL because district field doesn't exist yet
+      const districtField = screen.getByLabelText(/district/i);
+      await user.type(districtField, 'Kallio');
+
+      expect(districtField).toHaveValue('Kallio');
+    });
+
+    it('district field is in the location/address section', async () => {
+      renderWithRouter(<PropertyForm />, { initialEntries: ['/app/portfolio/own/add'] });
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
+      });
+
+      // The district field should be near the city field (they're both location-related)
+      const cityField = screen.getByLabelText(/city/i);
+      const districtField = screen.getByLabelText(/district/i);
+
+      // Both fields should exist
+      expect(cityField).toBeInTheDocument();
+      expect(districtField).toBeInTheDocument();
+    });
+  });
 });

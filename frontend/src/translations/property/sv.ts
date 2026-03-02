@@ -36,6 +36,7 @@ const property = {
     address: 'Adress',
     city: 'Stad',
     postalCode: 'Postnummer',
+    district: 'Stadsdel',
     buildYear: 'Byggår',
     apartmentType: 'Lägenhetstyp',
     noDescription: 'Ingen beskrivning',

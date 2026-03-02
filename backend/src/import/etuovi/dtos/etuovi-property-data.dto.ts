@@ -9,6 +9,7 @@ export class EtuoviPropertyDataDto {
   address?: string;
   city?: string;
   postalCode?: string;
+  district?: string;
   buildingYear?: number;
   propertyType?: string;
   roomStructure?: string;

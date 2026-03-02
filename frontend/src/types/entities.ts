@@ -15,6 +15,7 @@ export interface Address {
   street?: string;
   city?: string;
   postalCode?: string;
+  district?: string;
 }
 
 // Tier

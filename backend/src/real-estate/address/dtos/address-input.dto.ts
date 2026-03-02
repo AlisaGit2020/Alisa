@@ -14,4 +14,8 @@ export class AddressInputDto {
   @IsOptional()
   @IsString()
   postalCode?: string;
+
+  @IsOptional()
+  @IsString()
+  district?: string;
 }
