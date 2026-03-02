@@ -142,6 +142,71 @@ describe('PropertyForm Component Logic', () => {
       expect(result.address?.postalCode).toBe('00100');
     });
 
+    // District field tests (TDD - implementation does not exist yet)
+    it('updates address district field correctly', () => {
+      const updateAddressField = (
+        data: PropertyFormData,
+        field: 'street' | 'city' | 'postalCode' | 'district',
+        value: string
+      ): PropertyFormData => {
+        return {
+          ...data,
+          address: {
+            ...data.address,
+            [field]: value,
+          },
+        };
+      };
+
+      const result = updateAddressField(defaultPropertyInput, 'district', 'Kallio');
+      expect(result.address?.district).toBe('Kallio');
+    });
+
+    it('preserves other address fields when updating district', () => {
+      const inputWithAddress: PropertyFormData = {
+        ...defaultPropertyInput,
+        address: {
+          street: 'Test Street 1',
+          city: 'Helsinki',
+          postalCode: '00100',
+        },
+      };
+
+      const updateAddressField = (
+        data: PropertyFormData,
+        field: 'street' | 'city' | 'postalCode' | 'district',
+        value: string
+      ): PropertyFormData => {
+        return {
+          ...data,
+          address: {
+            ...data.address,
+            [field]: value,
+          },
+        };
+      };
+
+      const result = updateAddressField(inputWithAddress, 'district', 'Kallio');
+      expect(result.address?.street).toBe('Test Street 1');
+      expect(result.address?.city).toBe('Helsinki');
+      expect(result.address?.postalCode).toBe('00100');
+      expect(result.address?.district).toBe('Kallio');
+    });
+
+    it('loads existing district from property data', () => {
+      const propertyWithDistrict: PropertyFormData = {
+        ...defaultPropertyInput,
+        address: {
+          street: 'Kallionkatu 5',
+          city: 'Helsinki',
+          postalCode: '00530',
+          district: 'Kallio',
+        },
+      };
+
+      expect(propertyWithDistrict.address?.district).toBe('Kallio');
+    });
+
     it('updates build year field correctly', () => {
       const updateField = (
         data: PropertyFormData,
