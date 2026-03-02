@@ -40,7 +40,7 @@ In `frontend/src/translations/fi.ts`, add to the `property` namespace:
 ```typescript
 addProspectTitle: "Lisää seurattava kohde",
 chooseAddMethod: "Miten haluat lisätä kohteen?",
-importFromEtuovi: "Tuo Etuovista",
+importFromEtuovi: "Tuo Etuovesta",
 etuoviUrlPlaceholder: "Liitä Etuovi-kohteen URL (esim. https://www.etuovi.com/kohde/12345)",
 importButton: "Tuo",
 addManually: "Täytä lomake manuaalisesti",
