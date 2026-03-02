@@ -49,6 +49,7 @@ function PropertyForm({ t }: WithTranslation) {
             street: '',
             city: '',
             postalCode: '',
+            district: '',
         },
         buildYear: undefined,
         apartmentType: undefined,
@@ -88,7 +89,7 @@ function PropertyForm({ t }: WithTranslation) {
     }
 
     const handleAddressChange = (
-        field: 'street' | 'city' | 'postalCode',
+        field: 'street' | 'city' | 'postalCode' | 'district',
         value: string
     ) => {
         setData({
@@ -180,6 +181,13 @@ function PropertyForm({ t }: WithTranslation) {
                             label={t('city')}
                             value={data.address?.city || ''}
                             onChange={(e) => handleAddressChange('city', e.target.value)}
+                        />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                        <AssetTextField
+                            label={t('district')}
+                            value={data.address?.district || ''}
+                            onChange={(e) => handleAddressChange('district', e.target.value)}
                         />
                     </Box>
                 </Stack>

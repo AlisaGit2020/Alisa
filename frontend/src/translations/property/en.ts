@@ -36,6 +36,7 @@ const property = {
     address: 'Address',
     city: 'City',
     postalCode: 'Postal code',
+    district: 'District',
     buildYear: 'Build year',
     apartmentType: 'Apartment type',
     noDescription: 'No description',

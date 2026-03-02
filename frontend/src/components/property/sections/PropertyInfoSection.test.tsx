@@ -72,4 +72,95 @@ describe('PropertyInfoSection', () => {
     // Location section title should not be present
     expect(screen.queryByText(/location/i)).not.toBeInTheDocument();
   });
+
+  // District display tests (TDD - implementation does not exist yet)
+  describe('district display', () => {
+    it('displays district in location card when present', () => {
+      const property = createMockProperty({
+        address: {
+          id: 1,
+          street: 'Kallionkatu 5',
+          city: 'Helsinki',
+          postalCode: '00530',
+          district: 'Kallio',
+        },
+      });
+
+      renderWithProviders(<PropertyInfoSection property={property} />);
+
+      // Should show the district value
+      expect(screen.getByText('Kallio')).toBeInTheDocument();
+    });
+
+    it('displays district label when district is present', () => {
+      const property = createMockProperty({
+        address: {
+          id: 1,
+          street: 'Kallionkatu 5',
+          city: 'Helsinki',
+          postalCode: '00530',
+          district: 'Kallio',
+        },
+      });
+
+      renderWithProviders(<PropertyInfoSection property={property} />);
+
+      // Should show the district label (from translations)
+      expect(screen.getByText(/district/i)).toBeInTheDocument();
+    });
+
+    it('hides district row when district is not present', () => {
+      const property = createMockProperty({
+        address: {
+          id: 1,
+          street: 'Test Street 1',
+          city: 'Helsinki',
+          postalCode: '00100',
+          // district is not set
+        },
+      });
+
+      renderWithProviders(<PropertyInfoSection property={property} />);
+
+      // Should not show district text (since it's not set)
+      // The word "district" should not appear as a label
+      expect(screen.queryByText(/district/i)).not.toBeInTheDocument();
+    });
+
+    it('renders district alongside city and street', () => {
+      const property = createMockProperty({
+        address: {
+          id: 1,
+          street: 'Töölönkatu 10',
+          city: 'Helsinki',
+          postalCode: '00100',
+          district: 'Töölö',
+        },
+      });
+
+      renderWithProviders(<PropertyInfoSection property={property} />);
+
+      // All location details should be present
+      expect(screen.getByText('Töölönkatu 10')).toBeInTheDocument();
+      expect(screen.getByText(/Helsinki/)).toBeInTheDocument();
+      expect(screen.getByText('Töölö')).toBeInTheDocument();
+    });
+
+    it('displays district with special characters correctly', () => {
+      const property = createMockProperty({
+        address: {
+          id: 1,
+          street: 'Sörnäistenkatu 5',
+          city: 'Helsinki',
+          postalCode: '00540',
+          district: 'Sörnäinen',
+        },
+      });
+
+      renderWithProviders(<PropertyInfoSection property={property} />);
+
+      // Finnish special characters should render correctly
+      expect(screen.getByText('Sörnäinen')).toBeInTheDocument();
+    });
+  });
 });

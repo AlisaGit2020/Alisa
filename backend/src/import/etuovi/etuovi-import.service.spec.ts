@@ -166,6 +166,118 @@ describe('EtuoviImportService', () => {
       expect(result.postalCode).toBe('66400');
     });
 
+    // District parsing tests (TDD - implementation does not exist yet)
+    it('parses district from location.district.defaultName', () => {
+      const htmlWithDistrict = `
+        <html><script>
+        window.__INITIAL_STATE__ = {
+          "property": {
+            "debfFreePrice": 100000,
+            "livingArea": 50,
+            "periodicCharges": [{"periodicCharge": "HOUSING_COMPANY_MAINTENANCE_CHARGE", "price": 200}],
+            "location": {
+              "municipality": {"defaultName": "Helsinki"},
+              "postCode": "00100",
+              "district": {"defaultName": "Kallio"}
+            }
+          }
+        };
+        </script></html>
+      `;
+
+      const result = service.parseHtml(testUrl, htmlWithDistrict);
+      expect(result.district).toBe('Kallio');
+    });
+
+    it('parses districtNameFreeForm as fallback when district.defaultName is not present', () => {
+      const htmlWithFreeFormDistrict = `
+        <html><script>
+        window.__INITIAL_STATE__ = {
+          "property": {
+            "debfFreePrice": 100000,
+            "livingArea": 50,
+            "periodicCharges": [{"periodicCharge": "HOUSING_COMPANY_MAINTENANCE_CHARGE", "price": 200}],
+            "location": {
+              "municipality": {"defaultName": "Helsinki"},
+              "postCode": "00100"
+            },
+            "districtNameFreeForm": "Sörnäinen"
+          }
+        };
+        </script></html>
+      `;
+
+      const result = service.parseHtml(testUrl, htmlWithFreeFormDistrict);
+      expect(result.district).toBe('Sörnäinen');
+    });
+
+    it('returns undefined district when not present in HTML', () => {
+      const htmlWithoutDistrict = `
+        <html><script>
+        window.__INITIAL_STATE__ = {
+          "property": {
+            "debfFreePrice": 100000,
+            "livingArea": 50,
+            "periodicCharges": [{"periodicCharge": "HOUSING_COMPANY_MAINTENANCE_CHARGE", "price": 200}],
+            "location": {
+              "municipality": {"defaultName": "Helsinki"},
+              "postCode": "00100"
+            }
+          }
+        };
+        </script></html>
+      `;
+
+      const result = service.parseHtml(testUrl, htmlWithoutDistrict);
+      expect(result.district).toBeUndefined();
+    });
+
+    it('prefers district.defaultName over districtNameFreeForm when both present', () => {
+      const htmlWithBothDistrictFormats = `
+        <html><script>
+        window.__INITIAL_STATE__ = {
+          "property": {
+            "debfFreePrice": 100000,
+            "livingArea": 50,
+            "periodicCharges": [{"periodicCharge": "HOUSING_COMPANY_MAINTENANCE_CHARGE", "price": 200}],
+            "location": {
+              "municipality": {"defaultName": "Helsinki"},
+              "postCode": "00100",
+              "district": {"defaultName": "Kallio"}
+            },
+            "districtNameFreeForm": "Sörnäinen"
+          }
+        };
+        </script></html>
+      `;
+
+      const result = service.parseHtml(testUrl, htmlWithBothDistrictFormats);
+      expect(result.district).toBe('Kallio');
+    });
+
+    it('parses district from inline HTML text when __INITIAL_STATE__ is not available', () => {
+      // Service uses regex to extract fields directly from HTML text
+      const inlineDistrictHtml = `
+        <html><body>
+        "debfFreePrice":200000,"livingArea":75.5,"periodicCharges":[{"periodicCharge":"HOUSING_COMPANY_MAINTENANCE_CHARGE","price":250,"chargePeriod":"MONTH"}],"district":{"defaultName":"Töölö"}
+        </body></html>
+      `;
+
+      const result = service.parseHtml(testUrl, inlineDistrictHtml);
+      expect(result.district).toBe('Töölö');
+    });
+
+    it('parses districtNameFreeForm from inline HTML text', () => {
+      const inlineDistrictFreeFormHtml = `
+        <html><body>
+        "debfFreePrice":200000,"livingArea":75.5,"periodicCharges":[{"periodicCharge":"HOUSING_COMPANY_MAINTENANCE_CHARGE","price":250,"chargePeriod":"MONTH"}],"districtNameFreeForm":"Kamppi"
+        </body></html>
+      `;
+
+      const result = service.parseHtml(testUrl, inlineDistrictFreeFormHtml);
+      expect(result.district).toBe('Kamppi');
+    });
+
     it('parses default image URL from mock HTML', () => {
       const result = service.parseHtml(testUrl, mockHtml);
       // The MAIN image with ordinal 0 should be selected
@@ -564,6 +676,57 @@ describe('EtuoviImportService', () => {
 
       expect(result.address).toBeDefined();
       expect(result.address.postalCode).toBe('00100');
+    });
+
+    // District mapping tests (TDD - implementation does not exist yet)
+    it('maps district to address.district', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        address: 'Testikatu 5',
+        city: 'Helsinki',
+        district: 'Kallio',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.address).toBeDefined();
+      expect(result.address.district).toBe('Kallio');
+    });
+
+    it('creates address with only district when street is present', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        address: 'Testikatu 5',
+        district: 'Töölö',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.address).toBeDefined();
+      expect(result.address.street).toBe('Testikatu 5');
+      expect(result.address.district).toBe('Töölö');
+    });
+
+    it('does not set district when not provided', () => {
+      const etuoviData: EtuoviPropertyDataDto = {
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        address: 'Testikatu 5',
+        city: 'Helsinki',
+      };
+
+      const result = service.createPropertyInput(etuoviData);
+
+      expect(result.address).toBeDefined();
+      expect(result.address.district).toBeUndefined();
     });
 
     it('does not create address when etuovi address is missing', () => {

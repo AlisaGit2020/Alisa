@@ -5,6 +5,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
+import MapIcon from '@mui/icons-material/Map';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
@@ -86,6 +87,13 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
                 icon={<LocationCityIcon fontSize="small" />}
                 label={t('city')}
                 value={`${property.address.postalCode ? property.address.postalCode + ' ' : ''}${property.address.city}`}
+              />
+            )}
+            {property.address?.district && (
+              <DetailRow
+                icon={<MapIcon fontSize="small" />}
+                label={t('district')}
+                value={property.address.district}
               />
             )}
           </PropertyInfoCard>
