@@ -373,6 +373,49 @@ describe('PropertyService', () => {
       expect(mockRepository.save).toHaveBeenCalled();
     });
 
+    it('creates property with address including district', async () => {
+      const input = {
+        name: 'City Apartment',
+        size: 65,
+        address: {
+          street: 'Rantakatu 22',
+          district: 'Keskusta',
+          city: 'Vaasa',
+          postalCode: '65100',
+        },
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity, id: 1 }),
+      );
+
+      const result = await service.add(testUser, input);
+
+      expect(result.address?.street).toBe('Rantakatu 22');
+      expect(result.address?.district).toBe('Keskusta');
+      expect(result.address?.city).toBe('Vaasa');
+      expect(result.address?.postalCode).toBe('65100');
+    });
+
+    it('creates address when only district is provided', async () => {
+      const input = {
+        name: 'District Only Property',
+        size: 50,
+        address: {
+          district: 'Palosaari',
+        },
+        ownerships: [{ share: 100, userId: testUser.id }],
+      };
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity, id: 1 }),
+      );
+
+      const result = await service.add(testUser, input);
+
+      expect(result.address).toBeDefined();
+      expect(result.address?.district).toBe('Palosaari');
+    });
+
     it('creates property with rooms field', async () => {
       const input = {
         name: 'Cozy Apartment',
@@ -744,6 +787,37 @@ describe('PropertyService', () => {
       expect(result.ownerships[0].propertyId).toBe(1);
       expect(result.ownerships[0].userId).toBe(testUser.id);
       expect(result.ownerships[0].share).toBe(75);
+    });
+
+    it('updates property with address including district', async () => {
+      const existingProperty = createProperty({
+        id: 1,
+        name: 'Test Property',
+        address: { id: 5, street: 'Old Street', city: 'Old City' },
+      });
+      const input = {
+        name: 'Test Property',
+        size: 50,
+        address: {
+          street: 'Rantakatu 22',
+          district: 'Keskusta',
+          city: 'Vaasa',
+          postalCode: '65100',
+        },
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(existingProperty);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve(entity),
+      );
+
+      const result = await service.update(testUser, 1, input);
+
+      expect(result.address?.street).toBe('Rantakatu 22');
+      expect(result.address?.district).toBe('Keskusta');
+      expect(result.address?.city).toBe('Vaasa');
+      expect(result.address?.postalCode).toBe('65100');
     });
 
     it('handles null address without throwing error', async () => {
