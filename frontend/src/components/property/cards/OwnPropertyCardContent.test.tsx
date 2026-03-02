@@ -44,14 +44,15 @@ describe('OwnPropertyCardContent', () => {
         name: 'Test Property',
         status: PropertyStatus.OWN,
         monthlyRent: 0,
+        size: 50,
       });
 
       renderWithProviders(
         <OwnPropertyCardContent property={property} />
       );
 
-      // Should render without crashing
-      expect(screen.getByText(/0/)).toBeInTheDocument();
+      // Should render without crashing and show monthly rent label
+      expect(screen.getByText(/Monthly Rent|monthlyRent/i)).toBeInTheDocument();
     });
 
     it('handles missing monthly rent', () => {

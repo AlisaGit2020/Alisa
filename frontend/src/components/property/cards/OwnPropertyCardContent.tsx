@@ -37,6 +37,30 @@ function OwnPropertyCardContent({ property }: OwnPropertyCardContentProps) {
 
   return (
     <Box sx={{ mt: 1 }}>
+      {/* Size */}
+      {property.size !== undefined && property.size > 0 && (
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            {t('size')}
+          </Typography>
+          <Typography variant="body2">
+            {property.size} m²
+          </Typography>
+        </Box>
+      )}
+
+      {/* Build Year */}
+      {property.buildYear && (
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            {t('buildYear')}
+          </Typography>
+          <Typography variant="body2">
+            {property.buildYear}
+          </Typography>
+        </Box>
+      )}
+
       {/* Monthly Rent */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
         <Typography variant="body2" color="text.secondary">

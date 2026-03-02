@@ -1,5 +1,5 @@
 // frontend/test/utils/test-data.ts
-import { Property, Transaction, User, TransactionStatus, TransactionType } from '@asset-types';
+import { Property, Transaction, User, TransactionStatus, TransactionType, PropertyStatus } from '@asset-types';
 import { AxiosError, AxiosHeaders } from 'axios';
 
 /**
@@ -16,6 +16,7 @@ export const createMockProperty = (overrides?: Partial<Property>): Property => {
       city: 'Helsinki',
     },
     size: 50,
+    status: PropertyStatus.OWN,
     ownerships: [],
     ...overrides,
   } as Property;

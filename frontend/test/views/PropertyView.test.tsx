@@ -106,8 +106,7 @@ describe('Properties Integration', () => {
       expect(screen.getByText('75 m²')).toBeInTheDocument();
       expect(screen.getByText('120 m²')).toBeInTheDocument();
 
-      // Verify ownership share is displayed for partial ownership (< 100%)
-      expect(screen.getByText('50 %')).toBeInTheDocument();
+      // Note: Ownership share is now displayed in the card ribbon (PropertyStatusRibbon), not in the card content
 
       // Verify edit and delete buttons are present for each property
       const editButtons = screen.getAllByRole('button', { name: /edit/i });
