@@ -409,16 +409,16 @@ describe('Prospects Compare Route', () => {
 
       // Wait for view to render
       await waitFor(() => {
-        expect(screen.getByTestId('ViewListIcon')).toBeInTheDocument();
+        expect(screen.getByTestId('list-view-toggle')).toBeInTheDocument();
       });
 
-      // Click List toggle button - use testid since ToggleButton rendering can vary
-      const listButton = screen.getByTestId('ViewListIcon').closest('button')!;
+      // Click List toggle button
+      const listButton = screen.getByTestId('list-view-toggle');
       await user.click(listButton);
 
       // Should switch to list view - need to re-query as navigation changes the DOM
       await waitFor(() => {
-        const newListButton = screen.getByTestId('ViewListIcon').closest('button')!;
+        const newListButton = screen.getByTestId('list-view-toggle');
         expect(newListButton).toHaveAttribute('aria-pressed', 'true');
       });
     });

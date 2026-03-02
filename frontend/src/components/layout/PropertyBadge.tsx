@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import HomeWorkIcon from "@mui/icons-material/HomeWork";
 import CheckIcon from "@mui/icons-material/Check";
-import { useEffect, useState, useRef, useCallback, MouseEvent } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo, MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useToast } from "../asset";
 import {
@@ -180,7 +180,7 @@ function PropertyBadge() {
     return parts.join(", ");
   };
 
-  const groupedProperties = groupPropertiesByStatus(properties);
+  const groupedProperties = useMemo(() => groupPropertiesByStatus(properties), [properties]);
   const selectedProperty = getSelectedProperty();
 
   return (

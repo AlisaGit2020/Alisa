@@ -129,8 +129,8 @@ describe('ProspectsPanel', () => {
         expect(screen.getByTestId('comparison-panel')).toBeInTheDocument();
       });
 
-      // Then switch back to list view - use testid since ToggleButton rendering can vary
-      const listButton = screen.getByTestId('ViewListIcon').closest('button')!;
+      // Then switch back to list view
+      const listButton = screen.getByTestId('list-view-toggle');
       await user.click(listButton);
 
       await waitFor(() => {

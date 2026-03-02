@@ -144,13 +144,13 @@ function ProspectsPanel({ onAddClick, refreshKey = 0 }: ProspectsPanelProps) {
           aria-label="view mode"
           size="small"
         >
-          <ToggleButton value={VIEW_LIST} aria-label={t('property:listView')}>
+          <ToggleButton value={VIEW_LIST} aria-label={t('property:listView')} data-testid="list-view-toggle">
             <ViewListIcon data-testid="ViewListIcon" sx={{ mr: { xs: 0, sm: 1 } }} />
             <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
               {t('property:listView')}
             </Box>
           </ToggleButton>
-          <ToggleButton value={VIEW_COMPARE} aria-label={t('property:compareView')}>
+          <ToggleButton value={VIEW_COMPARE} aria-label={t('property:compareView')} data-testid="compare-view-toggle">
             <CompareArrowsIcon data-testid="CompareArrowsIcon" sx={{ mr: { xs: 0, sm: 1 } }} />
             <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
               {t('property:compareView')}

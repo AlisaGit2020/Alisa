@@ -42,9 +42,10 @@ interface EditableFieldProps {
   value: number;
   onSave: (value: number) => void;
   suffix?: string;
+  'data-testid'?: string;
 }
 
-function EditableField({ value, onSave, suffix = '' }: EditableFieldProps) {
+function EditableField({ value, onSave, suffix = '', 'data-testid': testId }: EditableFieldProps) {
   const theme = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
@@ -93,6 +94,7 @@ function EditableField({ value, onSave, suffix = '' }: EditableFieldProps) {
   return (
     <Typography
       onClick={handleClick}
+      data-testid={testId}
       sx={{
         cursor: 'pointer',
         '&:hover': {
@@ -283,6 +285,7 @@ function ApartmentCalculationDialog({
             <EditableField
               value={data.deptFreePrice}
               onSave={(v) => handleChange('deptFreePrice', v)}
+              data-testid="editable-purchase-price"
             />
           </Grid>
           <Grid size={{ xs: 6 }}>
@@ -310,6 +313,7 @@ function ApartmentCalculationDialog({
             <EditableField
               value={data.rentPerMonth}
               onSave={(v) => handleChange('rentPerMonth', v)}
+              data-testid="editable-rent"
             />
           </Grid>
           <Grid size={{ xs: 6 }}>
