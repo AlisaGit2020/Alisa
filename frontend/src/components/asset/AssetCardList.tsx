@@ -49,6 +49,8 @@ interface AssetCardListInputProps<T> {
   onAddClick?: () => void;
   /** Hide the add link entirely (e.g., for sold properties) */
   hideAddLink?: boolean;
+  /** Optional custom content renderer for cards (replaces default card content) */
+  renderCardContent?: (item: T, t: TFunction) => React.ReactNode;
 }
 
 function AssetCardList<T extends { id: number }>({
@@ -60,6 +62,7 @@ function AssetCardList<T extends { id: number }>({
   routePrefix,
   onAddClick,
   hideAddLink,
+  renderCardContent,
 }: AssetCardListInputProps<T>) {
   // Build route paths with optional prefix
   const buildRoutePath = (suffix: string) => {
@@ -231,40 +234,46 @@ function AssetCardList<T extends { id: number }>({
                         {item.address.city}
                       </Typography>
                     )}
-                    <Table size="small">
-                      <TableBody>
-                        <TableRow>
-                          <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("size")}</TableCell>
-                          <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.size} m²</TableCell>
-                        </TableRow>
-                        {item.buildYear && (
-                          <TableRow>
-                            <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("buildYear")}</TableCell>
-                            <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.buildYear}</TableCell>
-                          </TableRow>
-                        )}
-                        {item.ownerships?.[0]?.share !== undefined && item.ownerships[0].share < 100 && (
-                          <TableRow>
-                            <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("ownershipShare")}</TableCell>
-                            <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.ownerships[0].share} %</TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        mt: 1,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        fontStyle: item.description ? 'normal' : 'italic'
-                      }}
-                    >
-                      {item.description || t("noDescription")}
-                    </Typography>
+                    {renderCardContent ? (
+                      renderCardContent(item, t)
+                    ) : (
+                      <>
+                        <Table size="small">
+                          <TableBody>
+                            <TableRow>
+                              <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("size")}</TableCell>
+                              <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.size} m²</TableCell>
+                            </TableRow>
+                            {item.buildYear && (
+                              <TableRow>
+                                <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("buildYear")}</TableCell>
+                                <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.buildYear}</TableCell>
+                              </TableRow>
+                            )}
+                            {item.ownerships?.[0]?.share !== undefined && item.ownerships[0].share < 100 && (
+                              <TableRow>
+                                <TableCell sx={{ border: 0, py: 0.5, pl: 0 }}>{t("ownershipShare")}</TableCell>
+                                <TableCell align="right" sx={{ border: 0, py: 0.5, pr: 0 }}>{item.ownerships[0].share} %</TableCell>
+                              </TableRow>
+                            )}
+                          </TableBody>
+                        </Table>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            mt: 1,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            fontStyle: item.description ? 'normal' : 'italic'
+                          }}
+                        >
+                          {item.description || t("noDescription")}
+                        </Typography>
+                      </>
+                    )}
                   </CardContent>
                 </CardActionArea>
                 <CardActions>

@@ -20,6 +20,7 @@ import AssetCardList from '../asset/AssetCardList';
 import { PROPERTY_LIST_CHANGE_EVENT } from '../layout/PropertyBadge';
 import ProspectCompareView from '../investment-calculator/ProspectCompareView';
 import { AssetButton, AssetAlert } from '../asset';
+import { ProspectPropertyCardContent } from './cards';
 
 const VIEW_LIST = 'list';
 const VIEW_COMPARE = 'compare';
@@ -130,13 +131,11 @@ function ProspectsPanel({ onAddClick, refreshKey = 0 }: ProspectsPanelProps) {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {view === VIEW_LIST && (
-            <AssetButton
-              label={t('property:add')}
-              startIcon={<AddIcon />}
-              onClick={handleAddClick}
-            />
-          )}
+          <AssetButton
+            label={t('property:add')}
+            startIcon={<AddIcon />}
+            onClick={handleAddClick}
+          />
         </Box>
         <ToggleButtonGroup
           value={view}
@@ -199,6 +198,9 @@ function ProspectsPanel({ onAddClick, refreshKey = 0 }: ProspectsPanelProps) {
                   routePrefix="prospects"
                   onAddClick={handleAddClick}
                   hideAddLink={true}
+                  renderCardContent={(item) => (
+                    <ProspectPropertyCardContent property={item as Property} />
+                  )}
                 />
               </Grid>
             </Grid>
@@ -206,7 +208,7 @@ function ProspectsPanel({ onAddClick, refreshKey = 0 }: ProspectsPanelProps) {
         </>
       )}
 
-      {view === VIEW_COMPARE && <ProspectCompareView />}
+      {view === VIEW_COMPARE && <ProspectCompareView refreshKey={refreshKey} />}
     </Box>
   );
 }
