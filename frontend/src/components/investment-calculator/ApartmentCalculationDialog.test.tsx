@@ -756,7 +756,8 @@ describe('ApartmentCalculationDialog - Property Group Integration', () => {
       // Wait for and get the spinbutton input
       const input = await screen.findByRole('spinbutton');
 
-      // Change the value
+      // Click on the input to ensure it's focused before clearing
+      await user.click(input);
       await user.clear(input);
       await user.type(input, '1000');
 
