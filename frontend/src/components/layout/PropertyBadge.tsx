@@ -91,7 +91,7 @@ function PropertyBadge() {
         context: propertyContext,
         fetchOptions: {
           select: ["id", "name", "photo", "status"],
-          relations: ["address"],
+          relations: { address: true },
           order: { name: "ASC" },
         },
       });

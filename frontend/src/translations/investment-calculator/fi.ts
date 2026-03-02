@@ -88,6 +88,7 @@ const investmentCalculator = {
 
   // Prospect Compare View
   prospectCompare: 'Vertaa kohteita',
+  toggleCalculationsList: 'Näytä/piilota laskelmalista',
   calculations: 'Laskelmat',
   comparison: 'Vertailu',
   loading: 'Ladataan...',

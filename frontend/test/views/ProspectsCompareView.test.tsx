@@ -237,7 +237,7 @@ describe('Prospects Compare Route', () => {
 
       // Should render the two-panel layout from ProspectCompareView
       await waitFor(() => {
-        expect(screen.getByTestId('calculations-list-panel')).toBeInTheDocument();
+        expect(screen.getByTestId('toggle-drawer-button')).toBeInTheDocument();
         expect(screen.getByTestId('comparison-panel')).toBeInTheDocument();
       });
     });
@@ -407,17 +407,18 @@ describe('Prospects Compare Route', () => {
         initialEntries: ['/app/portfolio/prospects/compare'],
       });
 
+      // Wait for view to render
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /list/i })).toBeInTheDocument();
+        expect(screen.getByTestId('ViewListIcon')).toBeInTheDocument();
       });
 
-      // Click List toggle button
-      const listButton = screen.getByRole('button', { name: /list/i });
+      // Click List toggle button - use testid since ToggleButton rendering can vary
+      const listButton = screen.getByTestId('ViewListIcon').closest('button')!;
       await user.click(listButton);
 
       // Should switch to list view - need to re-query as navigation changes the DOM
       await waitFor(() => {
-        const newListButton = screen.getByRole('button', { name: /list/i });
+        const newListButton = screen.getByTestId('ViewListIcon').closest('button')!;
         expect(newListButton).toHaveAttribute('aria-pressed', 'true');
       });
     });
@@ -438,7 +439,7 @@ describe('Prospects Compare Route', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId('calculations-list-panel')).toBeInTheDocument();
+        expect(screen.getByTestId('toggle-drawer-button')).toBeInTheDocument();
       });
 
       // Should show calculation names
@@ -603,7 +604,7 @@ describe('Prospects Compare Route', () => {
 
       await waitFor(() => {
         // Both panels should render (stacked on mobile)
-        expect(screen.getByTestId('calculations-list-panel')).toBeInTheDocument();
+        expect(screen.getByTestId('toggle-drawer-button')).toBeInTheDocument();
         expect(screen.getByTestId('comparison-panel')).toBeInTheDocument();
       });
     });

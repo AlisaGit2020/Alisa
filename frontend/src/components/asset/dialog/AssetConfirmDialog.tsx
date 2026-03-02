@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material"
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, SxProps, Theme } from "@mui/material"
 
 function AssetConfirmDialog(props: {
   open: boolean,
@@ -8,6 +8,7 @@ function AssetConfirmDialog(props: {
   buttonTextConfirm: string,
   onConfirm: () => void
   onClose: () => void
+  sx?: SxProps<Theme>
 }) {
 
   return (
@@ -15,7 +16,8 @@ function AssetConfirmDialog(props: {
       open={props.open}
       onClose={props.onClose}
       fullWidth={true}
-      maxWidth={'xs'}>
+      maxWidth={'xs'}
+      sx={props.sx}>
 
       <DialogTitle>{props.title}</DialogTitle>
       <DialogContent dividers>

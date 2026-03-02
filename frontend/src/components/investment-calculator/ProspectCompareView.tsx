@@ -12,13 +12,18 @@ import {
   ListItemIcon,
   CircularProgress,
   Divider,
-  Grid,
   ToggleButton,
   ToggleButtonGroup,
+  Drawer,
+  IconButton,
+  Tooltip,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AddIcon from '@mui/icons-material/Add';
+import MenuIcon from '@mui/icons-material/Menu';
 import { AssetButton, AssetConfirmDialog, useToast } from '../asset';
 import ApiClient from '@asset-lib/api-client';
 import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
@@ -44,11 +49,15 @@ interface ProspectCompareViewProps {
 
 const STORAGE_KEY_PREFIX = 'prospect-compare-selections-';
 
+const DRAWER_WIDTH = 360;
+
 function ProspectCompareView({ standalone = false, refreshKey = 0 }: ProspectCompareViewProps) {
   const { t } = useTranslation(['investment-calculator', 'common', 'property']);
   const { showToast } = useToast();
   const navigate = useNavigate();
   const { user } = useUser();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [calculations, setCalculations] = useState<CalculationWithProperty[]>([]);
   const [prospects, setProspects] = useState<Property[]>([]);
@@ -58,6 +67,7 @@ function ProspectCompareView({ standalone = false, refreshKey = 0 }: ProspectCom
   const [addDialogProperty, setAddDialogProperty] = useState<Property | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
   const [selectionsLoaded, setSelectionsLoaded] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Get user-specific storage key
   const storageKey = user?.id ? `${STORAGE_KEY_PREFIX}${user.id}` : null;
@@ -93,24 +103,36 @@ function ProspectCompareView({ standalone = false, refreshKey = 0 }: ProspectCom
 
   // Load saved selections from localStorage when calculations are fetched
   useEffect(() => {
-    if (!storageKey || loading || selectionsLoaded || calculations.length === 0) return;
+    if (loading || selectionsLoaded) return;
 
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        const savedIds: number[] = JSON.parse(saved);
-        // Map saved IDs back to full calculation objects
-        const restoredCalculations = savedIds
-          .map((id) => calculations.find((c) => c.id === id))
-          .filter((c): c is CalculationWithProperty => c !== undefined)
-          .slice(0, MAX_CALCULATIONS);
-        setComparisonCalculations(restoredCalculations);
+    let hasRestoredCalculations = false;
+
+    // Only try to restore from localStorage if we have a user and calculations
+    if (storageKey && calculations.length > 0) {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const savedIds: number[] = JSON.parse(saved);
+          // Map saved IDs back to full calculation objects
+          const restoredCalculations = savedIds
+            .map((id) => calculations.find((c) => c.id === id))
+            .filter((c): c is CalculationWithProperty => c !== undefined)
+            .slice(0, MAX_CALCULATIONS);
+          setComparisonCalculations(restoredCalculations);
+          hasRestoredCalculations = restoredCalculations.length > 0;
+        }
+      } catch (err) {
+        console.error('Failed to load saved selections:', err);
       }
-    } catch (err) {
-      console.error('Failed to load saved selections:', err);
     }
+
     setSelectionsLoaded(true);
-  }, [storageKey, loading, calculations, selectionsLoaded]);
+
+    // Open drawer on desktop if no calculations are in comparison
+    if (!isMobile && !hasRestoredCalculations) {
+      setDrawerOpen(true);
+    }
+  }, [storageKey, loading, calculations, selectionsLoaded, isMobile]);
 
   // Save selections to localStorage when they change
   useEffect(() => {
@@ -205,6 +227,10 @@ function ProspectCompareView({ standalone = false, refreshKey = 0 }: ProspectCom
 
   const handleDeleteCancel = useCallback(() => {
     setDeleteTargetId(null);
+  }, []);
+
+  const handleToggleDrawer = useCallback(() => {
+    setDrawerOpen((prev) => !prev);
   }, []);
 
   // Group calculations by property AND include all prospects
@@ -302,6 +328,70 @@ function ProspectCompareView({ standalone = false, refreshKey = 0 }: ProspectCom
     // If compare is selected or null, stay on current page
   };
 
+  // Drawer content - extracted to avoid duplication
+  const drawerContent = (
+    <Box sx={{ width: DRAWER_WIDTH }}>
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6">
+          {t('investment-calculator:calculations')}
+        </Typography>
+      </Box>
+      <Divider />
+      <List>
+        {/* Grouped by property */}
+        {groupedByProperty.properties.map(({ property, calculations: calcs }, index) => (
+          <React.Fragment key={property.id}>
+            <PropertyListHeader property={property} />
+            {calcs.map((calc) => (
+              <CalculationListItem
+                key={calc.id}
+                calculation={calc}
+                property={calc.property}
+                showAvatar={false}
+                isSelected={comparisonCalculations.some((c) => c.id === calc.id)}
+                onClick={() => handleToggleComparison(calc)}
+                onDelete={() => handleDeleteClick(calc.id)}
+              />
+            ))}
+            <ListItemButton
+              sx={{ pl: 2 }}
+              onClick={() => handleOpenAddDialog(property)}
+            >
+              <ListItemIcon sx={{ minWidth: 36 }}>
+                <AddIcon color="primary" fontSize="small" />
+              </ListItemIcon>
+              <ListItemText
+                primary={t('investment-calculator:addCalculation')}
+                primaryTypographyProps={{ color: 'primary', variant: 'body2' }}
+              />
+            </ListItemButton>
+            {index < groupedByProperty.properties.length - 1 && (
+              <Divider sx={{ my: 1 }} />
+            )}
+          </React.Fragment>
+        ))}
+
+        {/* Unlinked calculations */}
+        {groupedByProperty.unlinked.length > 0 && (
+          <>
+            <ListSubheader sx={{ backgroundColor: 'background.paper' }}>
+              {t('investment-calculator:unlinkedCalculations')}
+            </ListSubheader>
+            {groupedByProperty.unlinked.map((calc) => (
+              <CalculationListItem
+                key={calc.id}
+                calculation={calc}
+                isSelected={comparisonCalculations.some((c) => c.id === calc.id)}
+                onClick={() => handleToggleComparison(calc)}
+                onDelete={() => handleDeleteClick(calc.id)}
+              />
+            ))}
+          </>
+        )}
+      </List>
+    </Box>
+  );
+
   return (
     <Box sx={{ p: standalone ? 2 : 0 }}>
       {/* Toolbar with toggle buttons - only shown in standalone mode */}
@@ -340,88 +430,50 @@ function ProspectCompareView({ standalone = false, refreshKey = 0 }: ProspectCom
         </Box>
       )}
 
-      <Grid container spacing={3}>
-        {/* Left panel - Calculations list */}
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Paper
-            data-testid="calculations-list-panel"
-            sx={{ height: '100%', overflow: 'auto' }}
-          >
-            <Box sx={{ p: 2 }}>
-              <Typography variant="h6">
-                {t('investment-calculator:calculations')}
-              </Typography>
-            </Box>
-            <Divider />
-            <List>
-              {/* Grouped by property */}
-              {groupedByProperty.properties.map(({ property, calculations: calcs }, index) => (
-                <React.Fragment key={property.id}>
-                  <PropertyListHeader property={property} />
-                  {calcs.map((calc) => (
-                    <CalculationListItem
-                      key={calc.id}
-                      calculation={calc}
-                      property={calc.property}
-                      showAvatar={false}
-                      isSelected={comparisonCalculations.some((c) => c.id === calc.id)}
-                      onClick={() => handleToggleComparison(calc)}
-                      onDelete={() => handleDeleteClick(calc.id)}
-                    />
-                  ))}
-                  <ListItemButton
-                    sx={{ pl: 2 }}
-                    onClick={() => handleOpenAddDialog(property)}
-                  >
-                    <ListItemIcon sx={{ minWidth: 36 }}>
-                      <AddIcon color="primary" fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t('investment-calculator:addCalculation')}
-                      primaryTypographyProps={{ color: 'primary', variant: 'body2' }}
-                    />
-                  </ListItemButton>
-                  {index < groupedByProperty.properties.length - 1 && (
-                    <Divider sx={{ my: 1 }} />
-                  )}
-                </React.Fragment>
-              ))}
+      {/* Sliding drawer for calculations list */}
+      <Drawer
+        variant="temporary"
+        anchor="left"
+        open={drawerOpen}
+        onClose={handleToggleDrawer}
+        ModalProps={{
+          keepMounted: true, // Better mobile performance
+        }}
+        sx={{
+          zIndex: (theme) => theme.zIndex.modal + 1,
+          '& .MuiDrawer-paper': {
+            width: DRAWER_WIDTH,
+            boxSizing: 'border-box',
+          },
+        }}
+        data-testid="calculations-list-drawer"
+      >
+        {drawerContent}
+      </Drawer>
 
-              {/* Unlinked calculations */}
-              {groupedByProperty.unlinked.length > 0 && (
-                <>
-                  <ListSubheader sx={{ backgroundColor: 'background.paper' }}>
-                    {t('investment-calculator:unlinkedCalculations')}
-                  </ListSubheader>
-                  {groupedByProperty.unlinked.map((calc) => (
-                    <CalculationListItem
-                      key={calc.id}
-                      calculation={calc}
-                      isSelected={comparisonCalculations.some((c) => c.id === calc.id)}
-                      onClick={() => handleToggleComparison(calc)}
-                      onDelete={() => handleDeleteClick(calc.id)}
-                    />
-                  ))}
-                </>
-              )}
-            </List>
-          </Paper>
-        </Grid>
-
-        {/* Right panel - Comparison area */}
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Paper data-testid="comparison-panel" sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              {t('investment-calculator:comparison')}
-            </Typography>
-            <ComparisonDropZone
-              calculations={comparisonCalculations}
-              onRemove={handleRemoveFromComparison}
-              onUpdate={handleUpdateCalculation}
-            />
-          </Paper>
-        </Grid>
-      </Grid>
+      {/* Main content - Comparison area (full width) */}
+      <Paper data-testid="comparison-panel" sx={{ p: 2, width: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Tooltip title={t('investment-calculator:toggleCalculationsList')}>
+            <IconButton
+              onClick={handleToggleDrawer}
+              aria-label={t('investment-calculator:toggleCalculationsList')}
+              data-testid="toggle-drawer-button"
+              size="small"
+            >
+              <MenuIcon />
+            </IconButton>
+          </Tooltip>
+          <Typography variant="h6">
+            {t('investment-calculator:comparison')}
+          </Typography>
+        </Box>
+        <ComparisonDropZone
+          calculations={comparisonCalculations}
+          onRemove={handleRemoveFromComparison}
+          onUpdate={handleUpdateCalculation}
+        />
+      </Paper>
 
       {/* Add Calculation Dialog */}
       {addDialogProperty && (
@@ -442,6 +494,7 @@ function ProspectCompareView({ standalone = false, refreshKey = 0 }: ProspectCom
         buttonTextConfirm={t('common:confirm')}
         onConfirm={handleDeleteConfirm}
         onClose={handleDeleteCancel}
+        sx={{ zIndex: (theme) => theme.zIndex.modal + 2 }}
       />
     </Box>
   );

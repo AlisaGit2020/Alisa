@@ -139,7 +139,13 @@ function InvestmentAddDialog({
   }, [formData, property, validate, onSave, onClose, t]);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      sx={{ zIndex: (theme) => theme.zIndex.modal + 2 }}
+    >
       <DialogTitle>
         {property.address?.street
           ? `${property.address.street} - ${t('investment-calculator:newCalculation')}`
