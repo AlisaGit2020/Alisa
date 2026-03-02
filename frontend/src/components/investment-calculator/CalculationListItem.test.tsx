@@ -167,6 +167,73 @@ describe('CalculationListItem', () => {
       expect(avatar).toHaveAttribute('alt', 'No property linked');
     });
 
+    it('hides avatar when showAvatar is false', () => {
+      const property = createMockProperty({ photo: '/uploads/properties/apartment.jpg' });
+      const calculation = createMockCalculation();
+
+      renderWithProviders(
+        <CalculationListItem
+          {...defaultProps}
+          calculation={calculation}
+          property={property}
+          showAvatar={false}
+        />
+      );
+
+      expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    });
+
+    it('shows only calculation name (not street) when showAvatar is false', () => {
+      const property = createMockProperty({
+        address: { id: 1, street: 'Kauppapuistikko 24', city: 'Vaasa', postalCode: '65100' },
+      });
+      const calculation = createMockCalculation({ name: 'My Calculation' });
+
+      renderWithProviders(
+        <CalculationListItem
+          {...defaultProps}
+          calculation={calculation}
+          property={property}
+          showAvatar={false}
+        />
+      );
+
+      // Should show just calculation name, not "Street - Name" format
+      expect(screen.getByText('My Calculation')).toBeInTheDocument();
+      expect(screen.queryByText('Kauppapuistikko 24 - My Calculation')).not.toBeInTheDocument();
+    });
+
+    it('shows check icon when selected and showAvatar is false', () => {
+      const calculation = createMockCalculation({ name: 'Selected Calc' });
+
+      renderWithProviders(
+        <CalculationListItem
+          {...defaultProps}
+          calculation={calculation}
+          showAvatar={false}
+          isSelected={true}
+        />
+      );
+
+      expect(screen.getByTestId('CheckCircleIcon')).toBeInTheDocument();
+    });
+
+    it('does not show check icon when not selected but reserves space', () => {
+      const calculation = createMockCalculation({ name: 'Unselected Calc' });
+
+      renderWithProviders(
+        <CalculationListItem
+          {...defaultProps}
+          calculation={calculation}
+          showAvatar={false}
+          isSelected={false}
+        />
+      );
+
+      // Check icon should not be visible, but space is reserved
+      expect(screen.queryByTestId('CheckCircleIcon')).not.toBeInTheDocument();
+    });
+
     it('shows rental yield as key metric', () => {
       const calculation = createMockCalculation({ rentalYieldPercent: 7.5 });
 
@@ -190,30 +257,26 @@ describe('CalculationListItem', () => {
   });
 
   describe('Selection State', () => {
-    it('applies selected styling when isSelected is true', () => {
+    it('shows check icon when isSelected is true and showAvatar is false', () => {
       renderWithProviders(
-        <CalculationListItem {...defaultProps} isSelected={true} />
+        <CalculationListItem {...defaultProps} isSelected={true} showAvatar={false} />
       );
 
-      const listItem = screen.getByTestId('calculation-list-item-1');
-      // Selected items typically have a different background color or border
-      expect(listItem).toHaveClass('Mui-selected');
+      expect(screen.getByTestId('CheckCircleIcon')).toBeInTheDocument();
     });
 
-    it('does not apply selected styling when isSelected is false', () => {
+    it('does not show check icon when isSelected is false', () => {
       renderWithProviders(
-        <CalculationListItem {...defaultProps} isSelected={false} />
+        <CalculationListItem {...defaultProps} isSelected={false} showAvatar={false} />
       );
 
-      const listItem = screen.getByTestId('calculation-list-item-1');
-      expect(listItem).not.toHaveClass('Mui-selected');
+      expect(screen.queryByTestId('CheckCircleIcon')).not.toBeInTheDocument();
     });
 
-    it('does not apply selected styling when isSelected is undefined', () => {
-      renderWithProviders(<CalculationListItem {...defaultProps} />);
+    it('does not show check icon when isSelected is undefined', () => {
+      renderWithProviders(<CalculationListItem {...defaultProps} showAvatar={false} />);
 
-      const listItem = screen.getByTestId('calculation-list-item-1');
-      expect(listItem).not.toHaveClass('Mui-selected');
+      expect(screen.queryByTestId('CheckCircleIcon')).not.toBeInTheDocument();
     });
   });
 

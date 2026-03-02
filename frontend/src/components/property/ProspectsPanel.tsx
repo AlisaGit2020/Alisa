@@ -208,7 +208,7 @@ function ProspectsPanel({ onAddClick, refreshKey = 0 }: ProspectsPanelProps) {
         </>
       )}
 
-      {view === VIEW_COMPARE && <ProspectCompareView />}
+      {view === VIEW_COMPARE && <ProspectCompareView refreshKey={refreshKey} />}
     </Box>
   );
 }

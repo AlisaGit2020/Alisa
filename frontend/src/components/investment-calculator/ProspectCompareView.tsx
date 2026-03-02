@@ -26,6 +26,7 @@ import { Property } from '@asset-types';
 import { PropertyStatus } from '@asset-types/common';
 import { useUser } from '@asset-lib/user-context';
 import CalculationListItem from './CalculationListItem';
+import PropertyListHeader from './PropertyListHeader';
 import ComparisonDropZone from './ComparisonDropZone';
 import InvestmentAddDialog from '../property/sections/InvestmentAddDialog';
 
@@ -38,11 +39,12 @@ const MAX_CALCULATIONS = 5;
 
 interface ProspectCompareViewProps {
   standalone?: boolean;
+  refreshKey?: number;
 }
 
 const STORAGE_KEY_PREFIX = 'prospect-compare-selections-';
 
-function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
+function ProspectCompareView({ standalone = false, refreshKey = 0 }: ProspectCompareViewProps) {
   const { t } = useTranslation(['investment-calculator', 'common', 'property']);
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -87,7 +89,7 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
 
   useEffect(() => {
     fetchCalculations();
-  }, [fetchCalculations]);
+  }, [fetchCalculations, refreshKey]);
 
   // Load saved selections from localStorage when calculations are fetched
   useEffect(() => {
@@ -122,14 +124,11 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
     }
   }, [storageKey, comparisonCalculations, selectionsLoaded]);
 
-  const handleAddToComparison = useCallback(
+  const handleToggleComparison = useCallback(
     (calculation: CalculationWithProperty) => {
-      // Check if already in comparison
+      // Toggle: if already in comparison, remove it; otherwise add it
       if (comparisonCalculations.some((c) => c.id === calculation.id)) {
-        showToast({
-          message: t('investment-calculator:duplicateWarning'),
-          severity: 'warning',
-        });
+        setComparisonCalculations((prev) => prev.filter((c) => c.id !== calculation.id));
         return;
       }
 
@@ -356,23 +355,22 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
             <Divider />
             <List>
               {/* Grouped by property */}
-              {groupedByProperty.properties.map(({ property, calculations: calcs }) => (
+              {groupedByProperty.properties.map(({ property, calculations: calcs }, index) => (
                 <React.Fragment key={property.id}>
-                  <ListSubheader sx={{ backgroundColor: 'background.paper' }}>
-                    {property.name || property.address?.street || `Property ${property.id}`}
-                  </ListSubheader>
+                  <PropertyListHeader property={property} />
                   {calcs.map((calc) => (
                     <CalculationListItem
                       key={calc.id}
                       calculation={calc}
                       property={calc.property}
+                      showAvatar={false}
                       isSelected={comparisonCalculations.some((c) => c.id === calc.id)}
-                      onClick={() => handleAddToComparison(calc)}
+                      onClick={() => handleToggleComparison(calc)}
                       onDelete={() => handleDeleteClick(calc.id)}
                     />
                   ))}
                   <ListItemButton
-                    sx={{ pl: 4 }}
+                    sx={{ pl: 2 }}
                     onClick={() => handleOpenAddDialog(property)}
                   >
                     <ListItemIcon sx={{ minWidth: 36 }}>
@@ -383,6 +381,9 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
                       primaryTypographyProps={{ color: 'primary', variant: 'body2' }}
                     />
                   </ListItemButton>
+                  {index < groupedByProperty.properties.length - 1 && (
+                    <Divider sx={{ my: 1 }} />
+                  )}
                 </React.Fragment>
               ))}
 
@@ -397,7 +398,7 @@ function ProspectCompareView({ standalone = false }: ProspectCompareViewProps) {
                       key={calc.id}
                       calculation={calc}
                       isSelected={comparisonCalculations.some((c) => c.id === calc.id)}
-                      onClick={() => handleAddToComparison(calc)}
+                      onClick={() => handleToggleComparison(calc)}
                       onDelete={() => handleDeleteClick(calc.id)}
                     />
                   ))}

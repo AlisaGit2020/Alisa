@@ -190,6 +190,7 @@ describe('Prospects Compare Route', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
     mockSearch = jest.spyOn(ApiClient, 'search');
     mockGet = jest.spyOn(ApiClient, 'get');
     // Mock the me() call that AuthInitializer uses
@@ -494,8 +495,8 @@ describe('Prospects Compare Route', () => {
       });
 
       await waitFor(() => {
-        // Property name should appear as group header
-        expect(screen.getByText('Test Property')).toBeInTheDocument();
+        // Property street should appear as group header
+        expect(screen.getByText('Mannerheimintie 1')).toBeInTheDocument();
       });
     });
 

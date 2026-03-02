@@ -195,14 +195,14 @@ describe('ProspectCompareView', () => {
 
       renderWithProviders(<ProspectCompareView />);
 
-      // Wait for loading to complete and calculations to display
-      // Display format is "Street - Calculation Name"
+      // Wait for loading to complete
+      // Property header shows street as primary
       await waitFor(() => {
-        expect(screen.getByText('Mannerheimintie 1 - Linked Calc')).toBeInTheDocument();
+        expect(screen.getByText('Mannerheimintie 1')).toBeInTheDocument();
       });
 
-      // Property name should appear in the group header
-      expect(screen.getAllByText('Test Property').length).toBeGreaterThan(0);
+      // Calculation name should appear (without street prefix since showAvatar=false)
+      expect(screen.getByText('Linked Calc')).toBeInTheDocument();
     });
 
     it('shows unlinked section for calculations without property', async () => {
@@ -228,8 +228,9 @@ describe('ProspectCompareView', () => {
 
       renderWithProviders(<ProspectCompareView />);
 
+      // PropertyListHeader shows street as primary
       await waitFor(() => {
-        expect(screen.getByText('Empty Prospect')).toBeInTheDocument();
+        expect(screen.getByText('Empty Street 1')).toBeInTheDocument();
       });
     });
   });
@@ -335,7 +336,7 @@ describe('ProspectCompareView', () => {
       expect(within(comparisonZone).getAllByText('Selectable Calc').length).toBeGreaterThan(0);
     });
 
-    it('can remove calculation from comparison', async () => {
+    it('can remove calculation from comparison via chip close', async () => {
       const user = userEvent.setup();
       const calculations = [createMockCalculation({ id: 1, name: 'Removable Calc' })];
       setupMocks({ calculations, prospects: [] });
@@ -364,6 +365,34 @@ describe('ProspectCompareView', () => {
         expect(within(comparisonZone).queryByText(/click to add to comparison/i)).toBeInTheDocument();
       });
     });
+
+    it('clicking selected calculation removes it from comparison (toggle)', async () => {
+      const user = userEvent.setup();
+      const calculations = [createMockCalculation({ id: 1, name: 'Toggle Calc' })];
+      setupMocks({ calculations, prospects: [] });
+
+      renderWithProviders(<ProspectCompareView />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Toggle Calc')).toBeInTheDocument();
+      });
+
+      // Add to comparison by clicking
+      const calcItem = screen.getByTestId('calculation-list-item-1');
+      await user.click(calcItem);
+
+      // Verify it's in comparison
+      const comparisonZone = screen.getByTestId('comparison-drop-zone');
+      expect(within(comparisonZone).getAllByText('Toggle Calc').length).toBeGreaterThan(0);
+
+      // Click again to remove
+      await user.click(calcItem);
+
+      // Should no longer be in comparison
+      await waitFor(() => {
+        expect(within(comparisonZone).queryByText(/click to add to comparison/i)).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Layout', () => {
@@ -376,6 +405,43 @@ describe('ProspectCompareView', () => {
         expect(screen.getByTestId('calculations-list-panel')).toBeInTheDocument();
       });
       expect(screen.getByTestId('comparison-panel')).toBeInTheDocument();
+    });
+  });
+
+  describe('Refresh Behavior', () => {
+    it('refreshes calculations when refreshKey changes', async () => {
+      const calculations = [createMockCalculation({ id: 1, name: 'Initial Calc' })];
+      setupMocks({ calculations, prospects: [] });
+
+      const { rerender } = renderWithProviders(<ProspectCompareView refreshKey={0} />);
+
+      // Wait for initial fetch
+      await waitFor(() => {
+        expect(screen.getByText('Initial Calc')).toBeInTheDocument();
+      });
+
+      // Clear call history
+      mockSearch.mockClear();
+
+      // Update with new calculation data
+      const newCalculation = createMockCalculation({ id: 2, name: 'New Property Calc' });
+      setupMocks({ calculations: [calculations[0], newCalculation], prospects: [] });
+
+      // Rerender with new refreshKey
+      rerender(<ProspectCompareView refreshKey={1} />);
+
+      // Should fetch again
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledWith(
+          'real-estate/investment',
+          expect.any(Object)
+        );
+      });
+
+      // New calculation should appear
+      await waitFor(() => {
+        expect(screen.getByText('New Property Calc')).toBeInTheDocument();
+      });
     });
   });
 });

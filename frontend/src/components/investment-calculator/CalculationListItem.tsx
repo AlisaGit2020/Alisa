@@ -2,12 +2,14 @@ import { useTranslation } from 'react-i18next';
 import {
   ListItem,
   ListItemAvatar,
+  ListItemIcon,
   ListItemText,
   ListItemSecondaryAction,
   Avatar,
   Typography,
   IconButton,
 } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
 import { Property } from '@asset-types';
@@ -18,6 +20,7 @@ interface CalculationListItemProps {
   property?: Property;
   isDragging?: boolean;
   isSelected?: boolean;
+  showAvatar?: boolean;
   onClick?: () => void;
   onDelete?: () => void;
 }
@@ -27,6 +30,7 @@ function CalculationListItem({
   property,
   isDragging = false,
   isSelected = false,
+  showAvatar = true,
   onClick,
   onDelete,
 }: CalculationListItemProps) {
@@ -35,32 +39,41 @@ function CalculationListItem({
   const photoUrl = getPhotoUrl(property?.photo);
   const calcName = calculation.name || `#${calculation.id}`;
 
-  // Build display name: "Street - Calculation" when property linked, just calculation name otherwise
+  // Build display name: when showAvatar is false (grouped under property), just show calculation name
+  // When showAvatar is true (standalone), show "Street - Calculation" format
   const streetName = property?.address?.street;
-  const displayName = streetName ? `${streetName} - ${calcName}` : calcName;
+  const displayName = showAvatar && streetName ? `${streetName} - ${calcName}` : calcName;
   const avatarAlt = streetName || t('investment-calculator:unlinkedProperty');
 
   return (
     <ListItem
       data-testid={`calculation-list-item-${calculation.id}`}
       onClick={onClick}
-      className={isSelected ? 'Mui-selected' : ''}
       sx={{
         opacity: isDragging ? 0.5 : 1,
         cursor: 'pointer',
+        pl: showAvatar ? 2 : 2,
         '&:hover': {
           backgroundColor: 'action.hover',
         },
-        '&.Mui-selected': {
-          backgroundColor: 'action.selected',
-        },
       }}
     >
-      <ListItemAvatar>
-        <Avatar src={photoUrl} alt={avatarAlt}>
-          {avatarAlt.charAt(0).toUpperCase()}
-        </Avatar>
-      </ListItemAvatar>
+      {showAvatar && (
+        <ListItemAvatar>
+          <Avatar src={photoUrl} alt={avatarAlt}>
+            {avatarAlt.charAt(0).toUpperCase()}
+          </Avatar>
+        </ListItemAvatar>
+      )}
+      {!showAvatar && (
+        <ListItemIcon sx={{ minWidth: 36 }}>
+          {isSelected ? (
+            <CheckCircleIcon color="success" fontSize="small" />
+          ) : (
+            <span style={{ width: 20 }} />
+          )}
+        </ListItemIcon>
+      )}
       <ListItemText
         primary={
           <Typography variant="body1" fontWeight="medium">
