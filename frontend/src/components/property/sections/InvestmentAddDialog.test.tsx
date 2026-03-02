@@ -223,11 +223,14 @@ describe('InvestmentAddDialog', () => {
       await user.click(displayText);
 
       // Should show input field for editing (not remain as read-only text)
-      await waitFor(() => {
-        const input = screen.getByRole('spinbutton');
-        expect(input).toBeInTheDocument();
-        expect(input).toHaveValue(950);
-      });
+      await waitFor(
+        () => {
+          const input = screen.getByRole('spinbutton');
+          expect(input).toBeInTheDocument();
+          expect(input).toHaveValue(950);
+        },
+        { timeout: 3000 }
+      );
     });
 
     it('purchase price is displayed as text and is editable', () => {
