@@ -1,4 +1,15 @@
-import { Chip, Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
+import {
+  Box,
+  Chip,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  ListSubheader,
+  Typography,
+  Avatar,
+  Divider,
+} from "@mui/material";
 import HomeWorkIcon from "@mui/icons-material/HomeWork";
 import CheckIcon from "@mui/icons-material/Check";
 import { useEffect, useState, useRef, useCallback, MouseEvent } from "react";
@@ -10,13 +21,34 @@ import {
 } from "@asset-lib/initial-data";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../transaction/TransactionLeftMenuItems";
 import DataService from "@asset-lib/data-service";
-import { Property } from "@asset-types";
+import { Property, PropertyStatus } from "@asset-types";
 import { propertyContext } from "@asset-lib/asset-contexts";
+import { getPhotoUrl } from "@asset-lib/functions";
 
 // Event constants for property selection required
 export const PROPERTY_SELECTION_REQUIRED_EVENT = "propertySelectionRequired";
 export const OPEN_PROPERTY_SELECTOR_EVENT = "openPropertySelector";
 export const PROPERTY_LIST_CHANGE_EVENT = "propertyListChange";
+
+// Group properties by status
+const groupPropertiesByStatus = (properties: Property[]) => {
+  const groups: Record<PropertyStatus, Property[]> = {
+    [PropertyStatus.OWN]: [],
+    [PropertyStatus.PROSPECT]: [],
+    [PropertyStatus.SOLD]: [],
+  };
+
+  properties.forEach((property) => {
+    if (groups[property.status]) {
+      groups[property.status].push(property);
+    }
+  });
+
+  return groups;
+};
+
+// Status display order
+const STATUS_ORDER = [PropertyStatus.OWN, PropertyStatus.PROSPECT, PropertyStatus.SOLD];
 
 function PropertyBadge() {
   const { t } = useTranslation("dashboard");
@@ -52,13 +84,14 @@ function PropertyBadge() {
     };
   }, [handleHighlight, handleOpenSelector]);
 
-  // Fetch all properties
+  // Fetch all properties with additional fields for display
   const fetchProperties = useCallback(async () => {
     try {
       const dataService = new DataService<Property>({
         context: propertyContext,
         fetchOptions: {
-          select: ["id", "name"],
+          select: ["id", "name", "photo", "status"],
+          relations: ["address"],
           order: { name: "ASC" },
         },
       });
@@ -126,6 +159,10 @@ function PropertyBadge() {
     handleClose();
   };
 
+  const getSelectedProperty = () => {
+    return properties.find((p) => p.id === propertyId);
+  };
+
   const getPropertyName = () => {
     if (propertyId === 0) {
       return t("allProperties");
@@ -133,16 +170,33 @@ function PropertyBadge() {
     if (isLoading) {
       return "";
     }
-    const property = properties.find((p) => p.id === propertyId);
+    const property = getSelectedProperty();
     return property?.name || t("allProperties");
   };
+
+  const formatAddress = (property: Property) => {
+    if (!property.address) return "";
+    const parts = [property.address.street, property.address.city].filter(Boolean);
+    return parts.join(", ");
+  };
+
+  const groupedProperties = groupPropertiesByStatus(properties);
+  const selectedProperty = getSelectedProperty();
 
   return (
     <>
       <Chip
         ref={chipRef}
         data-testid="property-badge"
-        icon={<HomeWorkIcon />}
+        avatar={
+          <Avatar
+            src={getPhotoUrl(selectedProperty?.photo)}
+            alt={selectedProperty?.name || t("allProperties")}
+            sx={{ width: 24, height: 24 }}
+          >
+            {!selectedProperty && <HomeWorkIcon sx={{ fontSize: 14 }} />}
+          </Avatar>
+        }
         label={getPropertyName()}
         variant="outlined"
         onClick={handleClick}
@@ -163,9 +217,8 @@ function PropertyBadge() {
           "&:hover": {
             backgroundColor: "rgba(255, 255, 255, 0.1)",
           },
-          "& .MuiChip-icon": {
-            color: "inherit",
-            fontSize: "1.2rem",
+          "& .MuiChip-avatar": {
+            marginLeft: "4px",
           },
           ...(isHighlighted && {
             animation: "pulse 0.5s ease-in-out 3",
@@ -188,28 +241,82 @@ function PropertyBadge() {
           vertical: "top",
           horizontal: "left",
         }}
+        slotProps={{
+          paper: {
+            sx: {
+              maxHeight: { xs: "70vh", sm: 400 },
+              minWidth: { xs: 280, sm: 320 },
+              maxWidth: { xs: "90vw", sm: 400 },
+            },
+          },
+        }}
       >
+        {/* Explanatory header */}
+        <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: "divider" }}>
+          <Typography variant="body2" color="text.secondary">
+            {t("propertySelector.description")}
+          </Typography>
+        </Box>
+
+        {/* All Properties option */}
         <MenuItem
           onClick={() => handleSelectProperty(0)}
           selected={propertyId === 0}
+          aria-selected={propertyId === 0}
         >
           <ListItemIcon>
-            {propertyId === 0 && <CheckIcon fontSize="small" />}
+            {propertyId === 0 ? <CheckIcon fontSize="small" /> : null}
           </ListItemIcon>
           <ListItemText>{t("allProperties")}</ListItemText>
         </MenuItem>
-        {properties.map((property) => (
-          <MenuItem
-            key={property.id}
-            onClick={() => handleSelectProperty(property.id)}
-            selected={propertyId === property.id}
-          >
-            <ListItemIcon>
-              {propertyId === property.id && <CheckIcon fontSize="small" />}
-            </ListItemIcon>
-            <ListItemText>{property.name}</ListItemText>
-          </MenuItem>
-        ))}
+
+        <Divider />
+
+        {/* Grouped properties by status */}
+        {STATUS_ORDER.map((status) => {
+          const statusProperties = groupedProperties[status];
+          if (statusProperties.length === 0) return null;
+
+          return [
+            <ListSubheader
+              key={`header-${status}`}
+              sx={{
+                backgroundColor: "background.paper",
+                lineHeight: "32px",
+                fontWeight: 600,
+              }}
+            >
+              {t(`status.${status === PropertyStatus.OWN ? "own" : status === PropertyStatus.PROSPECT ? "prospect" : "sold"}`)}
+            </ListSubheader>,
+            ...statusProperties.map((property) => (
+              <MenuItem
+                key={property.id}
+                onClick={() => handleSelectProperty(property.id)}
+                selected={propertyId === property.id}
+                aria-selected={propertyId === property.id}
+                sx={{ pl: 2 }}
+              >
+                <ListItemIcon sx={{ minWidth: 44 }}>
+                  {propertyId === property.id ? (
+                    <CheckIcon fontSize="small" data-testid="CheckIcon" />
+                  ) : (
+                    <Avatar
+                      src={getPhotoUrl(property.photo)}
+                      alt={property.name}
+                      sx={{ width: 28, height: 28 }}
+                    />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary={property.name}
+                  secondary={formatAddress(property)}
+                  primaryTypographyProps={{ noWrap: true }}
+                  secondaryTypographyProps={{ noWrap: true, variant: "caption" }}
+                />
+              </MenuItem>
+            )),
+          ];
+        })}
       </Menu>
     </>
   );

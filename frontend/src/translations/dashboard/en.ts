@@ -4,6 +4,18 @@ const dashboard = {
   pageDescription: "Overview of your property portfolio performance.",
 
   allProperties: "All properties",
+
+  // Property selector
+  propertySelector: {
+    description: "Select a property to filter all data and transactions to that property only.",
+  },
+
+  // Property status labels for grouping
+  status: {
+    own: "My Properties",
+    prospect: "Prospects",
+    sold: "Sold",
+  },
   monthly: "Monthly",
   yearly: "Yearly",
   summary: "Summary",
