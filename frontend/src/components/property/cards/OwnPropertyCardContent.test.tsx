@@ -168,105 +168,6 @@ describe('OwnPropertyCardContent', () => {
     });
   });
 
-  describe('ownership share display', () => {
-    it('displays full ownership (100%)', () => {
-      const property = createMockProperty({
-        id: 1,
-        name: 'Test Property',
-        status: PropertyStatus.OWN,
-        ownerships: [{ share: 100, userId: 1, propertyId: 1 }],
-      });
-
-      renderWithProviders(
-        <OwnPropertyCardContent property={property} />
-      );
-
-      expect(screen.getByText(/100/)).toBeInTheDocument();
-    });
-
-    it('displays partial ownership', () => {
-      const property = createMockProperty({
-        id: 1,
-        name: 'Test Property',
-        status: PropertyStatus.OWN,
-        ownerships: [{ share: 50, userId: 1, propertyId: 1 }],
-      });
-
-      renderWithProviders(
-        <OwnPropertyCardContent property={property} />
-      );
-
-      expect(screen.getByText(/50/)).toBeInTheDocument();
-    });
-
-    it('displays ownership share label', () => {
-      const property = createMockProperty({
-        id: 1,
-        name: 'Test Property',
-        status: PropertyStatus.OWN,
-        ownerships: [{ share: 75, userId: 1, propertyId: 1 }],
-      });
-
-      renderWithProviders(
-        <OwnPropertyCardContent property={property} />
-      );
-
-      // Uses i18n key property:ownershipShare -> "Ownership share"
-      expect(screen.getByText(/Ownership|ownershipShare/i)).toBeInTheDocument();
-    });
-
-    it('handles multiple ownerships by showing first ownership', () => {
-      const property = createMockProperty({
-        id: 1,
-        name: 'Test Property',
-        status: PropertyStatus.OWN,
-        ownerships: [
-          { share: 60, userId: 1, propertyId: 1 },
-          { share: 40, userId: 2, propertyId: 1 },
-        ],
-      });
-
-      renderWithProviders(
-        <OwnPropertyCardContent property={property} />
-      );
-
-      // Should display the first (current user's) ownership share
-      expect(screen.getByText(/60/)).toBeInTheDocument();
-    });
-
-    it('handles empty ownerships array', () => {
-      const property = createMockProperty({
-        id: 1,
-        name: 'Test Property',
-        status: PropertyStatus.OWN,
-        ownerships: [],
-      });
-
-      renderWithProviders(
-        <OwnPropertyCardContent property={property} />
-      );
-
-      // Should render without crashing
-      expect(document.body).toBeInTheDocument();
-    });
-
-    it('handles missing ownerships', () => {
-      const property = createMockProperty({
-        id: 1,
-        name: 'Test Property',
-        status: PropertyStatus.OWN,
-        ownerships: undefined,
-      });
-
-      renderWithProviders(
-        <OwnPropertyCardContent property={property} />
-      );
-
-      // Should render without crashing
-      expect(document.body).toBeInTheDocument();
-    });
-  });
-
   describe('layout and formatting', () => {
     it('formats currency values with euro symbol', () => {
       const property = createMockProperty({
@@ -284,20 +185,5 @@ describe('OwnPropertyCardContent', () => {
       expect(screen.getByText(/1.*500/)).toBeInTheDocument();
     });
 
-    it('formats percentage values with percent symbol', () => {
-      const property = createMockProperty({
-        id: 1,
-        name: 'Test Property',
-        status: PropertyStatus.OWN,
-        ownerships: [{ share: 75, userId: 1, propertyId: 1 }],
-      });
-
-      renderWithProviders(
-        <OwnPropertyCardContent property={property} />
-      );
-
-      // Should display percentage with % symbol
-      expect(screen.getByText(/75.*%|%.*75/)).toBeInTheDocument();
-    });
   });
 });

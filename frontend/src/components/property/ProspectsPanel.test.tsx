@@ -223,7 +223,7 @@ describe('ProspectsPanel', () => {
       });
     });
 
-    it('hides Add Prospect button in compare view', async () => {
+    it('shows Add Prospect button in compare view', async () => {
       const user = userEvent.setup();
       mockSearch.mockResolvedValue([createMockProperty()]);
 
@@ -239,8 +239,32 @@ describe('ProspectsPanel', () => {
       await user.click(compareButton);
 
       await waitFor(() => {
-        expect(screen.queryByRole('link', { name: /add prospect/i })).not.toBeInTheDocument();
+        // Add button should be visible in compare view (there may be multiple, so use getAllByRole)
+        const addButtons = screen.getAllByRole('button', { name: /add/i });
+        expect(addButtons.length).toBeGreaterThan(0);
       });
+    });
+
+    it('calls onAddClick when Add button is clicked in compare view', async () => {
+      const user = userEvent.setup();
+      const mockOnAddClick = jest.fn();
+      mockSearch.mockResolvedValue([createMockProperty()]);
+
+      renderWithRouter(<ProspectsPanel onAddClick={mockOnAddClick} />, {
+        initialEntries: ['/app/portfolio/prospects?view=compare'],
+      });
+
+      await waitFor(() => {
+        // The toolbar Add button is the first one (MUI Button, not ListItemButton)
+        const addButtons = screen.getAllByRole('button', { name: /add/i });
+        expect(addButtons.length).toBeGreaterThan(0);
+      });
+
+      // Click the first Add button (the toolbar one)
+      const addButtons = screen.getAllByRole('button', { name: /add/i });
+      await user.click(addButtons[0]);
+
+      expect(mockOnAddClick).toHaveBeenCalledTimes(1);
     });
   });
 

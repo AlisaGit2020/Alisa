@@ -434,5 +434,22 @@ describe('ProspectPropertyCardContent', () => {
       // Should render without crashing
       expect(document.body).toBeInTheDocument();
     });
+
+    it('displays zero debt share', () => {
+      const property = createMockProperty({
+        id: 1,
+        name: 'Test Prospect',
+        status: PropertyStatus.PROSPECT,
+        purchasePrice: 150000,
+        debtShare: 0,
+      });
+
+      renderWithProviders(
+        <ProspectPropertyCardContent property={property} />
+      );
+
+      // Should display debt share label even when zero
+      expect(screen.getByText(/Debt Share|debtShare|Yhtiölainaosuus/i)).toBeInTheDocument();
+    });
   });
 });

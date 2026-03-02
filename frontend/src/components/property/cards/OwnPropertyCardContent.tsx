@@ -21,9 +21,6 @@ function OwnPropertyCardContent({ property }: OwnPropertyCardContentProps) {
   // Net rent = rent - all costs
   const netRent = monthlyRent - maintenanceFee - financialCharge - waterCharge;
 
-  // Get ownership share from first ownership
-  const ownershipShare = property.ownerships?.[0]?.share;
-
   const formatCurrency = (value: number): string => {
     const formatted = new Intl.NumberFormat('fi-FI', {
       style: 'currency',
@@ -67,17 +64,6 @@ function OwnPropertyCardContent({ property }: OwnPropertyCardContentProps) {
         </Box>
       )}
 
-      {/* Ownership Share */}
-      {ownershipShare !== undefined && (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography variant="body2" color="text.secondary">
-            {t('ownershipShare')}
-          </Typography>
-          <Typography variant="body2">
-            {ownershipShare} %
-          </Typography>
-        </Box>
-      )}
     </Box>
   );
 }

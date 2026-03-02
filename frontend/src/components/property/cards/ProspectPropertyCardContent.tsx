@@ -95,8 +95,8 @@ function ProspectPropertyCardContent({ property }: ProspectPropertyCardContentPr
         </Typography>
       </Box>
 
-      {/* Debt Share */}
-      {debtShare !== undefined && debtShare > 0 && (
+      {/* Debt Share - always show when defined, even if zero */}
+      {debtShare !== undefined && (
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
           <Typography variant="body2" color="text.secondary">
             {t('debtShare')}

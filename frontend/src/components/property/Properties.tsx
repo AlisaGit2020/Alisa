@@ -15,6 +15,7 @@ import { CardGridPageTemplate } from "../templates";
 import { PROPERTY_LIST_CHANGE_EVENT } from "../layout/PropertyBadge";
 import ProspectAddChoiceDialog from "./ProspectAddChoiceDialog";
 import ProspectsPanel from "./ProspectsPanel";
+import { OwnPropertyCardContent, SoldPropertyCardContent } from "./cards";
 
 const TAB_OWN = 0;
 const TAB_PROSPECT = 1;
@@ -182,6 +183,9 @@ function Properties({ t }: WithTranslation) {
                     onAfterDelete={handleAfterDelete}
                     routePrefix={ROUTE_OWN}
                     hideAddLink={true}
+                    renderCardContent={(item) => (
+                      <OwnPropertyCardContent property={item as Property} />
+                    )}
                   />
                 </Grid>
               </Grid>
@@ -205,6 +209,9 @@ function Properties({ t }: WithTranslation) {
                     onAfterDelete={handleAfterDelete}
                     routePrefix={ROUTE_SOLD}
                     hideAddLink={true}
+                    renderCardContent={(item) => (
+                      <SoldPropertyCardContent property={item as Property} />
+                    )}
                   />
                 </Grid>
               </Grid>
