@@ -27,8 +27,20 @@ function SoldPropertyCardContent({ property }: SoldPropertyCardContentProps) {
     ? (profitLoss / purchasePrice) * 100
     : null;
 
-  // Check if profit display would collide with date display
-  // This happens when the day of the month matches the leading digits of profit
+  /**
+   * Detects visual collision between profit and date displays.
+   *
+   * Edge case: When the sale date day (e.g., "15") matches the leading digits
+   * of the profit (e.g., "15,000 €"), users may confuse them at a glance.
+   *
+   * Example collision:
+   *   Profit/Loss:  15 000 €
+   *   Sale Date:    15.03.2024
+   *
+   * When collision detected, we show profit as percentage instead:
+   *   Profit/Loss:  +12.5%
+   *   Sale Date:    15.03.2024
+   */
   const hasDisplayCollision = (): boolean => {
     if (!saleDate || profitLoss === null) return false;
     const day = new Date(saleDate).getDate().toString();
@@ -36,7 +48,6 @@ function SoldPropertyCardContent({ property }: SoldPropertyCardContentProps) {
     return profitStr.startsWith(day);
   };
 
-  // Show profit as percentage when there would be a display collision with date
   const showProfitAsPercent = hasDisplayCollision();
 
   const formatCurrency = (value: number): string => {

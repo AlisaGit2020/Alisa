@@ -52,7 +52,7 @@ function CalculationListItem({
       sx={{
         opacity: isDragging ? 0.5 : 1,
         cursor: 'pointer',
-        pl: showAvatar ? 2 : 2,
+        pl: 2,
         '&:hover': {
           backgroundColor: 'action.hover',
         },
