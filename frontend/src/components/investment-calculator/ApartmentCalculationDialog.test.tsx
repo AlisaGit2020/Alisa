@@ -486,8 +486,8 @@ describe('ApartmentCalculationDialog', () => {
       const priceField = screen.getByTestId('editable-purchase-price');
       await user.click(priceField);
 
-      // Should show editable input
-      const input = await screen.findByRole('spinbutton');
+      // Should show editable input (with longer timeout for CI)
+      const input = await screen.findByRole('spinbutton', {}, { timeout: 3000 });
       expect(input).toBeInTheDocument();
     });
 
@@ -503,8 +503,8 @@ describe('ApartmentCalculationDialog', () => {
       const rentField = screen.getByTestId('editable-rent');
       await user.click(rentField);
 
-      // Should show editable input
-      const input = await screen.findByRole('spinbutton');
+      // Should show editable input (with longer timeout for CI)
+      const input = await screen.findByRole('spinbutton', {}, { timeout: 3000 });
       expect(input).toBeInTheDocument();
     });
   });
@@ -753,8 +753,8 @@ describe('ApartmentCalculationDialog - Property Group Integration', () => {
       const rentField = screen.getByTestId('editable-rent');
       await user.click(rentField);
 
-      // Wait for and get the spinbutton input
-      const input = await screen.findByRole('spinbutton');
+      // Wait for and get the spinbutton input (with longer timeout for CI)
+      const input = await screen.findByRole('spinbutton', {}, { timeout: 3000 });
 
       // Triple-click to select all text, then type new value
       await user.tripleClick(input);
