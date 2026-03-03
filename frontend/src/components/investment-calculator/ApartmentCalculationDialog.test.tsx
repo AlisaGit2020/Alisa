@@ -483,14 +483,12 @@ describe('ApartmentCalculationDialog', () => {
       );
 
       // Find and click on the price field to edit
-      const priceText = screen.getByText(/150.*000/);
-      await user.click(priceText);
+      const priceField = screen.getByTestId('editable-purchase-price');
+      await user.click(priceField);
 
-      // Should show editable input
-      await waitFor(() => {
-        const input = screen.getByRole('spinbutton');
-        expect(input).toBeInTheDocument();
-      });
+      // Should show editable input (with longer timeout for CI)
+      const input = await screen.findByRole('spinbutton', {}, { timeout: 3000 });
+      expect(input).toBeInTheDocument();
     });
 
     it('allows editing pre-filled monthly rent', async () => {
@@ -502,13 +500,12 @@ describe('ApartmentCalculationDialog', () => {
       );
 
       // Find and click on the rent field to edit
-      const rentText = screen.getByText(/850/);
-      await user.click(rentText);
+      const rentField = screen.getByTestId('editable-rent');
+      await user.click(rentField);
 
-      await waitFor(() => {
-        const input = screen.getByRole('spinbutton');
-        expect(input).toBeInTheDocument();
-      });
+      // Should show editable input (with longer timeout for CI)
+      const input = await screen.findByRole('spinbutton', {}, { timeout: 3000 });
+      expect(input).toBeInTheDocument();
     });
   });
 
@@ -753,18 +750,15 @@ describe('ApartmentCalculationDialog - Property Group Integration', () => {
       renderWithProviders(<ApartmentCalculationDialog {...defaultProps} />);
 
       // Find and click on the rent field to edit
-      const rentText = screen.getByText(/850/);
-      await user.click(rentText);
+      const rentField = screen.getByTestId('editable-rent');
+      await user.click(rentField);
 
-      await waitFor(() => {
-        const input = screen.getByRole('spinbutton');
-        expect(input).toBeInTheDocument();
-      });
+      // Wait for and get the spinbutton input (with longer timeout for CI)
+      const input = await screen.findByRole('spinbutton', {}, { timeout: 3000 });
 
-      // Change the value
-      const input = screen.getByRole('spinbutton');
-      await user.clear(input);
-      await user.type(input, '1000');
+      // Triple-click to select all text, then type new value
+      await user.tripleClick(input);
+      await user.keyboard('1000');
 
       // Blur to trigger recalculation
       await user.tab();

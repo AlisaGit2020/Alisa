@@ -27,7 +27,7 @@ function ProtectedLayout() {
           }}
         >
           <Toolbar />
-          <Container maxWidth={false} sx={{ mt: 3, mb: 4 }}>
+          <Container maxWidth="lg" sx={{ mt: 3, mb: 4, ml: 0 }}>
             <Breadcrumbs />
             <Outlet />
           </Container>

@@ -88,6 +88,7 @@ const investmentCalculator = {
 
   // Prospect Compare View
   prospectCompare: 'Compare Prospects',
+  toggleCalculationsList: 'Toggle calculations list',
   calculations: 'Calculations',
   comparison: 'Comparison',
   loading: 'Loading...',

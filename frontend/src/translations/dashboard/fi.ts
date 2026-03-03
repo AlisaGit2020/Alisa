@@ -4,6 +4,18 @@ const dashboard = {
   pageDescription: "Yleiskatsaus kiinteistösalkkusi suorituskyvystä.",
 
   allProperties: "Kaikki kohteet",
+
+  // Property selector
+  propertySelector: {
+    description: "Valitse kohde suodattaaksesi kaikki tiedot ja tapahtumat vain kyseiseen kohteeseen.",
+  },
+
+  // Property status labels for grouping
+  status: {
+    own: "Omat kohteet",
+    prospect: "Harkinnassa",
+    sold: "Myydyt",
+  },
   monthly: "Kuukausittain",
   yearly: "Vuosittain",
   summary: "Yhteenveto",

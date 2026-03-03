@@ -396,15 +396,34 @@ describe('ProspectCompareView', () => {
   });
 
   describe('Layout', () => {
-    it('renders two-panel layout', async () => {
+    it('renders drawer toggle button and comparison panel', async () => {
       setupMocks({ calculations: [createMockCalculation()], prospects: [] });
 
-      renderWithProviders(<ProspectCompareView />);
+      renderWithProviders(<ProspectCompareView standalone />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('calculations-list-panel')).toBeInTheDocument();
+        expect(screen.getByTestId('toggle-drawer-button')).toBeInTheDocument();
       });
       expect(screen.getByTestId('comparison-panel')).toBeInTheDocument();
+    });
+
+    it('opens calculations drawer when toggle button clicked', async () => {
+      const user = userEvent.setup();
+      setupMocks({ calculations: [createMockCalculation()], prospects: [] });
+
+      renderWithProviders(<ProspectCompareView standalone />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('toggle-drawer-button')).toBeInTheDocument();
+      });
+
+      // Click toggle to open drawer
+      await user.click(screen.getByTestId('toggle-drawer-button'));
+
+      // Drawer should be visible
+      await waitFor(() => {
+        expect(screen.getByTestId('calculations-list-drawer')).toBeInTheDocument();
+      });
     });
   });
 

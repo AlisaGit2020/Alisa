@@ -124,8 +124,13 @@ describe('ProspectsPanel', () => {
       const compareButton = await screen.findByRole('button', { name: /compare/i });
       await user.click(compareButton);
 
+      // Wait for compare view to render
+      await waitFor(() => {
+        expect(screen.getByTestId('comparison-panel')).toBeInTheDocument();
+      });
+
       // Then switch back to list view
-      const listButton = screen.getByRole('button', { name: /list/i });
+      const listButton = screen.getByTestId('list-view-toggle');
       await user.click(listButton);
 
       await waitFor(() => {
@@ -217,8 +222,8 @@ describe('ProspectsPanel', () => {
       await user.click(compareButton);
 
       await waitFor(() => {
-        // ProspectCompareView renders calculation list panel and comparison panel
-        expect(screen.getByTestId('calculations-list-panel')).toBeInTheDocument();
+        // ProspectCompareView renders drawer toggle button and comparison panel
+        expect(screen.getByTestId('toggle-drawer-button')).toBeInTheDocument();
         expect(screen.getByTestId('comparison-panel')).toBeInTheDocument();
       });
     });

@@ -88,6 +88,7 @@ const investmentCalculator = {
 
   // Prospect Compare View
   prospectCompare: 'Jämför prospekt',
+  toggleCalculationsList: 'Visa/dölj beräkningslista',
   calculations: 'Beräkningar',
   comparison: 'Jämförelse',
   loading: 'Laddar...',

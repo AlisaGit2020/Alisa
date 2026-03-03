@@ -4,6 +4,18 @@ const dashboard = {
   pageDescription: "Överblick av din fastighetsportföljs prestanda.",
 
   allProperties: "Alla fastigheter",
+
+  // Property selector
+  propertySelector: {
+    description: "Välj en fastighet för att filtrera all data och transaktioner till endast den fastigheten.",
+  },
+
+  // Property status labels for grouping
+  status: {
+    own: "Mina fastigheter",
+    prospect: "Prospekt",
+    sold: "Sålda",
+  },
   monthly: "Månadsvis",
   yearly: "Årsvis",
   summary: "Sammanfattning",
