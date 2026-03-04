@@ -362,8 +362,10 @@ export class OikotieImportService {
     // Extract water fee (Vesimaksu)
     result.waterFee = parseNumber(extractTableValue('Vesimaksu'));
 
-    // Extract financing fee (Rahoitusvastike)
-    result.financingFee = parseNumber(extractTableValue('Rahoitusvastike'));
+    // Extract financing fee (Rahoitusvastike or Pääomavastike - both refer to housing company loan payment)
+    result.financingFee =
+      parseNumber(extractTableValue('Rahoitusvastike')) ??
+      parseNumber(extractTableValue('Pääomavastike'));
 
     // Extract condition (Kunto)
     result.condition = extractTableValue('Kunto') ?? undefined;
