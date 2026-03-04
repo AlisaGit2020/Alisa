@@ -177,3 +177,13 @@ export interface InvestmentInput {
   name?: string;
   etuoviUrl?: string;
 }
+
+// Listing import source
+export type ListingSource = 'etuovi' | 'oikotie';
+
+// Unified listing fetch input
+export interface ListingFetchInput {
+  url: string;
+  monthlyRent?: number;
+  source: ListingSource;
+}

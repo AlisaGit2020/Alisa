@@ -59,12 +59,21 @@ const investmentCalculator = {
   taxPerYear: 'Skatt/år',
   taxDeductibleExpensesPerYear: 'Avdragsgilla kostnader/år',
 
-  // Etuovi import
+  // Listing import
   etuoviUrl: 'Etuovi.com URL',
+  listingUrl: 'Annons-URL',
+  listingSource: 'Källa',
+  fetchFromListing: 'Hämta data',
   fetchFromEtuovi: 'Hämta data',
   fetchSuccess: 'Fastighetsdata laddad',
   fetchError: 'Kunde inte hämta fastighetsdata',
-  invalidUrl: 'Ogiltig etuovi.com URL',
+  invalidUrl: 'Ogiltig annons-URL',
+  invalidEtuoviUrl: 'Ogiltig Etuovi-URL',
+  invalidOikotieUrl: 'Ogiltig Oikotie-URL',
+  etuovi: 'Etuovi',
+  oikotie: 'Oikotie',
+  etuoviUrlPlaceholder: 'https://www.etuovi.com/kohde/...',
+  oikotieUrlPlaceholder: 'https://asunnot.oikotie.fi/myytavat-asunnot/...',
 
   // Saved calculations
   createdAt: 'Skapad',

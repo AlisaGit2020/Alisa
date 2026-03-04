@@ -1,10 +1,7 @@
-import { useState, ChangeEvent } from "react";
 import {
-  Box,
   Card,
   CardActionArea,
   CardContent,
-  CircularProgress,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -16,11 +13,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import HomeIcon from "@mui/icons-material/Home";
 import EditIcon from "@mui/icons-material/Edit";
 import { useTranslation } from "react-i18next";
-import AssetTextField from "../asset/form/AssetTextField";
-import AssetNumberField from "../asset/form/AssetNumberField";
-import AssetButton from "../asset/form/AssetButton";
-import { useToast } from "../asset/toast";
-import ApiClient from "@asset-lib/api-client";
+import ListingImportInput from "./ListingImportInput";
 
 interface ProspectAddChoiceDialogProps {
   open: boolean;
@@ -29,8 +22,6 @@ interface ProspectAddChoiceDialogProps {
   onManualAdd: () => void;
 }
 
-const ETUOVI_URL_PATTERN = /^https?:\/\/(www\.)?etuovi\.com\/kohde\/\d+/;
-
 export default function ProspectAddChoiceDialog({
   open,
   onClose,
@@ -38,56 +29,10 @@ export default function ProspectAddChoiceDialog({
   onManualAdd,
 }: ProspectAddChoiceDialogProps) {
   const { t } = useTranslation("property");
-  const { showToast } = useToast();
-  const [etuoviUrl, setEtuoviUrl] = useState("");
-  const [monthlyRent, setMonthlyRent] = useState<number | undefined>(undefined);
-  const [loading, setLoading] = useState(false);
-  const [validationError, setValidationError] = useState<string | undefined>(undefined);
-
-  const handleUrlChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEtuoviUrl(e.target.value);
-    setValidationError(undefined);
-  };
-
-  const validateUrl = (url: string): boolean => {
-    if (!ETUOVI_URL_PATTERN.test(url)) {
-      setValidationError(t("invalidEtuoviUrl"));
-      return false;
-    }
-    return true;
-  };
-
-  const handleImport = async () => {
-    if (!validateUrl(etuoviUrl)) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const payload: { url: string; monthlyRent?: number } = { url: etuoviUrl };
-      if (monthlyRent !== undefined && monthlyRent > 0) {
-        payload.monthlyRent = monthlyRent;
-      }
-      await ApiClient.post("import/etuovi/create-prospect", payload);
-      showToast({ message: t("importSuccess"), severity: "success" });
-      setEtuoviUrl("");
-      setMonthlyRent(undefined);
-      onSuccess();
-    } catch {
-      showToast({ message: t("importError"), severity: "error" });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleClose = () => {
-    setEtuoviUrl("");
-    setMonthlyRent(undefined);
-    setValidationError(undefined);
     onClose();
   };
-
-  const isImportDisabled = !etuoviUrl.trim() || loading;
 
   return (
     <Dialog
@@ -111,44 +56,18 @@ export default function ProspectAddChoiceDialog({
         <Typography sx={{ mb: 3 }}>{t("chooseAddMethod")}</Typography>
 
         <Stack spacing={2}>
-          {/* Etuovi Import Option */}
+          {/* Listing Import Option */}
           <Card variant="outlined">
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
                 <HomeIcon color="primary" />
-                <Typography variant="h6">{t("importFromEtuovi")}</Typography>
+                <Typography variant="h6">{t("importFromListing")}</Typography>
               </Stack>
-              <Stack spacing={2}>
-                <AssetTextField
-                  label=""
-                  placeholder={t("etuoviUrlPlaceholder")}
-                  value={etuoviUrl}
-                  onChange={handleUrlChange}
-                  error={!!validationError}
-                  helperText={validationError}
-                  disabled={loading}
-                  fullWidth
-                />
-                <AssetNumberField
-                  label={t("expectedRent")}
-                  value={monthlyRent ?? ''}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setMonthlyRent(value ? Number(value) : undefined);
-                  }}
-                  disabled={loading}
-                  adornment="€"
-                  fullWidth
-                />
-                <Box>
-                  <AssetButton
-                    label={loading ? "" : t("importButton")}
-                    onClick={handleImport}
-                    disabled={isImportDisabled}
-                    startIcon={loading ? <CircularProgress size={20} /> : undefined}
-                  />
-                </Box>
-              </Stack>
+              <ListingImportInput
+                mode="prospect"
+                onSuccess={onSuccess}
+                showRentInput={true}
+              />
             </CardContent>
           </Card>
 

@@ -106,13 +106,21 @@ const property = {
     // Prospect add choice modal
     addProspectTitle: 'Lisää seurattava kohde',
     chooseAddMethod: 'Miten haluat lisätä kohteen?',
+    importFromListing: 'Tuo ilmoituksesta',
     importFromEtuovi: 'Tuo Etuovesta',
+    importFromOikotie: 'Tuo Oikotieltä',
     etuoviUrlPlaceholder: 'Liitä Etuovi-kohteen URL (esim. https://www.etuovi.com/kohde/12345)',
+    oikotieUrlPlaceholder: 'Liitä Oikotie-kohteen URL (esim. https://asunnot.oikotie.fi/myytavat-asunnot/...)',
     importButton: 'Tuo',
     addManually: 'Täytä lomake manuaalisesti',
     importSuccess: 'Kohde tuotu onnistuneesti',
     importError: 'Kohteen tuonti epäonnistui',
     invalidEtuoviUrl: 'Anna kelvollinen Etuovi-URL',
+    invalidOikotieUrl: 'Anna kelvollinen Oikotie-URL',
+    invalidListingUrl: 'Anna kelvollinen ilmoituksen URL',
+    listingSource: 'Lähde',
+    etuovi: 'Etuovi',
+    oikotie: 'Oikotie',
 
     // Status change dialogs
     markAsPurchased: 'Asunto ostettu',

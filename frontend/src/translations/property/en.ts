@@ -106,13 +106,21 @@ const property = {
     // Prospect add choice modal
     addProspectTitle: 'Add Prospect Property',
     chooseAddMethod: 'How would you like to add a property?',
+    importFromListing: 'Import from Listing',
     importFromEtuovi: 'Import from Etuovi',
+    importFromOikotie: 'Import from Oikotie',
     etuoviUrlPlaceholder: 'Paste Etuovi property URL (e.g., https://www.etuovi.com/kohde/12345)',
+    oikotieUrlPlaceholder: 'Paste Oikotie property URL (e.g., https://asunnot.oikotie.fi/myytavat-asunnot/...)',
     importButton: 'Import',
     addManually: 'Fill in form manually',
     importSuccess: 'Property imported successfully',
     importError: 'Failed to import property',
     invalidEtuoviUrl: 'Please enter a valid Etuovi URL',
+    invalidOikotieUrl: 'Please enter a valid Oikotie URL',
+    invalidListingUrl: 'Please enter a valid property listing URL',
+    listingSource: 'Source',
+    etuovi: 'Etuovi',
+    oikotie: 'Oikotie',
 
     // Status change dialogs
     markAsPurchased: 'Apartment purchased',
