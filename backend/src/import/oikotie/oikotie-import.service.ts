@@ -19,41 +19,28 @@ import { PropertyService } from '@asset-backend/real-estate/property/property.se
 import { JWTUser } from '@asset-backend/auth/types';
 import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
 
-interface OikotieAddress {
-  street?: string;
-  city?: string;
-  postalCode?: string;
-  district?: string;
-}
-
-interface OikotieImage {
-  url?: string;
-  type?: string;
-  ordinal?: number;
-}
-
-interface OikotieCard {
-  id?: number;
+/**
+ * Analytics object from var otAsunnot JSON
+ * This matches the real Oikotie page structure
+ */
+interface OikotieAnalytics {
   cardId?: number;
-  price?: number;
-  debtPrice?: number;
+  apartmentType?: string;
+  apartmentTypeId?: number;
   size?: number;
-  buildYear?: number;
-  buildingType?: string;
-  roomConfiguration?: string;
-  rooms?: number;
-  condition?: string;
-  energyClass?: string;
-  maintenanceFee?: number;
-  waterFee?: number;
-  financingFee?: number;
-  address?: OikotieAddress;
-  images?: OikotieImage[];
-  mainImage?: { url?: string };
+  price?: number;
+  zipCode?: string;
+  locationPath?: string;
+  apartmentBuildYear?: number;
 }
 
+/**
+ * Root data structure from var otAsunnot JSON
+ */
 interface OikotieData {
-  card?: OikotieCard;
+  cardId?: number;
+  analytics?: OikotieAnalytics;
+  address?: string;
 }
 
 interface JsonLdAddress {
@@ -176,15 +163,22 @@ export class OikotieImportService {
   }
 
   parseHtml(url: string, html: string): OikotiePropertyDataDto {
-    // Try to extract data from window.otAsunnot first
+    // Try to extract data from var otAsunnot JSON first
     const oikotieData = this.extractOtAsunnot(html);
     // Fallback to JSON-LD data
     const jsonLdData = this.extractJsonLd(html);
+    // Parse HTML tables for additional data (fees, condition, etc.)
+    const htmlTableData = this.extractHtmlTableData(html);
 
-    const card = oikotieData?.card;
+    const analytics = oikotieData?.analytics;
+
+    // Check if htmlTableData has any defined values
+    const hasHtmlTableData = Object.values(htmlTableData).some(
+      (value) => value !== undefined,
+    );
 
     // Validate that we have at least some data to work with
-    if (!card && !jsonLdData) {
+    if (!analytics && !jsonLdData && !hasHtmlTableData) {
       throw new InternalServerErrorException(
         'Could not extract data from listing. The page structure may have changed.',
       );
@@ -193,43 +187,72 @@ export class OikotieImportService {
     const result = new OikotiePropertyDataDto();
     result.url = url;
 
-    // Parse price data from card
-    if (card) {
-      result.debtFreePrice = card.price ?? 0;
-      result.debtShare = card.debtPrice || undefined;
-      result.apartmentSize = card.size ?? 0;
-      result.maintenanceFee = card.maintenanceFee ?? 0;
-      result.waterFee = card.waterFee || undefined;
-      result.financingFee = card.financingFee || undefined;
-      result.buildingYear = card.buildYear || undefined;
-      result.propertyType = card.buildingType || undefined;
-      result.roomDescription = card.roomConfiguration || undefined;
-      result.roomCount = card.rooms || undefined;
-      result.condition = card.condition ? this.sanitizeCondition(card.condition) : undefined;
-      result.energyClass = card.energyClass || undefined;
+    // Parse data from analytics object (from var otAsunnot JSON)
+    if (analytics) {
+      result.debtFreePrice = analytics.price ?? 0;
+      result.apartmentSize = analytics.size ?? 0;
+      result.buildingYear = analytics.apartmentBuildYear || undefined;
+      result.propertyType = analytics.apartmentType || undefined;
+      result.postalCode = analytics.zipCode || undefined;
 
-      // Parse address from card
-      if (card.address) {
-        result.city = card.address.city || undefined;
-        result.postalCode = card.address.postalCode || undefined;
-        result.district = card.address.district || undefined;
-
-        // Build full address string
-        const addressParts: string[] = [];
-        if (card.address.street) {
-          addressParts.push(card.address.street);
+      // Parse city from locationPath (e.g., "Vaasa/4 kaupunginosa/65100")
+      if (analytics.locationPath) {
+        const parts = analytics.locationPath.split('/');
+        if (parts.length > 0) {
+          result.city = parts[0];
         }
-        if (card.address.postalCode && card.address.city) {
-          addressParts.push(`${card.address.postalCode} ${card.address.city}`);
-        }
-        if (addressParts.length > 0) {
-          result.address = addressParts.join(', ');
+        if (parts.length > 1) {
+          result.district = parts[1];
         }
       }
-
-      // Parse image URL
-      result.defaultImageUrl = this.extractImageUrl(card);
     }
+
+    // Get address from oikotieData root level
+    if (oikotieData?.address) {
+      result.address = oikotieData.address;
+    }
+
+    // Parse fees and other data from HTML tables
+    if (htmlTableData.maintenanceFee !== undefined) {
+      result.maintenanceFee = htmlTableData.maintenanceFee;
+    } else {
+      result.maintenanceFee = 0;
+    }
+    if (htmlTableData.waterFee !== undefined) {
+      result.waterFee = htmlTableData.waterFee;
+    }
+    if (htmlTableData.financingFee !== undefined) {
+      result.financingFee = htmlTableData.financingFee;
+    }
+    if (htmlTableData.condition) {
+      result.condition = this.sanitizeCondition(htmlTableData.condition);
+    }
+    if (htmlTableData.roomDescription) {
+      result.roomDescription = htmlTableData.roomDescription;
+    }
+    if (htmlTableData.energyClass) {
+      result.energyClass = htmlTableData.energyClass;
+    }
+    if (htmlTableData.debtShare !== undefined) {
+      result.debtShare = htmlTableData.debtShare;
+    }
+
+    // Override with HTML data if analytics data is missing
+    if (!result.apartmentSize && htmlTableData.size) {
+      result.apartmentSize = htmlTableData.size;
+    }
+    if (!result.debtFreePrice && htmlTableData.debtFreePrice) {
+      result.debtFreePrice = htmlTableData.debtFreePrice;
+    }
+    if (!result.buildingYear && htmlTableData.buildYear) {
+      result.buildingYear = htmlTableData.buildYear;
+    }
+    if (!result.propertyType && htmlTableData.propertyType) {
+      result.propertyType = htmlTableData.propertyType;
+    }
+
+    // Extract image URL from HTML
+    result.defaultImageUrl = this.extractImageUrlFromHtml(html);
 
     // Fallback to JSON-LD data for missing fields
     if (jsonLdData) {
@@ -251,20 +274,152 @@ export class OikotieImportService {
   }
 
   private extractOtAsunnot(html: string): OikotieData | null {
-    // Look for window.otAsunnot = {...}
-    const match = html.match(/window\.otAsunnot\s*=\s*(\{[\s\S]*?\});?\s*(?:<\/script>|$)/);
+    // Look for var otAsunnot={...} (real Oikotie pages use this format)
+    // Also support window.otAsunnot = {...} for backwards compatibility with tests
+    const patterns = [
+      /var otAsunnot=(\{[^;]+\});/,
+      /window\.otAsunnot\s*=\s*(\{[\s\S]*?\});?\s*(?:<\/script>|$)/,
+    ];
 
-    if (!match) {
-      return null;
+    for (const pattern of patterns) {
+      const match = html.match(pattern);
+      if (match) {
+        try {
+          const jsonStr = match[1];
+          return JSON.parse(jsonStr) as OikotieData;
+        } catch {
+          // JSON parse failed, try next pattern
+          continue;
+        }
+      }
     }
 
-    try {
-      const jsonStr = match[1];
-      return JSON.parse(jsonStr) as OikotieData;
-    } catch {
-      // JSON parse failed, return null
+    return null;
+  }
+
+  /**
+   * Extract data from HTML tables (info-table and details-grid)
+   * This is where fees and other details are stored on real Oikotie pages
+   */
+  private extractHtmlTableData(html: string): {
+    maintenanceFee?: number;
+    waterFee?: number;
+    financingFee?: number;
+    condition?: string;
+    roomDescription?: string;
+    energyClass?: string;
+    debtShare?: number;
+    size?: number;
+    debtFreePrice?: number;
+    buildYear?: number;
+    propertyType?: string;
+  } {
+    const result: ReturnType<typeof this.extractHtmlTableData> = {};
+
+    // Helper to extract value after a title in HTML tables
+    const extractTableValue = (titlePattern: string): string | null => {
+      // Match both info-table and details-grid formats
+      const patterns = [
+        // info-table format: <dt class="info-table__title">Title</dt>...<dd class="info-table__value">Value</dd>
+        new RegExp(
+          `<dt[^>]*class="[^"]*info-table__title[^"]*"[^>]*>${titlePattern}</dt>[\\s\\S]*?<dd[^>]*class="[^"]*info-table__value[^"]*"[^>]*>([^<]+)</dd>`,
+          'i',
+        ),
+        // details-grid format: <dt class="details-grid__item-title">Title</dt><dd class="details-grid__item-value">Value</dd>
+        new RegExp(
+          `<dt[^>]*class="[^"]*details-grid__item-title[^"]*"[^>]*>${titlePattern}</dt>[\\s\\S]*?<dd[^>]*class="[^"]*details-grid__item-value[^"]*"[^>]*>([^<]+)</dd>`,
+          'i',
+        ),
+      ];
+
+      for (const pattern of patterns) {
+        const match = html.match(pattern);
+        if (match && match[1]) {
+          return match[1].trim();
+        }
+      }
       return null;
+    };
+
+    // Helper to parse Finnish number format (154,35 -> 154.35)
+    const parseNumber = (value: string | null): number | undefined => {
+      if (!value) return undefined;
+      // Remove currency symbols, spaces, and unit suffixes
+      const cleaned = value
+        .replace(/[€\s]/g, '')
+        .replace('/ kk', '')
+        .replace('/ kk', '')
+        .replace('m²', '')
+        .replace(',', '.')
+        .trim();
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? undefined : num;
+    };
+
+    // Extract maintenance fee (Hoitovastike)
+    result.maintenanceFee = parseNumber(extractTableValue('Hoitovastike'));
+
+    // Extract water fee (Vesimaksu)
+    result.waterFee = parseNumber(extractTableValue('Vesimaksu'));
+
+    // Extract financing fee (Rahoitusvastike)
+    result.financingFee = parseNumber(extractTableValue('Rahoitusvastike'));
+
+    // Extract condition (Kunto)
+    result.condition = extractTableValue('Kunto') ?? undefined;
+
+    // Extract room description (Huoneiston kokoonpano)
+    result.roomDescription = extractTableValue('Huoneiston kokoonpano') ?? undefined;
+
+    // Extract energy class (Energialuokka)
+    result.energyClass = extractTableValue('Energialuokka') ?? undefined;
+
+    // Extract debt share from selling price (Myyntihinta)
+    // On Oikotie, if there's both "Velaton hinta" and "Myyntihinta", the difference is the debt
+    const debtFreePrice = parseNumber(extractTableValue('Velaton hinta'));
+    const sellingPrice = parseNumber(extractTableValue('Myyntihinta'));
+    if (debtFreePrice !== undefined && sellingPrice !== undefined && debtFreePrice > sellingPrice) {
+      result.debtShare = debtFreePrice - sellingPrice;
+      result.debtFreePrice = debtFreePrice;
+    } else if (debtFreePrice !== undefined) {
+      result.debtFreePrice = debtFreePrice;
     }
+
+    // Extract size (Asuinpinta-ala)
+    result.size = parseNumber(extractTableValue('Asuinpinta-ala'));
+
+    // Extract build year (Rakennusvuosi)
+    const buildYearStr = extractTableValue('Rakennusvuosi');
+    if (buildYearStr) {
+      const year = parseInt(buildYearStr, 10);
+      if (!isNaN(year) && year > 1800 && year < 2100) {
+        result.buildYear = year;
+      }
+    }
+
+    // Extract property type (Rakennuksen tyyppi)
+    result.propertyType = extractTableValue('Rakennuksen tyyppi') ?? undefined;
+
+    return result;
+  }
+
+  /**
+   * Extract main image URL from HTML
+   */
+  private extractImageUrlFromHtml(html: string): string | undefined {
+    // Look for og:image meta tag
+    const ogImageMatch = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
+    if (ogImageMatch && ogImageMatch[1]) {
+      return this.normalizeImageUrl(ogImageMatch[1]);
+    }
+
+    // Look for main listing image
+    const imgMatch = html.match(/<img[^>]*class="[^"]*listing-image[^"]*"[^>]*src="([^"]+)"/i);
+    if (imgMatch && imgMatch[1]) {
+      return this.normalizeImageUrl(imgMatch[1]);
+    }
+
+    return undefined;
   }
 
   private extractJsonLd(html: string): JsonLdData | null {
@@ -280,33 +435,6 @@ export class OikotieImportService {
     } catch {
       return null;
     }
-  }
-
-  private extractImageUrl(card: OikotieCard): string | undefined {
-    // Try mainImage first
-    if (card.mainImage?.url) {
-      return this.normalizeImageUrl(card.mainImage.url);
-    }
-
-    // Try images array, find MAIN type or lowest ordinal
-    if (card.images && Array.isArray(card.images) && card.images.length > 0) {
-      // First try to find MAIN type
-      const mainImage = card.images.find((img) => img.type === 'MAIN');
-      if (mainImage?.url) {
-        return this.normalizeImageUrl(mainImage.url);
-      }
-
-      // Fall back to first image by ordinal
-      const sortedImages = [...card.images]
-        .filter((img) => img.url)
-        .sort((a, b) => (a.ordinal ?? 999) - (b.ordinal ?? 999));
-
-      if (sortedImages.length > 0 && sortedImages[0].url) {
-        return this.normalizeImageUrl(sortedImages[0].url);
-      }
-    }
-
-    return undefined;
   }
 
   private normalizeImageUrl(url: string): string {
