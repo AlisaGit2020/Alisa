@@ -45,15 +45,15 @@ describe("ListingImportInput", () => {
   });
 
   describe("Rendering", () => {
-    it("renders with default source selection (Etuovi)", () => {
+    it("renders with default source selection (Oikotie)", () => {
       renderWithProviders(
         <ListingImportInput mode="prospect" onSuccess={mockOnSuccess} />
       );
 
-      // Should have a source selector with Etuovi selected by default
-      expect(screen.getByRole("combobox")).toBeInTheDocument();
-      // Etuovi placeholder should be visible
-      expect(screen.getByPlaceholderText(/etuovi/i)).toBeInTheDocument();
+      // Should have radio buttons with Oikotie selected by default
+      expect(screen.getByRole("radiogroup")).toBeInTheDocument();
+      // Oikotie placeholder should be visible (default)
+      expect(screen.getByPlaceholderText(/oikotie/i)).toBeInTheDocument();
     });
 
     it("renders URL input field", () => {
@@ -95,39 +95,31 @@ describe("ListingImportInput", () => {
   });
 
   describe("Source Selector", () => {
-    it("source selector changes URL placeholder text to Oikotie", async () => {
+    it("source selector changes URL placeholder text to Etuovi when selected", async () => {
       const user = userEvent.setup();
       renderWithProviders(
         <ListingImportInput mode="prospect" onSuccess={mockOnSuccess} />
       );
 
-      // Initially should show Etuovi placeholder
-      expect(screen.getByPlaceholderText(/etuovi/i)).toBeInTheDocument();
-
-      // Open source selector and select Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
-      // Now should show Oikotie placeholder
+      // Initially should show Oikotie placeholder (default)
       expect(screen.getByPlaceholderText(/oikotie/i)).toBeInTheDocument();
+
+      // Select Etuovi radio button
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
+
+      // Now should show Etuovi placeholder
+      expect(screen.getByPlaceholderText(/etuovi/i)).toBeInTheDocument();
     });
 
-    it("source selector shows both Etuovi and Oikotie options", async () => {
-      const user = userEvent.setup();
+    it("source selector shows both Etuovi and Oikotie radio options", () => {
       renderWithProviders(
         <ListingImportInput mode="prospect" onSuccess={mockOnSuccess} />
       );
 
-      // Open source selector
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-
-      // Should show both options
-      expect(screen.getByRole("option", { name: /etuovi/i })).toBeInTheDocument();
-      expect(screen.getByRole("option", { name: /oikotie/i })).toBeInTheDocument();
+      // Should show both radio options
+      expect(screen.getByRole("radio", { name: /etuovi/i })).toBeInTheDocument();
+      expect(screen.getByRole("radio", { name: /oikotie/i })).toBeInTheDocument();
     });
   });
 
@@ -143,6 +135,10 @@ describe("ListingImportInput", () => {
       renderWithProviders(
         <ListingImportInput mode="prospect" onSuccess={mockOnSuccess} />
       );
+
+      // Switch to Etuovi (Oikotie is default)
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
 
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
@@ -164,6 +160,10 @@ describe("ListingImportInput", () => {
       renderWithProviders(
         <ListingImportInput mode="prospect" onSuccess={mockOnSuccess} />
       );
+
+      // Switch to Etuovi (Oikotie is default)
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
 
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://not-etuovi.com/something");
@@ -188,12 +188,7 @@ describe("ListingImportInput", () => {
         <ListingImportInput mode="prospect" onSuccess={mockOnSuccess} />
       );
 
-      // Switch to Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
+      // Oikotie is default, no need to switch
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
@@ -215,12 +210,7 @@ describe("ListingImportInput", () => {
         <ListingImportInput mode="prospect" onSuccess={mockOnSuccess} />
       );
 
-      // Switch to Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
+      // Oikotie is default, no need to switch
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://not-oikotie.com/something");
 
@@ -244,8 +234,8 @@ describe("ListingImportInput", () => {
       const importButton = screen.getByRole("button", { name: /import/i });
       await user.click(importButton);
 
-      // Should show validation error
-      expect(screen.getByText(/valid/i)).toBeInTheDocument();
+      // Should show validation error (for Oikotie since it's default)
+      expect(screen.getByText(/valid.*oikotie/i)).toBeInTheDocument();
     });
 
     it("clears validation error when URL changes", async () => {
@@ -261,14 +251,14 @@ describe("ListingImportInput", () => {
       await user.click(importButton);
 
       // Should show validation error
-      expect(screen.getByText(/valid/i)).toBeInTheDocument();
+      expect(screen.getByText(/valid.*oikotie/i)).toBeInTheDocument();
 
       // Clear and type new URL
       await user.clear(urlInput);
-      await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
+      await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
       // Error should be cleared
-      expect(screen.queryByText(/valid.*etuovi/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/valid.*oikotie/i)).not.toBeInTheDocument();
     });
   });
 
@@ -289,7 +279,7 @@ describe("ListingImportInput", () => {
       );
 
       const urlInput = screen.getByRole("textbox");
-      await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
+      await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
       const importButton = screen.getByRole("button", { name: /import/i });
       expect(importButton).toBeEnabled();
@@ -299,7 +289,7 @@ describe("ListingImportInput", () => {
   describe("Loading State", () => {
     it("loading state disables all inputs", async () => {
       server.use(
-        http.post(`${API_BASE}/api/import/etuovi/create-prospect`, async () => {
+        http.post(`${API_BASE}/api/import/oikotie/create-prospect`, async () => {
           // Delay response to test loading state
           await new Promise((resolve) => setTimeout(resolve, 100));
           return HttpResponse.json({ id: 1, name: "Test Property" });
@@ -312,7 +302,7 @@ describe("ListingImportInput", () => {
       );
 
       const urlInput = screen.getByRole("textbox");
-      await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
+      await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
       const importButton = screen.getByRole("button", { name: /import/i });
       await user.click(importButton);
@@ -352,7 +342,7 @@ describe("ListingImportInput", () => {
   describe("Prospect Mode (create-prospect)", () => {
     it("calls onSuccess after successful import", async () => {
       server.use(
-        http.post(`${API_BASE}/api/import/etuovi/create-prospect`, () => {
+        http.post(`${API_BASE}/api/import/oikotie/create-prospect`, () => {
           return HttpResponse.json({ id: 1, name: "Test Property" });
         })
       );
@@ -363,7 +353,7 @@ describe("ListingImportInput", () => {
       );
 
       const urlInput = screen.getByRole("textbox");
-      await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
+      await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
       const importButton = screen.getByRole("button", { name: /import/i });
       await user.click(importButton);
@@ -386,6 +376,10 @@ describe("ListingImportInput", () => {
       renderWithProviders(
         <ListingImportInput mode="prospect" onSuccess={mockOnSuccess} />
       );
+
+      // Switch to Etuovi (Oikotie is default)
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
 
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
@@ -412,12 +406,7 @@ describe("ListingImportInput", () => {
         <ListingImportInput mode="prospect" onSuccess={mockOnSuccess} />
       );
 
-      // Switch to Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
+      // Oikotie is default, no need to switch
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
@@ -432,7 +421,7 @@ describe("ListingImportInput", () => {
     it("sends monthly rent with import request when provided", async () => {
       let capturedBody: { url: string; monthlyRent?: number } | null = null;
       server.use(
-        http.post(`${API_BASE}/api/import/etuovi/create-prospect`, async ({ request }) => {
+        http.post(`${API_BASE}/api/import/oikotie/create-prospect`, async ({ request }) => {
           capturedBody = await request.json() as { url: string; monthlyRent?: number };
           return HttpResponse.json({ id: 1, name: "Test Property" });
         })
@@ -448,7 +437,7 @@ describe("ListingImportInput", () => {
       );
 
       const urlInput = screen.getByRole("textbox");
-      await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
+      await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
       const rentInput = screen.getByLabelText(/rent/i);
       await user.type(rentInput, "850");
@@ -461,7 +450,7 @@ describe("ListingImportInput", () => {
       });
 
       expect(capturedBody).toEqual({
-        url: "https://www.etuovi.com/kohde/12345",
+        url: "https://asunnot.oikotie.fi/myytavat-asunnot/12345",
         monthlyRent: 850,
       });
     });
@@ -479,6 +468,10 @@ describe("ListingImportInput", () => {
       renderWithProviders(
         <ListingImportInput mode="fetch" onDataFetched={mockOnDataFetched} />
       );
+
+      // Switch to Etuovi (Oikotie is default)
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
 
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
@@ -503,12 +496,7 @@ describe("ListingImportInput", () => {
         <ListingImportInput mode="fetch" onDataFetched={mockOnDataFetched} />
       );
 
-      // Switch to Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
+      // Oikotie is default, no need to switch
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
@@ -533,6 +521,10 @@ describe("ListingImportInput", () => {
       renderWithProviders(
         <ListingImportInput mode="fetch" onDataFetched={mockOnDataFetched} />
       );
+
+      // Switch to Etuovi (Oikotie is default)
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
 
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
@@ -559,12 +551,7 @@ describe("ListingImportInput", () => {
         <ListingImportInput mode="fetch" onDataFetched={mockOnDataFetched} />
       );
 
-      // Switch to Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
+      // Oikotie is default, no need to switch
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
@@ -580,7 +567,7 @@ describe("ListingImportInput", () => {
   describe("Error Handling", () => {
     it("shows error toast on API failure (404)", async () => {
       server.use(
-        http.post(`${API_BASE}/api/import/etuovi/create-prospect`, () => {
+        http.post(`${API_BASE}/api/import/oikotie/create-prospect`, () => {
           return HttpResponse.json(
             { message: "Property listing not found" },
             { status: 404 }
@@ -594,7 +581,7 @@ describe("ListingImportInput", () => {
       );
 
       const urlInput = screen.getByRole("textbox");
-      await user.type(urlInput, "https://www.etuovi.com/kohde/99999");
+      await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/99999");
 
       const importButton = screen.getByRole("button", { name: /import/i });
       await user.click(importButton);
@@ -608,7 +595,7 @@ describe("ListingImportInput", () => {
 
     it("shows error toast on API failure (500)", async () => {
       server.use(
-        http.post(`${API_BASE}/api/import/etuovi/create-prospect`, () => {
+        http.post(`${API_BASE}/api/import/oikotie/create-prospect`, () => {
           return HttpResponse.json(
             { message: "Internal server error" },
             { status: 500 }
@@ -622,7 +609,7 @@ describe("ListingImportInput", () => {
       );
 
       const urlInput = screen.getByRole("textbox");
-      await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
+      await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
       const importButton = screen.getByRole("button", { name: /import/i });
       await user.click(importButton);
@@ -649,12 +636,7 @@ describe("ListingImportInput", () => {
         <ListingImportInput mode="prospect" onSuccess={mockOnSuccess} />
       );
 
-      // Switch to Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
+      // Oikotie is default, no need to switch
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/99999");
 
@@ -670,7 +652,7 @@ describe("ListingImportInput", () => {
 
     it("shows error toast on fetch mode API failure", async () => {
       server.use(
-        http.post(`${API_BASE}/api/import/etuovi/fetch`, () => {
+        http.post(`${API_BASE}/api/import/oikotie/fetch`, () => {
           return HttpResponse.json(
             { message: "Property listing not found" },
             { status: 404 }
@@ -684,7 +666,7 @@ describe("ListingImportInput", () => {
       );
 
       const urlInput = screen.getByRole("textbox");
-      await user.type(urlInput, "https://www.etuovi.com/kohde/99999");
+      await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/99999");
 
       const fetchButton = screen.getByRole("button", { name: /fetch|search/i });
       await user.click(fetchButton);
