@@ -59,12 +59,21 @@ const investmentCalculator = {
   taxPerYear: 'Verot/vuosi',
   taxDeductibleExpensesPerYear: 'Vähennyskelpoiset kulut/vuosi',
 
-  // Etuovi import
+  // Listing import
   etuoviUrl: 'Etuovi.com -linkki',
+  listingUrl: 'Ilmoituksen URL',
+  listingSource: 'Lähde',
+  fetchFromListing: 'Hae tiedot',
   fetchFromEtuovi: 'Hae tiedot',
   fetchSuccess: 'Asunnon tiedot ladattu',
   fetchError: 'Tietojen haku epäonnistui',
-  invalidUrl: 'Virheellinen etuovi.com -osoite',
+  invalidUrl: 'Virheellinen ilmoituksen URL',
+  invalidEtuoviUrl: 'Virheellinen Etuovi-URL',
+  invalidOikotieUrl: 'Virheellinen Oikotie-URL',
+  etuovi: 'Etuovi',
+  oikotie: 'Oikotie',
+  etuoviUrlPlaceholder: 'https://www.etuovi.com/kohde/...',
+  oikotieUrlPlaceholder: 'https://asunnot.oikotie.fi/myytavat-asunnot/...',
 
   // Saved calculations
   createdAt: 'Luotu',

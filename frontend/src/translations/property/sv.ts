@@ -106,13 +106,21 @@ const property = {
     // Prospect add choice modal
     addProspectTitle: 'Lägg till prospekt',
     chooseAddMethod: 'Hur vill du lägga till en fastighet?',
+    importFromListing: 'Importera från annons',
     importFromEtuovi: 'Importera från Etuovi',
+    importFromOikotie: 'Importera från Oikotie',
     etuoviUrlPlaceholder: 'Klistra in Etuovi-URL (t.ex. https://www.etuovi.com/kohde/12345)',
+    oikotieUrlPlaceholder: 'Klistra in Oikotie-URL (t.ex. https://asunnot.oikotie.fi/myytavat-asunnot/...)',
     importButton: 'Importera',
     addManually: 'Fyll i formuläret manuellt',
     importSuccess: 'Fastighet importerad',
     importError: 'Kunde inte importera fastighet',
     invalidEtuoviUrl: 'Ange en giltig Etuovi-URL',
+    invalidOikotieUrl: 'Ange en giltig Oikotie-URL',
+    invalidListingUrl: 'Ange en giltig annons-URL',
+    listingSource: 'Källa',
+    etuovi: 'Etuovi',
+    oikotie: 'Oikotie',
 
     // Status change dialogs
     markAsPurchased: 'Lägenhet köpt',

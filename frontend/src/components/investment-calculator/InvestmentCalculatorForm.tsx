@@ -1,13 +1,13 @@
 import { WithTranslation, withTranslation } from "react-i18next";
-import { Box, Divider, Grid, Typography } from "@mui/material";
-import { useState } from "react";
-import axios from "axios";
-import { AssetNumberField, AssetTextField, AssetTextButton, useAssetToast } from "../asset";
+import { Box, CircularProgress, Divider, Grid, Stack, Typography } from "@mui/material";
+import { ChangeEvent, useState } from "react";
+import { AssetNumberField, AssetTextField, AssetButton, AssetSelectField, useAssetToast } from "../asset";
 import { VITE_API_URL } from "../../constants";
 import AssetFormHandler from "../asset/form/AssetFormHandler";
 import DataService from "@asset-lib/data-service";
 import { investmentCalculationContext } from "@asset-lib/asset-contexts";
 import { getFieldErrorProps } from "@asset-lib/form-utils";
+import { ListingSource } from "../../types/inputs";
 
 export interface InvestmentInputData {
   id?: number;
@@ -27,7 +27,7 @@ export interface InvestmentInputData {
   etuoviUrl?: string;
 }
 
-interface EtuoviPropertyData {
+interface ListingPropertyData {
   url: string;
   deptFreePrice: number;
   deptShare?: number;
@@ -45,10 +45,21 @@ interface InvestmentCalculatorFormProps extends WithTranslation {
   onAfterSubmit: () => void;
 }
 
+// URL validation patterns
+const ETUOVI_URL_PATTERN = /^https?:\/\/(www\.)?etuovi\.com\/kohde\/\d+/;
+const OIKOTIE_URL_PATTERN = /^https?:\/\/(www\.)?asunnot\.oikotie\.fi\//;
+
+const SOURCE_ITEMS = [
+  { id: 1, name: "Etuovi", key: "etuovi" },
+  { id: 2, name: "Oikotie", key: "oikotie" },
+];
+
 function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmit }: InvestmentCalculatorFormProps) {
   const { showToast } = useAssetToast();
-  const [etuoviUrl, setEtuoviUrl] = useState('');
+  const [listingSource, setListingSource] = useState<ListingSource>('etuovi');
+  const [listingUrl, setListingUrl] = useState('');
   const [isFetching, setIsFetching] = useState(false);
+  const [urlError, setUrlError] = useState<string | undefined>(undefined);
 
   const getDefaultFormData = (): InvestmentInputData => ({
     id: initialValues?.id,
@@ -76,29 +87,70 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
     setData(dataService.updateNestedData(data, field, value));
   };
 
-  const isValidEtuoviUrl = (url: string): boolean => {
-    const pattern = /^https?:\/\/(www\.)?etuovi\.com\/kohde\//;
-    return pattern.test(url);
+  const getSourceFromId = (id: number): ListingSource => {
+    return id === 2 ? 'oikotie' : 'etuovi';
   };
 
-  const handleFetchFromEtuovi = async () => {
-    if (!etuoviUrl.trim()) {
+  const getIdFromSource = (src: ListingSource): number => {
+    return src === 'oikotie' ? 2 : 1;
+  };
+
+  const handleSourceChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newSource = getSourceFromId(Number(e.target.value));
+    setListingSource(newSource);
+    setUrlError(undefined);
+  };
+
+  const handleUrlChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setListingUrl(e.target.value);
+    setUrlError(undefined);
+  };
+
+  const getPlaceholder = (): string => {
+    return listingSource === 'oikotie'
+      ? t('investment-calculator:oikotieUrlPlaceholder')
+      : t('investment-calculator:etuoviUrlPlaceholder');
+  };
+
+  const validateUrl = (url: string): boolean => {
+    const pattern = listingSource === 'oikotie' ? OIKOTIE_URL_PATTERN : ETUOVI_URL_PATTERN;
+    const errorKey = listingSource === 'oikotie'
+      ? 'investment-calculator:invalidOikotieUrl'
+      : 'investment-calculator:invalidEtuoviUrl';
+
+    if (!pattern.test(url)) {
+      setUrlError(t(errorKey));
+      return false;
+    }
+    return true;
+  };
+
+  const handleFetchFromListing = async () => {
+    if (!listingUrl.trim()) {
       return;
     }
 
-    if (!isValidEtuoviUrl(etuoviUrl)) {
-      showToast({ message: t('investment-calculator:invalidUrl'), severity: 'error' });
+    if (!validateUrl(listingUrl)) {
       return;
     }
 
     setIsFetching(true);
     try {
-      const response = await axios.post<EtuoviPropertyData>(
-        `${VITE_API_URL}/import/etuovi/fetch`,
-        { url: etuoviUrl }
+      // Use fetch API for better test compatibility
+      const fetchResponse = await fetch(
+        `${VITE_API_URL}/import/${listingSource}/fetch`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: listingUrl }),
+        }
       );
 
-      const fetchedData = response.data;
+      if (!fetchResponse.ok) {
+        throw new Error('Fetch failed');
+      }
+
+      const fetchedData: ListingPropertyData = await fetchResponse.json();
       setData(prev => ({
         ...prev,
         deptFreePrice: fetchedData.deptFreePrice,
@@ -113,7 +165,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
 
       showToast({ message: t('investment-calculator:fetchSuccess'), severity: 'success' });
     } catch (error) {
-      console.error('Etuovi fetch error:', error);
+      console.error('Listing fetch error:', error);
       showToast({ message: t('investment-calculator:fetchError'), severity: 'error' });
     } finally {
       setIsFetching(false);
@@ -123,20 +175,39 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
   const renderFormContent = (fieldErrors: Partial<Record<keyof InvestmentInputData, string>>) => (
     <Box sx={{ mt: 2, maxWidth: 800 }}>
       <Grid container spacing={2}>
-        {/* Etuovi URL fetch section */}
+        {/* Listing URL fetch section */}
         <Grid size={{ xs: 12 }}>
           <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-            etuovi.com
+            {t('investment-calculator:listingSource')}
           </Typography>
-          <AssetTextButton
-            label={t('investment-calculator:etuoviUrl')}
-            buttonLabel={t('common:search')}
-            value={etuoviUrl}
-            onChange={(e) => setEtuoviUrl(e.target.value)}
-            onButtonClick={handleFetchFromEtuovi}
-            placeholder="https://www.etuovi.com/kohde/..."
-            loading={isFetching}
-          />
+          <Stack spacing={2}>
+            <AssetSelectField
+              label={t('investment-calculator:listingSource')}
+              value={getIdFromSource(listingSource)}
+              items={SOURCE_ITEMS}
+              onChange={handleSourceChange}
+              disabled={isFetching}
+              fullWidth
+            />
+            <AssetTextField
+              label=""
+              placeholder={getPlaceholder()}
+              value={listingUrl}
+              onChange={handleUrlChange}
+              error={!!urlError}
+              helperText={urlError}
+              disabled={isFetching}
+              fullWidth
+            />
+            <Box>
+              <AssetButton
+                label={isFetching ? '' : t('common:search')}
+                onClick={handleFetchFromListing}
+                disabled={!listingUrl.trim() || isFetching}
+                startIcon={isFetching ? <CircularProgress size={20} /> : undefined}
+              />
+            </Box>
+          </Stack>
         </Grid>
 
         {/* Property Details Section */}

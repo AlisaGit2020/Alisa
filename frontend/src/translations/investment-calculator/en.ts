@@ -59,12 +59,21 @@ const investmentCalculator = {
   taxPerYear: 'Taxes/year',
   taxDeductibleExpensesPerYear: 'Deductible expenses/year',
 
-  // Etuovi import
+  // Listing import
   etuoviUrl: 'Etuovi.com URL',
+  listingUrl: 'Property listing URL',
+  listingSource: 'Source',
+  fetchFromListing: 'Fetch data',
   fetchFromEtuovi: 'Fetch data',
   fetchSuccess: 'Property data loaded',
-  fetchError: 'Could not fetch property data',
-  invalidUrl: 'Invalid etuovi.com URL',
+  fetchError: 'Failed to fetch property data',
+  invalidUrl: 'Invalid property listing URL',
+  invalidEtuoviUrl: 'Invalid Etuovi URL',
+  invalidOikotieUrl: 'Invalid Oikotie URL',
+  etuovi: 'Etuovi',
+  oikotie: 'Oikotie',
+  etuoviUrlPlaceholder: 'https://www.etuovi.com/kohde/...',
+  oikotieUrlPlaceholder: 'https://asunnot.oikotie.fi/myytavat-asunnot/...',
 
   // Saved calculations
   createdAt: 'Created',

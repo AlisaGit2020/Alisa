@@ -226,18 +226,12 @@ describe('OikotieImportService', () => {
         <html>
         <body>
           <script>
-            window.otAsunnot = {
-              "card": {
-                "id": 12345,
-                "price": 100000,
-                "size": 50,
-                "maintenanceFee": 200,
-                "address": {
-                  "street": "Test 1"
-                }
-              }
-            };
+            var otAsunnot={"cardId":12345,"analytics":{"price":100000,"size":50},"address":"Test 1"};
           </script>
+          <dl class="info-table">
+            <dt class="info-table__title">Hoitovastike</dt>
+            <dd class="info-table__value">200 € / kk</dd>
+          </dl>
         </body>
         </html>
       `;
@@ -255,27 +249,17 @@ describe('OikotieImportService', () => {
     it('converts protocol-relative image URLs to https', () => {
       const htmlWithProtocolRelativeUrl = `
         <html>
+        <head>
+          <meta property="og:image" content="//images.oikotie.fi/property/12345/main.jpg">
+        </head>
         <body>
           <script>
-            window.otAsunnot = {
-              "card": {
-                "id": 12345,
-                "price": 100000,
-                "size": 50,
-                "maintenanceFee": 200,
-                "address": {
-                  "street": "Test 1"
-                },
-                "images": [
-                  {
-                    "url": "//images.oikotie.fi/property/12345/main.jpg",
-                    "type": "MAIN",
-                    "ordinal": 0
-                  }
-                ]
-              }
-            };
+            var otAsunnot={"cardId":12345,"analytics":{"price":100000,"size":50},"address":"Test 1"};
           </script>
+          <dl class="info-table">
+            <dt class="info-table__title">Hoitovastike</dt>
+            <dd class="info-table__value">200 € / kk</dd>
+          </dl>
         </body>
         </html>
       `;
