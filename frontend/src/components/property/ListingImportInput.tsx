@@ -1,9 +1,10 @@
-import { useState, ChangeEvent } from "react";
+import { useState } from "react";
+import type { ChangeEvent } from "react";
 import { Box, CircularProgress, Stack } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import AssetTextField from "../asset/form/AssetTextField";
 import AssetNumberField from "../asset/form/AssetNumberField";
-import AssetSelectField from "../asset/form/AssetSelectField";
+import AssetRadioGroup from "../asset/form/AssetRadioGroup";
 import AssetButton from "../asset/form/AssetButton";
 import { useToast } from "../asset/toast";
 import ApiClient from "@asset-lib/api-client";
@@ -50,7 +51,7 @@ export default function ListingImportInput({
   const { t } = useTranslation(["property", "common"]);
   const { showToast } = useToast();
 
-  const [source, setSource] = useState<ListingSource>("etuovi");
+  const [source, setSource] = useState<ListingSource>("oikotie");
   const [url, setUrl] = useState("");
   const [monthlyRent, setMonthlyRent] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,8 +70,8 @@ export default function ListingImportInput({
     return src === "oikotie" ? 2 : 1;
   };
 
-  const handleSourceChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newSource = getSourceFromId(Number(e.target.value));
+  const handleSourceChange = (id: number) => {
+    const newSource = getSourceFromId(id);
     setSource(newSource);
     setValidationError(undefined);
   };
@@ -148,13 +149,12 @@ export default function ListingImportInput({
 
   return (
     <Stack spacing={2}>
-      <AssetSelectField
+      <AssetRadioGroup
         label={t("listingSource")}
         value={getIdFromSource(source)}
         items={SOURCE_ITEMS}
         onChange={handleSourceChange}
-        disabled={isDisabled}
-        fullWidth
+        direction="row"
       />
       <AssetTextField
         label=""
