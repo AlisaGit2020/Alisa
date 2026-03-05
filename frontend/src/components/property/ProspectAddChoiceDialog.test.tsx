@@ -66,46 +66,41 @@ describe("ProspectAddChoiceDialog", () => {
   describe("Source Selector", () => {
     it("source selector appears in import section", () => {
       renderDialog();
-      // Should have a combobox (select) for source selection
-      expect(screen.getByRole("combobox")).toBeInTheDocument();
+      // Should have a radiogroup for source selection
+      expect(screen.getByRole("radiogroup")).toBeInTheDocument();
     });
 
     it("can switch between Etuovi and Oikotie sources", async () => {
       const user = userEvent.setup();
       renderDialog();
 
-      // Initially should show Etuovi placeholder
-      expect(screen.getByPlaceholderText(/etuovi/i)).toBeInTheDocument();
-
-      // Open source selector and select Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
-      // Now should show Oikotie placeholder
+      // Initially should show Oikotie placeholder (default)
       expect(screen.getByPlaceholderText(/oikotie/i)).toBeInTheDocument();
+
+      // Select Etuovi radio
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
+
+      // Now should show Etuovi placeholder
+      expect(screen.getByPlaceholderText(/etuovi/i)).toBeInTheDocument();
     });
 
     it("source selector changes URL placeholder text", async () => {
       const user = userEvent.setup();
       renderDialog();
 
-      // Initially Etuovi placeholder
+      // Initially Oikotie placeholder (default)
       const urlInput = screen.getByRole("textbox");
-      expect(urlInput).toHaveAttribute("placeholder", expect.stringMatching(/etuovi/i));
+      expect(urlInput).toHaveAttribute("placeholder", expect.stringMatching(/oikotie/i));
 
-      // Switch to Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
+      // Switch to Etuovi
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
 
       // Placeholder should change
       expect(screen.getByRole("textbox")).toHaveAttribute(
         "placeholder",
-        expect.stringMatching(/oikotie/i)
+        expect.stringMatching(/etuovi/i)
       );
     });
   });
@@ -145,7 +140,7 @@ describe("ProspectAddChoiceDialog", () => {
       renderDialog();
 
       const input = screen.getByRole("textbox");
-      await user.type(input, "https://www.etuovi.com/kohde/12345");
+      await user.type(input, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
       const importButton = screen.getByRole("button", { name: /^import$/i });
       expect(importButton).toBeEnabled();
@@ -163,6 +158,10 @@ describe("ProspectAddChoiceDialog", () => {
 
       const user = userEvent.setup();
       renderDialog();
+
+      // Switch to Etuovi (Oikotie is default)
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
 
       const input = screen.getByRole("textbox");
       await user.type(input, "https://www.etuovi.com/kohde/12345");
@@ -182,6 +181,10 @@ describe("ProspectAddChoiceDialog", () => {
 
       const user = userEvent.setup();
       renderDialog();
+
+      // Switch to Etuovi (Oikotie is default)
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
 
       const input = screen.getByRole("textbox");
       await user.type(input, "https://www.etuovi.com/kohde/12345");
@@ -207,6 +210,10 @@ describe("ProspectAddChoiceDialog", () => {
       const user = userEvent.setup();
       renderDialog();
 
+      // Switch to Etuovi (Oikotie is default)
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
+
       const input = screen.getByRole("textbox");
       await user.type(input, "https://www.etuovi.com/kohde/99999");
 
@@ -221,6 +228,10 @@ describe("ProspectAddChoiceDialog", () => {
     it("validates Etuovi URL format before submission", async () => {
       const user = userEvent.setup();
       renderDialog();
+
+      // Switch to Etuovi (Oikotie is default)
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
 
       const input = screen.getByRole("textbox");
       await user.type(input, "not-a-valid-url");
@@ -245,12 +256,7 @@ describe("ProspectAddChoiceDialog", () => {
       const user = userEvent.setup();
       renderDialog();
 
-      // Switch to Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
+      // Oikotie is default, no need to switch
       const input = screen.getByRole("textbox");
       await user.type(input, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
@@ -270,12 +276,7 @@ describe("ProspectAddChoiceDialog", () => {
       const user = userEvent.setup();
       renderDialog();
 
-      // Switch to Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
+      // Oikotie is default, no need to switch
       const input = screen.getByRole("textbox");
       await user.type(input, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
@@ -300,12 +301,7 @@ describe("ProspectAddChoiceDialog", () => {
       const user = userEvent.setup();
       renderDialog();
 
-      // Switch to Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
+      // Oikotie is default, no need to switch
       const input = screen.getByRole("textbox");
       await user.type(input, "https://asunnot.oikotie.fi/myytavat-asunnot/99999");
 
@@ -321,12 +317,7 @@ describe("ProspectAddChoiceDialog", () => {
       const user = userEvent.setup();
       renderDialog();
 
-      // Switch to Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
+      // Oikotie is default, no need to switch
       const input = screen.getByRole("textbox");
       await user.type(input, "not-a-valid-url");
 
@@ -355,6 +346,10 @@ describe("ProspectAddChoiceDialog", () => {
 
       const user = userEvent.setup();
       renderDialog();
+
+      // Switch to Etuovi (Oikotie is default)
+      const etuoviRadio = screen.getByRole("radio", { name: /etuovi/i });
+      await user.click(etuoviRadio);
 
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
@@ -387,12 +382,7 @@ describe("ProspectAddChoiceDialog", () => {
       const user = userEvent.setup();
       renderDialog();
 
-      // Switch to Oikotie
-      const sourceSelect = screen.getByRole("combobox");
-      await user.click(sourceSelect);
-      const oikotieOption = screen.getByRole("option", { name: /oikotie/i });
-      await user.click(oikotieOption);
-
+      // Oikotie is default, no need to switch
       const urlInput = screen.getByRole("textbox");
       await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
@@ -415,7 +405,7 @@ describe("ProspectAddChoiceDialog", () => {
     it("sends import request without rent when rent field is empty", async () => {
       let capturedBody: { url: string; monthlyRent?: number } | null = null;
       server.use(
-        http.post(`${API_BASE}/api/import/etuovi/create-prospect`, async ({ request }) => {
+        http.post(`${API_BASE}/api/import/oikotie/create-prospect`, async ({ request }) => {
           capturedBody = await request.json() as { url: string; monthlyRent?: number };
           return HttpResponse.json({ id: 1, name: "Test Property" });
         })
@@ -424,8 +414,9 @@ describe("ProspectAddChoiceDialog", () => {
       const user = userEvent.setup();
       renderDialog();
 
+      // Oikotie is default
       const urlInput = screen.getByRole("textbox");
-      await user.type(urlInput, "https://www.etuovi.com/kohde/12345");
+      await user.type(urlInput, "https://asunnot.oikotie.fi/myytavat-asunnot/12345");
 
       const importButton = screen.getByRole("button", { name: /^import$/i });
       await user.click(importButton);
@@ -435,7 +426,7 @@ describe("ProspectAddChoiceDialog", () => {
       });
 
       expect(capturedBody).toEqual({
-        url: "https://www.etuovi.com/kohde/12345",
+        url: "https://asunnot.oikotie.fi/myytavat-asunnot/12345",
       });
     });
   });
