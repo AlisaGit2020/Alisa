@@ -5,6 +5,7 @@ import { TFunction } from "i18next";
 import { adminContext } from "@asset-lib/asset-contexts";
 import AssetTextField from "../../asset/form/AssetTextField";
 import AssetNumberField from "../../asset/form/AssetNumberField";
+import AssetMoneyField from "../../asset/form/AssetMoneyField";
 import AssetSwitch from "../../asset/form/AssetSwitch";
 import { getNumber } from "@asset-lib/functions";
 import { AssetButton, AssetDialog } from "../../asset";
@@ -79,13 +80,10 @@ function AdminTierFormContent({
           autoFocus
           onChange={(e) => setData({ ...data, name: e.target.value })}
         />
-        <AssetNumberField
+        <AssetMoneyField
           label={t("tierPrice")}
           value={data.price}
-          adornment="€"
-          onChange={(e) =>
-            setData({ ...data, price: getNumber(e.target.value, 2) })
-          }
+          onChange={(value) => setData({ ...data, price: value ?? 0 })}
         />
         <AssetNumberField
           label={t("tierMaxProperties")}

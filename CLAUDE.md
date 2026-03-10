@@ -87,6 +87,7 @@ When writing frontend code:
 |------------------|-------------|
 | `Button` | `AssetButton` |
 | `TextField` | `AssetTextField` or `AssetNumberField` |
+| `TextField` (money) | `AssetMoneyField` (€ adornment, 2 decimals, comma support) |
 | `TextField` + `Button` | `AssetTextButton` (combined input with action button) |
 | `Dialog` | `AssetDialog` or `AssetConfirmDialog` |
 | `DatePicker` | `AssetDatePicker` |

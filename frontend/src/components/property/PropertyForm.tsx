@@ -4,6 +4,7 @@ import { getNumber, getNumberOrUndefined } from '../../lib/functions';
 import { PropertyInput, PropertyStatus, PropertyType, propertyTypeNames } from '@asset-types'
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AssetNumberField from '../asset/form/AssetNumberField';
+import AssetMoneyField from '../asset/form/AssetMoneyField';
 import AssetSelectField from '../asset/form/AssetSelectField';
 import AssetTextField from '../asset/form/AssetTextField';
 import AssetDatePicker from '../asset/form/AssetDatePicker';
@@ -232,37 +233,33 @@ function PropertyForm({ t }: WithTranslation) {
                 </Typography>
                 <Stack direction="row" spacing={2}>
                     <Box sx={{ flex: 1 }}>
-                        <AssetNumberField
+                        <AssetMoneyField
                             label={t('maintenanceFee')}
                             value={data.maintenanceFee ?? 0}
-                            onChange={(e) => handleChange('maintenanceFee', getNumberOrUndefined(e.target.value, 0))}
-                            adornment='€'
+                            onChange={(value) => handleChange('maintenanceFee', value)}
                         />
                     </Box>
                     <Box sx={{ flex: 1 }}>
-                        <AssetNumberField
+                        <AssetMoneyField
                             label={t('waterCharge')}
                             value={data.waterCharge ?? 0}
-                            onChange={(e) => handleChange('waterCharge', getNumberOrUndefined(e.target.value, 0))}
-                            adornment='€'
+                            onChange={(value) => handleChange('waterCharge', value)}
                         />
                     </Box>
                 </Stack>
                 <Stack direction="row" spacing={2}>
                     <Box sx={{ flex: 1 }}>
-                        <AssetNumberField
+                        <AssetMoneyField
                             label={t('financialCharge')}
                             value={data.financialCharge ?? 0}
-                            onChange={(e) => handleChange('financialCharge', getNumberOrUndefined(e.target.value, 0))}
-                            adornment='€'
+                            onChange={(value) => handleChange('financialCharge', value)}
                         />
                     </Box>
                     <Box sx={{ flex: 1 }}>
-                        <AssetNumberField
+                        <AssetMoneyField
                             label={data.status === PropertyStatus.PROSPECT ? t('expectedRent') : t('monthlyRent')}
                             value={data.monthlyRent ?? 0}
-                            onChange={(e) => handleChange('monthlyRent', getNumberOrUndefined(e.target.value, 0))}
-                            adornment='€'
+                            onChange={(value) => handleChange('monthlyRent', value)}
                         />
                     </Box>
                 </Stack>
@@ -276,19 +273,17 @@ function PropertyForm({ t }: WithTranslation) {
                         </Typography>
                         <Stack direction="row" spacing={2}>
                             <Box sx={{ flex: 1 }}>
-                                <AssetNumberField
+                                <AssetMoneyField
                                     label={data.status === PropertyStatus.PROSPECT ? t('askingPrice') : t('purchasePrice')}
                                     value={data.purchasePrice ?? 0}
-                                    onChange={(e) => handleChange('purchasePrice', getNumberOrUndefined(e.target.value, 0))}
-                                    adornment='€'
+                                    onChange={(value) => handleChange('purchasePrice', value)}
                                 />
                             </Box>
                             <Box sx={{ flex: 1 }}>
-                                <AssetNumberField
+                                <AssetMoneyField
                                     label={t('debtShare')}
                                     value={data.debtShare ?? 0}
-                                    onChange={(e) => handleChange('debtShare', getNumberOrUndefined(e.target.value, 0))}
-                                    adornment='€'
+                                    onChange={(value) => handleChange('debtShare', value)}
                                 />
                             </Box>
                         </Stack>
@@ -302,11 +297,10 @@ function PropertyForm({ t }: WithTranslation) {
                                     />
                                 </Box>
                                 <Box sx={{ flex: 1 }}>
-                                    <AssetNumberField
+                                    <AssetMoneyField
                                         label={t('purchaseLoan')}
                                         value={data.purchaseLoan ?? 0}
-                                        onChange={(e) => handleChange('purchaseLoan', getNumberOrUndefined(e.target.value, 0))}
-                                        adornment='€'
+                                        onChange={(value) => handleChange('purchaseLoan', value)}
                                     />
                                 </Box>
                             </Stack>
@@ -323,11 +317,10 @@ function PropertyForm({ t }: WithTranslation) {
                         </Typography>
                         <Stack direction="row" spacing={2}>
                             <Box sx={{ flex: 1 }}>
-                                <AssetNumberField
+                                <AssetMoneyField
                                     label={t('salePrice')}
                                     value={data.salePrice ?? 0}
-                                    onChange={(e) => handleChange('salePrice', getNumberOrUndefined(e.target.value, 0))}
-                                    adornment='€'
+                                    onChange={(value) => handleChange('salePrice', value)}
                                 />
                             </Box>
                             <Box sx={{ flex: 1 }}>

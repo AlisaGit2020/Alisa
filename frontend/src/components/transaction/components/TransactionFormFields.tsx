@@ -4,7 +4,7 @@ import { getFieldErrorProps } from "@asset-lib/form-utils";
 import { Stack } from "@mui/material";
 import { WithTranslation, withTranslation } from "react-i18next";
 import AssetDatePicker from "../../asset/form/AssetDatePicker";
-import AssetNumberField from "../../asset/form/AssetNumberField";
+import AssetMoneyField from "../../asset/form/AssetMoneyField";
 import AssetTextField from "../../asset/form/AssetTextField";
 import AssetTransactionStatusSelect from "../../asset/data/AssetTransactionStatusSelect.tsx";
 import AssetTransactionTypeSelect from "../../asset/data/AssetTransactionTypeSelect.tsx";
@@ -82,12 +82,11 @@ function TransactionFormFields(props: TransactionFormFieldsProps) {
       />
 
       <Stack direction={"row"} spacing={2}>
-        <AssetNumberField
+        <AssetMoneyField
           label={props.t("totalAmount")}
           value={props.data.amount}
-          onChange={(e) => handleChange("amount", e.target.value)}
+          onChange={(value) => handleChange("amount", value ?? 0)}
           onBlur={() => props.onAmountChange(props.data.amount)}
-          adornment="€"
           {...getErrorProps("amount")}
         />
         <AssetDatePicker
