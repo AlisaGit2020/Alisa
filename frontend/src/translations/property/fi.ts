@@ -84,6 +84,7 @@ const property = {
     // Property fields
     maintenanceFee: 'Hoitovastike',
     financialCharge: 'Rahoitusvastike',
+    totalCharge: 'Yhtiövastike',
     waterCharge: 'Vesimaksu',
     debtShare: 'Yhtiölainaosuus',
     noHousingCompanyLoan: 'Ei yhtiölainaa',

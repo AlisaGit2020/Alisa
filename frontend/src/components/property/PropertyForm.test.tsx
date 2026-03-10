@@ -5,6 +5,7 @@ import {
   getPropertyStatusFromPath,
   getReturnPathForStatus,
 } from './property-form-utils';
+import { calculateCharge, ChargeValues, ChargeFieldName } from './charge-calculation';
 
 // Since Jest mock hoisting causes issues with relative paths in ESM mode,
 // we test the data transformation logic separately from the React component
@@ -459,6 +460,151 @@ describe('PropertyForm Component Logic', () => {
     it('uses correct endpoint for property', () => {
       const apiEndpoint = 'real-estate/property';
       expect(apiEndpoint).toBe('real-estate/property');
+    });
+  });
+
+  describe('Monthly charge calculation (totalCharge = maintenanceFee + financialCharge)', () => {
+    // Tests use the actual calculateCharge function imported from charge-calculation.ts
+    // totalCharge is UI-only helper field, not saved to database
+    // Formula: totalCharge = maintenanceFee + financialCharge
+    // User can fill any two fields and the third is auto-calculated
+
+    describe('when maintenanceFee and financialCharge are set', () => {
+      it('calculates totalCharge', () => {
+        const values: ChargeValues = {
+          maintenanceFee: 150,
+          financialCharge: 50,
+          totalCharge: 0,
+        };
+        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee', 'financialCharge']);
+
+        const result = calculateCharge(values, userSetFields);
+
+        expect(result).toEqual({ field: 'totalCharge', value: 200 });
+      });
+
+      it('calculates totalCharge with different values', () => {
+        const values: ChargeValues = {
+          maintenanceFee: 200,
+          financialCharge: 100,
+          totalCharge: 0,
+        };
+        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee', 'financialCharge']);
+
+        const result = calculateCharge(values, userSetFields);
+
+        expect(result).toEqual({ field: 'totalCharge', value: 300 });
+      });
+    });
+
+    describe('when totalCharge and maintenanceFee are set', () => {
+      it('calculates financialCharge', () => {
+        const values: ChargeValues = {
+          maintenanceFee: 150,
+          financialCharge: 0,
+          totalCharge: 200,
+        };
+        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee', 'totalCharge']);
+
+        const result = calculateCharge(values, userSetFields);
+
+        expect(result).toEqual({ field: 'financialCharge', value: 50 });
+      });
+
+      it('calculates financialCharge with different values', () => {
+        const values: ChargeValues = {
+          maintenanceFee: 120,
+          financialCharge: 0,
+          totalCharge: 200,
+        };
+        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee', 'totalCharge']);
+
+        const result = calculateCharge(values, userSetFields);
+
+        expect(result).toEqual({ field: 'financialCharge', value: 80 });
+      });
+    });
+
+    describe('when totalCharge and financialCharge are set', () => {
+      it('calculates maintenanceFee', () => {
+        const values: ChargeValues = {
+          maintenanceFee: 0,
+          financialCharge: 50,
+          totalCharge: 200,
+        };
+        const userSetFields = new Set<ChargeFieldName>(['financialCharge', 'totalCharge']);
+
+        const result = calculateCharge(values, userSetFields);
+
+        expect(result).toEqual({ field: 'maintenanceFee', value: 150 });
+      });
+
+      it('calculates maintenanceFee with different values', () => {
+        const values: ChargeValues = {
+          maintenanceFee: 0,
+          financialCharge: 80,
+          totalCharge: 250,
+        };
+        const userSetFields = new Set<ChargeFieldName>(['financialCharge', 'totalCharge']);
+
+        const result = calculateCharge(values, userSetFields);
+
+        expect(result).toEqual({ field: 'maintenanceFee', value: 170 });
+      });
+    });
+
+    describe('edge cases', () => {
+      it('returns null when only one field is set', () => {
+        const values: ChargeValues = {
+          maintenanceFee: 150,
+          financialCharge: 0,
+          totalCharge: 0,
+        };
+        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee']);
+
+        const result = calculateCharge(values, userSetFields);
+
+        expect(result).toBeNull();
+      });
+
+      it('returns null when all three fields are set', () => {
+        const values: ChargeValues = {
+          maintenanceFee: 150,
+          financialCharge: 50,
+          totalCharge: 200,
+        };
+        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee', 'financialCharge', 'totalCharge']);
+
+        const result = calculateCharge(values, userSetFields);
+
+        expect(result).toBeNull();
+      });
+
+      it('returns null when no fields are set', () => {
+        const values: ChargeValues = {
+          maintenanceFee: 0,
+          financialCharge: 0,
+          totalCharge: 0,
+        };
+        const userSetFields = new Set<ChargeFieldName>();
+
+        const result = calculateCharge(values, userSetFields);
+
+        expect(result).toBeNull();
+      });
+
+      it('handles decimal values correctly', () => {
+        const values: ChargeValues = {
+          maintenanceFee: 150.50,
+          financialCharge: 49.50,
+          totalCharge: 0,
+        };
+        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee', 'financialCharge']);
+
+        const result = calculateCharge(values, userSetFields);
+
+        expect(result).toEqual({ field: 'totalCharge', value: 200 });
+      });
     });
   });
 

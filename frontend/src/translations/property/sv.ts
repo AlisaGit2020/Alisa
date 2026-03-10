@@ -84,6 +84,7 @@ const property = {
     // Property fields
     maintenanceFee: 'Underhållsavgift',
     financialCharge: 'Finansieringsavgift',
+    totalCharge: 'Total avgift',
     waterCharge: 'Vattenavgift',
     debtShare: 'Skulddel',
     noHousingCompanyLoan: 'Inget bostadsbolagslån',
