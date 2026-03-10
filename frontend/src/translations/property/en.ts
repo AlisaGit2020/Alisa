@@ -84,6 +84,7 @@ const property = {
     // Property fields
     maintenanceFee: 'Maintenance Fee',
     financialCharge: 'Financial Charge',
+    totalCharge: 'Total Charge',
     waterCharge: 'Water Charge',
     debtShare: 'Debt Share',
     noHousingCompanyLoan: 'No Housing Company Loan',

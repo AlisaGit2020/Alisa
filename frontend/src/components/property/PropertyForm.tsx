@@ -1,7 +1,8 @@
 import { Box, Divider, Stack, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { getNumber, getNumberOrUndefined } from '../../lib/functions';
 import { PropertyInput, PropertyStatus, PropertyType, propertyTypeNames } from '@asset-types'
+import { calculateCharge, ChargeValues, ChargeFieldName } from './charge-calculation';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AssetNumberField from '../asset/form/AssetNumberField';
 import AssetMoneyField from '../asset/form/AssetMoneyField';
@@ -59,6 +60,10 @@ function PropertyForm({ t }: WithTranslation) {
         ownerships: [{ userId: 0, share: 100 }]
     });
     const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
+    // totalCharge is UI-only helper for calculating charges (not saved to DB)
+    const [totalCharge, setTotalCharge] = useState<number>(0);
+    // Track which charge fields the user has explicitly set (for calculation)
+    const [userSetChargeFields, setUserSetChargeFields] = useState<Set<ChargeFieldName>>(new Set());
 
     const handleNavigateBack = () => {
         const returnTo = (location.state as { returnTo?: string })?.returnTo;
@@ -101,6 +106,45 @@ function PropertyForm({ t }: WithTranslation) {
             },
         });
     }
+
+    // Handle charge field changes with auto-calculation
+    const handleChargeChange = useCallback((
+        field: ChargeFieldName,
+        value: number | undefined
+    ) => {
+        const numValue = value ?? 0;
+        const currentValues: ChargeValues = {
+            maintenanceFee: field === 'maintenanceFee' ? numValue : (data.maintenanceFee ?? 0),
+            financialCharge: field === 'financialCharge' ? numValue : (data.financialCharge ?? 0),
+            totalCharge: field === 'totalCharge' ? numValue : totalCharge,
+        };
+
+        // Update the field that was changed
+        if (field === 'totalCharge') {
+            setTotalCharge(numValue);
+        } else {
+            setData(prev => ({ ...prev, [field]: numValue }));
+        }
+
+        // Track which fields the user has set (non-zero value)
+        const newUserSetFields = new Set(userSetChargeFields);
+        if (numValue !== 0) {
+            newUserSetFields.add(field);
+        } else {
+            newUserSetFields.delete(field);
+        }
+        setUserSetChargeFields(newUserSetFields);
+
+        // Calculate the third field if exactly two are set
+        const calculated = calculateCharge(currentValues, newUserSetFields);
+        if (calculated) {
+            if (calculated.field === 'totalCharge') {
+                setTotalCharge(calculated.value);
+            } else {
+                setData(prev => ({ ...prev, [calculated.field]: calculated.value }));
+            }
+        }
+    }, [data.maintenanceFee, data.financialCharge, totalCharge, userSetChargeFields]);
 
     const handleSaveResult = async (result: DTO<PropertyInput>) => {
         // Upload pending photo after property is saved
@@ -236,23 +280,30 @@ function PropertyForm({ t }: WithTranslation) {
                         <AssetMoneyField
                             label={t('maintenanceFee')}
                             value={data.maintenanceFee ?? 0}
-                            onChange={(value) => handleChange('maintenanceFee', value)}
+                            onChange={(value) => handleChargeChange('maintenanceFee', value)}
                         />
                     </Box>
                     <Box sx={{ flex: 1 }}>
                         <AssetMoneyField
-                            label={t('waterCharge')}
-                            value={data.waterCharge ?? 0}
-                            onChange={(value) => handleChange('waterCharge', value)}
+                            label={t('financialCharge')}
+                            value={data.financialCharge ?? 0}
+                            onChange={(value) => handleChargeChange('financialCharge', value)}
+                        />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                        <AssetMoneyField
+                            label={t('totalCharge')}
+                            value={totalCharge}
+                            onChange={(value) => handleChargeChange('totalCharge', value)}
                         />
                     </Box>
                 </Stack>
                 <Stack direction="row" spacing={2}>
                     <Box sx={{ flex: 1 }}>
                         <AssetMoneyField
-                            label={t('financialCharge')}
-                            value={data.financialCharge ?? 0}
-                            onChange={(value) => handleChange('financialCharge', value)}
+                            label={t('waterCharge')}
+                            value={data.waterCharge ?? 0}
+                            onChange={(value) => handleChange('waterCharge', value)}
                         />
                     </Box>
                     <Box sx={{ flex: 1 }}>
