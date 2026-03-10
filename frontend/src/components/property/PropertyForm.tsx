@@ -1,5 +1,5 @@
 import { Box, Divider, Stack, Typography } from '@mui/material';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { getNumber, getNumberOrUndefined } from '../../lib/functions';
 import { PropertyInput, PropertyStatus, PropertyType, propertyTypeNames } from '@asset-types'
 import { calculateCharge, ChargeValues, ChargeFieldName } from './charge-calculation';
@@ -62,8 +62,9 @@ function PropertyForm({ t }: WithTranslation) {
     const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
     // totalCharge is UI-only helper for calculating charges (not saved to DB)
     const [totalCharge, setTotalCharge] = useState<number>(0);
-    // Track which charge fields the user has explicitly set (for calculation)
-    const [userSetChargeFields, setUserSetChargeFields] = useState<Set<ChargeFieldName>>(new Set());
+    // Track which charge fields the user has touched (for calculation)
+    // Using ref to avoid stale closure issues in useCallback
+    const touchedChargeFieldsRef = useRef<Set<ChargeFieldName>>(new Set());
 
     const handleNavigateBack = () => {
         const returnTo = (location.state as { returnTo?: string })?.returnTo;
@@ -126,17 +127,12 @@ function PropertyForm({ t }: WithTranslation) {
             setData(prev => ({ ...prev, [field]: numValue }));
         }
 
-        // Track which fields the user has set (non-zero value)
-        const newUserSetFields = new Set(userSetChargeFields);
-        if (numValue !== 0) {
-            newUserSetFields.add(field);
-        } else {
-            newUserSetFields.delete(field);
-        }
-        setUserSetChargeFields(newUserSetFields);
+        // Track touched fields (user has interacted, regardless of value)
+        // This allows 0 to be a valid intentional value
+        touchedChargeFieldsRef.current.add(field);
 
-        // Calculate the third field if exactly two are set
-        const calculated = calculateCharge(currentValues, newUserSetFields);
+        // Calculate the third field if exactly two are touched
+        const calculated = calculateCharge(currentValues, touchedChargeFieldsRef.current);
         if (calculated) {
             if (calculated.field === 'totalCharge') {
                 setTotalCharge(calculated.value);
@@ -144,7 +140,7 @@ function PropertyForm({ t }: WithTranslation) {
                 setData(prev => ({ ...prev, [calculated.field]: calculated.value }));
             }
         }
-    }, [data.maintenanceFee, data.financialCharge, totalCharge, userSetChargeFields]);
+    }, [data.maintenanceFee, data.financialCharge, totalCharge]);
 
     const handleSaveResult = async (result: DTO<PropertyInput>) => {
         // Upload pending photo after property is saved

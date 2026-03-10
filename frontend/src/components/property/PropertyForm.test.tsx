@@ -5,6 +5,7 @@ import {
   getPropertyStatusFromPath,
   getReturnPathForStatus,
 } from './property-form-utils';
+import { calculateCharge, ChargeValues, ChargeFieldName } from './charge-calculation';
 
 // Since Jest mock hoisting causes issues with relative paths in ESM mode,
 // we test the data transformation logic separately from the React component
@@ -463,53 +464,10 @@ describe('PropertyForm Component Logic', () => {
   });
 
   describe('Monthly charge calculation (totalCharge = maintenanceFee + financialCharge)', () => {
+    // Tests use the actual calculateCharge function imported from charge-calculation.ts
     // totalCharge is UI-only helper field, not saved to database
     // Formula: totalCharge = maintenanceFee + financialCharge
     // User can fill any two fields and the third is auto-calculated
-    // Tests use the actual calculateCharge function from charge-calculation.ts
-
-    type ChargeFieldName = 'maintenanceFee' | 'financialCharge' | 'totalCharge';
-
-    interface ChargeValues {
-      maintenanceFee: number | null;
-      financialCharge: number | null;
-      totalCharge: number | null;
-    }
-
-    interface ChargeField {
-      field: ChargeFieldName;
-      value: number;
-    }
-
-    // Calculate based on which fields the user has set
-    const calculateCharge = (
-      values: ChargeValues,
-      userSetFields: Set<ChargeFieldName>
-    ): ChargeField | null => {
-      const { maintenanceFee, financialCharge, totalCharge } = values;
-
-      if (userSetFields.size !== 2) return null;
-
-      const hasMaintenanceFee = userSetFields.has('maintenanceFee');
-      const hasFinancialCharge = userSetFields.has('financialCharge');
-      const hasTotalCharge = userSetFields.has('totalCharge');
-
-      const mf = maintenanceFee ?? 0;
-      const fc = financialCharge ?? 0;
-      const tc = totalCharge ?? 0;
-
-      if (hasMaintenanceFee && hasFinancialCharge && !hasTotalCharge) {
-        return { field: 'totalCharge', value: mf + fc };
-      }
-      if (hasMaintenanceFee && hasTotalCharge && !hasFinancialCharge) {
-        return { field: 'financialCharge', value: tc - mf };
-      }
-      if (hasFinancialCharge && hasTotalCharge && !hasMaintenanceFee) {
-        return { field: 'maintenanceFee', value: tc - fc };
-      }
-
-      return null;
-    };
 
     describe('when maintenanceFee and financialCharge are set', () => {
       it('calculates totalCharge', () => {
