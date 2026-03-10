@@ -394,7 +394,8 @@ describe('TransactionForm', () => {
       await user.clear(amountInput);
       await user.type(amountInput, '500');
 
-      expect(amountInput).toHaveValue(500);
+      // AssetMoneyField uses text input, so value is string
+      expect(amountInput).toHaveValue('500');
     });
   });
 
@@ -742,9 +743,9 @@ describe('TransactionForm', () => {
       const descriptionInput = screen.getByLabelText('description');
       await user.type(descriptionInput, 'Test Description');
 
-      // Amount field should be empty/null by default (no value entered)
+      // Amount field is empty initially (undefined becomes empty string)
       const amountInput = screen.getByLabelText('totalAmount');
-      expect(amountInput).toHaveValue(null);
+      expect(amountInput).toHaveValue('');
 
       // Click save to trigger validation
       const saveButton = screen.getByRole('button', { name: 'save' });

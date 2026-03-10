@@ -148,4 +148,5 @@ describe('PropertyForm rendering', () => {
       expect(districtField).toBeInTheDocument();
     });
   });
+
 });

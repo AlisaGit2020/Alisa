@@ -13,6 +13,7 @@ import { Property, PropertyStatus, PropertyExternalSource, propertyExternalSourc
 import AssetDialog from '../../asset/dialog/AssetDialog';
 import AssetButton from '../../asset/form/AssetButton';
 import AssetNumberField from '../../asset/form/AssetNumberField';
+import AssetMoneyField from '../../asset/form/AssetMoneyField';
 import AssetDatePicker from '../../asset/form/AssetDatePicker';
 import ApiClient from '@asset-lib/api-client';
 
@@ -270,22 +271,20 @@ function PropertyActionsMenu({
               purchaseDate: value?.toDate() ?? null
             }))}
           />
-          <AssetNumberField
+          <AssetMoneyField
             label={t('purchasePrice')}
             value={purchaseForm.purchasePrice}
-            adornment="€"
-            onChange={(e) => setPurchaseForm(prev => ({
+            onChange={(value) => setPurchaseForm(prev => ({
               ...prev,
-              purchasePrice: e.target.value ? Number(e.target.value) : ''
+              purchasePrice: value ?? ''
             }))}
           />
-          <AssetNumberField
+          <AssetMoneyField
             label={t('purchaseLoan')}
             value={purchaseForm.purchaseLoan}
-            adornment="€"
-            onChange={(e) => setPurchaseForm(prev => ({
+            onChange={(value) => setPurchaseForm(prev => ({
               ...prev,
-              purchaseLoan: e.target.value ? Number(e.target.value) : ''
+              purchaseLoan: value ?? ''
             }))}
           />
           <AssetNumberField
@@ -330,13 +329,12 @@ function PropertyActionsMenu({
               saleDate: value?.toDate() ?? null
             }))}
           />
-          <AssetNumberField
+          <AssetMoneyField
             label={t('salePrice')}
             value={saleForm.salePrice}
-            adornment="€"
-            onChange={(e) => setSaleForm(prev => ({
+            onChange={(value) => setSaleForm(prev => ({
               ...prev,
-              salePrice: e.target.value ? Number(e.target.value) : ''
+              salePrice: value ?? ''
             }))}
           />
         </Stack>

@@ -5,6 +5,7 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import { IncomeInput, IncomeType } from "@asset-types";
 import AssetTextField from "../../asset/form/AssetTextField";
 import AssetNumberField from "../../asset/form/AssetNumberField";
+import AssetMoneyField from "../../asset/form/AssetMoneyField";
 import AssetDatePicker from "../../asset/form/AssetDatePicker";
 import AssetSelect from "../../asset/data/AssetSelect";
 import { incomeContext, incomeTypeContext } from "@asset-lib/asset-contexts";
@@ -136,19 +137,17 @@ function IncomeForm({
           disabled={isLinkedToTransaction}
           {...getFieldErrorProps<IncomeInput>(fieldErrors, "quantity")}
         />
-        <AssetNumberField
+        <AssetMoneyField
           label={t("amount")}
           value={data.amount}
-          onChange={(e) => handleChange("amount", getNumber(e.target.value, 2))}
-          adornment="€"
+          onChange={(value) => handleChange("amount", value ?? 0)}
           disabled={isLinkedToTransaction}
           {...getFieldErrorProps<IncomeInput>(fieldErrors, "amount")}
         />
-        <AssetNumberField
+        <AssetMoneyField
           label={t("totalAmount")}
           value={data.totalAmount}
-          onChange={(e) => handleChange("totalAmount", getNumber(e.target.value, 2))}
-          adornment="€"
+          onChange={(value) => handleChange("totalAmount", value ?? 0)}
           disabled={isLinkedToTransaction}
           {...getFieldErrorProps<IncomeInput>(fieldErrors, "totalAmount")}
         />

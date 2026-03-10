@@ -62,7 +62,8 @@ describe('AdminTierForm', () => {
     it('renders price field', () => {
       renderWithProviders(<AdminTierForm {...defaultProps} />);
 
-      expect(screen.getByRole('spinbutton', { name: /price/i })).toBeInTheDocument();
+      // AssetMoneyField uses text input with inputMode="decimal" for comma support
+      expect(screen.getByRole('textbox', { name: /price/i })).toBeInTheDocument();
     });
 
     it('renders max properties field', () => {
