@@ -97,6 +97,21 @@ describe('AssetMoneyField', () => {
     expect(moneyField).toHaveAttribute('type', 'text');
     expect(moneyField).toHaveAttribute('inputMode', 'decimal');
   });
+
+  it('handles typing with comma separator', async () => {
+    const user = userEvent.setup();
+    const mockOnChange = jest.fn();
+
+    renderWithProviders(
+      <AssetMoneyField label="Amount" value={0} onChange={mockOnChange} />
+    );
+
+    const moneyField = screen.getByLabelText('Amount');
+    await user.clear(moneyField);
+    await user.type(moneyField, '181,45');
+
+    expect(mockOnChange).toHaveBeenLastCalledWith(181.45);
+  });
 });
 
 describe('parseMoneyValue', () => {

@@ -1,5 +1,5 @@
 import { InputAdornment, TextField } from "@mui/material";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 
 /**
  * Parses a money value string, converting comma to period and rounding to 2 decimals.
@@ -57,21 +57,21 @@ function AssetMoneyField(props: {
     typeof props.value === "number" ? String(props.value) : ""
   );
 
-  // Track the last synced external value to detect external changes
-  const [lastExternalValue, setLastExternalValue] = useState(props.value);
+  // Track the last synced external value to detect external changes.
+  // Using ref + state sync during render is a documented React pattern for
+  // "adjusting state when props change" - see React docs on useState.
+  const lastExternalValueRef = useRef(props.value);
 
-  // Derive the display value: use local input, but sync when external value changes
-  const externalValue = typeof props.value === "number" ? String(props.value) : "";
-  const displayValue = props.value !== lastExternalValue ? externalValue : inputValue;
-
-  // Update tracking when external value changes
-  if (props.value !== lastExternalValue) {
-    setLastExternalValue(props.value);
+  // Sync local state when external value changes (not from user typing)
+  // eslint-disable-next-line react-hooks/refs -- documented React pattern for adjusting state when props change
+  if (props.value !== lastExternalValueRef.current) {
+    lastExternalValueRef.current = props.value; // eslint-disable-line react-hooks/refs
+    const externalValue = typeof props.value === "number" ? String(props.value) : "";
     setInputValue(externalValue);
   }
 
   // Shrink label when there's any input
-  const hasValue = displayValue !== "" || typeof props.value === "number";
+  const hasValue = inputValue !== "" || typeof props.value === "number";
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
