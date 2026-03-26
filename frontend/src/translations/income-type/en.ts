@@ -5,6 +5,7 @@ const incomeTypes = {
     'capital-income': 'Capital income',
     'insurance-compensation': 'Insurance compensation',
     'cleaning-fee': 'Cleaning fee',
+    'water-refund': 'Water fee refund',
     // General labels
     incomeTypes: 'Income types',
     isTaxable: 'Taxable',

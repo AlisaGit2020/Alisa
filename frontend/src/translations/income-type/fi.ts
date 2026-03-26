@@ -5,6 +5,7 @@ const incomeTypes = {
     'capital-income': 'Pääomatulo',
     'insurance-compensation': 'Vakuutuskorvaus',
     'cleaning-fee': 'Siivousmaksu',
+    'water-refund': 'Vesimaksun palautus',
     // General labels
     incomeTypes: 'Tulolajit',
     isTaxable: 'Verotettava',

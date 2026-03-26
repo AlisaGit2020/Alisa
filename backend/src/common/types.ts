@@ -163,6 +163,7 @@ export enum IncomeTypeKey {
   CAPITAL_INCOME = 'capital-income',
   INSURANCE_COMPENSATION = 'insurance-compensation',
   CLEANING_FEE = 'cleaning-fee',
+  WATER_REFUND = 'water-refund',
 }
 
 // Allocation rule condition types

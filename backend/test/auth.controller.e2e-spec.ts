@@ -261,8 +261,8 @@ describe('AuthController (e2e)', () => {
       const incomeTypeRepo = dataSource.getRepository(IncomeType);
       const incomeTypes = await incomeTypeRepo.find();
 
-      // Should have 5 global income types seeded by DefaultsSeeder
-      expect(incomeTypes.length).toBe(5);
+      // Should have 6 global income types seeded by DefaultsSeeder
+      expect(incomeTypes.length).toBe(6);
 
       // Verify some expected keys exist
       const keys = incomeTypes.map((t) => t.key);

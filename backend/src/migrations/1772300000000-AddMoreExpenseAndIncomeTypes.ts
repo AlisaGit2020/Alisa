@@ -25,7 +25,8 @@ export class AddMoreExpenseAndIncomeTypes1772300000000
     await queryRunner.query(`
       INSERT INTO income_type (key, "isTaxable")
       VALUES
-        ('cleaning-fee', true)
+        ('cleaning-fee', true),
+        ('water-refund', true)
       ON CONFLICT (key) DO NOTHING
     `);
 
@@ -38,7 +39,7 @@ export class AddMoreExpenseAndIncomeTypes1772300000000
     `);
 
     await queryRunner.query(`
-      DELETE FROM income_type WHERE key = 'cleaning-fee'
+      DELETE FROM income_type WHERE key IN ('cleaning-fee', 'water-refund')
     `);
   }
 }

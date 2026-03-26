@@ -145,6 +145,10 @@ const GLOBAL_INCOME_TYPES: GlobalIncomeType[] = [
     key: IncomeTypeKey.CLEANING_FEE,
     isTaxable: true,
   },
+  {
+    key: IncomeTypeKey.WATER_REFUND,
+    isTaxable: true,
+  },
 ];
 
 @Injectable()
