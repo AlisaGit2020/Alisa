@@ -16,7 +16,7 @@ export class AddMoreExpenseAndIncomeTypes1772300000000
         ('rental-operations', true, false),
         ('rent-refund', true, false),
         ('internet', true, false),
-        ('withholding-tax', true, false)
+        ('withholding-tax', false, false)
       ON CONFLICT (key) DO NOTHING
     `);
 
