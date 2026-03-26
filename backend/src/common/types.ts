@@ -151,6 +151,8 @@ export enum ExpenseTypeKey {
   FURNISHINGS = 'furnishings',
   CONSUMABLES = 'consumables',
   RENTAL_OPERATIONS = 'rental-operations',
+  RENT_REFUND = 'rent-refund',
+  INTERNET = 'internet',
 }
 
 // Global income type keys (translations are handled by i18n using these keys)

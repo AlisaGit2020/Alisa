@@ -18,6 +18,8 @@ const expenseTypes = {
     'furnishings': 'Furnishings',
     'consumables': 'Consumables',
     'rental-operations': 'Rental operations',
+    'rent-refund': 'Rent refund',
+    'internet': 'Internet',
     // General labels
     expenseTypes: 'Expense types',
     isTaxDeductible: 'Tax deductible',
