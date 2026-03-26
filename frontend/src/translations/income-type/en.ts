@@ -4,6 +4,7 @@ const incomeTypes = {
     'airbnb': 'Airbnb',
     'capital-income': 'Capital income',
     'insurance-compensation': 'Insurance compensation',
+    'cleaning-fee': 'Cleaning fee',
     // General labels
     incomeTypes: 'Income types',
     isTaxable: 'Taxable',

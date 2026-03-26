@@ -148,6 +148,9 @@ export enum ExpenseTypeKey {
   LOAN_HANDLING_FEE = 'loan-handling-fee',
   LOAN_PAYMENT = 'loan-payment',
   CLEANING = 'cleaning',
+  FURNISHINGS = 'furnishings',
+  CONSUMABLES = 'consumables',
+  RENTAL_OPERATIONS = 'rental-operations',
 }
 
 // Global income type keys (translations are handled by i18n using these keys)
@@ -156,6 +159,7 @@ export enum IncomeTypeKey {
   AIRBNB = 'airbnb',
   CAPITAL_INCOME = 'capital-income',
   INSURANCE_COMPENSATION = 'insurance-compensation',
+  CLEANING_FEE = 'cleaning-fee',
 }
 
 // Allocation rule condition types

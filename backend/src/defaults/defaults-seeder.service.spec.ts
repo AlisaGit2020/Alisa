@@ -37,7 +37,7 @@ describe('DefaultsSeeder', () => {
     seeder = module.get<DefaultsSeeder>(DefaultsSeeder);
   });
 
-  it('seeds 15 global expense types when table is empty', async () => {
+  it('seeds 17 global expense types when table is empty', async () => {
     mockExpenseTypeRepo.count.mockResolvedValue(0);
     mockIncomeTypeRepo.count.mockResolvedValue(0);
     mockExpenseTypeRepo.save.mockResolvedValue({});
@@ -46,10 +46,10 @@ describe('DefaultsSeeder', () => {
     await seeder.onModuleInit();
 
     // Each type is saved individually
-    expect(mockExpenseTypeRepo.save).toHaveBeenCalledTimes(15);
+    expect(mockExpenseTypeRepo.save).toHaveBeenCalledTimes(18);
   });
 
-  it('seeds 4 global income types when table is empty', async () => {
+  it('seeds 5 global income types when table is empty', async () => {
     mockExpenseTypeRepo.count.mockResolvedValue(0);
     mockIncomeTypeRepo.count.mockResolvedValue(0);
     mockExpenseTypeRepo.save.mockResolvedValue({});
@@ -58,11 +58,11 @@ describe('DefaultsSeeder', () => {
     await seeder.onModuleInit();
 
     // Each type is saved individually
-    expect(mockIncomeTypeRepo.save).toHaveBeenCalledTimes(4);
+    expect(mockIncomeTypeRepo.save).toHaveBeenCalledTimes(5);
   });
 
   it('does not seed expense types if data already exists', async () => {
-    mockExpenseTypeRepo.count.mockResolvedValue(15);
+    mockExpenseTypeRepo.count.mockResolvedValue(18);
     mockIncomeTypeRepo.count.mockResolvedValue(0);
     mockIncomeTypeRepo.save.mockResolvedValue({});
 
@@ -74,7 +74,7 @@ describe('DefaultsSeeder', () => {
   it('does not seed income types if data already exists', async () => {
     mockExpenseTypeRepo.count.mockResolvedValue(0);
     mockExpenseTypeRepo.save.mockResolvedValue({});
-    mockIncomeTypeRepo.count.mockResolvedValue(4);
+    mockIncomeTypeRepo.count.mockResolvedValue(5);
 
     await seeder.onModuleInit();
 
@@ -109,7 +109,7 @@ describe('DefaultsSeeder', () => {
       (call) => call[0].key,
     );
     const uniqueKeys = new Set(savedKeys);
-    expect(uniqueKeys.size).toBe(15);
+    expect(uniqueKeys.size).toBe(18);
   });
 
   it('seeds income types with unique keys', async () => {
@@ -124,7 +124,7 @@ describe('DefaultsSeeder', () => {
       (call) => call[0].key,
     );
     const uniqueKeys = new Set(savedKeys);
-    expect(uniqueKeys.size).toBe(4);
+    expect(uniqueKeys.size).toBe(5);
     expect(savedKeys).toContain('airbnb');
     expect(savedKeys).toContain('rental');
   });

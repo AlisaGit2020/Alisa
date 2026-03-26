@@ -246,8 +246,8 @@ describe('AuthController (e2e)', () => {
       const expenseTypeRepo = dataSource.getRepository(ExpenseType);
       const expenseTypes = await expenseTypeRepo.find();
 
-      // Should have 15 global expense types seeded by DefaultsSeeder
-      expect(expenseTypes.length).toBe(15);
+      // Should have 18 global expense types seeded by DefaultsSeeder
+      expect(expenseTypes.length).toBe(18);
 
       // Verify some expected keys exist
       const keys = expenseTypes.map((t) => t.key);
@@ -261,8 +261,8 @@ describe('AuthController (e2e)', () => {
       const incomeTypeRepo = dataSource.getRepository(IncomeType);
       const incomeTypes = await incomeTypeRepo.find();
 
-      // Should have 4 global income types seeded by DefaultsSeeder
-      expect(incomeTypes.length).toBe(4);
+      // Should have 5 global income types seeded by DefaultsSeeder
+      expect(incomeTypes.length).toBe(5);
 
       // Verify some expected keys exist
       const keys = incomeTypes.map((t) => t.key);

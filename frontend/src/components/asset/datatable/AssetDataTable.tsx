@@ -307,8 +307,8 @@ function AssetDataTable<T extends { id: number }>(props: {
           </Box>
         </Box>
       )}
-      <TableContainer sx={{ maxHeight: 960, overflowX: isMobile ? "hidden" : "auto" }}>
-        <Table stickyHeader size="small" aria-label="simple table" sx={{ tableLayout: isMobile ? "fixed" : "auto" }}>
+      <TableContainer sx={{ maxHeight: 960, overflowX: isMobile ? "hidden" : "auto", width: "100%" }}>
+        <Table stickyHeader size="small" aria-label="simple table" sx={{ tableLayout: isMobile ? "fixed" : "auto", width: "100%" }}>
           <TableHead>
             <TableRow>
               {props.onSelectChange && (
