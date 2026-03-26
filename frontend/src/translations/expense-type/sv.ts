@@ -15,6 +15,8 @@ const expenseTypes = {
     'loan-handling-fee': 'Låneavgifter',
     'loan-payment': 'Lånebetalning (auto-uppdelning)',
     'cleaning': 'Städning',
+    'furnishings': 'Lösöre',
+    'consumables': 'Förbrukningsvaror',
     // General labels
     expenseTypes: 'Utgiftstyper',
     isTaxDeductible: 'Avdragsgill',

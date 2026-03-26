@@ -148,6 +148,8 @@ export enum ExpenseTypeKey {
   LOAN_HANDLING_FEE = 'loan-handling-fee',
   LOAN_PAYMENT = 'loan-payment',
   CLEANING = 'cleaning',
+  FURNISHINGS = 'furnishings',
+  CONSUMABLES = 'consumables',
 }
 
 // Global income type keys (translations are handled by i18n using these keys)

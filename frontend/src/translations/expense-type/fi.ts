@@ -15,6 +15,8 @@ const expenseTypes = {
     'loan-handling-fee': 'Lainan käsittelykulut',
     'loan-payment': 'Lainan maksu (automaattinen jako)',
     'cleaning': 'Siivous',
+    'furnishings': 'Irtaimisto',
+    'consumables': 'Kulutustavarat',
     // General labels
     expenseTypes: 'Kululajit',
     isTaxDeductible: 'Verovähennettävä',
