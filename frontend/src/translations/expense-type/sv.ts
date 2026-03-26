@@ -20,6 +20,7 @@ const expenseTypes = {
     'rental-operations': 'Uthyrningskostnader',
     'rent-refund': 'Hyresåterbetalning',
     'internet': 'Internet',
+    'withholding-tax': 'Källskatt',
     // General labels
     expenseTypes: 'Utgiftstyper',
     isTaxDeductible: 'Avdragsgill',

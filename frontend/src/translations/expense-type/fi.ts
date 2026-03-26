@@ -20,6 +20,7 @@ const expenseTypes = {
     'rental-operations': 'Vuokraustoimintakulut',
     'rent-refund': 'Vuokran palautus',
     'internet': 'Internet',
+    'withholding-tax': 'Lähdevero',
     // General labels
     expenseTypes: 'Kululajit',
     isTaxDeductible: 'Verovähennettävä',

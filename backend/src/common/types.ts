@@ -153,6 +153,7 @@ export enum ExpenseTypeKey {
   RENTAL_OPERATIONS = 'rental-operations',
   RENT_REFUND = 'rent-refund',
   INTERNET = 'internet',
+  WITHHOLDING_TAX = 'withholding-tax',
 }
 
 // Global income type keys (translations are handled by i18n using these keys)

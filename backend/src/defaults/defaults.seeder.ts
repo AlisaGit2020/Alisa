@@ -117,6 +117,11 @@ const GLOBAL_EXPENSE_TYPES: GlobalExpenseType[] = [
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
+  {
+    key: ExpenseTypeKey.WITHHOLDING_TAX,
+    isTaxDeductible: true,
+    isCapitalImprovement: false,
+  },
 ];
 
 const GLOBAL_INCOME_TYPES: GlobalIncomeType[] = [

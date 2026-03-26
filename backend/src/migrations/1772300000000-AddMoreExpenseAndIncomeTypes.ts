@@ -15,7 +15,8 @@ export class AddMoreExpenseAndIncomeTypes1772300000000
       VALUES
         ('rental-operations', true, false),
         ('rent-refund', true, false),
-        ('internet', true, false)
+        ('internet', true, false),
+        ('withholding-tax', true, false)
       ON CONFLICT (key) DO NOTHING
     `);
 
@@ -33,7 +34,7 @@ export class AddMoreExpenseAndIncomeTypes1772300000000
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      DELETE FROM expense_type WHERE key IN ('rental-operations', 'rent-refund', 'internet')
+      DELETE FROM expense_type WHERE key IN ('rental-operations', 'rent-refund', 'internet', 'withholding-tax')
     `);
 
     await queryRunner.query(`

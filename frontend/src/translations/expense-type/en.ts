@@ -20,6 +20,7 @@ const expenseTypes = {
     'rental-operations': 'Rental operations',
     'rent-refund': 'Rent refund',
     'internet': 'Internet',
+    'withholding-tax': 'Withholding tax',
     // General labels
     expenseTypes: 'Expense types',
     isTaxDeductible: 'Tax deductible',
