@@ -21,7 +21,8 @@ export class AddFurniturePurchasesExpenseType1772200000000
       VALUES
         ('furnishings', true, false),
         ('consumables', true, false),
-        ('rental-operations', true, false)
+        ('rental-operations', true, false),
+        ('rent-refund', true, false)
       ON CONFLICT (key) DO NOTHING
     `);
 
@@ -41,7 +42,7 @@ export class AddFurniturePurchasesExpenseType1772200000000
     console.log('Removing furnishings and consumables expense types...');
 
     await queryRunner.query(`
-      DELETE FROM expense_type WHERE key IN ('furnishings', 'consumables', 'rental-operations')
+      DELETE FROM expense_type WHERE key IN ('furnishings', 'consumables', 'rental-operations', 'rent-refund')
     `);
 
     console.log('Removing cleaning-fee income type...');
