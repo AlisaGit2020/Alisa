@@ -20,7 +20,8 @@ export class AddFurniturePurchasesExpenseType1772200000000
       INSERT INTO expense_type (key, "isTaxDeductible", "isCapitalImprovement")
       VALUES
         ('furnishings', true, false),
-        ('consumables', true, false)
+        ('consumables', true, false),
+        ('rental-operations', true, false)
       ON CONFLICT (key) DO NOTHING
     `);
 
@@ -40,7 +41,7 @@ export class AddFurniturePurchasesExpenseType1772200000000
     console.log('Removing furnishings and consumables expense types...');
 
     await queryRunner.query(`
-      DELETE FROM expense_type WHERE key IN ('furnishings', 'consumables')
+      DELETE FROM expense_type WHERE key IN ('furnishings', 'consumables', 'rental-operations')
     `);
 
     console.log('Removing cleaning-fee income type...');

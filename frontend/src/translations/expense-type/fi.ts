@@ -17,6 +17,7 @@ const expenseTypes = {
     'cleaning': 'Siivous',
     'furnishings': 'Irtaimisto',
     'consumables': 'Kulutustavarat',
+    'rental-operations': 'Vuokraustoimintakulut',
     // General labels
     expenseTypes: 'Kululajit',
     isTaxDeductible: 'Verovähennettävä',

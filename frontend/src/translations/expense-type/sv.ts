@@ -17,6 +17,7 @@ const expenseTypes = {
     'cleaning': 'Städning',
     'furnishings': 'Lösöre',
     'consumables': 'Förbrukningsvaror',
+    'rental-operations': 'Uthyrningskostnader',
     // General labels
     expenseTypes: 'Utgiftstyper',
     isTaxDeductible: 'Avdragsgill',

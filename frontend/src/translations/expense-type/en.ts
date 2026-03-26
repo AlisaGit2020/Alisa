@@ -17,6 +17,7 @@ const expenseTypes = {
     'cleaning': 'Cleaning',
     'furnishings': 'Furnishings',
     'consumables': 'Consumables',
+    'rental-operations': 'Rental operations',
     // General labels
     expenseTypes: 'Expense types',
     isTaxDeductible: 'Tax deductible',

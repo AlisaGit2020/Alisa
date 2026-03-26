@@ -150,6 +150,7 @@ export enum ExpenseTypeKey {
   CLEANING = 'cleaning',
   FURNISHINGS = 'furnishings',
   CONSUMABLES = 'consumables',
+  RENTAL_OPERATIONS = 'rental-operations',
 }
 
 // Global income type keys (translations are handled by i18n using these keys)

@@ -102,6 +102,11 @@ const GLOBAL_EXPENSE_TYPES: GlobalExpenseType[] = [
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
+  {
+    key: ExpenseTypeKey.RENTAL_OPERATIONS,
+    isTaxDeductible: true,
+    isCapitalImprovement: false,
+  },
 ];
 
 const GLOBAL_INCOME_TYPES: GlobalIncomeType[] = [
