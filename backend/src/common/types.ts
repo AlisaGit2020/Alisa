@@ -158,6 +158,7 @@ export enum IncomeTypeKey {
   AIRBNB = 'airbnb',
   CAPITAL_INCOME = 'capital-income',
   INSURANCE_COMPENSATION = 'insurance-compensation',
+  CLEANING_FEE = 'cleaning-fee',
 }
 
 // Allocation rule condition types
