@@ -19,6 +19,7 @@ const expenseTypes = {
     'consumables': 'Kulutustavarat',
     'rental-operations': 'Vuokraustoimintakulut',
     'rent-refund': 'Vuokran palautus',
+    'internet': 'Internet',
     // General labels
     expenseTypes: 'Kululajit',
     isTaxDeductible: 'Verovähennettävä',

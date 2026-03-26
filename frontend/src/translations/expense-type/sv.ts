@@ -19,6 +19,7 @@ const expenseTypes = {
     'consumables': 'Förbrukningsvaror',
     'rental-operations': 'Uthyrningskostnader',
     'rent-refund': 'Hyresåterbetalning',
+    'internet': 'Internet',
     // General labels
     expenseTypes: 'Utgiftstyper',
     isTaxDeductible: 'Avdragsgill',
