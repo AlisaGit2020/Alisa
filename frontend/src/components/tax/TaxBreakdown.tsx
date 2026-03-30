@@ -34,6 +34,20 @@ interface DepreciationAssetBreakdown {
   isFullyDepreciated: boolean;
 }
 
+interface TaxDeductionBreakdown {
+  id: number;
+  type: number;
+  typeName: string;
+  description: string | null;
+  amount: number;
+  metadata?: {
+    distanceKm?: number;
+    visits?: number;
+    ratePerKm?: number;
+    pricePerLaundry?: number;
+  };
+}
+
 interface TaxBreakdownProps {
   grossIncome: number;
   deductions: number;
@@ -41,6 +55,8 @@ interface TaxBreakdownProps {
   netIncome: number;
   breakdown: BreakdownItem[];
   depreciationBreakdown?: DepreciationAssetBreakdown[];
+  taxDeductions?: number;
+  taxDeductionBreakdown?: TaxDeductionBreakdown[];
 }
 
 function TaxBreakdown({
@@ -50,6 +66,8 @@ function TaxBreakdown({
   netIncome,
   breakdown,
   depreciationBreakdown,
+  taxDeductions = 0,
+  taxDeductionBreakdown,
 }: TaxBreakdownProps) {
   const { t } = useTranslation("tax");
   const { t: tExpenseType } = useTranslation("expense-type");
@@ -138,6 +156,60 @@ function TaxBreakdown({
                 {formatCurrency(deductions)}
               </TableCell>
             </TableRow>
+
+            {/* Tax Deductions Section */}
+            {taxDeductions > 0 && taxDeductionBreakdown && taxDeductionBreakdown.length > 0 && (
+              <>
+                <TableRow>
+                  <TableCell colSpan={2}>
+                    <Divider />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell
+                    colSpan={2}
+                    sx={{ bgcolor: "warning.light", fontWeight: "bold" }}
+                  >
+                    {t("taxDeductionsSection")}
+                  </TableCell>
+                </TableRow>
+                {taxDeductionBreakdown.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell sx={{ pl: 4 }}>
+                      <Box>
+                        <Typography variant="body2">
+                          {t(`deductionType.${item.typeName}`)}
+                          {item.description && ` - ${item.description}`}
+                        </Typography>
+                        {item.metadata && (
+                          <Typography variant="caption" color="text.secondary">
+                            {item.metadata.distanceKm && item.metadata.visits && item.metadata.ratePerKm && (
+                              <>
+                                {(item.metadata.distanceKm * 2).toFixed(1)} km × {item.metadata.visits} × {item.metadata.ratePerKm.toFixed(2)} €/km
+                              </>
+                            )}
+                            {item.metadata.pricePerLaundry && item.metadata.visits && !item.metadata.distanceKm && (
+                              <>
+                                {item.metadata.visits} × {item.metadata.pricePerLaundry.toFixed(2)} €
+                              </>
+                            )}
+                          </Typography>
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell align="right">{formatCurrency(item.amount)}</TableCell>
+                  </TableRow>
+                ))}
+                <TableRow>
+                  <TableCell sx={{ fontWeight: "bold" }}>
+                    {t("taxDeductionsTotal")}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                    {formatCurrency(taxDeductions)}
+                  </TableCell>
+                </TableRow>
+              </>
+            )}
 
             <TableRow>
               <TableCell colSpan={2}>
