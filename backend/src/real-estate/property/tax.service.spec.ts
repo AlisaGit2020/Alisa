@@ -9,11 +9,13 @@ import { createMockRepository, MockRepository } from 'test/mocks';
 import { createJWTUser } from 'test/factories';
 import { StatisticKey } from '@asset-backend/common/types';
 import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
+import { TaxDeduction } from './entities/tax-deduction.entity';
 
 describe('TaxService', () => {
   let service: TaxService;
   let mockStatsRepository: MockRepository<PropertyStatistics>;
   let mockOwnershipRepository: MockRepository<Ownership>;
+  let mockTaxDeductionRepository: MockRepository<TaxDeduction>;
   let mockPropertyService: Partial<PropertyService>;
   let mockDataSource: Partial<DataSource>;
   let mockDepreciationService: Partial<DepreciationService>;
@@ -24,12 +26,16 @@ describe('TaxService', () => {
   beforeEach(async () => {
     mockStatsRepository = createMockRepository<PropertyStatistics>();
     mockOwnershipRepository = createMockRepository<Ownership>();
+    mockTaxDeductionRepository = createMockRepository<TaxDeduction>();
 
     // Default: return 100% ownership for all properties
     mockOwnershipRepository.find.mockResolvedValue([
       { propertyId: 1, userId: testUser.id, share: 100 },
       { propertyId: 2, userId: testUser.id, share: 100 },
     ]);
+
+    // Default: no tax deductions
+    mockTaxDeductionRepository.find.mockResolvedValue([]);
 
     mockPropertyService = {
       findOne: jest.fn(),
@@ -49,6 +55,7 @@ describe('TaxService', () => {
         TaxService,
         { provide: getRepositoryToken(PropertyStatistics), useValue: mockStatsRepository },
         { provide: getRepositoryToken(Ownership), useValue: mockOwnershipRepository },
+        { provide: getRepositoryToken(TaxDeduction), useValue: mockTaxDeductionRepository },
         { provide: PropertyService, useValue: mockPropertyService },
         { provide: DataSource, useValue: mockDataSource },
         { provide: DepreciationService, useValue: mockDepreciationService },
@@ -67,6 +74,7 @@ describe('TaxService', () => {
       expect(result.year).toBe(2024);
       expect(result.grossIncome).toBe(0);
       expect(result.deductions).toBe(0);
+      expect(result.taxDeductions).toBe(0);
       expect(result.depreciation).toBe(0);
       expect(result.netIncome).toBe(0);
       expect(result.breakdown).toEqual([]);
@@ -97,6 +105,7 @@ describe('TaxService', () => {
       expect(result.propertyId).toBe(propertyId);
       expect(result.grossIncome).toBe(5000);
       expect(result.deductions).toBe(500);
+      expect(result.taxDeductions).toBe(0);
       expect(result.depreciation).toBe(0); // No items means no depreciation
       expect(result.netIncome).toBe(4500);
       expect(result.ownershipShare).toBe(100);
@@ -132,6 +141,7 @@ describe('TaxService', () => {
 
       expect(result.grossIncome).toBe(10000);
       expect(result.deductions).toBe(1500);
+      expect(result.taxDeductions).toBe(0);
       expect(result.depreciation).toBe(0); // No items means no depreciation
       expect(result.netIncome).toBe(8500);
       expect(result.ownershipShare).toBe(100);
@@ -144,6 +154,7 @@ describe('TaxService', () => {
 
       expect(result.grossIncome).toBe(0);
       expect(result.deductions).toBe(0);
+      expect(result.taxDeductions).toBe(0);
       expect(result.depreciation).toBe(0);
       expect(result.netIncome).toBe(0);
     });
@@ -246,6 +257,7 @@ describe('TaxService', () => {
       const result = await service.calculate(testUser, { propertyId, year: 2024 });
 
       expect(result.grossIncome).toBe(0);
+      expect(result.taxDeductions).toBe(0);
       expect(result.netIncome).toBe(-150);
     });
 
@@ -285,6 +297,7 @@ describe('TaxService', () => {
       expect(result.ownershipShare).toBe(50);
       expect(result.grossIncome).toBe(1000); // 2000 * 0.5
       expect(result.deductions).toBe(200); // 400 * 0.5
+      expect(result.taxDeductions).toBe(0); // No tax deductions
       expect(result.depreciation).toBe(100); // 200 * 0.5
       expect(result.netIncome).toBe(700); // 1000 - 200 - 100
     });
@@ -337,6 +350,7 @@ describe('TaxService', () => {
       expect(result.ownershipShare).toBe(100);
       expect(result.grossIncome).toBe(5000);
       expect(result.deductions).toBe(500);
+      expect(result.taxDeductions).toBe(0);
       expect(result.depreciation).toBe(200);
       expect(result.netIncome).toBe(4300);
     });
@@ -369,6 +383,7 @@ describe('TaxService', () => {
 
       expect(result.grossIncome).toBe(5000);
       expect(result.deductions).toBe(300);
+      expect(result.taxDeductions).toBe(0);
       expect(result.ownershipShare).toBe(100);
     });
 

@@ -1,9 +1,20 @@
+import { TaxDeductionMetadata, TaxDeductionType } from '@asset-backend/common/types';
+
 export class TaxBreakdownItemDto {
   category: string;
   amount: number;
   isTaxDeductible: boolean;
   isCapitalImprovement?: boolean;
   depreciationAmount?: number;
+}
+
+export class TaxDeductionBreakdownDto {
+  id: number;
+  type: TaxDeductionType;
+  typeName: string;
+  description: string | null;
+  amount: number;
+  metadata?: TaxDeductionMetadata;
 }
 
 export class DepreciationAssetBreakdownDto {
@@ -25,9 +36,11 @@ export class TaxResponseDto {
   ownershipShare?: number;
   grossIncome: number;
   deductions: number;
+  taxDeductions: number = 0;
   depreciation: number;
   netIncome: number;
   breakdown: TaxBreakdownItemDto[];
+  taxDeductionBreakdown?: TaxDeductionBreakdownDto[];
   depreciationBreakdown?: DepreciationAssetBreakdownDto[];
   calculatedAt?: Date;
 }
