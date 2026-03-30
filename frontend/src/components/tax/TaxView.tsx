@@ -16,7 +16,7 @@ import {
 import CalculateIcon from "@mui/icons-material/Calculate";
 import AddIcon from "@mui/icons-material/Add";
 import { useTranslation } from "react-i18next";
-import { AssetButton } from "../asset";
+import { AssetButton, AssetConfirmDialog } from "../asset";
 import axios from "axios";
 import ApiClient from "@asset-lib/api-client";
 import { VITE_API_URL } from "../../constants";
@@ -96,6 +96,7 @@ function TaxView() {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [dialogType, setDialogType] = useState<TaxDeductionType | null>(null);
   const [isAirbnbProperty, setIsAirbnbProperty] = useState(false);
+  const [deleteDeductionId, setDeleteDeductionId] = useState<number | null>(null);
 
   const yearOptions = Array.from({ length: 10 }, (_, i) => currentYear - 1 - i);
 
@@ -201,18 +202,22 @@ function TaxView() {
     fetchTaxData();
   };
 
-  const handleDeleteDeduction = async (id: number) => {
-    if (!window.confirm(t("deleteDeductionConfirm"))) {
-      return;
-    }
+  const handleDeleteDeduction = (id: number) => {
+    setDeleteDeductionId(id);
+  };
+
+  const confirmDeleteDeduction = async () => {
+    if (deleteDeductionId === null) return;
     try {
       await axios.delete(
-        `${VITE_API_URL}/real-estate/property/tax/deductions/${id}`,
+        `${VITE_API_URL}/real-estate/property/tax/deductions/${deleteDeductionId}`,
         await ApiClient.getOptions()
       );
       fetchTaxData();
     } catch (err) {
       console.error("Error deleting deduction:", err);
+    } finally {
+      setDeleteDeductionId(null);
     }
   };
 
@@ -355,6 +360,16 @@ function TaxView() {
           deductionType={dialogType}
         />
       )}
+
+      <AssetConfirmDialog
+        open={deleteDeductionId !== null}
+        title={t("deleteDeduction")}
+        contentText={t("deleteDeductionConfirm")}
+        buttonTextCancel={t("common:cancel")}
+        buttonTextConfirm={t("common:delete")}
+        onConfirm={confirmDeleteDeduction}
+        onClose={() => setDeleteDeductionId(null)}
+      />
     </ListPageTemplate>
   );
 }
