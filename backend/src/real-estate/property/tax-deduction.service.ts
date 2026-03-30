@@ -76,7 +76,7 @@ export class TaxDeductionService {
       throw new NotFoundException('Property not found');
     }
 
-    const visits = await this.getAirbnbVisits(propertyId, year);
+    const visits = await this.getAirbnbVisits(user, propertyId, year);
     const ratePerKm = getTravelCompensationRate(year);
     const distanceKm = property.distanceFromHome ?? null;
 
@@ -154,9 +154,9 @@ export class TaxDeductionService {
     await this.repository.delete(id);
   }
 
-  async getAirbnbVisits(propertyId: number, year: number): Promise<number> {
+  async getAirbnbVisits(user: JWTUser, propertyId: number, year: number): Promise<number> {
     const stats = await this.statisticsService.searchAll(
-      { id: 0, email: '' } as JWTUser,
+      user,
       {
         propertyId,
         key: StatisticKey.AIRBNB_VISITS,
