@@ -50,15 +50,31 @@ interface DepreciationAssetBreakdown {
   isFullyDepreciated: boolean;
 }
 
+interface TaxDeductionBreakdown {
+  id: number;
+  type: number;
+  typeName: string;
+  description: string | null;
+  amount: number;
+  metadata?: {
+    distanceKm?: number;
+    visits?: number;
+    ratePerKm?: number;
+    pricePerLaundry?: number;
+  };
+}
+
 interface TaxData {
   year: number;
   propertyId?: number;
   ownershipShare?: number;
   grossIncome: number;
   deductions: number;
+  taxDeductions?: number;
   depreciation: number;
   netIncome: number;
   breakdown: BreakdownItem[];
+  taxDeductionBreakdown?: TaxDeductionBreakdown[];
   depreciationBreakdown?: DepreciationAssetBreakdown[];
   calculatedAt?: string;
 }
@@ -303,9 +319,11 @@ function TaxView() {
           <TaxBreakdown
             grossIncome={taxData.grossIncome}
             deductions={taxData.deductions}
+            taxDeductions={taxData.taxDeductions}
             depreciation={taxData.depreciation}
             netIncome={taxData.netIncome}
             breakdown={taxData.breakdown}
+            taxDeductionBreakdown={taxData.taxDeductionBreakdown}
             depreciationBreakdown={taxData.depreciationBreakdown}
           />
         </>
