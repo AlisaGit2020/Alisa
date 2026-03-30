@@ -5,9 +5,11 @@ import {
   PropertyExternalSource,
   PropertyStatus,
   PropertyType,
+  TaxDeductionType,
   TransactionStatus,
   TransactionType,
 } from './common';
+import { TaxDeductionMetadata } from './entities';
 
 // Ownership input
 export interface OwnershipInput {
@@ -48,6 +50,8 @@ export interface PropertyInput {
   financialCharge?: number;
   monthlyRent?: number;
   waterCharge?: number;
+  isAirbnb?: boolean;
+  distanceFromHome?: number;
   ownerships?: OwnershipInput[];
 }
 
@@ -186,4 +190,15 @@ export interface ListingFetchInput {
   url: string;
   monthlyRent?: number;
   source: ListingSource;
+}
+
+// Tax deduction input
+export interface TaxDeductionInput {
+  id?: number;
+  propertyId: number;
+  year: number;
+  deductionType: TaxDeductionType;
+  description?: string;
+  amount: number;
+  metadata?: TaxDeductionMetadata;
 }

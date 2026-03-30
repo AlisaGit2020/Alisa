@@ -95,6 +95,12 @@ export enum PropertyType {
   WOODEN_HOUSE = 7,
 }
 
+export enum TaxDeductionType {
+  TRAVEL = 1,
+  LAUNDRY = 2,
+  CUSTOM = 3,
+}
+
 export enum PropertyTypeName {
   APARTMENT = 'apartment',
   ROW_HOUSE = 'row-house',
