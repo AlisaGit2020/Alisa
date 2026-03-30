@@ -23,10 +23,13 @@ import { Expense } from '@asset-backend/accounting/expense/entities/expense.enti
 import { Income } from '@asset-backend/accounting/income/entities/income.entity';
 import { DepreciationAsset } from '@asset-backend/accounting/depreciation/entities/depreciation-asset.entity';
 import { Address } from './address/entities/address.entity';
+import { TaxDeduction } from './property/entities/tax-deduction.entity';
+import { TaxDeductionService } from './property/tax-deduction.service';
+import { TaxDeductionController } from './property/tax-deduction.controller';
 
 @Module({
-  controllers: [InvestmentController, TaxController, PropertyController],
-  providers: [InvestmentService, PropertyService, PropertyStatisticsService, PropertyStatisticsSchemaService, AirbnbStatisticsService, TaxService],
+  controllers: [InvestmentController, TaxController, PropertyController, TaxDeductionController],
+  providers: [InvestmentService, PropertyService, PropertyStatisticsService, PropertyStatisticsSchemaService, AirbnbStatisticsService, TaxService, TaxDeductionService],
   imports: [
     TypeOrmModule.forFeature([
       Address,
@@ -38,6 +41,7 @@ import { Address } from './address/entities/address.entity';
       Expense,
       Income,
       DepreciationAsset,
+      TaxDeduction,
     ]),
     forwardRef(() => AccountingModule),
     forwardRef(() => EtuoviImportModule),
