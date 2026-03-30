@@ -12,7 +12,6 @@ import {
   IconButton,
   Stack,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslation } from "react-i18next";
 import InfoTooltip from "../asset/InfoTooltip";
@@ -61,7 +60,6 @@ interface TaxBreakdownProps {
   depreciationBreakdown?: DepreciationAssetBreakdown[];
   taxDeductions?: number;
   taxDeductionBreakdown?: TaxDeductionBreakdown[];
-  onEditDeduction?: (id: number) => void;
   onDeleteDeduction?: (id: number) => void;
 }
 
@@ -74,7 +72,6 @@ function TaxBreakdown({
   depreciationBreakdown,
   taxDeductions = 0,
   taxDeductionBreakdown,
-  onEditDeduction,
   onDeleteDeduction,
 }: TaxBreakdownProps) {
   const { t } = useTranslation("tax");
@@ -159,35 +156,27 @@ function TaxBreakdown({
             {taxDeductionBreakdown && taxDeductionBreakdown.map((item) => (
               <TableRow key={`tax-${item.id}`}>
                 <TableCell sx={{ pl: 4 }}>
-                  <Box>
-                    <Typography variant="body2">
-                      {t(`deductionType.${item.typeName}`)}
-                      {item.description && ` - ${item.description}`}
-                    </Typography>
-                    {item.metadata && (
-                      <Typography variant="caption" color="text.secondary">
-                        {item.metadata.distanceKm && item.metadata.visits && item.metadata.ratePerKm && (
-                          <>
-                            {(item.metadata.distanceKm * 2).toFixed(1)} km × {item.metadata.visits} × {item.metadata.ratePerKm.toFixed(2)} €/km
-                          </>
-                        )}
-                        {item.metadata.pricePerLaundry && item.metadata.visits && !item.metadata.distanceKm && (
-                          <>
-                            {item.metadata.visits} × {item.metadata.pricePerLaundry.toFixed(2)} €
-                          </>
-                        )}
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="body2">
+                        {t(`deductionType.${item.typeName}`)}
+                        {item.description && ` - ${item.description}`}
                       </Typography>
-                    )}
-                  </Box>
-                </TableCell>
-                <TableCell align="right">
-                  <Stack direction="row" spacing={0.5} justifyContent="flex-end" alignItems="center">
-                    <Typography>{formatCurrency(item.amount)}</Typography>
-                    {onEditDeduction && (
-                      <IconButton size="small" onClick={() => onEditDeduction(item.id)}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    )}
+                      {item.metadata && (
+                        <Typography variant="caption" color="text.secondary">
+                          {item.metadata.distanceKm && item.metadata.visits && item.metadata.ratePerKm && (
+                            <>
+                              {(item.metadata.distanceKm * 2).toFixed(1)} km × {item.metadata.visits} × {item.metadata.ratePerKm.toFixed(2)} €/km
+                            </>
+                          )}
+                          {item.metadata.pricePerLaundry && item.metadata.visits && !item.metadata.distanceKm && (
+                            <>
+                              {item.metadata.visits} × {item.metadata.pricePerLaundry.toFixed(2)} €
+                            </>
+                          )}
+                        </Typography>
+                      )}
+                    </Box>
                     {onDeleteDeduction && (
                       <IconButton size="small" onClick={() => onDeleteDeduction(item.id)}>
                         <DeleteIcon fontSize="small" />
@@ -195,6 +184,7 @@ function TaxBreakdown({
                     )}
                   </Stack>
                 </TableCell>
+                <TableCell align="right">{formatCurrency(item.amount)}</TableCell>
               </TableRow>
             ))}
 

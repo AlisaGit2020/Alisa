@@ -254,35 +254,6 @@ function TaxView() {
             ))}
           </Select>
         </FormControl>
-        {propertyId > 0 && (
-          <>
-            <AssetButton
-              label={t("addTaxDeduction")}
-              startIcon={<AddIcon />}
-              onClick={handleMenuOpen}
-              variant="contained"
-            />
-            <Menu
-              anchorEl={menuAnchor}
-              open={Boolean(menuAnchor)}
-              onClose={handleMenuClose}
-            >
-              {isAirbnbProperty && (
-                <>
-                  <MenuItem onClick={() => handleDeductionSelect(TaxDeductionType.TRAVEL)}>
-                    {t("travelExpenses")}
-                  </MenuItem>
-                  <MenuItem onClick={() => handleDeductionSelect(TaxDeductionType.LAUNDRY)}>
-                    {t("laundryExpenses")}
-                  </MenuItem>
-                </>
-              )}
-              <MenuItem onClick={() => handleDeductionSelect(TaxDeductionType.CUSTOM)}>
-                {t("customDeduction")}
-              </MenuItem>
-            </Menu>
-          </>
-        )}
       </Stack>
 
       {error && (
@@ -327,7 +298,7 @@ function TaxView() {
               {t("ownershipShare")}: {taxData.ownershipShare}%
             </Alert>
           )}
-          <Box sx={{ mt: 3, mb: 2 }}>
+          <Stack direction="row" spacing={2} sx={{ mt: 3, mb: 2 }}>
             <AssetButton
               label={calculating ? t("calculating") : t("calculate")}
               variant="outlined"
@@ -335,7 +306,36 @@ function TaxView() {
               onClick={calculateTaxData}
               loading={calculating}
             />
-          </Box>
+            {propertyId > 0 && (
+              <>
+                <AssetButton
+                  label={t("addTaxDeduction")}
+                  startIcon={<AddIcon />}
+                  onClick={handleMenuOpen}
+                  variant="contained"
+                />
+                <Menu
+                  anchorEl={menuAnchor}
+                  open={Boolean(menuAnchor)}
+                  onClose={handleMenuClose}
+                >
+                  {isAirbnbProperty && (
+                    <>
+                      <MenuItem onClick={() => handleDeductionSelect(TaxDeductionType.TRAVEL)}>
+                        {t("travelExpenses")}
+                      </MenuItem>
+                      <MenuItem onClick={() => handleDeductionSelect(TaxDeductionType.LAUNDRY)}>
+                        {t("laundryExpenses")}
+                      </MenuItem>
+                    </>
+                  )}
+                  <MenuItem onClick={() => handleDeductionSelect(TaxDeductionType.CUSTOM)}>
+                    {t("customDeduction")}
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
+          </Stack>
           <TaxBreakdown
             grossIncome={taxData.grossIncome}
             deductions={taxData.deductions}
