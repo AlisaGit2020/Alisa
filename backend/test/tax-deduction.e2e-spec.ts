@@ -55,12 +55,12 @@ describe('TaxDeductionController (e2e)', () => {
     await closeAppGracefully(app, server);
   });
 
-  describe('POST /api/real-estate/property/tax/deductions', () => {
+  describe('POST /real-estate/property/tax/deductions', () => {
     it('should create a travel deduction', async () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       const response = await request(server)
-        .post('/api/real-estate/property/tax/deductions')
+        .post('/real-estate/property/tax/deductions')
         .set('Authorization', getBearerToken(token))
         .send({
           propertyId,
@@ -83,7 +83,7 @@ describe('TaxDeductionController (e2e)', () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       const response = await request(server)
-        .post('/api/real-estate/property/tax/deductions')
+        .post('/real-estate/property/tax/deductions')
         .set('Authorization', getBearerToken(token))
         .send({
           propertyId,
@@ -103,7 +103,7 @@ describe('TaxDeductionController (e2e)', () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       const response = await request(server)
-        .post('/api/real-estate/property/tax/deductions')
+        .post('/real-estate/property/tax/deductions')
         .set('Authorization', getBearerToken(token))
         .send({
           propertyId,
@@ -122,7 +122,7 @@ describe('TaxDeductionController (e2e)', () => {
 
     it('should return 401 when not authenticated', async () => {
       await request(server)
-        .post('/api/real-estate/property/tax/deductions')
+        .post('/real-estate/property/tax/deductions')
         .send({
           propertyId,
           year: 2025,
@@ -137,7 +137,7 @@ describe('TaxDeductionController (e2e)', () => {
       const otherUserProperty = testUsers.user2WithProperties.properties[0];
 
       await request(server)
-        .post('/api/real-estate/property/tax/deductions')
+        .post('/real-estate/property/tax/deductions')
         .set('Authorization', getBearerToken(token))
         .send({
           propertyId: otherUserProperty.id,
@@ -149,12 +149,12 @@ describe('TaxDeductionController (e2e)', () => {
     });
   });
 
-  describe('GET /api/real-estate/property/tax/deductions', () => {
+  describe('GET /real-estate/property/tax/deductions', () => {
     it('should return deductions for year', async () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       const response = await request(server)
-        .get('/api/real-estate/property/tax/deductions')
+        .get('/real-estate/property/tax/deductions')
         .query({ year: 2025 })
         .set('Authorization', getBearerToken(token))
         .expect(200);
@@ -167,7 +167,7 @@ describe('TaxDeductionController (e2e)', () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       const response = await request(server)
-        .get('/api/real-estate/property/tax/deductions')
+        .get('/real-estate/property/tax/deductions')
         .query({ year: 2025, propertyId: propertyId.toString() })
         .set('Authorization', getBearerToken(token))
         .expect(200);
@@ -184,7 +184,7 @@ describe('TaxDeductionController (e2e)', () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       const response = await request(server)
-        .get('/api/real-estate/property/tax/deductions')
+        .get('/real-estate/property/tax/deductions')
         .query({ year: 2020 })
         .set('Authorization', getBearerToken(token))
         .expect(200);
@@ -195,18 +195,18 @@ describe('TaxDeductionController (e2e)', () => {
 
     it('should return 401 when not authenticated', async () => {
       await request(server)
-        .get('/api/real-estate/property/tax/deductions')
+        .get('/real-estate/property/tax/deductions')
         .query({ year: 2025 })
         .expect(401);
     });
   });
 
-  describe('GET /api/real-estate/property/tax/deductions/calculate', () => {
+  describe('GET /real-estate/property/tax/deductions/calculate', () => {
     it('should return calculation preview for property', async () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       const response = await request(server)
-        .get('/api/real-estate/property/tax/deductions/calculate')
+        .get('/real-estate/property/tax/deductions/calculate')
         .query({ propertyId: propertyId.toString(), year: 2025 })
         .set('Authorization', getBearerToken(token))
         .expect(200);
@@ -214,12 +214,12 @@ describe('TaxDeductionController (e2e)', () => {
       expect(response.body.distanceKm).toBe(25);
       expect(response.body.ratePerKm).toBeDefined();
       expect(response.body.defaultLaundryPrice).toBeDefined();
-      expect(response.body.totalVisits).toBeDefined();
+      expect(response.body.visits).toBeDefined();
     });
 
     it('should return 401 when not authenticated', async () => {
       await request(server)
-        .get('/api/real-estate/property/tax/deductions/calculate')
+        .get('/real-estate/property/tax/deductions/calculate')
         .query({ propertyId: propertyId.toString(), year: 2025 })
         .expect(401);
     });
@@ -229,19 +229,19 @@ describe('TaxDeductionController (e2e)', () => {
       const otherUserProperty = testUsers.user2WithProperties.properties[0];
 
       await request(server)
-        .get('/api/real-estate/property/tax/deductions/calculate')
+        .get('/real-estate/property/tax/deductions/calculate')
         .query({ propertyId: otherUserProperty.id.toString(), year: 2025 })
         .set('Authorization', getBearerToken(token))
         .expect(401);
     });
   });
 
-  describe('GET /api/real-estate/property/tax/deductions/rates', () => {
+  describe('GET /real-estate/property/tax/deductions/rates', () => {
     it('should return current year rates by default', async () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       const response = await request(server)
-        .get('/api/real-estate/property/tax/deductions/rates')
+        .get('/real-estate/property/tax/deductions/rates')
         .set('Authorization', getBearerToken(token))
         .expect(200);
 
@@ -255,7 +255,7 @@ describe('TaxDeductionController (e2e)', () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       const response = await request(server)
-        .get('/api/real-estate/property/tax/deductions/rates')
+        .get('/real-estate/property/tax/deductions/rates')
         .query({ year: '2024' })
         .set('Authorization', getBearerToken(token))
         .expect(200);
@@ -265,13 +265,13 @@ describe('TaxDeductionController (e2e)', () => {
     });
   });
 
-  describe('PUT /api/real-estate/property/tax/deductions/:id', () => {
+  describe('PUT /real-estate/property/tax/deductions/:id', () => {
     it('should update a deduction', async () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       // First create a deduction
       const createResponse = await request(server)
-        .post('/api/real-estate/property/tax/deductions')
+        .post('/real-estate/property/tax/deductions')
         .set('Authorization', getBearerToken(token))
         .send({
           propertyId,
@@ -286,7 +286,7 @@ describe('TaxDeductionController (e2e)', () => {
 
       // Update it
       const updateResponse = await request(server)
-        .put(`/api/real-estate/property/tax/deductions/${id}`)
+        .put(`/real-estate/property/tax/deductions/${id}`)
         .set('Authorization', getBearerToken(token))
         .send({
           propertyId,
@@ -308,7 +308,7 @@ describe('TaxDeductionController (e2e)', () => {
 
       // User1 creates a deduction
       const createResponse = await request(server)
-        .post('/api/real-estate/property/tax/deductions')
+        .post('/real-estate/property/tax/deductions')
         .set('Authorization', getBearerToken(token))
         .send({
           propertyId,
@@ -323,7 +323,7 @@ describe('TaxDeductionController (e2e)', () => {
 
       // User2 tries to update it
       await request(server)
-        .put(`/api/real-estate/property/tax/deductions/${id}`)
+        .put(`/real-estate/property/tax/deductions/${id}`)
         .set('Authorization', getBearerToken(token2))
         .send({
           propertyId,
@@ -336,13 +336,13 @@ describe('TaxDeductionController (e2e)', () => {
     });
   });
 
-  describe('DELETE /api/real-estate/property/tax/deductions/:id', () => {
+  describe('DELETE /real-estate/property/tax/deductions/:id', () => {
     it('should delete a deduction', async () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       // First create one to delete
       const createResponse = await request(server)
-        .post('/api/real-estate/property/tax/deductions')
+        .post('/real-estate/property/tax/deductions')
         .set('Authorization', getBearerToken(token))
         .send({
           propertyId,
@@ -356,13 +356,13 @@ describe('TaxDeductionController (e2e)', () => {
       const id = createResponse.body.id;
 
       await request(server)
-        .delete(`/api/real-estate/property/tax/deductions/${id}`)
+        .delete(`/real-estate/property/tax/deductions/${id}`)
         .set('Authorization', getBearerToken(token))
         .expect(200);
 
       // Verify it's deleted by trying to get it
       const getResponse = await request(server)
-        .get('/api/real-estate/property/tax/deductions')
+        .get('/real-estate/property/tax/deductions')
         .query({ year: 2025 })
         .set('Authorization', getBearerToken(token))
         .expect(200);
@@ -377,7 +377,7 @@ describe('TaxDeductionController (e2e)', () => {
 
       // User1 creates a deduction
       const createResponse = await request(server)
-        .post('/api/real-estate/property/tax/deductions')
+        .post('/real-estate/property/tax/deductions')
         .set('Authorization', getBearerToken(token))
         .send({
           propertyId,
@@ -392,14 +392,14 @@ describe('TaxDeductionController (e2e)', () => {
 
       // User2 tries to delete it
       await request(server)
-        .delete(`/api/real-estate/property/tax/deductions/${id}`)
+        .delete(`/real-estate/property/tax/deductions/${id}`)
         .set('Authorization', getBearerToken(token2))
         .expect(401);
     });
 
     it('should return 401 when not authenticated', async () => {
       await request(server)
-        .delete('/api/real-estate/property/tax/deductions/999')
+        .delete('/real-estate/property/tax/deductions/999')
         .expect(401);
     });
   });
@@ -409,7 +409,7 @@ describe('TaxDeductionController (e2e)', () => {
       const token2 = await getUserAccessToken2(authService, testUsers.user2WithProperties.jwtUser);
 
       const response = await request(server)
-        .get('/api/real-estate/property/tax/deductions')
+        .get('/real-estate/property/tax/deductions')
         .query({ year: 2025 })
         .set('Authorization', getBearerToken(token2))
         .expect(200);
@@ -426,7 +426,7 @@ describe('TaxDeductionController (e2e)', () => {
 
       // User2 creates a deduction
       await request(server)
-        .post('/api/real-estate/property/tax/deductions')
+        .post('/real-estate/property/tax/deductions')
         .set('Authorization', getBearerToken(token2))
         .send({
           propertyId: user2PropertyId,
@@ -439,7 +439,7 @@ describe('TaxDeductionController (e2e)', () => {
 
       // User1 should not see user2's deduction
       const response = await request(server)
-        .get('/api/real-estate/property/tax/deductions')
+        .get('/real-estate/property/tax/deductions')
         .query({ year: 2025 })
         .set('Authorization', getBearerToken(token))
         .expect(200);
