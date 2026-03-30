@@ -133,6 +133,12 @@ const property = {
     congratulationsPurchase: 'Grattis till din nya fastighet!',
     congratulationsSale: 'Grattis till försäljningen!',
 
+    // Airbnb settings
+    airbnbSettings: 'Airbnb-inställningar',
+    isAirbnb: 'Airbnb-fastighet',
+    distanceFromHome: 'Avstånd från hemmet (km)',
+    distanceFromHomeHelp: 'Används för att beräkna resekostnadsavdrag',
+
     // Report section
     report: {
         currentYearIncome: 'Årets intäkter',

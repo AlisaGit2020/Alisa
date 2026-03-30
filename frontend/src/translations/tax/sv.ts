@@ -33,6 +33,33 @@ const tax = {
   depreciationInfoText2: 'Avskrivningar beräknas med 10% per år av ursprungligt anskaffningsvärde. Avskrivning görs under högst 10 år tills hela beloppet är avdraget.',
   depreciationInfoText3: 'Löpande reparationer (t.ex. byte av kran, målning) dras av helt samma år som kostnad, inte som avskrivning.',
   ownershipShare: 'Din ägarandel',
+
+  // Tax deductions
+  taxDeductionsSection: 'Skatteavdrag',
+  taxDeductionsTotal: 'Skatteavdrag totalt',
+  addTaxDeduction: 'Lägg till skatteavdrag',
+  travelExpenses: 'Resekostnader',
+  laundryExpenses: 'Tvättkostnader',
+  customDeduction: 'Anpassat avdrag',
+  travelDeductionTitle: 'Lägg till resekostnader',
+  laundryDeductionTitle: 'Lägg till tvättkostnader',
+  customDeductionTitle: 'Lägg till anpassat skatteavdrag',
+  distanceFromHome: 'Avstånd från hemmet',
+  visits: 'Besök',
+  visitsFromStatistics: 'från statistik',
+  ratePerKm: 'Kilometerersättning',
+  roundTripDistance: 'Tur och retur',
+  pricePerLaundry: 'Pris per tvätt',
+  calculatedTotal: 'Beräknat avdrag',
+  addDeduction: 'Lägg till avdrag',
+  editDeduction: 'Redigera avdrag',
+  deleteDeduction: 'Ta bort avdrag',
+  deleteDeductionConfirm: 'Är du säker på att du vill ta bort detta skatteavdrag?',
+  deductionType: {
+    travel: 'Resa',
+    laundry: 'Tvätt',
+    custom: 'Anpassat',
+  },
 }
 
 export default tax

@@ -133,6 +133,12 @@ const property = {
     congratulationsPurchase: 'Onneksi olkoon uudesta asunnostasi!',
     congratulationsSale: 'Onneksi olkoon kaupasta!',
 
+    // Airbnb settings
+    airbnbSettings: 'Airbnb-asetukset',
+    isAirbnb: 'Airbnb-kohde',
+    distanceFromHome: 'Etäisyys kotoa (km)',
+    distanceFromHomeHelp: 'Käytetään matkakuluvähennysten laskemiseen',
+
     // Report section
     report: {
         currentYearIncome: 'Kuluvan vuoden tulot',

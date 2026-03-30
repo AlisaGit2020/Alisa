@@ -33,6 +33,33 @@ const tax = {
   depreciationInfoText2: 'Poistot lasketaan 10% vuodessa alkuperäisestä hankintahinnasta. Poisto tehdään enintään 10 vuoden ajan, kunnes koko summa on vähennetty.',
   depreciationInfoText3: 'Vuosikorjaukset (esim. hanan vaihto, maalaus) vähennetään kokonaan samana vuonna kuluna, ei poistoina.',
   ownershipShare: 'Omistusosuutesi',
+
+  // Tax deductions
+  taxDeductionsSection: 'Verovähennykset',
+  taxDeductionsTotal: 'Verovähennykset yhteensä',
+  addTaxDeduction: 'Lisää verovähennys',
+  travelExpenses: 'Matkakulut',
+  laundryExpenses: 'Pyykkikulut',
+  customDeduction: 'Muu vähennys',
+  travelDeductionTitle: 'Lisää matkakulut',
+  laundryDeductionTitle: 'Lisää pyykkikulut',
+  customDeductionTitle: 'Lisää muu verovähennys',
+  distanceFromHome: 'Etäisyys kotoa',
+  visits: 'Käynnit',
+  visitsFromStatistics: 'tilastoista',
+  ratePerKm: 'Kilometrikorvaus',
+  roundTripDistance: 'Edestakainen matka',
+  pricePerLaundry: 'Hinta per pyykki',
+  calculatedTotal: 'Laskettu vähennys',
+  addDeduction: 'Lisää vähennys',
+  editDeduction: 'Muokkaa vähennystä',
+  deleteDeduction: 'Poista vähennys',
+  deleteDeductionConfirm: 'Haluatko varmasti poistaa tämän verovähennyksen?',
+  deductionType: {
+    travel: 'Matka',
+    laundry: 'Pyykki',
+    custom: 'Muu',
+  },
 }
 
 export default tax
