@@ -58,7 +58,9 @@ function PropertyForm({ t }: WithTranslation) {
         apartmentType: undefined,
         rooms: undefined,
         status: statusFromPath,
-        ownerships: [{ userId: 0, share: 100 }]
+        ownerships: [{ userId: 0, share: 100 }],
+        isAirbnb: false,
+        distanceFromHome: undefined,
     });
     const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
     // totalCharge is UI-only helper for calculating charges (not saved to DB)
@@ -323,16 +325,14 @@ function PropertyForm({ t }: WithTranslation) {
                         value={data.isAirbnb ?? false}
                         onChange={(_, checked) => handleChange('isAirbnb', checked)}
                     />
-                    {data.isAirbnb && (
-                        <Box sx={{ flex: 1, maxWidth: 200 }}>
-                            <AssetNumberField
-                                label={t('distanceFromHome')}
-                                value={data.distanceFromHome ?? ''}
-                                onChange={(e) => handleChange('distanceFromHome', e.target.value ? parseFloat(e.target.value) : undefined)}
-                                adornment="km"
-                            />
-                        </Box>
-                    )}
+                    <Box sx={{ flex: 1, maxWidth: 200 }}>
+                        <AssetNumberField
+                            label={t('distanceFromHome')}
+                            value={data.distanceFromHome ?? ''}
+                            onChange={(e) => handleChange('distanceFromHome', e.target.value ? parseFloat(e.target.value) : undefined)}
+                            adornment="km"
+                        />
+                    </Box>
                 </Stack>
 
                 {/* Purchase Info Section - for OWN and PROSPECT */}

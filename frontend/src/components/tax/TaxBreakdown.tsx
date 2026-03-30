@@ -9,7 +9,11 @@ import {
   Divider,
   Box,
   Chip,
+  IconButton,
+  Stack,
 } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslation } from "react-i18next";
 import InfoTooltip from "../asset/InfoTooltip";
 
@@ -57,6 +61,8 @@ interface TaxBreakdownProps {
   depreciationBreakdown?: DepreciationAssetBreakdown[];
   taxDeductions?: number;
   taxDeductionBreakdown?: TaxDeductionBreakdown[];
+  onEditDeduction?: (id: number) => void;
+  onDeleteDeduction?: (id: number) => void;
 }
 
 function TaxBreakdown({
@@ -68,6 +74,8 @@ function TaxBreakdown({
   depreciationBreakdown,
   taxDeductions = 0,
   taxDeductionBreakdown,
+  onEditDeduction,
+  onDeleteDeduction,
 }: TaxBreakdownProps) {
   const { t } = useTranslation("tax");
   const { t: tExpenseType } = useTranslation("expense-type");
@@ -147,69 +155,58 @@ function TaxBreakdown({
               </TableRow>
             ))}
 
-            {/* Deductions Total */}
+            {/* Tax Deduction Items - shown inline with other deductions */}
+            {taxDeductionBreakdown && taxDeductionBreakdown.map((item) => (
+              <TableRow key={`tax-${item.id}`}>
+                <TableCell sx={{ pl: 4 }}>
+                  <Box>
+                    <Typography variant="body2">
+                      {t(`deductionType.${item.typeName}`)}
+                      {item.description && ` - ${item.description}`}
+                    </Typography>
+                    {item.metadata && (
+                      <Typography variant="caption" color="text.secondary">
+                        {item.metadata.distanceKm && item.metadata.visits && item.metadata.ratePerKm && (
+                          <>
+                            {(item.metadata.distanceKm * 2).toFixed(1)} km × {item.metadata.visits} × {item.metadata.ratePerKm.toFixed(2)} €/km
+                          </>
+                        )}
+                        {item.metadata.pricePerLaundry && item.metadata.visits && !item.metadata.distanceKm && (
+                          <>
+                            {item.metadata.visits} × {item.metadata.pricePerLaundry.toFixed(2)} €
+                          </>
+                        )}
+                      </Typography>
+                    )}
+                  </Box>
+                </TableCell>
+                <TableCell align="right">
+                  <Stack direction="row" spacing={0.5} justifyContent="flex-end" alignItems="center">
+                    <Typography>{formatCurrency(item.amount)}</Typography>
+                    {onEditDeduction && (
+                      <IconButton size="small" onClick={() => onEditDeduction(item.id)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                    {onDeleteDeduction && (
+                      <IconButton size="small" onClick={() => onDeleteDeduction(item.id)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            ))}
+
+            {/* Deductions Total (includes tax deductions) */}
             <TableRow>
               <TableCell sx={{ fontWeight: "bold" }}>
                 {t("deductionsTotal")}
               </TableCell>
               <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                {formatCurrency(deductions)}
+                {formatCurrency(deductions + taxDeductions)}
               </TableCell>
             </TableRow>
-
-            {/* Tax Deductions Section */}
-            {taxDeductions > 0 && taxDeductionBreakdown && taxDeductionBreakdown.length > 0 && (
-              <>
-                <TableRow>
-                  <TableCell colSpan={2}>
-                    <Divider />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell
-                    colSpan={2}
-                    sx={{ bgcolor: "warning.light", fontWeight: "bold" }}
-                  >
-                    {t("taxDeductionsSection")}
-                  </TableCell>
-                </TableRow>
-                {taxDeductionBreakdown.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell sx={{ pl: 4 }}>
-                      <Box>
-                        <Typography variant="body2">
-                          {t(`deductionType.${item.typeName}`)}
-                          {item.description && ` - ${item.description}`}
-                        </Typography>
-                        {item.metadata && (
-                          <Typography variant="caption" color="text.secondary">
-                            {item.metadata.distanceKm && item.metadata.visits && item.metadata.ratePerKm && (
-                              <>
-                                {(item.metadata.distanceKm * 2).toFixed(1)} km × {item.metadata.visits} × {item.metadata.ratePerKm.toFixed(2)} €/km
-                              </>
-                            )}
-                            {item.metadata.pricePerLaundry && item.metadata.visits && !item.metadata.distanceKm && (
-                              <>
-                                {item.metadata.visits} × {item.metadata.pricePerLaundry.toFixed(2)} €
-                              </>
-                            )}
-                          </Typography>
-                        )}
-                      </Box>
-                    </TableCell>
-                    <TableCell align="right">{formatCurrency(item.amount)}</TableCell>
-                  </TableRow>
-                ))}
-                <TableRow>
-                  <TableCell sx={{ fontWeight: "bold" }}>
-                    {t("taxDeductionsTotal")}
-                  </TableCell>
-                  <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                    {formatCurrency(taxDeductions)}
-                  </TableCell>
-                </TableRow>
-              </>
-            )}
 
             <TableRow>
               <TableCell colSpan={2}>

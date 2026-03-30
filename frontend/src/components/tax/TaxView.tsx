@@ -201,6 +201,21 @@ function TaxView() {
     fetchTaxData();
   };
 
+  const handleDeleteDeduction = async (id: number) => {
+    if (!window.confirm(t("deleteDeductionConfirm"))) {
+      return;
+    }
+    try {
+      await axios.delete(
+        `${VITE_API_URL}/real-estate/property/tax/deductions/${id}`,
+        await ApiClient.getOptions()
+      );
+      fetchTaxData();
+    } catch (err) {
+      console.error("Error deleting deduction:", err);
+    }
+  };
+
   useEffect(() => {
     fetchTaxData();
     fetchPropertyData();
@@ -325,6 +340,7 @@ function TaxView() {
             breakdown={taxData.breakdown}
             taxDeductionBreakdown={taxData.taxDeductionBreakdown}
             depreciationBreakdown={taxData.depreciationBreakdown}
+            onDeleteDeduction={handleDeleteDeduction}
           />
         </>
       )}
