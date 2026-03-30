@@ -1,37 +1,43 @@
 import { Box, Typography, Stack, Divider } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { AssetMoneyField } from '../asset';
-import { TaxDeductionCalculation } from '../../types/entities';
-
+import { AssetMoneyField, AssetNumberField } from '../asset';
+import type { TaxDeductionCalculation } from '../../types/entities';
 interface LaundryDeductionFormProps {
   calculation: TaxDeductionCalculation;
+  visits: number;
   pricePerLaundry: number;
+  onVisitsChange: (value: number) => void;
   onPriceChange: (value: number) => void;
 }
 
 function LaundryDeductionForm({
   calculation,
+  visits,
   pricePerLaundry,
+  onVisitsChange,
   onPriceChange,
 }: LaundryDeductionFormProps) {
   const { t } = useTranslation('tax');
 
-  const totalAmount = calculation.visits * pricePerLaundry;
+  const totalAmount = visits * pricePerLaundry;
 
   return (
     <Stack spacing={2}>
       <Box>
         <Typography variant="body2" color="text.secondary" gutterBottom>
           {t('visits')}
-        </Typography>
-        <Box sx={{ p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
-          <Typography variant="h6">
-            {calculation.visits}
-            <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-              ({t('visitsFromStatistics')})
+          {calculation.visits > 0 && (
+            <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+              ({t('visitsFromStatistics')}: {calculation.visits})
             </Typography>
-          </Typography>
-        </Box>
+          )}
+        </Typography>
+        <AssetNumberField
+          label=""
+          value={visits}
+          onChange={(e) => onVisitsChange(parseInt(e.target.value) || 0)}
+          fullWidth
+        />
       </Box>
 
       <Box>
@@ -55,7 +61,7 @@ function LaundryDeductionForm({
               {t('calculatedTotal')}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {calculation.visits} × {pricePerLaundry.toFixed(2)} €
+              {visits} × {pricePerLaundry.toFixed(2)} €
             </Typography>
           </Box>
           <Typography variant="h4" color="success.dark" fontWeight="bold">

@@ -134,6 +134,7 @@ const property = {
     congratulationsSale: 'Onneksi olkoon kaupasta!',
 
     // Airbnb settings
+    airbnbSettingsSection: 'Airbnb-asetukset',
     airbnbSettings: 'Airbnb-asetukset',
     isAirbnb: 'Airbnb-kohde',
     distanceFromHome: 'Etäisyys kotoa (km)',

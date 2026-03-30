@@ -6,22 +6,26 @@ import { TaxDeductionCalculation } from '../../types/entities';
 interface TravelDeductionFormProps {
   calculation: TaxDeductionCalculation;
   distanceKm: number;
+  visits: number;
   ratePerKm: number;
   onDistanceChange: (value: number) => void;
+  onVisitsChange: (value: number) => void;
   onRateChange: (value: number) => void;
 }
 
 function TravelDeductionForm({
   calculation,
   distanceKm,
+  visits,
   ratePerKm,
   onDistanceChange,
+  onVisitsChange,
   onRateChange,
 }: TravelDeductionFormProps) {
   const { t } = useTranslation('tax');
 
   const roundTrip = distanceKm * 2;
-  const totalAmount = roundTrip * calculation.visits * ratePerKm;
+  const totalAmount = roundTrip * visits * ratePerKm;
 
   return (
     <Stack spacing={2}>
@@ -41,15 +45,18 @@ function TravelDeductionForm({
       <Box>
         <Typography variant="body2" color="text.secondary" gutterBottom>
           {t('visits')}
-        </Typography>
-        <Box sx={{ p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
-          <Typography variant="h6">
-            {calculation.visits}
-            <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-              ({t('visitsFromStatistics')})
+          {calculation.visits > 0 && (
+            <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+              ({t('visitsFromStatistics')}: {calculation.visits})
             </Typography>
-          </Typography>
-        </Box>
+          )}
+        </Typography>
+        <AssetNumberField
+          label=""
+          value={visits}
+          onChange={(e) => onVisitsChange(parseInt(e.target.value) || 0)}
+          fullWidth
+        />
       </Box>
 
       <Box>
@@ -88,7 +95,7 @@ function TravelDeductionForm({
               {t('calculatedTotal')}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {roundTrip.toFixed(1)} km × {calculation.visits} × {ratePerKm.toFixed(2)} €/km
+              {roundTrip.toFixed(1)} km × {visits} × {ratePerKm.toFixed(2)} €/km
             </Typography>
           </Box>
           <Typography variant="h4" color="success.dark" fontWeight="bold">

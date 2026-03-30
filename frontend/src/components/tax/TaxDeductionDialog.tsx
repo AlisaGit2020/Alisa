@@ -37,6 +37,7 @@ function TaxDeductionDialog({
 
   // Form state
   const [distanceKm, setDistanceKm] = useState(0);
+  const [visits, setVisits] = useState(0);
   const [ratePerKm, setRatePerKm] = useState(0.30);
   const [pricePerLaundry, setPricePerLaundry] = useState(3.0);
   const [description, setDescription] = useState('');
@@ -59,6 +60,7 @@ function TaxDeductionDialog({
       );
       setCalculation(response.data);
       setDistanceKm(response.data.distanceKm ?? 0);
+      setVisits(response.data.visits);
       setRatePerKm(response.data.ratePerKm);
       setPricePerLaundry(response.data.defaultLaundryPrice);
     } catch (err) {
@@ -77,16 +79,16 @@ function TaxDeductionDialog({
 
       if (deductionType === TaxDeductionType.TRAVEL && calculation) {
         const roundTrip = distanceKm * 2;
-        inputAmount = roundTrip * calculation.visits * ratePerKm;
+        inputAmount = roundTrip * visits * ratePerKm;
         metadata = {
           distanceKm,
-          visits: calculation.visits,
+          visits,
           ratePerKm,
         };
       } else if (deductionType === TaxDeductionType.LAUNDRY && calculation) {
-        inputAmount = calculation.visits * pricePerLaundry;
+        inputAmount = visits * pricePerLaundry;
         metadata = {
-          visits: calculation.visits,
+          visits,
           pricePerLaundry,
         };
       } else {
@@ -171,8 +173,10 @@ function TaxDeductionDialog({
             <TravelDeductionForm
               calculation={calculation}
               distanceKm={distanceKm}
+              visits={visits}
               ratePerKm={ratePerKm}
               onDistanceChange={setDistanceKm}
+              onVisitsChange={setVisits}
               onRateChange={setRatePerKm}
             />
           )}
@@ -180,7 +184,9 @@ function TaxDeductionDialog({
           {deductionType === TaxDeductionType.LAUNDRY && calculation && (
             <LaundryDeductionForm
               calculation={calculation}
+              visits={visits}
               pricePerLaundry={pricePerLaundry}
+              onVisitsChange={setVisits}
               onPriceChange={setPricePerLaundry}
             />
           )}

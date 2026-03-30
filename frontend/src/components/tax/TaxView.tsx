@@ -290,6 +290,7 @@ function TaxView() {
           <TaxSummaryCards
             grossIncome={taxData.grossIncome}
             deductions={taxData.deductions}
+            taxDeductions={taxData.taxDeductions ?? 0}
             depreciation={taxData.depreciation}
             netIncome={taxData.netIncome}
           />

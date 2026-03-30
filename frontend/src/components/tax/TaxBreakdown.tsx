@@ -10,7 +10,6 @@ import {
   Box,
   Chip,
   IconButton,
-  Stack,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslation } from "react-i18next";
@@ -156,33 +155,33 @@ function TaxBreakdown({
             {taxDeductionBreakdown && taxDeductionBreakdown.map((item) => (
               <TableRow key={`tax-${item.id}`}>
                 <TableCell sx={{ pl: 4 }}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body2">
+                  <Box>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                      <Typography variant="body2" component="span">
                         {t(`deductionType.${item.typeName}`)}
                         {item.description && ` - ${item.description}`}
                       </Typography>
-                      {item.metadata && (
-                        <Typography variant="caption" color="text.secondary">
-                          {item.metadata.distanceKm && item.metadata.visits && item.metadata.ratePerKm && (
-                            <>
-                              {(item.metadata.distanceKm * 2).toFixed(1)} km × {item.metadata.visits} × {item.metadata.ratePerKm.toFixed(2)} €/km
-                            </>
-                          )}
-                          {item.metadata.pricePerLaundry && item.metadata.visits && !item.metadata.distanceKm && (
-                            <>
-                              {item.metadata.visits} × {item.metadata.pricePerLaundry.toFixed(2)} €
-                            </>
-                          )}
-                        </Typography>
+                      {onDeleteDeduction && (
+                        <IconButton size="small" onClick={() => onDeleteDeduction(item.id)} sx={{ ml: 0.5 }}>
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
                       )}
                     </Box>
-                    {onDeleteDeduction && (
-                      <IconButton size="small" onClick={() => onDeleteDeduction(item.id)}>
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                    {item.metadata && (
+                      <Typography variant="caption" color="text.secondary" component="div">
+                        {item.metadata.distanceKm && item.metadata.visits && item.metadata.ratePerKm && (
+                          <>
+                            {(item.metadata.distanceKm * 2).toFixed(1)} km × {item.metadata.visits} × {item.metadata.ratePerKm.toFixed(2)} €/km
+                          </>
+                        )}
+                        {item.metadata.pricePerLaundry && item.metadata.visits && !item.metadata.distanceKm && (
+                          <>
+                            {item.metadata.visits} × {item.metadata.pricePerLaundry.toFixed(2)} €
+                          </>
+                        )}
+                      </Typography>
                     )}
-                  </Stack>
+                  </Box>
                 </TableCell>
                 <TableCell align="right">{formatCurrency(item.amount)}</TableCell>
               </TableRow>

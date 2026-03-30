@@ -134,6 +134,7 @@ const property = {
     congratulationsSale: 'Congratulations on the sale!',
 
     // Airbnb settings
+    airbnbSettingsSection: 'Airbnb Settings',
     airbnbSettings: 'Airbnb Settings',
     isAirbnb: 'Airbnb property',
     distanceFromHome: 'Distance from home (km)',

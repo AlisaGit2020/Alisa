@@ -172,7 +172,6 @@ export class TaxService {
     const grossIncome = this.sumStatsByKey(allStats, StatisticKey.TAX_GROSS_INCOME);
     const deductions = this.sumStatsByKey(allStats, StatisticKey.TAX_DEDUCTIONS);
     const depreciation = this.sumStatsByKey(allStats, StatisticKey.TAX_DEPRECIATION);
-    const netIncome = this.sumStatsByKey(allStats, StatisticKey.TAX_NET_INCOME);
 
     // Get ownership shares for breakdown calculations
     const ownershipShares = await this.getOwnershipShares(user.id, propertyIds);
@@ -187,6 +186,9 @@ export class TaxService {
     // Get tax deduction breakdown (calculated live with ownership adjustment)
     const { total: taxDeductionTotal, breakdown: taxDeductionBreakdown } =
       await this.calculateTaxDeductions(propertyIds, year, ownershipShares);
+
+    // Recalculate netIncome to include current tax deductions
+    const netIncome = grossIncome - deductions - taxDeductionTotal - depreciation;
 
     // Get depreciation breakdown from service
     const depreciationBreakdownData =

@@ -134,6 +134,7 @@ const property = {
     congratulationsSale: 'Grattis till försäljningen!',
 
     // Airbnb settings
+    airbnbSettingsSection: 'Airbnb-inställningar',
     airbnbSettings: 'Airbnb-inställningar',
     isAirbnb: 'Airbnb-fastighet',
     distanceFromHome: 'Avstånd från hemmet (km)',
