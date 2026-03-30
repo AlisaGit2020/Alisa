@@ -9,6 +9,7 @@ import AssetMoneyField from '../asset/form/AssetMoneyField';
 import AssetSelectField from '../asset/form/AssetSelectField';
 import AssetTextField from '../asset/form/AssetTextField';
 import AssetDatePicker from '../asset/form/AssetDatePicker';
+import { AssetSwitch } from '../asset';
 import { propertyContext } from '../../lib/asset-contexts';
 import AssetFormHandler from '../asset/form/AssetFormHandler';
 import { DTO } from '../../lib/types';
@@ -309,6 +310,29 @@ function PropertyForm({ t }: WithTranslation) {
                             onChange={(value) => handleChange('monthlyRent', value)}
                         />
                     </Box>
+                </Stack>
+
+                {/* Airbnb Settings Section */}
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="subtitle2" color="text.secondary" sx={{ textTransform: 'uppercase', mb: 1 }}>
+                    {t('airbnbSettingsSection')}
+                </Typography>
+                <Stack direction="row" spacing={2} alignItems="center">
+                    <AssetSwitch
+                        label={t('isAirbnb')}
+                        value={data.isAirbnb ?? false}
+                        onChange={(_, checked) => handleChange('isAirbnb', checked)}
+                    />
+                    {data.isAirbnb && (
+                        <Box sx={{ flex: 1, maxWidth: 200 }}>
+                            <AssetNumberField
+                                label={t('distanceFromHome')}
+                                value={data.distanceFromHome ?? ''}
+                                onChange={(e) => handleChange('distanceFromHome', e.target.value ? parseFloat(e.target.value) : undefined)}
+                                adornment="km"
+                            />
+                        </Box>
+                    )}
                 </Stack>
 
                 {/* Purchase Info Section - for OWN and PROSPECT */}
