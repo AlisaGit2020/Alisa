@@ -15,6 +15,7 @@ import {
   IsInt,
   IsEnum,
   ValidateNested,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -111,6 +112,16 @@ export class PropertyInputDto {
   @IsNumber()
   @Min(0)
   waterCharge?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isAirbnb?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(9999.9)
+  distanceFromHome?: number;
 
   ownerships?: OwnershipInputDto[];
 }
