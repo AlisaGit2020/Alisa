@@ -171,4 +171,16 @@ export class Property {
     transformer: new DecimalToNumberTransformer(),
   })
   public waterCharge?: number;
+
+  @Column({ type: 'boolean', default: false })
+  public isAirbnb: boolean = false;
+
+  @Column({
+    type: 'decimal',
+    precision: 6,
+    scale: 1,
+    nullable: true,
+    transformer: new DecimalToNumberTransformer(),
+  })
+  public distanceFromHome?: number;
 }

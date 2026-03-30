@@ -1,0 +1,64 @@
+<h2>Travel Expenses Dialog</h2>
+<p class="subtitle">Modal for adding Airbnb travel deduction</p>
+
+<div class="mockup" style="max-width: 500px; margin: 0 auto;">
+  <div class="mockup-header">Add Travel Expenses - 2025</div>
+  <div class="mockup-body" style="padding: 20px;">
+    <div style="margin-bottom: 16px;">
+      <label style="display: block; font-size: 12px; color: #666; margin-bottom: 4px;">Property</label>
+      <div style="padding: 8px 12px; background: #f5f5f5; border-radius: 4px;">Airbnb Kallio</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+      <div>
+        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 4px;">Distance from home</label>
+        <div style="display: flex; align-items: center;">
+          <input class="mock-input" value="12.5" style="flex: 1; text-align: right;">
+          <span style="margin-left: 8px; color: #666;">km</span>
+        </div>
+      </div>
+      <div>
+        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 4px;">Visits in 2025</label>
+        <div style="padding: 8px 12px; background: #e3f2fd; border-radius: 4px; text-align: right; font-weight: bold;">
+          24
+          <span style="font-size: 11px; color: #666; font-weight: normal;">(from statistics)</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+      <div>
+        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 4px;">Compensation rate (2025)</label>
+        <div style="display: flex; align-items: center;">
+          <input class="mock-input" value="0.30" style="flex: 1; text-align: right;">
+          <span style="margin-left: 8px; color: #666;">€/km</span>
+        </div>
+      </div>
+      <div>
+        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 4px;">Round trip distance</label>
+        <div style="padding: 8px 12px; background: #f5f5f5; border-radius: 4px; text-align: right;">
+          25.0 km <span style="color: #666; font-size: 11px;">(12.5 × 2)</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: #e8f5e9; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 12px; color: #666;">Calculated deduction</div>
+          <div style="font-size: 11px; color: #888;">25.0 km × 24 visits × 0.30 €/km</div>
+        </div>
+        <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">180.00 €</div>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 12px;">
+      <button class="mock-button">Cancel</button>
+      <button class="mock-button" style="background: #1976d2; color: white;">Add Deduction</button>
+    </div>
+  </div>
+</div>
+
+<p style="text-align: center; margin-top: 20px; color: #666;">
+  Does this dialog layout work for travel expenses?
+</p>

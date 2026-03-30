@@ -405,6 +405,9 @@ export class PropertyService {
       property.monthlyRent = input.monthlyRent;
     if (input.waterCharge !== undefined)
       property.waterCharge = input.waterCharge;
+    if (input.isAirbnb !== undefined) property.isAirbnb = input.isAirbnb;
+    if (input.distanceFromHome !== undefined)
+      property.distanceFromHome = input.distanceFromHome;
     if (input.ownerships !== undefined)
       property.ownerships = input.ownerships as unknown as Ownership[];
   }

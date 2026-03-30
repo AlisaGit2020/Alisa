@@ -9,7 +9,9 @@ import {
   Divider,
   Box,
   Chip,
+  IconButton,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslation } from "react-i18next";
 import InfoTooltip from "../asset/InfoTooltip";
 
@@ -34,6 +36,20 @@ interface DepreciationAssetBreakdown {
   isFullyDepreciated: boolean;
 }
 
+interface TaxDeductionBreakdown {
+  id: number;
+  type: number;
+  typeName: string;
+  description: string | null;
+  amount: number;
+  metadata?: {
+    distanceKm?: number;
+    visits?: number;
+    ratePerKm?: number;
+    pricePerLaundry?: number;
+  };
+}
+
 interface TaxBreakdownProps {
   grossIncome: number;
   deductions: number;
@@ -41,6 +57,9 @@ interface TaxBreakdownProps {
   netIncome: number;
   breakdown: BreakdownItem[];
   depreciationBreakdown?: DepreciationAssetBreakdown[];
+  taxDeductions?: number;
+  taxDeductionBreakdown?: TaxDeductionBreakdown[];
+  onDeleteDeduction?: (id: number) => void;
 }
 
 function TaxBreakdown({
@@ -50,6 +69,9 @@ function TaxBreakdown({
   netIncome,
   breakdown,
   depreciationBreakdown,
+  taxDeductions = 0,
+  taxDeductionBreakdown,
+  onDeleteDeduction,
 }: TaxBreakdownProps) {
   const { t } = useTranslation("tax");
   const { t: tExpenseType } = useTranslation("expense-type");
@@ -129,13 +151,49 @@ function TaxBreakdown({
               </TableRow>
             ))}
 
-            {/* Deductions Total */}
+            {/* Tax Deduction Items - shown inline with other deductions */}
+            {taxDeductionBreakdown && taxDeductionBreakdown.map((item) => (
+              <TableRow key={`tax-${item.id}`}>
+                <TableCell sx={{ pl: 4 }}>
+                  <Box>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                      <Typography variant="body2" component="span">
+                        {t(`deductionType.${item.typeName}`)}
+                        {item.description && ` - ${item.description}`}
+                      </Typography>
+                      {onDeleteDeduction && (
+                        <IconButton size="small" onClick={() => onDeleteDeduction(item.id)} sx={{ ml: 0.5 }}>
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </Box>
+                    {item.metadata && (
+                      <Typography variant="caption" color="text.secondary" component="div">
+                        {item.metadata.distanceKm && item.metadata.visits && item.metadata.ratePerKm && (
+                          <>
+                            {(item.metadata.distanceKm * 2).toFixed(1)} km × {item.metadata.visits} × {item.metadata.ratePerKm.toFixed(2)} €/km
+                          </>
+                        )}
+                        {item.metadata.pricePerLaundry && item.metadata.visits && !item.metadata.distanceKm && (
+                          <>
+                            {item.metadata.visits} × {item.metadata.pricePerLaundry.toFixed(2)} €
+                          </>
+                        )}
+                      </Typography>
+                    )}
+                  </Box>
+                </TableCell>
+                <TableCell align="right">{formatCurrency(item.amount)}</TableCell>
+              </TableRow>
+            ))}
+
+            {/* Deductions Total (includes tax deductions) */}
             <TableRow>
               <TableCell sx={{ fontWeight: "bold" }}>
                 {t("deductionsTotal")}
               </TableCell>
               <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                {formatCurrency(deductions)}
+                {formatCurrency(deductions + taxDeductions)}
               </TableCell>
             </TableRow>
 

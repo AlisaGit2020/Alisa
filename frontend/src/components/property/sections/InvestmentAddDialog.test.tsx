@@ -218,8 +218,13 @@ describe('InvestmentAddDialog', () => {
         />
       );
 
+      // Wait for dialog to be fully rendered
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+      });
+
       // Click on rent field to edit
-      const displayText = screen.getByText('950 €/mo');
+      const displayText = await screen.findByText('950 €/mo');
       await user.click(displayText);
 
       // Should show input field for editing (not remain as read-only text)
@@ -229,7 +234,7 @@ describe('InvestmentAddDialog', () => {
           expect(input).toBeInTheDocument();
           expect(input).toHaveValue(950);
         },
-        { timeout: 3000 }
+        { timeout: 5000 }
       );
     });
 

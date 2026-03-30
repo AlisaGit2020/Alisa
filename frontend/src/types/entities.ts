@@ -5,6 +5,7 @@ import {
   PropertyExternalSource,
   PropertyStatus,
   PropertyType,
+  TaxDeductionType,
   TransactionStatus,
   TransactionType,
 } from './common';
@@ -81,6 +82,8 @@ export interface Property {
   financialCharge?: number;
   monthlyRent?: number;
   waterCharge?: number;
+  isAirbnb?: boolean;
+  distanceFromHome?: number;
 }
 
 // PropertyStatistics
@@ -160,4 +163,37 @@ export interface Transaction {
   propertyId: number;
   expenses?: Expense[];
   incomes?: Income[];
+}
+
+// TaxDeduction metadata
+export interface TaxDeductionMetadata {
+  distanceKm?: number;
+  visits?: number;
+  ratePerKm?: number;
+  pricePerLaundry?: number;
+}
+
+// TaxDeduction
+export interface TaxDeduction {
+  id: number;
+  propertyId: number;
+  year: number;
+  deductionType: TaxDeductionType;
+  typeName: string;
+  description: string | null;
+  amount: number;
+  metadata: TaxDeductionMetadata | null;
+}
+
+// TaxDeduction calculation result
+export interface TaxDeductionCalculation {
+  propertyId: number;
+  propertyName: string;
+  year: number;
+  visits: number;
+  distanceKm: number | null;
+  ratePerKm: number;
+  defaultLaundryPrice: number;
+  travelAmount: number;
+  laundryAmount: number;
 }

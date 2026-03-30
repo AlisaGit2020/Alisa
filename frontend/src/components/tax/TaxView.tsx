@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, MouseEvent } from "react";
 import {
   Box,
   Paper,
@@ -11,10 +11,12 @@ import {
   CircularProgress,
   SelectChangeEvent,
   Stack,
+  Menu,
 } from "@mui/material";
 import CalculateIcon from "@mui/icons-material/Calculate";
+import AddIcon from "@mui/icons-material/Add";
 import { useTranslation } from "react-i18next";
-import { AssetButton } from "../asset";
+import { AssetButton, AssetConfirmDialog } from "../asset";
 import axios from "axios";
 import ApiClient from "@asset-lib/api-client";
 import { VITE_API_URL } from "../../constants";
@@ -23,6 +25,9 @@ import TaxBreakdown from "./TaxBreakdown";
 import { ListPageTemplate } from "../templates";
 import { getTransactionPropertyId } from "@asset-lib/initial-data";
 import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "../transaction/TransactionLeftMenuItems";
+import { TaxDeductionType } from "../../types/common";
+import TaxDeductionDialog from "./TaxDeductionDialog";
+import type { Property } from "../../types/entities";
 
 interface BreakdownItem {
   category: string;
@@ -45,15 +50,31 @@ interface DepreciationAssetBreakdown {
   isFullyDepreciated: boolean;
 }
 
+interface TaxDeductionBreakdown {
+  id: number;
+  type: number;
+  typeName: string;
+  description: string | null;
+  amount: number;
+  metadata?: {
+    distanceKm?: number;
+    visits?: number;
+    ratePerKm?: number;
+    pricePerLaundry?: number;
+  };
+}
+
 interface TaxData {
   year: number;
   propertyId?: number;
   ownershipShare?: number;
   grossIncome: number;
   deductions: number;
+  taxDeductions?: number;
   depreciation: number;
   netIncome: number;
   breakdown: BreakdownItem[];
+  taxDeductionBreakdown?: TaxDeductionBreakdown[];
   depreciationBreakdown?: DepreciationAssetBreakdown[];
   calculatedAt?: string;
 }
@@ -72,6 +93,10 @@ function TaxView() {
   const [loading, setLoading] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const [dialogType, setDialogType] = useState<TaxDeductionType | null>(null);
+  const [isAirbnbProperty, setIsAirbnbProperty] = useState(false);
+  const [deleteDeductionId, setDeleteDeductionId] = useState<number | null>(null);
 
   const yearOptions = Array.from({ length: 10 }, (_, i) => currentYear - 1 - i);
 
@@ -120,6 +145,20 @@ function TaxView() {
     }
   }, [selectedYear, propertyId]);
 
+  const fetchPropertyData = useCallback(async () => {
+    if (propertyId > 0) {
+      try {
+        const property = await ApiClient.get<Property>('real-estate/property', propertyId);
+        setIsAirbnbProperty(property.isAirbnb || false);
+      } catch (err) {
+        console.error("Error fetching property data:", err);
+        setIsAirbnbProperty(false);
+      }
+    } else {
+      setIsAirbnbProperty(false);
+    }
+  }, [propertyId]);
+
   const calculateTaxData = async () => {
     setCalculating(true);
     setError(null);
@@ -142,9 +181,50 @@ function TaxView() {
     }
   };
 
+  const handleMenuOpen = (event: MouseEvent<HTMLElement>) => {
+    setMenuAnchor(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+  };
+
+  const handleDeductionSelect = (type: TaxDeductionType) => {
+    setDialogType(type);
+    handleMenuClose();
+  };
+
+  const handleDialogClose = () => {
+    setDialogType(null);
+  };
+
+  const handleDeductionSaved = () => {
+    fetchTaxData();
+  };
+
+  const handleDeleteDeduction = (id: number) => {
+    setDeleteDeductionId(id);
+  };
+
+  const confirmDeleteDeduction = async () => {
+    if (deleteDeductionId === null) return;
+    try {
+      await axios.delete(
+        `${VITE_API_URL}/real-estate/property/tax/deductions/${deleteDeductionId}`,
+        await ApiClient.getOptions()
+      );
+      fetchTaxData();
+    } catch (err) {
+      console.error("Error deleting deduction:", err);
+    } finally {
+      setDeleteDeductionId(null);
+    }
+  };
+
   useEffect(() => {
     fetchTaxData();
-  }, [fetchTaxData]);
+    fetchPropertyData();
+  }, [fetchTaxData, fetchPropertyData]);
 
   const handleYearChange = (event: SelectChangeEvent<number>) => {
     setSelectedYear(event.target.value as number);
@@ -210,6 +290,7 @@ function TaxView() {
           <TaxSummaryCards
             grossIncome={taxData.grossIncome}
             deductions={taxData.deductions}
+            taxDeductions={taxData.taxDeductions ?? 0}
             depreciation={taxData.depreciation}
             netIncome={taxData.netIncome}
           />
@@ -218,7 +299,7 @@ function TaxView() {
               {t("ownershipShare")}: {taxData.ownershipShare}%
             </Alert>
           )}
-          <Box sx={{ mt: 3, mb: 2 }}>
+          <Stack direction="row" spacing={2} sx={{ mt: 3, mb: 2 }}>
             <AssetButton
               label={calculating ? t("calculating") : t("calculate")}
               variant="outlined"
@@ -226,17 +307,70 @@ function TaxView() {
               onClick={calculateTaxData}
               loading={calculating}
             />
-          </Box>
+            {propertyId > 0 && (
+              <>
+                <AssetButton
+                  label={t("addTaxDeduction")}
+                  startIcon={<AddIcon />}
+                  onClick={handleMenuOpen}
+                  variant="contained"
+                />
+                <Menu
+                  anchorEl={menuAnchor}
+                  open={Boolean(menuAnchor)}
+                  onClose={handleMenuClose}
+                >
+                  {isAirbnbProperty && (
+                    <>
+                      <MenuItem onClick={() => handleDeductionSelect(TaxDeductionType.TRAVEL)}>
+                        {t("travelExpenses")}
+                      </MenuItem>
+                      <MenuItem onClick={() => handleDeductionSelect(TaxDeductionType.LAUNDRY)}>
+                        {t("laundryExpenses")}
+                      </MenuItem>
+                    </>
+                  )}
+                  <MenuItem onClick={() => handleDeductionSelect(TaxDeductionType.CUSTOM)}>
+                    {t("customDeduction")}
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
+          </Stack>
           <TaxBreakdown
             grossIncome={taxData.grossIncome}
             deductions={taxData.deductions}
+            taxDeductions={taxData.taxDeductions}
             depreciation={taxData.depreciation}
             netIncome={taxData.netIncome}
             breakdown={taxData.breakdown}
+            taxDeductionBreakdown={taxData.taxDeductionBreakdown}
             depreciationBreakdown={taxData.depreciationBreakdown}
+            onDeleteDeduction={handleDeleteDeduction}
           />
         </>
       )}
+
+      {dialogType !== null && propertyId > 0 && (
+        <TaxDeductionDialog
+          open={dialogType !== null}
+          onClose={handleDialogClose}
+          onSaved={handleDeductionSaved}
+          propertyId={propertyId}
+          year={selectedYear}
+          deductionType={dialogType}
+        />
+      )}
+
+      <AssetConfirmDialog
+        open={deleteDeductionId !== null}
+        title={t("deleteDeduction")}
+        contentText={t("deleteDeductionConfirm")}
+        buttonTextCancel={t("common:cancel")}
+        buttonTextConfirm={t("common:delete")}
+        onConfirm={confirmDeleteDeduction}
+        onClose={() => setDeleteDeductionId(null)}
+      />
     </ListPageTemplate>
   );
 }

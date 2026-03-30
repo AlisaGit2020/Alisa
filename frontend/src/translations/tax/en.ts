@@ -33,6 +33,33 @@ const tax = {
   depreciationInfoText2: 'Depreciation is calculated at 10% per year of the original purchase price. Depreciation is applied for a maximum of 10 years until the entire amount has been deducted.',
   depreciationInfoText3: 'Annual repairs (e.g., faucet replacement, painting) are deducted in full in the same year as an expense, not as depreciation.',
   ownershipShare: 'Your ownership share',
+
+  // Tax deductions
+  taxDeductionsSection: 'Tax Deductions',
+  taxDeductionsTotal: 'Total Tax Deductions',
+  addTaxDeduction: 'Add Tax Deduction',
+  travelExpenses: 'Travel Expenses',
+  laundryExpenses: 'Laundry Expenses',
+  customDeduction: 'Custom Deduction',
+  travelDeductionTitle: 'Add Travel Expenses',
+  laundryDeductionTitle: 'Add Laundry Expenses',
+  customDeductionTitle: 'Add Custom Tax Deduction',
+  distanceFromHome: 'Distance from home',
+  visits: 'Visits',
+  visitsFromStatistics: 'from statistics',
+  ratePerKm: 'Compensation rate',
+  roundTripDistance: 'Round trip distance',
+  pricePerLaundry: 'Price per laundry',
+  calculatedTotal: 'Calculated deduction',
+  addDeduction: 'Add Deduction',
+  editDeduction: 'Edit Deduction',
+  deleteDeduction: 'Delete Deduction',
+  deleteDeductionConfirm: 'Are you sure you want to delete this tax deduction?',
+  deductionType: {
+    travel: 'Travel',
+    laundry: 'Laundry',
+    custom: 'Custom',
+  },
 }
 
 export default tax

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 interface TaxSummaryCardsProps {
   grossIncome: number;
   deductions: number;
+  taxDeductions: number;
   depreciation: number;
   netIncome: number;
 }
@@ -11,6 +12,7 @@ interface TaxSummaryCardsProps {
 function TaxSummaryCards({
   grossIncome,
   deductions,
+  taxDeductions,
   depreciation,
   netIncome,
 }: TaxSummaryCardsProps) {
@@ -31,7 +33,7 @@ function TaxSummaryCards({
     },
     {
       label: t("deductions"),
-      value: deductions + depreciation,
+      value: deductions + taxDeductions + depreciation,
       color: "error.main",
     },
     {

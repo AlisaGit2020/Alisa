@@ -9,8 +9,10 @@ import {
   TaxResponseDto,
   TaxBreakdownItemDto,
   DepreciationAssetBreakdownDto,
+  TaxDeductionBreakdownDto,
 } from './dtos/tax-response.dto';
-import { StatisticKey, TransactionStatus } from '@asset-backend/common/types';
+import { StatisticKey, TransactionStatus, taxDeductionTypeNames } from '@asset-backend/common/types';
+import { TaxDeduction } from './entities/tax-deduction.entity';
 import { DepreciationService } from '@asset-backend/accounting/depreciation/depreciation.service';
 import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
 
@@ -21,6 +23,8 @@ export class TaxService {
     private statisticsRepository: Repository<PropertyStatistics>,
     @InjectRepository(Ownership)
     private ownershipRepository: Repository<Ownership>,
+    @InjectRepository(TaxDeduction)
+    private taxDeductionRepository: Repository<TaxDeduction>,
     @Inject(forwardRef(() => PropertyService))
     private propertyService: PropertyService,
     private dataSource: DataSource,
@@ -50,6 +54,10 @@ export class TaxService {
     // Calculate deductions (adjusted by ownership)
     const { total: deductions, breakdown: deductionBreakdown } =
       await this.calculateDeductions(propertyIds, input.year, ownershipShares);
+
+    // Calculate tax deductions (adjusted by ownership)
+    const { total: taxDeductionTotal, breakdown: taxDeductionBreakdown } =
+      await this.calculateTaxDeductions(propertyIds, input.year, ownershipShares);
 
     // Calculate depreciation using DepreciationService
     const depreciationBreakdownData =
@@ -95,7 +103,7 @@ export class TaxService {
     }));
 
     // Calculate net income
-    const netIncome = grossIncome - deductions - depreciation;
+    const netIncome = grossIncome - deductions - taxDeductionTotal - depreciation;
 
     // Get average ownership share for display
     const ownershipShare = await this.getAverageOwnershipShare(
@@ -117,9 +125,11 @@ export class TaxService {
       ownershipShare,
       grossIncome,
       deductions,
+      taxDeductions: taxDeductionTotal,
       depreciation,
       netIncome,
       breakdown: [...deductionBreakdown, ...legacyDepreciationBreakdown],
+      taxDeductionBreakdown,
       depreciationBreakdown,
       calculatedAt: new Date(),
     };
@@ -162,7 +172,6 @@ export class TaxService {
     const grossIncome = this.sumStatsByKey(allStats, StatisticKey.TAX_GROSS_INCOME);
     const deductions = this.sumStatsByKey(allStats, StatisticKey.TAX_DEDUCTIONS);
     const depreciation = this.sumStatsByKey(allStats, StatisticKey.TAX_DEPRECIATION);
-    const netIncome = this.sumStatsByKey(allStats, StatisticKey.TAX_NET_INCOME);
 
     // Get ownership shares for breakdown calculations
     const ownershipShares = await this.getOwnershipShares(user.id, propertyIds);
@@ -173,6 +182,13 @@ export class TaxService {
       year,
       ownershipShares,
     );
+
+    // Get tax deduction breakdown (calculated live with ownership adjustment)
+    const { total: taxDeductionTotal, breakdown: taxDeductionBreakdown } =
+      await this.calculateTaxDeductions(propertyIds, year, ownershipShares);
+
+    // Recalculate netIncome to include current tax deductions
+    const netIncome = grossIncome - deductions - taxDeductionTotal - depreciation;
 
     // Get depreciation breakdown from service
     const depreciationBreakdownData =
@@ -218,9 +234,11 @@ export class TaxService {
       ownershipShare,
       grossIncome,
       deductions,
+      taxDeductions: taxDeductionTotal,
       depreciation,
       netIncome,
       breakdown: [...deductionBreakdown, ...legacyDepreciationBreakdown],
+      taxDeductionBreakdown,
       depreciationBreakdown,
     };
   }
@@ -330,6 +348,39 @@ export class TaxService {
     return { total, breakdown };
   }
 
+  private async calculateTaxDeductions(
+    propertyIds: number[],
+    year: number,
+    ownershipShares: Map<number, number>,
+  ): Promise<{ total: number; breakdown: TaxDeductionBreakdownDto[] }> {
+    const deductions = await this.taxDeductionRepository.find({
+      where: {
+        propertyId: In(propertyIds),
+        year,
+      },
+    });
+
+    let total = 0;
+    const breakdown: TaxDeductionBreakdownDto[] = [];
+
+    for (const d of deductions) {
+      const share = ownershipShares.get(d.propertyId) ?? 100;
+      const adjustedAmount = d.amount * (share / 100);
+      total += adjustedAmount;
+
+      breakdown.push({
+        id: d.id,
+        type: d.deductionType,
+        typeName: taxDeductionTypeNames.get(d.deductionType) ?? 'custom',
+        description: d.description,
+        amount: adjustedAmount,
+        metadata: d.metadata ?? undefined,
+      });
+    }
+
+    return { total, breakdown };
+  }
+
   private async saveStatistics(
     propertyIds: number[],
     year: number,
@@ -374,9 +425,11 @@ export class TaxService {
       propertyId,
       grossIncome: 0,
       deductions: 0,
+      taxDeductions: 0,
       depreciation: 0,
       netIncome: 0,
       breakdown: [],
+      taxDeductionBreakdown: [],
       depreciationBreakdown: [],
     };
   }

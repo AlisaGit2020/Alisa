@@ -183,3 +183,23 @@ export interface AllocationCondition {
   operator: AllocationConditionOperator;
   value: string;
 }
+
+// Tax deduction types (tax-only, no accounting impact)
+export enum TaxDeductionType {
+  TRAVEL = 1,
+  LAUNDRY = 2,
+  CUSTOM = 3,
+}
+
+export const taxDeductionTypeNames = new Map<TaxDeductionType, string>([
+  [TaxDeductionType.TRAVEL, 'travel'],
+  [TaxDeductionType.LAUNDRY, 'laundry'],
+  [TaxDeductionType.CUSTOM, 'custom'],
+]);
+
+export interface TaxDeductionMetadata {
+  distanceKm?: number;
+  visits?: number;
+  ratePerKm?: number;
+  pricePerLaundry?: number;
+}
