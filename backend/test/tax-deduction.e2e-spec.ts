@@ -47,7 +47,7 @@ describe('TaxDeductionController (e2e)', () => {
       ...mainUser.properties[0],
       isAirbnb: true,
       distanceFromHome: 25,
-      ownerships: [{ share: 100 }],
+      ownerships: [{ userId: mainUser.jwtUser.id, share: 100 }],
     });
   });
 
