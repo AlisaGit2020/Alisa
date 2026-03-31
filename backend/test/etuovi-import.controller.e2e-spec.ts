@@ -397,9 +397,7 @@ describe('EtuoviImportController (e2e)', () => {
       // From mock HTML: deptFreePrice 125000, debtShareAmount 25000, maintenanceFee 180, financialCharge 75, waterCharge 25
       expect(response.body.purchasePrice).toBe(125000);
       expect(response.body.debtShare).toBe(25000);
-      expect(response.body.maintenanceFee).toBe(180);
-      expect(response.body.financialCharge).toBe(75);
-      expect(response.body.waterCharge).toBe(25);
+      // Note: charges (maintenanceFee, financialCharge, waterCharge) are now stored in PropertyCharge table
     });
 
     it('updates existing property when user already has property with same etuovi id', async () => {

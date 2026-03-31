@@ -177,10 +177,7 @@ describe('PropertyService', () => {
         id: 1,
         name: 'Investment Property',
         debtShare: 50000,
-        maintenanceFee: 250,
-        financialCharge: 150,
         monthlyRent: 1200,
-        waterCharge: 25,
       });
       mockRepository.findOneBy.mockResolvedValue(property);
       mockAuthService.hasOwnership.mockResolvedValue(true);
@@ -188,10 +185,7 @@ describe('PropertyService', () => {
       const result = await service.findOne(testUser, 1);
 
       expect(result.debtShare).toBe(50000);
-      expect(result.maintenanceFee).toBe(250);
-      expect(result.financialCharge).toBe(150);
       expect(result.monthlyRent).toBe(1200);
-      expect(result.waterCharge).toBe(25);
     });
 
     it('returns null when property does not exist', async () => {
@@ -497,10 +491,7 @@ describe('PropertyService', () => {
         name: 'Investment Property',
         size: 55,
         debtShare: 45000,
-        maintenanceFee: 200,
-        financialCharge: 120,
         monthlyRent: 950,
-        waterCharge: 20,
         ownerships: [{ share: 100, userId: testUser.id }],
       };
       const savedProperty = createProperty({
@@ -508,20 +499,14 @@ describe('PropertyService', () => {
         name: input.name,
         size: input.size,
         debtShare: 45000,
-        maintenanceFee: 200,
-        financialCharge: 120,
         monthlyRent: 950,
-        waterCharge: 20,
       });
       mockRepository.save.mockResolvedValue(savedProperty);
 
       const result = await service.add(testUser, input);
 
       expect(result.debtShare).toBe(45000);
-      expect(result.maintenanceFee).toBe(200);
-      expect(result.financialCharge).toBe(120);
       expect(result.monthlyRent).toBe(950);
-      expect(result.waterCharge).toBe(20);
       expect(mockRepository.save).toHaveBeenCalled();
     });
 
@@ -965,10 +950,7 @@ describe('PropertyService', () => {
         name: 'Test Property',
         size: 50,
         debtShare: 35000,
-        maintenanceFee: 180,
-        financialCharge: 100,
         monthlyRent: 850,
-        waterCharge: 18,
       };
 
       mockRepository.findOneBy.mockResolvedValue(existingProperty);
@@ -978,10 +960,7 @@ describe('PropertyService', () => {
       const result = await service.update(testUser, 1, input);
 
       expect(result.debtShare).toBe(35000);
-      expect(result.maintenanceFee).toBe(180);
-      expect(result.financialCharge).toBe(100);
       expect(result.monthlyRent).toBe(850);
-      expect(result.waterCharge).toBe(18);
     });
 
     it('updates external source fields', async () => {
