@@ -117,6 +117,7 @@ const property = {
     noCharges: 'Inga avgifter',
     actions: 'Åtgärder',
     cancel: 'Avbryt',
+    delete: 'Ta bort',
     save: 'Spara',
     close: 'Stäng',
     debtShare: 'Skulddel',

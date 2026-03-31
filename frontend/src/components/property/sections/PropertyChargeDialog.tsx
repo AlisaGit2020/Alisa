@@ -268,9 +268,11 @@ function PropertyChargeDialog({
       <AssetConfirmDialog
         open={deleteConfirmOpen}
         title={t('deleteCharge')}
-        message={t('confirmDeleteCharge')}
+        contentText={t('confirmDeleteCharge')}
+        buttonTextCancel={t('cancel')}
+        buttonTextConfirm={t('delete')}
         onConfirm={handleConfirmDelete}
-        onCancel={() => {
+        onClose={() => {
           setDeleteConfirmOpen(false);
           setChargeToDelete(null);
         }}

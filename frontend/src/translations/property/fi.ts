@@ -117,6 +117,7 @@ const property = {
     noCharges: 'Ei vastikkeita',
     actions: 'Toiminnot',
     cancel: 'Peruuta',
+    delete: 'Poista',
     save: 'Tallenna',
     close: 'Sulje',
     debtShare: 'Yhtiölainaosuus',

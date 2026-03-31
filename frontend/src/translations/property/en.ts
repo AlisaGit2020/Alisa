@@ -117,6 +117,7 @@ const property = {
     noCharges: 'No charges',
     actions: 'Actions',
     cancel: 'Cancel',
+    delete: 'Delete',
     save: 'Save',
     close: 'Close',
     debtShare: 'Debt Share',
