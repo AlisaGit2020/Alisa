@@ -10,7 +10,7 @@ import MapIcon from '@mui/icons-material/Map';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import HistoryIcon from '@mui/icons-material/History';
+import EditIcon from '@mui/icons-material/Edit';
 import { Property, PropertyStatus, CurrentCharges } from '@asset-types';
 import { formatCurrency, formatDate } from '@asset-lib/format-utils';
 import ApiClient from '@asset-lib/api-client';
@@ -141,7 +141,7 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
                 onClick={() => setChargeDialogOpen(true)}
                 aria-label={t('manageCharges')}
               >
-                <HistoryIcon fontSize="small" />
+                <EditIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           }
