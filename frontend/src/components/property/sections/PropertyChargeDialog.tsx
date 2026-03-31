@@ -79,7 +79,7 @@ function PropertyChargeDialog({
   const totalMismatch = useMemo(() => {
     const getActiveAmount = (typeName: string): number => {
       const typeCharges = chargesByType.get(typeName) || [];
-      const activeCharge = typeCharges.find(c => c.endDate === null);
+      const activeCharge = typeCharges.find(c => !c.endDate);
       return activeCharge?.amount ?? 0;
     };
 
