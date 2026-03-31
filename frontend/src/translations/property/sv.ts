@@ -108,6 +108,7 @@ const property = {
     validUntilFurtherNotice: 'Gäller tills vidare',
     currentCharges: 'Aktuella avgifter',
     startDateRequired: 'Startdatum krävs',
+    endDateMustBeAfterStartDate: 'Slutdatum måste vara efter startdatum',
     amountMustBePositive: 'Beloppet måste vara 0 eller större',
     leaveEmptyForValidUntilFurtherNotice: 'Lämna tomt för "gäller tills vidare"',
     chargeAmount: 'Belopp',

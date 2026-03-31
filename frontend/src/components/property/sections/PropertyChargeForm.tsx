@@ -40,6 +40,7 @@ function PropertyChargeForm({ propertyId, charge, defaultChargeType, onSubmit, o
   );
   const [errors, setErrors] = useState<{
     startDate?: string;
+    endDate?: string;
     amount?: string;
   }>({});
 
@@ -48,6 +49,10 @@ function PropertyChargeForm({ propertyId, charge, defaultChargeType, onSubmit, o
 
     if (!startDate) {
       newErrors.startDate = t('startDateRequired');
+    }
+
+    if (endDate && startDate && endDate.isBefore(startDate)) {
+      newErrors.endDate = t('endDateMustBeAfterStartDate');
     }
 
     if (amount < 0) {
@@ -121,7 +126,8 @@ function PropertyChargeForm({ propertyId, charge, defaultChargeType, onSubmit, o
           onChange={(date) => setEndDate(date)}
           slotProps={{
             textField: {
-              helperText: t('leaveEmptyForValidUntilFurtherNotice'),
+              error: !!errors.endDate,
+              helperText: errors.endDate || t('leaveEmptyForValidUntilFurtherNotice'),
               inputProps: { 'aria-label': t('endDate') },
             },
           }}

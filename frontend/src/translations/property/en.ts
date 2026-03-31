@@ -108,6 +108,7 @@ const property = {
     validUntilFurtherNotice: 'Valid until further notice',
     currentCharges: 'Current Charges',
     startDateRequired: 'Start date is required',
+    endDateMustBeAfterStartDate: 'End date must be after start date',
     amountMustBePositive: 'Amount must be 0 or greater',
     leaveEmptyForValidUntilFurtherNotice: 'Leave empty for "valid until further notice"',
     chargeAmount: 'Amount',

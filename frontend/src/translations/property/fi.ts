@@ -108,6 +108,7 @@ const property = {
     validUntilFurtherNotice: 'Voimassa toistaiseksi',
     currentCharges: 'Nykyiset vastikkeet',
     startDateRequired: 'Alkupäivä on pakollinen',
+    endDateMustBeAfterStartDate: 'Loppupäivän on oltava alkupäivän jälkeen',
     amountMustBePositive: 'Summan on oltava vähintään 0',
     leaveEmptyForValidUntilFurtherNotice: 'Jätä tyhjäksi jos voimassa toistaiseksi',
     chargeAmount: 'Summa',
