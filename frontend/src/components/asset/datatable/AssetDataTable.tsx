@@ -48,6 +48,7 @@ export interface AssetDataTableField<T> {
   sum?: boolean;
   render?: (item: T, t: TFunction) => React.ReactNode;
   hideOnMobile?: boolean;
+  width?: number | string;
 }
 
 type SortDirection = "asc" | "desc";
@@ -67,6 +68,7 @@ function AssetDataTable<T extends { id: number }>(props: {
   onDeleteRequest?: (id: number) => void;
   refreshTrigger?: number;
   sortable?: boolean;
+  fixedLayout?: boolean;
 }) {
   const [fetchedData, setFetchedData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -308,7 +310,7 @@ function AssetDataTable<T extends { id: number }>(props: {
         </Box>
       )}
       <TableContainer sx={{ maxHeight: 960, overflowX: isMobile ? "hidden" : "auto", width: "100%" }}>
-        <Table stickyHeader size="small" aria-label="simple table" sx={{ tableLayout: isMobile ? "fixed" : "auto", width: "100%" }}>
+        <Table stickyHeader size="small" aria-label="simple table" sx={{ tableLayout: isMobile || props.fixedLayout ? "fixed" : "auto", width: "100%" }}>
           <TableHead>
             <TableRow>
               {props.onSelectChange && (
@@ -325,7 +327,7 @@ function AssetDataTable<T extends { id: number }>(props: {
                 <TableCell
                   key={field.name as string}
                   align={field.format === "currency" ? "right" : "left"}
-                  sx={{ whiteSpace: isMobile ? "normal" : "nowrap" }}
+                  sx={{ whiteSpace: isMobile ? "normal" : "nowrap", width: field.width }}
                   sortDirection={sortColumn === field.name ? sortDirection : false}
                 >
                   {props.sortable ? (
@@ -398,6 +400,7 @@ function AssetDataTable<T extends { id: number }>(props: {
                         whiteSpace: isMobile ? "normal" : "nowrap",
                         cursor: props.onOpen ? "pointer" : "default",
                         wordBreak: isMobile ? "break-word" : "normal",
+                        width: field.width,
                       }}
                       onClick={() => props.onOpen?.(item.id)}
                     >

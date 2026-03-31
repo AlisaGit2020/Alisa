@@ -143,24 +143,27 @@ function PropertyChargeDialog({
 
   const fields: AssetDataTableField<PropertyCharge>[] = [
     {
-      name: 'amount',
-      label: t('chargeAmount'),
-      format: 'currency',
-    },
-    {
       name: 'startDate',
       label: t('startDate'),
       format: 'date',
+      width: '25%',
     },
     {
       name: 'endDate',
       label: t('endDate'),
+      width: '35%',
       render: (charge) => charge.endDate
         ? t('format.date', {
             val: new Date(charge.endDate),
             formatParams: { val: { year: 'numeric', month: 'numeric', day: 'numeric' } },
           })
         : t('validUntilFurtherNotice'),
+    },
+    {
+      name: 'amount',
+      label: t('chargeAmount'),
+      format: 'currency',
+      width: '25%',
     },
   ];
 
@@ -215,6 +218,7 @@ function PropertyChargeDialog({
                     fields={fields}
                     onEdit={handleEdit}
                     onDeleteRequest={handleDeleteRequest}
+                    fixedLayout
                   />
                 </Box>
               );
