@@ -130,54 +130,62 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
         </Grid>
       )}
 
-      {/* Monthly Costs Card */}
-      {hasCosts && (
-        <Grid size={{ xs: 12, md: 6 }}>
-          <PropertyInfoCard
-            title={t('monthlyCostsSection')}
-            action={
-              <Tooltip title={t('chargeHistory')}>
-                <IconButton
-                  size="small"
-                  onClick={() => setChargeDialogOpen(true)}
-                  aria-label={t('chargeHistory')}
-                >
-                  <HistoryIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            }
-          >
-            {currentCharges?.maintenanceFee !== null && currentCharges?.maintenanceFee !== undefined && (
-              <DetailRow
-                icon={<HomeWorkIcon fontSize="small" />}
-                label={t('maintenanceFee')}
-                value={`${formatCurrency(currentCharges.maintenanceFee, 2)}${t('perMonth')}`}
-              />
-            )}
-            {currentCharges?.waterPrepayment !== null && currentCharges?.waterPrepayment !== undefined && (
-              <DetailRow
-                icon={<WaterDropIcon fontSize="small" />}
-                label={t('waterPrepayment')}
-                value={`${formatCurrency(currentCharges.waterPrepayment, 2)}${t('perMonth')}`}
-              />
-            )}
-            {currentCharges?.financialCharge !== null && currentCharges?.financialCharge !== undefined && (
-              <DetailRow
-                icon={<AccountBalanceIcon fontSize="small" />}
-                label={t('financialCharge')}
-                value={`${formatCurrency(currentCharges.financialCharge, 2)}${t('perMonth')}`}
-              />
-            )}
-            {totalMonthlyCosts > 0 && (
-              <DetailRow
-                icon={<CalculateIcon fontSize="small" />}
-                label={t('totalMonthlyCosts')}
-                value={`${formatCurrency(totalMonthlyCosts, 2)}${t('perMonth')}`}
-              />
-            )}
-          </PropertyInfoCard>
-        </Grid>
-      )}
+      {/* Monthly Costs Card - always show so users can add charges */}
+      <Grid size={{ xs: 12, md: 6 }}>
+        <PropertyInfoCard
+          title={t('monthlyCostsSection')}
+          action={
+            <Tooltip title={t('manageCharges')}>
+              <IconButton
+                size="small"
+                onClick={() => setChargeDialogOpen(true)}
+                aria-label={t('manageCharges')}
+              >
+                <HistoryIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          }
+        >
+          {hasCosts ? (
+            <>
+              {currentCharges?.maintenanceFee !== null && currentCharges?.maintenanceFee !== undefined && (
+                <DetailRow
+                  icon={<HomeWorkIcon fontSize="small" />}
+                  label={t('maintenanceFee')}
+                  value={`${formatCurrency(currentCharges.maintenanceFee, 2)}${t('perMonth')}`}
+                />
+              )}
+              {currentCharges?.waterPrepayment !== null && currentCharges?.waterPrepayment !== undefined && (
+                <DetailRow
+                  icon={<WaterDropIcon fontSize="small" />}
+                  label={t('waterPrepayment')}
+                  value={`${formatCurrency(currentCharges.waterPrepayment, 2)}${t('perMonth')}`}
+                />
+              )}
+              {currentCharges?.financialCharge !== null && currentCharges?.financialCharge !== undefined && (
+                <DetailRow
+                  icon={<AccountBalanceIcon fontSize="small" />}
+                  label={t('financialCharge')}
+                  value={`${formatCurrency(currentCharges.financialCharge, 2)}${t('perMonth')}`}
+                />
+              )}
+              {totalMonthlyCosts > 0 && (
+                <DetailRow
+                  icon={<CalculateIcon fontSize="small" />}
+                  label={t('totalMonthlyCosts')}
+                  value={`${formatCurrency(totalMonthlyCosts, 2)}${t('perMonth')}`}
+                />
+              )}
+            </>
+          ) : (
+            <DetailRow
+              icon={<CalculateIcon fontSize="small" />}
+              label={t('noCharges')}
+              value={t('addCharge')}
+            />
+          )}
+        </PropertyInfoCard>
+      </Grid>
 
       {/* Purchase Details Card */}
       {hasPurchaseDetails && (

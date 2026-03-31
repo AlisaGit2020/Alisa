@@ -34,14 +34,15 @@ describe('PropertyInfoSection', () => {
     expect(screen.getByText(/Helsinki/)).toBeInTheDocument();
   });
 
-  it('does not render monthly costs card when no charges data', () => {
+  it('renders monthly costs card with empty state when no charges data', () => {
     const property = createMockProperty();
 
-    // API will fail silently (no handler set up)
     renderWithProviders(<PropertyInfoSection property={property} />);
 
-    // Monthly costs section should not appear when data isn't available
-    expect(screen.queryByText('Monthly Costs')).not.toBeInTheDocument();
+    // Monthly costs section should always appear with manage button
+    expect(screen.getByText('Monthly Costs')).toBeInTheDocument();
+    // Should show empty state prompting to add charges
+    expect(screen.getByText('No charges')).toBeInTheDocument();
   });
 
   it('renders purchase details for OWN status', () => {
