@@ -247,6 +247,8 @@ function PropertyChargeDialog({
                     onEdit={handleEdit}
                     onDeleteRequest={handleDeleteRequest}
                     fixedLayout
+                    stripedRows={false}
+                    rowHighlight={(charge) => !charge.endDate ? 'success.light' : undefined}
                   />
                 </Box>
               );

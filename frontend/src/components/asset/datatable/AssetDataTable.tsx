@@ -1,5 +1,5 @@
 import * as React from "react";
-import { styled, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -30,16 +30,6 @@ const MOBILE_ACTION_WIDTH = 48;
 const MOBILE_CELL_PADDING = "6px 8px";
 const MOBILE_ACTION_CELL_PADDING = "6px 8px 6px 0";
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.hover,
-  },
-  // hide last border
-  "&:last-child td, &:last-child th": {
-    border: 0,
-  },
-}));
-
 export interface AssetDataTableField<T> {
   name: keyof T;
   maxLength?: number;
@@ -69,6 +59,8 @@ function AssetDataTable<T extends { id: number }>(props: {
   refreshTrigger?: number;
   sortable?: boolean;
   fixedLayout?: boolean;
+  stripedRows?: boolean;
+  rowHighlight?: (item: T) => string | undefined;
 }) {
   const [fetchedData, setFetchedData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -381,8 +373,17 @@ function AssetDataTable<T extends { id: number }>(props: {
           </TableHead>
           {data.length > 0 && (
             <TableBody>
-              {data.map((item) => (
-                <StyledTableRow key={item.id}>
+              {data.map((item, index) => {
+                const highlightColor = props.rowHighlight?.(item);
+                const stripedBg = props.stripedRows !== false && index % 2 === 0 ? "action.hover" : undefined;
+                return (
+                <TableRow
+                  key={item.id}
+                  sx={{
+                    backgroundColor: highlightColor || stripedBg,
+                    "&:last-child td, &:last-child th": { border: 0 },
+                  }}
+                >
                   {props.onSelectChange && (
                     <TableCell sx={{ width: isMobile ? MOBILE_CHECKBOX_WIDTH : "auto", padding: isMobile ? MOBILE_CELL_PADDING : undefined }}>
                       <AssetDataTableSelectRow
@@ -422,8 +423,9 @@ function AssetDataTable<T extends { id: number }>(props: {
                       ></AssetDataTableActionButtons>
                     </TableCell>
                   )}
-                </StyledTableRow>
-              ))}
+                </TableRow>
+              );
+              })}
             </TableBody>
           )}
         </Table>
