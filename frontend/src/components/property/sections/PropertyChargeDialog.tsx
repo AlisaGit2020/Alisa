@@ -1,15 +1,13 @@
-import { Box, CircularProgress, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Box, CircularProgress, Typography } from '@mui/material';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { PropertyCharge, PropertyChargeInput } from '@asset-types';
 import ApiClient from '@asset-lib/api-client';
 import AssetDialog from '../../asset/dialog/AssetDialog';
 import AssetConfirmDialog from '../../asset/dialog/AssetConfirmDialog';
 import AssetButton from '../../asset/form/AssetButton';
+import AssetDataTable, { AssetDataTableField } from '../../asset/datatable/AssetDataTable';
 import PropertyChargeForm from './PropertyChargeForm';
-import { formatCurrency, formatDate } from '@asset-lib/format-utils';
 
 interface PropertyChargeDialogProps {
   open: boolean;
@@ -33,7 +31,7 @@ function PropertyChargeDialog({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [chargeToDelete, setChargeToDelete] = useState<PropertyCharge | null>(null);
 
-  const fetchCharges = async () => {
+  const fetchCharges = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -47,27 +45,33 @@ function PropertyChargeDialog({
     } finally {
       setLoading(false);
     }
-  };
+  }, [propertyId, t]);
 
   useEffect(() => {
     if (open) {
       fetchCharges();
     }
-  }, [open, propertyId]);
+  }, [open, fetchCharges]);
 
   const handleAdd = () => {
     setEditingCharge(undefined);
     setShowForm(true);
   };
 
-  const handleEdit = (charge: PropertyCharge) => {
-    setEditingCharge(charge);
-    setShowForm(true);
+  const handleEdit = (id: number) => {
+    const charge = charges.find(c => c.id === id);
+    if (charge) {
+      setEditingCharge(charge);
+      setShowForm(true);
+    }
   };
 
-  const handleDelete = (charge: PropertyCharge) => {
-    setChargeToDelete(charge);
-    setDeleteConfirmOpen(true);
+  const handleDeleteRequest = (id: number) => {
+    const charge = charges.find(c => c.id === id);
+    if (charge) {
+      setChargeToDelete(charge);
+      setDeleteConfirmOpen(true);
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -116,6 +120,34 @@ function PropertyChargeDialog({
     setEditingCharge(undefined);
   };
 
+  const fields: AssetDataTableField<PropertyCharge>[] = [
+    {
+      name: 'typeName',
+      label: t('chargeType'),
+      render: (charge) => t(`chargeTypes.${charge.typeName}`),
+    },
+    {
+      name: 'amount',
+      label: t('chargeAmount'),
+      format: 'currency',
+    },
+    {
+      name: 'startDate',
+      label: t('startDate'),
+      format: 'date',
+    },
+    {
+      name: 'endDate',
+      label: t('endDate'),
+      render: (charge) => charge.endDate
+        ? t('format.date', {
+            val: new Date(charge.endDate),
+            formatParams: { val: { year: 'numeric', month: 'numeric', day: 'numeric' } },
+          })
+        : t('validUntilFurtherNotice'),
+    },
+  ];
+
   if (!open) {
     return null;
   }
@@ -145,64 +177,14 @@ function PropertyChargeDialog({
         )}
 
         {!loading && !error && !showForm && (
-          <>
-            <Box sx={{ mb: 2 }}>
-              <AssetButton
-                label={t('addCharge')}
-                variant="contained"
-                onClick={handleAdd}
-              />
-            </Box>
-
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>{t('chargeType')}</TableCell>
-                  <TableCell align="right">{t('chargeAmount')}</TableCell>
-                  <TableCell>{t('startDate')}</TableCell>
-                  <TableCell>{t('endDate')}</TableCell>
-                  <TableCell align="center">{t('actions')}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {charges.map((charge) => (
-                  <TableRow key={charge.id}>
-                    <TableCell>{t(`chargeTypes.${charge.typeName}`)}</TableCell>
-                    <TableCell align="right">{formatCurrency(charge.amount)}</TableCell>
-                    <TableCell>{formatDate(charge.startDate)}</TableCell>
-                    <TableCell>
-                      {charge.endDate
-                        ? formatDate(charge.endDate)
-                        : t('validUntilFurtherNotice')}
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleEdit(charge)}
-                        aria-label={t('editCharge')}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDelete(charge)}
-                        aria-label={t('deleteCharge')}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {charges.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center">
-                      {t('noCharges')}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </>
+          <AssetDataTable<PropertyCharge>
+            t={t}
+            data={charges}
+            fields={fields}
+            onNewRow={handleAdd}
+            onEdit={handleEdit}
+            onDeleteRequest={handleDeleteRequest}
+          />
         )}
 
         {showForm && (
