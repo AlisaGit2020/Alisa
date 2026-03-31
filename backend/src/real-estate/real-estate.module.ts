@@ -31,7 +31,7 @@ import { PropertyChargeService } from './property/property-charge.service';
 import { PropertyChargeController } from './property/property-charge.controller';
 
 @Module({
-  controllers: [InvestmentController, TaxController, PropertyController, TaxDeductionController, PropertyChargeController],
+  controllers: [InvestmentController, TaxController, TaxDeductionController, PropertyChargeController, PropertyController],
   providers: [InvestmentService, PropertyService, PropertyStatisticsService, PropertyStatisticsSchemaService, AirbnbStatisticsService, TaxService, TaxDeductionService, PropertyChargeService],
   imports: [
     TypeOrmModule.forFeature([
