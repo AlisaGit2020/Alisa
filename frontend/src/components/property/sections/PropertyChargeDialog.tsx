@@ -1,5 +1,6 @@
 import { Alert, Box, CircularProgress, IconButton, Tooltip, Typography } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
+import AddIcon from '@mui/icons-material/Add';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChargeType, PropertyCharge, PropertyChargeInput } from '@asset-types';
@@ -254,7 +255,7 @@ function PropertyChargeDialog({
 
         {!loading && !error && !showForm && (
           <>
-            {CHARGE_TYPES.map(({ typeName, chargeType }, index) => {
+            {CHARGE_TYPES.map(({ typeName, chargeType }) => {
               const typeCharges = chargesByType.get(typeName) || [];
               const showHistory = expandedHistory.has(typeName);
               const visibleCharges = showHistory
@@ -264,10 +265,19 @@ function PropertyChargeDialog({
 
               return (
                 <Box key={typeName} sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
                       {t(`chargeTypes.${typeName}`)}
                     </Typography>
+                    <Tooltip title={t('addCharge')}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleAdd(chargeType)}
+                        color="primary"
+                      >
+                        <AddIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     {(hasHistory || showHistory) && (
                       <Tooltip title={showHistory ? t('hideHistory') : t('showHistory')}>
                         <IconButton
@@ -284,12 +294,11 @@ function PropertyChargeDialog({
                     t={t}
                     data={visibleCharges}
                     fields={fields}
-                    onNewRow={() => handleAdd(chargeType)}
                     onEdit={handleEdit}
                     onDeleteRequest={handleDeleteRequest}
                     fixedLayout
                     stripedRows={false}
-                    showHeader={index === 0}
+                    showHeader={false}
                   />
                 </Box>
               );
