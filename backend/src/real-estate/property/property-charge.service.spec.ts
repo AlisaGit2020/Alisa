@@ -49,7 +49,6 @@ describe('PropertyChargeService', () => {
   const todayStr = formatDate(today);
   const yesterdayStr = formatDate(yesterday);
   const tomorrowStr = formatDate(tomorrow);
-  const lastMonthStr = formatDate(lastMonth);
 
   const createMockCharge = (
     id: number,

@@ -1,7 +1,7 @@
 import { Box, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChargeType, chargeTypeNames, PropertyCharge, PropertyChargeInput } from '@asset-types';
+import { ChargeType, PropertyCharge, PropertyChargeInput } from '@asset-types';
 import AssetButton from '../../asset/form/AssetButton';
 import AssetMoneyField from '../../asset/form/AssetMoneyField';
 import AssetDatePicker from '../../asset/form/AssetDatePicker';

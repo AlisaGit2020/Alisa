@@ -53,8 +53,12 @@ describe('PropertyChargeController (e2e)', () => {
   });
 
   beforeEach(async () => {
-    // Clean up charges before each test
-    await dataSource.getRepository(PropertyCharge).delete({});
+    // Clean up charges before each test using query builder
+    await dataSource
+      .getRepository(PropertyCharge)
+      .createQueryBuilder()
+      .delete()
+      .execute();
   });
 
   describe('POST /api/real-estate/property/:id/charges', () => {
