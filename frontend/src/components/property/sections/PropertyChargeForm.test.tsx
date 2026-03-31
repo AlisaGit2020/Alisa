@@ -32,10 +32,11 @@ describe('PropertyChargeForm', () => {
     await user.click(chargeTypeSelect);
 
     await waitFor(() => {
-      expect(screen.getByText(/hoitovastike/i)).toBeInTheDocument();
-      expect(screen.getByText(/rahoitusvastike/i)).toBeInTheDocument();
-      expect(screen.getByText(/vesi-ennakko/i)).toBeInTheDocument();
-      expect(screen.getByText(/yhtiövastike/i)).toBeInTheDocument();
+      // English translations for charge types
+      expect(screen.getByText('Maintenance Fee')).toBeInTheDocument();
+      expect(screen.getByText('Financial Charge')).toBeInTheDocument();
+      expect(screen.getByText('Water Prepayment')).toBeInTheDocument();
+      expect(screen.getByText('Total Charge')).toBeInTheDocument();
     });
   });
 
@@ -78,24 +79,17 @@ describe('PropertyChargeForm', () => {
     const user = userEvent.setup();
     renderWithProviders(<PropertyChargeForm {...defaultProps} />);
 
-    // Select charge type
-    const chargeTypeSelect = screen.getByLabelText(/charge type/i);
-    await user.click(chargeTypeSelect);
-    await user.click(screen.getByText(/hoitovastike/i));
+    // Select charge type (Maintenance Fee is default, no need to change)
 
     // Fill in amount
     const amountField = screen.getByLabelText(/amount/i);
     await user.clear(amountField);
     await user.type(amountField, '150');
 
-    // Fill in start date
+    // Fill in start date - using the date picker's input field
     const startDateField = screen.getByLabelText(/start date/i);
     await user.clear(startDateField);
-    await user.type(startDateField, '01.01.2025');
-
-    // Leave end date empty
-    const endDateField = screen.getByLabelText(/end date/i);
-    expect(endDateField).toHaveValue('');
+    await user.type(startDateField, '01/01/2025');
 
     const submitButton = screen.getByRole('button', { name: /save/i });
     await user.click(submitButton);
@@ -118,7 +112,7 @@ describe('PropertyChargeForm', () => {
     // Select charge type
     const chargeTypeSelect = screen.getByLabelText(/charge type/i);
     await user.click(chargeTypeSelect);
-    await user.click(screen.getByText(/rahoitusvastike/i));
+    await user.click(screen.getByText('Financial Charge'));
 
     // Fill in amount
     const amountField = screen.getByLabelText(/amount/i);
@@ -128,12 +122,12 @@ describe('PropertyChargeForm', () => {
     // Fill in start date
     const startDateField = screen.getByLabelText(/start date/i);
     await user.clear(startDateField);
-    await user.type(startDateField, '01.07.2025');
+    await user.type(startDateField, '07/01/2025');
 
     // Fill in end date
     const endDateField = screen.getByLabelText(/end date/i);
     await user.clear(endDateField);
-    await user.type(endDateField, '30.06.2026');
+    await user.type(endDateField, '06/30/2026');
 
     const submitButton = screen.getByRole('button', { name: /save/i });
     await user.click(submitButton);

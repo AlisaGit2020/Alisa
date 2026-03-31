@@ -53,6 +53,7 @@ export const emptyTables = async (
     'expense',
     'income',
     'transaction',
+    'property_charge',
     'ownership',
     'user',
     'property',

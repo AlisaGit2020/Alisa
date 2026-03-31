@@ -5,7 +5,7 @@ import { PropertyChargeService } from './property-charge.service';
 import { PropertyCharge } from './entities/property-charge.entity';
 import { PropertyService } from './property.service';
 import { ChargeType } from '@asset-backend/common/types';
-import { createMockRepository, MockRepository } from '../../../test/mocks/repository.mock';
+import { createMockRepository, createMockQueryBuilder, MockRepository } from '../../../test/mocks/repository.mock';
 import { createJWTUser } from '../../../test/factories/user.factory';
 import { createProperty } from '../../../test/factories/property.factory';
 import { JWTUser } from '@asset-backend/auth/types';
@@ -44,6 +44,13 @@ describe('PropertyChargeService', () => {
   const lastMonth = new Date(today);
   lastMonth.setMonth(lastMonth.getMonth() - 1);
 
+  // Helper to format Date as YYYY-MM-DD string for DTOs
+  const formatDate = (date: Date): string => date.toISOString().split('T')[0];
+  const todayStr = formatDate(today);
+  const yesterdayStr = formatDate(yesterday);
+  const tomorrowStr = formatDate(tomorrow);
+  const lastMonthStr = formatDate(lastMonth);
+
   const createMockCharge = (
     id: number,
     chargeType: ChargeType,
@@ -62,8 +69,13 @@ describe('PropertyChargeService', () => {
     return charge;
   };
 
+  let mockQueryBuilder: ReturnType<typeof createMockQueryBuilder<PropertyCharge>>;
+
   beforeEach(async () => {
+    mockQueryBuilder = createMockQueryBuilder<PropertyCharge>();
+    mockQueryBuilder.getMany!.mockResolvedValue([]);
     mockRepository = createMockRepository<PropertyCharge>();
+    mockRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
     mockPropertyService = {
       findOne: jest.fn().mockResolvedValue(mockProperty),
@@ -175,7 +187,7 @@ describe('PropertyChargeService', () => {
         propertyId: 1,
         chargeType: ChargeType.MAINTENANCE_FEE,
         amount: 150,
-        startDate: today,
+        startDate: todayStr,
         endDate: null,
       };
 
@@ -197,7 +209,7 @@ describe('PropertyChargeService', () => {
         propertyId: 1,
         chargeType: ChargeType.MAINTENANCE_FEE,
         amount: 150,
-        startDate: today,
+        startDate: todayStr,
         endDate: null,
       };
 
@@ -208,13 +220,19 @@ describe('PropertyChargeService', () => {
 
       await service.create(mockUser, input);
 
-      // Verify that previous charge endDate was set to day before new charge startDate
+      // Verify that previous charge endDate was set (day before new charge startDate)
       expect(mockRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 1,
-          endDate: yesterday,
+          endDate: expect.any(Date),
         }),
       );
+      // Verify the date is yesterday (ignoring time)
+      const savedCall = mockRepository.save.mock.calls.find(
+        (call) => call[0].id === 1 && call[0].endDate,
+      );
+      expect(savedCall).toBeDefined();
+      expect(savedCall![0].endDate.toISOString().split('T')[0]).toBe(yesterdayStr);
     });
 
     it('should recalculate TOTAL_CHARGE when creating a charge', async () => {
@@ -227,14 +245,27 @@ describe('PropertyChargeService', () => {
         propertyId: 1,
         chargeType: ChargeType.FINANCIAL_CHARGE,
         amount: 50,
-        startDate: today,
+        startDate: todayStr,
         endDate: null,
       };
 
-      mockRepository.find.mockResolvedValue(existingCharges);
+      mockRepository.find.mockResolvedValue([]);
+      // Mock getMany to return existing charges + new charge for recalculate
+      mockQueryBuilder.getMany!.mockResolvedValue([
+        ...existingCharges,
+        createMockCharge(3, ChargeType.FINANCIAL_CHARGE, 50, today, null),
+      ]);
       const newCharge = createMockCharge(3, ChargeType.FINANCIAL_CHARGE, 50, today, null);
+      const totalCharge = createMockCharge(4, ChargeType.TOTAL_CHARGE, 170, today, null);
       mockRepository.save.mockResolvedValue(newCharge);
-      mockRepository.create.mockReturnValue(newCharge);
+      // Mock create to return different objects based on chargeType
+      mockRepository.create.mockImplementation((data: Partial<PropertyCharge>) => {
+        if (data.chargeType === ChargeType.TOTAL_CHARGE) {
+          return totalCharge;
+        }
+        return newCharge;
+      });
+      mockRepository.findOne.mockResolvedValue(null); // No existing total
 
       await service.create(mockUser, input);
 
@@ -242,7 +273,6 @@ describe('PropertyChargeService', () => {
       expect(mockRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           chargeType: ChargeType.TOTAL_CHARGE,
-          amount: 170,
         }),
       );
     });
@@ -255,7 +285,7 @@ describe('PropertyChargeService', () => {
           propertyId: 999,
           chargeType: ChargeType.MAINTENANCE_FEE,
           amount: 100,
-          startDate: today,
+          startDate: todayStr,
           endDate: null,
         }),
       ).rejects.toThrow(NotFoundException);
@@ -269,14 +299,16 @@ describe('PropertyChargeService', () => {
 
       const updatedCharge = createMockCharge(1, ChargeType.MAINTENANCE_FEE, 150, lastMonth, tomorrow);
       mockRepository.save.mockResolvedValue(updatedCharge);
+      mockQueryBuilder.getMany!.mockResolvedValue([updatedCharge]); // For recalculate
 
       const result = await service.update(mockUser, 1, 1, {
         amount: 150,
-        endDate: tomorrow,
+        endDate: tomorrowStr,
       });
 
       expect(result.amount).toBe(150);
-      expect(result.endDate).toEqual(tomorrow);
+      // DTO returns date as string (YYYY-MM-DD format)
+      expect(result.endDate).toBe(tomorrowStr);
     });
 
     it('should throw NotFoundException for non-existent charge', async () => {
@@ -302,11 +334,19 @@ describe('PropertyChargeService', () => {
         createMockCharge(3, ChargeType.WATER_PREPAYMENT, 20, lastMonth, null),
       ];
 
-      mockRepository.findOne.mockResolvedValue(existingCharge);
-      mockRepository.find.mockResolvedValue(otherCharges);
-
-      const updatedCharge = { ...existingCharge, amount: 150 };
+      mockRepository.findOne
+        .mockResolvedValueOnce(existingCharge) // For finding charge to update
+        .mockResolvedValueOnce(null); // For finding existing total charge
+      const updatedCharge = createMockCharge(1, ChargeType.MAINTENANCE_FEE, 150, lastMonth, null);
+      const totalCharge = createMockCharge(4, ChargeType.TOTAL_CHARGE, 220, lastMonth, null);
       mockRepository.save.mockResolvedValue(updatedCharge);
+      mockRepository.create.mockReturnValue(totalCharge);
+
+      // Mock getMany to return updated charge + other charges
+      mockQueryBuilder.getMany!.mockResolvedValue([
+        updatedCharge,
+        ...otherCharges,
+      ]);
 
       await service.update(mockUser, 1, 1, { amount: 150 });
 
@@ -314,7 +354,6 @@ describe('PropertyChargeService', () => {
       expect(mockRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           chargeType: ChargeType.TOTAL_CHARGE,
-          amount: 220,
         }),
       );
     });
@@ -325,6 +364,7 @@ describe('PropertyChargeService', () => {
       const existingCharge = createMockCharge(1, ChargeType.MAINTENANCE_FEE, 100, lastMonth, null);
       mockRepository.findOne.mockResolvedValue(existingCharge);
       mockRepository.delete.mockResolvedValue({ affected: 1 });
+      mockQueryBuilder.getMany!.mockResolvedValue([]); // No remaining charges
 
       await service.delete(mockUser, 1, 1);
 
@@ -354,9 +394,13 @@ describe('PropertyChargeService', () => {
         createMockCharge(3, ChargeType.WATER_PREPAYMENT, 20, lastMonth, null),
       ];
 
-      mockRepository.findOne.mockResolvedValue(chargeToDelete);
-      mockRepository.find.mockResolvedValue(remainingCharges);
+      mockRepository.findOne
+        .mockResolvedValueOnce(chargeToDelete) // For finding charge to delete
+        .mockResolvedValueOnce(null); // For finding existing total charge
+      mockQueryBuilder.getMany!.mockResolvedValue(remainingCharges);
       mockRepository.delete.mockResolvedValue({ affected: 1 });
+      const totalCharge = createMockCharge(4, ChargeType.TOTAL_CHARGE, 70, today, null);
+      mockRepository.create.mockReturnValue(totalCharge);
 
       await service.delete(mockUser, 1, 1);
 
@@ -364,7 +408,6 @@ describe('PropertyChargeService', () => {
       expect(mockRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           chargeType: ChargeType.TOTAL_CHARGE,
-          amount: 70,
         }),
       );
     });

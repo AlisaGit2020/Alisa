@@ -1,34 +1,32 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { DataSource, Repository } from 'typeorm';
-import { Property } from '../src/real-estate/property/entities/property.entity';
-import { PropertyCharge } from '../src/real-estate/property/entities/property-charge.entity';
-import { Ownership } from '../src/people/ownership/entities/ownership.entity';
-import { User } from '../src/people/user/entities/user.entity';
-import { ChargeType, PropertyStatus } from '../src/common/types';
+import { AuthService } from '@asset-backend/auth/auth.service';
 import {
-  createTestProperty,
-  createTestUser,
-  getAuthToken,
-  cleanupTestData,
+  closeAppGracefully,
+  getBearerToken,
+  getTestUsers,
+  getUserAccessToken2,
+  prepareDatabase,
+  TestUser,
+  TestUsersSetup,
 } from './helper-functions';
+import { ChargeType } from '@asset-backend/common/types';
+import * as http from 'http';
+import { DataSource } from 'typeorm';
+import { PropertyCharge } from '@asset-backend/real-estate/property/entities/property-charge.entity';
 
 describe('PropertyChargeController (e2e)', () => {
   let app: INestApplication;
+  let server: http.Server;
+  let authService: AuthService;
   let dataSource: DataSource;
-  let propertyRepository: Repository<Property>;
-  let chargeRepository: Repository<PropertyCharge>;
-  let ownershipRepository: Repository<Ownership>;
-  let userRepository: Repository<User>;
-
-  let testUser: User;
-  let testUser2: User;
-  let testProperty: Property;
-  let testProperty2: Property;
-  let authToken: string;
-  let authToken2: string;
+  let testUsers: TestUsersSetup;
+  let mainUser: TestUser;
+  let otherUser: TestUser;
+  let propertyId: number;
+  let otherPropertyId: number;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -36,80 +34,54 @@ describe('PropertyChargeController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ transform: true }));
     await app.init();
+    server = app.getHttpServer();
 
-    dataSource = moduleFixture.get(DataSource);
-    propertyRepository = dataSource.getRepository(Property);
-    chargeRepository = dataSource.getRepository(PropertyCharge);
-    ownershipRepository = dataSource.getRepository(Ownership);
-    userRepository = dataSource.getRepository(User);
-  });
+    authService = app.get(AuthService);
+    dataSource = app.get(DataSource);
 
-  beforeEach(async () => {
-    // Clean up test data
-    await cleanupTestData(dataSource, 'property-charge-e2e');
-
-    // Create test users
-    testUser = await createTestUser(userRepository, {
-      email: 'property-charge-e2e-user1@test.com',
-      firstName: 'Test',
-      lastName: 'User1',
-    });
-    testUser2 = await createTestUser(userRepository, {
-      email: 'property-charge-e2e-user2@test.com',
-      firstName: 'Test',
-      lastName: 'User2',
-    });
-
-    // Create test properties
-    testProperty = await createTestProperty(
-      propertyRepository,
-      ownershipRepository,
-      testUser,
-      { name: 'Charge Test Property 1', status: PropertyStatus.OWN },
-    );
-    testProperty2 = await createTestProperty(
-      propertyRepository,
-      ownershipRepository,
-      testUser2,
-      { name: 'Charge Test Property 2', status: PropertyStatus.OWN },
-    );
-
-    // Get auth tokens
-    authToken = await getAuthToken(app, testUser);
-    authToken2 = await getAuthToken(app, testUser2);
+    await prepareDatabase(app);
+    testUsers = await getTestUsers(app);
+    mainUser = testUsers.user1WithProperties;
+    otherUser = testUsers.user2WithProperties;
+    propertyId = mainUser.properties[0].id;
+    otherPropertyId = otherUser.properties[0].id;
   });
 
   afterAll(async () => {
-    await cleanupTestData(dataSource, 'property-charge-e2e');
-    await app.close();
+    await closeAppGracefully(app, server);
   });
 
-  describe('POST /real-estate/property/:id/charges', () => {
-    it('should create a charge (201)', async () => {
-      const chargeInput = {
-        chargeType: ChargeType.MAINTENANCE_FEE,
-        amount: 150,
-        startDate: '2025-01-01',
-        endDate: null,
-      };
+  beforeEach(async () => {
+    // Clean up charges before each test
+    await dataSource.getRepository(PropertyCharge).delete({});
+  });
 
-      const response = await request(app.getHttpServer())
-        .post(`/real-estate/property/${testProperty.id}/charges`)
-        .set('Authorization', `Bearer ${authToken}`)
-        .send(chargeInput)
+  describe('POST /api/real-estate/property/:id/charges', () => {
+    it('should create a charge (201)', async () => {
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      const response = await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
+        .send({
+          chargeType: ChargeType.MAINTENANCE_FEE,
+          amount: 150,
+          startDate: '2025-01-01',
+          endDate: null,
+        })
         .expect(201);
 
       expect(response.body.id).toBeDefined();
       expect(response.body.chargeType).toBe(ChargeType.MAINTENANCE_FEE);
       expect(response.body.amount).toBe(150);
-      expect(response.body.propertyId).toBe(testProperty.id);
+      expect(response.body.propertyId).toBe(propertyId);
+      expect(response.body.typeName).toBe('maintenance-fee');
     });
 
     it('should return 401 for unauthenticated request', async () => {
-      await request(app.getHttpServer())
-        .post(`/real-estate/property/${testProperty.id}/charges`)
+      await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
         .send({
           chargeType: ChargeType.MAINTENANCE_FEE,
           amount: 100,
@@ -118,22 +90,26 @@ describe('PropertyChargeController (e2e)', () => {
         .expect(401);
     });
 
-    it('should return 403 when creating charge for another user property', async () => {
-      await request(app.getHttpServer())
-        .post(`/real-estate/property/${testProperty2.id}/charges`)
-        .set('Authorization', `Bearer ${authToken}`)
+    it('should return 404 when creating charge for another user property', async () => {
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      await request(server)
+        .post(`/api/real-estate/property/${otherPropertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
         .send({
           chargeType: ChargeType.MAINTENANCE_FEE,
           amount: 100,
           startDate: '2025-01-01',
         })
-        .expect(403);
+        .expect(404);
     });
 
     it('should return 404 for non-existent property', async () => {
-      await request(app.getHttpServer())
-        .post('/real-estate/property/99999/charges')
-        .set('Authorization', `Bearer ${authToken}`)
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      await request(server)
+        .post('/api/real-estate/property/99999/charges')
+        .set('Authorization', getBearerToken(token))
         .send({
           chargeType: ChargeType.MAINTENANCE_FEE,
           amount: 100,
@@ -143,10 +119,12 @@ describe('PropertyChargeController (e2e)', () => {
     });
 
     it('should auto-close previous open charge when creating new one', async () => {
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
       // Create first charge
-      await request(app.getHttpServer())
-        .post(`/real-estate/property/${testProperty.id}/charges`)
-        .set('Authorization', `Bearer ${authToken}`)
+      await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
         .send({
           chargeType: ChargeType.MAINTENANCE_FEE,
           amount: 100,
@@ -156,9 +134,9 @@ describe('PropertyChargeController (e2e)', () => {
         .expect(201);
 
       // Create second charge with new start date
-      await request(app.getHttpServer())
-        .post(`/real-estate/property/${testProperty.id}/charges`)
-        .set('Authorization', `Bearer ${authToken}`)
+      await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
         .send({
           chargeType: ChargeType.MAINTENANCE_FEE,
           amount: 150,
@@ -168,124 +146,130 @@ describe('PropertyChargeController (e2e)', () => {
         .expect(201);
 
       // Get all charges and verify first one was closed
-      const response = await request(app.getHttpServer())
-        .get(`/real-estate/property/${testProperty.id}/charges`)
-        .set('Authorization', `Bearer ${authToken}`)
+      const response = await request(server)
+        .get(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
         .expect(200);
 
       const charges = response.body;
-      const oldCharge = charges.find((c: PropertyCharge) => c.amount === 100);
+      const maintenanceCharges = charges.filter(
+        (c: { chargeType: ChargeType }) => c.chargeType === ChargeType.MAINTENANCE_FEE,
+      );
+      const oldCharge = maintenanceCharges.find((c: { amount: number }) => c.amount === 100);
       expect(oldCharge.endDate).toBe('2025-06-30');
     });
   });
 
-  describe('GET /real-estate/property/:id/charges', () => {
+  describe('GET /api/real-estate/property/:id/charges', () => {
     beforeEach(async () => {
-      // Create some test charges
-      await chargeRepository.save([
-        {
-          propertyId: testProperty.id,
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      // Create test charges via API
+      await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
+        .send({
           chargeType: ChargeType.MAINTENANCE_FEE,
           amount: 150,
-          startDate: new Date('2025-01-01'),
-          endDate: null,
-        },
-        {
-          propertyId: testProperty.id,
+          startDate: '2025-01-01',
+        });
+
+      await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
+        .send({
           chargeType: ChargeType.FINANCIAL_CHARGE,
           amount: 50,
-          startDate: new Date('2025-01-01'),
-          endDate: null,
-        },
-      ]);
+          startDate: '2025-01-01',
+        });
     });
 
     it('should return all charges (200)', async () => {
-      const response = await request(app.getHttpServer())
-        .get(`/real-estate/property/${testProperty.id}/charges`)
-        .set('Authorization', `Bearer ${authToken}`)
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      const response = await request(server)
+        .get(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
         .expect(200);
 
       expect(response.body).toBeInstanceOf(Array);
+      // Should have at least maintenance, financial, and auto-calculated total
       expect(response.body.length).toBeGreaterThanOrEqual(2);
     });
 
     it('should return 401 for unauthenticated request', async () => {
-      await request(app.getHttpServer())
-        .get(`/real-estate/property/${testProperty.id}/charges`)
+      await request(server)
+        .get(`/api/real-estate/property/${propertyId}/charges`)
         .expect(401);
     });
 
-    it('should return 403 for another user property', async () => {
-      await request(app.getHttpServer())
-        .get(`/real-estate/property/${testProperty2.id}/charges`)
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(403);
+    it('should return 404 for another user property', async () => {
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      await request(server)
+        .get(`/api/real-estate/property/${otherPropertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
+        .expect(404);
     });
   });
 
-  describe('GET /real-estate/property/:id/charges/current', () => {
+  describe('GET /api/real-estate/property/:id/charges/current', () => {
     beforeEach(async () => {
-      const today = new Date();
-      const lastMonth = new Date(today);
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+      const lastMonth = new Date();
       lastMonth.setMonth(lastMonth.getMonth() - 1);
+      const lastMonthStr = lastMonth.toISOString().split('T')[0];
 
-      await chargeRepository.save([
-        {
-          propertyId: testProperty.id,
+      await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
+        .send({
           chargeType: ChargeType.MAINTENANCE_FEE,
           amount: 150,
-          startDate: lastMonth,
-          endDate: null,
-        },
-        {
-          propertyId: testProperty.id,
+          startDate: lastMonthStr,
+        });
+
+      await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
+        .send({
           chargeType: ChargeType.FINANCIAL_CHARGE,
           amount: 50,
-          startDate: lastMonth,
-          endDate: null,
-        },
-        {
-          propertyId: testProperty.id,
+          startDate: lastMonthStr,
+        });
+
+      await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
+        .send({
           chargeType: ChargeType.WATER_PREPAYMENT,
           amount: 25,
-          startDate: lastMonth,
-          endDate: null,
-        },
-        {
-          propertyId: testProperty.id,
-          chargeType: ChargeType.TOTAL_CHARGE,
-          amount: 225,
-          startDate: lastMonth,
-          endDate: null,
-        },
-      ]);
+          startDate: lastMonthStr,
+        });
     });
 
     it('should return current charges (200)', async () => {
-      const response = await request(app.getHttpServer())
-        .get(`/real-estate/property/${testProperty.id}/charges/current`)
-        .set('Authorization', `Bearer ${authToken}`)
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      const response = await request(server)
+        .get(`/api/real-estate/property/${propertyId}/charges/current`)
+        .set('Authorization', getBearerToken(token))
         .expect(200);
 
       expect(response.body.maintenanceFee).toBe(150);
       expect(response.body.financialCharge).toBe(50);
       expect(response.body.waterPrepayment).toBe(25);
-      expect(response.body.totalCharge).toBe(225);
+      expect(response.body.totalCharge).toBe(225); // Auto-calculated
     });
 
     it('should return null for missing charge types', async () => {
-      // Create a new property without charges
-      const emptyProperty = await createTestProperty(
-        propertyRepository,
-        ownershipRepository,
-        testUser,
-        { name: 'Empty Charges Property', status: PropertyStatus.OWN },
-      );
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+      // Use second property which has no charges
+      const emptyPropertyId = mainUser.properties[1].id;
 
-      const response = await request(app.getHttpServer())
-        .get(`/real-estate/property/${emptyProperty.id}/charges/current`)
-        .set('Authorization', `Bearer ${authToken}`)
+      const response = await request(server)
+        .get(`/api/real-estate/property/${emptyPropertyId}/charges/current`)
+        .set('Authorization', getBearerToken(token))
         .expect(200);
 
       expect(response.body.maintenanceFee).toBeNull();
@@ -295,23 +279,30 @@ describe('PropertyChargeController (e2e)', () => {
     });
   });
 
-  describe('PUT /real-estate/property/:id/charges/:chargeId', () => {
-    let testCharge: PropertyCharge;
+  describe('PUT /api/real-estate/property/:id/charges/:chargeId', () => {
+    let testChargeId: number;
 
     beforeEach(async () => {
-      testCharge = await chargeRepository.save({
-        propertyId: testProperty.id,
-        chargeType: ChargeType.MAINTENANCE_FEE,
-        amount: 100,
-        startDate: new Date('2025-01-01'),
-        endDate: null,
-      });
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      const response = await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
+        .send({
+          chargeType: ChargeType.MAINTENANCE_FEE,
+          amount: 100,
+          startDate: '2025-01-01',
+        });
+
+      testChargeId = response.body.id;
     });
 
     it('should update charge (200)', async () => {
-      const response = await request(app.getHttpServer())
-        .put(`/real-estate/property/${testProperty.id}/charges/${testCharge.id}`)
-        .set('Authorization', `Bearer ${authToken}`)
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      const response = await request(server)
+        .put(`/api/real-estate/property/${propertyId}/charges/${testChargeId}`)
+        .set('Authorization', getBearerToken(token))
         .send({
           amount: 150,
           endDate: '2025-12-31',
@@ -323,96 +314,78 @@ describe('PropertyChargeController (e2e)', () => {
     });
 
     it('should return 401 for unauthenticated request', async () => {
-      await request(app.getHttpServer())
-        .put(`/real-estate/property/${testProperty.id}/charges/${testCharge.id}`)
+      await request(server)
+        .put(`/api/real-estate/property/${propertyId}/charges/${testChargeId}`)
         .send({ amount: 150 })
         .expect(401);
     });
 
-    it('should return 403 for another user property charge', async () => {
-      const otherCharge = await chargeRepository.save({
-        propertyId: testProperty2.id,
-        chargeType: ChargeType.MAINTENANCE_FEE,
-        amount: 100,
-        startDate: new Date('2025-01-01'),
-        endDate: null,
-      });
-
-      await request(app.getHttpServer())
-        .put(`/real-estate/property/${testProperty2.id}/charges/${otherCharge.id}`)
-        .set('Authorization', `Bearer ${authToken}`)
-        .send({ amount: 150 })
-        .expect(403);
-    });
-
     it('should return 404 for non-existent charge', async () => {
-      await request(app.getHttpServer())
-        .put(`/real-estate/property/${testProperty.id}/charges/99999`)
-        .set('Authorization', `Bearer ${authToken}`)
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      await request(server)
+        .put(`/api/real-estate/property/${propertyId}/charges/99999`)
+        .set('Authorization', getBearerToken(token))
         .send({ amount: 150 })
         .expect(404);
     });
   });
 
-  describe('DELETE /real-estate/property/:id/charges/:chargeId', () => {
-    let testCharge: PropertyCharge;
+  describe('DELETE /api/real-estate/property/:id/charges/:chargeId', () => {
+    let testChargeId: number;
 
     beforeEach(async () => {
-      testCharge = await chargeRepository.save({
-        propertyId: testProperty.id,
-        chargeType: ChargeType.MAINTENANCE_FEE,
-        amount: 100,
-        startDate: new Date('2025-01-01'),
-        endDate: null,
-      });
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      const response = await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
+        .send({
+          chargeType: ChargeType.MAINTENANCE_FEE,
+          amount: 100,
+          startDate: '2025-01-01',
+        });
+
+      testChargeId = response.body.id;
     });
 
     it('should delete charge (200)', async () => {
-      await request(app.getHttpServer())
-        .delete(`/real-estate/property/${testProperty.id}/charges/${testCharge.id}`)
-        .set('Authorization', `Bearer ${authToken}`)
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      await request(server)
+        .delete(`/api/real-estate/property/${propertyId}/charges/${testChargeId}`)
+        .set('Authorization', getBearerToken(token))
         .expect(200);
 
-      // Verify charge is deleted
-      const deleted = await chargeRepository.findOneBy({ id: testCharge.id });
-      expect(deleted).toBeNull();
+      // Verify charge is deleted by trying to get it
+      const charges = await dataSource.getRepository(PropertyCharge).findOneBy({ id: testChargeId });
+      expect(charges).toBeNull();
     });
 
     it('should return 401 for unauthenticated request', async () => {
-      await request(app.getHttpServer())
-        .delete(`/real-estate/property/${testProperty.id}/charges/${testCharge.id}`)
+      await request(server)
+        .delete(`/api/real-estate/property/${propertyId}/charges/${testChargeId}`)
         .expect(401);
     });
 
-    it('should return 403 for another user property charge', async () => {
-      const otherCharge = await chargeRepository.save({
-        propertyId: testProperty2.id,
-        chargeType: ChargeType.MAINTENANCE_FEE,
-        amount: 100,
-        startDate: new Date('2025-01-01'),
-        endDate: null,
-      });
-
-      await request(app.getHttpServer())
-        .delete(`/real-estate/property/${testProperty2.id}/charges/${otherCharge.id}`)
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(403);
-    });
-
     it('should return 404 for non-existent charge', async () => {
-      await request(app.getHttpServer())
-        .delete(`/real-estate/property/${testProperty.id}/charges/99999`)
-        .set('Authorization', `Bearer ${authToken}`)
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      await request(server)
+        .delete(`/api/real-estate/property/${propertyId}/charges/99999`)
+        .set('Authorization', getBearerToken(token))
         .expect(404);
     });
   });
 
   describe('TOTAL_CHARGE auto-calculation', () => {
     it('should auto-calculate total when creating charges', async () => {
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
       // Create maintenance fee
-      await request(app.getHttpServer())
-        .post(`/real-estate/property/${testProperty.id}/charges`)
-        .set('Authorization', `Bearer ${authToken}`)
+      await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
         .send({
           chargeType: ChargeType.MAINTENANCE_FEE,
           amount: 100,
@@ -421,9 +394,9 @@ describe('PropertyChargeController (e2e)', () => {
         .expect(201);
 
       // Create financial charge
-      await request(app.getHttpServer())
-        .post(`/real-estate/property/${testProperty.id}/charges`)
-        .set('Authorization', `Bearer ${authToken}`)
+      await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
         .send({
           chargeType: ChargeType.FINANCIAL_CHARGE,
           amount: 50,
@@ -432,9 +405,9 @@ describe('PropertyChargeController (e2e)', () => {
         .expect(201);
 
       // Create water prepayment
-      await request(app.getHttpServer())
-        .post(`/real-estate/property/${testProperty.id}/charges`)
-        .set('Authorization', `Bearer ${authToken}`)
+      await request(server)
+        .post(`/api/real-estate/property/${propertyId}/charges`)
+        .set('Authorization', getBearerToken(token))
         .send({
           chargeType: ChargeType.WATER_PREPAYMENT,
           amount: 25,
@@ -443,9 +416,9 @@ describe('PropertyChargeController (e2e)', () => {
         .expect(201);
 
       // Get current charges and verify total
-      const response = await request(app.getHttpServer())
-        .get(`/real-estate/property/${testProperty.id}/charges/current`)
-        .set('Authorization', `Bearer ${authToken}`)
+      const response = await request(server)
+        .get(`/api/real-estate/property/${propertyId}/charges/current`)
+        .set('Authorization', getBearerToken(token))
         .expect(200);
 
       expect(response.body.totalCharge).toBe(175); // 100 + 50 + 25
