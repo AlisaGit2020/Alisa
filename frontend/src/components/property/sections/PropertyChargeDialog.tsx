@@ -1,7 +1,7 @@
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PropertyCharge, PropertyChargeInput } from '@asset-types';
+import { ChargeType, PropertyCharge, PropertyChargeInput } from '@asset-types';
 import ApiClient from '@asset-lib/api-client';
 import AssetDialog from '../../asset/dialog/AssetDialog';
 import AssetConfirmDialog from '../../asset/dialog/AssetConfirmDialog';
@@ -16,11 +16,11 @@ interface PropertyChargeDialogProps {
   onChargesUpdated?: () => void;
 }
 
-const CHARGE_TYPE_ORDER = [
-  'maintenance-fee',
-  'financial-charge',
-  'water-prepayment',
-  'total-charge',
+const CHARGE_TYPES = [
+  { typeName: 'maintenance-fee', chargeType: ChargeType.MAINTENANCE_FEE },
+  { typeName: 'financial-charge', chargeType: ChargeType.FINANCIAL_CHARGE },
+  { typeName: 'water-prepayment', chargeType: ChargeType.WATER_PREPAYMENT },
+  { typeName: 'total-charge', chargeType: ChargeType.TOTAL_CHARGE },
 ];
 
 function PropertyChargeDialog({
@@ -35,6 +35,7 @@ function PropertyChargeDialog({
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingCharge, setEditingCharge] = useState<PropertyCharge | undefined>(undefined);
+  const [selectedChargeType, setSelectedChargeType] = useState<ChargeType | undefined>(undefined);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [chargeToDelete, setChargeToDelete] = useState<PropertyCharge | null>(null);
 
@@ -63,7 +64,7 @@ function PropertyChargeDialog({
   // Group charges by type
   const chargesByType = useMemo(() => {
     const grouped = new Map<string, PropertyCharge[]>();
-    for (const typeName of CHARGE_TYPE_ORDER) {
+    for (const { typeName } of CHARGE_TYPES) {
       grouped.set(typeName, []);
     }
     for (const charge of charges) {
@@ -74,8 +75,9 @@ function PropertyChargeDialog({
     return grouped;
   }, [charges]);
 
-  const handleAdd = () => {
+  const handleAdd = (chargeType: ChargeType) => {
     setEditingCharge(undefined);
+    setSelectedChargeType(chargeType);
     setShowForm(true);
   };
 
@@ -83,6 +85,7 @@ function PropertyChargeDialog({
     const charge = charges.find(c => c.id === id);
     if (charge) {
       setEditingCharge(charge);
+      setSelectedChargeType(undefined);
       setShowForm(true);
     }
   };
@@ -129,6 +132,7 @@ function PropertyChargeDialog({
         });
       }
       setShowForm(false);
+      setSelectedChargeType(undefined);
       await fetchCharges();
       onChargesUpdated?.();
     } catch {
@@ -139,6 +143,7 @@ function PropertyChargeDialog({
   const handleFormCancel = () => {
     setShowForm(false);
     setEditingCharge(undefined);
+    setSelectedChargeType(undefined);
   };
 
   const fields: AssetDataTableField<PropertyCharge>[] = [
@@ -197,15 +202,7 @@ function PropertyChargeDialog({
 
         {!loading && !error && !showForm && (
           <>
-            <Box sx={{ mb: 2 }}>
-              <AssetButton
-                label={t('addCharge')}
-                variant="contained"
-                onClick={handleAdd}
-              />
-            </Box>
-
-            {CHARGE_TYPE_ORDER.map((typeName) => {
+            {CHARGE_TYPES.map(({ typeName, chargeType }) => {
               const typeCharges = chargesByType.get(typeName) || [];
               return (
                 <Box key={typeName} sx={{ mb: 3 }}>
@@ -216,6 +213,7 @@ function PropertyChargeDialog({
                     t={t}
                     data={typeCharges}
                     fields={fields}
+                    onNewRow={() => handleAdd(chargeType)}
                     onEdit={handleEdit}
                     onDeleteRequest={handleDeleteRequest}
                     fixedLayout
@@ -230,6 +228,7 @@ function PropertyChargeDialog({
           <PropertyChargeForm
             propertyId={propertyId}
             charge={editingCharge}
+            defaultChargeType={selectedChargeType}
             onSubmit={handleFormSubmit}
             onCancel={handleFormCancel}
           />

@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 interface PropertyChargeFormProps {
   propertyId: number;
   charge?: PropertyCharge;
+  defaultChargeType?: ChargeType;
   onSubmit: (input: PropertyChargeInput) => void;
   onCancel: () => void;
 }
@@ -22,12 +23,13 @@ const chargeTypeItems = [
   { id: ChargeType.TOTAL_CHARGE, key: 'total-charge' },
 ];
 
-function PropertyChargeForm({ propertyId, charge, onSubmit, onCancel }: PropertyChargeFormProps) {
+function PropertyChargeForm({ propertyId, charge, defaultChargeType, onSubmit, onCancel }: PropertyChargeFormProps) {
   const { t } = useTranslation('property');
   const isEdit = !!charge;
+  const isTypeFixed = isEdit || defaultChargeType !== undefined;
 
   const [chargeType, setChargeType] = useState<ChargeType>(
-    charge?.chargeType ?? ChargeType.MAINTENANCE_FEE
+    charge?.chargeType ?? defaultChargeType ?? ChargeType.MAINTENANCE_FEE
   );
   const [amount, setAmount] = useState<number>(charge?.amount ?? 0);
   const [startDate, setStartDate] = useState<dayjs.Dayjs | null>(
@@ -87,7 +89,7 @@ function PropertyChargeForm({ propertyId, charge, onSubmit, onCancel }: Property
           t={t}
           translateKeyPrefix="chargeTypes"
           onChange={(e) => setChargeType(Number(e.target.value) as ChargeType)}
-          disabled={isEdit}
+          disabled={isTypeFixed}
           aria-label={t('chargeType')}
         />
 
