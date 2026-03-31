@@ -24,7 +24,7 @@ export class PropertyChargeService {
 
     const charges = await this.repository.find({
       where: { propertyId },
-      order: { startDate: 'DESC', chargeType: 'ASC' },
+      order: { chargeType: 'ASC', endDate: { direction: 'DESC', nulls: 'FIRST' } },
     });
 
     return charges.map(PropertyChargeDto.fromEntity);
