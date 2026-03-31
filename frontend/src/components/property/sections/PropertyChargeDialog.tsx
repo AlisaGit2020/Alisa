@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PropertyCharge, PropertyChargeInput } from '@asset-types';
 import ApiClient from '@asset-lib/api-client';
@@ -15,6 +15,13 @@ interface PropertyChargeDialogProps {
   onClose: () => void;
   onChargesUpdated?: () => void;
 }
+
+const CHARGE_TYPE_ORDER = [
+  'maintenance-fee',
+  'financial-charge',
+  'water-prepayment',
+  'total-charge',
+];
 
 function PropertyChargeDialog({
   open,
@@ -52,6 +59,20 @@ function PropertyChargeDialog({
       fetchCharges();
     }
   }, [open, fetchCharges]);
+
+  // Group charges by type
+  const chargesByType = useMemo(() => {
+    const grouped = new Map<string, PropertyCharge[]>();
+    for (const typeName of CHARGE_TYPE_ORDER) {
+      grouped.set(typeName, []);
+    }
+    for (const charge of charges) {
+      const existing = grouped.get(charge.typeName) || [];
+      existing.push(charge);
+      grouped.set(charge.typeName, existing);
+    }
+    return grouped;
+  }, [charges]);
 
   const handleAdd = () => {
     setEditingCharge(undefined);
@@ -122,11 +143,6 @@ function PropertyChargeDialog({
 
   const fields: AssetDataTableField<PropertyCharge>[] = [
     {
-      name: 'typeName',
-      label: t('chargeType'),
-      render: (charge) => t(`chargeTypes.${charge.typeName}`),
-    },
-    {
       name: 'amount',
       label: t('chargeAmount'),
       format: 'currency',
@@ -177,14 +193,33 @@ function PropertyChargeDialog({
         )}
 
         {!loading && !error && !showForm && (
-          <AssetDataTable<PropertyCharge>
-            t={t}
-            data={charges}
-            fields={fields}
-            onNewRow={handleAdd}
-            onEdit={handleEdit}
-            onDeleteRequest={handleDeleteRequest}
-          />
+          <>
+            <Box sx={{ mb: 2 }}>
+              <AssetButton
+                label={t('addCharge')}
+                variant="contained"
+                onClick={handleAdd}
+              />
+            </Box>
+
+            {CHARGE_TYPE_ORDER.map((typeName) => {
+              const typeCharges = chargesByType.get(typeName) || [];
+              return (
+                <Box key={typeName} sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>
+                    {t(`chargeTypes.${typeName}`)}
+                  </Typography>
+                  <AssetDataTable<PropertyCharge>
+                    t={t}
+                    data={typeCharges}
+                    fields={fields}
+                    onEdit={handleEdit}
+                    onDeleteRequest={handleDeleteRequest}
+                  />
+                </Box>
+              );
+            })}
+          </>
         )}
 
         {showForm && (
