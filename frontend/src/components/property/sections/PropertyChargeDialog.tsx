@@ -235,7 +235,7 @@ function PropertyChargeDialog({
 
         {!loading && !error && !showForm && (
           <>
-            {CHARGE_TYPES.map(({ typeName, chargeType }) => {
+            {CHARGE_TYPES.map(({ typeName, chargeType }, index) => {
               const typeCharges = chargesByType.get(typeName) || [];
               return (
                 <Box key={typeName} sx={{ mb: 3 }}>
@@ -251,6 +251,7 @@ function PropertyChargeDialog({
                     onDeleteRequest={handleDeleteRequest}
                     fixedLayout
                     stripedRows={false}
+                    showHeader={index === 0}
                     rowHighlight={(charge) => {
                       const today = new Date().toISOString().split('T')[0];
                       const isActive = charge.startDate <= today && (!charge.endDate || charge.endDate >= today);
