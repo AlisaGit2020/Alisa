@@ -97,7 +97,7 @@ const property = {
     },
 
     // Charge history
-    chargeHistory: 'Avgiftshistorik',
+    chargeHistory: 'Avgifter',
     manageCharges: 'Hantera avgifter',
     addCharge: 'Lägg till avgift',
     editCharge: 'Redigera avgift',

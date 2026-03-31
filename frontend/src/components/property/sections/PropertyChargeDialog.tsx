@@ -226,7 +226,7 @@ function PropertyChargeDialog({
         open={open}
         onClose={onClose}
         title={t('chargeHistory')}
-        maxWidth="md"
+        maxWidth="sm"
         fullWidth
         actions={
           <AssetButton label={t('close')} variant="outlined" onClick={onClose} />
@@ -265,19 +265,21 @@ function PropertyChargeDialog({
 
               return (
                 <Box key={typeName} sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
-                      {t(`chargeTypes.${typeName}`)}
-                    </Typography>
-                    <Tooltip title={t('addCharge')}>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleAdd(chargeType)}
-                        color="primary"
-                      >
-                        <AddIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
+                        {t(`chargeTypes.${typeName}`)}
+                      </Typography>
+                      <Tooltip title={t('addCharge')}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleAdd(chargeType)}
+                          color="primary"
+                        >
+                          <AddIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                     {(hasHistory || showHistory) && (
                       <Tooltip title={showHistory ? t('hideHistory') : t('showHistory')}>
                         <IconButton
