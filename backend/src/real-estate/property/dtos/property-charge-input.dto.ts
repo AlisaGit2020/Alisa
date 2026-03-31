@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsDateString, Min } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsDateString, Min } from 'class-validator';
 import { ChargeType } from '@asset-backend/common/types';
 
 export class PropertyChargeInputDto {
@@ -17,9 +17,9 @@ export class PropertyChargeInputDto {
   @Min(0)
   amount: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsDateString()
-  startDate: string;
+  startDate?: string | null;
 
   @IsOptional()
   @IsDateString()

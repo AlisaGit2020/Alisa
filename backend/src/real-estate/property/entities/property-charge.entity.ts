@@ -32,8 +32,8 @@ export class PropertyCharge {
   })
   amount: number;
 
-  @Column({ type: 'date' })
-  startDate: Date;
+  @Column({ type: 'date', nullable: true })
+  startDate: Date | null;
 
   @Column({ type: 'date', nullable: true })
   endDate: Date | null;
