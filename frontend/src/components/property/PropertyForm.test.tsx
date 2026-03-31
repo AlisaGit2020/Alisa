@@ -1,11 +1,12 @@
 import '@testing-library/jest-dom';
-import { PropertyInput, PropertyType } from '@asset-types';
+import { PropertyInput, PropertyType, ChargeType, PropertyChargeInput } from '@asset-types';
 import { PropertyStatus } from '@asset-types/common';
 import {
   getPropertyStatusFromPath,
   getReturnPathForStatus,
 } from './property-form-utils';
 import { calculateCharge, ChargeValues, ChargeFieldName } from './charge-calculation';
+import dayjs from 'dayjs';
 
 // Since Jest mock hoisting causes issues with relative paths in ESM mode,
 // we test the data transformation logic separately from the React component
@@ -774,6 +775,284 @@ describe('PropertyForm Component Logic', () => {
 
     it('returns /prospects path for PROSPECT status', () => {
       expect(getReturnPathForStatus(PropertyStatus.PROSPECT)).toBe('/app/portfolio/prospects');
+    });
+  });
+
+  describe('Separate charge state (for batch API)', () => {
+    // Charge state is separate from property data and used for batch API creation
+    interface ChargeState {
+      maintenanceFee: number;
+      financialCharge: number;
+      waterCharge: number;
+      totalCharge: number;
+    }
+
+    const defaultChargeState: ChargeState = {
+      maintenanceFee: 0,
+      financialCharge: 0,
+      waterCharge: 0,
+      totalCharge: 0,
+    };
+
+    it('has default values of 0 for all charge fields', () => {
+      expect(defaultChargeState.maintenanceFee).toBe(0);
+      expect(defaultChargeState.financialCharge).toBe(0);
+      expect(defaultChargeState.waterCharge).toBe(0);
+      expect(defaultChargeState.totalCharge).toBe(0);
+    });
+
+    it('updates individual charge fields', () => {
+      const updateCharge = (
+        state: ChargeState,
+        field: keyof ChargeState,
+        value: number
+      ): ChargeState => {
+        return { ...state, [field]: value };
+      };
+
+      let state = { ...defaultChargeState };
+      state = updateCharge(state, 'maintenanceFee', 150);
+      expect(state.maintenanceFee).toBe(150);
+
+      state = updateCharge(state, 'financialCharge', 50);
+      expect(state.financialCharge).toBe(50);
+
+      state = updateCharge(state, 'waterCharge', 25);
+      expect(state.waterCharge).toBe(25);
+    });
+
+    it('edit mode is detected by idParam > 0', () => {
+      const isEditMode = (idParam: string | undefined): boolean => {
+        return !!idParam && Number(idParam) > 0;
+      };
+
+      expect(isEditMode(undefined)).toBe(false);
+      expect(isEditMode('0')).toBe(false);
+      expect(isEditMode('1')).toBe(true);
+      expect(isEditMode('123')).toBe(true);
+    });
+  });
+
+  describe('Batch charge creation for new properties', () => {
+    it('builds charge inputs array from charge state', () => {
+      const charges = {
+        maintenanceFee: 150,
+        financialCharge: 50,
+        waterCharge: 25,
+        totalCharge: 200,
+      };
+      const propertyId = 42;
+      const purchaseDate = new Date('2025-01-15');
+
+      const chargeInputs: PropertyChargeInput[] = [];
+      const startDate = dayjs(purchaseDate).format('YYYY-MM-DD');
+
+      if (charges.maintenanceFee > 0) {
+        chargeInputs.push({
+          propertyId,
+          chargeType: ChargeType.MAINTENANCE_FEE,
+          amount: charges.maintenanceFee,
+          startDate,
+        });
+      }
+      if (charges.financialCharge > 0) {
+        chargeInputs.push({
+          propertyId,
+          chargeType: ChargeType.FINANCIAL_CHARGE,
+          amount: charges.financialCharge,
+          startDate,
+        });
+      }
+      if (charges.waterCharge > 0) {
+        chargeInputs.push({
+          propertyId,
+          chargeType: ChargeType.WATER_PREPAYMENT,
+          amount: charges.waterCharge,
+          startDate,
+        });
+      }
+
+      expect(chargeInputs).toHaveLength(3);
+      expect(chargeInputs[0]).toEqual({
+        propertyId: 42,
+        chargeType: ChargeType.MAINTENANCE_FEE,
+        amount: 150,
+        startDate: '2025-01-15',
+      });
+      expect(chargeInputs[1]).toEqual({
+        propertyId: 42,
+        chargeType: ChargeType.FINANCIAL_CHARGE,
+        amount: 50,
+        startDate: '2025-01-15',
+      });
+      expect(chargeInputs[2]).toEqual({
+        propertyId: 42,
+        chargeType: ChargeType.WATER_PREPAYMENT,
+        amount: 25,
+        startDate: '2025-01-15',
+      });
+    });
+
+    it('skips charges with 0 amount', () => {
+      const charges = {
+        maintenanceFee: 150,
+        financialCharge: 0,
+        waterCharge: 0,
+        totalCharge: 150,
+      };
+      const propertyId = 42;
+
+      const chargeInputs: PropertyChargeInput[] = [];
+      const startDate = null; // No purchase date
+
+      if (charges.maintenanceFee > 0) {
+        chargeInputs.push({
+          propertyId,
+          chargeType: ChargeType.MAINTENANCE_FEE,
+          amount: charges.maintenanceFee,
+          startDate,
+        });
+      }
+      if (charges.financialCharge > 0) {
+        chargeInputs.push({
+          propertyId,
+          chargeType: ChargeType.FINANCIAL_CHARGE,
+          amount: charges.financialCharge,
+          startDate,
+        });
+      }
+      if (charges.waterCharge > 0) {
+        chargeInputs.push({
+          propertyId,
+          chargeType: ChargeType.WATER_PREPAYMENT,
+          amount: charges.waterCharge,
+          startDate,
+        });
+      }
+
+      expect(chargeInputs).toHaveLength(1);
+      expect(chargeInputs[0].chargeType).toBe(ChargeType.MAINTENANCE_FEE);
+    });
+
+    it('handles null startDate when purchaseDate is not set', () => {
+      const charges = {
+        maintenanceFee: 150,
+        financialCharge: 50,
+        waterCharge: 0,
+        totalCharge: 200,
+      };
+      const propertyId = 42;
+      const purchaseDate: Date | undefined = undefined;
+
+      const chargeInputs: PropertyChargeInput[] = [];
+      const startDate = purchaseDate
+        ? dayjs(purchaseDate).format('YYYY-MM-DD')
+        : null;
+
+      if (charges.maintenanceFee > 0) {
+        chargeInputs.push({
+          propertyId,
+          chargeType: ChargeType.MAINTENANCE_FEE,
+          amount: charges.maintenanceFee,
+          startDate,
+        });
+      }
+      if (charges.financialCharge > 0) {
+        chargeInputs.push({
+          propertyId,
+          chargeType: ChargeType.FINANCIAL_CHARGE,
+          amount: charges.financialCharge,
+          startDate,
+        });
+      }
+
+      expect(chargeInputs).toHaveLength(2);
+      expect(chargeInputs[0].startDate).toBeNull();
+      expect(chargeInputs[1].startDate).toBeNull();
+    });
+
+    it('does not create batch request when no charges have positive values', () => {
+      const charges = {
+        maintenanceFee: 0,
+        financialCharge: 0,
+        waterCharge: 0,
+        totalCharge: 0,
+      };
+
+      const chargeInputs: PropertyChargeInput[] = [];
+
+      if (charges.maintenanceFee > 0) {
+        chargeInputs.push({
+          propertyId: 42,
+          chargeType: ChargeType.MAINTENANCE_FEE,
+          amount: charges.maintenanceFee,
+          startDate: null,
+        });
+      }
+      if (charges.financialCharge > 0) {
+        chargeInputs.push({
+          propertyId: 42,
+          chargeType: ChargeType.FINANCIAL_CHARGE,
+          amount: charges.financialCharge,
+          startDate: null,
+        });
+      }
+      if (charges.waterCharge > 0) {
+        chargeInputs.push({
+          propertyId: 42,
+          chargeType: ChargeType.WATER_PREPAYMENT,
+          amount: charges.waterCharge,
+          startDate: null,
+        });
+      }
+
+      // Should not make batch API call if no charges
+      expect(chargeInputs.length > 0).toBe(false);
+    });
+  });
+
+  describe('Current charges fetching for edit mode', () => {
+    it('maps API response to charge state', () => {
+      // Simulates mapping from CurrentCharges API response to component state
+      const apiResponse = {
+        maintenanceFee: 150,
+        financialCharge: 50,
+        waterPrepayment: 25,
+        totalCharge: 200,
+      };
+
+      const chargeState = {
+        maintenanceFee: apiResponse.maintenanceFee ?? 0,
+        financialCharge: apiResponse.financialCharge ?? 0,
+        waterCharge: apiResponse.waterPrepayment ?? 0, // Note: API uses waterPrepayment
+        totalCharge: apiResponse.totalCharge ?? 0,
+      };
+
+      expect(chargeState.maintenanceFee).toBe(150);
+      expect(chargeState.financialCharge).toBe(50);
+      expect(chargeState.waterCharge).toBe(25);
+      expect(chargeState.totalCharge).toBe(200);
+    });
+
+    it('handles null values in API response', () => {
+      const apiResponse = {
+        maintenanceFee: null,
+        financialCharge: 50,
+        waterPrepayment: null,
+        totalCharge: null,
+      };
+
+      const chargeState = {
+        maintenanceFee: apiResponse.maintenanceFee ?? 0,
+        financialCharge: apiResponse.financialCharge ?? 0,
+        waterCharge: apiResponse.waterPrepayment ?? 0,
+        totalCharge: apiResponse.totalCharge ?? 0,
+      };
+
+      expect(chargeState.maintenanceFee).toBe(0);
+      expect(chargeState.financialCharge).toBe(50);
+      expect(chargeState.waterCharge).toBe(0);
+      expect(chargeState.totalCharge).toBe(0);
     });
   });
 });
