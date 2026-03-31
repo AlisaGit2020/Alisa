@@ -14,8 +14,11 @@ import {
   PropertyExternalSource,
   PropertyStatus,
   PropertyType,
+  ChargeType,
 } from '@asset-backend/common/types';
 import { PropertyService } from '@asset-backend/real-estate/property/property.service';
+import { PropertyChargeService } from '@asset-backend/real-estate/property/property-charge.service';
+import { PropertyChargeInputDto } from '@asset-backend/real-estate/property/dtos/property-charge-input.dto';
 import { JWTUser } from '@asset-backend/auth/types';
 import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
 
@@ -84,7 +87,10 @@ export class EtuoviImportService {
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
   private readonly TIMEOUT = 15000;
 
-  constructor(private readonly propertyService: PropertyService) {}
+  constructor(
+    private readonly propertyService: PropertyService,
+    private readonly propertyChargeService: PropertyChargeService,
+  ) {}
 
   async createProspectProperty(
     user: JWTUser,
@@ -106,17 +112,23 @@ export class EtuoviImportService {
       propertyInput.externalSourceId,
     );
 
+    let property: Property;
     if (existingProperty) {
       this.logger.debug(
         `Updating existing property ${existingProperty.id} from Etuovi listing ${propertyInput.externalSourceId}`,
       );
-      return this.propertyService.update(user, existingProperty.id, propertyInput);
+      property = await this.propertyService.update(user, existingProperty.id, propertyInput);
+    } else {
+      this.logger.debug(
+        `Creating new prospect property from Etuovi listing ${propertyInput.externalSourceId}`,
+      );
+      property = await this.propertyService.add(user, propertyInput);
     }
 
-    this.logger.debug(
-      `Creating new prospect property from Etuovi listing ${propertyInput.externalSourceId}`,
-    );
-    return this.propertyService.add(user, propertyInput);
+    // Create charges from Etuovi data
+    await this.createChargesFromEtuoviData(user, property.id, etuoviData);
+
+    return property;
   }
 
   async fetchPropertyData(url: string): Promise<EtuoviPropertyDataDto> {
@@ -559,5 +571,44 @@ export class EtuoviImportService {
   private extractNameFromUrl(url: string): string {
     const id = this.extractIdFromUrl(url);
     return `Etuovi ${id}`;
+  }
+
+  private async createChargesFromEtuoviData(
+    user: JWTUser,
+    propertyId: number,
+    data: EtuoviPropertyDataDto,
+  ): Promise<void> {
+    const charges: PropertyChargeInputDto[] = [];
+
+    if (data.maintenanceFee && data.maintenanceFee > 0) {
+      charges.push({
+        propertyId,
+        chargeType: ChargeType.MAINTENANCE_FEE,
+        amount: data.maintenanceFee,
+        startDate: null,
+      });
+    }
+
+    if (data.chargeForFinancialCosts && data.chargeForFinancialCosts > 0) {
+      charges.push({
+        propertyId,
+        chargeType: ChargeType.FINANCIAL_CHARGE,
+        amount: data.chargeForFinancialCosts,
+        startDate: null,
+      });
+    }
+
+    if (data.waterCharge && data.waterCharge > 0) {
+      charges.push({
+        propertyId,
+        chargeType: ChargeType.WATER_PREPAYMENT,
+        amount: data.waterCharge,
+        startDate: null,
+      });
+    }
+
+    if (charges.length > 0) {
+      await this.propertyChargeService.createBatch(user, propertyId, charges);
+    }
   }
 }

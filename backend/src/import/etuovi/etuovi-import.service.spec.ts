@@ -14,6 +14,7 @@ import {
 } from '@asset-backend/common/types';
 import { EtuoviPropertyDataDto } from './dtos/etuovi-property-data.dto';
 import { PropertyService } from '@asset-backend/real-estate/property/property.service';
+import { PropertyChargeService } from '@asset-backend/real-estate/property/property-charge.service';
 
 describe('EtuoviImportService', () => {
   let service: EtuoviImportService;
@@ -23,6 +24,10 @@ describe('EtuoviImportService', () => {
     add: jest.fn(),
     update: jest.fn(),
     findByExternalSource: jest.fn(),
+  };
+
+  const mockPropertyChargeService = {
+    createBatch: jest.fn().mockResolvedValue([]),
   };
 
   beforeAll(() => {
@@ -35,6 +40,7 @@ describe('EtuoviImportService', () => {
       providers: [
         EtuoviImportService,
         { provide: PropertyService, useValue: mockPropertyService },
+        { provide: PropertyChargeService, useValue: mockPropertyChargeService },
       ],
     }).compile();
 
@@ -810,73 +816,20 @@ describe('EtuoviImportService', () => {
       expect(result.debtShare).toBe(25000);
     });
 
-    it('maps maintenanceFee to maintenanceFee', () => {
+    it('does not set financial charge fields on property input', () => {
       const etuoviData: EtuoviPropertyDataDto = {
         url: 'https://www.etuovi.com/kohde/12345',
         deptFreePrice: 150000,
         apartmentSize: 65.5,
         maintenanceFee: 180.50,
-      };
-
-      const result = service.createPropertyInput(etuoviData);
-
-      expect(result.maintenanceFee).toBe(180.50);
-    });
-
-    it('maps chargeForFinancialCosts to financialCharge', () => {
-      const etuoviData: EtuoviPropertyDataDto = {
-        url: 'https://www.etuovi.com/kohde/12345',
-        deptFreePrice: 150000,
-        apartmentSize: 65.5,
-        maintenanceFee: 200,
         chargeForFinancialCosts: 75.25,
-      };
-
-      const result = service.createPropertyInput(etuoviData);
-
-      expect(result.financialCharge).toBe(75.25);
-    });
-
-    it('maps waterCharge to waterCharge', () => {
-      const etuoviData: EtuoviPropertyDataDto = {
-        url: 'https://www.etuovi.com/kohde/12345',
-        deptFreePrice: 150000,
-        apartmentSize: 65.5,
-        maintenanceFee: 200,
         waterCharge: 18,
       };
 
       const result = service.createPropertyInput(etuoviData);
 
-      expect(result.waterCharge).toBe(18);
-    });
-
-    it('does not set financial fields when not provided', () => {
-      const etuoviData: EtuoviPropertyDataDto = {
-        url: 'https://www.etuovi.com/kohde/12345',
-        deptFreePrice: 150000,
-        apartmentSize: 65.5,
-        maintenanceFee: 0,
-      };
-
-      const result = service.createPropertyInput(etuoviData);
-
+      // Charges are created separately via PropertyChargeService
       expect(result.debtShare).toBeUndefined();
-      expect(result.financialCharge).toBeUndefined();
-      expect(result.waterCharge).toBeUndefined();
-    });
-
-    it('sets maintenanceFee to 0 when etuovi maintenanceFee is 0', () => {
-      const etuoviData: EtuoviPropertyDataDto = {
-        url: 'https://www.etuovi.com/kohde/12345',
-        deptFreePrice: 150000,
-        apartmentSize: 65.5,
-        maintenanceFee: 0,
-      };
-
-      const result = service.createPropertyInput(etuoviData);
-
-      expect(result.maintenanceFee).toBe(0);
     });
   });
 
@@ -895,6 +848,7 @@ describe('EtuoviImportService', () => {
       mockPropertyService.add.mockReset();
       mockPropertyService.update.mockReset();
       mockPropertyService.findByExternalSource.mockReset();
+      mockPropertyChargeService.createBatch.mockReset().mockResolvedValue([]);
     });
 
     it('calls propertyService.add with converted property input', async () => {
@@ -1085,6 +1039,65 @@ describe('EtuoviImportService', () => {
           monthlyRent: expect.anything(),
         }),
       );
+    });
+
+    it('creates charges via PropertyChargeService when property is created', async () => {
+      const mockProperty = { id: 1, name: 'Test Property' };
+      mockPropertyService.add.mockResolvedValue(mockProperty);
+      mockPropertyService.findByExternalSource.mockResolvedValue(null);
+
+      jest.spyOn(service, 'fetchPropertyData').mockResolvedValue({
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 180,
+        chargeForFinancialCosts: 75,
+        waterCharge: 25,
+      });
+
+      await service.createProspectProperty(
+        mockUser,
+        'https://www.etuovi.com/kohde/12345',
+      );
+
+      expect(mockPropertyChargeService.createBatch).toHaveBeenCalledWith(
+        mockUser,
+        1,
+        expect.arrayContaining([
+          expect.objectContaining({
+            chargeType: 1, // ChargeType.MAINTENANCE_FEE
+            amount: 180,
+          }),
+          expect.objectContaining({
+            chargeType: 2, // ChargeType.FINANCIAL_CHARGE
+            amount: 75,
+          }),
+          expect.objectContaining({
+            chargeType: 3, // ChargeType.WATER_PREPAYMENT
+            amount: 25,
+          }),
+        ]),
+      );
+    });
+
+    it('does not create charges when all charge values are 0 or undefined', async () => {
+      const mockProperty = { id: 1, name: 'Test Property' };
+      mockPropertyService.add.mockResolvedValue(mockProperty);
+      mockPropertyService.findByExternalSource.mockResolvedValue(null);
+
+      jest.spyOn(service, 'fetchPropertyData').mockResolvedValue({
+        url: 'https://www.etuovi.com/kohde/12345',
+        deptFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 0,
+      });
+
+      await service.createProspectProperty(
+        mockUser,
+        'https://www.etuovi.com/kohde/12345',
+      );
+
+      expect(mockPropertyChargeService.createBatch).not.toHaveBeenCalled();
     });
   });
 });
