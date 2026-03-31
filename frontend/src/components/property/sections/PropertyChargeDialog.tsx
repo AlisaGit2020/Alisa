@@ -77,9 +77,12 @@ function PropertyChargeDialog({
 
   // Check if total charge matches sum of components
   const totalMismatch = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
     const getActiveAmount = (typeName: string): number => {
       const typeCharges = chargesByType.get(typeName) || [];
-      const activeCharge = typeCharges.find(c => !c.endDate);
+      const activeCharge = typeCharges.find(c =>
+        c.startDate <= today && (!c.endDate || c.endDate >= today)
+      );
       return activeCharge?.amount ?? 0;
     };
 
@@ -248,7 +251,11 @@ function PropertyChargeDialog({
                     onDeleteRequest={handleDeleteRequest}
                     fixedLayout
                     stripedRows={false}
-                    rowHighlight={(charge) => !charge.endDate ? 'success.light' : undefined}
+                    rowHighlight={(charge) => {
+                      const today = new Date().toISOString().split('T')[0];
+                      const isActive = charge.startDate <= today && (!charge.endDate || charge.endDate >= today);
+                      return isActive ? 'rgba(76, 175, 80, 0.12)' : undefined;
+                    }}
                   />
                 </Box>
               );
