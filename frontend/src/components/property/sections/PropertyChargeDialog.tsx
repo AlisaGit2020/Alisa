@@ -239,7 +239,7 @@ function PropertyChargeDialog({
               const typeCharges = chargesByType.get(typeName) || [];
               return (
                 <Box key={typeName} sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>
+                  <Typography variant="subtitle1" sx={{ mb: 0.5, fontWeight: 'medium' }}>
                     {t(`chargeTypes.${typeName}`)}
                   </Typography>
                   <AssetDataTable<PropertyCharge>
