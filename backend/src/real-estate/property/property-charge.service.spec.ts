@@ -106,7 +106,7 @@ describe('PropertyChargeService', () => {
       expect(mockPropertyService.findOne).toHaveBeenCalledWith(mockUser, 1);
       expect(mockRepository.find).toHaveBeenCalledWith({
         where: { propertyId: 1 },
-        order: { startDate: 'DESC', chargeType: 'ASC' },
+        order: { chargeType: 'ASC', endDate: { direction: 'DESC', nulls: 'FIRST' } },
       });
     });
 
