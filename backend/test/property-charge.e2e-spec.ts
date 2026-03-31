@@ -428,4 +428,51 @@ describe('PropertyChargeController (e2e)', () => {
       expect(response.body.totalCharge).toBe(175); // 100 + 50 + 25
     });
   });
+
+  describe('POST /real-estate/property/:id/charges/batch', () => {
+    it('should create multiple charges', async () => {
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+      const inputs = [
+        { chargeType: ChargeType.MAINTENANCE_FEE, amount: 150, startDate: '2024-01-15' },
+        { chargeType: ChargeType.FINANCIAL_CHARGE, amount: 50, startDate: '2024-01-15' },
+      ];
+
+      const response = await request(server)
+        .post(`/real-estate/property/${propertyId}/charges/batch`)
+        .set('Authorization', getBearerToken(token))
+        .send(inputs)
+        .expect(201);
+
+      expect(response.body).toHaveLength(3); // 2 inputs + 1 total
+      const totalCharge = response.body.find(
+        (c: { chargeType: ChargeType }) => c.chargeType === ChargeType.TOTAL_CHARGE,
+      );
+      expect(totalCharge.amount).toBe(200);
+    });
+
+    it('should allow null startDate', async () => {
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+      const inputs = [
+        { chargeType: ChargeType.MAINTENANCE_FEE, amount: 100, startDate: null },
+      ];
+
+      const response = await request(server)
+        .post(`/real-estate/property/${propertyId}/charges/batch`)
+        .set('Authorization', getBearerToken(token))
+        .send(inputs)
+        .expect(201);
+
+      expect(response.body[0].startDate).toBeNull();
+    });
+
+    it('should return 404 for non-existent property', async () => {
+      const token = await getUserAccessToken2(authService, mainUser.jwtUser);
+
+      await request(server)
+        .post('/real-estate/property/99999/charges/batch')
+        .set('Authorization', getBearerToken(token))
+        .send([{ chargeType: ChargeType.MAINTENANCE_FEE, amount: 100, startDate: null }])
+        .expect(404);
+    });
+  });
 });

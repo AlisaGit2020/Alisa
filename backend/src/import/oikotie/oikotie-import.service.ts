@@ -490,9 +490,6 @@ export class OikotieImportService {
     // Financial fields
     input.purchasePrice = oikotieData.debtFreePrice;
     input.debtShare = oikotieData.debtShare;
-    input.maintenanceFee = oikotieData.maintenanceFee;
-    input.financialCharge = oikotieData.financingFee;
-    input.waterCharge = oikotieData.waterFee;
 
     return input;
   }

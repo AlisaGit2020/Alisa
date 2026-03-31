@@ -526,9 +526,6 @@ export class EtuoviImportService {
     // Financial fields
     input.purchasePrice = etuoviData.deptFreePrice;
     input.debtShare = etuoviData.deptShare;
-    input.maintenanceFee = etuoviData.maintenanceFee;
-    input.financialCharge = etuoviData.chargeForFinancialCosts;
-    input.waterCharge = etuoviData.waterCharge;
 
     return input;
   }
