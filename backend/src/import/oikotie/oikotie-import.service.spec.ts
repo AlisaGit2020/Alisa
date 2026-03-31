@@ -14,6 +14,7 @@ import {
 } from '@asset-backend/common/types';
 import { OikotiePropertyDataDto } from './dtos/oikotie-property-data.dto';
 import { PropertyService } from '@asset-backend/real-estate/property/property.service';
+import { PropertyChargeService } from '@asset-backend/real-estate/property/property-charge.service';
 
 describe('OikotieImportService', () => {
   let service: OikotieImportService;
@@ -23,6 +24,10 @@ describe('OikotieImportService', () => {
     add: jest.fn(),
     update: jest.fn(),
     findByExternalSource: jest.fn(),
+  };
+
+  const mockPropertyChargeService = {
+    createBatch: jest.fn().mockResolvedValue([]),
   };
 
   beforeAll(() => {
@@ -35,6 +40,7 @@ describe('OikotieImportService', () => {
       providers: [
         OikotieImportService,
         { provide: PropertyService, useValue: mockPropertyService },
+        { provide: PropertyChargeService, useValue: mockPropertyChargeService },
       ],
     }).compile();
 
@@ -568,62 +574,6 @@ describe('OikotieImportService', () => {
 
       expect(result.debtShare).toBe(25000);
     });
-
-    it('maps maintenanceFee to maintenanceFee', () => {
-      const oikotieData: OikotiePropertyDataDto = {
-        url: 'https://asunnot.oikotie.fi/myytavat-asunnot/vaasa/24322524',
-        debtFreePrice: 150000,
-        apartmentSize: 65.5,
-        maintenanceFee: 180.50,
-      };
-
-      const result = service.createPropertyInput(oikotieData);
-
-      expect(result.maintenanceFee).toBe(180.50);
-    });
-
-    it('maps financingFee to financialCharge', () => {
-      const oikotieData: OikotiePropertyDataDto = {
-        url: 'https://asunnot.oikotie.fi/myytavat-asunnot/vaasa/24322524',
-        debtFreePrice: 150000,
-        apartmentSize: 65.5,
-        maintenanceFee: 200,
-        financingFee: 75.25,
-      };
-
-      const result = service.createPropertyInput(oikotieData);
-
-      expect(result.financialCharge).toBe(75.25);
-    });
-
-    it('maps waterFee to waterCharge', () => {
-      const oikotieData: OikotiePropertyDataDto = {
-        url: 'https://asunnot.oikotie.fi/myytavat-asunnot/vaasa/24322524',
-        debtFreePrice: 150000,
-        apartmentSize: 65.5,
-        maintenanceFee: 200,
-        waterFee: 18,
-      };
-
-      const result = service.createPropertyInput(oikotieData);
-
-      expect(result.waterCharge).toBe(18);
-    });
-
-    it('does not set financial fields when not provided', () => {
-      const oikotieData: OikotiePropertyDataDto = {
-        url: 'https://asunnot.oikotie.fi/myytavat-asunnot/vaasa/24322524',
-        debtFreePrice: 150000,
-        apartmentSize: 65.5,
-        maintenanceFee: 0,
-      };
-
-      const result = service.createPropertyInput(oikotieData);
-
-      expect(result.debtShare).toBeUndefined();
-      expect(result.financialCharge).toBeUndefined();
-      expect(result.waterCharge).toBeUndefined();
-    });
   });
 
   describe('createProspectProperty', () => {
@@ -641,6 +591,8 @@ describe('OikotieImportService', () => {
       mockPropertyService.add.mockReset();
       mockPropertyService.update.mockReset();
       mockPropertyService.findByExternalSource.mockReset();
+      mockPropertyChargeService.createBatch.mockReset();
+      mockPropertyChargeService.createBatch.mockResolvedValue([]);
     });
 
     it('calls propertyService.add with converted property input', async () => {
@@ -832,6 +784,109 @@ describe('OikotieImportService', () => {
         expect.not.objectContaining({
           monthlyRent: expect.anything(),
         }),
+      );
+    });
+
+    it('creates charges from Oikotie data', async () => {
+      const mockProperty = { id: 1, name: 'Test Property' };
+      mockPropertyService.add.mockResolvedValue(mockProperty);
+      mockPropertyService.findByExternalSource.mockResolvedValue(null);
+
+      jest.spyOn(service, 'fetchPropertyData').mockResolvedValue({
+        url: 'https://asunnot.oikotie.fi/myytavat-asunnot/vaasa/24322524',
+        debtFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 200,
+        financingFee: 75,
+        waterFee: 25,
+      });
+
+      await service.createProspectProperty(
+        mockUser,
+        'https://asunnot.oikotie.fi/myytavat-asunnot/vaasa/24322524',
+      );
+
+      expect(mockPropertyChargeService.createBatch).toHaveBeenCalledWith(
+        mockUser,
+        1,
+        expect.arrayContaining([
+          expect.objectContaining({
+            chargeType: 1, // MAINTENANCE_FEE
+            amount: 200,
+            startDate: null,
+          }),
+          expect.objectContaining({
+            chargeType: 2, // FINANCIAL_CHARGE
+            amount: 75,
+            startDate: null,
+          }),
+          expect.objectContaining({
+            chargeType: 3, // WATER_PREPAYMENT
+            amount: 25,
+            startDate: null,
+          }),
+        ]),
+      );
+    });
+
+    it('does not create charges when fees are zero', async () => {
+      const mockProperty = { id: 1, name: 'Test Property' };
+      mockPropertyService.add.mockResolvedValue(mockProperty);
+      mockPropertyService.findByExternalSource.mockResolvedValue(null);
+
+      jest.spyOn(service, 'fetchPropertyData').mockResolvedValue({
+        url: 'https://asunnot.oikotie.fi/myytavat-asunnot/vaasa/24322524',
+        debtFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 0,
+      });
+
+      await service.createProspectProperty(
+        mockUser,
+        'https://asunnot.oikotie.fi/myytavat-asunnot/vaasa/24322524',
+      );
+
+      expect(mockPropertyChargeService.createBatch).not.toHaveBeenCalled();
+    });
+
+    it('creates charges when updating existing property', async () => {
+      const existingProperty = {
+        id: 99,
+        name: 'Old Name',
+        externalSource: PropertyExternalSource.OIKOTIE,
+        externalSourceId: '24322524',
+      };
+      const updatedProperty = { id: 99, name: 'Testikatu 1, 65100 Vaasa' };
+
+      mockPropertyService.findByExternalSource.mockResolvedValue(existingProperty);
+      mockPropertyService.update.mockResolvedValue(updatedProperty);
+
+      jest.spyOn(service, 'fetchPropertyData').mockResolvedValue({
+        url: 'https://asunnot.oikotie.fi/myytavat-asunnot/vaasa/24322524',
+        debtFreePrice: 150000,
+        apartmentSize: 65.5,
+        maintenanceFee: 180,
+        financingFee: 70,
+      });
+
+      await service.createProspectProperty(
+        mockUser,
+        'https://asunnot.oikotie.fi/myytavat-asunnot/vaasa/24322524',
+      );
+
+      expect(mockPropertyChargeService.createBatch).toHaveBeenCalledWith(
+        mockUser,
+        99,
+        expect.arrayContaining([
+          expect.objectContaining({
+            chargeType: 1, // MAINTENANCE_FEE
+            amount: 180,
+          }),
+          expect.objectContaining({
+            chargeType: 2, // FINANCIAL_CHARGE
+            amount: 70,
+          }),
+        ]),
       );
     });
   });

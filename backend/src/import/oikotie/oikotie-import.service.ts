@@ -16,8 +16,11 @@ import {
   PropertyType,
 } from '@asset-backend/common/types';
 import { PropertyService } from '@asset-backend/real-estate/property/property.service';
+import { PropertyChargeService } from '@asset-backend/real-estate/property/property-charge.service';
+import { PropertyChargeInputDto } from '@asset-backend/real-estate/property/dtos/property-charge-input.dto';
 import { JWTUser } from '@asset-backend/auth/types';
 import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
+import { ChargeType } from '@asset-backend/common/types';
 
 /**
  * Analytics object from var otAsunnot JSON
@@ -70,7 +73,10 @@ export class OikotieImportService {
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
   private readonly TIMEOUT = 15000;
 
-  constructor(private readonly propertyService: PropertyService) {}
+  constructor(
+    private readonly propertyService: PropertyService,
+    private readonly propertyChargeService: PropertyChargeService,
+  ) {}
 
   async createProspectProperty(
     user: JWTUser,
@@ -92,17 +98,23 @@ export class OikotieImportService {
       propertyInput.externalSourceId,
     );
 
+    let property: Property;
     if (existingProperty) {
       this.logger.debug(
         `Updating existing property ${existingProperty.id} from Oikotie listing ${propertyInput.externalSourceId}`,
       );
-      return this.propertyService.update(user, existingProperty.id, propertyInput);
+      property = await this.propertyService.update(user, existingProperty.id, propertyInput);
+    } else {
+      this.logger.debug(
+        `Creating new prospect property from Oikotie listing ${propertyInput.externalSourceId}`,
+      );
+      property = await this.propertyService.add(user, propertyInput);
     }
 
-    this.logger.debug(
-      `Creating new prospect property from Oikotie listing ${propertyInput.externalSourceId}`,
-    );
-    return this.propertyService.add(user, propertyInput);
+    // Create charges from scraped data
+    await this.createChargesFromOikotieData(user, property.id, oikotieData);
+
+    return property;
   }
 
   async fetchPropertyData(url: string): Promise<OikotiePropertyDataDto> {
@@ -526,5 +538,44 @@ export class OikotieImportService {
   private extractNameFromUrl(url: string): string {
     const id = this.extractIdFromUrl(url);
     return `Oikotie ${id}`;
+  }
+
+  private async createChargesFromOikotieData(
+    user: JWTUser,
+    propertyId: number,
+    data: OikotiePropertyDataDto,
+  ): Promise<void> {
+    const charges: PropertyChargeInputDto[] = [];
+
+    if (data.maintenanceFee && data.maintenanceFee > 0) {
+      charges.push({
+        propertyId,
+        chargeType: ChargeType.MAINTENANCE_FEE,
+        amount: data.maintenanceFee,
+        startDate: null,
+      });
+    }
+
+    if (data.financingFee && data.financingFee > 0) {
+      charges.push({
+        propertyId,
+        chargeType: ChargeType.FINANCIAL_CHARGE,
+        amount: data.financingFee,
+        startDate: null,
+      });
+    }
+
+    if (data.waterFee && data.waterFee > 0) {
+      charges.push({
+        propertyId,
+        chargeType: ChargeType.WATER_PREPAYMENT,
+        amount: data.waterFee,
+        startDate: null,
+      });
+    }
+
+    if (charges.length > 0) {
+      await this.propertyChargeService.createBatch(user, propertyId, charges);
+    }
   }
 }
