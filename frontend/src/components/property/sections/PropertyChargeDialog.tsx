@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Alert, Box, CircularProgress, Typography } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChargeType, PropertyCharge, PropertyChargeInput } from '@asset-types';
@@ -74,6 +74,27 @@ function PropertyChargeDialog({
     }
     return grouped;
   }, [charges]);
+
+  // Check if total charge matches sum of components
+  const totalMismatch = useMemo(() => {
+    const getActiveAmount = (typeName: string): number => {
+      const typeCharges = chargesByType.get(typeName) || [];
+      const activeCharge = typeCharges.find(c => c.endDate === null);
+      return activeCharge?.amount ?? 0;
+    };
+
+    const maintenanceFee = getActiveAmount('maintenance-fee');
+    const financialCharge = getActiveAmount('financial-charge');
+    const waterPrepayment = getActiveAmount('water-prepayment');
+    const totalCharge = getActiveAmount('total-charge');
+
+    const calculatedSum = maintenanceFee + financialCharge + waterPrepayment;
+
+    if (totalCharge > 0 && Math.abs(calculatedSum - totalCharge) > 0.01) {
+      return { calculatedSum, totalCharge };
+    }
+    return null;
+  }, [chargesByType]);
 
   const handleAdd = (chargeType: ChargeType) => {
     setEditingCharge(undefined);
@@ -198,6 +219,15 @@ function PropertyChargeDialog({
           <Typography color="error" sx={{ p: 2 }}>
             {error}
           </Typography>
+        )}
+
+        {!loading && !showForm && totalMismatch && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {t('totalChargeMismatch', {
+              calculated: totalMismatch.calculatedSum.toFixed(2),
+              actual: totalMismatch.totalCharge.toFixed(2),
+            })}
+          </Alert>
         )}
 
         {!loading && !error && !showForm && (

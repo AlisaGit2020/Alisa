@@ -109,6 +109,7 @@ const property = {
     currentCharges: 'Aktuella avgifter',
     startDateRequired: 'Startdatum krävs',
     endDateMustBeAfterStartDate: 'Slutdatum måste vara efter startdatum',
+    totalChargeMismatch: 'Total avgift ({{actual}} €) matchar inte summan av komponenter ({{calculated}} €)',
     amountMustBePositive: 'Beloppet måste vara 0 eller större',
     leaveEmptyForValidUntilFurtherNotice: 'Lämna tomt för "gäller tills vidare"',
     chargeAmount: 'Belopp',
