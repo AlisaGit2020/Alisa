@@ -32,10 +32,7 @@ export interface CreatePropertyOptions {
   salePrice?: number;
   saleDate?: Date;
   debtShare?: number;
-  maintenanceFee?: number;
-  financialCharge?: number;
   monthlyRent?: number;
-  waterCharge?: number;
 }
 
 export const createAddress = (options: CreateAddressOptions = {}): Address => {
@@ -69,9 +66,6 @@ export const createProperty = (options: CreatePropertyOptions = {}): Property =>
   property.salePrice = options.salePrice;
   property.saleDate = options.saleDate;
   property.debtShare = options.debtShare;
-  property.maintenanceFee = options.maintenanceFee;
-  property.financialCharge = options.financialCharge;
   property.monthlyRent = options.monthlyRent;
-  property.waterCharge = options.waterCharge;
   return property;
 };
