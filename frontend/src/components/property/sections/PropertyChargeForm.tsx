@@ -111,26 +111,16 @@ function PropertyChargeForm({ propertyId, charge, defaultChargeType, onSubmit, o
           label={t('startDate')}
           value={startDate}
           onChange={(date) => setStartDate(date)}
-          slotProps={{
-            textField: {
-              error: !!errors.startDate,
-              helperText: errors.startDate,
-              inputProps: { 'aria-label': t('startDate') },
-            },
-          }}
+          error={!!errors.startDate}
+          helperText={errors.startDate}
         />
 
         <AssetDatePicker
           label={t('endDate')}
           value={endDate}
           onChange={(date) => setEndDate(date)}
-          slotProps={{
-            textField: {
-              error: !!errors.endDate,
-              helperText: errors.endDate || t('leaveEmptyForValidUntilFurtherNotice'),
-              inputProps: { 'aria-label': t('endDate') },
-            },
-          }}
+          error={!!errors.endDate}
+          helperText={errors.endDate || t('leaveEmptyForValidUntilFurtherNotice')}
         />
 
         <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 2 }}>
