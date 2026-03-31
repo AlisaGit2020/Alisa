@@ -118,6 +118,8 @@ const property = {
     actions: 'Toiminnot',
     cancel: 'Peruuta',
     delete: 'Poista',
+    showHistory: 'Näytä historia',
+    hideHistory: 'Piilota historia',
     save: 'Tallenna',
     close: 'Sulje',
     debtShare: 'Yhtiölainaosuus',

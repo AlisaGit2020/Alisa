@@ -118,6 +118,8 @@ const property = {
     actions: 'Actions',
     cancel: 'Cancel',
     delete: 'Delete',
+    showHistory: 'Show history',
+    hideHistory: 'Hide history',
     save: 'Save',
     close: 'Close',
     debtShare: 'Debt Share',

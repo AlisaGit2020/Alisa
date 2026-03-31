@@ -118,6 +118,8 @@ const property = {
     actions: 'Åtgärder',
     cancel: 'Avbryt',
     delete: 'Ta bort',
+    showHistory: 'Visa historik',
+    hideHistory: 'Dölj historik',
     save: 'Spara',
     close: 'Stäng',
     debtShare: 'Skulddel',
