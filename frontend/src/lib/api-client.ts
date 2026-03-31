@@ -204,6 +204,36 @@ class ApiClient {
     }
   }
 
+  /**
+   * Generic request method for custom API calls.
+   */
+  public static async request<T>(config: {
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    url: string;
+    data?: unknown;
+  }): Promise<T> {
+    const fullUrl = ApiClient.getApiUrl(config.url.replace(/^\//, ''));
+    const options = await ApiClient.getOptions();
+
+    let response;
+    switch (config.method) {
+      case 'GET':
+        response = await axios.get<T>(fullUrl, options);
+        break;
+      case 'POST':
+        response = await axios.post<T>(fullUrl, config.data, options);
+        break;
+      case 'PUT':
+        response = await axios.put<T>(fullUrl, config.data, options);
+        break;
+      case 'DELETE':
+        response = await axios.delete<T>(fullUrl, options);
+        break;
+    }
+
+    return response.data;
+  }
+
   private static getApiUrl(path: string) {
     return `${VITE_API_URL}/${path}`;
   }
