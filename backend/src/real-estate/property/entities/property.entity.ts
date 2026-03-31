@@ -143,34 +143,7 @@ export class Property {
     nullable: true,
     transformer: new DecimalToNumberTransformer(),
   })
-  public maintenanceFee?: number;
-
-  @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    nullable: true,
-    transformer: new DecimalToNumberTransformer(),
-  })
-  public financialCharge?: number;
-
-  @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    nullable: true,
-    transformer: new DecimalToNumberTransformer(),
-  })
   public monthlyRent?: number;
-
-  @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    nullable: true,
-    transformer: new DecimalToNumberTransformer(),
-  })
-  public waterCharge?: number;
 
   @Column({ type: 'boolean', default: false })
   public isAirbnb: boolean = false;
