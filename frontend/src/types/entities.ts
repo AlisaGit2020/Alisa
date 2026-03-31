@@ -1,6 +1,7 @@
 // Entity interfaces - pure TypeScript types without decorators
 
 import {
+  ChargeType,
   DashboardConfig,
   PropertyExternalSource,
   PropertyStatus,
@@ -196,4 +197,23 @@ export interface TaxDeductionCalculation {
   defaultLaundryPrice: number;
   travelAmount: number;
   laundryAmount: number;
+}
+
+// PropertyCharge - seasonal charges with date ranges
+export interface PropertyCharge {
+  id: number;
+  propertyId: number;
+  chargeType: ChargeType;
+  typeName: string;
+  amount: number;
+  startDate: string;
+  endDate: string | null;
+}
+
+// CurrentCharges - current values for each charge type
+export interface CurrentCharges {
+  maintenanceFee: number | null;
+  financialCharge: number | null;
+  waterPrepayment: number | null;
+  totalCharge: number | null;
 }
