@@ -40,7 +40,7 @@ function PropertyChargeDialog({
   const [selectedChargeType, setSelectedChargeType] = useState<ChargeType | undefined>(undefined);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [chargeToDelete, setChargeToDelete] = useState<PropertyCharge | null>(null);
-  const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
   const fetchCharges = useCallback(async () => {
     setLoading(true);
@@ -107,17 +107,17 @@ function PropertyChargeDialog({
     return charge.startDate <= today && (!charge.endDate || charge.endDate >= today);
   };
 
-  const toggleHistory = (typeName: string) => {
-    setExpandedHistory(prev => {
-      const next = new Set(prev);
-      if (next.has(typeName)) {
-        next.delete(typeName);
-      } else {
-        next.add(typeName);
+  // Check if any type has history to show
+  const hasAnyHistory = useMemo(() => {
+    for (const { typeName } of CHARGE_TYPES) {
+      const typeCharges = chargesByType.get(typeName) || [];
+      const activeCharges = typeCharges.filter(isChargeActive);
+      if (typeCharges.length > activeCharges.length) {
+        return true;
       }
-      return next;
-    });
-  };
+    }
+    return false;
+  }, [chargesByType]);
 
   const handleAdd = (chargeType: ChargeType) => {
     setEditingCharge(undefined);
@@ -229,7 +229,19 @@ function PropertyChargeDialog({
         maxWidth="sm"
         fullWidth
         actions={
-          <AssetButton label={t('close')} variant="outlined" onClick={onClose} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', px: 2 }}>
+            {hasAnyHistory && !showForm ? (
+              <AssetButton
+                label={showAllHistory ? t('hideHistory') : t('showHistory')}
+                variant="text"
+                startIcon={<HistoryIcon />}
+                onClick={() => setShowAllHistory(prev => !prev)}
+              />
+            ) : (
+              <Box />
+            )}
+            <AssetButton label={t('close')} variant="outlined" onClick={onClose} />
+          </Box>
         }
       >
         {loading && (
@@ -257,40 +269,40 @@ function PropertyChargeDialog({
           <>
             {CHARGE_TYPES.map(({ typeName, chargeType }) => {
               const typeCharges = chargesByType.get(typeName) || [];
-              const showHistory = expandedHistory.has(typeName);
-              const visibleCharges = showHistory
+              const visibleCharges = showAllHistory
                 ? typeCharges
                 : typeCharges.filter(isChargeActive);
-              const hasHistory = typeCharges.length > visibleCharges.length;
 
               return (
                 <Box key={typeName} sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
-                        {t(`chargeTypes.${typeName}`)}
-                      </Typography>
-                      <Tooltip title={t('addCharge')}>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleAdd(chargeType)}
-                          color="primary"
-                        >
-                          <AddIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                    {(hasHistory || showHistory) && (
-                      <Tooltip title={showHistory ? t('hideHistory') : t('showHistory')}>
-                        <IconButton
-                          size="small"
-                          onClick={() => toggleHistory(typeName)}
-                          color={showHistory ? 'primary' : 'default'}
-                        >
-                          <HistoryIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      mb: 0.5,
+                      py: 0.5,
+                      px: 1,
+                      borderRadius: 1,
+                      bgcolor: 'primary.main',
+                    }}
+                  >
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'medium', color: 'primary.contrastText' }}>
+                      {t(`chargeTypes.${typeName}`)}
+                    </Typography>
+                    <Tooltip title={t('addCharge')}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleAdd(chargeType)}
+                        sx={{
+                          bgcolor: 'primary.light',
+                          color: 'primary.contrastText',
+                          '&:hover': { bgcolor: 'primary.dark' },
+                        }}
+                      >
+                        <AddIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                   </Box>
                   <AssetDataTable<PropertyCharge>
                     t={t}
