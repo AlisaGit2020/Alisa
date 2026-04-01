@@ -128,12 +128,12 @@ describe('PropertyChargeService', () => {
   });
 
   describe('getCurrentCharges', () => {
-    it('should return charges valid today', async () => {
+    it('should return charges valid today and calculate total', async () => {
+      // Note: TOTAL_CHARGE is not stored in DB, it's calculated from components
       const mockCharges = [
         createMockCharge(1, ChargeType.MAINTENANCE_FEE, 150, lastMonth, null),
         createMockCharge(2, ChargeType.FINANCIAL_CHARGE, 50, lastMonth, null),
         createMockCharge(3, ChargeType.WATER_PREPAYMENT, 25, lastMonth, null),
-        createMockCharge(4, ChargeType.TOTAL_CHARGE, 225, lastMonth, null),
       ];
 
       const queryBuilder = mockRepository.createQueryBuilder();
@@ -145,10 +145,11 @@ describe('PropertyChargeService', () => {
       expect(result.maintenanceFee).toBe(150);
       expect(result.financialCharge).toBe(50);
       expect(result.waterPrepayment).toBe(25);
+      // totalCharge is calculated: 150 + 50 + 25 = 225
       expect(result.totalCharge).toBe(225);
     });
 
-    it('should return null for charge types without current charge', async () => {
+    it('should calculate total from available charges', async () => {
       const mockCharges = [
         createMockCharge(1, ChargeType.MAINTENANCE_FEE, 150, lastMonth, null),
       ];
@@ -162,10 +163,32 @@ describe('PropertyChargeService', () => {
       expect(result.maintenanceFee).toBe(150);
       expect(result.financialCharge).toBeNull();
       expect(result.waterPrepayment).toBeNull();
-      expect(result.totalCharge).toBeNull();
+      // totalCharge is calculated from available components: 150
+      expect(result.totalCharge).toBe(150);
     });
 
-    it('should not return charges that have ended', async () => {
+    it('should include OTHER_CHARGE_BASED in total calculation', async () => {
+      const mockCharges = [
+        createMockCharge(1, ChargeType.MAINTENANCE_FEE, 100, lastMonth, null),
+        createMockCharge(2, ChargeType.FINANCIAL_CHARGE, 50, lastMonth, null),
+        createMockCharge(3, ChargeType.WATER_PREPAYMENT, 20, lastMonth, null),
+        createMockCharge(4, ChargeType.OTHER_CHARGE_BASED, 30, lastMonth, null),
+      ];
+
+      const queryBuilder = mockRepository.createQueryBuilder();
+      queryBuilder.getMany.mockResolvedValue(mockCharges);
+
+      const result = await service.getCurrentCharges(mockUser, 1);
+
+      expect(result.maintenanceFee).toBe(100);
+      expect(result.financialCharge).toBe(50);
+      expect(result.waterPrepayment).toBe(20);
+      expect(result.otherChargeBased).toBe(30);
+      // totalCharge includes OTHER_CHARGE_BASED: 100 + 50 + 20 + 30 = 200
+      expect(result.totalCharge).toBe(200);
+    });
+
+    it('should return zero total when no charges exist', async () => {
       const mockCharges: PropertyCharge[] = [];
 
       const queryBuilder = mockRepository.createQueryBuilder();
@@ -176,7 +199,7 @@ describe('PropertyChargeService', () => {
       expect(result.maintenanceFee).toBeNull();
       expect(result.financialCharge).toBeNull();
       expect(result.waterPrepayment).toBeNull();
-      expect(result.totalCharge).toBeNull();
+      expect(result.totalCharge).toBe(0);
     });
   });
 
@@ -234,87 +257,6 @@ describe('PropertyChargeService', () => {
       expect(savedCall![0].endDate.toISOString().split('T')[0]).toBe(yesterdayStr);
     });
 
-    it('should recalculate TOTAL_CHARGE when creating a charge', async () => {
-      const existingCharges = [
-        createMockCharge(1, ChargeType.MAINTENANCE_FEE, 100, lastMonth, null),
-        createMockCharge(2, ChargeType.WATER_PREPAYMENT, 20, lastMonth, null),
-      ];
-
-      const input = {
-        propertyId: 1,
-        chargeType: ChargeType.FINANCIAL_CHARGE,
-        amount: 50,
-        startDate: todayStr,
-        endDate: null,
-      };
-
-      mockRepository.find.mockResolvedValue([]);
-      // Mock getMany to return existing charges + new charge for recalculate
-      mockQueryBuilder.getMany!.mockResolvedValue([
-        ...existingCharges,
-        createMockCharge(3, ChargeType.FINANCIAL_CHARGE, 50, today, null),
-      ]);
-      const newCharge = createMockCharge(3, ChargeType.FINANCIAL_CHARGE, 50, today, null);
-      const totalCharge = createMockCharge(4, ChargeType.TOTAL_CHARGE, 170, today, null);
-      mockRepository.save.mockResolvedValue(newCharge);
-      // Mock create to return different objects based on chargeType
-      mockRepository.create.mockImplementation((data: Partial<PropertyCharge>) => {
-        if (data.chargeType === ChargeType.TOTAL_CHARGE) {
-          return totalCharge;
-        }
-        return newCharge;
-      });
-      mockRepository.findOne.mockResolvedValue(null); // No existing total
-
-      await service.create(mockUser, input);
-
-      // Verify TOTAL_CHARGE is recalculated: 100 + 50 + 20 = 170
-      expect(mockRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          chargeType: ChargeType.TOTAL_CHARGE,
-        }),
-      );
-    });
-
-    it('should include OTHER_CHARGE_BASED in total calculation', async () => {
-      const input = {
-        propertyId: 1,
-        chargeType: ChargeType.MAINTENANCE_FEE,
-        amount: 110,
-        startDate: todayStr,
-        endDate: null,
-      };
-
-      mockRepository.find.mockResolvedValue([]);
-      // Mock getMany to return all charges including OTHER_CHARGE_BASED
-      mockQueryBuilder.getMany!.mockResolvedValue([
-        createMockCharge(1, ChargeType.MAINTENANCE_FEE, 110, today, null),
-        createMockCharge(2, ChargeType.FINANCIAL_CHARGE, 50, lastMonth, null),
-        createMockCharge(3, ChargeType.WATER_PREPAYMENT, 20, lastMonth, null),
-        createMockCharge(5, ChargeType.OTHER_CHARGE_BASED, 30, lastMonth, null),
-      ]);
-      const newCharge = createMockCharge(1, ChargeType.MAINTENANCE_FEE, 110, today, null);
-      const totalCharge = createMockCharge(6, ChargeType.TOTAL_CHARGE, 210, today, null);
-      mockRepository.save.mockResolvedValue(newCharge);
-      mockRepository.create.mockImplementation((data: Partial<PropertyCharge>) => {
-        if (data.chargeType === ChargeType.TOTAL_CHARGE) {
-          return totalCharge;
-        }
-        return newCharge;
-      });
-      mockRepository.findOne.mockResolvedValue(null);
-
-      await service.create(mockUser, input);
-
-      // Verify TOTAL_CHARGE includes OTHER_CHARGE_BASED: 110 + 50 + 20 + 30 = 210
-      expect(mockRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          chargeType: ChargeType.TOTAL_CHARGE,
-          amount: 210,
-        }),
-      );
-    });
-
     it('should throw NotFoundException if property not owned by user', async () => {
       mockPropertyService.findOne.mockResolvedValue(null);
 
@@ -364,37 +306,6 @@ describe('PropertyChargeService', () => {
         service.update(mockUser2, 1, 1, { amount: 150 }),
       ).rejects.toThrow(UnauthorizedException);
     });
-
-    it('should recalculate TOTAL_CHARGE when updating a charge', async () => {
-      const existingCharge = createMockCharge(1, ChargeType.MAINTENANCE_FEE, 100, lastMonth, null);
-      const otherCharges = [
-        createMockCharge(2, ChargeType.FINANCIAL_CHARGE, 50, lastMonth, null),
-        createMockCharge(3, ChargeType.WATER_PREPAYMENT, 20, lastMonth, null),
-      ];
-
-      mockRepository.findOne
-        .mockResolvedValueOnce(existingCharge) // For finding charge to update
-        .mockResolvedValueOnce(null); // For finding existing total charge
-      const updatedCharge = createMockCharge(1, ChargeType.MAINTENANCE_FEE, 150, lastMonth, null);
-      const totalCharge = createMockCharge(4, ChargeType.TOTAL_CHARGE, 220, lastMonth, null);
-      mockRepository.save.mockResolvedValue(updatedCharge);
-      mockRepository.create.mockReturnValue(totalCharge);
-
-      // Mock getMany to return updated charge + other charges
-      mockQueryBuilder.getMany!.mockResolvedValue([
-        updatedCharge,
-        ...otherCharges,
-      ]);
-
-      await service.update(mockUser, 1, 1, { amount: 150 });
-
-      // Verify TOTAL_CHARGE is recalculated: 150 + 50 + 20 = 220
-      expect(mockRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          chargeType: ChargeType.TOTAL_CHARGE,
-        }),
-      );
-    });
   });
 
   describe('delete', () => {
@@ -424,31 +335,6 @@ describe('PropertyChargeService', () => {
         UnauthorizedException,
       );
     });
-
-    it('should recalculate TOTAL_CHARGE after deleting a charge', async () => {
-      const chargeToDelete = createMockCharge(1, ChargeType.MAINTENANCE_FEE, 100, lastMonth, null);
-      const remainingCharges = [
-        createMockCharge(2, ChargeType.FINANCIAL_CHARGE, 50, lastMonth, null),
-        createMockCharge(3, ChargeType.WATER_PREPAYMENT, 20, lastMonth, null),
-      ];
-
-      mockRepository.findOne
-        .mockResolvedValueOnce(chargeToDelete) // For finding charge to delete
-        .mockResolvedValueOnce(null); // For finding existing total charge
-      mockQueryBuilder.getMany!.mockResolvedValue(remainingCharges);
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
-      const totalCharge = createMockCharge(4, ChargeType.TOTAL_CHARGE, 70, today, null);
-      mockRepository.create.mockReturnValue(totalCharge);
-
-      await service.delete(mockUser, 1, 1);
-
-      // Verify TOTAL_CHARGE is recalculated: 50 + 20 = 70
-      expect(mockRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          chargeType: ChargeType.TOTAL_CHARGE,
-        }),
-      );
-    });
   });
 
   describe('getChargeHistory', () => {
@@ -472,7 +358,7 @@ describe('PropertyChargeService', () => {
   });
 
   describe('createBatch', () => {
-    it('should create multiple charges and auto-calculate total', async () => {
+    it('should create multiple charges without storing TOTAL_CHARGE', async () => {
       const inputs = [
         { propertyId: 1, chargeType: ChargeType.MAINTENANCE_FEE, amount: 150, startDate: '2024-01-15' },
         { propertyId: 1, chargeType: ChargeType.FINANCIAL_CHARGE, amount: 50, startDate: '2024-01-15' },
@@ -483,7 +369,6 @@ describe('PropertyChargeService', () => {
         createMockCharge(1, ChargeType.MAINTENANCE_FEE, 150, new Date('2024-01-15'), null),
         createMockCharge(2, ChargeType.FINANCIAL_CHARGE, 50, new Date('2024-01-15'), null),
         createMockCharge(3, ChargeType.WATER_PREPAYMENT, 25, new Date('2024-01-15'), null),
-        createMockCharge(4, ChargeType.TOTAL_CHARGE, 225, new Date('2024-01-15'), null),
       ];
 
       // Mock closeOpenCharges finding no existing open charges
@@ -502,8 +387,32 @@ describe('PropertyChargeService', () => {
 
       const result = await service.createBatch(mockUser, 1, inputs);
 
-      expect(result).toHaveLength(4); // 3 inputs + 1 auto-calculated total
-      expect(result.find(c => c.chargeType === ChargeType.TOTAL_CHARGE)?.amount).toBe(225);
+      // Only component charges are stored, TOTAL_CHARGE is calculated on read
+      expect(result).toHaveLength(3);
+      expect(result.find(c => c.chargeType === ChargeType.TOTAL_CHARGE)).toBeUndefined();
+    });
+
+    it('should skip TOTAL_CHARGE if passed in inputs', async () => {
+      const inputs = [
+        { propertyId: 1, chargeType: ChargeType.MAINTENANCE_FEE, amount: 100, startDate: '2024-01-15' },
+        { propertyId: 1, chargeType: ChargeType.TOTAL_CHARGE, amount: 100, startDate: '2024-01-15' },
+      ];
+
+      const savedCharge = createMockCharge(1, ChargeType.MAINTENANCE_FEE, 100, new Date('2024-01-15'), null);
+
+      mockRepository.find.mockResolvedValue([]);
+      mockRepository.create.mockImplementation((data: Partial<PropertyCharge>) => {
+        const charge = new PropertyCharge();
+        Object.assign(charge, data);
+        return charge;
+      });
+      mockRepository.save.mockResolvedValue(savedCharge);
+
+      const result = await service.createBatch(mockUser, 1, inputs);
+
+      // TOTAL_CHARGE input is skipped
+      expect(result).toHaveLength(1);
+      expect(result[0].chargeType).toBe(ChargeType.MAINTENANCE_FEE);
     });
 
     it('should allow null startDate', async () => {
@@ -511,10 +420,7 @@ describe('PropertyChargeService', () => {
         { propertyId: 1, chargeType: ChargeType.MAINTENANCE_FEE, amount: 100, startDate: null },
       ];
 
-      const savedCharges = [
-        createMockCharge(1, ChargeType.MAINTENANCE_FEE, 100, null, null),
-        createMockCharge(2, ChargeType.TOTAL_CHARGE, 100, null, null),
-      ];
+      const savedCharge = createMockCharge(1, ChargeType.MAINTENANCE_FEE, 100, null, null);
 
       mockRepository.create.mockImplementation((data: Partial<PropertyCharge>) => {
         const charge = new PropertyCharge();
@@ -522,15 +428,37 @@ describe('PropertyChargeService', () => {
         return charge;
       });
 
-      let saveCallCount = 0;
-      mockRepository.save.mockImplementation(() => {
-        return Promise.resolve(savedCharges[saveCallCount++]);
-      });
+      mockRepository.save.mockResolvedValue(savedCharge);
 
       const result = await service.createBatch(mockUser, 1, inputs);
 
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(1);
       expect(result[0].startDate).toBeNull();
+    });
+
+    it('should delete existing charges with same startDate when editing', async () => {
+      const inputs = [
+        { propertyId: 1, chargeType: ChargeType.MAINTENANCE_FEE, amount: 150, startDate: '2024-01-15' },
+      ];
+
+      const savedCharge = createMockCharge(1, ChargeType.MAINTENANCE_FEE, 150, new Date('2024-01-15'), null);
+
+      mockRepository.find.mockResolvedValue([]);
+      mockRepository.delete.mockResolvedValue({ affected: 2 });
+      mockRepository.create.mockImplementation((data: Partial<PropertyCharge>) => {
+        const charge = new PropertyCharge();
+        Object.assign(charge, data);
+        return charge;
+      });
+      mockRepository.save.mockResolvedValue(savedCharge);
+
+      await service.createBatch(mockUser, 1, inputs);
+
+      // Verify delete was called with the startDate
+      expect(mockRepository.delete).toHaveBeenCalledWith({
+        propertyId: 1,
+        startDate: new Date('2024-01-15'),
+      });
     });
 
     it('should throw NotFoundException for invalid property', async () => {
