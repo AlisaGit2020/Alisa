@@ -279,7 +279,8 @@ describe('PropertyChargeController (e2e)', () => {
       expect(response.body.maintenanceFee).toBeNull();
       expect(response.body.financialCharge).toBeNull();
       expect(response.body.waterPrepayment).toBeNull();
-      expect(response.body.totalCharge).toBeNull();
+      // totalCharge is calculated from components, so 0 when all are null
+      expect(response.body.totalCharge).toBe(0);
     });
   });
 

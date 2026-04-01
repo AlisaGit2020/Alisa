@@ -131,15 +131,8 @@ export class PropertyChargeService {
         startDate,
       });
 
-      // Close all existing open charges before creating new ones
-      for (const chargeType of [
-        ChargeType.MAINTENANCE_FEE,
-        ChargeType.FINANCIAL_CHARGE,
-        ChargeType.WATER_PREPAYMENT,
-        ChargeType.OTHER_CHARGE_BASED,
-      ]) {
-        await this.closeOpenCharges(propertyId, chargeType, startDate);
-      }
+      // Close all existing open charges in a single batch update
+      await this.closeAllOpenCharges(propertyId, startDate);
     }
 
     for (const input of inputs) {
@@ -257,6 +250,25 @@ export class PropertyChargeService {
       charge.endDate = dayBefore;
       await this.repository.save(charge);
     }
+  }
+
+  private async closeAllOpenCharges(
+    propertyId: number,
+    newStartDate: Date,
+  ): Promise<void> {
+    // Set endDate to day before new charge starts
+    const dayBefore = new Date(newStartDate);
+    dayBefore.setDate(dayBefore.getDate() - 1);
+
+    // Close all open charges in a single batch update (avoids N+1)
+    await this.repository
+      .createQueryBuilder()
+      .update(PropertyCharge)
+      .set({ endDate: dayBefore })
+      .where('propertyId = :propertyId', { propertyId })
+      .andWhere('endDate IS NULL')
+      .andWhere('startDate < :newStartDate', { newStartDate })
+      .execute();
   }
 
 }

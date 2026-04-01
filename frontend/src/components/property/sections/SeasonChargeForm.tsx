@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import dayjs, { Dayjs } from 'dayjs';
@@ -33,20 +33,32 @@ function SeasonChargeForm({ propertyId, initialValues, onSubmit, onCancel }: Sea
     initialValues?.endDate ? dayjs(initialValues.endDate).toDate() : null
   );
 
-  // State for charge amounts
-  const [maintenanceFee, setMaintenanceFee] = useState<number | undefined>(initialValues?.maintenanceFee ?? 0);
-  const [financialCharge, setFinancialCharge] = useState<number | undefined>(initialValues?.financialCharge ?? 0);
-  const [waterPrepayment, setWaterPrepayment] = useState<number | undefined>(initialValues?.waterPrepayment ?? 0);
-  const [otherCharge, setOtherCharge] = useState<number | undefined>(initialValues?.otherChargeBased ?? 0);
+  // State for charge amounts as a single object
+  const [charges, setCharges] = useState({
+    maintenanceFee: initialValues?.maintenanceFee ?? 0,
+    financialCharge: initialValues?.financialCharge ?? 0,
+    waterPrepayment: initialValues?.waterPrepayment ?? 0,
+    otherChargeBased: initialValues?.otherChargeBased ?? 0,
+  });
+
+  // Charge field definitions for rendering and submission
+  const chargeFields = [
+    { key: 'maintenanceFee' as const, labelKey: 'chargeTypes.maintenance-fee', chargeType: ChargeType.MAINTENANCE_FEE },
+    { key: 'financialCharge' as const, labelKey: 'chargeTypes.financial-charge', chargeType: ChargeType.FINANCIAL_CHARGE },
+    { key: 'waterPrepayment' as const, labelKey: 'chargeTypes.water-prepayment', chargeType: ChargeType.WATER_PREPAYMENT },
+    { key: 'otherChargeBased' as const, labelKey: 'chargeTypes.other-charge-based', chargeType: ChargeType.OTHER_CHARGE_BASED },
+  ];
 
   // Validation errors
   const [startDateError, setStartDateError] = useState<string>('');
   const [endDateError, setEndDateError] = useState<string>('');
 
-  // Calculate total
-  const total = useMemo(() => {
-    return (maintenanceFee ?? 0) + (financialCharge ?? 0) + (waterPrepayment ?? 0) + (otherCharge ?? 0);
-  }, [maintenanceFee, financialCharge, waterPrepayment, otherCharge]);
+  // Calculate total from all charge fields
+  const total = charges.maintenanceFee + charges.financialCharge + charges.waterPrepayment + charges.otherChargeBased;
+
+  const handleChargeChange = (key: keyof typeof charges) => (value: number | undefined) => {
+    setCharges(prev => ({ ...prev, [key]: value ?? 0 }));
+  };
 
   const handleStartDateChange = (value: Dayjs | null) => {
     setStartDate(value ? value.toDate() : null);
@@ -72,59 +84,22 @@ function SeasonChargeForm({ propertyId, initialValues, onSubmit, onCancel }: Sea
       return;
     }
 
-    // Build charge inputs array
-    const charges: PropertyChargeInput[] = [];
-
     // Use dayjs to format in local time (avoids UTC timezone shift)
     const dateStr = dayjs(startDate).format('YYYY-MM-DD');
     const endDateStr = endDate ? dayjs(endDate).format('YYYY-MM-DD') : null;
 
-    // Add maintenance fee (only if > 0)
-    if (maintenanceFee && maintenanceFee > 0) {
-      charges.push({
+    // Build charge inputs from non-zero charges
+    const chargeInputs: PropertyChargeInput[] = chargeFields
+      .filter(({ key }) => charges[key] > 0)
+      .map(({ key, chargeType }) => ({
         propertyId,
-        chargeType: ChargeType.MAINTENANCE_FEE,
-        amount: maintenanceFee,
+        chargeType,
+        amount: charges[key],
         startDate: dateStr,
         endDate: endDateStr,
-      });
-    }
+      }));
 
-    // Add financial charge (only if > 0)
-    if (financialCharge && financialCharge > 0) {
-      charges.push({
-        propertyId,
-        chargeType: ChargeType.FINANCIAL_CHARGE,
-        amount: financialCharge,
-        startDate: dateStr,
-        endDate: endDateStr,
-      });
-    }
-
-    // Add water prepayment (only if > 0)
-    if (waterPrepayment && waterPrepayment > 0) {
-      charges.push({
-        propertyId,
-        chargeType: ChargeType.WATER_PREPAYMENT,
-        amount: waterPrepayment,
-        startDate: dateStr,
-        endDate: endDateStr,
-      });
-    }
-
-    // Add other charge (only if > 0)
-    if (otherCharge && otherCharge > 0) {
-      charges.push({
-        propertyId,
-        chargeType: ChargeType.OTHER_CHARGE_BASED,
-        amount: otherCharge,
-        startDate: dateStr,
-        endDate: endDateStr,
-      });
-    }
-
-    // Total is calculated on read from component charges
-    onSubmit(charges);
+    onSubmit(chargeInputs);
   };
 
   return (
@@ -149,73 +124,25 @@ function SeasonChargeForm({ propertyId, initialValues, onSubmit, onCancel }: Sea
 
       {/* Charge input cards */}
       <Box sx={{ display: 'flex', gap: 1.5, mb: 3, flexWrap: 'wrap' }}>
-        <Box
-          sx={{
-            flex: '1 1 0',
-            minWidth: 140,
-            p: 2,
-            bgcolor: 'grey.100',
-            borderRadius: 2,
-          }}
-        >
-          <AssetMoneyField
-            label={t('chargeTypes.maintenance-fee')}
-            value={maintenanceFee ?? ''}
-            onChange={setMaintenanceFee}
-            fullWidth
-          />
-        </Box>
-
-        <Box
-          sx={{
-            flex: '1 1 0',
-            minWidth: 140,
-            p: 2,
-            bgcolor: 'grey.100',
-            borderRadius: 2,
-          }}
-        >
-          <AssetMoneyField
-            label={t('chargeTypes.financial-charge')}
-            value={financialCharge ?? ''}
-            onChange={setFinancialCharge}
-            fullWidth
-          />
-        </Box>
-
-        <Box
-          sx={{
-            flex: '1 1 0',
-            minWidth: 140,
-            p: 2,
-            bgcolor: 'grey.100',
-            borderRadius: 2,
-          }}
-        >
-          <AssetMoneyField
-            label={t('chargeTypes.water-prepayment')}
-            value={waterPrepayment ?? ''}
-            onChange={setWaterPrepayment}
-            fullWidth
-          />
-        </Box>
-
-        <Box
-          sx={{
-            flex: '1 1 0',
-            minWidth: 140,
-            p: 2,
-            bgcolor: 'grey.100',
-            borderRadius: 2,
-          }}
-        >
-          <AssetMoneyField
-            label={t('chargeTypes.other-charge-based')}
-            value={otherCharge ?? ''}
-            onChange={setOtherCharge}
-            fullWidth
-          />
-        </Box>
+        {chargeFields.map(({ key, labelKey }) => (
+          <Box
+            key={key}
+            sx={{
+              flex: '1 1 0',
+              minWidth: 140,
+              p: 2,
+              bgcolor: 'grey.100',
+              borderRadius: 2,
+            }}
+          >
+            <AssetMoneyField
+              label={t(labelKey)}
+              value={charges[key] || ''}
+              onChange={handleChargeChange(key)}
+              fullWidth
+            />
+          </Box>
+        ))}
       </Box>
 
       {/* Total display */}
