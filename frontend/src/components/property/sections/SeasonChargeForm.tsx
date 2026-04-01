@@ -3,6 +3,7 @@ import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import dayjs, { Dayjs } from 'dayjs';
 import { ChargeType, PropertyChargeInput } from '@asset-types';
+import { formatCurrency } from '@asset-lib/format-utils';
 import AssetMoneyField from '../../asset/form/AssetMoneyField';
 import AssetDatePicker from '../../asset/form/AssetDatePicker';
 import AssetButton from '../../asset/form/AssetButton';
@@ -222,7 +223,7 @@ function SeasonChargeForm({ propertyId, initialValues, onSubmit, onCancel }: Sea
           {t('total')}
         </Typography>
         <Typography variant="h5" fontWeight={700} component="span" sx={{ ml: 1 }}>
-          €{total}
+          {formatCurrency(total, 2)}
         </Typography>
         <Typography variant="caption" sx={{ opacity: 0.9, ml: 0.5 }}>
           {t('perMonth')}

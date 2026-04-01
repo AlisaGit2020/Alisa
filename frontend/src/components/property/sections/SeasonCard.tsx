@@ -3,6 +3,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
 import { ChargeType, PropertyCharge } from '@asset-types';
+import { formatCurrency } from '@asset-lib/format-utils';
 
 interface SeasonCardProps {
   charges: PropertyCharge[];
@@ -103,7 +104,7 @@ function SeasonCard({ charges, startDate, endDate, isActive, onEdit, onDelete }:
                 {t(`chargeTypes.${typeName || 'maintenance-fee'}`).split(' ')[0]}
               </Typography>
               <Typography variant="body2" fontWeight={600}>
-                €{amount}
+                {formatCurrency(amount, 2)}
               </Typography>
             </Box>
           );
@@ -124,7 +125,7 @@ function SeasonCard({ charges, startDate, endDate, isActive, onEdit, onDelete }:
           {t('total')}
         </Typography>
         <Typography variant="h6" fontWeight={700} component="span" sx={{ ml: 1 }}>
-          €{total}
+          {formatCurrency(total, 2)}
         </Typography>
         <Typography variant="caption" sx={{ opacity: 0.9, ml: 0.5 }}>
           {t('perMonth')}

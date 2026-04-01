@@ -24,11 +24,12 @@ describe('SeasonCard', () => {
       />
     );
 
-    expect(screen.getByText('€150')).toBeInTheDocument();
-    expect(screen.getByText('€85')).toBeInTheDocument();
-    expect(screen.getByText('€25')).toBeInTheDocument();
-    expect(screen.getByText('€15')).toBeInTheDocument();
-    expect(screen.getByText('€275')).toBeInTheDocument();
+    // Finnish currency format: "150,00 €" (with non-breaking space before €)
+    expect(screen.getByText(/150,00\s*€/)).toBeInTheDocument();
+    expect(screen.getByText(/85,00\s*€/)).toBeInTheDocument();
+    expect(screen.getByText(/25,00\s*€/)).toBeInTheDocument();
+    expect(screen.getByText(/15,00\s*€/)).toBeInTheDocument();
+    expect(screen.getByText(/275,00\s*€/)).toBeInTheDocument();
   });
 
   it('shows edit button for active season', async () => {

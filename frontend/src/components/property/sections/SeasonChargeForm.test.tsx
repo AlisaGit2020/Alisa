@@ -36,7 +36,8 @@ describe('SeasonChargeForm', () => {
     await user.type(financialInput, '50');
 
     await waitFor(() => {
-      expect(screen.getByText(/€\s*200/)).toBeInTheDocument();
+      // Finnish currency format: "200,00 €"
+      expect(screen.getByText(/200,00\s*€/)).toBeInTheDocument();
     });
   });
 
