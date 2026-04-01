@@ -224,3 +224,18 @@ export interface AllocationResult {
   skipped: SkippedTransaction[];
   conflicting: ConflictingTransaction[];
 }
+
+// Property charge types (seasonal charges with date ranges)
+export enum ChargeType {
+  MAINTENANCE_FEE = 1,    // Hoitovastike
+  FINANCIAL_CHARGE = 2,   // Rahoitusvastike
+  WATER_PREPAYMENT = 3,   // Vesi-ennakko
+  TOTAL_CHARGE = 4,       // Yhtiövastike (calculated)
+}
+
+export const chargeTypeNames = new Map<ChargeType, string>([
+  [ChargeType.MAINTENANCE_FEE, 'maintenance-fee'],
+  [ChargeType.FINANCIAL_CHARGE, 'financial-charge'],
+  [ChargeType.WATER_PREPAYMENT, 'water-prepayment'],
+  [ChargeType.TOTAL_CHARGE, 'total-charge'],
+]);

@@ -2,6 +2,7 @@
 
 import {
   AllocationCondition,
+  ChargeType,
   PropertyExternalSource,
   PropertyStatus,
   PropertyType,
@@ -201,4 +202,14 @@ export interface TaxDeductionInput {
   description?: string;
   amount: number;
   metadata?: TaxDeductionMetadata;
+}
+
+// Property charge input (seasonal charges with date ranges)
+export interface PropertyChargeInput {
+  id?: number;
+  propertyId: number;
+  chargeType: ChargeType;
+  amount: number;
+  startDate: string;
+  endDate?: string | null;
 }
