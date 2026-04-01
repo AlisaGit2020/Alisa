@@ -7,13 +7,15 @@ export class PropertyChargeDto {
   chargeType: ChargeType;
   typeName: string;
   amount: number;
-  startDate: string;
+  startDate: string | null;
   endDate: string | null;
 
   static fromEntity(entity: PropertyCharge): PropertyChargeDto {
-    const startDate = entity.startDate instanceof Date
-      ? entity.startDate.toISOString().split('T')[0]
-      : String(entity.startDate);
+    const startDate = entity.startDate
+      ? (entity.startDate instanceof Date
+          ? entity.startDate.toISOString().split('T')[0]
+          : String(entity.startDate))
+      : null;
     const endDate = entity.endDate
       ? (entity.endDate instanceof Date
           ? entity.endDate.toISOString().split('T')[0]

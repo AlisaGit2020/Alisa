@@ -1,5 +1,5 @@
 import * as React from "react";
-import { styled, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -30,16 +30,6 @@ const MOBILE_ACTION_WIDTH = 48;
 const MOBILE_CELL_PADDING = "6px 8px";
 const MOBILE_ACTION_CELL_PADDING = "6px 8px 6px 0";
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.hover,
-  },
-  // hide last border
-  "&:last-child td, &:last-child th": {
-    border: 0,
-  },
-}));
-
 export interface AssetDataTableField<T> {
   name: keyof T;
   maxLength?: number;
@@ -48,6 +38,7 @@ export interface AssetDataTableField<T> {
   sum?: boolean;
   render?: (item: T, t: TFunction) => React.ReactNode;
   hideOnMobile?: boolean;
+  width?: number | string;
 }
 
 type SortDirection = "asc" | "desc";
@@ -67,6 +58,10 @@ function AssetDataTable<T extends { id: number }>(props: {
   onDeleteRequest?: (id: number) => void;
   refreshTrigger?: number;
   sortable?: boolean;
+  fixedLayout?: boolean;
+  stripedRows?: boolean;
+  rowHighlight?: (item: T) => string | undefined;
+  showHeader?: boolean;
 }) {
   const [fetchedData, setFetchedData] = React.useState<T[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -308,79 +303,90 @@ function AssetDataTable<T extends { id: number }>(props: {
         </Box>
       )}
       <TableContainer sx={{ maxHeight: 960, overflowX: isMobile ? "hidden" : "auto", width: "100%" }}>
-        <Table stickyHeader size="small" aria-label="simple table" sx={{ tableLayout: isMobile ? "fixed" : "auto", width: "100%" }}>
-          <TableHead>
-            <TableRow>
-              {props.onSelectChange && (
-                <TableCell sx={{ width: isMobile ? MOBILE_CHECKBOX_WIDTH : "auto", padding: isMobile ? MOBILE_CELL_PADDING : undefined }}>
-                  <AssetDataTableSelectHeaderRow
-                    t={props.t}
-                    checked={data.length == props.selectedIds?.length}
-                    onSelectAll={handleSelectAll}
-                    visible={data.length > 0}
-                  ></AssetDataTableSelectHeaderRow>
-                </TableCell>
-              )}
-              {visibleFields.map((field) => (
-                <TableCell
-                  key={field.name as string}
-                  align={field.format === "currency" ? "right" : "left"}
-                  sx={{ whiteSpace: isMobile ? "normal" : "nowrap" }}
-                  sortDirection={sortColumn === field.name ? sortDirection : false}
-                >
-                  {props.sortable ? (
-                    <TableSortLabel
-                      active={sortColumn === field.name}
-                      direction={sortColumn === field.name ? sortDirection : "asc"}
-                      onClick={() => handleSort(field.name)}
-                      sx={{
-                        "&:hover": {
-                          color: "primary.main",
-                        },
-                        "&.Mui-active": {
-                          color: "primary.main",
-                          "& .MuiTableSortLabel-icon": {
+        <Table stickyHeader size="small" aria-label="simple table" sx={{ tableLayout: isMobile || props.fixedLayout ? "fixed" : "auto", width: "100%" }}>
+          {props.showHeader !== false && (
+            <TableHead>
+              <TableRow>
+                {props.onSelectChange && (
+                  <TableCell sx={{ width: isMobile ? MOBILE_CHECKBOX_WIDTH : "auto", padding: isMobile ? MOBILE_CELL_PADDING : undefined }}>
+                    <AssetDataTableSelectHeaderRow
+                      t={props.t}
+                      checked={data.length == props.selectedIds?.length}
+                      onSelectAll={handleSelectAll}
+                      visible={data.length > 0}
+                    ></AssetDataTableSelectHeaderRow>
+                  </TableCell>
+                )}
+                {visibleFields.map((field) => (
+                  <TableCell
+                    key={field.name as string}
+                    align={field.format === "currency" ? "right" : "left"}
+                    sx={{ whiteSpace: isMobile ? "normal" : "nowrap", width: field.width }}
+                    sortDirection={sortColumn === field.name ? sortDirection : false}
+                  >
+                    {props.sortable ? (
+                      <TableSortLabel
+                        active={sortColumn === field.name}
+                        direction={sortColumn === field.name ? sortDirection : "asc"}
+                        onClick={() => handleSort(field.name)}
+                        sx={{
+                          "&:hover": {
                             color: "primary.main",
                           },
-                        },
-                        "& .MuiTableSortLabel-icon": {
-                          opacity: sortColumn === field.name ? 1 : 0,
-                        },
-                      }}
-                    >
+                          "&.Mui-active": {
+                            color: "primary.main",
+                            "& .MuiTableSortLabel-icon": {
+                              color: "primary.main",
+                            },
+                          },
+                          "& .MuiTableSortLabel-icon": {
+                            opacity: sortColumn === field.name ? 1 : 0,
+                          },
+                        }}
+                      >
+                        <Typography fontWeight={"bold"}>
+                          {field.label !== undefined
+                            ? field.label
+                            : props.t(field.name as string)}
+                        </Typography>
+                      </TableSortLabel>
+                    ) : (
                       <Typography fontWeight={"bold"}>
                         {field.label !== undefined
                           ? field.label
                           : props.t(field.name as string)}
                       </Typography>
-                    </TableSortLabel>
-                  ) : (
-                    <Typography fontWeight={"bold"}>
-                      {field.label !== undefined
-                        ? field.label
-                        : props.t(field.name as string)}
-                    </Typography>
-                  )}
-                </TableCell>
-              ))}
-              {props.onNewRow && (
-                <TableCell align="right" sx={{ whiteSpace: "nowrap", width: isMobile ? MOBILE_ACTION_WIDTH : "auto", padding: isMobile ? MOBILE_ACTION_CELL_PADDING : undefined }}>
-                  <AssetDataTableAddButton
-                    onClick={props.onNewRow}
-                    t={props.t}
-                    visible={
-                      props.selectedIds?.length == 0 ||
-                      props.selectedIds === undefined
-                    }
-                  ></AssetDataTableAddButton>
-                </TableCell>
-              )}
-            </TableRow>
-          </TableHead>
+                    )}
+                  </TableCell>
+                ))}
+                {props.onNewRow && (
+                  <TableCell align="right" sx={{ whiteSpace: "nowrap", width: isMobile ? MOBILE_ACTION_WIDTH : "auto", padding: isMobile ? MOBILE_ACTION_CELL_PADDING : undefined }}>
+                    <AssetDataTableAddButton
+                      onClick={props.onNewRow}
+                      t={props.t}
+                      visible={
+                        props.selectedIds?.length == 0 ||
+                        props.selectedIds === undefined
+                      }
+                    ></AssetDataTableAddButton>
+                  </TableCell>
+                )}
+              </TableRow>
+            </TableHead>
+          )}
           {data.length > 0 && (
             <TableBody>
-              {data.map((item) => (
-                <StyledTableRow key={item.id}>
+              {data.map((item, index) => {
+                const highlightColor = props.rowHighlight?.(item);
+                const stripedBg = props.stripedRows !== false && index % 2 === 0 ? "action.hover" : undefined;
+                return (
+                <TableRow
+                  key={item.id}
+                  sx={{
+                    backgroundColor: highlightColor || stripedBg,
+                    "&:last-child td, &:last-child th": { border: 0 },
+                  }}
+                >
                   {props.onSelectChange && (
                     <TableCell sx={{ width: isMobile ? MOBILE_CHECKBOX_WIDTH : "auto", padding: isMobile ? MOBILE_CELL_PADDING : undefined }}>
                       <AssetDataTableSelectRow
@@ -398,6 +404,7 @@ function AssetDataTable<T extends { id: number }>(props: {
                         whiteSpace: isMobile ? "normal" : "nowrap",
                         cursor: props.onOpen ? "pointer" : "default",
                         wordBreak: isMobile ? "break-word" : "normal",
+                        width: field.width,
                       }}
                       onClick={() => props.onOpen?.(item.id)}
                     >
@@ -419,8 +426,9 @@ function AssetDataTable<T extends { id: number }>(props: {
                       ></AssetDataTableActionButtons>
                     </TableCell>
                   )}
-                </StyledTableRow>
-              ))}
+                </TableRow>
+              );
+              })}
             </TableBody>
           )}
         </Table>

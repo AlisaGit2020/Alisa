@@ -96,22 +96,7 @@ export class PropertyInputDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  maintenanceFee?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  financialCharge?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
   monthlyRent?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  waterCharge?: number;
 
   @IsOptional()
   @IsBoolean()

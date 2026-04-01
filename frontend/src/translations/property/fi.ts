@@ -97,7 +97,7 @@ const property = {
     },
 
     // Charge history
-    chargeHistory: 'Vastikkeiden historia',
+    chargeHistory: 'Vastikkeet',
     manageCharges: 'Hallitse vastikkeita',
     addCharge: 'Lisää vastike',
     editCharge: 'Muokkaa vastiketta',

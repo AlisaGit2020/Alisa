@@ -1,8 +1,9 @@
 import { Box, Divider, Stack, Typography } from '@mui/material';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getNumber, getNumberOrUndefined } from '../../lib/functions';
-import { PropertyInput, PropertyStatus, PropertyType, propertyTypeNames } from '@asset-types'
+import { PropertyInput, PropertyStatus, PropertyType, propertyTypeNames, CurrentCharges, ChargeType, PropertyChargeInput } from '@asset-types'
 import { calculateCharge, ChargeValues, ChargeFieldName } from './charge-calculation';
+import dayjs from 'dayjs';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AssetNumberField from '../asset/form/AssetNumberField';
 import AssetMoneyField from '../asset/form/AssetMoneyField';
@@ -17,8 +18,9 @@ import DataService from '../../lib/data-service';
 import { getFieldErrorProps } from '@asset-lib/form-utils';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PropertyPhotoUpload from './PropertyPhotoUpload';
+import PropertyChargeDialog from './sections/PropertyChargeDialog';
 import AssetContent from '../asset/AssetContent';
-import { useAssetToast } from '../asset';
+import { useAssetToast, AssetButton } from '../asset';
 import axios from 'axios';
 import ApiClient from '@asset-lib/api-client';
 import { VITE_API_URL } from '../../constants';
@@ -63,11 +65,37 @@ function PropertyForm({ t }: WithTranslation) {
         distanceFromHome: undefined,
     });
     const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
-    // totalCharge is UI-only helper for calculating charges (not saved to DB)
-    const [totalCharge, setTotalCharge] = useState<number>(0);
+    // Separate charge state - used for both add and edit modes
+    const [charges, setCharges] = useState({
+        maintenanceFee: 0,
+        financialCharge: 0,
+        waterCharge: 0,
+        totalCharge: 0,
+    });
+    const [chargeDialogOpen, setChargeDialogOpen] = useState(false);
+    const isEditMode = !!idParam && Number(idParam) > 0;
     // Track which charge fields the user has touched (for calculation)
     // Using ref to avoid stale closure issues in useCallback
     const touchedChargeFieldsRef = useRef<Set<ChargeFieldName>>(new Set());
+
+    // Fetch current charges in edit mode
+    useEffect(() => {
+        if (isEditMode) {
+            ApiClient.request<CurrentCharges>({
+                method: 'GET',
+                url: `/real-estate/property/${idParam}/charges/current`,
+            }).then((result) => {
+                setCharges({
+                    maintenanceFee: result.maintenanceFee ?? 0,
+                    financialCharge: result.financialCharge ?? 0,
+                    waterCharge: result.waterPrepayment ?? 0,
+                    totalCharge: result.totalCharge ?? 0,
+                });
+            }).catch(() => {
+                // Silently fail - charges will remain at 0
+            });
+        }
+    }, [isEditMode, idParam]);
 
     const handleNavigateBack = () => {
         const returnTo = (location.state as { returnTo?: string })?.returnTo;
@@ -111,39 +139,32 @@ function PropertyForm({ t }: WithTranslation) {
         });
     }
 
-    // Handle charge field changes with auto-calculation
+    // Handle charge field changes with auto-calculation (uses separate charges state)
     const handleChargeChange = useCallback((
         field: ChargeFieldName,
         value: number | undefined
     ) => {
         const numValue = value ?? 0;
-        const currentValues: ChargeValues = {
-            maintenanceFee: field === 'maintenanceFee' ? numValue : (data.maintenanceFee ?? 0),
-            financialCharge: field === 'financialCharge' ? numValue : (data.financialCharge ?? 0),
-            totalCharge: field === 'totalCharge' ? numValue : totalCharge,
-        };
 
-        // Update the field that was changed
-        if (field === 'totalCharge') {
-            setTotalCharge(numValue);
-        } else {
-            setData(prev => ({ ...prev, [field]: numValue }));
-        }
+        setCharges(prev => {
+            const updated = { ...prev, [field]: numValue };
 
-        // Track touched fields (user has interacted, regardless of value)
-        // This allows 0 to be a valid intentional value
-        touchedChargeFieldsRef.current.add(field);
+            touchedChargeFieldsRef.current.add(field);
 
-        // Calculate the third field if exactly two are touched
-        const calculated = calculateCharge(currentValues, touchedChargeFieldsRef.current);
-        if (calculated) {
-            if (calculated.field === 'totalCharge') {
-                setTotalCharge(calculated.value);
-            } else {
-                setData(prev => ({ ...prev, [calculated.field]: calculated.value }));
+            const currentValues: ChargeValues = {
+                maintenanceFee: field === 'maintenanceFee' ? numValue : prev.maintenanceFee,
+                financialCharge: field === 'financialCharge' ? numValue : prev.financialCharge,
+                totalCharge: field === 'totalCharge' ? numValue : prev.totalCharge,
+            };
+
+            const calculated = calculateCharge(currentValues, touchedChargeFieldsRef.current);
+            if (calculated) {
+                updated[calculated.field] = calculated.value;
             }
-        }
-    }, [data.maintenanceFee, data.financialCharge, totalCharge]);
+
+            return updated;
+        });
+    }, []);
 
     const handleSaveResult = async (result: DTO<PropertyInput>) => {
         // Upload pending photo after property is saved
@@ -179,6 +200,51 @@ function PropertyForm({ t }: WithTranslation) {
                 // No separate toast - AssetFormHandler already shows "save success"
             } catch {
                 showToast({ message: t('property:photoUploadError'), severity: "error" });
+            }
+        }
+
+        // Create charges for new properties only via batch API
+        if (!idParam && propertyId) {
+            const chargeInputs: PropertyChargeInput[] = [];
+            const startDate = data.purchaseDate
+                ? dayjs(data.purchaseDate).format('YYYY-MM-DD')
+                : null;
+
+            if (charges.maintenanceFee > 0) {
+                chargeInputs.push({
+                    propertyId,
+                    chargeType: ChargeType.MAINTENANCE_FEE,
+                    amount: charges.maintenanceFee,
+                    startDate,
+                });
+            }
+            if (charges.financialCharge > 0) {
+                chargeInputs.push({
+                    propertyId,
+                    chargeType: ChargeType.FINANCIAL_CHARGE,
+                    amount: charges.financialCharge,
+                    startDate,
+                });
+            }
+            if (charges.waterCharge > 0) {
+                chargeInputs.push({
+                    propertyId,
+                    chargeType: ChargeType.WATER_PREPAYMENT,
+                    amount: charges.waterCharge,
+                    startDate,
+                });
+            }
+
+            if (chargeInputs.length > 0) {
+                try {
+                    await ApiClient.request({
+                        method: 'POST',
+                        url: `/real-estate/property/${propertyId}/charges/batch`,
+                        data: chargeInputs,
+                    });
+                } catch {
+                    showToast({ message: t('property:report.fetchError'), severity: "error" });
+                }
             }
         }
     }
@@ -271,48 +337,100 @@ function PropertyForm({ t }: WithTranslation) {
 
                 {/* Monthly Costs Section */}
                 <Divider sx={{ my: 1 }} />
-                <Typography variant="subtitle2" color="text.secondary" sx={{ textTransform: 'uppercase' }}>
-                    {t('monthlyCostsSection')}
-                </Typography>
-                <Stack direction="row" spacing={2}>
-                    <Box sx={{ flex: 1 }}>
-                        <AssetMoneyField
-                            label={t('maintenanceFee')}
-                            value={data.maintenanceFee ?? 0}
-                            onChange={(value) => handleChargeChange('maintenanceFee', value)}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ textTransform: 'uppercase' }}>
+                        {t('monthlyCostsSection')}
+                    </Typography>
+                    {isEditMode && (
+                        <AssetButton
+                            label={t('manageCharges')}
+                            variant="text"
+                            size="small"
+                            onClick={() => setChargeDialogOpen(true)}
                         />
-                    </Box>
-                    <Box sx={{ flex: 1 }}>
-                        <AssetMoneyField
-                            label={t('financialCharge')}
-                            value={data.financialCharge ?? 0}
-                            onChange={(value) => handleChargeChange('financialCharge', value)}
-                        />
-                    </Box>
-                    <Box sx={{ flex: 1 }}>
-                        <AssetMoneyField
-                            label={t('totalCharge')}
-                            value={totalCharge}
-                            onChange={(value) => handleChargeChange('totalCharge', value)}
-                        />
-                    </Box>
-                </Stack>
-                <Stack direction="row" spacing={2}>
-                    <Box sx={{ flex: 1 }}>
-                        <AssetMoneyField
-                            label={t('waterCharge')}
-                            value={data.waterCharge ?? 0}
-                            onChange={(value) => handleChange('waterCharge', value)}
-                        />
-                    </Box>
-                    <Box sx={{ flex: 1 }}>
-                        <AssetMoneyField
-                            label={data.status === PropertyStatus.PROSPECT ? t('expectedRent') : t('monthlyRent')}
-                            value={data.monthlyRent ?? 0}
-                            onChange={(value) => handleChange('monthlyRent', value)}
-                        />
-                    </Box>
-                </Stack>
+                    )}
+                </Box>
+
+                {isEditMode ? (
+                    // Edit mode: readonly display
+                    <>
+                        <Stack direction="row" spacing={2}>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetMoneyField
+                                    label={t('maintenanceFee')}
+                                    value={charges.maintenanceFee}
+                                    disabled
+                                />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetMoneyField
+                                    label={t('financialCharge')}
+                                    value={charges.financialCharge}
+                                    disabled
+                                />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetMoneyField
+                                    label={t('totalCharge')}
+                                    value={charges.totalCharge}
+                                    disabled
+                                />
+                            </Box>
+                        </Stack>
+                        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                            <Box sx={{ flex: 1, maxWidth: 200 }}>
+                                <AssetMoneyField
+                                    label={data.status === PropertyStatus.PROSPECT ? t('expectedRent') : t('monthlyRent')}
+                                    value={data.monthlyRent ?? 0}
+                                    onChange={(value) => handleChange('monthlyRent', value)}
+                                />
+                            </Box>
+                        </Stack>
+                    </>
+                ) : (
+                    // Add mode: editable fields
+                    <>
+                        <Stack direction="row" spacing={2}>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetMoneyField
+                                    label={t('maintenanceFee')}
+                                    value={charges.maintenanceFee}
+                                    onChange={(value) => handleChargeChange('maintenanceFee', value)}
+                                />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetMoneyField
+                                    label={t('financialCharge')}
+                                    value={charges.financialCharge}
+                                    onChange={(value) => handleChargeChange('financialCharge', value)}
+                                />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetMoneyField
+                                    label={t('totalCharge')}
+                                    value={charges.totalCharge}
+                                    onChange={(value) => handleChargeChange('totalCharge', value)}
+                                />
+                            </Box>
+                        </Stack>
+                        <Stack direction="row" spacing={2}>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetMoneyField
+                                    label={t('waterCharge')}
+                                    value={charges.waterCharge}
+                                    onChange={(value) => setCharges(prev => ({ ...prev, waterCharge: value ?? 0 }))}
+                                />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetMoneyField
+                                    label={data.status === PropertyStatus.PROSPECT ? t('expectedRent') : t('monthlyRent')}
+                                    value={data.monthlyRent ?? 0}
+                                    onChange={(value) => handleChange('monthlyRent', value)}
+                                />
+                            </Box>
+                        </Stack>
+                    </>
+                )}
 
                 {/* Airbnb Settings Section */}
                 <Divider sx={{ my: 2 }} />
@@ -456,6 +574,27 @@ function PropertyForm({ t }: WithTranslation) {
                 onAfterSubmit={handleNavigateBack}
                 onSaveResult={handleSaveResult}
             />
+            {isEditMode && (
+                <PropertyChargeDialog
+                    open={chargeDialogOpen}
+                    propertyId={Number(idParam)}
+                    onClose={() => setChargeDialogOpen(false)}
+                    onChargesUpdated={() => {
+                        // Refetch charges
+                        ApiClient.request<CurrentCharges>({
+                            method: 'GET',
+                            url: `/real-estate/property/${idParam}/charges/current`,
+                        }).then((result) => {
+                            setCharges({
+                                maintenanceFee: result.maintenanceFee ?? 0,
+                                financialCharge: result.financialCharge ?? 0,
+                                waterCharge: result.waterPrepayment ?? 0,
+                                totalCharge: result.totalCharge ?? 0,
+                            });
+                        });
+                    }}
+                />
+            )}
         </AssetContent>
     );
 }

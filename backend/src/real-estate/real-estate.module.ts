@@ -53,6 +53,6 @@ import { PropertyChargeController } from './property/property-charge.controller'
     PeopleModule,
     TierModule,
   ],
-  exports: [PropertyService],
+  exports: [PropertyService, PropertyChargeService],
 })
 export class RealEstateModule {}

@@ -47,10 +47,7 @@ export interface PropertyInput {
   salePrice?: number;
   saleDate?: Date;
   debtShare?: number;
-  maintenanceFee?: number;
-  financialCharge?: number;
   monthlyRent?: number;
-  waterCharge?: number;
   isAirbnb?: boolean;
   distanceFromHome?: number;
   ownerships?: OwnershipInput[];
@@ -210,6 +207,6 @@ export interface PropertyChargeInput {
   propertyId: number;
   chargeType: ChargeType;
   amount: number;
-  startDate: string;
+  startDate: string | null;
   endDate?: string | null;
 }

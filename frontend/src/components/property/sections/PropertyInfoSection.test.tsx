@@ -1,7 +1,6 @@
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { renderWithProviders } from '@test-utils/test-wrapper';
-import { createMockProperty } from '@test-utils/test-data';
+import { renderWithProviders, createMockProperty } from '@test-utils';
 import { PropertyStatus } from '@asset-types';
 import PropertyInfoSection from './PropertyInfoSection';
 
@@ -35,19 +34,15 @@ describe('PropertyInfoSection', () => {
     expect(screen.getByText(/Helsinki/)).toBeInTheDocument();
   });
 
-  it('renders monthly costs card when costs exist', () => {
-    const property = createMockProperty({
-      maintenanceFee: 200,
-      waterCharge: 45,
-    });
+  it('renders monthly costs card with empty state when no charges data', () => {
+    const property = createMockProperty();
 
     renderWithProviders(<PropertyInfoSection property={property} />);
 
-    // Check section title is rendered (proves card is shown)
+    // Monthly costs section should always appear with manage button
     expect(screen.getByText('Monthly Costs')).toBeInTheDocument();
-    // Check that costs are rendered (using getAllByText since there are multiple € values)
-    const euroValues = screen.getAllByText(/€/);
-    expect(euroValues.length).toBeGreaterThanOrEqual(2);
+    // Should show empty state prompting to add charges
+    expect(screen.getByText('No charges')).toBeInTheDocument();
   });
 
   it('renders purchase details for OWN status', () => {

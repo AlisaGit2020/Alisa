@@ -106,7 +106,7 @@ describe('PropertyChargeService', () => {
       expect(mockPropertyService.findOne).toHaveBeenCalledWith(mockUser, 1);
       expect(mockRepository.find).toHaveBeenCalledWith({
         where: { propertyId: 1 },
-        order: { startDate: 'DESC', chargeType: 'ASC' },
+        order: { chargeType: 'ASC', endDate: { direction: 'DESC', nulls: 'FIRST' } },
       });
     });
 
@@ -429,6 +429,74 @@ describe('PropertyChargeService', () => {
         where: { propertyId: 1, chargeType: ChargeType.MAINTENANCE_FEE },
         order: { startDate: 'DESC' },
       });
+    });
+  });
+
+  describe('createBatch', () => {
+    it('should create multiple charges and auto-calculate total', async () => {
+      const inputs = [
+        { propertyId: 1, chargeType: ChargeType.MAINTENANCE_FEE, amount: 150, startDate: '2024-01-15' },
+        { propertyId: 1, chargeType: ChargeType.FINANCIAL_CHARGE, amount: 50, startDate: '2024-01-15' },
+        { propertyId: 1, chargeType: ChargeType.WATER_PREPAYMENT, amount: 25, startDate: '2024-01-15' },
+      ];
+
+      const savedCharges = [
+        createMockCharge(1, ChargeType.MAINTENANCE_FEE, 150, new Date('2024-01-15'), null),
+        createMockCharge(2, ChargeType.FINANCIAL_CHARGE, 50, new Date('2024-01-15'), null),
+        createMockCharge(3, ChargeType.WATER_PREPAYMENT, 25, new Date('2024-01-15'), null),
+        createMockCharge(4, ChargeType.TOTAL_CHARGE, 225, new Date('2024-01-15'), null),
+      ];
+
+      mockRepository.create.mockImplementation((data: Partial<PropertyCharge>) => {
+        const charge = new PropertyCharge();
+        Object.assign(charge, data);
+        return charge;
+      });
+
+      let saveCallCount = 0;
+      mockRepository.save.mockImplementation(() => {
+        return Promise.resolve(savedCharges[saveCallCount++]);
+      });
+
+      const result = await service.createBatch(mockUser, 1, inputs);
+
+      expect(result).toHaveLength(4); // 3 inputs + 1 auto-calculated total
+      expect(result.find(c => c.chargeType === ChargeType.TOTAL_CHARGE)?.amount).toBe(225);
+    });
+
+    it('should allow null startDate', async () => {
+      const inputs = [
+        { propertyId: 1, chargeType: ChargeType.MAINTENANCE_FEE, amount: 100, startDate: null },
+      ];
+
+      const savedCharges = [
+        createMockCharge(1, ChargeType.MAINTENANCE_FEE, 100, null, null),
+        createMockCharge(2, ChargeType.TOTAL_CHARGE, 100, null, null),
+      ];
+
+      mockRepository.create.mockImplementation((data: Partial<PropertyCharge>) => {
+        const charge = new PropertyCharge();
+        Object.assign(charge, data);
+        return charge;
+      });
+
+      let saveCallCount = 0;
+      mockRepository.save.mockImplementation(() => {
+        return Promise.resolve(savedCharges[saveCallCount++]);
+      });
+
+      const result = await service.createBatch(mockUser, 1, inputs);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].startDate).toBeNull();
+    });
+
+    it('should throw NotFoundException for invalid property', async () => {
+      mockPropertyService.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.createBatch(mockUser, 999, [{ propertyId: 999, chargeType: ChargeType.MAINTENANCE_FEE, amount: 100, startDate: null }])
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

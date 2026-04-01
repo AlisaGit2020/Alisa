@@ -48,6 +48,15 @@ export class PropertyChargeController {
     return this.service.create(user, input);
   }
 
+  @Post(':id/charges/batch')
+  async createBatch(
+    @User() user: JWTUser,
+    @Param('id', ParseIntPipe) propertyId: number,
+    @Body() inputs: PropertyChargeInputDto[],
+  ): Promise<PropertyChargeDto[]> {
+    return this.service.createBatch(user, propertyId, inputs);
+  }
+
   @Put(':id/charges/:chargeId')
   async update(
     @User() user: JWTUser,

@@ -1,5 +1,6 @@
-import { Grid } from '@mui/material';
+import { Grid, IconButton, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useState, useEffect } from 'react';
 import SquareFootIcon from '@mui/icons-material/SquareFoot';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CalculateIcon from '@mui/icons-material/Calculate';
@@ -9,10 +10,13 @@ import MapIcon from '@mui/icons-material/Map';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import { Property, PropertyStatus } from '@asset-types';
+import EditIcon from '@mui/icons-material/Edit';
+import { Property, PropertyStatus, CurrentCharges } from '@asset-types';
 import { formatCurrency, formatDate } from '@asset-lib/format-utils';
+import ApiClient from '@asset-lib/api-client';
 import PropertyInfoCard from '../shared/PropertyInfoCard';
 import DetailRow from '../shared/DetailRow';
+import PropertyChargeDialog from './PropertyChargeDialog';
 
 interface PropertyInfoSectionProps {
   property: Property;
@@ -20,12 +24,38 @@ interface PropertyInfoSectionProps {
 
 function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
   const { t } = useTranslation('property');
+  const [currentCharges, setCurrentCharges] = useState<CurrentCharges | null>(null);
+  const [chargeDialogOpen, setChargeDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchCharges = async () => {
+      try {
+        const charges = await ApiClient.request<CurrentCharges>({
+          method: 'GET',
+          url: `/real-estate/property/${property.id}/charges/current`,
+        });
+        setCurrentCharges(charges);
+      } catch {
+        // Silently fail - charges will show as empty
+      }
+    };
+    fetchCharges();
+  }, [property.id]);
+
+  const handleChargesUpdated = () => {
+    // Refetch charges
+    ApiClient.request<CurrentCharges>({
+      method: 'GET',
+      url: `/real-estate/property/${property.id}/charges/current`,
+    }).then(setCurrentCharges);
+  };
 
   const hasAddress = property.address?.street || property.address?.city;
   const hasCosts =
-    property.maintenanceFee !== undefined ||
-    property.waterCharge !== undefined ||
-    property.financialCharge !== undefined;
+    currentCharges !== null &&
+    (currentCharges.maintenanceFee !== null ||
+      currentCharges.waterPrepayment !== null ||
+      currentCharges.financialCharge !== null);
   const hasPurchaseDetails =
     (property.status === PropertyStatus.OWN || property.status === PropertyStatus.SOLD) &&
     (property.purchaseDate !== undefined || property.purchaseLoan !== undefined);
@@ -35,9 +65,9 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
     property.saleDate !== null;
 
   const totalMonthlyCosts =
-    (property.maintenanceFee ?? 0) +
-    (property.waterCharge ?? 0) +
-    (property.financialCharge ?? 0);
+    (currentCharges?.maintenanceFee ?? 0) +
+    (currentCharges?.waterPrepayment ?? 0) +
+    (currentCharges?.financialCharge ?? 0);
 
   const pricePerSqm =
     property.purchasePrice && property.size > 0
@@ -100,41 +130,62 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
         </Grid>
       )}
 
-      {/* Monthly Costs Card */}
-      {hasCosts && (
-        <Grid size={{ xs: 12, md: 6 }}>
-          <PropertyInfoCard title={t('monthlyCostsSection')}>
-            {property.maintenanceFee !== undefined && property.maintenanceFee !== null && (
-              <DetailRow
-                icon={<HomeWorkIcon fontSize="small" />}
-                label={t('maintenanceFee')}
-                value={`${formatCurrency(property.maintenanceFee, 2)}${t('perMonth')}`}
-              />
-            )}
-            {property.waterCharge !== undefined && property.waterCharge !== null && (
-              <DetailRow
-                icon={<WaterDropIcon fontSize="small" />}
-                label={t('waterCharge')}
-                value={`${formatCurrency(property.waterCharge, 2)}${t('perMonth')}`}
-              />
-            )}
-            {property.financialCharge !== undefined && property.financialCharge !== null && (
-              <DetailRow
-                icon={<AccountBalanceIcon fontSize="small" />}
-                label={t('financialCharge')}
-                value={`${formatCurrency(property.financialCharge, 2)}${t('perMonth')}`}
-              />
-            )}
-            {totalMonthlyCosts > 0 && (
-              <DetailRow
-                icon={<CalculateIcon fontSize="small" />}
-                label={t('totalMonthlyCosts')}
-                value={`${formatCurrency(totalMonthlyCosts, 2)}${t('perMonth')}`}
-              />
-            )}
-          </PropertyInfoCard>
-        </Grid>
-      )}
+      {/* Monthly Costs Card - always show so users can add charges */}
+      <Grid size={{ xs: 12, md: 6 }}>
+        <PropertyInfoCard
+          title={t('monthlyCostsSection')}
+          action={
+            <Tooltip title={t('manageCharges')}>
+              <IconButton
+                size="small"
+                onClick={() => setChargeDialogOpen(true)}
+                aria-label={t('manageCharges')}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          }
+        >
+          {hasCosts ? (
+            <>
+              {currentCharges?.maintenanceFee !== null && currentCharges?.maintenanceFee !== undefined && (
+                <DetailRow
+                  icon={<HomeWorkIcon fontSize="small" />}
+                  label={t('maintenanceFee')}
+                  value={`${formatCurrency(currentCharges.maintenanceFee, 2)}${t('perMonth')}`}
+                />
+              )}
+              {currentCharges?.waterPrepayment !== null && currentCharges?.waterPrepayment !== undefined && (
+                <DetailRow
+                  icon={<WaterDropIcon fontSize="small" />}
+                  label={t('waterPrepayment')}
+                  value={`${formatCurrency(currentCharges.waterPrepayment, 2)}${t('perMonth')}`}
+                />
+              )}
+              {currentCharges?.financialCharge !== null && currentCharges?.financialCharge !== undefined && (
+                <DetailRow
+                  icon={<AccountBalanceIcon fontSize="small" />}
+                  label={t('financialCharge')}
+                  value={`${formatCurrency(currentCharges.financialCharge, 2)}${t('perMonth')}`}
+                />
+              )}
+              {totalMonthlyCosts > 0 && (
+                <DetailRow
+                  icon={<CalculateIcon fontSize="small" />}
+                  label={t('totalMonthlyCosts')}
+                  value={`${formatCurrency(totalMonthlyCosts, 2)}${t('perMonth')}`}
+                />
+              )}
+            </>
+          ) : (
+            <DetailRow
+              icon={<CalculateIcon fontSize="small" />}
+              label={t('noCharges')}
+              value={t('addCharge')}
+            />
+          )}
+        </PropertyInfoCard>
+      </Grid>
 
       {/* Purchase Details Card */}
       {hasPurchaseDetails && (
@@ -170,6 +221,14 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
           </PropertyInfoCard>
         </Grid>
       )}
+
+      {/* Charge History Dialog */}
+      <PropertyChargeDialog
+        open={chargeDialogOpen}
+        propertyId={property.id}
+        onClose={() => setChargeDialogOpen(false)}
+        onChargesUpdated={handleChargesUpdated}
+      />
     </Grid>
   );
 }

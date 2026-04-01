@@ -46,9 +46,10 @@ function PropertyChargeDialog({
     setLoading(true);
     setError(null);
     try {
-      const data = await ApiClient.fetch<PropertyCharge[]>(
-        `real-estate/property/${propertyId}/charges`
-      );
+      const data = await ApiClient.request<PropertyCharge[]>({
+        method: 'GET',
+        url: `/real-estate/property/${propertyId}/charges`,
+      });
       setCharges(data);
     } catch {
       setError(t('report.fetchError'));
@@ -77,11 +78,6 @@ function PropertyChargeDialog({
     return grouped;
   }, [charges]);
 
-  const isChargeActive = (charge: PropertyCharge): boolean => {
-    const today = new Date().toISOString().split('T')[0];
-    return charge.startDate <= today && (!charge.endDate || charge.endDate >= today);
-  };
-
   // Check if total charge matches sum of components
   const totalMismatch = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -105,6 +101,11 @@ function PropertyChargeDialog({
     }
     return null;
   }, [chargesByType]);
+
+  const isChargeActive = (charge: PropertyCharge): boolean => {
+    const today = new Date().toISOString().split('T')[0];
+    return charge.startDate <= today && (!charge.endDate || charge.endDate >= today);
+  };
 
   // Check if any type has history to show
   const hasAnyHistory = useMemo(() => {
@@ -145,10 +146,10 @@ function PropertyChargeDialog({
     if (!chargeToDelete) return;
 
     try {
-      await ApiClient.delete(
-        `real-estate/property/${propertyId}/charges`,
-        chargeToDelete.id
-      );
+      await ApiClient.request({
+        method: 'DELETE',
+        url: `/real-estate/property/${propertyId}/charges/${chargeToDelete.id}`,
+      });
       await fetchCharges();
       onChargesUpdated?.();
     } catch {
@@ -162,16 +163,17 @@ function PropertyChargeDialog({
   const handleFormSubmit = async (input: PropertyChargeInput) => {
     try {
       if (input.id) {
-        await ApiClient.put(
-          `real-estate/property/${propertyId}/charges`,
-          input.id,
-          input
-        );
+        await ApiClient.request({
+          method: 'PUT',
+          url: `/real-estate/property/${propertyId}/charges/${input.id}`,
+          data: input,
+        });
       } else {
-        await ApiClient.post(
-          `real-estate/property/${propertyId}/charges`,
-          input
-        );
+        await ApiClient.request({
+          method: 'POST',
+          url: `/real-estate/property/${propertyId}/charges`,
+          data: input,
+        });
       }
       setShowForm(false);
       setSelectedChargeType(undefined);
@@ -193,10 +195,12 @@ function PropertyChargeDialog({
       name: 'startDate',
       label: t('startDate'),
       format: 'date',
+      width: '25%',
     },
     {
       name: 'endDate',
       label: t('endDate'),
+      width: '35%',
       render: (charge) => charge.endDate
         ? t('format.date', {
             val: new Date(charge.endDate),
@@ -208,6 +212,7 @@ function PropertyChargeDialog({
       name: 'amount',
       label: t('chargeAmount'),
       format: 'currency',
+      width: '25%',
     },
   ];
 
@@ -305,6 +310,9 @@ function PropertyChargeDialog({
                     fields={fields}
                     onEdit={handleEdit}
                     onDeleteRequest={handleDeleteRequest}
+                    fixedLayout
+                    stripedRows={false}
+                    showHeader={false}
                   />
                 </Box>
               );

@@ -79,10 +79,7 @@ export interface Property {
   salePrice?: number;
   saleDate?: Date;
   debtShare?: number;
-  maintenanceFee?: number;
-  financialCharge?: number;
   monthlyRent?: number;
-  waterCharge?: number;
   isAirbnb?: boolean;
   distanceFromHome?: number;
 }

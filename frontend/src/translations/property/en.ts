@@ -97,7 +97,7 @@ const property = {
     },
 
     // Charge history
-    chargeHistory: 'Charge History',
+    chargeHistory: 'Charges',
     manageCharges: 'Manage Charges',
     addCharge: 'Add Charge',
     editCharge: 'Edit Charge',
