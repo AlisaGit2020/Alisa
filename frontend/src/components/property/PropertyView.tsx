@@ -19,12 +19,14 @@ import PropertyKpiSection from './sections/PropertyKpiSection';
 import PropertyInfoSection from './sections/PropertyInfoSection';
 import PropertyInfoCard from './shared/PropertyInfoCard';
 import { calculateSummaryData } from './report/report-utils';
+import PropertyChargeDialog from './sections/PropertyChargeDialog';
 
 function PropertyView({ t }: WithTranslation) {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rulesModalOpen, setRulesModalOpen] = useState(false);
+  const [chargesDialogOpen, setChargesDialogOpen] = useState(false);
   const [showAdvancedReports, setShowAdvancedReports] = useState(false);
   const [statistics, setStatistics] = useState<PropertyStatistics[]>([]);
   const { idParam } = useParams();
@@ -150,6 +152,7 @@ function PropertyView({ t }: WithTranslation) {
             property={property}
             onEdit={handleEdit}
             onOpenAllocationRules={() => setRulesModalOpen(true)}
+            onOpenCharges={() => setChargesDialogOpen(true)}
             onToggleAdvancedReports={() => setShowAdvancedReports((prev) => !prev)}
             onPropertyUpdated={(updated) => setProperty(updated)}
           />
@@ -235,6 +238,13 @@ function PropertyView({ t }: WithTranslation) {
         propertyId={property.id}
         propertyName={property.name}
         onClose={() => setRulesModalOpen(false)}
+      />
+
+      {/* Property Charges Dialog */}
+      <PropertyChargeDialog
+        open={chargesDialogOpen}
+        propertyId={property.id}
+        onClose={() => setChargesDialogOpen(false)}
       />
     </Paper>
   );

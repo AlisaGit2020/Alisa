@@ -1,15 +1,15 @@
-import { Box, CircularProgress, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Alert, Box, CircularProgress, IconButton, Tooltip, Typography } from '@mui/material';
+import HistoryIcon from '@mui/icons-material/History';
+import AddIcon from '@mui/icons-material/Add';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { PropertyCharge, PropertyChargeInput } from '@asset-types';
+import { ChargeType, PropertyCharge, PropertyChargeInput } from '@asset-types';
 import ApiClient from '@asset-lib/api-client';
 import AssetDialog from '../../asset/dialog/AssetDialog';
 import AssetConfirmDialog from '../../asset/dialog/AssetConfirmDialog';
 import AssetButton from '../../asset/form/AssetButton';
+import AssetDataTable, { AssetDataTableField } from '../../asset/datatable/AssetDataTable';
 import PropertyChargeForm from './PropertyChargeForm';
-import { formatCurrency, formatDate } from '@asset-lib/format-utils';
 
 interface PropertyChargeDialogProps {
   open: boolean;
@@ -17,6 +17,13 @@ interface PropertyChargeDialogProps {
   onClose: () => void;
   onChargesUpdated?: () => void;
 }
+
+const CHARGE_TYPES = [
+  { typeName: 'maintenance-fee', chargeType: ChargeType.MAINTENANCE_FEE },
+  { typeName: 'financial-charge', chargeType: ChargeType.FINANCIAL_CHARGE },
+  { typeName: 'water-prepayment', chargeType: ChargeType.WATER_PREPAYMENT },
+  { typeName: 'total-charge', chargeType: ChargeType.TOTAL_CHARGE },
+];
 
 function PropertyChargeDialog({
   open,
@@ -30,54 +37,118 @@ function PropertyChargeDialog({
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingCharge, setEditingCharge] = useState<PropertyCharge | undefined>(undefined);
+  const [selectedChargeType, setSelectedChargeType] = useState<ChargeType | undefined>(undefined);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [chargeToDelete, setChargeToDelete] = useState<PropertyCharge | null>(null);
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
-  const fetchCharges = async () => {
+  const fetchCharges = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await ApiClient.request<PropertyCharge[]>({
-        method: 'GET',
-        url: `/real-estate/property/${propertyId}/charges`,
-      });
+      const data = await ApiClient.fetch<PropertyCharge[]>(
+        `real-estate/property/${propertyId}/charges`
+      );
       setCharges(data);
     } catch {
       setError(t('report.fetchError'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [propertyId, t]);
 
   useEffect(() => {
     if (open) {
       fetchCharges();
     }
-  }, [open, propertyId]);
+  }, [open, fetchCharges]);
 
-  const handleAdd = () => {
+  // Group charges by type
+  const chargesByType = useMemo(() => {
+    const grouped = new Map<string, PropertyCharge[]>();
+    for (const { typeName } of CHARGE_TYPES) {
+      grouped.set(typeName, []);
+    }
+    for (const charge of charges) {
+      const existing = grouped.get(charge.typeName) || [];
+      existing.push(charge);
+      grouped.set(charge.typeName, existing);
+    }
+    return grouped;
+  }, [charges]);
+
+  const isChargeActive = (charge: PropertyCharge): boolean => {
+    const today = new Date().toISOString().split('T')[0];
+    return charge.startDate <= today && (!charge.endDate || charge.endDate >= today);
+  };
+
+  // Check if total charge matches sum of components
+  const totalMismatch = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const getActiveAmount = (typeName: string): number => {
+      const typeCharges = chargesByType.get(typeName) || [];
+      const activeCharge = typeCharges.find(c =>
+        c.startDate <= today && (!c.endDate || c.endDate >= today)
+      );
+      return activeCharge?.amount ?? 0;
+    };
+
+    const maintenanceFee = getActiveAmount('maintenance-fee');
+    const financialCharge = getActiveAmount('financial-charge');
+    const waterPrepayment = getActiveAmount('water-prepayment');
+    const totalCharge = getActiveAmount('total-charge');
+
+    const calculatedSum = maintenanceFee + financialCharge + waterPrepayment;
+
+    if (totalCharge > 0 && Math.abs(calculatedSum - totalCharge) > 0.01) {
+      return { calculatedSum, totalCharge };
+    }
+    return null;
+  }, [chargesByType]);
+
+  // Check if any type has history to show
+  const hasAnyHistory = useMemo(() => {
+    for (const { typeName } of CHARGE_TYPES) {
+      const typeCharges = chargesByType.get(typeName) || [];
+      const activeCharges = typeCharges.filter(isChargeActive);
+      if (typeCharges.length > activeCharges.length) {
+        return true;
+      }
+    }
+    return false;
+  }, [chargesByType]);
+
+  const handleAdd = (chargeType: ChargeType) => {
     setEditingCharge(undefined);
+    setSelectedChargeType(chargeType);
     setShowForm(true);
   };
 
-  const handleEdit = (charge: PropertyCharge) => {
-    setEditingCharge(charge);
-    setShowForm(true);
+  const handleEdit = (id: number) => {
+    const charge = charges.find(c => c.id === id);
+    if (charge) {
+      setEditingCharge(charge);
+      setSelectedChargeType(undefined);
+      setShowForm(true);
+    }
   };
 
-  const handleDelete = (charge: PropertyCharge) => {
-    setChargeToDelete(charge);
-    setDeleteConfirmOpen(true);
+  const handleDeleteRequest = (id: number) => {
+    const charge = charges.find(c => c.id === id);
+    if (charge) {
+      setChargeToDelete(charge);
+      setDeleteConfirmOpen(true);
+    }
   };
 
   const handleConfirmDelete = async () => {
     if (!chargeToDelete) return;
 
     try {
-      await ApiClient.request({
-        method: 'DELETE',
-        url: `/real-estate/property/${propertyId}/charges/${chargeToDelete.id}`,
-      });
+      await ApiClient.delete(
+        `real-estate/property/${propertyId}/charges`,
+        chargeToDelete.id
+      );
       await fetchCharges();
       onChargesUpdated?.();
     } catch {
@@ -91,19 +162,19 @@ function PropertyChargeDialog({
   const handleFormSubmit = async (input: PropertyChargeInput) => {
     try {
       if (input.id) {
-        await ApiClient.request({
-          method: 'PUT',
-          url: `/real-estate/property/${propertyId}/charges/${input.id}`,
-          data: input,
-        });
+        await ApiClient.put(
+          `real-estate/property/${propertyId}/charges`,
+          input.id,
+          input
+        );
       } else {
-        await ApiClient.request({
-          method: 'POST',
-          url: `/real-estate/property/${propertyId}/charges`,
-          data: input,
-        });
+        await ApiClient.post(
+          `real-estate/property/${propertyId}/charges`,
+          input
+        );
       }
       setShowForm(false);
+      setSelectedChargeType(undefined);
       await fetchCharges();
       onChargesUpdated?.();
     } catch {
@@ -114,7 +185,31 @@ function PropertyChargeDialog({
   const handleFormCancel = () => {
     setShowForm(false);
     setEditingCharge(undefined);
+    setSelectedChargeType(undefined);
   };
+
+  const fields: AssetDataTableField<PropertyCharge>[] = [
+    {
+      name: 'startDate',
+      label: t('startDate'),
+      format: 'date',
+    },
+    {
+      name: 'endDate',
+      label: t('endDate'),
+      render: (charge) => charge.endDate
+        ? t('format.date', {
+            val: new Date(charge.endDate),
+            formatParams: { val: { year: 'numeric', month: 'numeric', day: 'numeric' } },
+          })
+        : t('validUntilFurtherNotice'),
+    },
+    {
+      name: 'amount',
+      label: t('chargeAmount'),
+      format: 'currency',
+    },
+  ];
 
   if (!open) {
     return null;
@@ -126,10 +221,22 @@ function PropertyChargeDialog({
         open={open}
         onClose={onClose}
         title={t('chargeHistory')}
-        maxWidth="md"
+        maxWidth="sm"
         fullWidth
         actions={
-          <AssetButton label={t('close')} variant="outlined" onClick={onClose} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', px: 2 }}>
+            {hasAnyHistory && !showForm ? (
+              <AssetButton
+                label={showAllHistory ? t('hideHistory') : t('showHistory')}
+                variant="text"
+                startIcon={<HistoryIcon />}
+                onClick={() => setShowAllHistory(prev => !prev)}
+              />
+            ) : (
+              <Box />
+            )}
+            <AssetButton label={t('close')} variant="outlined" onClick={onClose} />
+          </Box>
         }
       >
         {loading && (
@@ -144,64 +251,64 @@ function PropertyChargeDialog({
           </Typography>
         )}
 
+        {!loading && !showForm && totalMismatch && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {t('totalChargeMismatch', {
+              calculated: totalMismatch.calculatedSum.toFixed(2),
+              actual: totalMismatch.totalCharge.toFixed(2),
+            })}
+          </Alert>
+        )}
+
         {!loading && !error && !showForm && (
           <>
-            <Box sx={{ mb: 2 }}>
-              <AssetButton
-                label={t('addCharge')}
-                variant="contained"
-                onClick={handleAdd}
-              />
-            </Box>
+            {CHARGE_TYPES.map(({ typeName, chargeType }) => {
+              const typeCharges = chargesByType.get(typeName) || [];
+              const visibleCharges = showAllHistory
+                ? typeCharges
+                : typeCharges.filter(isChargeActive);
 
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>{t('chargeType')}</TableCell>
-                  <TableCell align="right">{t('chargeAmount')}</TableCell>
-                  <TableCell>{t('startDate')}</TableCell>
-                  <TableCell>{t('endDate')}</TableCell>
-                  <TableCell align="center">{t('actions')}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {charges.map((charge) => (
-                  <TableRow key={charge.id}>
-                    <TableCell>{t(`chargeTypes.${charge.typeName}`)}</TableCell>
-                    <TableCell align="right">{formatCurrency(charge.amount)}</TableCell>
-                    <TableCell>{formatDate(charge.startDate)}</TableCell>
-                    <TableCell>
-                      {charge.endDate
-                        ? formatDate(charge.endDate)
-                        : t('validUntilFurtherNotice')}
-                    </TableCell>
-                    <TableCell align="center">
+              return (
+                <Box key={typeName} sx={{ mb: 2 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      mb: 0.5,
+                      py: 0.5,
+                      px: 1,
+                      borderRadius: 1,
+                      bgcolor: 'primary.main',
+                    }}
+                  >
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'medium', color: 'primary.contrastText' }}>
+                      {t(`chargeTypes.${typeName}`)}
+                    </Typography>
+                    <Tooltip title={t('addCharge')}>
                       <IconButton
                         size="small"
-                        onClick={() => handleEdit(charge)}
-                        aria-label={t('editCharge')}
+                        onClick={() => handleAdd(chargeType)}
+                        sx={{
+                          bgcolor: 'primary.light',
+                          color: 'primary.contrastText',
+                          '&:hover': { bgcolor: 'primary.dark' },
+                        }}
                       >
-                        <EditIcon fontSize="small" />
+                        <AddIcon fontSize="small" />
                       </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDelete(charge)}
-                        aria-label={t('deleteCharge')}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {charges.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center">
-                      {t('noCharges')}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                    </Tooltip>
+                  </Box>
+                  <AssetDataTable<PropertyCharge>
+                    t={t}
+                    data={visibleCharges}
+                    fields={fields}
+                    onEdit={handleEdit}
+                    onDeleteRequest={handleDeleteRequest}
+                  />
+                </Box>
+              );
+            })}
           </>
         )}
 
@@ -209,6 +316,7 @@ function PropertyChargeDialog({
           <PropertyChargeForm
             propertyId={propertyId}
             charge={editingCharge}
+            defaultChargeType={selectedChargeType}
             onSubmit={handleFormSubmit}
             onCancel={handleFormCancel}
           />
@@ -218,9 +326,11 @@ function PropertyChargeDialog({
       <AssetConfirmDialog
         open={deleteConfirmOpen}
         title={t('deleteCharge')}
-        message={t('confirmDeleteCharge')}
+        contentText={t('confirmDeleteCharge')}
+        buttonTextCancel={t('cancel')}
+        buttonTextConfirm={t('delete')}
         onConfirm={handleConfirmDelete}
-        onCancel={() => {
+        onClose={() => {
           setDeleteConfirmOpen(false);
           setChargeToDelete(null);
         }}

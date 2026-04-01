@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 interface PropertyChargeFormProps {
   propertyId: number;
   charge?: PropertyCharge;
+  defaultChargeType?: ChargeType;
   onSubmit: (input: PropertyChargeInput) => void;
   onCancel: () => void;
 }
@@ -22,22 +23,23 @@ const chargeTypeItems = [
   { id: ChargeType.TOTAL_CHARGE, key: 'total-charge' },
 ];
 
-function PropertyChargeForm({ propertyId, charge, onSubmit, onCancel }: PropertyChargeFormProps) {
+function PropertyChargeForm({ propertyId, charge, defaultChargeType, onSubmit, onCancel }: PropertyChargeFormProps) {
   const { t } = useTranslation('property');
   const isEdit = !!charge;
 
   const [chargeType, setChargeType] = useState<ChargeType>(
-    charge?.chargeType ?? ChargeType.MAINTENANCE_FEE
+    charge?.chargeType ?? defaultChargeType ?? ChargeType.MAINTENANCE_FEE
   );
   const [amount, setAmount] = useState<number>(charge?.amount ?? 0);
-  const [startDate, setStartDate] = useState<dayjs.Dayjs | null>(
-    charge?.startDate ? dayjs(charge.startDate) : null
+  const [startDate, setStartDate] = useState<Date | null>(
+    charge?.startDate ? new Date(charge.startDate) : null
   );
-  const [endDate, setEndDate] = useState<dayjs.Dayjs | null>(
-    charge?.endDate ? dayjs(charge.endDate) : null
+  const [endDate, setEndDate] = useState<Date | null>(
+    charge?.endDate ? new Date(charge.endDate) : null
   );
   const [errors, setErrors] = useState<{
     startDate?: string;
+    endDate?: string;
     amount?: string;
   }>({});
 
@@ -50,6 +52,10 @@ function PropertyChargeForm({ propertyId, charge, onSubmit, onCancel }: Property
 
     if (amount < 0) {
       newErrors.amount = t('amountMustBePositive');
+    }
+
+    if (startDate && endDate && dayjs(endDate).isBefore(dayjs(startDate))) {
+      newErrors.endDate = t('endDateMustBeAfterStartDate');
     }
 
     setErrors(newErrors);
@@ -66,8 +72,8 @@ function PropertyChargeForm({ propertyId, charge, onSubmit, onCancel }: Property
       propertyId,
       chargeType,
       amount,
-      startDate: startDate!.format('YYYY-MM-DD'),
-      endDate: endDate ? endDate.format('YYYY-MM-DD') : null,
+      startDate: dayjs(startDate).format('YYYY-MM-DD'),
+      endDate: endDate ? dayjs(endDate).format('YYYY-MM-DD') : null,
     };
 
     onSubmit(input);
@@ -87,7 +93,7 @@ function PropertyChargeForm({ propertyId, charge, onSubmit, onCancel }: Property
           t={t}
           translateKeyPrefix="chargeTypes"
           onChange={(e) => setChargeType(Number(e.target.value) as ChargeType)}
-          disabled={isEdit}
+          disabled={isEdit || !!defaultChargeType}
           aria-label={t('chargeType')}
         />
 
@@ -103,26 +109,17 @@ function PropertyChargeForm({ propertyId, charge, onSubmit, onCancel }: Property
         <AssetDatePicker
           label={t('startDate')}
           value={startDate}
-          onChange={(date) => setStartDate(date)}
-          slotProps={{
-            textField: {
-              error: !!errors.startDate,
-              helperText: errors.startDate,
-              inputProps: { 'aria-label': t('startDate') },
-            },
-          }}
+          onChange={(date) => setStartDate(date?.toDate() ?? null)}
+          error={!!errors.startDate}
+          helperText={errors.startDate}
         />
 
         <AssetDatePicker
           label={t('endDate')}
           value={endDate}
-          onChange={(date) => setEndDate(date)}
-          slotProps={{
-            textField: {
-              helperText: t('leaveEmptyForValidUntilFurtherNotice'),
-              inputProps: { 'aria-label': t('endDate') },
-            },
-          }}
+          onChange={(date) => setEndDate(date?.toDate() ?? null)}
+          error={!!errors.endDate}
+          helperText={errors.endDate || t('leaveEmptyForValidUntilFurtherNotice')}
         />
 
         <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 2 }}>
