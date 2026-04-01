@@ -16,15 +16,16 @@ interface PropertyChargeFormProps {
   onCancel: () => void;
 }
 
-const chargeTypeItems = [
-  { id: ChargeType.MAINTENANCE_FEE, key: 'maintenance-fee' },
-  { id: ChargeType.FINANCIAL_CHARGE, key: 'financial-charge' },
-  { id: ChargeType.WATER_PREPAYMENT, key: 'water-prepayment' },
-  { id: ChargeType.TOTAL_CHARGE, key: 'total-charge' },
-];
-
 function PropertyChargeForm({ propertyId, charge, defaultChargeType, onSubmit, onCancel }: PropertyChargeFormProps) {
   const { t } = useTranslation('property');
+
+  // Define items inside component to use translated names
+  const chargeTypeItems = [
+    { id: ChargeType.MAINTENANCE_FEE, name: t('chargeTypes.maintenance-fee') },
+    { id: ChargeType.FINANCIAL_CHARGE, name: t('chargeTypes.financial-charge') },
+    { id: ChargeType.WATER_PREPAYMENT, name: t('chargeTypes.water-prepayment') },
+    { id: ChargeType.TOTAL_CHARGE, name: t('chargeTypes.total-charge') },
+  ];
   const isEdit = !!charge;
   const isTypeFixed = isEdit || defaultChargeType !== undefined;
 
@@ -91,8 +92,6 @@ function PropertyChargeForm({ propertyId, charge, defaultChargeType, onSubmit, o
           label={t('chargeType')}
           value={chargeType}
           items={chargeTypeItems}
-          t={t}
-          translateKeyPrefix="chargeTypes"
           onChange={(e) => setChargeType(Number(e.target.value) as ChargeType)}
           disabled={isTypeFixed}
           aria-label={t('chargeType')}
