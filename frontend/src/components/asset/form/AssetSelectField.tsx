@@ -29,7 +29,7 @@ function AssetSelectField(props: {
 
     const getItemLabel = (item: AssetSelectFieldItem): string => {
         if (props.t && props.translateKeyPrefix && item.key) {
-            return props.t(`${props.translateKeyPrefix}.${item.key}`);
+            return props.t(`${props.translateKeyPrefix}:${item.key}`);
         }
         return item.name || "";
     };
