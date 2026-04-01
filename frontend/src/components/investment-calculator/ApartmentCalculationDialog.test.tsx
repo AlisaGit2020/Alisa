@@ -62,8 +62,6 @@ const createMockProperty = (overrides: Partial<Property> = {}): Property => ({
   },
   purchasePrice: 150000,
   monthlyRent: 850,
-  maintenanceFee: 200,
-  financialCharge: 50,
   ...overrides,
 });
 
@@ -163,26 +161,6 @@ describe('ApartmentCalculationDialog', () => {
       expect(screen.getByText(/950/)).toBeInTheDocument();
     });
 
-    it('pre-fills maintenance fee from property', () => {
-      const property = createMockProperty({ maintenanceFee: 250 });
-
-      renderWithProviders(
-        <ApartmentCalculationDialog {...defaultProps} property={property} />
-      );
-
-      expect(screen.getByText(/250/)).toBeInTheDocument();
-    });
-
-    it('pre-fills financial costs charge from property', () => {
-      const property = createMockProperty({ financialCharge: 75 });
-
-      renderWithProviders(
-        <ApartmentCalculationDialog {...defaultProps} property={property} />
-      );
-
-      expect(screen.getByText(/75/)).toBeInTheDocument();
-    });
-
     it('pre-fills apartment size from property', () => {
       const property = createMockProperty({ size: 65 });
 
@@ -198,7 +176,6 @@ describe('ApartmentCalculationDialog', () => {
       const property = createMockProperty({
         purchasePrice: undefined,
         monthlyRent: undefined,
-        maintenanceFee: undefined,
       });
 
       renderWithProviders(

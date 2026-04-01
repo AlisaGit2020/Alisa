@@ -136,8 +136,8 @@ export class PropertyChargeService {
     }
 
     for (const input of inputs) {
-      // Skip if amount is 0 or not provided
-      if (!input.amount || input.amount === 0) {
+      // Skip if amount is not provided (but allow 0 amounts)
+      if (input.amount === null || input.amount === undefined) {
         continue;
       }
 

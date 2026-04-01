@@ -14,12 +14,6 @@ function OwnPropertyCardContent({ property }: OwnPropertyCardContentProps) {
   const { t } = useTranslation('property');
 
   const monthlyRent = property.monthlyRent ?? 0;
-  const maintenanceFee = property.maintenanceFee ?? 0;
-  const financialCharge = property.financialCharge ?? 0;
-  const waterCharge = property.waterCharge ?? 0;
-
-  // Net rent = rent - all costs
-  const netRent = monthlyRent - maintenanceFee - financialCharge - waterCharge;
 
   const formatCurrency = (value: number): string => {
     const formatted = new Intl.NumberFormat('fi-FI', {
@@ -31,9 +25,6 @@ function OwnPropertyCardContent({ property }: OwnPropertyCardContentProps) {
     // Replace Unicode minus (U+2212) with regular hyphen-minus for consistent display
     return formatted.replace(/\u2212/g, '-');
   };
-
-  // Check if any costs are present (to determine whether to show net rent)
-  const hasCosts = maintenanceFee > 0 || financialCharge > 0 || waterCharge > 0;
 
   return (
     <Box sx={{ mt: 1 }}>
@@ -70,23 +61,6 @@ function OwnPropertyCardContent({ property }: OwnPropertyCardContentProps) {
           {formatCurrency(monthlyRent)}
         </Typography>
       </Box>
-
-      {/* Net Rent - only show if there are costs (otherwise net = gross) */}
-      {hasCosts && (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography variant="body2" color="text.secondary">
-            {t('netRent')}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: netRent >= 0 ? 'success.main' : 'error.main',
-            }}
-          >
-            {formatCurrency(netRent)}
-          </Typography>
-        </Box>
-      )}
 
     </Box>
   );

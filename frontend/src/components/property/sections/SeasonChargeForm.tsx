@@ -88,9 +88,8 @@ function SeasonChargeForm({ propertyId, initialValues, onSubmit, onCancel }: Sea
     const dateStr = dayjs(startDate).format('YYYY-MM-DD');
     const endDateStr = endDate ? dayjs(endDate).format('YYYY-MM-DD') : null;
 
-    // Build charge inputs from non-zero charges
+    // Build charge inputs (include zero amounts)
     const chargeInputs: PropertyChargeInput[] = chargeFields
-      .filter(({ key }) => charges[key] > 0)
       .map(({ key, chargeType }) => ({
         propertyId,
         chargeType,

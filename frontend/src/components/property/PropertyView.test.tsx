@@ -112,10 +112,13 @@ describe('PropertyView', () => {
     mockAxiosPost = jest.spyOn(axios, 'post').mockResolvedValue({ data: [] });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Wait for any pending promises to settle
+    await new Promise(resolve => setTimeout(resolve, 0));
     mockGet.mockRestore();
     mockGetOptions.mockRestore();
     mockAxiosPost.mockRestore();
+    jest.clearAllMocks();
   });
 
   describe('Rendering', () => {

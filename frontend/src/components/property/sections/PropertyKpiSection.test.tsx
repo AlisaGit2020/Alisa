@@ -12,9 +12,6 @@ describe('PropertyKpiSection', () => {
       purchasePrice: 185000,
       debtShare: 15000,
       monthlyRent: 850,
-      maintenanceFee: 200,
-      waterCharge: 50,
-      financialCharge: 100,
     });
 
     renderWithProviders(<PropertyKpiSection property={property} />);
