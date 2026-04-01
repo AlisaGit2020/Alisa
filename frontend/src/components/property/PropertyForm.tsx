@@ -1,8 +1,7 @@
 import { Box, Divider, Stack, Typography } from '@mui/material';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getNumber, getNumberOrUndefined } from '../../lib/functions';
 import { PropertyInput, PropertyStatus, PropertyType, propertyTypeNames, CurrentCharges, ChargeType, PropertyChargeInput } from '@asset-types'
-import { calculateCharge, ChargeValues, ChargeFieldName } from './charge-calculation';
 import dayjs from 'dayjs';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import AssetNumberField from '../asset/form/AssetNumberField';
@@ -70,13 +69,13 @@ function PropertyForm({ t }: WithTranslation) {
         maintenanceFee: 0,
         financialCharge: 0,
         waterCharge: 0,
-        totalCharge: 0,
+        otherChargeBased: 0,
     });
     const [chargeDialogOpen, setChargeDialogOpen] = useState(false);
     const isEditMode = !!idParam && Number(idParam) > 0;
-    // Track which charge fields the user has touched (for calculation)
-    // Using ref to avoid stale closure issues in useCallback
-    const touchedChargeFieldsRef = useRef<Set<ChargeFieldName>>(new Set());
+
+    // Calculate total from component charges
+    const totalCharge = charges.maintenanceFee + charges.financialCharge + charges.waterCharge + charges.otherChargeBased;
 
     // Fetch current charges in edit mode
     useEffect(() => {
@@ -89,7 +88,7 @@ function PropertyForm({ t }: WithTranslation) {
                     maintenanceFee: result.maintenanceFee ?? 0,
                     financialCharge: result.financialCharge ?? 0,
                     waterCharge: result.waterPrepayment ?? 0,
-                    totalCharge: result.totalCharge ?? 0,
+                    otherChargeBased: result.otherChargeBased ?? 0,
                 });
             }).catch(() => {
                 // Silently fail - charges will remain at 0
@@ -139,31 +138,12 @@ function PropertyForm({ t }: WithTranslation) {
         });
     }
 
-    // Handle charge field changes with auto-calculation (uses separate charges state)
+    // Handle charge field changes (total is auto-calculated from components)
     const handleChargeChange = useCallback((
-        field: ChargeFieldName,
+        field: 'maintenanceFee' | 'financialCharge' | 'waterCharge' | 'otherChargeBased',
         value: number | undefined
     ) => {
-        const numValue = value ?? 0;
-
-        setCharges(prev => {
-            const updated = { ...prev, [field]: numValue };
-
-            touchedChargeFieldsRef.current.add(field);
-
-            const currentValues: ChargeValues = {
-                maintenanceFee: field === 'maintenanceFee' ? numValue : prev.maintenanceFee,
-                financialCharge: field === 'financialCharge' ? numValue : prev.financialCharge,
-                totalCharge: field === 'totalCharge' ? numValue : prev.totalCharge,
-            };
-
-            const calculated = calculateCharge(currentValues, touchedChargeFieldsRef.current);
-            if (calculated) {
-                updated[calculated.field] = calculated.value;
-            }
-
-            return updated;
-        });
+        setCharges(prev => ({ ...prev, [field]: value ?? 0 }));
     }, []);
 
     const handleSaveResult = async (result: DTO<PropertyInput>) => {
@@ -231,6 +211,14 @@ function PropertyForm({ t }: WithTranslation) {
                     propertyId,
                     chargeType: ChargeType.WATER_PREPAYMENT,
                     amount: charges.waterCharge,
+                    startDate,
+                });
+            }
+            if (charges.otherChargeBased > 0) {
+                chargeInputs.push({
+                    propertyId,
+                    chargeType: ChargeType.OTHER_CHARGE_BASED,
+                    amount: charges.otherChargeBased,
                     startDate,
                 });
             }
@@ -352,7 +340,7 @@ function PropertyForm({ t }: WithTranslation) {
                 </Box>
 
                 {isEditMode ? (
-                    // Edit mode: readonly display
+                    // Edit mode: readonly display of charges
                     <>
                         <Stack direction="row" spacing={2}>
                             <Box sx={{ flex: 1 }}>
@@ -371,14 +359,28 @@ function PropertyForm({ t }: WithTranslation) {
                             </Box>
                             <Box sx={{ flex: 1 }}>
                                 <AssetMoneyField
-                                    label={t('totalCharge')}
-                                    value={charges.totalCharge}
+                                    label={t('waterCharge')}
+                                    value={charges.waterCharge}
                                     disabled
                                 />
                             </Box>
                         </Stack>
-                        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                            <Box sx={{ flex: 1, maxWidth: 200 }}>
+                        <Stack direction="row" spacing={2}>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetMoneyField
+                                    label={t('otherChargeBased')}
+                                    value={charges.otherChargeBased}
+                                    disabled
+                                />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetMoneyField
+                                    label={t('totalCharge')}
+                                    value={totalCharge}
+                                    disabled
+                                />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
                                 <AssetMoneyField
                                     label={data.status === PropertyStatus.PROSPECT ? t('expectedRent') : t('monthlyRent')}
                                     value={data.monthlyRent ?? 0}
@@ -388,7 +390,7 @@ function PropertyForm({ t }: WithTranslation) {
                         </Stack>
                     </>
                 ) : (
-                    // Add mode: editable fields
+                    // Add mode: editable charge fields
                     <>
                         <Stack direction="row" spacing={2}>
                             <Box sx={{ flex: 1 }}>
@@ -407,18 +409,25 @@ function PropertyForm({ t }: WithTranslation) {
                             </Box>
                             <Box sx={{ flex: 1 }}>
                                 <AssetMoneyField
-                                    label={t('totalCharge')}
-                                    value={charges.totalCharge}
-                                    onChange={(value) => handleChargeChange('totalCharge', value)}
+                                    label={t('waterCharge')}
+                                    value={charges.waterCharge}
+                                    onChange={(value) => handleChargeChange('waterCharge', value)}
                                 />
                             </Box>
                         </Stack>
                         <Stack direction="row" spacing={2}>
                             <Box sx={{ flex: 1 }}>
                                 <AssetMoneyField
-                                    label={t('waterCharge')}
-                                    value={charges.waterCharge}
-                                    onChange={(value) => setCharges(prev => ({ ...prev, waterCharge: value ?? 0 }))}
+                                    label={t('otherChargeBased')}
+                                    value={charges.otherChargeBased}
+                                    onChange={(value) => handleChargeChange('otherChargeBased', value)}
+                                />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                                <AssetMoneyField
+                                    label={t('totalCharge')}
+                                    value={totalCharge}
+                                    disabled
                                 />
                             </Box>
                             <Box sx={{ flex: 1 }}>
@@ -589,7 +598,7 @@ function PropertyForm({ t }: WithTranslation) {
                                 maintenanceFee: result.maintenanceFee ?? 0,
                                 financialCharge: result.financialCharge ?? 0,
                                 waterCharge: result.waterPrepayment ?? 0,
-                                totalCharge: result.totalCharge ?? 0,
+                                otherChargeBased: result.otherChargeBased ?? 0,
                             });
                         });
                     }}

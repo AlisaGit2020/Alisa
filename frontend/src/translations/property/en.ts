@@ -87,6 +87,7 @@ const property = {
     totalCharge: 'Total Charge',
     waterCharge: 'Water Charge',
     waterPrepayment: 'Water Prepayment',
+    otherChargeBased: 'Other Charge-Based',
 
     // Charge types
     chargeTypes: {

@@ -87,6 +87,7 @@ const property = {
     totalCharge: 'Yhtiövastike',
     waterCharge: 'Vesimaksu',
     waterPrepayment: 'Vesi-ennakko',
+    otherChargeBased: 'Muut vastikeperusteiset',
 
     // Charge types
     chargeTypes: {

@@ -87,6 +87,7 @@ const property = {
     totalCharge: 'Total avgift',
     waterCharge: 'Vattenavgift',
     waterPrepayment: 'Vattenförskott',
+    otherChargeBased: 'Övriga avgiftsbaserade',
 
     // Charge types
     chargeTypes: {

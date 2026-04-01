@@ -5,7 +5,6 @@ import {
   getPropertyStatusFromPath,
   getReturnPathForStatus,
 } from './property-form-utils';
-import { calculateCharge, ChargeValues, ChargeFieldName } from './charge-calculation';
 import dayjs from 'dayjs';
 
 // Since Jest mock hoisting causes issues with relative paths in ESM mode,
@@ -464,148 +463,64 @@ describe('PropertyForm Component Logic', () => {
     });
   });
 
-  describe('Monthly charge calculation (totalCharge = maintenanceFee + financialCharge)', () => {
-    // Tests use the actual calculateCharge function imported from charge-calculation.ts
-    // totalCharge is UI-only helper field, not saved to database
-    // Formula: totalCharge = maintenanceFee + financialCharge
-    // User can fill any two fields and the third is auto-calculated
+  describe('Monthly charge total calculation', () => {
+    // Total is always calculated from all 4 component charges
+    // Formula: total = maintenanceFee + financialCharge + waterCharge + otherChargeBased
 
-    describe('when maintenanceFee and financialCharge are set', () => {
-      it('calculates totalCharge', () => {
-        const values: ChargeValues = {
-          maintenanceFee: 150,
-          financialCharge: 50,
-          totalCharge: 0,
-        };
-        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee', 'financialCharge']);
+    it('calculates total from all components', () => {
+      const charges = {
+        maintenanceFee: 150,
+        financialCharge: 50,
+        waterCharge: 25,
+        otherChargeBased: 15,
+      };
 
-        const result = calculateCharge(values, userSetFields);
+      const total = charges.maintenanceFee + charges.financialCharge +
+                    charges.waterCharge + charges.otherChargeBased;
 
-        expect(result).toEqual({ field: 'totalCharge', value: 200 });
-      });
-
-      it('calculates totalCharge with different values', () => {
-        const values: ChargeValues = {
-          maintenanceFee: 200,
-          financialCharge: 100,
-          totalCharge: 0,
-        };
-        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee', 'financialCharge']);
-
-        const result = calculateCharge(values, userSetFields);
-
-        expect(result).toEqual({ field: 'totalCharge', value: 300 });
-      });
+      expect(total).toBe(240);
     });
 
-    describe('when totalCharge and maintenanceFee are set', () => {
-      it('calculates financialCharge', () => {
-        const values: ChargeValues = {
-          maintenanceFee: 150,
-          financialCharge: 0,
-          totalCharge: 200,
-        };
-        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee', 'totalCharge']);
+    it('calculates total with some zero values', () => {
+      const charges = {
+        maintenanceFee: 100,
+        financialCharge: 0,
+        waterCharge: 20,
+        otherChargeBased: 0,
+      };
 
-        const result = calculateCharge(values, userSetFields);
+      const total = charges.maintenanceFee + charges.financialCharge +
+                    charges.waterCharge + charges.otherChargeBased;
 
-        expect(result).toEqual({ field: 'financialCharge', value: 50 });
-      });
-
-      it('calculates financialCharge with different values', () => {
-        const values: ChargeValues = {
-          maintenanceFee: 120,
-          financialCharge: 0,
-          totalCharge: 200,
-        };
-        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee', 'totalCharge']);
-
-        const result = calculateCharge(values, userSetFields);
-
-        expect(result).toEqual({ field: 'financialCharge', value: 80 });
-      });
+      expect(total).toBe(120);
     });
 
-    describe('when totalCharge and financialCharge are set', () => {
-      it('calculates maintenanceFee', () => {
-        const values: ChargeValues = {
-          maintenanceFee: 0,
-          financialCharge: 50,
-          totalCharge: 200,
-        };
-        const userSetFields = new Set<ChargeFieldName>(['financialCharge', 'totalCharge']);
+    it('returns zero when all components are zero', () => {
+      const charges = {
+        maintenanceFee: 0,
+        financialCharge: 0,
+        waterCharge: 0,
+        otherChargeBased: 0,
+      };
 
-        const result = calculateCharge(values, userSetFields);
+      const total = charges.maintenanceFee + charges.financialCharge +
+                    charges.waterCharge + charges.otherChargeBased;
 
-        expect(result).toEqual({ field: 'maintenanceFee', value: 150 });
-      });
-
-      it('calculates maintenanceFee with different values', () => {
-        const values: ChargeValues = {
-          maintenanceFee: 0,
-          financialCharge: 80,
-          totalCharge: 250,
-        };
-        const userSetFields = new Set<ChargeFieldName>(['financialCharge', 'totalCharge']);
-
-        const result = calculateCharge(values, userSetFields);
-
-        expect(result).toEqual({ field: 'maintenanceFee', value: 170 });
-      });
+      expect(total).toBe(0);
     });
 
-    describe('edge cases', () => {
-      it('returns null when only one field is set', () => {
-        const values: ChargeValues = {
-          maintenanceFee: 150,
-          financialCharge: 0,
-          totalCharge: 0,
-        };
-        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee']);
+    it('handles decimal values correctly', () => {
+      const charges = {
+        maintenanceFee: 150.50,
+        financialCharge: 49.50,
+        waterCharge: 25.25,
+        otherChargeBased: 10.75,
+      };
 
-        const result = calculateCharge(values, userSetFields);
+      const total = charges.maintenanceFee + charges.financialCharge +
+                    charges.waterCharge + charges.otherChargeBased;
 
-        expect(result).toBeNull();
-      });
-
-      it('returns null when all three fields are set', () => {
-        const values: ChargeValues = {
-          maintenanceFee: 150,
-          financialCharge: 50,
-          totalCharge: 200,
-        };
-        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee', 'financialCharge', 'totalCharge']);
-
-        const result = calculateCharge(values, userSetFields);
-
-        expect(result).toBeNull();
-      });
-
-      it('returns null when no fields are set', () => {
-        const values: ChargeValues = {
-          maintenanceFee: 0,
-          financialCharge: 0,
-          totalCharge: 0,
-        };
-        const userSetFields = new Set<ChargeFieldName>();
-
-        const result = calculateCharge(values, userSetFields);
-
-        expect(result).toBeNull();
-      });
-
-      it('handles decimal values correctly', () => {
-        const values: ChargeValues = {
-          maintenanceFee: 150.50,
-          financialCharge: 49.50,
-          totalCharge: 0,
-        };
-        const userSetFields = new Set<ChargeFieldName>(['maintenanceFee', 'financialCharge']);
-
-        const result = calculateCharge(values, userSetFields);
-
-        expect(result).toEqual({ field: 'totalCharge', value: 200 });
-      });
+      expect(total).toBe(236);
     });
   });
 
@@ -779,26 +694,26 @@ describe('PropertyForm Component Logic', () => {
   });
 
   describe('Separate charge state (for batch API)', () => {
-    // Charge state is separate from property data and used for batch API creation
+    // Charge state stores 4 component charges, total is calculated
     interface ChargeState {
       maintenanceFee: number;
       financialCharge: number;
       waterCharge: number;
-      totalCharge: number;
+      otherChargeBased: number;
     }
 
     const defaultChargeState: ChargeState = {
       maintenanceFee: 0,
       financialCharge: 0,
       waterCharge: 0,
-      totalCharge: 0,
+      otherChargeBased: 0,
     };
 
     it('has default values of 0 for all charge fields', () => {
       expect(defaultChargeState.maintenanceFee).toBe(0);
       expect(defaultChargeState.financialCharge).toBe(0);
       expect(defaultChargeState.waterCharge).toBe(0);
-      expect(defaultChargeState.totalCharge).toBe(0);
+      expect(defaultChargeState.otherChargeBased).toBe(0);
     });
 
     it('updates individual charge fields', () => {
@@ -819,6 +734,9 @@ describe('PropertyForm Component Logic', () => {
 
       state = updateCharge(state, 'waterCharge', 25);
       expect(state.waterCharge).toBe(25);
+
+      state = updateCharge(state, 'otherChargeBased', 15);
+      expect(state.otherChargeBased).toBe(15);
     });
 
     it('edit mode is detected by idParam > 0', () => {
@@ -839,7 +757,7 @@ describe('PropertyForm Component Logic', () => {
         maintenanceFee: 150,
         financialCharge: 50,
         waterCharge: 25,
-        totalCharge: 200,
+        otherChargeBased: 15,
       };
       const propertyId = 42;
       const purchaseDate = new Date('2025-01-15');
@@ -871,8 +789,16 @@ describe('PropertyForm Component Logic', () => {
           startDate,
         });
       }
+      if (charges.otherChargeBased > 0) {
+        chargeInputs.push({
+          propertyId,
+          chargeType: ChargeType.OTHER_CHARGE_BASED,
+          amount: charges.otherChargeBased,
+          startDate,
+        });
+      }
 
-      expect(chargeInputs).toHaveLength(3);
+      expect(chargeInputs).toHaveLength(4);
       expect(chargeInputs[0]).toEqual({
         propertyId: 42,
         chargeType: ChargeType.MAINTENANCE_FEE,
@@ -891,6 +817,12 @@ describe('PropertyForm Component Logic', () => {
         amount: 25,
         startDate: '2025-01-15',
       });
+      expect(chargeInputs[3]).toEqual({
+        propertyId: 42,
+        chargeType: ChargeType.OTHER_CHARGE_BASED,
+        amount: 15,
+        startDate: '2025-01-15',
+      });
     });
 
     it('skips charges with 0 amount', () => {
@@ -898,7 +830,7 @@ describe('PropertyForm Component Logic', () => {
         maintenanceFee: 150,
         financialCharge: 0,
         waterCharge: 0,
-        totalCharge: 150,
+        otherChargeBased: 0,
       };
       const propertyId = 42;
 
@@ -929,6 +861,14 @@ describe('PropertyForm Component Logic', () => {
           startDate,
         });
       }
+      if (charges.otherChargeBased > 0) {
+        chargeInputs.push({
+          propertyId,
+          chargeType: ChargeType.OTHER_CHARGE_BASED,
+          amount: charges.otherChargeBased,
+          startDate,
+        });
+      }
 
       expect(chargeInputs).toHaveLength(1);
       expect(chargeInputs[0].chargeType).toBe(ChargeType.MAINTENANCE_FEE);
@@ -939,7 +879,7 @@ describe('PropertyForm Component Logic', () => {
         maintenanceFee: 150,
         financialCharge: 50,
         waterCharge: 0,
-        totalCharge: 200,
+        otherChargeBased: 0,
       };
       const propertyId = 42;
       const purchaseDate: Date | undefined = undefined;
@@ -976,7 +916,7 @@ describe('PropertyForm Component Logic', () => {
         maintenanceFee: 0,
         financialCharge: 0,
         waterCharge: 0,
-        totalCharge: 0,
+        otherChargeBased: 0,
       };
 
       const chargeInputs: PropertyChargeInput[] = [];
@@ -1005,6 +945,14 @@ describe('PropertyForm Component Logic', () => {
           startDate: null,
         });
       }
+      if (charges.otherChargeBased > 0) {
+        chargeInputs.push({
+          propertyId: 42,
+          chargeType: ChargeType.OTHER_CHARGE_BASED,
+          amount: charges.otherChargeBased,
+          startDate: null,
+        });
+      }
 
       // Should not make batch API call if no charges
       expect(chargeInputs.length > 0).toBe(false);
@@ -1018,20 +966,26 @@ describe('PropertyForm Component Logic', () => {
         maintenanceFee: 150,
         financialCharge: 50,
         waterPrepayment: 25,
-        totalCharge: 200,
+        otherChargeBased: 15,
+        totalCharge: 240, // Calculated total returned by API
       };
 
       const chargeState = {
         maintenanceFee: apiResponse.maintenanceFee ?? 0,
         financialCharge: apiResponse.financialCharge ?? 0,
         waterCharge: apiResponse.waterPrepayment ?? 0, // Note: API uses waterPrepayment
-        totalCharge: apiResponse.totalCharge ?? 0,
+        otherChargeBased: apiResponse.otherChargeBased ?? 0,
       };
+
+      // Total is calculated from components
+      const totalCharge = chargeState.maintenanceFee + chargeState.financialCharge +
+                          chargeState.waterCharge + chargeState.otherChargeBased;
 
       expect(chargeState.maintenanceFee).toBe(150);
       expect(chargeState.financialCharge).toBe(50);
       expect(chargeState.waterCharge).toBe(25);
-      expect(chargeState.totalCharge).toBe(200);
+      expect(chargeState.otherChargeBased).toBe(15);
+      expect(totalCharge).toBe(240);
     });
 
     it('handles null values in API response', () => {
@@ -1039,6 +993,7 @@ describe('PropertyForm Component Logic', () => {
         maintenanceFee: null,
         financialCharge: 50,
         waterPrepayment: null,
+        otherChargeBased: null,
         totalCharge: null,
       };
 
@@ -1046,13 +1001,18 @@ describe('PropertyForm Component Logic', () => {
         maintenanceFee: apiResponse.maintenanceFee ?? 0,
         financialCharge: apiResponse.financialCharge ?? 0,
         waterCharge: apiResponse.waterPrepayment ?? 0,
-        totalCharge: apiResponse.totalCharge ?? 0,
+        otherChargeBased: apiResponse.otherChargeBased ?? 0,
       };
+
+      // Total is calculated from components
+      const totalCharge = chargeState.maintenanceFee + chargeState.financialCharge +
+                          chargeState.waterCharge + chargeState.otherChargeBased;
 
       expect(chargeState.maintenanceFee).toBe(0);
       expect(chargeState.financialCharge).toBe(50);
       expect(chargeState.waterCharge).toBe(0);
-      expect(chargeState.totalCharge).toBe(0);
+      expect(chargeState.otherChargeBased).toBe(0);
+      expect(totalCharge).toBe(50);
     });
   });
 });
