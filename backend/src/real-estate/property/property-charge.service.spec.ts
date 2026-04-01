@@ -276,6 +276,45 @@ describe('PropertyChargeService', () => {
       );
     });
 
+    it('should include OTHER_CHARGE_BASED in total calculation', async () => {
+      const input = {
+        propertyId: 1,
+        chargeType: ChargeType.MAINTENANCE_FEE,
+        amount: 110,
+        startDate: todayStr,
+        endDate: null,
+      };
+
+      mockRepository.find.mockResolvedValue([]);
+      // Mock getMany to return all charges including OTHER_CHARGE_BASED
+      mockQueryBuilder.getMany!.mockResolvedValue([
+        createMockCharge(1, ChargeType.MAINTENANCE_FEE, 110, today, null),
+        createMockCharge(2, ChargeType.FINANCIAL_CHARGE, 50, lastMonth, null),
+        createMockCharge(3, ChargeType.WATER_PREPAYMENT, 20, lastMonth, null),
+        createMockCharge(5, ChargeType.OTHER_CHARGE_BASED, 30, lastMonth, null),
+      ]);
+      const newCharge = createMockCharge(1, ChargeType.MAINTENANCE_FEE, 110, today, null);
+      const totalCharge = createMockCharge(6, ChargeType.TOTAL_CHARGE, 210, today, null);
+      mockRepository.save.mockResolvedValue(newCharge);
+      mockRepository.create.mockImplementation((data: Partial<PropertyCharge>) => {
+        if (data.chargeType === ChargeType.TOTAL_CHARGE) {
+          return totalCharge;
+        }
+        return newCharge;
+      });
+      mockRepository.findOne.mockResolvedValue(null);
+
+      await service.create(mockUser, input);
+
+      // Verify TOTAL_CHARGE includes OTHER_CHARGE_BASED: 110 + 50 + 20 + 30 = 210
+      expect(mockRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chargeType: ChargeType.TOTAL_CHARGE,
+          amount: 210,
+        }),
+      );
+    });
+
     it('should throw NotFoundException if property not owned by user', async () => {
       mockPropertyService.findOne.mockResolvedValue(null);
 

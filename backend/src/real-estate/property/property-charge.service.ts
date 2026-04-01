@@ -287,6 +287,7 @@ export class PropertyChargeService {
           ChargeType.MAINTENANCE_FEE,
           ChargeType.FINANCIAL_CHARGE,
           ChargeType.WATER_PREPAYMENT,
+          ChargeType.OTHER_CHARGE_BASED,
         ],
       })
       .andWhere('charge.startDate <= :date', { date: asOfDate })
