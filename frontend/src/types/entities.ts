@@ -213,4 +213,5 @@ export interface CurrentCharges {
   financialCharge: number | null;
   waterPrepayment: number | null;
   totalCharge: number | null;
+  otherChargeBased: number | null;
 }
