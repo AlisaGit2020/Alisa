@@ -5,7 +5,7 @@ import SeasonCard from './SeasonCard';
 import { ChargeType, PropertyCharge } from '@asset-types';
 
 describe('SeasonCard', () => {
-  // Note: TOTAL_CHARGE is not included - total is calculated from components
+  // Total is calculated from component charges
   const mockCharges: PropertyCharge[] = [
     { id: 1, propertyId: 1, chargeType: ChargeType.MAINTENANCE_FEE, typeName: 'maintenance-fee', amount: 150, startDate: '2024-04-01', endDate: null },
     { id: 2, propertyId: 1, chargeType: ChargeType.FINANCIAL_CHARGE, typeName: 'financial-charge', amount: 85, startDate: '2024-04-01', endDate: null },

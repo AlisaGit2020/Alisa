@@ -29,7 +29,7 @@ function SeasonCard({ charges, startDate, endDate, isActive, onEdit, onDelete }:
     return charge?.amount ?? 0;
   };
 
-  // Calculate total from component charges (don't use TOTAL_CHARGE)
+  // Calculate total from component charges
   const total = CHARGE_TYPE_ORDER.reduce((sum, type) => sum + getChargeAmount(type), 0);
 
   const formatDate = (date: string) => {

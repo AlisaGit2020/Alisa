@@ -226,18 +226,17 @@ export interface AllocationResult {
 }
 
 // Property charge types (seasonal charges with date ranges)
+// Note: Total charge is calculated on the fly from components, not stored
 export enum ChargeType {
   MAINTENANCE_FEE = 1,    // Hoitovastike
   FINANCIAL_CHARGE = 2,   // Rahoitusvastike
   WATER_PREPAYMENT = 3,   // Vesi-ennakko
-  TOTAL_CHARGE = 4,       // Yhtiövastike (calculated)
-  OTHER_CHARGE_BASED = 5, // Muut vastikeperusteiset maksut
+  OTHER_CHARGE_BASED = 4, // Muut vastikeperusteiset maksut
 }
 
 export const chargeTypeNames = new Map<ChargeType, string>([
   [ChargeType.MAINTENANCE_FEE, 'maintenance-fee'],
   [ChargeType.FINANCIAL_CHARGE, 'financial-charge'],
   [ChargeType.WATER_PREPAYMENT, 'water-prepayment'],
-  [ChargeType.TOTAL_CHARGE, 'total-charge'],
   [ChargeType.OTHER_CHARGE_BASED, 'other-charge-based'],
 ]);

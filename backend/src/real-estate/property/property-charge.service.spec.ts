@@ -129,7 +129,7 @@ describe('PropertyChargeService', () => {
 
   describe('getCurrentCharges', () => {
     it('should return charges valid today and calculate total', async () => {
-      // Note: TOTAL_CHARGE is not stored in DB, it's calculated from components
+      // Total is calculated from component charges
       const mockCharges = [
         createMockCharge(1, ChargeType.MAINTENANCE_FEE, 150, lastMonth, null),
         createMockCharge(2, ChargeType.FINANCIAL_CHARGE, 50, lastMonth, null),
@@ -358,7 +358,7 @@ describe('PropertyChargeService', () => {
   });
 
   describe('createBatch', () => {
-    it('should create multiple charges without storing TOTAL_CHARGE', async () => {
+    it('should create multiple charges', async () => {
       const inputs = [
         { propertyId: 1, chargeType: ChargeType.MAINTENANCE_FEE, amount: 150, startDate: '2024-01-15' },
         { propertyId: 1, chargeType: ChargeType.FINANCIAL_CHARGE, amount: 50, startDate: '2024-01-15' },
@@ -387,32 +387,10 @@ describe('PropertyChargeService', () => {
 
       const result = await service.createBatch(mockUser, 1, inputs);
 
-      // Only component charges are stored, TOTAL_CHARGE is calculated on read
       expect(result).toHaveLength(3);
-      expect(result.find(c => c.chargeType === ChargeType.TOTAL_CHARGE)).toBeUndefined();
-    });
-
-    it('should skip TOTAL_CHARGE if passed in inputs', async () => {
-      const inputs = [
-        { propertyId: 1, chargeType: ChargeType.MAINTENANCE_FEE, amount: 100, startDate: '2024-01-15' },
-        { propertyId: 1, chargeType: ChargeType.TOTAL_CHARGE, amount: 100, startDate: '2024-01-15' },
-      ];
-
-      const savedCharge = createMockCharge(1, ChargeType.MAINTENANCE_FEE, 100, new Date('2024-01-15'), null);
-
-      mockRepository.find.mockResolvedValue([]);
-      mockRepository.create.mockImplementation((data: Partial<PropertyCharge>) => {
-        const charge = new PropertyCharge();
-        Object.assign(charge, data);
-        return charge;
-      });
-      mockRepository.save.mockResolvedValue(savedCharge);
-
-      const result = await service.createBatch(mockUser, 1, inputs);
-
-      // TOTAL_CHARGE input is skipped
-      expect(result).toHaveLength(1);
       expect(result[0].chargeType).toBe(ChargeType.MAINTENANCE_FEE);
+      expect(result[1].chargeType).toBe(ChargeType.FINANCIAL_CHARGE);
+      expect(result[2].chargeType).toBe(ChargeType.WATER_PREPAYMENT);
     });
 
     it('should allow null startDate', async () => {

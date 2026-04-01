@@ -27,15 +27,6 @@ const mockCharges: PropertyCharge[] = [
     startDate: '2024-01-01',
     endDate: null, // Current season
   },
-  {
-    id: 3,
-    propertyId: 1,
-    chargeType: ChargeType.TOTAL_CHARGE,
-    typeName: 'total-charge',
-    amount: 120,
-    startDate: '2024-01-01',
-    endDate: null, // Current season
-  },
 ];
 
 const mockUser = {

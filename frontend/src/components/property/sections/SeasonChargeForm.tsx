@@ -123,7 +123,7 @@ function SeasonChargeForm({ propertyId, initialValues, onSubmit, onCancel }: Sea
       });
     }
 
-    // Note: TOTAL_CHARGE is auto-calculated by backend via recalculateTotalCharge()
+    // Total is calculated on read from component charges
     onSubmit(charges);
   };
 

@@ -70,7 +70,7 @@ export class PropertyChargeService {
         case ChargeType.OTHER_CHARGE_BASED:
           result.otherChargeBased = charge.amount;
           break;
-        // TOTAL_CHARGE from DB is ignored - we calculate it below
+        // Total is calculated from components below
       }
     }
 
@@ -145,11 +145,6 @@ export class PropertyChargeService {
     for (const input of inputs) {
       // Skip if amount is 0 or not provided
       if (!input.amount || input.amount === 0) {
-        continue;
-      }
-
-      // Skip TOTAL_CHARGE - not stored in DB (calculated on read)
-      if (input.chargeType === ChargeType.TOTAL_CHARGE) {
         continue;
       }
 
