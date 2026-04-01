@@ -9,6 +9,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import HomeIcon from '@mui/icons-material/Home';
 import SellIcon from '@mui/icons-material/Sell';
+import PaymentsIcon from '@mui/icons-material/Payments';
 import { Property, PropertyStatus, PropertyExternalSource, propertyExternalSourceNames } from '@asset-types';
 import AssetDialog from '../../asset/dialog/AssetDialog';
 import AssetButton from '../../asset/form/AssetButton';
@@ -21,6 +22,7 @@ interface PropertyActionsMenuProps {
   property: Property;
   onEdit: () => void;
   onOpenAllocationRules: () => void;
+  onOpenCharges?: () => void;
   onToggleAdvancedReports?: () => void;
   onPropertyUpdated?: (property: Property) => void;
 }
@@ -52,6 +54,7 @@ function PropertyActionsMenu({
   property,
   onEdit,
   onOpenAllocationRules,
+  onOpenCharges,
   onToggleAdvancedReports,
   onPropertyUpdated,
 }: PropertyActionsMenuProps) {
@@ -96,6 +99,11 @@ function PropertyActionsMenu({
   const handleAllocationRules = () => {
     handleClose();
     onOpenAllocationRules();
+  };
+
+  const handleCharges = () => {
+    handleClose();
+    onOpenCharges?.();
   };
 
   const handleViewOriginalListing = () => {
@@ -221,6 +229,14 @@ function PropertyActionsMenu({
               <RuleIcon fontSize="small" />
             </ListItemIcon>
             {t('allocation:rules', 'Allocation Rules')}
+          </MenuItem>
+        )}
+        {showAllocationRules && onOpenCharges && (
+          <MenuItem onClick={handleCharges}>
+            <ListItemIcon>
+              <PaymentsIcon fontSize="small" />
+            </ListItemIcon>
+            {t('chargeHistory')}
           </MenuItem>
         )}
         {showAdvancedReports && (
