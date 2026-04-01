@@ -159,6 +159,21 @@ function PropertyChargeDialog({
     };
   };
 
+  // Get suggested start date for new season (day after latest season ends)
+  const getNewSeasonStartDate = (): string | undefined => {
+    if (seasons.length === 0) return undefined;
+
+    const latestSeason = seasons[0]; // Sorted by startDate descending
+    if (latestSeason.endDate) {
+      // Day after the end date
+      const nextDay = new Date(latestSeason.endDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      return nextDay.toISOString().split('T')[0];
+    }
+    // Active season - suggest today
+    return new Date().toISOString().split('T')[0];
+  };
+
   if (!open) {
     return null;
   }
@@ -195,7 +210,11 @@ function PropertyChargeDialog({
           {showForm ? (
             <SeasonChargeForm
               propertyId={propertyId}
-              initialValues={editingSeason ? getInitialValues(editingSeason) : undefined}
+              initialValues={
+                editingSeason
+                  ? getInitialValues(editingSeason)
+                  : { startDate: getNewSeasonStartDate() }
+              }
               onSubmit={handleFormSubmit}
               onCancel={handleFormCancel}
             />
