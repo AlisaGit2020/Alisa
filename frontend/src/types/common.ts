@@ -231,6 +231,7 @@ export enum ChargeType {
   FINANCIAL_CHARGE = 2,   // Rahoitusvastike
   WATER_PREPAYMENT = 3,   // Vesi-ennakko
   TOTAL_CHARGE = 4,       // Yhtiövastike (calculated)
+  OTHER_CHARGE_BASED = 5, // Muut vastikeperusteiset maksut
 }
 
 export const chargeTypeNames = new Map<ChargeType, string>([
@@ -238,4 +239,5 @@ export const chargeTypeNames = new Map<ChargeType, string>([
   [ChargeType.FINANCIAL_CHARGE, 'financial-charge'],
   [ChargeType.WATER_PREPAYMENT, 'water-prepayment'],
   [ChargeType.TOTAL_CHARGE, 'total-charge'],
+  [ChargeType.OTHER_CHARGE_BASED, 'other-charge-based'],
 ]);
