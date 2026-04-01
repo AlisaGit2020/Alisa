@@ -4,6 +4,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import dayjs from 'dayjs';
 import { ChargeType, PropertyCharge, PropertyChargeInput } from '@asset-types';
 import ApiClient from '@asset-lib/api-client';
 import AssetDialog from '../../asset/dialog/AssetDialog';
@@ -165,13 +166,11 @@ function PropertyChargeDialog({
 
     const latestSeason = seasons[0]; // Sorted by startDate descending
     if (latestSeason.endDate) {
-      // Day after the end date
-      const nextDay = new Date(latestSeason.endDate);
-      nextDay.setDate(nextDay.getDate() + 1);
-      return nextDay.toISOString().split('T')[0];
+      // Day after the end date (use dayjs to avoid timezone issues)
+      return dayjs(latestSeason.endDate).add(1, 'day').format('YYYY-MM-DD');
     }
     // Active season - suggest today
-    return new Date().toISOString().split('T')[0];
+    return dayjs().format('YYYY-MM-DD');
   };
 
   if (!open) {

@@ -66,8 +66,9 @@ function SeasonChargeForm({ propertyId, initialValues, onSubmit, onCancel }: Sea
     // Build charge inputs array
     const charges: PropertyChargeInput[] = [];
 
-    const dateStr = startDate.toISOString().split('T')[0];
-    const endDateStr = endDate ? endDate.toISOString().split('T')[0] : null;
+    // Use dayjs to format in local time (avoids UTC timezone shift)
+    const dateStr = dayjs(startDate).format('YYYY-MM-DD');
+    const endDateStr = endDate ? dayjs(endDate).format('YYYY-MM-DD') : null;
 
     // Add maintenance fee (only if > 0)
     if (maintenanceFee && maintenanceFee > 0) {
