@@ -446,5 +446,36 @@ describe('PropertyChargeService', () => {
         service.createBatch(mockUser, 999, [{ propertyId: 999, chargeType: ChargeType.MAINTENANCE_FEE, amount: 100, startDate: null }])
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('should save charges with zero amount', async () => {
+      const inputs = [
+        { propertyId: 1, chargeType: ChargeType.MAINTENANCE_FEE, amount: 150, startDate: '2024-01-15' },
+        { propertyId: 1, chargeType: ChargeType.OTHER_CHARGE_BASED, amount: 0, startDate: '2024-01-15' },
+      ];
+
+      const savedCharges = [
+        createMockCharge(1, ChargeType.MAINTENANCE_FEE, 150, new Date('2024-01-15'), null),
+        createMockCharge(2, ChargeType.OTHER_CHARGE_BASED, 0, new Date('2024-01-15'), null),
+      ];
+
+      mockRepository.find.mockResolvedValue([]);
+      mockRepository.create.mockImplementation((data: Partial<PropertyCharge>) => {
+        const charge = new PropertyCharge();
+        Object.assign(charge, data);
+        return charge;
+      });
+
+      let saveCallCount = 0;
+      mockRepository.save.mockImplementation(() => {
+        return Promise.resolve(savedCharges[saveCallCount++]);
+      });
+
+      const result = await service.createBatch(mockUser, 1, inputs);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].amount).toBe(150);
+      expect(result[1].amount).toBe(0);
+      expect(result[1].chargeType).toBe(ChargeType.OTHER_CHARGE_BASED);
+    });
   });
 });

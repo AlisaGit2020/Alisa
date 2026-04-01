@@ -67,10 +67,10 @@ function PropertyChargeDialog({
 
   // Group charges into seasons by startDate
   const seasons = useMemo(() => {
-    const seasonMap = new Map<string, Season>();
+    const seasonMap = new Map<string | null, Season>();
 
     for (const charge of charges) {
-      const key = charge.startDate;
+      const key = charge.startDate ?? null;
       if (!seasonMap.has(key)) {
         seasonMap.set(key, {
           startDate: charge.startDate,
@@ -82,10 +82,13 @@ function PropertyChargeDialog({
       seasonMap.get(key)!.charges.push(charge);
     }
 
-    // Sort by startDate descending (newest first)
-    return Array.from(seasonMap.values()).sort((a, b) =>
-      b.startDate.localeCompare(a.startDate)
-    );
+    // Sort by startDate descending (newest first, null dates last)
+    return Array.from(seasonMap.values()).sort((a, b) => {
+      if (a.startDate === null && b.startDate === null) return 0;
+      if (a.startDate === null) return 1;
+      if (b.startDate === null) return -1;
+      return b.startDate.localeCompare(a.startDate);
+    });
   }, [charges]);
 
   // Current season (no endDate)
@@ -262,9 +265,9 @@ function PropertyChargeDialog({
 
                   <Collapse in={showAllHistory}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      {pastSeasons.map((season) => (
+                      {pastSeasons.map((season, index) => (
                         <SeasonCard
-                          key={season.startDate}
+                          key={season.startDate ?? `no-date-${index}`}
                           charges={season.charges}
                           startDate={season.startDate}
                           endDate={season.endDate}
