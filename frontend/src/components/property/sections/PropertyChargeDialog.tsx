@@ -268,11 +268,11 @@ function PropertyChargeDialog({
       <AssetConfirmDialog
         open={!!deletingSeason}
         title={t('deleteSeasonConfirmTitle')}
-        message={t('deleteSeasonConfirmMessage')}
-        confirmLabel={t('delete')}
-        cancelLabel={t('cancel')}
+        contentText={t('deleteSeasonConfirmMessage')}
+        buttonTextConfirm={t('delete')}
+        buttonTextCancel={t('cancel')}
         onConfirm={handleDeleteSeason}
-        onCancel={() => setDeletingSeason(null)}
+        onClose={() => setDeletingSeason(null)}
       />
     </>
   );
