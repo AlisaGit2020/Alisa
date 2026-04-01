@@ -53,6 +53,7 @@ export class PropertyChargeService {
       financialCharge: null,
       waterPrepayment: null,
       totalCharge: null,
+      otherChargeBased: null,
     };
 
     for (const charge of charges) {
@@ -68,6 +69,9 @@ export class PropertyChargeService {
           break;
         case ChargeType.TOTAL_CHARGE:
           result.totalCharge = charge.amount;
+          break;
+        case ChargeType.OTHER_CHARGE_BASED:
+          result.otherChargeBased = charge.amount;
           break;
       }
     }

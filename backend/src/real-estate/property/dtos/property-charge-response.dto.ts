@@ -39,4 +39,5 @@ export interface CurrentChargesDto {
   financialCharge: number | null;
   waterPrepayment: number | null;
   totalCharge: number | null;
+  otherChargeBased: number | null;
 }
