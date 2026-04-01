@@ -5,12 +5,12 @@ import SeasonCard from './SeasonCard';
 import { ChargeType, PropertyCharge } from '@asset-types';
 
 describe('SeasonCard', () => {
+  // Note: TOTAL_CHARGE is not included - total is calculated from components
   const mockCharges: PropertyCharge[] = [
     { id: 1, propertyId: 1, chargeType: ChargeType.MAINTENANCE_FEE, typeName: 'maintenance-fee', amount: 150, startDate: '2024-04-01', endDate: null },
     { id: 2, propertyId: 1, chargeType: ChargeType.FINANCIAL_CHARGE, typeName: 'financial-charge', amount: 85, startDate: '2024-04-01', endDate: null },
     { id: 3, propertyId: 1, chargeType: ChargeType.WATER_PREPAYMENT, typeName: 'water-prepayment', amount: 25, startDate: '2024-04-01', endDate: null },
     { id: 4, propertyId: 1, chargeType: ChargeType.OTHER_CHARGE_BASED, typeName: 'other-charge-based', amount: 15, startDate: '2024-04-01', endDate: null },
-    { id: 5, propertyId: 1, chargeType: ChargeType.TOTAL_CHARGE, typeName: 'total-charge', amount: 275, startDate: '2024-04-01', endDate: null },
   ];
 
   it('renders all charge amounts', () => {

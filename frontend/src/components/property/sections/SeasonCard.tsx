@@ -29,8 +29,8 @@ function SeasonCard({ charges, startDate, endDate, isActive, onEdit, onDelete }:
     return charge?.amount ?? 0;
   };
 
-  const totalCharge = charges.find(c => c.chargeType === ChargeType.TOTAL_CHARGE);
-  const total = totalCharge?.amount ?? 0;
+  // Calculate total from component charges (don't use TOTAL_CHARGE)
+  const total = CHARGE_TYPE_ORDER.reduce((sum, type) => sum + getChargeAmount(type), 0);
 
   const formatDate = (date: string) => {
     return t('format.date', {
