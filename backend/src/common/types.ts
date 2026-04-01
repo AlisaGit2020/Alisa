@@ -154,6 +154,7 @@ export enum ExpenseTypeKey {
   RENT_REFUND = 'rent-refund',
   INTERNET = 'internet',
   WITHHOLDING_TAX = 'withholding-tax',
+  OTHER_CHARGE_BASED = 'other-charge-based',
 }
 
 // Global income type keys (translations are handled by i18n using these keys)
@@ -210,6 +211,7 @@ export enum ChargeType {
   FINANCIAL_CHARGE = 2,   // Rahoitusvastike
   WATER_PREPAYMENT = 3,   // Vesi-ennakko
   TOTAL_CHARGE = 4,       // Yhtiövastike (calculated)
+  OTHER_CHARGE_BASED = 5, // Muut vastikeperusteiset maksut
 }
 
 export const chargeTypeNames = new Map<ChargeType, string>([
@@ -217,4 +219,5 @@ export const chargeTypeNames = new Map<ChargeType, string>([
   [ChargeType.FINANCIAL_CHARGE, 'financial-charge'],
   [ChargeType.WATER_PREPAYMENT, 'water-prepayment'],
   [ChargeType.TOTAL_CHARGE, 'total-charge'],
+  [ChargeType.OTHER_CHARGE_BASED, 'other-charge-based'],
 ]);
