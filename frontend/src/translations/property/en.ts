@@ -109,6 +109,7 @@ const property = {
     currentCharges: 'Current Charges',
     startDateRequired: 'Start date is required',
     endDateMustBeAfterStartDate: 'End date must be after start date',
+    totalChargeMismatch: 'Total charge ({{actual}} €) does not match sum of components ({{calculated}} €)',
     amountMustBePositive: 'Amount must be 0 or greater',
     leaveEmptyForValidUntilFurtherNotice: 'Leave empty for "valid until further notice"',
     chargeAmount: 'Amount',

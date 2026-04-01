@@ -109,6 +109,7 @@ const property = {
     currentCharges: 'Nykyiset vastikkeet',
     startDateRequired: 'Alkupäivä on pakollinen',
     endDateMustBeAfterStartDate: 'Loppupäivän on oltava alkupäivän jälkeen',
+    totalChargeMismatch: 'Kokonaisvastike ({{actual}} €) ei vastaa osien summaa ({{calculated}} €)',
     amountMustBePositive: 'Summan on oltava vähintään 0',
     leaveEmptyForValidUntilFurtherNotice: 'Jätä tyhjäksi jos voimassa toistaiseksi',
     chargeAmount: 'Summa',
