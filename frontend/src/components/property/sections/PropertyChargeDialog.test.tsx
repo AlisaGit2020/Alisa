@@ -23,7 +23,7 @@ describe('PropertyChargeDialog', () => {
     });
 
     // Check for dialog title
-    expect(screen.getByText('Charge History')).toBeInTheDocument();
+    expect(screen.getByText('Charges')).toBeInTheDocument();
   });
 
   it('does not render when open is false', () => {
