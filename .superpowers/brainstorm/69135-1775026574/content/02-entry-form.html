@@ -1,0 +1,125 @@
+<h2>Adding a New Season</h2>
+<p class="subtitle">How should the entry form feel? All fields visible at once, focused on quick data entry.</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: var(--surface);">
+      <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 12px; color: #1976d2;">Uusi kausi</div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+          <div style="flex: 1;">
+            <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">Alkaen *</div>
+            <div style="border: 1px solid #1976d2; border-radius: 4px; padding: 8px 10px; background: var(--bg);">1.4.2024</div>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">Päättyy</div>
+            <div style="border: 1px solid var(--border); border-radius: 4px; padding: 8px 10px; color: var(--muted);">Toistaiseksi</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">Hoitovastike</div>
+            <div style="display: flex; align-items: center; border: 1px solid var(--border); border-radius: 4px; padding: 8px 10px;">
+              <span style="color: var(--muted); margin-right: 4px;">€</span>
+              <span>150,00</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">Rahoitusvastike</div>
+            <div style="display: flex; align-items: center; border: 1px solid var(--border); border-radius: 4px; padding: 8px 10px;">
+              <span style="color: var(--muted); margin-right: 4px;">€</span>
+              <span>85,00</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">Vesi-ennakko</div>
+            <div style="display: flex; align-items: center; border: 1px solid var(--border); border-radius: 4px; padding: 8px 10px;">
+              <span style="color: var(--muted); margin-right: 4px;">€</span>
+              <span>25,00</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">Muut vastikkeet</div>
+            <div style="display: flex; align-items: center; border: 1px solid var(--border); border-radius: 4px; padding: 8px 10px;">
+              <span style="color: var(--muted); margin-right: 4px;">€</span>
+              <span>15,00</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; padding: 12px; background: #e3f2fd; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 500;">Yhteensä</span>
+          <span style="font-size: 20px; font-weight: 600; color: #1976d2;">€ 275,00</span>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
+          <button style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); cursor: pointer;">Peruuta</button>
+          <button style="padding: 8px 16px; border: none; border-radius: 4px; background: #1976d2; color: white; cursor: pointer;">Tallenna</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A: 2x2 Grid Form</h3>
+      <p>Charges in a 2-column grid. Compact, all visible at once. Total auto-calculates below.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: var(--surface);">
+      <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 12px; color: #1976d2;">Uusi kausi</div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+          <div style="flex: 1;">
+            <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">Alkaen *</div>
+            <div style="border: 1px solid #1976d2; border-radius: 4px; padding: 8px 10px;">1.4.2024</div>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">Päättyy</div>
+            <div style="border: 1px solid var(--border); border-radius: 4px; padding: 8px 10px; color: var(--muted);">Toistaiseksi</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <div style="flex: 1; text-align: center; padding: 12px 8px; border: 1px solid var(--border); border-radius: 8px;">
+            <div style="font-size: 10px; color: var(--muted); margin-bottom: 6px;">Hoito</div>
+            <input type="text" value="150" style="width: 60px; text-align: center; border: none; border-bottom: 2px solid #1976d2; font-size: 18px; font-weight: 600; background: transparent; outline: none;">
+            <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">€/kk</div>
+          </div>
+          <div style="flex: 1; text-align: center; padding: 12px 8px; border: 1px solid var(--border); border-radius: 8px;">
+            <div style="font-size: 10px; color: var(--muted); margin-bottom: 6px;">Rahoitus</div>
+            <input type="text" value="85" style="width: 60px; text-align: center; border: none; border-bottom: 2px solid #1976d2; font-size: 18px; font-weight: 600; background: transparent; outline: none;">
+            <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">€/kk</div>
+          </div>
+          <div style="flex: 1; text-align: center; padding: 12px 8px; border: 1px solid var(--border); border-radius: 8px;">
+            <div style="font-size: 10px; color: var(--muted); margin-bottom: 6px;">Vesi</div>
+            <input type="text" value="25" style="width: 60px; text-align: center; border: none; border-bottom: 2px solid #1976d2; font-size: 18px; font-weight: 600; background: transparent; outline: none;">
+            <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">€/kk</div>
+          </div>
+          <div style="flex: 1; text-align: center; padding: 12px 8px; border: 1px solid var(--border); border-radius: 8px;">
+            <div style="font-size: 10px; color: var(--muted); margin-bottom: 6px;">Muut</div>
+            <input type="text" value="15" style="width: 60px; text-align: center; border: none; border-bottom: 2px solid #1976d2; font-size: 18px; font-weight: 600; background: transparent; outline: none;">
+            <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">€/kk</div>
+          </div>
+        </div>
+
+        <div style="text-align: center; padding: 16px; background: #1976d2; border-radius: 8px; color: white;">
+          <div style="font-size: 12px; opacity: 0.9;">Yhteensä</div>
+          <div style="font-size: 28px; font-weight: 700;">€ 275</div>
+          <div style="font-size: 12px; opacity: 0.9;">/kuukausi</div>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
+          <button style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); cursor: pointer;">Peruuta</button>
+          <button style="padding: 8px 16px; border: none; border-radius: 4px; background: #1976d2; color: white; cursor: pointer;">Tallenna</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B: Card Input Row</h3>
+      <p>Each charge as a mini-card in a row. Number inputs centered, total dominates.</p>
+    </div>
+  </div>
+</div>

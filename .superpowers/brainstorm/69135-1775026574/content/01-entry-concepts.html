@@ -1,0 +1,105 @@
+<h2>Property Charges Entry: Fresh Approaches</h2>
+<p class="subtitle">Which concept feels right for entering all charges at once?</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: var(--surface);">
+      <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: var(--bg);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <strong>Kausi alkaen: 1.4.2024</strong>
+          <span style="color: var(--muted); font-size: 12px;">Voimassa toistaiseksi</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
+          <div style="text-align: center; padding: 8px; background: var(--surface); border-radius: 4px;">
+            <div style="font-size: 11px; color: var(--muted);">Hoitovastike</div>
+            <div style="font-size: 18px; font-weight: 600;">€ 150</div>
+          </div>
+          <div style="text-align: center; padding: 8px; background: var(--surface); border-radius: 4px;">
+            <div style="font-size: 11px; color: var(--muted);">Rahoitusvastike</div>
+            <div style="font-size: 18px; font-weight: 600;">€ 85</div>
+          </div>
+          <div style="text-align: center; padding: 8px; background: var(--surface); border-radius: 4px;">
+            <div style="font-size: 11px; color: var(--muted);">Vesi-ennakko</div>
+            <div style="font-size: 18px; font-weight: 600;">€ 25</div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+          <div style="text-align: center; padding: 8px; background: var(--surface); border-radius: 4px;">
+            <div style="font-size: 11px; color: var(--muted);">Muut vastikkeet</div>
+            <div style="font-size: 18px; font-weight: 600;">€ 15</div>
+          </div>
+          <div style="text-align: center; padding: 8px; background: #1976d2; color: white; border-radius: 4px;">
+            <div style="font-size: 11px; opacity: 0.9;">Yhteensä</div>
+            <div style="font-size: 18px; font-weight: 600;">€ 275</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A: Season Cards</h3>
+      <p>Each season is a visual card showing all charges in a grid. Clean, scannable, no table rows.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: var(--surface);">
+      <div style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--bg);">
+        <div style="background: #1976d2; color: white; padding: 10px 12px; display: flex; justify-content: space-between;">
+          <span>1.4.2024 →</span>
+          <span style="font-weight: 600;">€ 275 /kk</span>
+        </div>
+        <div style="padding: 12px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <span style="background: var(--surface); padding: 4px 10px; border-radius: 12px; font-size: 13px;">Hoito €150</span>
+            <span style="background: var(--surface); padding: 4px 10px; border-radius: 12px; font-size: 13px;">Rahoitus €85</span>
+            <span style="background: var(--surface); padding: 4px 10px; border-radius: 12px; font-size: 13px;">Vesi €25</span>
+            <span style="background: var(--surface); padding: 4px 10px; border-radius: 12px; font-size: 13px;">Muut €15</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top: 8px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--bg); opacity: 0.6;">
+        <div style="background: var(--muted); color: white; padding: 10px 12px; display: flex; justify-content: space-between;">
+          <span>1.1.2023 → 31.3.2024</span>
+          <span style="font-weight: 600;">€ 245 /kk</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B: Compact Timeline</h3>
+      <p>Stacked bands with total prominently shown. Charges as pills/chips. History fades below.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: var(--surface);">
+      <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+          <div style="flex: 1; border: 1px solid var(--border); border-radius: 4px; padding: 8px;">
+            <div style="font-size: 11px; color: var(--muted);">Alkaen</div>
+            <div>1.4.2024</div>
+          </div>
+          <div style="flex: 1; border: 1px solid var(--border); border-radius: 4px; padding: 8px;">
+            <div style="font-size: 11px; color: var(--muted);">Päättyy</div>
+            <div style="color: var(--muted);">Toistaiseksi</div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 80px; gap: 8px; font-size: 14px;">
+          <div style="padding: 6px 0; border-bottom: 1px solid var(--border);">Hoitovastike</div>
+          <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: right; font-weight: 500;">€ 150</div>
+          <div style="padding: 6px 0; border-bottom: 1px solid var(--border);">Rahoitusvastike</div>
+          <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: right; font-weight: 500;">€ 85</div>
+          <div style="padding: 6px 0; border-bottom: 1px solid var(--border);">Vesi-ennakko</div>
+          <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: right; font-weight: 500;">€ 25</div>
+          <div style="padding: 6px 0; border-bottom: 1px solid var(--border);">Muut vastikkeet</div>
+          <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: right; font-weight: 500;">€ 15</div>
+          <div style="padding: 6px 0; font-weight: 600;">Yhteensä</div>
+          <div style="padding: 6px 0; text-align: right; font-weight: 600; color: #1976d2;">€ 275</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C: Clean Form View</h3>
+      <p>Dates at top, then simple label + amount rows. Minimal, focused on data entry.</p>
+    </div>
+  </div>
+</div>
