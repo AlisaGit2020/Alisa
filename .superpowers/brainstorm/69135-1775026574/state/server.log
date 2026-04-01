@@ -1,0 +1,6 @@
+{"type":"server-started","port":65439,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:65439","screen_dir":"/Users/juha.koivisto@m10s.io/Projects/Alisa/.superpowers/brainstorm/69135-1775026574/content","state_dir":"/Users/juha.koivisto@m10s.io/Projects/Alisa/.superpowers/brainstorm/69135-1775026574/state"}
+{"type":"screen-added","file":"/Users/juha.koivisto@m10s.io/Projects/Alisa/.superpowers/brainstorm/69135-1775026574/content/01-entry-concepts.html"}
+{"type":"screen-added","file":"/Users/juha.koivisto@m10s.io/Projects/Alisa/.superpowers/brainstorm/69135-1775026574/content/02-entry-form.html"}
+{"type":"screen-added","file":"/Users/juha.koivisto@m10s.io/Projects/Alisa/.superpowers/brainstorm/69135-1775026574/content/03-full-dialog.html"}
+{"type":"screen-added","file":"/Users/juha.koivisto@m10s.io/Projects/Alisa/.superpowers/brainstorm/69135-1775026574/content/waiting.html"}
+{"type":"server-stopped","reason":"idle timeout"}

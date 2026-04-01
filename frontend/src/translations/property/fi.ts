@@ -87,6 +87,7 @@ const property = {
     totalCharge: 'Yhtiövastike',
     waterCharge: 'Vesimaksu',
     waterPrepayment: 'Vesi-ennakko',
+    otherChargeBased: 'Muut vastikeperusteiset',
 
     // Charge types
     chargeTypes: {
@@ -94,6 +95,7 @@ const property = {
         'financial-charge': 'Rahoitusvastike',
         'water-prepayment': 'Vesi-ennakko',
         'total-charge': 'Yhtiövastike',
+        'other-charge-based': 'Muut vastikkeet',
     },
 
     // Charge history
@@ -122,6 +124,16 @@ const property = {
     hideHistory: 'Piilota historia',
     save: 'Tallenna',
     close: 'Sulje',
+    newSeason: 'Uusi kausi',
+    currentSeason: 'Voimassa oleva kausi',
+    addNewSeason: 'Lisää uusi kausi',
+    seasonFrom: 'Kausi alkaen',
+    showAll: 'Näytä kaikki',
+    ongoing: 'Toistaiseksi',
+    history: 'Historia',
+    total: 'Yhteensä',
+    deleteSeasonConfirmTitle: 'Poista kausi',
+    deleteSeasonConfirmMessage: 'Haluatko varmasti poistaa tämän kauden vastikkeet? Tätä toimintoa ei voi peruuttaa.',
     debtShare: 'Yhtiölainaosuus',
     noHousingCompanyLoan: 'Ei yhtiölainaa',
     monthlyRent: 'Kuukausivuokra',

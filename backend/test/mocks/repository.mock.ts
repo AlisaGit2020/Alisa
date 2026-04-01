@@ -18,7 +18,7 @@ export type MockRepository<T> = Omit<
 
 export const createMockQueryBuilder = <T>(): Partial<
   Record<keyof SelectQueryBuilder<T>, jest.Mock>
-> => ({
+> & { update: jest.Mock; set: jest.Mock } => ({
   select: jest.fn().mockReturnThis(),
   addSelect: jest.fn().mockReturnThis(),
   leftJoin: jest.fn().mockReturnThis(),
@@ -35,6 +35,9 @@ export const createMockQueryBuilder = <T>(): Partial<
   getRawOne: jest.fn(),
   getRawMany: jest.fn(),
   execute: jest.fn(),
+  // UpdateQueryBuilder methods
+  update: jest.fn().mockReturnThis(),
+  set: jest.fn().mockReturnThis(),
 });
 
 export const createMockEntityManager = (): MockEntityManager => ({

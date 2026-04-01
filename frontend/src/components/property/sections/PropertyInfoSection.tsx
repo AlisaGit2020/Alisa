@@ -10,6 +10,7 @@ import MapIcon from '@mui/icons-material/Map';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import EditIcon from '@mui/icons-material/Edit';
 import { Property, PropertyStatus, CurrentCharges } from '@asset-types';
 import { formatCurrency, formatDate } from '@asset-lib/format-utils';
@@ -55,7 +56,8 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
     currentCharges !== null &&
     (currentCharges.maintenanceFee !== null ||
       currentCharges.waterPrepayment !== null ||
-      currentCharges.financialCharge !== null);
+      currentCharges.financialCharge !== null ||
+      currentCharges.otherChargeBased !== null);
   const hasPurchaseDetails =
     (property.status === PropertyStatus.OWN || property.status === PropertyStatus.SOLD) &&
     (property.purchaseDate !== undefined || property.purchaseLoan !== undefined);
@@ -67,7 +69,8 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
   const totalMonthlyCosts =
     (currentCharges?.maintenanceFee ?? 0) +
     (currentCharges?.waterPrepayment ?? 0) +
-    (currentCharges?.financialCharge ?? 0);
+    (currentCharges?.financialCharge ?? 0) +
+    (currentCharges?.otherChargeBased ?? 0);
 
   const pricePerSqm =
     property.purchasePrice && property.size > 0
@@ -167,6 +170,13 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
                   icon={<AccountBalanceIcon fontSize="small" />}
                   label={t('financialCharge')}
                   value={`${formatCurrency(currentCharges.financialCharge, 2)}${t('perMonth')}`}
+                />
+              )}
+              {currentCharges?.otherChargeBased !== null && currentCharges?.otherChargeBased !== undefined && (
+                <DetailRow
+                  icon={<ReceiptLongIcon fontSize="small" />}
+                  label={t('chargeTypes.other-charge-based')}
+                  value={`${formatCurrency(currentCharges.otherChargeBased, 2)}${t('perMonth')}`}
                 />
               )}
               {totalMonthlyCosts > 0 && (

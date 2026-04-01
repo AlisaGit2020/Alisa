@@ -21,6 +21,7 @@ const expenseTypes = {
     'rent-refund': 'Vuokran palautus',
     'internet': 'Internet',
     'withholding-tax': 'Lähdevero',
+    'other-charge-based': 'Muut vastikeperusteiset maksut',
     // General labels
     expenseTypes: 'Kululajit',
     isTaxDeductible: 'Verovähennettävä',

@@ -1,15 +1,17 @@
-import { Alert, Box, CircularProgress, IconButton, Tooltip, Typography } from '@mui/material';
-import HistoryIcon from '@mui/icons-material/History';
+import { Alert, Box, CircularProgress, Collapse } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import dayjs from 'dayjs';
 import { ChargeType, PropertyCharge, PropertyChargeInput } from '@asset-types';
 import ApiClient from '@asset-lib/api-client';
 import AssetDialog from '../../asset/dialog/AssetDialog';
 import AssetConfirmDialog from '../../asset/dialog/AssetConfirmDialog';
 import AssetButton from '../../asset/form/AssetButton';
-import AssetDataTable, { AssetDataTableField } from '../../asset/datatable/AssetDataTable';
-import PropertyChargeForm from './PropertyChargeForm';
+import SeasonCard from './SeasonCard';
+import SeasonChargeForm from './SeasonChargeForm';
 
 interface PropertyChargeDialogProps {
   open: boolean;
@@ -18,12 +20,12 @@ interface PropertyChargeDialogProps {
   onChargesUpdated?: () => void;
 }
 
-const CHARGE_TYPES = [
-  { typeName: 'maintenance-fee', chargeType: ChargeType.MAINTENANCE_FEE },
-  { typeName: 'financial-charge', chargeType: ChargeType.FINANCIAL_CHARGE },
-  { typeName: 'water-prepayment', chargeType: ChargeType.WATER_PREPAYMENT },
-  { typeName: 'total-charge', chargeType: ChargeType.TOTAL_CHARGE },
-];
+interface Season {
+  startDate: string;
+  endDate: string | null;
+  charges: PropertyCharge[];
+  isActive: boolean;
+}
 
 function PropertyChargeDialog({
   open,
@@ -36,11 +38,9 @@ function PropertyChargeDialog({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [editingCharge, setEditingCharge] = useState<PropertyCharge | undefined>(undefined);
-  const [selectedChargeType, setSelectedChargeType] = useState<ChargeType | undefined>(undefined);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [chargeToDelete, setChargeToDelete] = useState<PropertyCharge | null>(null);
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const [editingSeason, setEditingSeason] = useState<Season | null>(null);
+  const [deletingSeason, setDeletingSeason] = useState<Season | null>(null);
 
   const fetchCharges = useCallback(async () => {
     setLoading(true);
@@ -61,122 +61,54 @@ function PropertyChargeDialog({
   useEffect(() => {
     if (open) {
       fetchCharges();
+      setShowForm(false);
     }
   }, [open, fetchCharges]);
 
-  // Group charges by type
-  const chargesByType = useMemo(() => {
-    const grouped = new Map<string, PropertyCharge[]>();
-    for (const { typeName } of CHARGE_TYPES) {
-      grouped.set(typeName, []);
-    }
+  // Group charges into seasons by startDate
+  const seasons = useMemo(() => {
+    const seasonMap = new Map<string, Season>();
+
     for (const charge of charges) {
-      const existing = grouped.get(charge.typeName) || [];
-      existing.push(charge);
-      grouped.set(charge.typeName, existing);
+      const key = charge.startDate;
+      if (!seasonMap.has(key)) {
+        seasonMap.set(key, {
+          startDate: charge.startDate,
+          endDate: charge.endDate,
+          charges: [],
+          isActive: charge.endDate === null,
+        });
+      }
+      seasonMap.get(key)!.charges.push(charge);
     }
-    return grouped;
+
+    // Sort by startDate descending (newest first)
+    return Array.from(seasonMap.values()).sort((a, b) =>
+      b.startDate.localeCompare(a.startDate)
+    );
   }, [charges]);
 
-  // Check if total charge matches sum of components
-  const totalMismatch = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const getActiveAmount = (typeName: string): number => {
-      const typeCharges = chargesByType.get(typeName) || [];
-      const activeCharge = typeCharges.find(c =>
-        c.startDate <= today && (!c.endDate || c.endDate >= today)
-      );
-      return activeCharge?.amount ?? 0;
-    };
+  // Current season (no endDate)
+  const currentSeason = useMemo(() =>
+    seasons.find(s => s.isActive),
+    [seasons]
+  );
 
-    const maintenanceFee = getActiveAmount('maintenance-fee');
-    const financialCharge = getActiveAmount('financial-charge');
-    const waterPrepayment = getActiveAmount('water-prepayment');
-    const totalCharge = getActiveAmount('total-charge');
+  // Past seasons (have endDate)
+  const pastSeasons = useMemo(() =>
+    seasons.filter(s => !s.isActive),
+    [seasons]
+  );
 
-    const calculatedSum = maintenanceFee + financialCharge + waterPrepayment;
-
-    if (totalCharge > 0 && Math.abs(calculatedSum - totalCharge) > 0.01) {
-      return { calculatedSum, totalCharge };
-    }
-    return null;
-  }, [chargesByType]);
-
-  const isChargeActive = (charge: PropertyCharge): boolean => {
-    const today = new Date().toISOString().split('T')[0];
-    return charge.startDate <= today && (!charge.endDate || charge.endDate >= today);
-  };
-
-  // Check if any type has history to show
-  const hasAnyHistory = useMemo(() => {
-    for (const { typeName } of CHARGE_TYPES) {
-      const typeCharges = chargesByType.get(typeName) || [];
-      const activeCharges = typeCharges.filter(isChargeActive);
-      if (typeCharges.length > activeCharges.length) {
-        return true;
-      }
-    }
-    return false;
-  }, [chargesByType]);
-
-  const handleAdd = (chargeType: ChargeType) => {
-    setEditingCharge(undefined);
-    setSelectedChargeType(chargeType);
-    setShowForm(true);
-  };
-
-  const handleEdit = (id: number) => {
-    const charge = charges.find(c => c.id === id);
-    if (charge) {
-      setEditingCharge(charge);
-      setSelectedChargeType(undefined);
-      setShowForm(true);
-    }
-  };
-
-  const handleDeleteRequest = (id: number) => {
-    const charge = charges.find(c => c.id === id);
-    if (charge) {
-      setChargeToDelete(charge);
-      setDeleteConfirmOpen(true);
-    }
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!chargeToDelete) return;
-
+  const handleFormSubmit = async (inputs: PropertyChargeInput[]) => {
     try {
       await ApiClient.request({
-        method: 'DELETE',
-        url: `/real-estate/property/${propertyId}/charges/${chargeToDelete.id}`,
+        method: 'POST',
+        url: `/real-estate/property/${propertyId}/charges/batch`,
+        data: inputs,
       });
-      await fetchCharges();
-      onChargesUpdated?.();
-    } catch {
-      setError(t('report.fetchError'));
-    } finally {
-      setDeleteConfirmOpen(false);
-      setChargeToDelete(null);
-    }
-  };
-
-  const handleFormSubmit = async (input: PropertyChargeInput) => {
-    try {
-      if (input.id) {
-        await ApiClient.request({
-          method: 'PUT',
-          url: `/real-estate/property/${propertyId}/charges/${input.id}`,
-          data: input,
-        });
-      } else {
-        await ApiClient.request({
-          method: 'POST',
-          url: `/real-estate/property/${propertyId}/charges`,
-          data: input,
-        });
-      }
       setShowForm(false);
-      setSelectedChargeType(undefined);
+      setEditingSeason(null);
       await fetchCharges();
       onChargesUpdated?.();
     } catch {
@@ -186,35 +118,61 @@ function PropertyChargeDialog({
 
   const handleFormCancel = () => {
     setShowForm(false);
-    setEditingCharge(undefined);
-    setSelectedChargeType(undefined);
+    setEditingSeason(null);
   };
 
-  const fields: AssetDataTableField<PropertyCharge>[] = [
-    {
-      name: 'startDate',
-      label: t('startDate'),
-      format: 'date',
-      width: '25%',
-    },
-    {
-      name: 'endDate',
-      label: t('endDate'),
-      width: '35%',
-      render: (charge) => charge.endDate
-        ? t('format.date', {
-            val: new Date(charge.endDate),
-            formatParams: { val: { year: 'numeric', month: 'numeric', day: 'numeric' } },
-          })
-        : t('validUntilFurtherNotice'),
-    },
-    {
-      name: 'amount',
-      label: t('chargeAmount'),
-      format: 'currency',
-      width: '25%',
-    },
-  ];
+  const handleEditSeason = (season: Season) => {
+    setEditingSeason(season);
+    setShowForm(true);
+  };
+
+  const handleDeleteSeason = async () => {
+    if (!deletingSeason) return;
+
+    try {
+      // Delete all charges in this season
+      for (const charge of deletingSeason.charges) {
+        await ApiClient.request({
+          method: 'DELETE',
+          url: `/real-estate/property/${propertyId}/charges/${charge.id}`,
+        });
+      }
+      setDeletingSeason(null);
+      await fetchCharges();
+      onChargesUpdated?.();
+    } catch {
+      setError(t('report.fetchError'));
+      setDeletingSeason(null);
+    }
+  };
+
+  // Convert season to initial values for the form
+  const getInitialValues = (season: Season) => {
+    const getAmount = (type: ChargeType) =>
+      season.charges.find(c => c.chargeType === type)?.amount ?? 0;
+
+    return {
+      maintenanceFee: getAmount(ChargeType.MAINTENANCE_FEE),
+      financialCharge: getAmount(ChargeType.FINANCIAL_CHARGE),
+      waterPrepayment: getAmount(ChargeType.WATER_PREPAYMENT),
+      otherChargeBased: getAmount(ChargeType.OTHER_CHARGE_BASED),
+      startDate: season.startDate,
+      endDate: season.endDate,
+    };
+  };
+
+  // Get suggested start date for new season (day after latest season ends)
+  const getNewSeasonStartDate = (): string | undefined => {
+    if (seasons.length === 0) return undefined;
+
+    const latestSeason = seasons[0]; // Sorted by startDate descending
+    if (latestSeason.endDate) {
+      // Day after the end date (use dayjs to avoid timezone issues)
+      return dayjs(latestSeason.endDate).add(1, 'day').format('YYYY-MM-DD');
+    }
+    // Active season - suggest today
+    return dayjs().format('YYYY-MM-DD');
+  };
 
   if (!open) {
     return null;
@@ -222,126 +180,118 @@ function PropertyChargeDialog({
 
   return (
     <>
-      <AssetDialog
-        open={open}
-        onClose={onClose}
-        title={t('chargeHistory')}
-        maxWidth="sm"
-        fullWidth
-        actions={
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', px: 2 }}>
-            {hasAnyHistory && !showForm ? (
-              <AssetButton
-                label={showAllHistory ? t('hideHistory') : t('showHistory')}
-                variant="text"
-                startIcon={<HistoryIcon />}
-                onClick={() => setShowAllHistory(prev => !prev)}
-              />
-            ) : (
-              <Box />
-            )}
-            <AssetButton label={t('close')} variant="outlined" onClick={onClose} />
-          </Box>
-        }
-      >
-        {loading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-            <CircularProgress role="progressbar" />
-          </Box>
-        )}
+    <AssetDialog
+      open={open}
+      onClose={onClose}
+      title={t('chargeHistory')}
+      maxWidth="sm"
+      fullWidth
+      actions={
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', px: 2 }}>
+          <AssetButton label={t('close')} variant="outlined" onClick={onClose} />
+        </Box>
+      }
+    >
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+          <CircularProgress role="progressbar" />
+        </Box>
+      )}
 
-        {error && (
-          <Typography color="error" sx={{ p: 2 }}>
-            {error}
-          </Typography>
-        )}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
-        {!loading && !showForm && totalMismatch && (
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            {t('totalChargeMismatch', {
-              calculated: totalMismatch.calculatedSum.toFixed(2),
-              actual: totalMismatch.totalCharge.toFixed(2),
-            })}
-          </Alert>
-        )}
-
-        {!loading && !error && !showForm && (
-          <>
-            {CHARGE_TYPES.map(({ typeName, chargeType }) => {
-              const typeCharges = chargesByType.get(typeName) || [];
-              const visibleCharges = showAllHistory
-                ? typeCharges
-                : typeCharges.filter(isChargeActive);
-
-              return (
-                <Box key={typeName} sx={{ mb: 2 }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      mb: 0.5,
-                      py: 0.5,
-                      px: 1,
-                      borderRadius: 1,
-                      bgcolor: 'primary.main',
-                    }}
-                  >
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'medium', color: 'primary.contrastText' }}>
-                      {t(`chargeTypes.${typeName}`)}
-                    </Typography>
-                    <Tooltip title={t('addCharge')}>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleAdd(chargeType)}
-                        sx={{
-                          bgcolor: 'primary.light',
-                          color: 'primary.contrastText',
-                          '&:hover': { bgcolor: 'primary.dark' },
-                        }}
-                      >
-                        <AddIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                  <AssetDataTable<PropertyCharge>
-                    t={t}
-                    data={visibleCharges}
-                    fields={fields}
-                    onEdit={handleEdit}
-                    onDeleteRequest={handleDeleteRequest}
-                    fixedLayout
-                    stripedRows={false}
-                    showHeader={false}
+      {!loading && !error && (
+        <>
+          {/* Form view */}
+          {showForm ? (
+            <SeasonChargeForm
+              propertyId={propertyId}
+              initialValues={
+                editingSeason
+                  ? getInitialValues(editingSeason)
+                  : { startDate: getNewSeasonStartDate() }
+              }
+              onSubmit={handleFormSubmit}
+              onCancel={handleFormCancel}
+            />
+          ) : (
+            <>
+              {/* Current season card */}
+              {currentSeason && (
+                <Box sx={{ mb: 2 }}>
+                  <SeasonCard
+                    charges={currentSeason.charges}
+                    startDate={currentSeason.startDate}
+                    endDate={currentSeason.endDate}
+                    isActive={currentSeason.isActive}
+                    onEdit={() => handleEditSeason(currentSeason)}
+                    onDelete={() => setDeletingSeason(currentSeason)}
                   />
                 </Box>
-              );
-            })}
-          </>
-        )}
+              )}
 
-        {showForm && (
-          <PropertyChargeForm
-            propertyId={propertyId}
-            charge={editingCharge}
-            defaultChargeType={selectedChargeType}
-            onSubmit={handleFormSubmit}
-            onCancel={handleFormCancel}
-          />
-        )}
-      </AssetDialog>
+              {/* Add new season button */}
+              <AssetButton
+                label={t('addNewSeason')}
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={() => setShowForm(true)}
+                fullWidth
+                sx={{
+                  mb: 2,
+                  py: 1.5,
+                  borderStyle: 'dashed',
+                }}
+              />
 
+              {/* History section */}
+              {pastSeasons.length > 0 && (
+                <>
+                  <AssetButton
+                    label={showAllHistory ? t('hideHistory') : t('showHistory')}
+                    variant="text"
+                    onClick={() => setShowAllHistory(prev => !prev)}
+                    endIcon={showAllHistory ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                    fullWidth
+                    sx={{ mb: 1, color: 'text.secondary' }}
+                  />
+
+                  <Collapse in={showAllHistory}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {pastSeasons.map((season) => (
+                        <SeasonCard
+                          key={season.startDate}
+                          charges={season.charges}
+                          startDate={season.startDate}
+                          endDate={season.endDate}
+                          isActive={season.isActive}
+                          onEdit={() => handleEditSeason(season)}
+                          onDelete={() => setDeletingSeason(season)}
+                        />
+                      ))}
+                    </Box>
+                  </Collapse>
+                </>
+              )}
+            </>
+          )}
+        </>
+      )}
+    </AssetDialog>
+
+      {/* Delete confirmation dialog */}
       <AssetConfirmDialog
-        open={deleteConfirmOpen}
-        title={t('deleteCharge')}
-        contentText={t('confirmDeleteCharge')}
-        buttonTextCancel={t('cancel')}
+        open={!!deletingSeason}
+        title={t('deleteSeasonConfirmTitle')}
+        contentText={t('deleteSeasonConfirmMessage')}
         buttonTextConfirm={t('delete')}
-        onConfirm={handleConfirmDelete}
-        onClose={() => {
-          setDeleteConfirmOpen(false);
-          setChargeToDelete(null);
-        }}
+        buttonTextCancel={t('cancel')}
+        onConfirm={handleDeleteSeason}
+        onClose={() => setDeletingSeason(null)}
       />
     </>
   );

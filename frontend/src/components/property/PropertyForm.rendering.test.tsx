@@ -102,19 +102,21 @@ describe('PropertyForm rendering', () => {
   });
 
   // Total charge field tests (totalCharge = maintenanceFee + financialCharge)
-  describe('totalCharge field (UI helper, not saved to DB)', () => {
-    it('renders totalCharge input field in monthly costs section', async () => {
+  describe('totalCharge field (calculated from components)', () => {
+    it('renders totalCharge field as disabled (calculated automatically)', async () => {
       renderWithRouter(<PropertyForm />, { initialEntries: ['/app/portfolio/own/add'] });
 
       await waitFor(() => {
         expect(screen.getByLabelText(/maintenance fee/i)).toBeInTheDocument();
       });
 
-      // Should have a totalCharge field alongside maintenanceFee and financialCharge
-      expect(screen.getByLabelText(/total charge/i)).toBeInTheDocument();
+      // Should have a disabled totalCharge field
+      const totalChargeField = screen.getByLabelText(/total charge/i);
+      expect(totalChargeField).toBeInTheDocument();
+      expect(totalChargeField).toBeDisabled();
     });
 
-    it('calculates totalCharge when maintenanceFee and financialCharge are filled', async () => {
+    it('calculates totalCharge from all component charges', async () => {
       const user = userEvent.setup();
       renderWithRouter(<PropertyForm />, { initialEntries: ['/app/portfolio/own/add'] });
 
@@ -122,68 +124,38 @@ describe('PropertyForm rendering', () => {
         expect(screen.getByLabelText(/maintenance fee/i)).toBeInTheDocument();
       });
 
-      // Fill maintenanceFee (150) and financialCharge (50)
+      // Fill all component charges
       const maintenanceFeeField = screen.getByLabelText(/maintenance fee/i);
       const financialChargeField = screen.getByLabelText(/financial charge/i);
+      const waterChargeField = screen.getByLabelText(/water charge/i);
+      const otherChargeField = screen.getByLabelText(/other charge-based/i);
 
       await user.clear(maintenanceFeeField);
       await user.type(maintenanceFeeField, '150');
       await user.clear(financialChargeField);
       await user.type(financialChargeField, '50');
+      await user.clear(waterChargeField);
+      await user.type(waterChargeField, '25');
+      await user.clear(otherChargeField);
+      await user.type(otherChargeField, '15');
 
-      // totalCharge should be calculated as 200
+      // totalCharge should be calculated as 240 (150 + 50 + 25 + 15)
       await waitFor(() => {
         const totalChargeField = screen.getByLabelText(/total charge/i);
-        expect(totalChargeField).toHaveValue('200');
+        expect(totalChargeField).toHaveValue('240');
       });
     });
 
-    it('calculates financialCharge when totalCharge and maintenanceFee are filled', async () => {
-      const user = userEvent.setup();
+    it('renders all 4 component charge fields', async () => {
       renderWithRouter(<PropertyForm />, { initialEntries: ['/app/portfolio/own/add'] });
 
       await waitFor(() => {
         expect(screen.getByLabelText(/maintenance fee/i)).toBeInTheDocument();
       });
 
-      // Fill totalCharge (200) and maintenanceFee (150)
-      const totalChargeField = screen.getByLabelText(/total charge/i);
-      const maintenanceFeeField = screen.getByLabelText(/maintenance fee/i);
-
-      await user.clear(totalChargeField);
-      await user.type(totalChargeField, '200');
-      await user.clear(maintenanceFeeField);
-      await user.type(maintenanceFeeField, '150');
-
-      // financialCharge should be calculated as 50
-      await waitFor(() => {
-        const financialChargeField = screen.getByLabelText(/financial charge/i);
-        expect(financialChargeField).toHaveValue('50');
-      });
-    });
-
-    it('calculates maintenanceFee when totalCharge and financialCharge are filled', async () => {
-      const user = userEvent.setup();
-      renderWithRouter(<PropertyForm />, { initialEntries: ['/app/portfolio/own/add'] });
-
-      await waitFor(() => {
-        expect(screen.getByLabelText(/financial charge/i)).toBeInTheDocument();
-      });
-
-      // Fill totalCharge (200) and financialCharge (50)
-      const totalChargeField = screen.getByLabelText(/total charge/i);
-      const financialChargeField = screen.getByLabelText(/financial charge/i);
-
-      await user.clear(totalChargeField);
-      await user.type(totalChargeField, '200');
-      await user.clear(financialChargeField);
-      await user.type(financialChargeField, '50');
-
-      // maintenanceFee should be calculated as 150
-      await waitFor(() => {
-        const maintenanceFeeField = screen.getByLabelText(/maintenance fee/i);
-        expect(maintenanceFeeField).toHaveValue('150');
-      });
+      expect(screen.getByLabelText(/financial charge/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/water charge/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/other charge-based/i)).toBeInTheDocument();
     });
   });
 

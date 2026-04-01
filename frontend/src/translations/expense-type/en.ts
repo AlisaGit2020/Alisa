@@ -21,6 +21,7 @@ const expenseTypes = {
     'rent-refund': 'Rent refund',
     'internet': 'Internet',
     'withholding-tax': 'Withholding tax',
+    'other-charge-based': 'Other charge-based payments',
     // General labels
     expenseTypes: 'Expense types',
     isTaxDeductible: 'Tax deductible',

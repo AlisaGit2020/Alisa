@@ -1,0 +1,110 @@
+<h2>Complete Charges Dialog</h2>
+<p class="subtitle">How the full view looks with current season + history</p>
+
+<div class="mockup" style="max-width: 500px; margin: 0 auto;">
+  <div class="mockup-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <span>Vastikkeet</span>
+    <span style="font-size: 12px; opacity: 0.8;">Asunto Oy Testikatu 5</span>
+  </div>
+  <div class="mockup-body" style="padding: 0;">
+
+    <!-- Current Season Card -->
+    <div style="padding: 16px; border-bottom: 1px solid var(--border);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div>
+          <span style="font-size: 12px; color: var(--muted);">Voimassa oleva kausi</span>
+          <div style="font-weight: 600;">1.4.2024 →</div>
+        </div>
+        <button style="padding: 6px 12px; border: 1px solid #1976d2; border-radius: 4px; background: transparent; color: #1976d2; cursor: pointer; font-size: 13px;">Muokkaa</button>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+        <div style="flex: 1; text-align: center; padding: 10px 6px; background: var(--surface); border-radius: 6px;">
+          <div style="font-size: 10px; color: var(--muted);">Hoito</div>
+          <div style="font-size: 16px; font-weight: 600;">€150</div>
+        </div>
+        <div style="flex: 1; text-align: center; padding: 10px 6px; background: var(--surface); border-radius: 6px;">
+          <div style="font-size: 10px; color: var(--muted);">Rahoitus</div>
+          <div style="font-size: 16px; font-weight: 600;">€85</div>
+        </div>
+        <div style="flex: 1; text-align: center; padding: 10px 6px; background: var(--surface); border-radius: 6px;">
+          <div style="font-size: 10px; color: var(--muted);">Vesi</div>
+          <div style="font-size: 16px; font-weight: 600;">€25</div>
+        </div>
+        <div style="flex: 1; text-align: center; padding: 10px 6px; background: var(--surface); border-radius: 6px;">
+          <div style="font-size: 10px; color: var(--muted);">Muut</div>
+          <div style="font-size: 16px; font-weight: 600;">€15</div>
+        </div>
+      </div>
+
+      <div style="text-align: center; padding: 12px; background: #1976d2; border-radius: 6px; color: white;">
+        <span style="font-size: 12px; opacity: 0.9;">Yhteensä </span>
+        <span style="font-size: 20px; font-weight: 700;">€275</span>
+        <span style="font-size: 12px; opacity: 0.9;"> /kk</span>
+      </div>
+    </div>
+
+    <!-- Add New Season Button -->
+    <div style="padding: 12px 16px; border-bottom: 1px solid var(--border);">
+      <button style="width: 100%; padding: 10px; border: 2px dashed var(--border); border-radius: 6px; background: transparent; color: #1976d2; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+        <span style="font-size: 18px;">+</span> Lisää uusi kausi
+      </button>
+    </div>
+
+    <!-- History Section -->
+    <div style="padding: 12px 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Historia</span>
+        <span style="font-size: 12px; color: #1976d2; cursor: pointer;">Näytä kaikki ▼</span>
+      </div>
+
+      <!-- Past Season 1 -->
+      <div style="padding: 10px; background: var(--surface); border-radius: 6px; margin-bottom: 8px; opacity: 0.7;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 13px; font-weight: 500;">1.1.2023 – 31.3.2024</div>
+            <div style="font-size: 12px; color: var(--muted);">Hoito €140 · Rahoitus €80 · Vesi €22 · Muut €0</div>
+          </div>
+          <div style="font-weight: 600;">€242</div>
+        </div>
+      </div>
+
+      <!-- Past Season 2 -->
+      <div style="padding: 10px; background: var(--surface); border-radius: 6px; opacity: 0.5;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 13px; font-weight: 500;">1.6.2021 – 31.12.2022</div>
+            <div style="font-size: 12px; color: var(--muted);">Hoito €130 · Rahoitus €75 · Vesi €20 · Muut €0</div>
+          </div>
+          <div style="font-weight: 600;">€225</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="padding: 16px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end;">
+      <button style="padding: 10px 20px; border: none; border-radius: 6px; background: var(--surface); cursor: pointer; font-size: 14px;">Sulje</button>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 24px; text-align: center;">
+  <p class="subtitle">Click to select if this overall structure works, or tell me what to change.</p>
+</div>
+
+<div class="options" style="margin-top: 16px;">
+  <div class="option" data-choice="yes" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>This looks right</h3>
+      <p>Current season prominent, add button clear, history below</p>
+    </div>
+  </div>
+  <div class="option" data-choice="changes" onclick="toggleSelect(this)">
+    <div class="letter">~</div>
+    <div class="content">
+      <h3>Needs changes</h3>
+      <p>Tell me what to adjust in the terminal</p>
+    </div>
+  </div>
+</div>

@@ -87,6 +87,7 @@ const property = {
     totalCharge: 'Total Charge',
     waterCharge: 'Water Charge',
     waterPrepayment: 'Water Prepayment',
+    otherChargeBased: 'Other Charge-Based',
 
     // Charge types
     chargeTypes: {
@@ -94,6 +95,7 @@ const property = {
         'financial-charge': 'Financial Charge',
         'water-prepayment': 'Water Prepayment',
         'total-charge': 'Total Charge',
+        'other-charge-based': 'Other Charges',
     },
 
     // Charge history
@@ -122,6 +124,16 @@ const property = {
     hideHistory: 'Hide history',
     save: 'Save',
     close: 'Close',
+    newSeason: 'New Season',
+    currentSeason: 'Current Season',
+    addNewSeason: 'Add New Season',
+    seasonFrom: 'Season from',
+    showAll: 'Show all',
+    ongoing: 'Ongoing',
+    history: 'History',
+    total: 'Total',
+    deleteSeasonConfirmTitle: 'Delete Season',
+    deleteSeasonConfirmMessage: 'Are you sure you want to delete this season\'s charges? This action cannot be undone.',
     debtShare: 'Debt Share',
     noHousingCompanyLoan: 'No Housing Company Loan',
     monthlyRent: 'Monthly Rent',

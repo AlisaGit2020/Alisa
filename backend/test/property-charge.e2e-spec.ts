@@ -279,7 +279,8 @@ describe('PropertyChargeController (e2e)', () => {
       expect(response.body.maintenanceFee).toBeNull();
       expect(response.body.financialCharge).toBeNull();
       expect(response.body.waterPrepayment).toBeNull();
-      expect(response.body.totalCharge).toBeNull();
+      // totalCharge is calculated from components, so 0 when all are null
+      expect(response.body.totalCharge).toBe(0);
     });
   });
 
@@ -382,8 +383,8 @@ describe('PropertyChargeController (e2e)', () => {
     });
   });
 
-  describe('TOTAL_CHARGE auto-calculation', () => {
-    it('should auto-calculate total when creating charges', async () => {
+  describe('Total charge calculation', () => {
+    it('should calculate total from component charges', async () => {
       const token = await getUserAccessToken2(authService, mainUser.jwtUser);
 
       // Create maintenance fee
@@ -419,7 +420,7 @@ describe('PropertyChargeController (e2e)', () => {
         })
         .expect(201);
 
-      // Get current charges and verify total
+      // Get current charges and verify total is calculated
       const response = await request(server)
         .get(`/real-estate/property/${propertyId}/charges/current`)
         .set('Authorization', getBearerToken(token))
@@ -443,11 +444,10 @@ describe('PropertyChargeController (e2e)', () => {
         .send(inputs)
         .expect(201);
 
-      expect(response.body).toHaveLength(3); // 2 inputs + 1 total
-      const totalCharge = response.body.find(
-        (c: { chargeType: ChargeType }) => c.chargeType === ChargeType.TOTAL_CHARGE,
-      );
-      expect(totalCharge.amount).toBe(200);
+      // Only component charges are returned (total is calculated on read)
+      expect(response.body).toHaveLength(2);
+      expect(response.body[0].chargeType).toBe(ChargeType.MAINTENANCE_FEE);
+      expect(response.body[1].chargeType).toBe(ChargeType.FINANCIAL_CHARGE);
     });
 
     it('should allow null startDate', async () => {

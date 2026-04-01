@@ -53,6 +53,7 @@ export class PropertyChargeService {
       financialCharge: null,
       waterPrepayment: null,
       totalCharge: null,
+      otherChargeBased: null,
     };
 
     for (const charge of charges) {
@@ -66,11 +67,19 @@ export class PropertyChargeService {
         case ChargeType.WATER_PREPAYMENT:
           result.waterPrepayment = charge.amount;
           break;
-        case ChargeType.TOTAL_CHARGE:
-          result.totalCharge = charge.amount;
+        case ChargeType.OTHER_CHARGE_BASED:
+          result.otherChargeBased = charge.amount;
           break;
+        // Total is calculated from components below
       }
     }
+
+    // Calculate totalCharge from components (not stored in DB)
+    result.totalCharge =
+      (result.maintenanceFee ?? 0) +
+      (result.financialCharge ?? 0) +
+      (result.waterPrepayment ?? 0) +
+      (result.otherChargeBased ?? 0);
 
     return result;
   }
@@ -99,11 +108,6 @@ export class PropertyChargeService {
 
     const savedCharge = await this.repository.save(charge);
 
-    // Recalculate TOTAL_CHARGE if this is a component charge
-    if (input.chargeType !== ChargeType.TOTAL_CHARGE && startDate) {
-      await this.recalculateTotalCharge(input.propertyId, startDate);
-    }
-
     return PropertyChargeDto.fromEntity(savedCharge);
   }
 
@@ -118,7 +122,18 @@ export class PropertyChargeService {
     }
 
     const results: PropertyChargeDto[] = [];
-    let hasComponentCharges = false;
+    const startDate = inputs[0]?.startDate ? new Date(inputs[0].startDate) : null;
+
+    if (startDate) {
+      // Delete existing charges with the exact same startDate (handles edits)
+      await this.repository.delete({
+        propertyId,
+        startDate,
+      });
+
+      // Close all existing open charges in a single batch update
+      await this.closeAllOpenCharges(propertyId, startDate);
+    }
 
     for (const input of inputs) {
       // Skip if amount is 0 or not provided
@@ -136,30 +151,6 @@ export class PropertyChargeService {
 
       const savedCharge = await this.repository.save(charge);
       results.push(PropertyChargeDto.fromEntity(savedCharge));
-
-      if (input.chargeType !== ChargeType.TOTAL_CHARGE) {
-        hasComponentCharges = true;
-      }
-    }
-
-    // Auto-calculate total charge if we have component charges
-    if (hasComponentCharges) {
-      const total = results
-        .filter(c => c.chargeType !== ChargeType.TOTAL_CHARGE)
-        .reduce((sum, c) => sum + c.amount, 0);
-
-      const startDate = inputs[0]?.startDate ? new Date(inputs[0].startDate) : null;
-
-      const totalCharge = this.repository.create({
-        propertyId,
-        chargeType: ChargeType.TOTAL_CHARGE,
-        amount: total,
-        startDate,
-        endDate: null,
-      });
-
-      const savedTotal = await this.repository.save(totalCharge);
-      results.push(PropertyChargeDto.fromEntity(savedTotal));
     }
 
     return results;
@@ -198,11 +189,6 @@ export class PropertyChargeService {
 
     const savedCharge = await this.repository.save(charge);
 
-    // Recalculate TOTAL_CHARGE if this is a component charge
-    if (charge.chargeType !== ChargeType.TOTAL_CHARGE) {
-      await this.recalculateTotalCharge(propertyId, charge.startDate);
-    }
-
     return PropertyChargeDto.fromEntity(savedCharge);
   }
 
@@ -221,15 +207,7 @@ export class PropertyChargeService {
       throw new NotFoundException('Charge not found');
     }
 
-    const chargeType = charge.chargeType;
-    const startDate = charge.startDate;
-
     await this.repository.delete(chargeId);
-
-    // Recalculate TOTAL_CHARGE if this was a component charge
-    if (chargeType !== ChargeType.TOTAL_CHARGE) {
-      await this.recalculateTotalCharge(propertyId, startDate);
-    }
   }
 
   async getChargeHistory(
@@ -274,53 +252,23 @@ export class PropertyChargeService {
     }
   }
 
-  private async recalculateTotalCharge(
+  private async closeAllOpenCharges(
     propertyId: number,
-    asOfDate: Date,
+    newStartDate: Date,
   ): Promise<void> {
-    // Get current component charges as of the given date
-    const charges = await this.repository
-      .createQueryBuilder('charge')
-      .where('charge.propertyId = :propertyId', { propertyId })
-      .andWhere('charge.chargeType IN (:...types)', {
-        types: [
-          ChargeType.MAINTENANCE_FEE,
-          ChargeType.FINANCIAL_CHARGE,
-          ChargeType.WATER_PREPAYMENT,
-        ],
-      })
-      .andWhere('charge.startDate <= :date', { date: asOfDate })
-      .andWhere('(charge.endDate IS NULL OR charge.endDate >= :date)', { date: asOfDate })
-      .getMany();
+    // Set endDate to day before new charge starts
+    const dayBefore = new Date(newStartDate);
+    dayBefore.setDate(dayBefore.getDate() - 1);
 
-    // Calculate total
-    let total = 0;
-    for (const charge of charges) {
-      total += charge.amount;
-    }
-
-    // Find or create TOTAL_CHARGE record
-    const existingTotal = await this.repository.findOne({
-      where: {
-        propertyId,
-        chargeType: ChargeType.TOTAL_CHARGE,
-        endDate: IsNull(),
-      },
-    });
-
-    if (existingTotal) {
-      existingTotal.amount = total;
-      existingTotal.startDate = asOfDate;
-      await this.repository.save(existingTotal);
-    } else {
-      const totalCharge = this.repository.create({
-        propertyId,
-        chargeType: ChargeType.TOTAL_CHARGE,
-        amount: total,
-        startDate: asOfDate,
-        endDate: null,
-      });
-      await this.repository.save(totalCharge);
-    }
+    // Close all open charges in a single batch update (avoids N+1)
+    await this.repository
+      .createQueryBuilder()
+      .update(PropertyCharge)
+      .set({ endDate: dayBefore })
+      .where('propertyId = :propertyId', { propertyId })
+      .andWhere('endDate IS NULL')
+      .andWhere('startDate < :newStartDate', { newStartDate })
+      .execute();
   }
+
 }
