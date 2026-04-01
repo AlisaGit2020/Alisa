@@ -51,17 +51,44 @@ describe('SeasonCard', () => {
     expect(onEdit).toHaveBeenCalled();
   });
 
-  it('does not show edit button for inactive season', () => {
+  it('shows edit button for inactive season', async () => {
+    const onEdit = jest.fn();
+    const user = userEvent.setup();
+
     renderWithProviders(
       <SeasonCard
         charges={mockCharges}
         startDate="2023-01-01"
         endDate="2024-03-31"
         isActive={false}
-        onEdit={jest.fn()}
+        onEdit={onEdit}
       />
     );
 
-    expect(screen.queryByRole('button', { name: /edit/i })).not.toBeInTheDocument();
+    const editButton = screen.getByRole('button', { name: /edit/i });
+    await user.click(editButton);
+
+    expect(onEdit).toHaveBeenCalled();
+  });
+
+  it('shows delete button and calls onDelete', async () => {
+    const onDelete = jest.fn();
+    const user = userEvent.setup();
+
+    renderWithProviders(
+      <SeasonCard
+        charges={mockCharges}
+        startDate="2024-04-01"
+        endDate={null}
+        isActive={true}
+        onEdit={jest.fn()}
+        onDelete={onDelete}
+      />
+    );
+
+    const deleteButton = screen.getByRole('button', { name: /delete/i });
+    await user.click(deleteButton);
+
+    expect(onDelete).toHaveBeenCalled();
   });
 });

@@ -4,9 +4,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PropertyCharge, PropertyChargeInput } from '@asset-types';
+import { ChargeType, PropertyCharge, PropertyChargeInput } from '@asset-types';
 import ApiClient from '@asset-lib/api-client';
 import AssetDialog from '../../asset/dialog/AssetDialog';
+import AssetConfirmDialog from '../../asset/dialog/AssetConfirmDialog';
 import AssetButton from '../../asset/form/AssetButton';
 import SeasonCard from './SeasonCard';
 import SeasonChargeForm from './SeasonChargeForm';
@@ -37,6 +38,8 @@ function PropertyChargeDialog({
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const [editingSeason, setEditingSeason] = useState<Season | null>(null);
+  const [deletingSeason, setDeletingSeason] = useState<Season | null>(null);
 
   const fetchCharges = useCallback(async () => {
     setLoading(true);
@@ -113,6 +116,47 @@ function PropertyChargeDialog({
 
   const handleFormCancel = () => {
     setShowForm(false);
+    setEditingSeason(null);
+  };
+
+  const handleEditSeason = (season: Season) => {
+    setEditingSeason(season);
+    setShowForm(true);
+  };
+
+  const handleDeleteSeason = async () => {
+    if (!deletingSeason) return;
+
+    try {
+      // Delete all charges in this season
+      for (const charge of deletingSeason.charges) {
+        await ApiClient.request({
+          method: 'DELETE',
+          url: `/real-estate/property/${propertyId}/charges/${charge.id}`,
+        });
+      }
+      setDeletingSeason(null);
+      await fetchCharges();
+      onChargesUpdated?.();
+    } catch {
+      setError(t('report.fetchError'));
+      setDeletingSeason(null);
+    }
+  };
+
+  // Convert season to initial values for the form
+  const getInitialValues = (season: Season) => {
+    const getAmount = (type: ChargeType) =>
+      season.charges.find(c => c.chargeType === type)?.amount ?? 0;
+
+    return {
+      maintenanceFee: getAmount(ChargeType.MAINTENANCE_FEE),
+      financialCharge: getAmount(ChargeType.FINANCIAL_CHARGE),
+      waterPrepayment: getAmount(ChargeType.WATER_PREPAYMENT),
+      otherChargeBased: getAmount(ChargeType.OTHER_CHARGE_BASED),
+      startDate: season.startDate,
+      endDate: season.endDate,
+    };
   };
 
   if (!open) {
@@ -120,6 +164,7 @@ function PropertyChargeDialog({
   }
 
   return (
+    <>
     <AssetDialog
       open={open}
       onClose={onClose}
@@ -150,6 +195,7 @@ function PropertyChargeDialog({
           {showForm ? (
             <SeasonChargeForm
               propertyId={propertyId}
+              initialValues={editingSeason ? getInitialValues(editingSeason) : undefined}
               onSubmit={handleFormSubmit}
               onCancel={handleFormCancel}
             />
@@ -163,7 +209,8 @@ function PropertyChargeDialog({
                     startDate={currentSeason.startDate}
                     endDate={currentSeason.endDate}
                     isActive={currentSeason.isActive}
-                    onEdit={() => setShowForm(true)}
+                    onEdit={() => handleEditSeason(currentSeason)}
+                    onDelete={() => setDeletingSeason(currentSeason)}
                   />
                 </Box>
               )}
@@ -203,6 +250,8 @@ function PropertyChargeDialog({
                           startDate={season.startDate}
                           endDate={season.endDate}
                           isActive={season.isActive}
+                          onEdit={() => handleEditSeason(season)}
+                          onDelete={() => setDeletingSeason(season)}
                         />
                       ))}
                     </Box>
@@ -214,6 +263,18 @@ function PropertyChargeDialog({
         </>
       )}
     </AssetDialog>
+
+      {/* Delete confirmation dialog */}
+      <AssetConfirmDialog
+        open={!!deletingSeason}
+        title={t('deleteSeasonConfirmTitle')}
+        message={t('deleteSeasonConfirmMessage')}
+        confirmLabel={t('delete')}
+        cancelLabel={t('cancel')}
+        onConfirm={handleDeleteSeason}
+        onCancel={() => setDeletingSeason(null)}
+      />
+    </>
   );
 }
 

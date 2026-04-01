@@ -131,6 +131,8 @@ const property = {
     ongoing: 'Ongoing',
     history: 'History',
     total: 'Total',
+    deleteSeasonConfirmTitle: 'Delete Season',
+    deleteSeasonConfirmMessage: 'Are you sure you want to delete this season\'s charges? This action cannot be undone.',
     debtShare: 'Debt Share',
     noHousingCompanyLoan: 'No Housing Company Loan',
     monthlyRent: 'Monthly Rent',

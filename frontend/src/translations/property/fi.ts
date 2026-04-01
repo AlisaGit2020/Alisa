@@ -131,6 +131,8 @@ const property = {
     ongoing: 'Toistaiseksi',
     history: 'Historia',
     total: 'Yhteensä',
+    deleteSeasonConfirmTitle: 'Poista kausi',
+    deleteSeasonConfirmMessage: 'Haluatko varmasti poistaa tämän kauden vastikkeet? Tätä toimintoa ei voi peruuttaa.',
     debtShare: 'Yhtiölainaosuus',
     noHousingCompanyLoan: 'Ei yhtiölainaa',
     monthlyRent: 'Kuukausivuokra',

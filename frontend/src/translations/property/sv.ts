@@ -131,6 +131,8 @@ const property = {
     ongoing: 'Tillsvidare',
     history: 'Historik',
     total: 'Totalt',
+    deleteSeasonConfirmTitle: 'Ta bort period',
+    deleteSeasonConfirmMessage: 'Är du säker på att du vill ta bort avgifterna för denna period? Denna åtgärd kan inte ångras.',
     debtShare: 'Skulddel',
     noHousingCompanyLoan: 'Inget bostadsbolagslån',
     monthlyRent: 'Månadshyra',

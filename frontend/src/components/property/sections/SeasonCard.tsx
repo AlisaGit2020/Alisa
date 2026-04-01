@@ -1,5 +1,6 @@
 import { Box, Typography, IconButton, Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
 import { ChargeType, PropertyCharge } from '@asset-types';
 
@@ -9,6 +10,7 @@ interface SeasonCardProps {
   endDate: string | null;
   isActive: boolean;
   onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 const CHARGE_TYPE_ORDER = [
@@ -18,7 +20,7 @@ const CHARGE_TYPE_ORDER = [
   ChargeType.OTHER_CHARGE_BASED,
 ];
 
-function SeasonCard({ charges, startDate, endDate, isActive, onEdit }: SeasonCardProps) {
+function SeasonCard({ charges, startDate, endDate, isActive, onEdit, onDelete }: SeasonCardProps) {
   const { t } = useTranslation('property');
 
   const getChargeAmount = (chargeType: ChargeType): number => {
@@ -59,13 +61,22 @@ function SeasonCard({ charges, startDate, endDate, isActive, onEdit }: SeasonCar
             {formatDate(startDate)} → {endDate ? formatDate(endDate) : t('ongoing')}
           </Typography>
         </Box>
-        {isActive && onEdit && (
-          <Tooltip title={t('editCharge')}>
-            <IconButton size="small" onClick={onEdit} color="primary">
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        )}
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          {onEdit && (
+            <Tooltip title={t('edit')}>
+              <IconButton size="small" onClick={onEdit} color="primary">
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+          {onDelete && (
+            <Tooltip title={t('delete')}>
+              <IconButton size="small" onClick={onDelete} color="error">
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
       </Box>
 
       {/* Charge cards grid */}
