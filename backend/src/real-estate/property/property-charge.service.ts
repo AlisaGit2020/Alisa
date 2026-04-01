@@ -123,6 +123,20 @@ export class PropertyChargeService {
 
     const results: PropertyChargeDto[] = [];
     let hasComponentCharges = false;
+    const startDate = inputs[0]?.startDate ? new Date(inputs[0].startDate) : null;
+
+    // Close all existing open charges before creating new ones
+    if (startDate) {
+      for (const chargeType of [
+        ChargeType.MAINTENANCE_FEE,
+        ChargeType.FINANCIAL_CHARGE,
+        ChargeType.WATER_PREPAYMENT,
+        ChargeType.OTHER_CHARGE_BASED,
+        ChargeType.TOTAL_CHARGE,
+      ]) {
+        await this.closeOpenCharges(propertyId, chargeType, startDate);
+      }
+    }
 
     for (const input of inputs) {
       // Skip if amount is 0 or not provided

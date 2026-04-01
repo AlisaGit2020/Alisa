@@ -486,6 +486,9 @@ describe('PropertyChargeService', () => {
         createMockCharge(4, ChargeType.TOTAL_CHARGE, 225, new Date('2024-01-15'), null),
       ];
 
+      // Mock closeOpenCharges finding no existing open charges
+      mockRepository.find.mockResolvedValue([]);
+
       mockRepository.create.mockImplementation((data: Partial<PropertyCharge>) => {
         const charge = new PropertyCharge();
         Object.assign(charge, data);
