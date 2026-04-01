@@ -122,6 +122,11 @@ const GLOBAL_EXPENSE_TYPES: GlobalExpenseType[] = [
     isTaxDeductible: true,
     isCapitalImprovement: false,
   },
+  {
+    key: ExpenseTypeKey.OTHER_CHARGE_BASED,
+    isTaxDeductible: true,
+    isCapitalImprovement: false,
+  },
 ];
 
 const GLOBAL_INCOME_TYPES: GlobalIncomeType[] = [
