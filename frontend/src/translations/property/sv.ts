@@ -94,6 +94,7 @@ const property = {
         'financial-charge': 'Finansieringsavgift',
         'water-prepayment': 'Vattenförskott',
         'total-charge': 'Total avgift',
+        'other-charge-based': 'Övriga avgifter',
     },
 
     // Charge history
@@ -122,6 +123,14 @@ const property = {
     hideHistory: 'Dölj historik',
     save: 'Spara',
     close: 'Stäng',
+    newSeason: 'Ny period',
+    currentSeason: 'Aktuell period',
+    addNewSeason: 'Lägg till ny period',
+    seasonFrom: 'Period från',
+    showAll: 'Visa alla',
+    ongoing: 'Tillsvidare',
+    history: 'Historik',
+    total: 'Totalt',
     debtShare: 'Skulddel',
     noHousingCompanyLoan: 'Inget bostadsbolagslån',
     monthlyRent: 'Månadshyra',

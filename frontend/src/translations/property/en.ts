@@ -94,6 +94,7 @@ const property = {
         'financial-charge': 'Financial Charge',
         'water-prepayment': 'Water Prepayment',
         'total-charge': 'Total Charge',
+        'other-charge-based': 'Other Charges',
     },
 
     // Charge history
@@ -122,6 +123,14 @@ const property = {
     hideHistory: 'Hide history',
     save: 'Save',
     close: 'Close',
+    newSeason: 'New Season',
+    currentSeason: 'Current Season',
+    addNewSeason: 'Add New Season',
+    seasonFrom: 'Season from',
+    showAll: 'Show all',
+    ongoing: 'Ongoing',
+    history: 'History',
+    total: 'Total',
     debtShare: 'Debt Share',
     noHousingCompanyLoan: 'No Housing Company Loan',
     monthlyRent: 'Monthly Rent',

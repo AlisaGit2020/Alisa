@@ -21,6 +21,7 @@ const expenseTypes = {
     'rent-refund': 'Hyresåterbetalning',
     'internet': 'Internet',
     'withholding-tax': 'Källskatt',
+    'other-charge-based': 'Övriga avgiftsbaserade betalningar',
     // General labels
     expenseTypes: 'Utgiftstyper',
     isTaxDeductible: 'Avdragsgill',
