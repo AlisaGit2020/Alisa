@@ -131,8 +131,8 @@ function ApartmentCalculationDialog({
     deptFreePrice: property?.purchasePrice ?? 100000,
     deptShare: 0,
     transferTaxPercent: 2,
-    maintenanceFee: property?.maintenanceFee ?? 200,
-    chargeForFinancialCosts: property?.financialCharge ?? 50,
+    maintenanceFee: 200,
+    chargeForFinancialCosts: 50,
     rentPerMonth: property?.monthlyRent ?? 800,
     apartmentSize: property?.size ?? 50,
     waterCharge: 20,
@@ -140,7 +140,7 @@ function ApartmentCalculationDialog({
     loanInterestPercent: 4,
     loanPeriod: 25,
     propertyId: property?.id,
-  }), [property?.purchasePrice, property?.maintenanceFee, property?.financialCharge, property?.monthlyRent, property?.size, property?.id]);
+  }), [property?.purchasePrice, property?.monthlyRent, property?.size, property?.id]);
 
   const [data, setData] = useState<InvestmentCalculationInput>(getDefaultData());
   const [saving, setSaving] = useState(false);

@@ -119,11 +119,11 @@ function InvestmentAddDialog({
       const submissionData = {
         ...formData,
         propertyId: property.id,
-        // Cost fields come from property
+        // Cost fields - charges are now managed separately via PropertyCharge API
         deptShare: property.debtShare ?? 0,
-        maintenanceFee: property.maintenanceFee ?? 0,
-        chargeForFinancialCosts: property.financialCharge ?? 0,
-        waterCharge: property.waterCharge ?? 0,
+        maintenanceFee: 0,
+        chargeForFinancialCosts: 0,
+        waterCharge: 0,
       };
 
       // ApiClient.post returns axios response (type mismatch in ApiClient)

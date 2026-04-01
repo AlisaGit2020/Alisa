@@ -17,13 +17,6 @@ interface PropertyKpiSectionProps {
 function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProps) {
   const { t } = useTranslation('property');
 
-  const totalMonthlyCosts =
-    (property.maintenanceFee ?? 0) +
-    (property.waterCharge ?? 0) +
-    (property.financialCharge ?? 0);
-
-  const netRent = (property.monthlyRent ?? 0) - totalMonthlyCosts;
-
   const grossYield =
     property.purchasePrice && property.monthlyRent
       ? ((property.monthlyRent * 12) / property.purchasePrice) * 100
@@ -54,7 +47,6 @@ function PropertyKpiSection({ property, allTimeBalance }: PropertyKpiSectionProp
           iconColor="success.main"
           label={t('monthlyRent')}
           value={`${formatCurrency(property.monthlyRent ?? 0)}${t('perMonth')}`}
-          subtitle={totalMonthlyCosts > 0 ? `${t('netRent')}: ${formatCurrency(netRent)}${t('perMonth')}` : undefined}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
