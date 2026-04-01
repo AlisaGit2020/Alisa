@@ -108,6 +108,7 @@ function PropertyChargeDialog({
         data: inputs,
       });
       setShowForm(false);
+      setEditingSeason(null);
       await fetchCharges();
       onChargesUpdated?.();
     } catch {
