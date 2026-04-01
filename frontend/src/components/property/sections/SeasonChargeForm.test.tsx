@@ -72,4 +72,26 @@ describe('SeasonChargeForm', () => {
 
     expect(screen.getByText(/start date is required/i)).toBeInTheDocument();
   });
+
+  it('shows error when end date is before start date', async () => {
+    const user = userEvent.setup();
+    const onSubmit = jest.fn();
+    renderWithProviders(
+      <SeasonChargeForm
+        {...defaultProps}
+        onSubmit={onSubmit}
+        initialValues={{
+          startDate: '2024-06-01',
+          endDate: '2024-05-01', // Before start date
+          maintenanceFee: 100,
+        }}
+      />
+    );
+
+    const saveButton = screen.getByRole('button', { name: /save/i });
+    await user.click(saveButton);
+
+    expect(screen.getByText(/end date must be after start date/i)).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
 });

@@ -39,8 +39,9 @@ function SeasonChargeForm({ propertyId, initialValues, onSubmit, onCancel }: Sea
   const [waterPrepayment, setWaterPrepayment] = useState<number | undefined>(initialValues?.waterPrepayment ?? 0);
   const [otherCharge, setOtherCharge] = useState<number | undefined>(initialValues?.otherChargeBased ?? 0);
 
-  // Validation error
-  const [error, setError] = useState<string>('');
+  // Validation errors
+  const [startDateError, setStartDateError] = useState<string>('');
+  const [endDateError, setEndDateError] = useState<string>('');
 
   // Calculate total
   const total = useMemo(() => {
@@ -49,17 +50,25 @@ function SeasonChargeForm({ propertyId, initialValues, onSubmit, onCancel }: Sea
 
   const handleStartDateChange = (value: Dayjs | null) => {
     setStartDate(value ? value.toDate() : null);
-    setError('');
+    setStartDateError('');
+    setEndDateError('');
   };
 
   const handleEndDateChange = (value: Dayjs | null) => {
     setEndDate(value ? value.toDate() : null);
+    setEndDateError('');
   };
 
   const handleSubmit = () => {
     // Validate start date
     if (!startDate) {
-      setError(t('startDateRequired'));
+      setStartDateError(t('startDateRequired'));
+      return;
+    }
+
+    // Validate end date is not before start date
+    if (endDate && dayjs(endDate).isBefore(dayjs(startDate), 'day')) {
+      setEndDateError(t('endDateMustBeAfterStartDate'));
       return;
     }
 
@@ -126,14 +135,15 @@ function SeasonChargeForm({ propertyId, initialValues, onSubmit, onCancel }: Sea
           label={t('startDate')}
           value={startDate}
           onChange={handleStartDateChange}
-          error={!!error}
-          helperText={error}
+          error={!!startDateError}
+          helperText={startDateError}
         />
         <AssetDatePicker
           label={t('endDate')}
           value={endDate}
           onChange={handleEndDateChange}
-          helperText={t('leaveEmptyForValidUntilFurtherNotice')}
+          error={!!endDateError}
+          helperText={endDateError || t('leaveEmptyForValidUntilFurtherNotice')}
         />
       </Box>
 
