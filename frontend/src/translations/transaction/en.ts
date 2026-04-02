@@ -56,6 +56,7 @@ const transaction = {
   searchField: "Search from",
   sender: "Sender",
   splitLoanPayment: "Split loan payment",
+  splitChargePayment: "Split to charges",
   startDate: "Start date",
   totalExpenses: "Expenses",
   totalIncomes: "Incomes",
@@ -82,6 +83,10 @@ const transaction = {
     unauthorized: "You don't have permission to modify this transaction",
     notPending: "Can only split pending transactions",
     notLoanFormat: "Transaction description does not match loan payment format",
+  },
+  chargeSplitErrors: {
+    noCharges: "No active charges found for transaction date",
+    amountMismatch: "Transaction amount does not match charges",
   },
   confirmDeleteTransactions:
     "Are you sure you want to delete {{count}} selected transactions?",

@@ -56,6 +56,7 @@ const transaction = {
   searchField: "Sök i fält",
   sender: "Avsändare",
   splitLoanPayment: "Dela lånebetalning",
+  splitChargePayment: "Dela till avgifter",
   startDate: "Startdatum",
   totalExpenses: "Utgifter",
   totalIncomes: "Intäkter",
@@ -82,6 +83,10 @@ const transaction = {
     unauthorized: "Du har inte behörighet att ändra denna transaktion",
     notPending: "Kan bara dela upp väntande transaktioner",
     notLoanFormat: "Transaktionsbeskrivningen matchar inte lånebetalningsformat",
+  },
+  chargeSplitErrors: {
+    noCharges: "Inga aktiva avgifter hittades för transaktionsdatumet",
+    amountMismatch: "Transaktionsbeloppet matchar inte avgifterna",
   },
   confirmDeleteTransactions:
     "Vill du verkligen ta bort {{count}} valda transaktioner?",

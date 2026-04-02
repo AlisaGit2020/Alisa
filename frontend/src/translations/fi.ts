@@ -131,6 +131,7 @@ const fi = {
       categoryUpdated: "Kategoria päivitetty",
       allocationReset: "Kohdistaminen nollattu",
       loanSplit: "Lainanmaksu jaettu",
+      chargeSplit: "Vastikemaksu jaettu",
       importSuccess: "{{count}} tapahtumaa tuotu",
       settingsSaved: "Asetukset tallennettu",
       photoUploaded: "Kuva ladattu",

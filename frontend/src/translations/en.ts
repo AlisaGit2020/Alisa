@@ -131,6 +131,7 @@ const en = {
       categoryUpdated: "Category updated",
       allocationReset: "Allocation reset",
       loanSplit: "Loan payment split",
+      chargeSplit: "Charge payment split",
       importSuccess: "{{count}} transactions imported",
       settingsSaved: "Settings saved",
       photoUploaded: "Photo uploaded",
