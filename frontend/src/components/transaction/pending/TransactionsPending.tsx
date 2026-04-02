@@ -40,6 +40,8 @@ import TransactionCategoryChips from "../components/TransactionCategoryChips";
 const getDefaultFilter = (): TransactionFilterData => ({
   propertyId: 0,
   transactionTypes: [],
+  expenseTypeIds: [],
+  incomeTypeIds: [],
   startDate: null,
   endDate: null,
   searchText: "",
@@ -274,7 +276,20 @@ function TransactionsPending({ t }: WithTranslation) {
   };
 
   const handleSelectTransactionTypes = (transactionTypes: TransactionType[]) => {
-    updateFilter({ ...filter, transactionTypes });
+    updateFilter({
+      ...filter,
+      transactionTypes,
+      expenseTypeIds: [],
+      incomeTypeIds: [],
+    });
+  };
+
+  const handleSelectExpenseTypes = (expenseTypeIds: number[]) => {
+    updateFilter({ ...filter, expenseTypeIds });
+  };
+
+  const handleSelectIncomeTypes = (incomeTypeIds: number[]) => {
+    updateFilter({ ...filter, incomeTypeIds });
   };
 
   const handleStartDateChange = (startDate: Date | null) => {
@@ -366,6 +381,12 @@ function TransactionsPending({ t }: WithTranslation) {
       type: transactionTypes.length > 0 ? { $in: transactionTypes } : undefined,
       transactionDate: getDateFilter(),
       [filter.searchField]: getSearchFilter(),
+      ...(filter.expenseTypeIds && filter.expenseTypeIds.length > 0
+        ? { expenses: { expenseTypeId: { $in: filter.expenseTypeIds } } }
+        : {}),
+      ...(filter.incomeTypeIds && filter.incomeTypeIds.length > 0
+        ? { incomes: { incomeTypeId: { $in: filter.incomeTypeIds } } }
+        : {}),
     },
   } as TypeOrmFetchOptions<Transaction>;
 
@@ -381,6 +402,8 @@ function TransactionsPending({ t }: WithTranslation) {
           open={selectedIds.length === 0}
           data={filter}
           onSelectTransactionTypes={handleSelectTransactionTypes}
+          onSelectExpenseTypes={handleSelectExpenseTypes}
+          onSelectIncomeTypes={handleSelectIncomeTypes}
           onStartDateChange={handleStartDateChange}
           onEndDateChange={handleEndDateChange}
           onSearchTextChange={handleSearchTextChange}
