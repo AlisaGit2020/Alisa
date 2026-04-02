@@ -111,6 +111,12 @@ function Transactions({
           : undefined,
       transactionDate: getDateFilter(),
       [filter.searchField]: getSearchFilter(),
+      ...(filter.expenseTypeIds && filter.expenseTypeIds.length > 0
+        ? { expenses: { expenseTypeId: { $in: filter.expenseTypeIds } } }
+        : {}),
+      ...(filter.incomeTypeIds && filter.incomeTypeIds.length > 0
+        ? { incomes: { incomeTypeId: { $in: filter.incomeTypeIds } } }
+        : {}),
     },
   } as TypeOrmFetchOptions<Transaction>;
 

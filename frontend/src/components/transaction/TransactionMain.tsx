@@ -23,6 +23,8 @@ import { TRANSACTION_PROPERTY_CHANGE_EVENT } from "./TransactionLeftMenuItems";
 const getDefaultFilter = (): TransactionFilterData => ({
   propertyId: 0,
   transactionTypes: [],
+  expenseTypeIds: [],
+  incomeTypeIds: [],
   startDate: null,
   endDate: null,
   searchText: "",
@@ -77,7 +79,20 @@ function TransactionMain({ t }: WithTranslation) {
   const handleSelectTransactionTypes = (
     transactionTypes: TransactionType[]
   ) => {
-    updateFilter({ ...filter, transactionTypes });
+    updateFilter({
+      ...filter,
+      transactionTypes,
+      expenseTypeIds: [],
+      incomeTypeIds: [],
+    });
+  };
+
+  const handleSelectExpenseTypes = (expenseTypeIds: number[]) => {
+    updateFilter({ ...filter, expenseTypeIds });
+  };
+
+  const handleSelectIncomeTypes = (incomeTypeIds: number[]) => {
+    updateFilter({ ...filter, incomeTypeIds });
   };
 
   const handleStartDateChange = (startDate: Date | null) => {
@@ -151,6 +166,8 @@ function TransactionMain({ t }: WithTranslation) {
           open={true}
           data={filter}
           onSelectTransactionTypes={handleSelectTransactionTypes}
+          onSelectExpenseTypes={handleSelectExpenseTypes}
+          onSelectIncomeTypes={handleSelectIncomeTypes}
           onStartDateChange={handleStartDateChange}
           onEndDateChange={handleEndDateChange}
           onSearchTextChange={handleSearchTextChange}
