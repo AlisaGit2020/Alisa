@@ -27,6 +27,7 @@ const transaction = {
   amount: "Summa",
   balance: "Saldo",
   category: "Kategoria",
+  categoryFilter: "Kululaji / Tulolaji",
   chooseTransactionType: "Valitse tapahtumatyyppi",
   dateRange: "Aikaväli",
   defaultIncomeType: "Oletustulolaji",

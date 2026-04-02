@@ -27,6 +27,7 @@ const transaction = {
   amount: "Amount",
   balance: "Balance",
   category: "Category",
+  categoryFilter: "Category type",
   chooseTransactionType: "Choose transaction type",
   dateRange: "Date range",
   defaultIncomeType: "Default income type",
