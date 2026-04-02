@@ -86,6 +86,7 @@ function TransactionFilter(props: TransactionFilterProps) {
         .then(setExpenseTypes)
         .catch(() => {});
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isExactlyExpense]);
 
   React.useEffect(() => {
@@ -98,6 +99,7 @@ function TransactionFilter(props: TransactionFilterProps) {
         .then(setIncomeTypes)
         .catch(() => {});
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isExactlyIncome]);
 
   const handleTransactionTypeChange = (

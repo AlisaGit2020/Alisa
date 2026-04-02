@@ -24,6 +24,8 @@ describe('Transactions Component Logic', () => {
   const defaultFilter: TransactionFilterData = {
     propertyId: 1,
     transactionTypes: [],
+    expenseTypeIds: [],
+    incomeTypeIds: [],
     startDate: null,
     endDate: null,
     searchText: '',
