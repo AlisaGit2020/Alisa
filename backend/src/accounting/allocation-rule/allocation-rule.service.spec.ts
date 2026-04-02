@@ -50,6 +50,11 @@ describe('AllocationRuleService', () => {
           'loan-interest': { id: 2, key: 'loan-interest' },
           'loan-handling-fee': { id: 3, key: 'loan-handling-fee' },
           'loan-payment': { id: 4, key: 'loan-payment' },
+          'housing-charge': { id: 5, key: 'housing-charge' },
+          'maintenance-charge': { id: 10, key: 'maintenance-charge' },
+          'financial-charge': { id: 11, key: 'financial-charge' },
+          'water': { id: 12, key: 'water' },
+          'other-charge-based': { id: 13, key: 'other-charge-based' },
         };
         return Promise.resolve(types[key] || null);
       }),
@@ -629,6 +634,80 @@ describe('AllocationRuleService', () => {
 
       expect(result.skipped).toHaveLength(1);
       expect(result.skipped[0].reason).toBe('loan_split_failed');
+    });
+  });
+
+  describe('HOUSING_CHARGE handling', () => {
+    beforeEach(() => {
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+    });
+
+    it('splits charge payment when HOUSING_CHARGE rule matches', async () => {
+      mockRuleRepository.find.mockResolvedValue([
+        createAllocationRule({
+          id: 1,
+          name: 'Charge Payment Rule',
+          transactionType: TransactionType.EXPENSE,
+          expenseTypeId: 5, // HOUSING_CHARGE type ID
+          conditions: [{ field: 'sender', operator: 'contains', value: 'Taloyhtiö' }],
+        }),
+      ]);
+
+      mockTransactionRepository.find.mockResolvedValue([
+        createTransaction({
+          id: 1,
+          propertyId: 1,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.UNKNOWN,
+          sender: 'Taloyhtiö Oy',
+          description: 'Taloyhtiö Vastike',
+          amount: -350,
+        }),
+      ]);
+
+      mockTransactionService.splitChargePayment = jest.fn().mockResolvedValue({});
+
+      const result = await service.apply(testUser, 1, [1]);
+
+      expect(result.allocated).toHaveLength(1);
+      expect(result.allocated[0].action).toBe('charge_split');
+      expect(mockTransactionService.splitChargePayment).toHaveBeenCalledWith(
+        testUser,
+        1,
+      );
+    });
+
+    it('skips charge payment when splitChargePayment fails', async () => {
+      mockRuleRepository.find.mockResolvedValue([
+        createAllocationRule({
+          id: 1,
+          name: 'Charge Payment Rule',
+          transactionType: TransactionType.EXPENSE,
+          expenseTypeId: 5, // HOUSING_CHARGE type ID
+          conditions: [{ field: 'sender', operator: 'contains', value: 'Taloyhtiö' }],
+        }),
+      ]);
+
+      mockTransactionRepository.find.mockResolvedValue([
+        createTransaction({
+          id: 1,
+          propertyId: 1,
+          status: TransactionStatus.PENDING,
+          type: TransactionType.UNKNOWN,
+          sender: 'Taloyhtiö Oy',
+          description: 'Taloyhtiö Vastike',
+          amount: -350,
+        }),
+      ]);
+
+      mockTransactionService.splitChargePayment = jest.fn().mockRejectedValue(
+        new BadRequestException('No active charges found'),
+      );
+
+      const result = await service.apply(testUser, 1, [1]);
+
+      expect(result.skipped).toHaveLength(1);
+      expect(result.skipped[0].reason).toBe('charge_split_failed');
     });
   });
 });

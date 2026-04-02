@@ -2,12 +2,12 @@ export class AllocatedTransactionDto {
   transactionId: number;
   ruleId: number;
   ruleName: string;
-  action?: 'type_set' | 'loan_split';
+  action?: 'type_set' | 'loan_split' | 'charge_split';
 }
 
 export class SkippedTransactionDto {
   transactionId: number;
-  reason: 'no_match' | 'loan_split_failed' | 'already_allocated';
+  reason: 'no_match' | 'loan_split_failed' | 'charge_split_failed' | 'already_allocated';
 }
 
 export class ConflictingTransactionDto {
