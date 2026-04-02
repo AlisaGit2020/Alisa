@@ -48,6 +48,7 @@ export interface CompactActionBarProps {
   onSetType: (type: number) => Promise<void>;
   onSetCategoryType: (expenseTypeId?: number, incomeTypeId?: number) => Promise<void>;
   onSplitLoanPayment: () => Promise<void>;
+  onSplitChargePayment?: () => Promise<void>;
   onDelete: () => void;
   onOpenAllocationRules?: () => void;
   onAutoAllocate?: () => void;
@@ -176,6 +177,12 @@ export default function CompactActionBar(props: CompactActionBarProps) {
 
   const handleLoanSplit = async () => {
     await props.onSplitLoanPayment();
+  };
+
+  const handleChargeSplit = async () => {
+    if (props.onSplitChargePayment) {
+      await props.onSplitChargePayment();
+    }
   };
 
   const handleCancel = () => {
@@ -437,6 +444,17 @@ export default function CompactActionBar(props: CompactActionBarProps) {
               variant="text"
               size="small"
               onClick={handleLoanSplit}
+              endIcon={<CallSplitIcon />}
+            />
+          )}
+
+          {/* Split charge payment */}
+          {props.onSplitChargePayment && (
+            <AssetButton
+              label={props.t("splitChargePayment")}
+              variant="text"
+              size="small"
+              onClick={handleChargeSplit}
               endIcon={<CallSplitIcon />}
             />
           )}

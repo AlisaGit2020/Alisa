@@ -41,6 +41,7 @@ interface TransactionsPendingActionsProps extends WithTranslation {
   onSetType: (type: number) => Promise<void>;
   onSetCategoryType: (expenseTypeId?: number, incomeTypeId?: number) => Promise<void>;
   onSplitLoanPayment: () => Promise<void>;
+  onSplitChargePayment: () => Promise<void>;
   onDelete: () => void;
   onOpenAllocationRules?: () => void;
   onAutoAllocate?: () => void;
@@ -102,6 +103,10 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
 
   const handleLoanSplit = async () => {
     await props.onSplitLoanPayment();
+  };
+
+  const handleChargeSplit = async () => {
+    await props.onSplitChargePayment();
   };
 
   const handleCancel = () => {
@@ -170,6 +175,7 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
           onSetType={props.onSetType}
           onSetCategoryType={props.onSetCategoryType}
           onSplitLoanPayment={props.onSplitLoanPayment}
+          onSplitChargePayment={handleChargeSplit}
           onDelete={handleDeleteClick}
           onOpenAllocationRules={props.onOpenAllocationRules}
           onAutoAllocate={props.onAutoAllocate}
@@ -361,6 +367,12 @@ function TransactionsPendingActions(props: TransactionsPendingActionsProps) {
                   endIcon={<CallSplitIcon />}
                 />
               )}
+              <AssetButton
+                label={props.t("splitChargePayment")}
+                variant="text"
+                onClick={handleChargeSplit}
+                endIcon={<CallSplitIcon />}
+              />
             </Stack>
 
             {!props.hideSplitLoanPayment && !supportsLoanSplit && (
