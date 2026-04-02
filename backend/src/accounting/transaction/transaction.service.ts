@@ -520,6 +520,8 @@ export class TransactionService {
 
     const expenses = [];
     for (const charge of charges) {
+      if (charge.amount === 0) continue;
+
       const expenseTypeKey = chargeTypeToExpenseTypeKey.get(charge.chargeType);
       if (!expenseTypeKey) continue;
 
@@ -610,6 +612,8 @@ export class TransactionService {
 
         const expenses = [];
         for (const charge of charges) {
+          if (charge.amount === 0) continue;
+
           const expenseTypeKey = chargeTypeToExpenseTypeKey.get(charge.chargeType);
           if (!expenseTypeKey) continue;
 
