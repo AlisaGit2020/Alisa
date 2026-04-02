@@ -191,7 +191,7 @@ function TransactionFilter(props: TransactionFilterProps) {
       filters.push(`${props.t("transactionType")}: ${typeNames}`);
     }
 
-    if (props.data.expenseTypeIds.length > 0) {
+    if (props.data.expenseTypeIds?.length > 0) {
       const typeNames = props.data.expenseTypeIds
         .map((id) => {
           const type = expenseTypes.find((et) => et.id === id);
@@ -201,7 +201,7 @@ function TransactionFilter(props: TransactionFilterProps) {
       filters.push(`${props.t("expenseType")}: ${typeNames}`);
     }
 
-    if (props.data.incomeTypeIds.length > 0) {
+    if (props.data.incomeTypeIds?.length > 0) {
       const typeNames = props.data.incomeTypeIds
         .map((id) => {
           const type = incomeTypes.find((it) => it.id === id);
@@ -270,7 +270,7 @@ function TransactionFilter(props: TransactionFilterProps) {
               <InputLabel>{props.t("categoryFilter")}</InputLabel>
               <Select
                 multiple
-                value={props.data.expenseTypeIds}
+                value={props.data.expenseTypeIds || []}
                 onChange={handleExpenseTypeChange}
                 input={<OutlinedInput label={props.t("categoryFilter")} />}
                 renderValue={getExpenseTypeLabel}
@@ -278,7 +278,7 @@ function TransactionFilter(props: TransactionFilterProps) {
                 {expenseTypes.map((type) => (
                   <MenuItem key={type.id} value={type.id}>
                     <Checkbox
-                      checked={props.data.expenseTypeIds.includes(type.id)}
+                      checked={(props.data.expenseTypeIds || []).includes(type.id)}
                     />
                     <ListItemText
                       primary={props.t(`expense-type:${type.key}`)}
@@ -294,7 +294,7 @@ function TransactionFilter(props: TransactionFilterProps) {
               <InputLabel>{props.t("categoryFilter")}</InputLabel>
               <Select
                 multiple
-                value={props.data.incomeTypeIds}
+                value={props.data.incomeTypeIds || []}
                 onChange={handleIncomeTypeChange}
                 input={<OutlinedInput label={props.t("categoryFilter")} />}
                 renderValue={getIncomeTypeLabel}
@@ -302,7 +302,7 @@ function TransactionFilter(props: TransactionFilterProps) {
                 {incomeTypes.map((type) => (
                   <MenuItem key={type.id} value={type.id}>
                     <Checkbox
-                      checked={props.data.incomeTypeIds.includes(type.id)}
+                      checked={(props.data.incomeTypeIds || []).includes(type.id)}
                     />
                     <ListItemText
                       primary={props.t(`income-type:${type.key}`)}
