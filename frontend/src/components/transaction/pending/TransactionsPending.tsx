@@ -11,6 +11,7 @@ import {
   TransactionSetTypeInput,
   TransactionSetCategoryTypeInput,
   SplitLoanPaymentBulkInput,
+  SplitChargePaymentBulkInput,
 } from "@asset-types";
 import DataService from "@asset-lib/data-service.ts";
 import { TypeOrmFetchOptions } from "@asset-lib/types.ts";
@@ -222,6 +223,22 @@ function TransactionsPending({ t }: WithTranslation) {
     }
   };
 
+  const handleSplitChargePaymentForSelected = async () => {
+    if (selectedIds.length > 0) {
+      const result =
+        await ApiClient.postSaveTask<SplitChargePaymentBulkInput>(
+          transactionContext.apiPath + "/split-charge-payment",
+          { ids: selectedIds },
+        );
+      if (result.allSuccess) {
+        showToast({ message: t("common:toast.chargeSplit"), severity: "success" });
+        setRefreshTrigger((prev) => prev + 1);
+      } else {
+        showToast({ message: t("common:toast.updateError"), severity: "error" });
+      }
+    }
+  };
+
   const handleSelectTransactionTypes = (transactionTypes: TransactionType[]) => {
     updateFilter({ ...filter, transactionTypes });
   };
@@ -354,6 +371,7 @@ function TransactionsPending({ t }: WithTranslation) {
           onSetType={handleSetTypeForSelected}
           onSetCategoryType={handleSetCategoryTypeForSelected}
           onSplitLoanPayment={handleSplitLoanPaymentForSelected}
+          onSplitChargePayment={handleSplitChargePaymentForSelected}
           onCancel={handleCancelSelected}
           onDelete={handleDeleteSelected}
         ></TransactionsPendingActions>
