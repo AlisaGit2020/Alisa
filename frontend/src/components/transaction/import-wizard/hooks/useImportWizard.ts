@@ -8,6 +8,7 @@ import {
   TransactionSetTypeInput,
   TransactionSetCategoryTypeInput,
   SplitLoanPaymentBulkInput,
+  SplitChargePaymentBulkInput,
 } from "@asset-types";
 import { ImportWizardState, ImportStats, ImportResponse, BankId } from "../types";
 import ApiClient from "@asset-lib/api-client";
@@ -478,6 +479,37 @@ export function useImportWizard() {
     [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection, showToast, t]
   );
 
+  const splitChargePaymentForSelected = useCallback(
+    async () => {
+      if (state.selectedIds.length === 0) return;
+
+      const result = await ApiClient.postSaveTask<SplitChargePaymentBulkInput>(
+        transactionContext.apiPath + "/split-charge-payment",
+        { ids: state.selectedIds }
+      );
+
+      if (result.allSuccess) {
+        showToast({ message: t("common:toast.chargeSplit"), severity: "success" });
+      } else if (result.rows?.success > 0) {
+        const firstError = result.results?.find(r => r.statusCode !== 200);
+        showToast({
+          message: firstError?.message || t("common:toast.partialSuccess", {
+            success: result.rows.success,
+            failed: result.rows.failed
+          }),
+          severity: "warning"
+        });
+      } else {
+        const firstError = result.results?.[0];
+        showToast({ message: firstError?.message || t("common:toast.error"), severity: "error" });
+      }
+
+      await fetchTransactions(state.importedTransactionIds);
+      clearSelection();
+    },
+    [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection, showToast, t]
+  );
+
   const deleteSelected = useCallback(async () => {
     if (state.selectedIds.length === 0) return;
 
@@ -603,6 +635,7 @@ export function useImportWizard() {
     setCategoryTypeForSelected,
     resetAllocationForSelected,
     splitLoanPaymentForSelected,
+    splitChargePaymentForSelected,
     deleteSelected,
     approveAll,
     reset,

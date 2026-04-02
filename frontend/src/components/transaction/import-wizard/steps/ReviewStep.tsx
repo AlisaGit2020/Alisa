@@ -51,6 +51,7 @@ interface ReviewStepProps {
   onSetCategoryType: (expenseTypeId?: number, incomeTypeId?: number) => Promise<void>;
   onResetAllocation: () => Promise<void>;
   onSplitLoanPayment: () => Promise<void>;
+  onSplitChargePayment: () => Promise<void>;
   onDelete: () => Promise<void>;
   onNext: () => void;
   onBack: () => void;
@@ -75,6 +76,7 @@ export default function ReviewStep({
   onSetCategoryType,
   onResetAllocation,
   onSplitLoanPayment,
+  onSplitChargePayment,
   onDelete,
   onNext,
   onBack,
@@ -176,6 +178,10 @@ export default function ReviewStep({
     await onSplitLoanPayment();
     // Clear search to show remaining unknown rows
     setSearchText("");
+  };
+
+  const handleSplitChargePayment = async () => {
+    await onSplitChargePayment();
   };
 
   const handleCancel = () => {
@@ -296,6 +302,7 @@ export default function ReviewStep({
         onSetType={handleSetType}
         onSetCategoryType={handleSetCategoryType}
         onSplitLoanPayment={handleSplitLoanPayment}
+        onSplitChargePayment={handleSplitChargePayment}
         onCancel={handleCancel}
         onDelete={onDelete}
         onOpenAllocationRules={() => setRulesModalOpen(true)}
