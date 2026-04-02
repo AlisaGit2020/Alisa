@@ -1,3 +1,4 @@
+import React from "react";
 import { withTranslation, WithTranslation } from "react-i18next";
 import { transactionContext } from "@asset-lib/asset-contexts.ts";
 import {
@@ -22,12 +23,20 @@ import dayjs from "dayjs";
 import ClearIcon from "@mui/icons-material/Clear";
 import { TransactionType, transactionTypeNames } from "@asset-types";
 import { AssetButton } from "../../asset";
+import DataService from "@asset-lib/data-service.ts";
+import {
+  expenseTypeContext,
+  incomeTypeContext,
+} from "@asset-lib/asset-contexts.ts";
+import { ExpenseType, IncomeType } from "@asset-types";
 
 export type SearchField = "sender" | "receiver" | "description";
 
 export interface TransactionFilterData {
   propertyId: number;
   transactionTypes: TransactionType[];
+  expenseTypeIds: number[];
+  incomeTypeIds: number[];
   startDate: Date | null;
   endDate: Date | null;
   searchText: string;
@@ -40,6 +49,8 @@ interface TransactionFilterProps extends WithTranslation {
   open: boolean;
   data: TransactionFilterData;
   onSelectTransactionTypes: (transactionTypes: TransactionType[]) => void;
+  onSelectExpenseTypes: (expenseTypeIds: number[]) => void;
+  onSelectIncomeTypes: (incomeTypeIds: number[]) => void;
   onStartDateChange: (date: Date | null) => void;
   onEndDateChange: (date: Date | null) => void;
   onSearchTextChange: (searchText: string) => void;
@@ -55,6 +66,40 @@ function TransactionFilter(props: TransactionFilterProps) {
     }),
   );
 
+  const [expenseTypes, setExpenseTypes] = React.useState<ExpenseType[]>([]);
+  const [incomeTypes, setIncomeTypes] = React.useState<IncomeType[]>([]);
+
+  const isExactlyExpense =
+    props.data.transactionTypes.length === 1 &&
+    props.data.transactionTypes[0] === TransactionType.EXPENSE;
+  const isExactlyIncome =
+    props.data.transactionTypes.length === 1 &&
+    props.data.transactionTypes[0] === TransactionType.INCOME;
+
+  React.useEffect(() => {
+    if (isExactlyExpense && expenseTypes.length === 0) {
+      new DataService<ExpenseType>({
+        context: expenseTypeContext,
+        fetchOptions: { order: { key: "ASC" } },
+      })
+        .search()
+        .then(setExpenseTypes)
+        .catch(() => {});
+    }
+  }, [isExactlyExpense]);
+
+  React.useEffect(() => {
+    if (isExactlyIncome && incomeTypes.length === 0) {
+      new DataService<IncomeType>({
+        context: incomeTypeContext,
+        fetchOptions: { order: { key: "ASC" } },
+      })
+        .search()
+        .then(setIncomeTypes)
+        .catch(() => {});
+    }
+  }, [isExactlyIncome]);
+
   const handleTransactionTypeChange = (
     event: SelectChangeEvent<TransactionType[]>,
   ) => {
@@ -62,6 +107,28 @@ function TransactionFilter(props: TransactionFilterProps) {
     props.onSelectTransactionTypes(
       typeof value === "string"
         ? (value.split(",").map(Number) as TransactionType[])
+        : value,
+    );
+  };
+
+  const handleExpenseTypeChange = (
+    event: SelectChangeEvent<number[]>,
+  ) => {
+    const value = event.target.value;
+    props.onSelectExpenseTypes(
+      typeof value === "string"
+        ? value.split(",").map(Number)
+        : value,
+    );
+  };
+
+  const handleIncomeTypeChange = (
+    event: SelectChangeEvent<number[]>,
+  ) => {
+    const value = event.target.value;
+    props.onSelectIncomeTypes(
+      typeof value === "string"
+        ? value.split(",").map(Number)
         : value,
     );
   };
@@ -74,6 +141,30 @@ function TransactionFilter(props: TransactionFilterProps) {
       .map((type) => {
         const option = transactionTypeOptions.find((o) => o.id === type);
         return option ? option.name : "";
+      })
+      .join(", ");
+  };
+
+  const getExpenseTypeLabel = (selected: number[]) => {
+    if (!selected || selected.length === 0) {
+      return props.t("dataNotSelected");
+    }
+    return selected
+      .map((id) => {
+        const type = expenseTypes.find((et) => et.id === id);
+        return type ? props.t(`expense-type:${type.key}`) : "";
+      })
+      .join(", ");
+  };
+
+  const getIncomeTypeLabel = (selected: number[]) => {
+    if (!selected || selected.length === 0) {
+      return props.t("dataNotSelected");
+    }
+    return selected
+      .map((id) => {
+        const type = incomeTypes.find((it) => it.id === id);
+        return type ? props.t(`income-type:${type.key}`) : "";
       })
       .join(", ");
   };
@@ -96,6 +187,26 @@ function TransactionFilter(props: TransactionFilterProps) {
         })
         .join(", ");
       filters.push(`${props.t("transactionType")}: ${typeNames}`);
+    }
+
+    if (props.data.expenseTypeIds.length > 0) {
+      const typeNames = props.data.expenseTypeIds
+        .map((id) => {
+          const type = expenseTypes.find((et) => et.id === id);
+          return type ? props.t(`expense-type:${type.key}`) : "";
+        })
+        .join(", ");
+      filters.push(`${props.t("expenseType")}: ${typeNames}`);
+    }
+
+    if (props.data.incomeTypeIds.length > 0) {
+      const typeNames = props.data.incomeTypeIds
+        .map((id) => {
+          const type = incomeTypes.find((it) => it.id === id);
+          return type ? props.t(`income-type:${type.key}`) : "";
+        })
+        .join(", ");
+      filters.push(`${props.t("incomeType")}: ${typeNames}`);
     }
 
     if (props.data.startDate || props.data.endDate) {
@@ -151,6 +262,54 @@ function TransactionFilter(props: TransactionFilterProps) {
               ))}
             </Select>
           </FormControl>
+
+          {isExactlyExpense && expenseTypes.length > 0 && (
+            <FormControl size="small" sx={{ width: 220 }}>
+              <InputLabel>{props.t("categoryFilter")}</InputLabel>
+              <Select
+                multiple
+                value={props.data.expenseTypeIds}
+                onChange={handleExpenseTypeChange}
+                input={<OutlinedInput label={props.t("categoryFilter")} />}
+                renderValue={getExpenseTypeLabel}
+              >
+                {expenseTypes.map((type) => (
+                  <MenuItem key={type.id} value={type.id}>
+                    <Checkbox
+                      checked={props.data.expenseTypeIds.includes(type.id)}
+                    />
+                    <ListItemText
+                      primary={props.t(`expense-type:${type.key}`)}
+                    />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+
+          {isExactlyIncome && incomeTypes.length > 0 && (
+            <FormControl size="small" sx={{ width: 220 }}>
+              <InputLabel>{props.t("categoryFilter")}</InputLabel>
+              <Select
+                multiple
+                value={props.data.incomeTypeIds}
+                onChange={handleIncomeTypeChange}
+                input={<OutlinedInput label={props.t("categoryFilter")} />}
+                renderValue={getIncomeTypeLabel}
+              >
+                {incomeTypes.map((type) => (
+                  <MenuItem key={type.id} value={type.id}>
+                    <Checkbox
+                      checked={props.data.incomeTypeIds.includes(type.id)}
+                    />
+                    <ListItemText
+                      primary={props.t(`income-type:${type.key}`)}
+                    />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
 
           <Stack direction={"row"} spacing={0.5} alignItems="center">
             <DatePicker
