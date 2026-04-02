@@ -26,10 +26,12 @@ import {
 import {
   TransactionStatus,
   TransactionType,
+  ChargeType,
 } from '@asset-backend/common/types';
 import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
 import { Income } from '@asset-backend/accounting/income/entities/income.entity';
 import { ExpenseTypeService } from '@asset-backend/accounting/expense/expense-type.service';
+import { PropertyChargeService } from '@asset-backend/real-estate/property/property-charge.service';
 
 describe('TransactionService', () => {
   let service: TransactionService;
@@ -39,6 +41,7 @@ describe('TransactionService', () => {
   let mockAuthService: MockAuthService;
   let mockEventEmitter: MockEventEmitter;
   let mockExpenseTypeService: { findByKey: jest.Mock };
+  let mockPropertyChargeService: { getChargesForDate: jest.Mock };
 
   const testUser = createJWTUser({ id: 1, ownershipInProperties: [1, 2] });
   const otherUser = createJWTUser({ id: 2, ownershipInProperties: [] });
@@ -55,9 +58,17 @@ describe('TransactionService', () => {
           'loan-principal': { id: 1, key: 'loan-principal', name: 'Loan principal' },
           'loan-interest': { id: 2, key: 'loan-interest', name: 'Loan interest' },
           'loan-handling-fee': { id: 3, key: 'loan-handling-fee', name: 'Loan handling fees' },
+          'maintenance-charge': { id: 10, key: 'maintenance-charge', name: 'Maintenance charge' },
+          'financial-charge': { id: 11, key: 'financial-charge', name: 'Financial charge' },
+          'water': { id: 12, key: 'water', name: 'Water' },
+          'other-charge-based': { id: 13, key: 'other-charge-based', name: 'Other charge-based' },
         };
         return Promise.resolve(types[key] || null);
       }),
+    };
+
+    mockPropertyChargeService = {
+      getChargesForDate: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -69,6 +80,7 @@ describe('TransactionService', () => {
         { provide: AuthService, useValue: mockAuthService },
         { provide: EventEmitter2, useValue: mockEventEmitter },
         { provide: ExpenseTypeService, useValue: mockExpenseTypeService },
+        { provide: PropertyChargeService, useValue: mockPropertyChargeService },
       ],
     }).compile();
 
@@ -1032,6 +1044,220 @@ describe('TransactionService', () => {
       mockAuthService.hasOwnership.mockResolvedValue(true);
 
       const result = await service.splitLoanPaymentBulk(testUser, {
+        ids: [1],
+      });
+
+      expect(result.rows.failed).toBe(1);
+      expect(result.results[0].statusCode).toBe(400);
+    });
+  });
+
+  describe('splitChargePayment', () => {
+    it('splits charge payment into expense components', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        amount: -350,
+        description: 'Yhtiövastike',
+      });
+
+      mockRepository.findOne.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockPropertyChargeService.getChargesForDate.mockResolvedValue([
+        { chargeType: ChargeType.MAINTENANCE_FEE, amount: 200 },
+        { chargeType: ChargeType.FINANCIAL_CHARGE, amount: 100 },
+        { chargeType: ChargeType.WATER_PREPAYMENT, amount: 50 },
+      ]);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity }),
+      );
+
+      const result = await service.splitChargePayment(testUser, 1);
+
+      expect(result.type).toBe(TransactionType.EXPENSE);
+      expect(result.expenses).toHaveLength(3);
+      expect(result.expenses[0].amount).toBe(200);
+      expect(result.expenses[0].expenseTypeId).toBe(10);
+      expect(result.expenses[1].amount).toBe(100);
+      expect(result.expenses[1].expenseTypeId).toBe(11);
+      expect(result.expenses[2].amount).toBe(50);
+      expect(result.expenses[2].expenseTypeId).toBe(12);
+    });
+
+    it('throws NotFoundException when transaction does not exist', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.splitChargePayment(testUser, 999),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws UnauthorizedException when user has no ownership', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        amount: -350,
+      });
+
+      mockRepository.findOne.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      await expect(
+        service.splitChargePayment(otherUser, 1),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('throws BadRequestException for non-pending transaction', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.ACCEPTED,
+        amount: -350,
+      });
+
+      mockRepository.findOne.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      await expect(
+        service.splitChargePayment(testUser, 1),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('throws BadRequestException when no active charges found', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        amount: -350,
+      });
+
+      mockRepository.findOne.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockPropertyChargeService.getChargesForDate.mockResolvedValue([]);
+
+      await expect(
+        service.splitChargePayment(testUser, 1),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('throws BadRequestException when amount does not match charges sum', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        amount: -350,
+      });
+
+      mockRepository.findOne.mockResolvedValue(transaction);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockPropertyChargeService.getChargesForDate.mockResolvedValue([
+        { chargeType: ChargeType.MAINTENANCE_FEE, amount: 200 },
+        { chargeType: ChargeType.FINANCIAL_CHARGE, amount: 100 },
+      ]);
+
+      await expect(
+        service.splitChargePayment(testUser, 1),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('splitChargePaymentBulk', () => {
+    it('splits multiple charge payment transactions', async () => {
+      const transactions = [
+        createTransaction({
+          id: 1,
+          propertyId: 1,
+          status: TransactionStatus.PENDING,
+          amount: -350,
+          transactionDate: new Date('2024-06-15'),
+        }),
+        createTransaction({
+          id: 2,
+          propertyId: 1,
+          status: TransactionStatus.PENDING,
+          amount: -350,
+          transactionDate: new Date('2024-07-15'),
+        }),
+      ];
+
+      mockRepository.find.mockResolvedValue(transactions);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockPropertyChargeService.getChargesForDate.mockResolvedValue([
+        { chargeType: ChargeType.MAINTENANCE_FEE, amount: 200 },
+        { chargeType: ChargeType.FINANCIAL_CHARGE, amount: 100 },
+        { chargeType: ChargeType.WATER_PREPAYMENT, amount: 50 },
+      ]);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity }),
+      );
+
+      const result = await service.splitChargePaymentBulk(testUser, {
+        ids: [1, 2],
+      });
+
+      expect(result.rows.total).toBe(2);
+      expect(result.rows.success).toBe(2);
+    });
+
+    it('throws BadRequestException when ids array is empty', async () => {
+      await expect(
+        service.splitChargePaymentBulk(testUser, { ids: [] }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('returns 401 for transactions user does not own', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        amount: -350,
+      });
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      const result = await service.splitChargePaymentBulk(testUser, {
+        ids: [1],
+      });
+
+      expect(result.rows.failed).toBe(1);
+      expect(result.results[0].statusCode).toBe(401);
+    });
+
+    it('returns 400 for non-pending transactions', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.ACCEPTED,
+        amount: -350,
+      });
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const result = await service.splitChargePaymentBulk(testUser, {
+        ids: [1],
+      });
+
+      expect(result.rows.failed).toBe(1);
+      expect(result.results[0].statusCode).toBe(400);
+    });
+
+    it('returns 400 when no active charges found', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        amount: -350,
+      });
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockPropertyChargeService.getChargesForDate.mockResolvedValue([]);
+
+      const result = await service.splitChargePaymentBulk(testUser, {
         ids: [1],
       });
 

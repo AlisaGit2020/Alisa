@@ -37,6 +37,7 @@ const allocation = {
   noMatch: 'No Match',
   skipped: 'Skipped',
   loanSplitFailed: 'Loan split failed',
+  chargeSplitFailed: 'Charge split failed',
   alreadyAllocated: 'Already allocated',
 
   // Messages

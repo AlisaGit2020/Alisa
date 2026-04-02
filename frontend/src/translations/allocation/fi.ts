@@ -37,6 +37,7 @@ const allocation = {
   noMatch: 'Ei osumaa',
   skipped: 'Ohitettu',
   loanSplitFailed: 'Lainan jako epäonnistui',
+  chargeSplitFailed: 'Vastikkeen jako epäonnistui',
   alreadyAllocated: 'Jo kohdistettu',
 
   // Messages

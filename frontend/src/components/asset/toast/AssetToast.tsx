@@ -38,7 +38,7 @@ function AssetToast({
         severity={severity}
         onClose={handleClose}
         action={action}
-        sx={{ width: "100%" }}
+        sx={{ width: "100%", whiteSpace: "pre-line" }}
       >
         {message}
       </Alert>

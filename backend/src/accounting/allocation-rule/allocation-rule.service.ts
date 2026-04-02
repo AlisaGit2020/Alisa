@@ -189,12 +189,13 @@ export class AllocationRuleService {
     });
 
     // Pre-fetch expense types for loan payment handling
-    const [principalExpenseType, interestExpenseType, handlingFeeExpenseType, loanPaymentExpenseType] =
+    const [principalExpenseType, interestExpenseType, handlingFeeExpenseType, loanPaymentExpenseType, housingChargeExpenseType] =
       await Promise.all([
         this.expenseTypeService.findByKey(ExpenseTypeKey.LOAN_PRINCIPAL),
         this.expenseTypeService.findByKey(ExpenseTypeKey.LOAN_INTEREST),
         this.expenseTypeService.findByKey(ExpenseTypeKey.LOAN_HANDLING_FEE),
         this.expenseTypeService.findByKey(ExpenseTypeKey.LOAN_PAYMENT),
+        this.expenseTypeService.findByKey(ExpenseTypeKey.HOUSING_CHARGE),
       ]);
 
     const result: AllocationResultDto = {
@@ -259,6 +260,28 @@ export class AllocationRuleService {
             result.skipped.push({
               transactionId: transaction.id,
               reason: 'loan_split_failed',
+            } as SkippedTransactionDto);
+          }
+        } else if (
+          housingChargeExpenseType &&
+          rule.expenseTypeId === housingChargeExpenseType.id
+        ) {
+          // Handle charge payment auto-split
+          try {
+            await this.transactionService.splitChargePayment(
+              user,
+              transaction.id,
+            );
+            result.allocated.push({
+              transactionId: transaction.id,
+              ruleId: rule.id,
+              ruleName: rule.name,
+              action: 'charge_split',
+            } as AllocatedTransactionDto);
+          } catch {
+            result.skipped.push({
+              transactionId: transaction.id,
+              reason: 'charge_split_failed',
             } as SkippedTransactionDto);
           }
         } else {

@@ -37,6 +37,7 @@ const allocation = {
   noMatch: 'Ingen matchning',
   skipped: 'Hoppades över',
   loanSplitFailed: 'Lånedelning misslyckades',
+  chargeSplitFailed: 'Avgiftsdelning misslyckades',
   alreadyAllocated: 'Redan allokerad',
 
   // Messages

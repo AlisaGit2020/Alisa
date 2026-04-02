@@ -220,3 +220,10 @@ export const chargeTypeNames = new Map<ChargeType, string>([
   [ChargeType.WATER_PREPAYMENT, 'water-prepayment'],
   [ChargeType.OTHER_CHARGE_BASED, 'other-charge-based'],
 ]);
+
+export const chargeTypeToExpenseTypeKey = new Map<ChargeType, ExpenseTypeKey>([
+  [ChargeType.MAINTENANCE_FEE, ExpenseTypeKey.MAINTENANCE_CHARGE],
+  [ChargeType.FINANCIAL_CHARGE, ExpenseTypeKey.FINANCIAL_CHARGE],
+  [ChargeType.WATER_PREPAYMENT, ExpenseTypeKey.WATER],
+  [ChargeType.OTHER_CHARGE_BASED, ExpenseTypeKey.OTHER_CHARGE_BASED],
+]);

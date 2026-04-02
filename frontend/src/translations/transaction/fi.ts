@@ -56,6 +56,7 @@ const transaction = {
   searchField: "Haetaan kentästä",
   sender: "Maksaja",
   splitLoanPayment: "Jaa lainan maksu",
+  splitChargePayment: "Jaa vastikkeisiin",
   startDate: "Alkupäivä",
   totalExpenses: "Kulut",
   totalIncomes: "Tulot",
@@ -82,6 +83,13 @@ const transaction = {
     unauthorized: "Sinulla ei ole oikeutta muokata tätä tapahtumaa",
     notPending: "Vain odottavia tapahtumia voi jakaa",
     notLoanFormat: "Tapahtuman kuvaus ei vastaa lainanmaksun muotoa",
+  },
+  chargeSplitErrors: {
+    unauthorized: "Sinulla ei ole oikeutta muokata tätä tapahtumaa",
+    notPending: "Vain odottavia tapahtumia voi jakaa",
+    notExpense: "Tulotapahtumia ei voi jakaa vastikkeisiin",
+    noCharges: "Aktiivisia vastikkeita ei löytynyt tapahtuman päivämäärälle",
+    amountMismatch: "Summa {{actual}} € ei täsmää vastikkeiden {{expected}} € kanssa",
   },
   confirmDeleteTransactions:
     "Haluatko varmasti poistaa {{count}} valittua tapahtumaa?",

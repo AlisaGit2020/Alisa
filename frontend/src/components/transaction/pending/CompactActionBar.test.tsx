@@ -42,6 +42,7 @@ describe("CompactActionBar", () => {
     onSetType: jest.fn().mockResolvedValue(undefined),
     onSetCategoryType: jest.fn().mockResolvedValue(undefined),
     onSplitLoanPayment: jest.fn().mockResolvedValue(undefined),
+    onSplitChargePayment: jest.fn(),
     onDelete: jest.fn(),
   };
 

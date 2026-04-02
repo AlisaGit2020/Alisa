@@ -131,6 +131,7 @@ const sv = {
       categoryUpdated: "Kategori uppdaterad",
       allocationReset: "Allokering återställd",
       loanSplit: "Lånbetalning uppdelad",
+      chargeSplit: "Avgiftsbetalning uppdelad",
       importSuccess: "{{count}} transaktioner importerade",
       settingsSaved: "Inställningar sparade",
       photoUploaded: "Bild uppladdad",

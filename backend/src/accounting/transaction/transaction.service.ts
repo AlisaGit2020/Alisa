@@ -23,9 +23,11 @@ import {
   ExpenseTypeKey,
   TransactionStatus,
   TransactionType,
+  chargeTypeToExpenseTypeKey,
 } from '@asset-backend/common/types';
 import { SplitLoanPaymentInputDto } from './dtos/split-loan-payment-input.dto';
 import { SplitLoanPaymentBulkInputDto } from './dtos/split-loan-payment-bulk-input.dto';
+import { SplitChargePaymentBulkInputDto } from './dtos/split-charge-payment-bulk-input.dto';
 import {
   parseLoanPaymentMessage,
   isLoanPaymentMessage,
@@ -37,6 +39,7 @@ import {
 import { Expense } from '@asset-backend/accounting/expense/entities/expense.entity';
 import { Income } from '@asset-backend/accounting/income/entities/income.entity';
 import { ExpenseTypeService } from '@asset-backend/accounting/expense/expense-type.service';
+import { PropertyChargeService } from '@asset-backend/real-estate/property/property-charge.service';
 
 @Injectable()
 export class TransactionService {
@@ -53,6 +56,7 @@ export class TransactionService {
     private authService: AuthService,
     private eventEmitter: EventEmitter2,
     private expenseTypeService: ExpenseTypeService,
+    private propertyChargeService: PropertyChargeService,
   ) {}
 
   async search(
@@ -470,6 +474,180 @@ export class TransactionService {
     transaction.expenses = expenses as Expense[];
 
     return this.repository.save(transaction);
+  }
+
+  async splitChargePayment(
+    user: JWTUser,
+    transactionId: number,
+  ): Promise<Transaction> {
+    const transaction = await this.repository.findOne({
+      where: { id: transactionId },
+      relations: { expenses: true },
+    });
+
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found');
+    }
+
+    if (!(await this.authService.hasOwnership(user, transaction.propertyId))) {
+      throw new UnauthorizedException();
+    }
+
+    if (transaction.status !== TransactionStatus.PENDING) {
+      throw new BadRequestException('Can only split pending transactions');
+    }
+
+    if (transaction.amount > 0) {
+      throw new BadRequestException('Cannot split income transactions to charges');
+    }
+
+    const chargeDate = transaction.accountingDate ?? transaction.transactionDate;
+    const charges = await this.propertyChargeService.getChargesForDate(
+      transaction.propertyId,
+      chargeDate,
+    );
+
+    if (charges.length === 0) {
+      throw new BadRequestException('No active charges found for transaction date');
+    }
+
+    const chargesSum = charges.reduce((sum, c) => sum + c.amount, 0);
+    if (Math.abs(transaction.amount) !== chargesSum) {
+      throw new BadRequestException(
+        `Transaction amount (${Math.abs(transaction.amount)}) does not match charges sum (${chargesSum})`,
+      );
+    }
+
+    const expenses = [];
+    for (const charge of charges) {
+      const expenseTypeKey = chargeTypeToExpenseTypeKey.get(charge.chargeType);
+      if (!expenseTypeKey) continue;
+
+      const expenseType = await this.expenseTypeService.findByKey(expenseTypeKey);
+      if (!expenseType) continue;
+
+      expenses.push({
+        expenseTypeId: expenseType.id,
+        propertyId: transaction.propertyId,
+        transactionId: transaction.id,
+        description: expenseType.key,
+        amount: charge.amount,
+        quantity: 1,
+        totalAmount: charge.amount,
+        accountingDate: transaction.accountingDate,
+      });
+    }
+
+    transaction.type = TransactionType.EXPENSE;
+    transaction.expenses = expenses as Expense[];
+
+    return this.repository.save(transaction);
+  }
+
+  async splitChargePaymentBulk(
+    user: JWTUser,
+    input: SplitChargePaymentBulkInputDto,
+  ): Promise<DataSaveResultDto> {
+    if (input.ids.length === 0) {
+      throw new BadRequestException('No ids provided');
+    }
+
+    const transactions = await this.repository.find({
+      where: { id: In(input.ids) },
+      relations: { expenses: true },
+    });
+
+    const saveTask = transactions.map(async (transaction) => {
+      try {
+        if (
+          !(await this.authService.hasOwnership(user, transaction.propertyId))
+        ) {
+          return {
+            id: transaction.id,
+            statusCode: 401,
+            message: 'Unauthorized',
+          } as DataSaveResultRowDto;
+        }
+
+        if (transaction.status !== TransactionStatus.PENDING) {
+          return {
+            id: transaction.id,
+            statusCode: 400,
+            message: 'Can only split pending transactions',
+          } as DataSaveResultRowDto;
+        }
+
+        if (transaction.amount > 0) {
+          return {
+            id: transaction.id,
+            statusCode: 400,
+            message: 'Cannot split income transactions to charges',
+          } as DataSaveResultRowDto;
+        }
+
+        const chargeDate = transaction.accountingDate ?? transaction.transactionDate;
+        const charges = await this.propertyChargeService.getChargesForDate(
+          transaction.propertyId,
+          chargeDate,
+        );
+
+        if (charges.length === 0) {
+          return {
+            id: transaction.id,
+            statusCode: 400,
+            message: 'No active charges found for transaction date',
+          } as DataSaveResultRowDto;
+        }
+
+        const chargesSum = charges.reduce((sum, c) => sum + c.amount, 0);
+        if (Math.abs(transaction.amount) !== chargesSum) {
+          return {
+            id: transaction.id,
+            statusCode: 400,
+            message: `Transaction amount (${Math.abs(transaction.amount)}) does not match charges sum (${chargesSum})`,
+          } as DataSaveResultRowDto;
+        }
+
+        const expenses = [];
+        for (const charge of charges) {
+          const expenseTypeKey = chargeTypeToExpenseTypeKey.get(charge.chargeType);
+          if (!expenseTypeKey) continue;
+
+          const expenseType = await this.expenseTypeService.findByKey(expenseTypeKey);
+          if (!expenseType) continue;
+
+          expenses.push({
+            expenseTypeId: expenseType.id,
+            propertyId: transaction.propertyId,
+            transactionId: transaction.id,
+            description: expenseType.key,
+            amount: charge.amount,
+            quantity: 1,
+            totalAmount: charge.amount,
+            accountingDate: transaction.accountingDate,
+          });
+        }
+
+        transaction.type = TransactionType.EXPENSE;
+        transaction.expenses = expenses as Expense[];
+
+        await this.repository.save(transaction);
+
+        return {
+          id: transaction.id,
+          statusCode: 200,
+          message: 'OK',
+        } as DataSaveResultRowDto;
+      } catch (e) {
+        return {
+          id: transaction.id,
+          statusCode: e.status || 500,
+          message: e.message,
+        } as DataSaveResultRowDto;
+      }
+    });
+
+    return this.getSaveTaskResult(saveTask, transactions);
   }
 
   async splitLoanPaymentBulk(

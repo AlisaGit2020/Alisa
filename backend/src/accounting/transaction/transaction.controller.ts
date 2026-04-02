@@ -24,6 +24,7 @@ import { TransactionSetCategoryTypeInputDto } from '@asset-backend/accounting/tr
 import { DataSaveResultDto } from '@asset-backend/common/dtos/data-save-result.dto';
 import { SplitLoanPaymentInputDto } from '@asset-backend/accounting/transaction/dtos/split-loan-payment-input.dto';
 import { SplitLoanPaymentBulkInputDto } from '@asset-backend/accounting/transaction/dtos/split-loan-payment-bulk-input.dto';
+import { SplitChargePaymentBulkInputDto } from '@asset-backend/accounting/transaction/dtos/split-charge-payment-bulk-input.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('accounting/transaction')
@@ -108,6 +109,22 @@ export class TransactionController {
     @Body() input: SplitLoanPaymentInputDto,
   ): Promise<Transaction> {
     return this.service.splitLoanPayment(user, Number(id), input);
+  }
+
+  @Post('/split-charge-payment')
+  async splitChargePaymentBulk(
+    @User() user: JWTUser,
+    @Body() input: SplitChargePaymentBulkInputDto,
+  ): Promise<DataSaveResultDto> {
+    return this.service.splitChargePaymentBulk(user, input);
+  }
+
+  @Post('/:id/split-charge-payment')
+  async splitChargePayment(
+    @User() user: JWTUser,
+    @Param('id') id: string,
+  ): Promise<Transaction> {
+    return this.service.splitChargePayment(user, Number(id));
   }
 
   @Get('/:id')

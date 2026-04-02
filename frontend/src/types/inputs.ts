@@ -123,6 +123,11 @@ export interface SplitLoanPaymentBulkInput {
   ids: number[];
 }
 
+// Split charge payment bulk input
+export interface SplitChargePaymentBulkInput {
+  ids: number[];
+}
+
 // OP import input
 export interface OpImportInput {
   file: string;

@@ -8,6 +8,7 @@ import {
   TransactionSetTypeInput,
   TransactionSetCategoryTypeInput,
   SplitLoanPaymentBulkInput,
+  SplitChargePaymentBulkInput,
 } from "@asset-types";
 import { ImportWizardState, ImportStats, ImportResponse, BankId } from "../types";
 import ApiClient from "@asset-lib/api-client";
@@ -436,42 +437,69 @@ export function useImportWizard() {
       // Helper to translate backend error messages
       const translateLoanSplitError = (message: string): string => {
         if (message === "Unauthorized") {
-          return t("loanSplitErrors.unauthorized");
+          return t("transaction:loanSplitErrors.unauthorized");
         }
         if (message === "Can only split pending transactions") {
-          return t("loanSplitErrors.notPending");
+          return t("transaction:loanSplitErrors.notPending");
         }
         if (message === "Transaction description does not match loan payment format") {
-          return t("loanSplitErrors.notLoanFormat");
+          return t("transaction:loanSplitErrors.notLoanFormat");
         }
         return message;
       };
 
       if (result.allSuccess) {
         showToast({ message: t("common:toast.loanSplit"), severity: "success" });
-      } else if (result.rows?.success > 0) {
-        // Partial success - show first error message from failed results
-        const firstError = result.results?.find(r => r.statusCode !== 200);
-        const errorMessage = firstError?.message
-          ? translateLoanSplitError(firstError.message)
-          : t("common:toast.partialSuccess", {
-              success: result.rows.success,
-              failed: result.rows.failed
-            });
-        showToast({
-          message: errorMessage,
-          severity: "warning"
-        });
       } else {
-        // All failed - show first error message from backend
-        const firstError = result.results?.[0];
-        const errorMessage = firstError?.message
-          ? translateLoanSplitError(firstError.message)
-          : t("common:toast.error");
-        showToast({ message: errorMessage, severity: "error" });
+        const errors = result.results
+          ?.filter(r => r.statusCode !== 200)
+          .map(r => translateLoanSplitError(r.message)) ?? [];
+        const summary = errors.length > 0 ? errors.join("\n") : t("common:toast.error");
+        showToast({
+          message: summary,
+          severity: result.rows?.success > 0 ? "warning" : "error",
+        });
       }
 
       // Refetch transactions to update UI
+      await fetchTransactions(state.importedTransactionIds);
+      clearSelection();
+    },
+    [state.selectedIds, state.importedTransactionIds, fetchTransactions, clearSelection, showToast, t]
+  );
+
+  const splitChargePaymentForSelected = useCallback(
+    async () => {
+      if (state.selectedIds.length === 0) return;
+
+      const result = await ApiClient.postSaveTask<SplitChargePaymentBulkInput>(
+        transactionContext.apiPath + "/split-charge-payment",
+        { ids: state.selectedIds }
+      );
+
+      const translateChargeSplitError = (message: string): string => {
+        if (message === "Unauthorized") return t("transaction:chargeSplitErrors.unauthorized");
+        if (message === "Can only split pending transactions") return t("transaction:chargeSplitErrors.notPending");
+        if (message === "Cannot split income transactions to charges") return t("transaction:chargeSplitErrors.notExpense");
+        if (message === "No active charges found for transaction date") return t("transaction:chargeSplitErrors.noCharges");
+        const match = message.match(/Transaction amount \((.+?)\) does not match charges sum \((.+?)\)/);
+        if (match) return t("transaction:chargeSplitErrors.amountMismatch", { actual: match[1], expected: match[2] });
+        return message;
+      };
+
+      if (result.allSuccess) {
+        showToast({ message: t("common:toast.chargeSplit"), severity: "success" });
+      } else {
+        const errors = result.results
+          ?.filter(r => r.statusCode !== 200)
+          .map(r => translateChargeSplitError(r.message)) ?? [];
+        const summary = errors.length > 0 ? errors.join("\n") : t("common:toast.error");
+        showToast({
+          message: summary,
+          severity: result.rows?.success > 0 ? "warning" : "error",
+        });
+      }
+
       await fetchTransactions(state.importedTransactionIds);
       clearSelection();
     },
@@ -603,6 +631,7 @@ export function useImportWizard() {
     setCategoryTypeForSelected,
     resetAllocationForSelected,
     splitLoanPaymentForSelected,
+    splitChargePaymentForSelected,
     deleteSelected,
     approveAll,
     reset,
