@@ -1163,6 +1163,109 @@ describe('TransactionService', () => {
     });
   });
 
+  describe('splitChargePaymentBulk', () => {
+    it('splits multiple charge payment transactions', async () => {
+      const transactions = [
+        createTransaction({
+          id: 1,
+          propertyId: 1,
+          status: TransactionStatus.PENDING,
+          amount: -350,
+          transactionDate: new Date('2024-06-15'),
+        }),
+        createTransaction({
+          id: 2,
+          propertyId: 1,
+          status: TransactionStatus.PENDING,
+          amount: -350,
+          transactionDate: new Date('2024-07-15'),
+        }),
+      ];
+
+      mockRepository.find.mockResolvedValue(transactions);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockPropertyChargeService.getChargesForDate.mockResolvedValue([
+        { chargeType: ChargeType.MAINTENANCE_FEE, amount: 200 },
+        { chargeType: ChargeType.FINANCIAL_CHARGE, amount: 100 },
+        { chargeType: ChargeType.WATER_PREPAYMENT, amount: 50 },
+      ]);
+      mockRepository.save.mockImplementation((entity) =>
+        Promise.resolve({ ...entity }),
+      );
+
+      const result = await service.splitChargePaymentBulk(testUser, {
+        ids: [1, 2],
+      });
+
+      expect(result.rows.total).toBe(2);
+      expect(result.rows.success).toBe(2);
+    });
+
+    it('throws BadRequestException when ids array is empty', async () => {
+      await expect(
+        service.splitChargePaymentBulk(testUser, { ids: [] }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('returns 401 for transactions user does not own', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        amount: -350,
+      });
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockAuthService.hasOwnership.mockResolvedValue(false);
+
+      const result = await service.splitChargePaymentBulk(testUser, {
+        ids: [1],
+      });
+
+      expect(result.rows.failed).toBe(1);
+      expect(result.results[0].statusCode).toBe(401);
+    });
+
+    it('returns 400 for non-pending transactions', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.ACCEPTED,
+        amount: -350,
+      });
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+
+      const result = await service.splitChargePaymentBulk(testUser, {
+        ids: [1],
+      });
+
+      expect(result.rows.failed).toBe(1);
+      expect(result.results[0].statusCode).toBe(400);
+    });
+
+    it('returns 400 when no active charges found', async () => {
+      const transaction = createTransaction({
+        id: 1,
+        propertyId: 1,
+        status: TransactionStatus.PENDING,
+        amount: -350,
+      });
+
+      mockRepository.find.mockResolvedValue([transaction]);
+      mockAuthService.hasOwnership.mockResolvedValue(true);
+      mockPropertyChargeService.getChargesForDate.mockResolvedValue([]);
+
+      const result = await service.splitChargePaymentBulk(testUser, {
+        ids: [1],
+      });
+
+      expect(result.rows.failed).toBe(1);
+      expect(result.results[0].statusCode).toBe(400);
+    });
+  });
+
   describe('statistics', () => {
     it('calculates statistics correctly', async () => {
       const mockQueryBuilder = mockRepository.createQueryBuilder();
