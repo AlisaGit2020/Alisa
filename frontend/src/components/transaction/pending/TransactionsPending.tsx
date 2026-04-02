@@ -275,21 +275,12 @@ function TransactionsPending({ t }: WithTranslation) {
     }
   };
 
-  const handleSelectTransactionTypes = (transactionTypes: TransactionType[]) => {
-    updateFilter({
-      ...filter,
-      transactionTypes,
-      expenseTypeIds: [],
-      incomeTypeIds: [],
-    });
-  };
-
-  const handleSelectExpenseTypes = (expenseTypeIds: number[]) => {
-    updateFilter({ ...filter, expenseTypeIds });
-  };
-
-  const handleSelectIncomeTypes = (incomeTypeIds: number[]) => {
-    updateFilter({ ...filter, incomeTypeIds });
+  const handleTypeFilterChange = (
+    transactionTypes: TransactionType[],
+    expenseTypeIds: number[],
+    incomeTypeIds: number[],
+  ) => {
+    updateFilter({ ...filter, transactionTypes, expenseTypeIds, incomeTypeIds });
   };
 
   const handleStartDateChange = (startDate: Date | null) => {
@@ -401,9 +392,7 @@ function TransactionsPending({ t }: WithTranslation) {
           marginTop={0}
           open={selectedIds.length === 0}
           data={filter}
-          onSelectTransactionTypes={handleSelectTransactionTypes}
-          onSelectExpenseTypes={handleSelectExpenseTypes}
-          onSelectIncomeTypes={handleSelectIncomeTypes}
+          onTypeFilterChange={handleTypeFilterChange}
           onStartDateChange={handleStartDateChange}
           onEndDateChange={handleEndDateChange}
           onSearchTextChange={handleSearchTextChange}

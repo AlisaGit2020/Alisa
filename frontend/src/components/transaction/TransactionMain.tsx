@@ -76,23 +76,12 @@ function TransactionMain({ t }: WithTranslation) {
      
   }, [filter]);
 
-  const handleSelectTransactionTypes = (
-    transactionTypes: TransactionType[]
+  const handleTypeFilterChange = (
+    transactionTypes: TransactionType[],
+    expenseTypeIds: number[],
+    incomeTypeIds: number[],
   ) => {
-    updateFilter({
-      ...filter,
-      transactionTypes,
-      expenseTypeIds: [],
-      incomeTypeIds: [],
-    });
-  };
-
-  const handleSelectExpenseTypes = (expenseTypeIds: number[]) => {
-    updateFilter({ ...filter, expenseTypeIds });
-  };
-
-  const handleSelectIncomeTypes = (incomeTypeIds: number[]) => {
-    updateFilter({ ...filter, incomeTypeIds });
+    updateFilter({ ...filter, transactionTypes, expenseTypeIds, incomeTypeIds });
   };
 
   const handleStartDateChange = (startDate: Date | null) => {
@@ -165,9 +154,7 @@ function TransactionMain({ t }: WithTranslation) {
           marginTop={0}
           open={true}
           data={filter}
-          onSelectTransactionTypes={handleSelectTransactionTypes}
-          onSelectExpenseTypes={handleSelectExpenseTypes}
-          onSelectIncomeTypes={handleSelectIncomeTypes}
+          onTypeFilterChange={handleTypeFilterChange}
           onStartDateChange={handleStartDateChange}
           onEndDateChange={handleEndDateChange}
           onSearchTextChange={handleSearchTextChange}
