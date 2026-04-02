@@ -21,7 +21,9 @@ import * as http from 'http';
 import {
   TransactionStatus,
   TransactionType,
+  ChargeType,
 } from '@asset-backend/common/types';
+import { PropertyChargeService } from '@asset-backend/real-estate/property/property-charge.service';
 import {
   getTransactionExpense1,
   getTransactionIncome1,
@@ -786,7 +788,124 @@ describe('TransactionController (e2e)', () => {
   });
 
   // ==========================================
-  // 9. GET /accounting/transaction/:id - Find one
+  // 9. POST /accounting/transaction/split-charge-payment - Bulk charge split
+  // ==========================================
+  describe('POST /accounting/transaction/split-charge-payment', () => {
+    it('splits charge payment transactions in bulk', async () => {
+      const propertyChargeService = app.get(PropertyChargeService);
+      const propertyId = mainUser.properties[0].id;
+
+      await propertyChargeService.create(mainUser.jwtUser, {
+        propertyId,
+        chargeType: ChargeType.MAINTENANCE_FEE,
+        amount: 200,
+        startDate: '2024-01-01',
+      });
+      await propertyChargeService.create(mainUser.jwtUser, {
+        propertyId,
+        chargeType: ChargeType.FINANCIAL_CHARGE,
+        amount: 100,
+        startDate: '2024-01-01',
+      });
+
+      const transaction = await addTransaction(app, mainUser.jwtUser, {
+        sender: 'Taloyhtiö',
+        receiver: 'My Account',
+        description: 'Yhtiövastike',
+        transactionDate: new Date('2024-06-15'),
+        accountingDate: new Date('2024-06-15'),
+        amount: -300,
+        propertyId,
+        status: TransactionStatus.PENDING,
+        type: TransactionType.UNKNOWN,
+        externalId: `charge-bulk-${Date.now()}`,
+      });
+
+      const response = await request(server)
+        .post('/accounting/transaction/split-charge-payment')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({ ids: [transaction.id] })
+        .expect(201);
+
+      expect(response.body).toHaveProperty('allSuccess');
+      expect(response.body.allSuccess).toBe(true);
+    });
+
+    it('returns 400 when no ids provided', async () => {
+      await request(server)
+        .post('/accounting/transaction/split-charge-payment')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .send({ ids: [] })
+        .expect(400);
+    });
+
+    it('returns 401 when not authenticated', async () => {
+      await request(server)
+        .post('/accounting/transaction/split-charge-payment')
+        .send({ ids: [1] })
+        .expect(401);
+    });
+  });
+
+  // ==========================================
+  // 10. POST /:id/split-charge-payment - Single charge split
+  // ==========================================
+  describe('POST /accounting/transaction/:id/split-charge-payment', () => {
+    it('splits a single charge payment transaction', async () => {
+      const propertyChargeService = app.get(PropertyChargeService);
+      const propertyId = mainUser.properties[0].id;
+
+      await propertyChargeService.create(mainUser.jwtUser, {
+        propertyId,
+        chargeType: ChargeType.MAINTENANCE_FEE,
+        amount: 250,
+        startDate: '2025-01-01',
+      });
+      await propertyChargeService.create(mainUser.jwtUser, {
+        propertyId,
+        chargeType: ChargeType.FINANCIAL_CHARGE,
+        amount: 150,
+        startDate: '2025-01-01',
+      });
+
+      const transaction = await addTransaction(app, mainUser.jwtUser, {
+        sender: 'Taloyhtiö',
+        receiver: 'My Account',
+        description: 'Yhtiövastike',
+        transactionDate: new Date('2025-06-15'),
+        accountingDate: new Date('2025-06-15'),
+        amount: -400,
+        propertyId,
+        status: TransactionStatus.PENDING,
+        type: TransactionType.UNKNOWN,
+        externalId: `charge-single-${Date.now()}`,
+      });
+
+      const response = await request(server)
+        .post(`/accounting/transaction/${transaction.id}/split-charge-payment`)
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(201);
+
+      expect(response.body).toHaveProperty('id');
+      expect(response.body.type).toBe(TransactionType.EXPENSE);
+    });
+
+    it('returns 404 for non-existent transaction', async () => {
+      await request(server)
+        .post('/accounting/transaction/999999/split-charge-payment')
+        .set('Authorization', getBearerToken(mainUserToken))
+        .expect(404);
+    });
+
+    it('returns 401 when not authenticated', async () => {
+      await request(server)
+        .post('/accounting/transaction/1/split-charge-payment')
+        .expect(401);
+    });
+  });
+
+  // ==========================================
+  // 11. GET /accounting/transaction/:id - Find one
   // ==========================================
   describe('GET /accounting/transaction/:id', () => {
     it('returns a transaction by id', async () => {
@@ -843,7 +962,7 @@ describe('TransactionController (e2e)', () => {
   });
 
   // ==========================================
-  // 10. PUT /accounting/transaction/:id - Update
+  // 12. PUT /accounting/transaction/:id - Update
   // ==========================================
   describe('PUT /accounting/transaction/:id', () => {
     it('updates a pending transaction successfully', async () => {
@@ -944,7 +1063,7 @@ describe('TransactionController (e2e)', () => {
   });
 
   // ==========================================
-  // 11. DELETE /accounting/transaction/:id - Delete single
+  // 13. DELETE /accounting/transaction/:id - Delete single
   // ==========================================
   describe('DELETE /accounting/transaction/:id', () => {
     it('deletes a transaction successfully', async () => {
@@ -1156,7 +1275,7 @@ describe('TransactionController (e2e)', () => {
   });
 
   // ==========================================
-  // 12. POST /accounting/transaction/delete - Bulk delete
+  // 14. POST /accounting/transaction/delete - Bulk delete
   // ==========================================
   describe('POST /accounting/transaction/delete', () => {
     it('deletes transactions successfully when user has ownership', async () => {
