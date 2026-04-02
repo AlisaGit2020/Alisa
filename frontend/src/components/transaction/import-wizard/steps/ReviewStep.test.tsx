@@ -90,6 +90,7 @@ describe('ReviewStep', () => {
   const mockOnSetType = jest.fn();
   const mockOnSetCategoryType = jest.fn();
   const mockOnSplitLoanPayment = jest.fn();
+  const mockOnSplitChargePayment = jest.fn();
   const mockOnDelete = jest.fn();
   const mockOnNext = jest.fn();
   const mockOnBack = jest.fn();
@@ -135,6 +136,7 @@ describe('ReviewStep', () => {
     onSetType: mockOnSetType,
     onSetCategoryType: mockOnSetCategoryType,
     onSplitLoanPayment: mockOnSplitLoanPayment,
+    onSplitChargePayment: mockOnSplitChargePayment,
     onDelete: mockOnDelete,
     onNext: mockOnNext,
     onBack: mockOnBack,
