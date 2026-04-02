@@ -85,8 +85,11 @@ const transaction = {
     notLoanFormat: "Transaktionsbeskrivningen matchar inte lånebetalningsformat",
   },
   chargeSplitErrors: {
+    unauthorized: "Du har inte behörighet att ändra denna transaktion",
+    notPending: "Kan bara dela upp väntande transaktioner",
+    notExpense: "Kan inte dela upp inkomsttransaktioner till avgifter",
     noCharges: "Inga aktiva avgifter hittades för transaktionsdatumet",
-    amountMismatch: "Transaktionsbeloppet matchar inte avgifterna",
+    amountMismatch: "Belopp {{actual}} € matchar inte avgifterna {{expected}} €",
   },
   confirmDeleteTransactions:
     "Vill du verkligen ta bort {{count}} valda transaktioner?",

@@ -497,9 +497,14 @@ export class TransactionService {
       throw new BadRequestException('Can only split pending transactions');
     }
 
+    if (transaction.amount > 0) {
+      throw new BadRequestException('Cannot split income transactions to charges');
+    }
+
+    const chargeDate = transaction.accountingDate ?? transaction.transactionDate;
     const charges = await this.propertyChargeService.getChargesForDate(
       transaction.propertyId,
-      transaction.transactionDate,
+      chargeDate,
     );
 
     if (charges.length === 0) {
@@ -572,9 +577,18 @@ export class TransactionService {
           } as DataSaveResultRowDto;
         }
 
+        if (transaction.amount > 0) {
+          return {
+            id: transaction.id,
+            statusCode: 400,
+            message: 'Cannot split income transactions to charges',
+          } as DataSaveResultRowDto;
+        }
+
+        const chargeDate = transaction.accountingDate ?? transaction.transactionDate;
         const charges = await this.propertyChargeService.getChargesForDate(
           transaction.propertyId,
-          transaction.transactionDate,
+          chargeDate,
         );
 
         if (charges.length === 0) {

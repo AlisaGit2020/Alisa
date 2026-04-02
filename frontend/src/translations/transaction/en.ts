@@ -85,8 +85,11 @@ const transaction = {
     notLoanFormat: "Transaction description does not match loan payment format",
   },
   chargeSplitErrors: {
+    unauthorized: "You don't have permission to modify this transaction",
+    notPending: "Can only split pending transactions",
+    notExpense: "Cannot split income transactions to charges",
     noCharges: "No active charges found for transaction date",
-    amountMismatch: "Transaction amount does not match charges",
+    amountMismatch: "Amount {{actual}} € does not match charges {{expected}} €",
   },
   confirmDeleteTransactions:
     "Are you sure you want to delete {{count}} selected transactions?",

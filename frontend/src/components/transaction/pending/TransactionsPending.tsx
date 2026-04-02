@@ -207,6 +207,30 @@ function TransactionsPending({ t }: WithTranslation) {
     }
   };
 
+  const translateLoanSplitError = (message: string): string => {
+    if (message === "Unauthorized") return t("loanSplitErrors.unauthorized");
+    if (message === "Can only split pending transactions") return t("loanSplitErrors.notPending");
+    if (message === "Transaction description does not match loan payment format") return t("loanSplitErrors.notLoanFormat");
+    return message;
+  };
+
+  const translateChargeSplitError = (message: string): string => {
+    if (message === "Unauthorized") return t("chargeSplitErrors.unauthorized");
+    if (message === "Can only split pending transactions") return t("chargeSplitErrors.notPending");
+    if (message === "Cannot split income transactions to charges") return t("chargeSplitErrors.notExpense");
+    if (message === "No active charges found for transaction date") return t("chargeSplitErrors.noCharges");
+    const match = message.match(/Transaction amount \((.+?)\) does not match charges sum \((.+?)\)/);
+    if (match) return t("chargeSplitErrors.amountMismatch", { actual: match[1], expected: match[2] });
+    return message;
+  };
+
+  const collectErrors = (results: { statusCode: number; message: string }[] | undefined, translator: (msg: string) => string): string[] => {
+    if (!results) return [];
+    return results
+      .filter(r => r.statusCode !== 200)
+      .map(r => translator(r.message));
+  };
+
   const handleSplitLoanPaymentForSelected = async () => {
     if (selectedIds.length > 0) {
       const result =
@@ -216,10 +240,15 @@ function TransactionsPending({ t }: WithTranslation) {
         );
       if (result.allSuccess) {
         showToast({ message: t("common:toast.loanSplit"), severity: "success" });
-        setRefreshTrigger((prev) => prev + 1);
       } else {
-        showToast({ message: t("common:toast.updateError"), severity: "error" });
+        const errors = collectErrors(result.results, translateLoanSplitError);
+        const summary = errors.length > 0 ? errors.join("\n") : t("common:toast.updateError");
+        showToast({
+          message: summary,
+          severity: result.rows?.success > 0 ? "warning" : "error",
+        });
       }
+      setRefreshTrigger((prev) => prev + 1);
     }
   };
 
@@ -232,10 +261,15 @@ function TransactionsPending({ t }: WithTranslation) {
         );
       if (result.allSuccess) {
         showToast({ message: t("common:toast.chargeSplit"), severity: "success" });
-        setRefreshTrigger((prev) => prev + 1);
       } else {
-        showToast({ message: t("common:toast.updateError"), severity: "error" });
+        const errors = collectErrors(result.results, translateChargeSplitError);
+        const summary = errors.length > 0 ? errors.join("\n") : t("common:toast.updateError");
+        showToast({
+          message: summary,
+          severity: result.rows?.success > 0 ? "warning" : "error",
+        });
       }
+      setRefreshTrigger((prev) => prev + 1);
     }
   };
 

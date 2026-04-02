@@ -21,6 +21,7 @@ import { Transaction, TransactionType, AllocationResult } from "@asset-types";
 import AssetDataTable from "../../../asset/datatable/AssetDataTable";
 import TransactionsPendingActions from "../../pending/TransactionsPendingActions";
 import TransactionDetails from "../../components/TransactionDetails";
+import TransactionForm from "../../TransactionForm";
 import { AllocationRulesModal } from "../../../allocation";
 import { useState, useMemo, useCallback } from "react";
 import axios from "axios";
@@ -87,6 +88,7 @@ export default function ReviewStep({
   const [searchField, setSearchField] = useState<SearchField>("all");
   const [showOnlyUnknown, setShowOnlyUnknown] = useState(true);
   const [detailId, setDetailId] = useState<number>(0);
+  const [editId, setEditId] = useState<number>(0);
   const [rulesModalOpen, setRulesModalOpen] = useState(false);
   const [isAllocating, setIsAllocating] = useState(false);
   const [conflictingIds, setConflictingIds] = useState<Set<number>>(new Set());
@@ -389,6 +391,7 @@ export default function ReviewStep({
           onSelectChange={onSelectChange}
           onSelectAllChange={onSelectAllChange}
           onOpen={setDetailId}
+          onEdit={setEditId}
           selectedIds={selectedIds}
         />
       </Paper>
@@ -397,6 +400,20 @@ export default function ReviewStep({
         <TransactionDetails
           id={detailId}
           onClose={() => setDetailId(0)}
+        />
+      )}
+
+      {editId > 0 && (
+        <TransactionForm
+          open={true}
+          id={editId}
+          propertyId={propertyId}
+          onClose={() => setEditId(0)}
+          onAfterSubmit={async () => {
+            setEditId(0);
+            if (onRefresh) await onRefresh();
+          }}
+          onCancel={() => setEditId(0)}
         />
       )}
 

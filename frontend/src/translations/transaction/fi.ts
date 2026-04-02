@@ -85,8 +85,11 @@ const transaction = {
     notLoanFormat: "Tapahtuman kuvaus ei vastaa lainanmaksun muotoa",
   },
   chargeSplitErrors: {
+    unauthorized: "Sinulla ei ole oikeutta muokata tätä tapahtumaa",
+    notPending: "Vain odottavia tapahtumia voi jakaa",
+    notExpense: "Tulotapahtumia ei voi jakaa vastikkeisiin",
     noCharges: "Aktiivisia vastikkeita ei löytynyt tapahtuman päivämäärälle",
-    amountMismatch: "Tapahtuman summa ei täsmää vastikkeiden kanssa",
+    amountMismatch: "Summa {{actual}} € ei täsmää vastikkeiden {{expected}} € kanssa",
   },
   confirmDeleteTransactions:
     "Haluatko varmasti poistaa {{count}} valittua tapahtumaa?",
