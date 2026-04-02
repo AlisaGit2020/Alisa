@@ -357,6 +357,47 @@ describe('PropertyChargeService', () => {
     });
   });
 
+  describe('getChargesForDate', () => {
+    it('returns charges active on a given date', async () => {
+      const charges = [
+        {
+          id: 1,
+          propertyId: 1,
+          chargeType: ChargeType.MAINTENANCE_FEE,
+          amount: 200,
+          startDate: new Date('2024-01-01'),
+          endDate: null,
+        },
+        {
+          id: 2,
+          propertyId: 1,
+          chargeType: ChargeType.FINANCIAL_CHARGE,
+          amount: 100,
+          startDate: new Date('2024-01-01'),
+          endDate: null,
+        },
+      ];
+
+      const mockQueryBuilder = mockRepository.createQueryBuilder();
+      mockQueryBuilder.getMany.mockResolvedValue(charges);
+
+      const result = await service.getChargesForDate(1, new Date('2024-06-15'));
+
+      expect(result).toHaveLength(2);
+      expect(result[0].amount).toBe(200);
+      expect(result[1].amount).toBe(100);
+    });
+
+    it('returns empty array when no charges are active on date', async () => {
+      const mockQueryBuilder = mockRepository.createQueryBuilder();
+      mockQueryBuilder.getMany.mockResolvedValue([]);
+
+      const result = await service.getChargesForDate(1, new Date('2020-01-01'));
+
+      expect(result).toHaveLength(0);
+    });
+  });
+
   describe('createBatch', () => {
     it('should create multiple charges', async () => {
       const inputs = [

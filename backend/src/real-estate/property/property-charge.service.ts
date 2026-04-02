@@ -84,6 +84,15 @@ export class PropertyChargeService {
     return result;
   }
 
+  async getChargesForDate(propertyId: number, date: Date): Promise<PropertyCharge[]> {
+    return this.repository
+      .createQueryBuilder('charge')
+      .where('charge.propertyId = :propertyId', { propertyId })
+      .andWhere('(charge.startDate IS NULL OR charge.startDate <= :date)', { date })
+      .andWhere('(charge.endDate IS NULL OR charge.endDate >= :date)', { date })
+      .getMany();
+  }
+
   async create(user: JWTUser, input: PropertyChargeInputDto): Promise<PropertyChargeDto> {
     const property = await this.propertyService.findOne(user, input.propertyId);
     if (!property) {
