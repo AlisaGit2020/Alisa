@@ -60,6 +60,15 @@ const tax = {
     laundry: 'Laundry',
     custom: 'Custom',
   },
+
+  // Form 7H structure
+  incomeTotal: 'Total rental income for the year',
+  housingAndWater: 'Housing charges and water fees',
+  financialCharges: 'Financial charges capitalized by company',
+  repairCosts: 'Annual repair costs',
+  otherCosts: 'Other costs',
+  columnTotal: 'Total (100%)',
+  columnYourShare: 'Your share ({{share}}%)',
 }
 
 export default tax

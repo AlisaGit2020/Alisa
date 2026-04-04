@@ -10,6 +10,7 @@ import admin from '../../src/translations/admin/en';
 import investmentCalculator from '../../src/translations/investment-calculator/en';
 import landing from '../../src/translations/landing/en';
 import route from '../../src/translations/route/en';
+import tax from '../../src/translations/tax/en';
 import en from '../../src/translations/en';
 
 // Partial common namespace - only include keys that tests need translated
@@ -41,7 +42,7 @@ const partialCommon = {
 i18n.use(initReactI18next).init({
   lng: 'en',
   fallbackLng: 'en',
-  ns: ['translation', 'property', 'property-type', 'settings', 'expense-type', 'income-type', 'admin', 'investment-calculator', 'landing', 'common', 'expenseTypes', 'incomeTypes', 'route'],
+  ns: ['translation', 'property', 'property-type', 'settings', 'expense-type', 'income-type', 'admin', 'investment-calculator', 'landing', 'common', 'expenseTypes', 'incomeTypes', 'route', 'tax'],
   defaultNS: 'translation',
   debug: false,
   interpolation: {
@@ -63,6 +64,7 @@ i18n.use(initReactI18next).init({
       'investment-calculator': investmentCalculator,
       landing,
       route,
+      tax,
       common: partialCommon,
       // Add expenseTypes and incomeTypes as namespaces for components using t('namespace:key')
       expenseTypes: en.expenseTypes,

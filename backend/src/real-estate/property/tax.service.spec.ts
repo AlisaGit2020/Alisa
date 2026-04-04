@@ -87,8 +87,8 @@ describe('TaxService', () => {
         { propertyId: 1, userId: testUser.id, share: 100 },
       ]);
       (mockDataSource.query as jest.Mock)
-        .mockResolvedValueOnce([{ propertyId: 1, total: '5000' }]) // grossIncome (per property)
-        .mockResolvedValueOnce([{ propertyId: 1, category: 'Repairs', amount: '500' }]) // deductions (per property)
+        .mockResolvedValueOnce([{ propertyId: 1, category: 'rental', amount: '5000' }]) // incomeBreakdown
+        .mockResolvedValueOnce([{ propertyId: 1, category: 'Repairs', amount: '500' }]) // deductions
         .mockResolvedValueOnce({ affectedRows: 1 }) // save stats
         .mockResolvedValueOnce({ affectedRows: 1 })
         .mockResolvedValueOnce({ affectedRows: 1 })
@@ -104,11 +104,14 @@ describe('TaxService', () => {
       expect(result.year).toBe(2024);
       expect(result.propertyId).toBe(propertyId);
       expect(result.grossIncome).toBe(5000);
+      expect(result.totalGrossIncome).toBe(5000);
       expect(result.deductions).toBe(500);
       expect(result.taxDeductions).toBe(0);
       expect(result.depreciation).toBe(0); // No items means no depreciation
       expect(result.netIncome).toBe(4500);
       expect(result.ownershipShare).toBe(100);
+      expect(result.incomeBreakdown).toHaveLength(1);
+      expect(result.incomeBreakdown[0].category).toBe('rental');
       expect(result.calculatedAt).toBeDefined();
     });
 
@@ -123,13 +126,13 @@ describe('TaxService', () => {
       ]);
       (mockDataSource.query as jest.Mock)
         .mockResolvedValueOnce([
-          { propertyId: 1, total: '6000' },
-          { propertyId: 2, total: '4000' },
-        ]) // grossIncome (per property)
+          { propertyId: 1, category: 'rental', amount: '6000' },
+          { propertyId: 2, category: 'rental', amount: '4000' },
+        ]) // incomeBreakdown
         .mockResolvedValueOnce([
           { propertyId: 1, category: 'Repairs', amount: '1000' },
           { propertyId: 2, category: 'Insurance', amount: '500' },
-        ]) // deductions (per property)
+        ]) // deductions
         .mockResolvedValue({ affectedRows: 1 }); // save stats
 
       (mockDepreciationService.getYearlyBreakdown as jest.Mock).mockResolvedValue({
@@ -166,7 +169,7 @@ describe('TaxService', () => {
         { propertyId: 1, userId: testUser.id, share: 100 },
       ]);
       (mockDataSource.query as jest.Mock)
-        .mockResolvedValueOnce([{ propertyId: 1, total: '3000' }])
+        .mockResolvedValueOnce([{ propertyId: 1, category: 'rental', amount: '3000' }])
         .mockResolvedValueOnce([])
         .mockResolvedValue({ affectedRows: 1 });
 
@@ -204,7 +207,7 @@ describe('TaxService', () => {
         { propertyId: 1, userId: testUser.id, share: 100 },
       ]);
       (mockDataSource.query as jest.Mock)
-        .mockResolvedValueOnce([{ propertyId: 1, total: '5000' }])
+        .mockResolvedValueOnce([{ propertyId: 1, category: 'rental', amount: '5000' }])
         .mockResolvedValueOnce([
           { propertyId: 1, category: 'Repairs', amount: '800' },
           { propertyId: 1, category: 'Management fees', amount: '200' },
@@ -232,7 +235,7 @@ describe('TaxService', () => {
         { propertyId: 1, userId: testUser.id, share: 100 },
       ]);
       (mockDataSource.query as jest.Mock)
-        .mockResolvedValueOnce([]) // no income
+        .mockResolvedValueOnce([]) // no income (incomeBreakdown returns empty)
         .mockResolvedValueOnce([{ propertyId: 1, category: 'Repairs', amount: '100' }])
         .mockResolvedValue({ affectedRows: 1 });
 
@@ -269,7 +272,7 @@ describe('TaxService', () => {
         { propertyId: 1, userId: testUser.id, share: 50 },
       ]);
       (mockDataSource.query as jest.Mock)
-        .mockResolvedValueOnce([{ propertyId: 1, total: '2000' }]) // grossIncome
+        .mockResolvedValueOnce([{ propertyId: 1, category: 'rental', amount: '2000' }]) // incomeBreakdown
         .mockResolvedValueOnce([{ propertyId: 1, category: 'Repairs', amount: '400' }]) // deductions
         .mockResolvedValue({ affectedRows: 1 });
 
@@ -337,6 +340,7 @@ describe('TaxService', () => {
           { propertyId, year: 2024, key: StatisticKey.TAX_NET_INCOME, value: '4300' },
         ]);
 
+      // get() calls calculateIncomeBreakdown, calculateDeductions, calculateTaxDeductions
       (mockDataSource.query as jest.Mock).mockResolvedValue([]);
       (mockDepreciationService.getYearlyBreakdown as jest.Mock).mockResolvedValue({
         totalDepreciation: 200,
@@ -353,6 +357,7 @@ describe('TaxService', () => {
       expect(result.taxDeductions).toBe(0);
       expect(result.depreciation).toBe(200);
       expect(result.netIncome).toBe(4300);
+      expect(result.incomeBreakdown).toEqual([]);
     });
 
     it('aggregates statistics across multiple properties', async () => {

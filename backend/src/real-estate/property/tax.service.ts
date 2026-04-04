@@ -8,6 +8,7 @@ import { TaxCalculateInputDto } from './dtos/tax-calculate-input.dto';
 import {
   TaxResponseDto,
   TaxBreakdownItemDto,
+  IncomeBreakdownItemDto,
   DepreciationAssetBreakdownDto,
   TaxDeductionBreakdownDto,
 } from './dtos/tax-response.dto';
@@ -44,20 +45,26 @@ export class TaxService {
     // Get ownership shares for all properties
     const ownershipShares = await this.getOwnershipShares(user.id, propertyIds);
 
-    // Calculate gross income (adjusted by ownership)
-    const grossIncome = await this.calculateGrossIncome(
-      propertyIds,
-      input.year,
-      ownershipShares,
-    );
+    // Calculate income breakdown by type (adjusted + unadjusted)
+    const {
+      total: grossIncome,
+      totalUnadjusted: totalGrossIncome,
+      breakdown: incomeBreakdown,
+    } = await this.calculateIncomeBreakdown(propertyIds, input.year, ownershipShares);
 
-    // Calculate deductions (adjusted by ownership)
-    const { total: deductions, breakdown: deductionBreakdown } =
-      await this.calculateDeductions(propertyIds, input.year, ownershipShares);
+    // Calculate deductions (adjusted + unadjusted)
+    const {
+      total: deductions,
+      totalUnadjusted: totalDeductions,
+      breakdown: deductionBreakdown,
+    } = await this.calculateDeductions(propertyIds, input.year, ownershipShares);
 
-    // Calculate tax deductions (adjusted by ownership)
-    const { total: taxDeductionTotal, breakdown: taxDeductionBreakdown } =
-      await this.calculateTaxDeductions(propertyIds, input.year, ownershipShares);
+    // Calculate tax deductions (adjusted + unadjusted)
+    const {
+      total: taxDeductionTotal,
+      totalUnadjusted: totalTaxDeductions,
+      breakdown: taxDeductionBreakdown,
+    } = await this.calculateTaxDeductions(propertyIds, input.year, ownershipShares);
 
     // Calculate depreciation using DepreciationService
     const depreciationBreakdownData =
@@ -69,15 +76,16 @@ export class TaxService {
 
     // Apply ownership share to depreciation
     let depreciation = 0;
+    let totalDepreciation = 0;
     const depreciationBreakdown: DepreciationAssetBreakdownDto[] = [];
 
     for (const item of depreciationBreakdownData.items) {
-      // Get ownership share for the property this asset belongs to
       const share = ownershipShares.get(item.propertyId) ?? 100;
       const shareMultiplier = share / 100;
 
       const adjustedDepreciationAmount = item.depreciationAmount * shareMultiplier;
       depreciation += adjustedDepreciationAmount;
+      totalDepreciation += item.depreciationAmount;
 
       depreciationBreakdown.push({
         assetId: item.assetId,
@@ -86,7 +94,9 @@ export class TaxService {
         acquisitionYear: item.acquisitionYear,
         acquisitionMonth: item.acquisitionMonth,
         originalAmount: item.originalAmount * shareMultiplier,
+        totalOriginalAmount: item.originalAmount,
         depreciationAmount: adjustedDepreciationAmount,
+        totalDepreciationAmount: item.depreciationAmount,
         remainingAmount: item.remainingAmount * shareMultiplier,
         yearsRemaining: item.yearsRemaining,
         isFullyDepreciated: item.isFullyDepreciated,
@@ -97,6 +107,7 @@ export class TaxService {
     const legacyDepreciationBreakdown = depreciationBreakdown.map((item) => ({
       category: item.description,
       amount: item.originalAmount,
+      totalAmount: item.totalOriginalAmount,
       isTaxDeductible: true,
       isCapitalImprovement: true,
       depreciationAmount: item.depreciationAmount,
@@ -104,6 +115,7 @@ export class TaxService {
 
     // Calculate net income
     const netIncome = grossIncome - deductions - taxDeductionTotal - depreciation;
+    const totalNetIncome = totalGrossIncome - totalDeductions - totalTaxDeductions - totalDepreciation;
 
     // Get average ownership share for display
     const ownershipShare = await this.getAverageOwnershipShare(
@@ -124,11 +136,17 @@ export class TaxService {
       propertyId: input.propertyId,
       ownershipShare,
       grossIncome,
+      totalGrossIncome,
       deductions,
+      totalDeductions,
       taxDeductions: taxDeductionTotal,
+      totalTaxDeductions,
       depreciation,
+      totalDepreciation,
       netIncome,
+      totalNetIncome,
       breakdown: [...deductionBreakdown, ...legacyDepreciationBreakdown],
+      incomeBreakdown,
       taxDeductionBreakdown,
       depreciationBreakdown,
       calculatedAt: new Date(),
@@ -176,16 +194,24 @@ export class TaxService {
     // Get ownership shares for breakdown calculations
     const ownershipShares = await this.getOwnershipShares(user.id, propertyIds);
 
+    // Get income breakdown (calculated live with ownership adjustment)
+    const {
+      totalUnadjusted: totalGrossIncome,
+      breakdown: incomeBreakdown,
+    } = await this.calculateIncomeBreakdown(propertyIds, year, ownershipShares);
+
     // Get breakdown (calculated live with ownership adjustment)
-    const { breakdown: deductionBreakdown } = await this.calculateDeductions(
-      propertyIds,
-      year,
-      ownershipShares,
-    );
+    const {
+      totalUnadjusted: totalDeductions,
+      breakdown: deductionBreakdown,
+    } = await this.calculateDeductions(propertyIds, year, ownershipShares);
 
     // Get tax deduction breakdown (calculated live with ownership adjustment)
-    const { total: taxDeductionTotal, breakdown: taxDeductionBreakdown } =
-      await this.calculateTaxDeductions(propertyIds, year, ownershipShares);
+    const {
+      total: taxDeductionTotal,
+      totalUnadjusted: totalTaxDeductions,
+      breakdown: taxDeductionBreakdown,
+    } = await this.calculateTaxDeductions(propertyIds, year, ownershipShares);
 
     // Recalculate netIncome to include current tax deductions
     const netIncome = grossIncome - deductions - taxDeductionTotal - depreciation;
@@ -195,10 +221,12 @@ export class TaxService {
       await this.depreciationService.getYearlyBreakdown(user, propertyIds, year);
 
     // Apply ownership share to depreciation breakdown
+    let totalDepreciation = 0;
     const depreciationBreakdown: DepreciationAssetBreakdownDto[] = [];
     for (const item of depreciationBreakdownData.items) {
       const share = ownershipShares.get(item.propertyId) ?? 100;
       const shareMultiplier = share / 100;
+      totalDepreciation += item.depreciationAmount;
 
       depreciationBreakdown.push({
         assetId: item.assetId,
@@ -207,7 +235,9 @@ export class TaxService {
         acquisitionYear: item.acquisitionYear,
         acquisitionMonth: item.acquisitionMonth,
         originalAmount: item.originalAmount * shareMultiplier,
+        totalOriginalAmount: item.originalAmount,
         depreciationAmount: item.depreciationAmount * shareMultiplier,
+        totalDepreciationAmount: item.depreciationAmount,
         remainingAmount: item.remainingAmount * shareMultiplier,
         yearsRemaining: item.yearsRemaining,
         isFullyDepreciated: item.isFullyDepreciated,
@@ -217,10 +247,13 @@ export class TaxService {
     const legacyDepreciationBreakdown = depreciationBreakdown.map((item) => ({
       category: item.description,
       amount: item.originalAmount,
+      totalAmount: item.totalOriginalAmount,
       isTaxDeductible: true,
       isCapitalImprovement: true,
       depreciationAmount: item.depreciationAmount,
     }));
+
+    const totalNetIncome = totalGrossIncome - totalDeductions - totalTaxDeductions - totalDepreciation;
 
     // Get average ownership share for display
     const ownershipShare = await this.getAverageOwnershipShare(
@@ -233,26 +266,67 @@ export class TaxService {
       propertyId,
       ownershipShare,
       grossIncome,
+      totalGrossIncome,
       deductions,
+      totalDeductions,
       taxDeductions: taxDeductionTotal,
+      totalTaxDeductions,
       depreciation,
+      totalDepreciation,
       netIncome,
+      totalNetIncome,
       breakdown: [...deductionBreakdown, ...legacyDepreciationBreakdown],
+      incomeBreakdown,
       taxDeductionBreakdown,
       depreciationBreakdown,
     };
   }
 
-  private convertToLegacyBreakdown(
-    items: { description: string; originalAmount: number; depreciationAmount: number }[],
-  ): TaxBreakdownItemDto[] {
-    return items.map((item) => ({
-      category: item.description,
-      amount: item.originalAmount,
-      isTaxDeductible: true,
-      isCapitalImprovement: true,
-      depreciationAmount: item.depreciationAmount,
-    }));
+  private async calculateIncomeBreakdown(
+    propertyIds: number[],
+    year: number,
+    ownershipShares: Map<number, number>,
+  ): Promise<{ total: number; totalUnadjusted: number; breakdown: IncomeBreakdownItemDto[] }> {
+    const propertyIdsArray = `{${propertyIds.join(',')}}`;
+    const result = await this.dataSource.query(
+      `SELECT i."propertyId", it.key as category, COALESCE(SUM(i."totalAmount"), 0) as amount
+       FROM income i
+       LEFT JOIN transaction t ON t.id = i."transactionId"
+       INNER JOIN income_type it ON it.id = i."incomeTypeId"
+       WHERE i."propertyId" = ANY($1::int[])
+         AND (i."transactionId" IS NULL OR t.status = $2)
+         AND EXTRACT(YEAR FROM i."accountingDate") = $3
+       GROUP BY i."propertyId", it.id, it.key
+       ORDER BY it.key`,
+      [propertyIdsArray, TransactionStatus.ACCEPTED, year],
+    );
+
+    const categoryTotals = new Map<string, { adjusted: number; unadjusted: number }>();
+    let totalAdjusted = 0;
+    let totalUnadjusted = 0;
+
+    for (const row of result) {
+      const amount = parseFloat(row.amount) || 0;
+      const share = ownershipShares.get(row.propertyId) ?? 100;
+      const adjustedAmount = amount * (share / 100);
+
+      const current = categoryTotals.get(row.category) || { adjusted: 0, unadjusted: 0 };
+      categoryTotals.set(row.category, {
+        adjusted: current.adjusted + adjustedAmount,
+        unadjusted: current.unadjusted + amount,
+      });
+      totalAdjusted += adjustedAmount;
+      totalUnadjusted += amount;
+    }
+
+    const breakdown: IncomeBreakdownItemDto[] = Array.from(categoryTotals.entries())
+      .map(([category, amounts]) => ({
+        category,
+        amount: amounts.adjusted,
+        totalAmount: amounts.unadjusted,
+      }));
+
+    return { total: totalAdjusted, totalUnadjusted, breakdown };
   }
 
   private async getPropertyIds(
@@ -271,38 +345,11 @@ export class TaxService {
     return properties.map((p) => p.id);
   }
 
-  private async calculateGrossIncome(
-    propertyIds: number[],
-    year: number,
-    ownershipShares: Map<number, number>,
-  ): Promise<number> {
-    const propertyIdsArray = `{${propertyIds.join(',')}}`;
-    const result = await this.dataSource.query(
-      `SELECT i."propertyId", COALESCE(SUM(i."totalAmount"), 0) as total
-       FROM income i
-       LEFT JOIN transaction t ON t.id = i."transactionId"
-       WHERE i."propertyId" = ANY($1::int[])
-         AND (i."transactionId" IS NULL OR t.status = $2)
-         AND EXTRACT(YEAR FROM i."accountingDate") = $3
-       GROUP BY i."propertyId"`,
-      [propertyIdsArray, TransactionStatus.ACCEPTED, year],
-    );
-
-    let totalIncome = 0;
-    for (const row of result) {
-      const propertyId = row.propertyId;
-      const amount = parseFloat(row.total) || 0;
-      const share = ownershipShares.get(propertyId) ?? 100;
-      totalIncome += amount * (share / 100);
-    }
-    return totalIncome;
-  }
-
   private async calculateDeductions(
     propertyIds: number[],
     year: number,
     ownershipShares: Map<number, number>,
-  ): Promise<{ total: number; breakdown: TaxBreakdownItemDto[] }> {
+  ): Promise<{ total: number; totalUnadjusted: number; breakdown: TaxBreakdownItemDto[] }> {
     const propertyIdsArray = `{${propertyIds.join(',')}}`;
     const result = await this.dataSource.query(
       `SELECT
@@ -323,36 +370,41 @@ export class TaxService {
     );
 
     // Aggregate by category with ownership adjustment
-    const categoryTotals = new Map<string, number>();
+    const categoryTotals = new Map<string, { adjusted: number; unadjusted: number }>();
     for (const row of result) {
       const propertyId = row.propertyId;
       const amount = parseFloat(row.amount) || 0;
       const share = ownershipShares.get(propertyId) ?? 100;
       const adjustedAmount = amount * (share / 100);
 
-      const currentTotal = categoryTotals.get(row.category) || 0;
-      categoryTotals.set(row.category, currentTotal + adjustedAmount);
+      const current = categoryTotals.get(row.category) || { adjusted: 0, unadjusted: 0 };
+      categoryTotals.set(row.category, {
+        adjusted: current.adjusted + adjustedAmount,
+        unadjusted: current.unadjusted + amount,
+      });
     }
 
     const breakdown: TaxBreakdownItemDto[] = Array.from(categoryTotals.entries())
-      .map(([category, amount]) => ({
+      .map(([category, amounts]) => ({
         category,
-        amount,
+        amount: amounts.adjusted,
+        totalAmount: amounts.unadjusted,
         isTaxDeductible: true,
         isCapitalImprovement: false,
       }))
       .sort((a, b) => a.category.localeCompare(b.category));
 
     const total = breakdown.reduce((sum, item) => sum + item.amount, 0);
+    const totalUnadjusted = breakdown.reduce((sum, item) => sum + item.totalAmount, 0);
 
-    return { total, breakdown };
+    return { total, totalUnadjusted, breakdown };
   }
 
   private async calculateTaxDeductions(
     propertyIds: number[],
     year: number,
     ownershipShares: Map<number, number>,
-  ): Promise<{ total: number; breakdown: TaxDeductionBreakdownDto[] }> {
+  ): Promise<{ total: number; totalUnadjusted: number; breakdown: TaxDeductionBreakdownDto[] }> {
     const deductions = await this.taxDeductionRepository.find({
       where: {
         propertyId: In(propertyIds),
@@ -361,12 +413,14 @@ export class TaxService {
     });
 
     let total = 0;
+    let totalUnadjusted = 0;
     const breakdown: TaxDeductionBreakdownDto[] = [];
 
     for (const d of deductions) {
       const share = ownershipShares.get(d.propertyId) ?? 100;
       const adjustedAmount = d.amount * (share / 100);
       total += adjustedAmount;
+      totalUnadjusted += d.amount;
 
       breakdown.push({
         id: d.id,
@@ -374,11 +428,12 @@ export class TaxService {
         typeName: taxDeductionTypeNames.get(d.deductionType) ?? 'custom',
         description: d.description,
         amount: adjustedAmount,
+        totalAmount: d.amount,
         metadata: d.metadata ?? undefined,
       });
     }
 
-    return { total, breakdown };
+    return { total, totalUnadjusted, breakdown };
   }
 
   private async saveStatistics(
@@ -424,11 +479,17 @@ export class TaxService {
       year,
       propertyId,
       grossIncome: 0,
+      totalGrossIncome: 0,
       deductions: 0,
+      totalDeductions: 0,
       taxDeductions: 0,
+      totalTaxDeductions: 0,
       depreciation: 0,
+      totalDepreciation: 0,
       netIncome: 0,
+      totalNetIncome: 0,
       breakdown: [],
+      incomeBreakdown: [],
       taxDeductionBreakdown: [],
       depreciationBreakdown: [],
     };

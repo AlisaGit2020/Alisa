@@ -60,6 +60,15 @@ const tax = {
     laundry: 'Tvätt',
     custom: 'Anpassat',
   },
+
+  // Form 7H structure
+  incomeTotal: 'Totala hyresintäkter för året',
+  housingAndWater: 'Skötselavgifter och vattenavgifter',
+  financialCharges: 'Kapitalavgifter intäktsförda av bolaget',
+  repairCosts: 'Årliga reparationskostnader',
+  otherCosts: 'Övriga kostnader',
+  columnTotal: 'Totalt (100%)',
+  columnYourShare: 'Din andel ({{share}}%)',
 }
 
 export default tax

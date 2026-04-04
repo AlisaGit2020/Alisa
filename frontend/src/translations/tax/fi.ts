@@ -60,6 +60,15 @@ const tax = {
     laundry: 'Pyykki',
     custom: 'Muu',
   },
+
+  // Form 7H structure
+  incomeTotal: 'Vuokratulojen määrä koko vuonna',
+  housingAndWater: 'Hoitovastikkeet ja vesimaksut',
+  financialCharges: 'Yhtiön tulouttamat pääomavastikkeet',
+  repairCosts: 'Vuosikorjausten kulut',
+  otherCosts: 'Muut kulut',
+  columnTotal: 'Yhteensä (100%)',
+  columnYourShare: 'Oma osuus ({{share}}%)',
 }
 
 export default tax

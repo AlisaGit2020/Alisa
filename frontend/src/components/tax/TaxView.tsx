@@ -32,9 +32,16 @@ import type { Property } from "../../types/entities";
 interface BreakdownItem {
   category: string;
   amount: number;
+  totalAmount: number;
   isTaxDeductible: boolean;
   isCapitalImprovement?: boolean;
   depreciationAmount?: number;
+}
+
+interface IncomeBreakdownItem {
+  category: string;
+  amount: number;
+  totalAmount: number;
 }
 
 interface DepreciationAssetBreakdown {
@@ -44,7 +51,9 @@ interface DepreciationAssetBreakdown {
   acquisitionYear: number;
   acquisitionMonth?: number;
   originalAmount: number;
+  totalOriginalAmount: number;
   depreciationAmount: number;
+  totalDepreciationAmount: number;
   remainingAmount: number;
   yearsRemaining: number;
   isFullyDepreciated: boolean;
@@ -56,6 +65,7 @@ interface TaxDeductionBreakdown {
   typeName: string;
   description: string | null;
   amount: number;
+  totalAmount: number;
   metadata?: {
     distanceKm?: number;
     visits?: number;
@@ -69,11 +79,17 @@ interface TaxData {
   propertyId?: number;
   ownershipShare?: number;
   grossIncome: number;
+  totalGrossIncome: number;
   deductions: number;
+  totalDeductions: number;
   taxDeductions?: number;
+  totalTaxDeductions?: number;
   depreciation: number;
+  totalDepreciation: number;
   netIncome: number;
+  totalNetIncome: number;
   breakdown: BreakdownItem[];
+  incomeBreakdown: IncomeBreakdownItem[];
   taxDeductionBreakdown?: TaxDeductionBreakdown[];
   depreciationBreakdown?: DepreciationAssetBreakdown[];
   calculatedAt?: string;
@@ -294,11 +310,6 @@ function TaxView() {
             depreciation={taxData.depreciation}
             netIncome={taxData.netIncome}
           />
-          {taxData.ownershipShare !== undefined && taxData.ownershipShare < 100 && (
-            <Alert severity="info" sx={{ mt: 2 }}>
-              {t("ownershipShare")}: {taxData.ownershipShare}%
-            </Alert>
-          )}
           <Stack direction="row" spacing={2} sx={{ mt: 3, mb: 2 }}>
             <AssetButton
               label={calculating ? t("calculating") : t("calculate")}
@@ -339,13 +350,20 @@ function TaxView() {
           </Stack>
           <TaxBreakdown
             grossIncome={taxData.grossIncome}
+            totalGrossIncome={taxData.totalGrossIncome}
             deductions={taxData.deductions}
+            totalDeductions={taxData.totalDeductions}
             taxDeductions={taxData.taxDeductions}
+            totalTaxDeductions={taxData.totalTaxDeductions}
             depreciation={taxData.depreciation}
+            totalDepreciation={taxData.totalDepreciation}
             netIncome={taxData.netIncome}
+            totalNetIncome={taxData.totalNetIncome}
             breakdown={taxData.breakdown}
+            incomeBreakdown={taxData.incomeBreakdown}
             taxDeductionBreakdown={taxData.taxDeductionBreakdown}
             depreciationBreakdown={taxData.depreciationBreakdown}
+            ownershipShare={taxData.ownershipShare}
             onDeleteDeduction={handleDeleteDeduction}
           />
         </>
