@@ -223,7 +223,7 @@ export const ensureAllTypesExist = async (
   const incomeTypes: Array<{ key: IncomeTypeKey; isTaxable: boolean }> = [
     { key: IncomeTypeKey.RENTAL, isTaxable: true },
     { key: IncomeTypeKey.AIRBNB, isTaxable: true },
-    { key: IncomeTypeKey.CAPITAL_INCOME, isTaxable: true },
+    { key: IncomeTypeKey.CAPITAL_INCOME, isTaxable: false },
     { key: IncomeTypeKey.INSURANCE_COMPENSATION, isTaxable: true },
     { key: IncomeTypeKey.CLEANING_FEE, isTaxable: true },
     { key: IncomeTypeKey.WATER_REFUND, isTaxable: true },

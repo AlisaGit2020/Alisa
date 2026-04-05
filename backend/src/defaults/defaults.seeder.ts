@@ -140,7 +140,7 @@ const GLOBAL_INCOME_TYPES: GlobalIncomeType[] = [
   },
   {
     key: IncomeTypeKey.CAPITAL_INCOME,
-    isTaxable: true,
+    isTaxable: false,
   },
   {
     key: IncomeTypeKey.INSURANCE_COMPENSATION,

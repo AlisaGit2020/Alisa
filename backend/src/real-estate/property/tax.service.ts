@@ -296,6 +296,7 @@ export class TaxService {
        WHERE i."propertyId" = ANY($1::int[])
          AND (i."transactionId" IS NULL OR t.status = $2)
          AND EXTRACT(YEAR FROM i."accountingDate") = $3
+         AND it."isTaxable" = true
        GROUP BY i."propertyId", it.id, it.key
        ORDER BY it.key`,
       [propertyIdsArray, TransactionStatus.ACCEPTED, year],
