@@ -10,7 +10,6 @@ import {
   TableRow,
   Divider,
   Box,
-  Chip,
   Collapse,
   IconButton,
 } from "@mui/material";
@@ -18,7 +17,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { useTranslation } from "react-i18next";
-import InfoTooltip from "../asset/InfoTooltip";
+
 
 interface BreakdownItem {
   category: string;
@@ -169,28 +168,13 @@ function TaxBreakdown({
   const repairTotal = sumTotalAmount(repairItems);
   const otherExpenseAmount = sumAmount(otherItems);
   const otherExpenseTotal = sumTotalAmount(otherItems);
-  const otherAmount = otherExpenseAmount + taxDeductions;
-  const otherTotal = otherExpenseTotal + totalTaxDeductions;
+  const depreciationShareAmount = depreciation;
+  const depreciationTotalAmount = totalDepreciation ?? depreciation;
+  const otherAmount = otherExpenseAmount + taxDeductions + depreciationShareAmount;
+  const otherTotal = otherExpenseTotal + totalTaxDeductions + depreciationTotalAmount;
 
   const hasNewDepreciationBreakdown =
     depreciationBreakdown && depreciationBreakdown.length > 0;
-
-  const depreciationInfoContent = (
-    <Box>
-      <Typography variant="body2" paragraph>
-        {t("depreciationInfoText1")}
-      </Typography>
-      <Typography variant="body2" component="ul" sx={{ pl: 2, mb: 1 }}>
-        <li>{t("depreciationInfoExample1")}</li>
-        <li>{t("depreciationInfoExample2")}</li>
-        <li>{t("depreciationInfoExample3")}</li>
-      </Typography>
-      <Typography variant="body2" paragraph>
-        {t("depreciationInfoText2")}
-      </Typography>
-      <Typography variant="body2">{t("depreciationInfoText3")}</Typography>
-    </Box>
-  );
 
   const renderExpandableRow = (
     key: string,
@@ -388,6 +372,40 @@ function TaxBreakdown({
                     item.totalAmount
                   )
                 )}
+                {hasNewDepreciationBreakdown &&
+                  depreciationBreakdown.map((asset) => (
+                    <TableRow key={`dep-${asset.assetId}`}>
+                      <TableCell sx={{ pl: 6 }}>
+                        <Box>
+                          <Typography variant="body2">
+                            {asset.description}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            component="div"
+                          >
+                            {formatCurrency(asset.originalAmount)} × 10% ={" "}
+                            {formatCurrency(asset.depreciationAmount)}
+                            {asset.isFullyDepreciated
+                              ? ` (${t("fullyDepreciated")})`
+                              : ` (${t("yearsRemaining", {
+                                  years: asset.yearsRemaining,
+                                  acquisitionYear: asset.acquisitionYear,
+                                })})`}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      {showDualColumns && (
+                        <TableCell align="right">
+                          {formatCurrency(asset.totalDepreciationAmount)}
+                        </TableCell>
+                      )}
+                      <TableCell align="right">
+                        {formatCurrency(asset.depreciationAmount)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 {taxDeductionBreakdown &&
                   taxDeductionBreakdown.map((item) => (
                     <TableRow key={`tax-${item.id}`}>
@@ -464,12 +482,12 @@ function TaxBreakdown({
               {showDualColumns && (
                 <TableCell align="right" sx={{ fontWeight: "bold" }}>
                   {formatCurrency(
-                    (totalDeductions ?? deductions) + totalTaxDeductions
+                    (totalDeductions ?? deductions) + totalTaxDeductions + depreciationTotalAmount
                   )}
                 </TableCell>
               )}
               <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                {formatCurrency(deductions + taxDeductions)}
+                {formatCurrency(deductions + taxDeductions + depreciationShareAmount)}
               </TableCell>
             </TableRow>
 
@@ -478,122 +496,6 @@ function TaxBreakdown({
                 <Divider />
               </TableCell>
             </TableRow>
-
-            {/* Depreciation Section */}
-            {depreciation > 0 ||
-            (depreciationBreakdown && depreciationBreakdown.length > 0) ? (
-              <>
-                <TableRow>
-                  <TableCell
-                    colSpan={colSpan}
-                    sx={{ bgcolor: "grey.50", fontWeight: "bold" }}
-                  >
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                    >
-                      {t("depreciationSection")}
-                      <InfoTooltip
-                        title={t("depreciationInfoTitle")}
-                        content={depreciationInfoContent}
-                        variant="dialog"
-                      />
-                    </Box>
-                  </TableCell>
-                </TableRow>
-
-                {hasNewDepreciationBreakdown
-                  ? depreciationBreakdown.map((asset) => (
-                      <TableRow key={asset.assetId}>
-                        <TableCell sx={{ pl: 4 }}>
-                          <Box>
-                            <Typography variant="body2">
-                              {asset.description}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              component="div"
-                            >
-                              {formatCurrency(asset.originalAmount)} × 10% ={" "}
-                              {formatCurrency(asset.depreciationAmount)}
-                            </Typography>
-                            <Box sx={{ mt: 0.5 }}>
-                              {asset.isFullyDepreciated ? (
-                                <Chip
-                                  label={t("fullyDepreciated")}
-                                  size="small"
-                                  color="default"
-                                />
-                              ) : (
-                                <Chip
-                                  label={t("yearsRemaining", {
-                                    years: asset.yearsRemaining,
-                                    acquisitionYear: asset.acquisitionYear,
-                                  })}
-                                  size="small"
-                                  color="primary"
-                                  variant="outlined"
-                                />
-                              )}
-                            </Box>
-                          </Box>
-                        </TableCell>
-                        {showDualColumns && (
-                          <TableCell
-                            align="right"
-                            sx={{ verticalAlign: "top" }}
-                          >
-                            {formatCurrency(asset.totalDepreciationAmount)}
-                          </TableCell>
-                        )}
-                        <TableCell align="right" sx={{ verticalAlign: "top" }}>
-                          {formatCurrency(asset.depreciationAmount)}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  : breakdown
-                      .filter((item) => item.isCapitalImprovement)
-                      .map((item) => (
-                        <TableRow key={item.category}>
-                          <TableCell sx={{ pl: 4 }}>
-                            {item.category} ({formatCurrency(item.amount)} ×
-                            10%)
-                          </TableCell>
-                          {showDualColumns && (
-                            <TableCell align="right">
-                              {formatCurrency(
-                                item.depreciationAmount ?? 0
-                              )}
-                            </TableCell>
-                          )}
-                          <TableCell align="right">
-                            {formatCurrency(item.depreciationAmount || 0)}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-
-                {/* Depreciation Total */}
-                <TableRow>
-                  <TableCell sx={{ fontWeight: "bold" }}>
-                    {t("depreciationTotal")}
-                  </TableCell>
-                  {showDualColumns && (
-                    <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                      {formatCurrency(totalDepreciation ?? depreciation)}
-                    </TableCell>
-                  )}
-                  <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                    {formatCurrency(depreciation)}
-                  </TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell colSpan={colSpan}>
-                    <Divider />
-                  </TableCell>
-                </TableRow>
-              </>
-            ) : null}
 
             {/* Taxable Income */}
             <TableRow sx={{ bgcolor: "grey.100" }}>

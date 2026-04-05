@@ -97,6 +97,32 @@ describe('TaxBreakdown', () => {
     expect(screen.getByText('Airbnb')).toBeInTheDocument();
   });
 
+  it('shows depreciation items under Other costs when expanded', async () => {
+    const user = userEvent.setup();
+    const depreciationBreakdown = [
+      {
+        assetId: 1,
+        expenseId: 10,
+        description: 'Kitchen renovation',
+        acquisitionYear: 2024,
+        originalAmount: 5000,
+        totalOriginalAmount: 5000,
+        depreciationAmount: 500,
+        totalDepreciationAmount: 500,
+        remainingAmount: 4500,
+        yearsRemaining: 9,
+        isFullyDepreciated: false,
+      },
+    ];
+
+    renderWithProviders(
+      <TaxBreakdown {...defaultProps} depreciation={500} depreciationBreakdown={depreciationBreakdown} />
+    );
+
+    await user.click(screen.getByText('Other costs'));
+    expect(screen.getByText('Kitchen renovation')).toBeInTheDocument();
+  });
+
   describe('dual column display', () => {
     it('shows dual columns when ownership < 100%', () => {
       renderWithProviders(
