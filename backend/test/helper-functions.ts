@@ -182,6 +182,41 @@ export const ensureAllTypesExist = async (
       isTaxDeductible: true,
       isCapitalImprovement: false,
     },
+    {
+      key: ExpenseTypeKey.FURNISHINGS,
+      isTaxDeductible: true,
+      isCapitalImprovement: false,
+    },
+    {
+      key: ExpenseTypeKey.CONSUMABLES,
+      isTaxDeductible: true,
+      isCapitalImprovement: false,
+    },
+    {
+      key: ExpenseTypeKey.RENTAL_OPERATIONS,
+      isTaxDeductible: true,
+      isCapitalImprovement: false,
+    },
+    {
+      key: ExpenseTypeKey.RENT_REFUND,
+      isTaxDeductible: true,
+      isCapitalImprovement: false,
+    },
+    {
+      key: ExpenseTypeKey.INTERNET,
+      isTaxDeductible: true,
+      isCapitalImprovement: false,
+    },
+    {
+      key: ExpenseTypeKey.WITHHOLDING_TAX,
+      isTaxDeductible: true,
+      isCapitalImprovement: false,
+    },
+    {
+      key: ExpenseTypeKey.OTHER_CHARGE_BASED,
+      isTaxDeductible: true,
+      isCapitalImprovement: false,
+    },
   ];
 
   // Define income types with their properties
@@ -190,6 +225,8 @@ export const ensureAllTypesExist = async (
     { key: IncomeTypeKey.AIRBNB, isTaxable: true },
     { key: IncomeTypeKey.CAPITAL_INCOME, isTaxable: true },
     { key: IncomeTypeKey.INSURANCE_COMPENSATION, isTaxable: true },
+    { key: IncomeTypeKey.CLEANING_FEE, isTaxable: true },
+    { key: IncomeTypeKey.WATER_REFUND, isTaxable: true },
   ];
 
   // Insert expense types
