@@ -377,8 +377,9 @@ function TaxBreakdown({
                     <TableRow key={`dep-${asset.assetId}`}>
                       <TableCell sx={{ pl: 6 }}>
                         <Box>
-                          <Typography variant="body2">
-                            {asset.description}
+                          <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                            {t("depreciationSection")}
+                            {asset.description ? `: ${asset.description}` : ""}
                           </Typography>
                           <Typography
                             variant="caption"

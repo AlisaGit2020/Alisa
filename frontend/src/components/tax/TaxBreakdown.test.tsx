@@ -120,7 +120,7 @@ describe('TaxBreakdown', () => {
     );
 
     await user.click(screen.getByText('Other costs'));
-    expect(screen.getByText('Kitchen renovation')).toBeInTheDocument();
+    expect(screen.getByText('Capital improvement depreciation (10%): Kitchen renovation')).toBeInTheDocument();
   });
 
   describe('dual column display', () => {
