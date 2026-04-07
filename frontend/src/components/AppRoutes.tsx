@@ -21,6 +21,8 @@ import ProspectCompareView from "./investment-calculator/ProspectCompareView";
 import PublicLayout from "./layout/PublicLayout";
 import ProtectedLayout from "./layout/ProtectedLayout";
 import { FinanceHub, ReportsHub } from "./hub";
+import CleanerDashboard from "./cleaning/CleanerDashboard";
+import AdminCleaningPage from "./cleaning/AdminCleaningPage";
 
 // Export AppRoutesContent for testing (use with MemoryRouter in tests)
 export function AppRoutesContent() {
@@ -37,6 +39,7 @@ export function AppRoutesContent() {
         <Route path="/app" element={<ProtectedLayout />}>
           <Route element={<AuthOutlet fallbackPath="/login" />}>
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="cleaner" element={<CleanerDashboard />} />
 
             {/* Portfolio routes - nested under /app/portfolio */}
             <Route path="portfolio" element={<Navigate to="/app/portfolio/own" replace />} />
@@ -44,6 +47,7 @@ export function AppRoutesContent() {
             <Route path="portfolio/own/add" element={<PropertyForm />} />
             <Route path="portfolio/own/edit/:idParam" element={<PropertyForm />} />
             <Route path="portfolio/own/:idParam" element={<PropertyView />} />
+            <Route path="portfolio/property/:idParam/cleanings" element={<AdminCleaningPage />} />
             <Route path="portfolio/prospects" element={<Properties />} />
             <Route path="portfolio/prospects/compare" element={<ProspectCompareView standalone />} />
             <Route path="portfolio/prospects/add" element={<PropertyForm />} />

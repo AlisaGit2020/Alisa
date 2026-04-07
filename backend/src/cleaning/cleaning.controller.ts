@@ -41,6 +41,12 @@ export class CleaningController {
     return this.cleaningService.addCleaning(user, input);
   }
 
+  @Get('my/properties')
+  @Roles(UserRole.CLEANER)
+  getMyProperties(@User() user: JWTUser) {
+    return this.propertyCleanerService.getPropertiesForCleaner(user.id);
+  }
+
   @Get('my')
   @Roles(UserRole.CLEANER)
   async getMyCleaning(@User() user: JWTUser): Promise<Cleaning[]> {
