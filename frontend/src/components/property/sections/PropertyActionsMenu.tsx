@@ -10,6 +10,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import HomeIcon from '@mui/icons-material/Home';
 import SellIcon from '@mui/icons-material/Sell';
 import PaymentsIcon from '@mui/icons-material/Payments';
+import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import { Property, PropertyStatus, PropertyExternalSource, propertyExternalSourceNames } from '@asset-types';
 import AssetDialog from '../../asset/dialog/AssetDialog';
 import AssetButton from '../../asset/form/AssetButton';
@@ -23,6 +24,7 @@ interface PropertyActionsMenuProps {
   onEdit: () => void;
   onOpenAllocationRules: () => void;
   onOpenCharges?: () => void;
+  onOpenManageCleaners?: () => void;
   onToggleAdvancedReports?: () => void;
   onPropertyUpdated?: (property: Property) => void;
 }
@@ -55,10 +57,11 @@ function PropertyActionsMenu({
   onEdit,
   onOpenAllocationRules,
   onOpenCharges,
+  onOpenManageCleaners,
   onToggleAdvancedReports,
   onPropertyUpdated,
 }: PropertyActionsMenuProps) {
-  const { t } = useTranslation('property');
+  const { t } = useTranslation(['property', 'cleaning']);
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -237,6 +240,12 @@ function PropertyActionsMenu({
               <PaymentsIcon fontSize="small" />
             </ListItemIcon>
             {t('chargeHistory')}
+          </MenuItem>
+        )}
+        {property.isAirbnb && onOpenManageCleaners && (
+          <MenuItem onClick={() => { handleClose(); onOpenManageCleaners(); }}>
+            <ListItemIcon><CleaningServicesIcon fontSize="small" /></ListItemIcon>
+            {t('cleaning:manageCleaners')}
           </MenuItem>
         )}
         {showAdvancedReports && (
