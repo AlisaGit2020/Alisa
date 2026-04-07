@@ -6,7 +6,7 @@ import { User } from '../people/user/entities/user.entity';
 import { JWTUser } from './types';
 import { FindOptionsWhere } from 'typeorm';
 import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
-import { FindOptionsWhereWithUserId } from '@asset-backend/common/types';
+import { FindOptionsWhereWithUserId, UserRole } from '@asset-backend/common/types';
 import { UserSettingsInputDto } from './dtos/user-settings-input.dto';
 import { TierService } from '@asset-backend/admin/tier.service';
 
@@ -57,7 +57,7 @@ export class AuthService {
       language: userEntity.language,
       ownershipInProperties:
         userEntity?.ownerships?.map((ownership) => ownership.propertyId) ?? [],
-      isAdmin: userEntity.isAdmin ?? false,
+      roles: userEntity.roles ?? [UserRole.OWNER],
       tierId: userEntity.tierId,
       tierName: userEntity.tier?.name,
       tierMaxProperties: userEntity.tier?.maxProperties,

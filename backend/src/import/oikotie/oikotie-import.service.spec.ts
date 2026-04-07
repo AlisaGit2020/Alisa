@@ -11,6 +11,7 @@ import {
   PropertyExternalSource,
   PropertyStatus,
   PropertyType,
+  UserRole,
 } from '@asset-backend/common/types';
 import { OikotiePropertyDataDto } from './dtos/oikotie-property-data.dto';
 import { PropertyService } from '@asset-backend/real-estate/property/property.service';
@@ -584,7 +585,7 @@ describe('OikotieImportService', () => {
       email: 'test@example.com',
       language: 'fi',
       ownershipInProperties: [],
-      isAdmin: false,
+      roles: [UserRole.OWNER],
     };
 
     beforeEach(() => {

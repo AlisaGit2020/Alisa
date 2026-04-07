@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { User } from '@asset-backend/people/user/entities/user.entity';
 import { UserInputDto } from '@asset-backend/people/user/dtos/user-input.dto';
+import { UserRole } from '@asset-backend/common/types';
 
 @Injectable()
 export class UserService {
@@ -59,7 +60,20 @@ export class UserService {
    * Should only be called by admin-level operations.
    */
   async setAdminStatus(userId: number, isAdmin: boolean): Promise<void> {
-    await this.repository.update(userId, { isAdmin });
+    const user = await this.findOne(userId);
+    if (!user) return;
+
+    if (isAdmin) {
+      // Add ADMIN role if not already present
+      if (!user.roles.includes(UserRole.ADMIN)) {
+        user.roles = [...user.roles, UserRole.ADMIN];
+      }
+    } else {
+      // Remove ADMIN role
+      user.roles = user.roles.filter((role) => role !== UserRole.ADMIN);
+    }
+
+    await this.repository.save(user);
   }
 
   async hasOwnership(userId: number, propertyId: number): Promise<boolean> {

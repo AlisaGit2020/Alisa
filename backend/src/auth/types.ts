@@ -1,3 +1,5 @@
+import { UserRole } from '@asset-backend/common/types';
+
 export type JWTUser = {
   id: number;
   firstName: string;
@@ -5,7 +7,7 @@ export type JWTUser = {
   email: string;
   language: string;
   ownershipInProperties: number[];
-  isAdmin: boolean;
+  roles: UserRole[];
   tierId?: number;
   tierName?: string;
   tierMaxProperties?: number;

@@ -1,5 +1,6 @@
 import { JWTUser } from '@asset-backend/auth/types';
 import { User } from '@asset-backend/people/user/entities/user.entity';
+import { UserRole } from '@asset-backend/common/types';
 
 export interface CreateJWTUserOptions {
   id?: number;
@@ -8,7 +9,7 @@ export interface CreateJWTUserOptions {
   email?: string;
   language?: string;
   ownershipInProperties?: number[];
-  isAdmin?: boolean;
+  roles?: UserRole[];
   tierId?: number;
   tierName?: string;
   tierMaxProperties?: number;
@@ -21,7 +22,7 @@ export const createJWTUser = (options: CreateJWTUserOptions = {}): JWTUser => ({
   email: options.email ?? 'test@example.com',
   language: options.language ?? 'fi',
   ownershipInProperties: options.ownershipInProperties ?? [1, 2],
-  isAdmin: options.isAdmin ?? false,
+  roles: options.roles ?? [UserRole.OWNER],
   tierId: options.tierId,
   tierName: options.tierName,
   tierMaxProperties: options.tierMaxProperties,
@@ -34,7 +35,7 @@ export interface CreateUserOptions {
   email?: string;
   language?: string;
   photo?: string;
-  isAdmin?: boolean;
+  roles?: UserRole[];
   tierId?: number;
 }
 
@@ -46,7 +47,7 @@ export const createUser = (options: CreateUserOptions = {}): User => {
   user.email = options.email ?? 'test@example.com';
   user.language = options.language ?? 'fi';
   user.photo = options.photo ?? 'https://example.com/photo.jpg';
-  user.isAdmin = options.isAdmin ?? false;
+  user.roles = options.roles ?? [UserRole.OWNER];
   user.tierId = options.tierId;
   user.ownerships = [];
   return user;

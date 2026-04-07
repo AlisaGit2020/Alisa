@@ -17,6 +17,7 @@ import {
 import { UserInputDto } from '@asset-backend/people/user/dtos/user-input.dto';
 import { JWTUser } from '@asset-backend/auth/types';
 import { User } from '@asset-backend/people/user/entities/user.entity';
+import { UserRole } from '@asset-backend/common/types';
 import * as http from 'http';
 
 describe('AdminController (e2e)', () => {
@@ -50,7 +51,7 @@ describe('AdminController (e2e)', () => {
     await userService.setAdminStatus(adminUser.user.id, true);
     adminToken = await getUserAccessToken2(authService, {
       ...adminUser.jwtUser,
-      isAdmin: true,
+      roles: [UserRole.ADMIN, UserRole.OWNER],
     });
 
     // Non-admin token
@@ -76,7 +77,7 @@ describe('AdminController (e2e)', () => {
       email,
       language: 'fi',
       ownershipInProperties: [],
-      isAdmin: false,
+      roles: [UserRole.OWNER],
     };
     await userService.add(jwtUser as unknown as UserInputDto);
     const users = await userService.search({ where: { email } });
