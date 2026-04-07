@@ -24,6 +24,7 @@ import UserDetails from "../user/UserDetails";
 import FeedbackDialog from "../feedback/FeedbackDialog";
 import { useSignOutWithCleanup } from "@asset-lib/use-sign-out-with-cleanup";
 import LanguageMenu from "./LanguageMenu";
+import { UserRole } from "@asset-types";
 
 function MobileMoreMenu() {
   const { t } = useTranslation("appBar");
@@ -40,7 +41,7 @@ function MobileMoreMenu() {
 
   const menuOpen = Boolean(anchorEl);
   const languageMenuOpen = Boolean(languageAnchorEl);
-  const isAdmin = user?.isAdmin === true;
+  const isAdmin = user?.roles?.includes(UserRole.ADMIN) ?? false;
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

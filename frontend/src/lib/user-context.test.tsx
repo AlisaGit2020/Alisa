@@ -19,7 +19,7 @@ describe("UserContext", () => {
   });
 
   it("provides user data to consuming components", async () => {
-    const mockUser = { id: 1, firstName: "Test", lastName: "User", email: "test@example.com", isAdmin: false };
+    const mockUser = { id: 1, firstName: "Test", lastName: "User", email: "test@example.com", roles: [] };
     mockMe.mockResolvedValue(mockUser);
 
     const { result } = renderHook(() => useUser(), { wrapper });

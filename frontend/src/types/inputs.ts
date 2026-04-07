@@ -49,6 +49,7 @@ export interface PropertyInput {
   debtShare?: number;
   monthlyRent?: number;
   isAirbnb?: boolean;
+  cleaningBruttoPrice?: number;
   distanceFromHome?: number;
   ownerships?: OwnershipInput[];
 }
@@ -214,4 +215,11 @@ export interface PropertyChargeInput {
   amount: number;
   startDate: string | null;
   endDate?: string | null;
+}
+
+// Cleaning input
+export interface CleaningInput {
+  date: string;
+  propertyId: number;
+  percentage: number;
 }

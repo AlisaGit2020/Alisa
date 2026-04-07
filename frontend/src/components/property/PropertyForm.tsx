@@ -61,6 +61,7 @@ function PropertyForm({ t }: WithTranslation) {
         status: statusFromPath,
         ownerships: [{ userId: 0, share: 100 }],
         isAirbnb: false,
+        cleaningBruttoPrice: undefined,
         distanceFromHome: undefined,
     });
     const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
@@ -461,6 +462,15 @@ function PropertyForm({ t }: WithTranslation) {
                         />
                     </Box>
                 </Stack>
+                {data.isAirbnb && (
+                    <Box sx={{ maxWidth: 200 }}>
+                        <AssetMoneyField
+                            label={t('cleaningBruttoPrice')}
+                            value={data.cleaningBruttoPrice ?? ''}
+                            onChange={(value) => handleChange('cleaningBruttoPrice', value)}
+                        />
+                    </Box>
+                )}
 
                 {/* Purchase Info Section - for OWN and PROSPECT */}
                 {(data.status === PropertyStatus.OWN || data.status === PropertyStatus.PROSPECT) && (

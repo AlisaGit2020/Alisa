@@ -9,7 +9,7 @@ export const emptyUser: User = {
   email: "",
   language: "",
   photo: "",
-  isAdmin: false,
+  roles: [],
   ownerships: [],
 };
 

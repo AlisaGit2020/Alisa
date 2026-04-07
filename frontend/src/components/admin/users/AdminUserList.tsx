@@ -106,7 +106,7 @@ function AdminUserList({ t }: WithTranslation) {
               </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.language}</TableCell>
-              <TableCell>{user.isAdmin ? t("yes") : t("no")}</TableCell>
+              <TableCell>{user.roles?.includes('admin') ? t("yes") : t("no")}</TableCell>
               <TableCell>
                 <Select
                   size="small"

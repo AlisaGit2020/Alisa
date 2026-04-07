@@ -4,13 +4,14 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import AdminDialog from "./AdminDialog";
 import { useUser } from "@asset-lib/user-context";
+import { UserRole } from "@asset-types";
 
 function AdminMenu() {
   const { t } = useTranslation("admin");
   const { user } = useUser();
   const [open, setOpen] = useState(false);
 
-  const isAdmin = user?.isAdmin === true;
+  const isAdmin = user?.roles?.includes(UserRole.ADMIN) ?? false;
 
   if (!isAdmin) {
     return null;

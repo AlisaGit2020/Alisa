@@ -13,7 +13,7 @@ describe('AdminUserList Logic', () => {
         lastName: 'Doe',
         email: 'john@example.com',
         language: 'en',
-        isAdmin: false,
+        roles: [],
         tierId: 1,
       };
 
@@ -22,7 +22,7 @@ describe('AdminUserList Logic', () => {
       expect(user.lastName).toBe('Doe');
       expect(user.email).toBe('john@example.com');
       expect(user.language).toBe('en');
-      expect(user.isAdmin).toBe(false);
+      expect(user.roles).toEqual([]);
       expect(user.tierId).toBe(1);
     });
 
@@ -64,17 +64,17 @@ describe('AdminUserList Logic', () => {
 
   describe('Admin status display', () => {
     it('returns Yes for admin users', () => {
-      const getAdminDisplay = (isAdmin: boolean, yesText: string, noText: string) =>
-        isAdmin ? yesText : noText;
+      const getAdminDisplay = (roles: string[], yesText: string, noText: string) =>
+        roles.includes('admin') ? yesText : noText;
 
-      expect(getAdminDisplay(true, 'Yes', 'No')).toBe('Yes');
+      expect(getAdminDisplay(['admin'], 'Yes', 'No')).toBe('Yes');
     });
 
     it('returns No for non-admin users', () => {
-      const getAdminDisplay = (isAdmin: boolean, yesText: string, noText: string) =>
-        isAdmin ? yesText : noText;
+      const getAdminDisplay = (roles: string[], yesText: string, noText: string) =>
+        roles.includes('admin') ? yesText : noText;
 
-      expect(getAdminDisplay(false, 'Yes', 'No')).toBe('No');
+      expect(getAdminDisplay([], 'Yes', 'No')).toBe('No');
     });
   });
 

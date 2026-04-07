@@ -14,7 +14,7 @@ describe('UserDetails Component Logic', () => {
       expect(emptyUser.email).toBe('');
       expect(emptyUser.language).toBe('');
       expect(emptyUser.photo).toBe('');
-      expect(emptyUser.isAdmin).toBe(false);
+      expect(emptyUser.roles).toEqual([]);
       expect(emptyUser.ownerships).toEqual([]);
     });
 
@@ -305,7 +305,7 @@ describe('UserDetails Component Logic', () => {
         firstName: '',
         lastName: '',
         email: '',
-        isAdmin: false,
+        roles: [],
       };
 
       expect(minimalUser.language).toBeUndefined();
