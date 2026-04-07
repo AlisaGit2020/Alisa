@@ -147,6 +147,15 @@ function PropertyView({ t }: WithTranslation) {
                 ].filter(Boolean).join(' · ')}
               </Typography>
             )}
+            {property.isAirbnb && (
+              <AssetButton
+                label="Siivous"
+                variant="outlined"
+                size="small"
+                onClick={() => navigate(`/app/portfolio/property/${idParam}/cleanings`)}
+                sx={{ mt: 1 }}
+              />
+            )}
           </Box>
           <PropertyActionsMenu
             property={property}
