@@ -20,6 +20,8 @@ import { PropertyCleanerService } from './property-cleaner.service';
 import { Cleaning } from './entities/cleaning.entity';
 import { PropertyCleaner } from './entities/property-cleaner.entity';
 import { CleaningInputDto } from './dtos/cleaning-input.dto';
+import { CreateCleanerDto } from './dtos/create-cleaner.dto';
+import { UserService } from '@asset-backend/people/user/user.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('cleaning')
@@ -27,6 +29,7 @@ export class CleaningController {
   constructor(
     private cleaningService: CleaningService,
     private propertyCleanerService: PropertyCleanerService,
+    private userService: UserService,
   ) {}
 
   @Post()
@@ -90,5 +93,17 @@ export class CleaningController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<void> {
     return this.propertyCleanerService.remove(user, propertyId, userId);
+  }
+
+  @Post('cleaners')
+  @Roles(UserRole.ADMIN)
+  createCleaner(@Body() dto: CreateCleanerDto) {
+    return this.userService.createCleaner(dto);
+  }
+
+  @Get('cleaners')
+  @Roles(UserRole.ADMIN)
+  getCleanersList(@User() user: JWTUser) {
+    return this.userService.findCleanersForAdmin(user.id);
   }
 }

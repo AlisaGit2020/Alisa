@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { User } from '@asset-backend/people/user/entities/user.entity';
@@ -87,6 +87,45 @@ export class UserService {
     return user.ownerships.some(
       (ownership) => ownership.propertyId === propertyId,
     );
+  }
+
+  async createCleaner(dto: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  }): Promise<User> {
+    const existing = await this.repository.findOne({
+      where: { email: dto.email },
+    });
+    if (existing) {
+      throw new BadRequestException('User with this email already exists');
+    }
+    return this.repository.save({
+      email: dto.email,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      roles: [UserRole.CLEANER],
+    });
+  }
+
+  async findCleanersForAdmin(adminUserId: number): Promise<User[]> {
+    return this.repository
+      .createQueryBuilder('user')
+      .innerJoin(
+        'property_cleaner',
+        'pc',
+        'pc."userId" = user.id',
+      )
+      .innerJoin(
+        'ownership',
+        'o',
+        'o."propertyId" = pc."propertyId" AND o."userId" = :adminUserId',
+        {
+          adminUserId,
+        },
+      )
+      .where("'cleaner' = ANY(user.roles)")
+      .getMany();
   }
 
   private mapData(user: User, input: UserInputDto) {
