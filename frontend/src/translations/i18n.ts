@@ -9,6 +9,7 @@ const namespaces = [
     'accounting',
     'admin',
     'allocation',
+    'cleaning',
     'dashboard',
     'expense',
     'expense-type',
