@@ -7,6 +7,8 @@ const route = {
   own: "Mina fastigheter",
   calculations: "Beräkningar",
   calculator: "Kalkylator",
+  cleaner: "Städare",
+  cleanings: "Städning",
   dashboard: "Översikt",
   edit: "Redigera",
   expense: "Utgift",

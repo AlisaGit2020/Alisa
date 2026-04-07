@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
-import { User, Tier } from "@asset-types";
+import { User, Tier, UserRole } from "@asset-types";
 import ApiClient from "@asset-lib/api-client";
 import { adminContext } from "@asset-lib/asset-contexts";
 
@@ -106,7 +106,7 @@ function AdminUserList({ t }: WithTranslation) {
               </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.language}</TableCell>
-              <TableCell>{user.roles?.includes('admin') ? t("yes") : t("no")}</TableCell>
+              <TableCell>{user.roles?.includes(UserRole.ADMIN) ? t("yes") : t("no")}</TableCell>
               <TableCell>
                 <Select
                   size="small"

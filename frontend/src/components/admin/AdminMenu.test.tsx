@@ -5,6 +5,7 @@ import { renderWithProviders } from '@test-utils/test-wrapper';
 import AdminMenu from './AdminMenu';
 import ApiClient from '@asset-lib/api-client';
 import { createMockUser } from '@test-utils/test-data';
+import { UserRole } from '@asset-types';
 
 jest.mock('@asset-lib/api-client');
 
@@ -14,7 +15,7 @@ describe('AdminMenu', () => {
     firstName: 'Admin',
     lastName: 'User',
     email: 'admin@example.com',
-    roles: ['admin'],
+    roles: [UserRole.ADMIN],
   });
 
   const mockNonAdminUser = createMockUser({
@@ -156,7 +157,7 @@ describe('AdminMenu Logic', () => {
   describe('Admin check flow', () => {
     it('calls ApiClient.me on mount', () => {
       const meSpy = jest.spyOn(ApiClient, 'me').mockResolvedValue(
-        createMockUser({ roles: ['admin'] })
+        createMockUser({ roles: [UserRole.ADMIN] })
       );
 
       renderWithProviders(<AdminMenu />);

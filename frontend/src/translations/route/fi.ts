@@ -7,6 +7,8 @@ const route = {
   own: "Omat asunnot",
   calculations: "Laskelmat",
   calculator: "Laskuri",
+  cleaner: "Siivooja",
+  cleanings: "Siivous",
   dashboard: "Yleiskatsaus",
   edit: "Muokkaa",
   expense: "Kulu",
