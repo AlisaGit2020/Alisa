@@ -156,4 +156,13 @@ export class Property {
     transformer: new DecimalToNumberTransformer(),
   })
   public distanceFromHome?: number;
+
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    transformer: new DecimalToNumberTransformer(),
+  })
+  public cleaningBruttoPrice?: number;
 }
