@@ -7,6 +7,7 @@ const cleaning = {
   amount: 'Amount',
   total: 'Total',
   property: 'Property',
+  propertyName: 'Property',
   cleaningHistory: 'Cleaning history',
   myCleaningHistory: 'My cleaning history',
   monthlySummary: 'Summary by cleaner',
@@ -27,6 +28,8 @@ const cleaning = {
   noCleanersAssigned: 'No cleaners assigned',
   rowCount_one: '{{count}} cleaning',
   rowCount_other: '{{count}} cleanings',
+  monthlyTotal: 'This month',
+  allTimeTotal: 'All time',
 };
 
 export default cleaning;

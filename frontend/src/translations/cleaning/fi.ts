@@ -7,6 +7,7 @@ const cleaning = {
   amount: 'Summa',
   total: 'Yhteensä',
   property: 'Kohde',
+  propertyName: 'Kohde',
   cleaningHistory: 'Siivoushistoria',
   myCleaningHistory: 'Omat siivoushistoria',
   monthlySummary: 'Yhteenveto siivoojakohtaisesti',
@@ -27,6 +28,8 @@ const cleaning = {
   noCleanersAssigned: 'Ei siivoojia liitetty',
   rowCount_one: '{{count}} siivous',
   rowCount_other: '{{count}} siivousta',
+  monthlyTotal: 'Tämä kuukausi',
+  allTimeTotal: 'Yhteensä',
 };
 
 export default cleaning;
