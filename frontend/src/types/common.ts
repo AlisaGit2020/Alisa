@@ -50,6 +50,7 @@ export enum StatisticKey {
   TAX_DEDUCTIONS = 'tax_deductions',
   TAX_DEPRECIATION = 'tax_depreciation',
   TAX_NET_INCOME = 'tax_net_income',
+  LOAN_BALANCE = 'loan_balance',
 }
 
 export enum PropertyStatus {
