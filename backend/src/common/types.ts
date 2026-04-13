@@ -55,6 +55,7 @@ export enum StatisticKey {
   TAX_DEPRECIATION = 'tax_depreciation',
   TAX_NET_INCOME = 'tax_net_income',
   AIRBNB_VISITS = 'airbnb_visits',
+  LOAN_BALANCE = 'loan_balance',
 }
 
 export type BetweenDates = {
