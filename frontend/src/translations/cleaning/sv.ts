@@ -7,6 +7,7 @@ const cleaning = {
   amount: 'Belopp',
   total: 'Totalt',
   property: 'Fastighet',
+  propertyName: 'Fastighet',
   cleaningHistory: 'Städhistorik',
   myCleaningHistory: 'Min städhistorik',
   monthlySummary: 'Sammanfattning per städare',
@@ -27,6 +28,8 @@ const cleaning = {
   noCleanersAssigned: 'Inga städare tilldelade',
   rowCount_one: '{{count}} städning',
   rowCount_other: '{{count}} städningar',
+  monthlyTotal: 'Denna månad',
+  allTimeTotal: 'Totalt',
 };
 
 export default cleaning;

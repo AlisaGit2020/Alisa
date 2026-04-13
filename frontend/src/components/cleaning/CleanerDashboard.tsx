@@ -1,5 +1,7 @@
 import React from 'react';
-import { Box, Card, CardContent, Stack, Typography } from '@mui/material';
+import { Box, Card, CardContent, IconButton, Stack, Typography } from '@mui/material';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useTranslation } from 'react-i18next';
 import { AssetButton, AssetDatePicker, AssetNumberField, AssetSelectField } from '../asset';
 import AssetDataTable, { AssetDataTableField } from '../asset/datatable/AssetDataTable';
@@ -27,6 +29,31 @@ function CleanerDashboard() {
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
   const [cleaningToDelete, setCleaningToDelete] = React.useState<number | null>(null);
+
+  // Month navigation
+  const now = new Date();
+  const [month, setMonth] = React.useState(now.getMonth() + 1); // 1-12
+  const [year, setYear] = React.useState(now.getFullYear());
+
+  const handlePrevMonth = () => {
+    if (month === 1) {
+      setMonth(12);
+      setYear(year - 1);
+    } else {
+      setMonth(month - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (month === 12) {
+      setMonth(1);
+      setYear(year + 1);
+    } else {
+      setMonth(month + 1);
+    }
+  };
+
+  const monthName = t(`common:${new Date(year, month - 1).toLocaleString('en-US', { month: 'long' }).toLowerCase()}`);
 
   // Fetch assigned properties on mount
   React.useEffect(() => {
@@ -95,24 +122,38 @@ function CleanerDashboard() {
     ? (selectedProperty.cleaningBruttoPrice * (Number(percentage) || 100)) / 100
     : 0;
 
-  // Transform cleanings to rows with computed fields
-  const cleaningRows: CleaningRow[] = cleanings.map(cleaning => {
-    const property = properties.find(p => p.propertyId === cleaning.propertyId)?.property;
-    const bruttoPrice = property?.cleaningBruttoPrice || 0;
-    const amount = (bruttoPrice * cleaning.percentage) / 100;
+  // Transform all cleanings to rows with amounts
+  const allCleaningRows: CleaningRow[] = React.useMemo(() => {
+    return cleanings.map(cleaning => {
+      const property = properties.find(p => p.propertyId === cleaning.propertyId)?.property;
+      const bruttoPrice = property?.cleaningBruttoPrice || 0;
+      const amount = (bruttoPrice * cleaning.percentage) / 100;
 
-    return {
-      ...cleaning,
-      propertyName: property?.name || '',
-      amount,
-    };
-  });
+      return {
+        ...cleaning,
+        propertyName: property?.name || '',
+        amount,
+      };
+    });
+  }, [cleanings, properties]);
+
+  // Filter cleanings by selected month
+  const cleaningRows = React.useMemo(() => {
+    return allCleaningRows.filter(cleaning => {
+      const cleaningDate = dayjs(cleaning.date);
+      return cleaningDate.month() + 1 === month && cleaningDate.year() === year;
+    });
+  }, [allCleaningRows, month, year]);
+
+  // Calculate totals
+  const monthlyTotal = cleaningRows.reduce((sum, row) => sum + row.amount, 0);
+  const allTimeTotal = allCleaningRows.reduce((sum, row) => sum + row.amount, 0);
 
   const fields: AssetDataTableField<CleaningRow>[] = [
     { name: 'date', format: 'date' },
     { name: 'propertyName' },
-    { name: 'percentage' },
-    { name: 'amount', format: 'currency', sum: true },
+    { name: 'percentage', hideOnMobile: true },
+    { name: 'amount', format: 'currency' },
   ];
 
   const handleDeleteRequest = (id: number) => {
@@ -142,7 +183,7 @@ function CleanerDashboard() {
 
       {/* Add Cleaning Form */}
       <Card sx={{ mb: 3, maxWidth: { xs: '100%', sm: 400 } }}>
-        <CardContent>
+        <CardContent sx={{ px: { xs: 2, sm: 2 } }}>
           <Typography variant="h6" gutterBottom>
             {t('cleaning:addCleaning')}
           </Typography>
@@ -209,10 +250,48 @@ function CleanerDashboard() {
 
       {/* Cleaning History Table */}
       <Card>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
+        <CardContent sx={{ px: { xs: 1, sm: 2 } }}>
+          <Typography variant="h6" gutterBottom sx={{ px: { xs: 1, sm: 0 } }}>
             {t('cleaning:myCleaningHistory')}
           </Typography>
+
+          {/* Month navigator */}
+          <Stack direction="row" alignItems="center" justifyContent="center" sx={{ mb: 2 }}>
+            <IconButton onClick={handlePrevMonth} size="small">
+              <ChevronLeftIcon />
+            </IconButton>
+            <Typography variant="subtitle1" sx={{ minWidth: { xs: 140, sm: 200 }, textAlign: 'center' }}>
+              {monthName} {year}
+            </Typography>
+            <IconButton onClick={handleNextMonth} size="small">
+              <ChevronRightIcon />
+            </IconButton>
+          </Stack>
+
+          {/* Totals summary */}
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={{ xs: 1, sm: 3 }}
+            justifyContent="center"
+            sx={{ mb: 2, px: { xs: 1, sm: 0 } }}
+          >
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                {t('cleaning:monthlyTotal')}
+              </Typography>
+              <Typography variant="h6" fontWeight="bold">
+                {t('common:format.currency.euro', { val: monthlyTotal })}
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                {t('cleaning:allTimeTotal')}
+              </Typography>
+              <Typography variant="h6" fontWeight="bold">
+                {t('common:format.currency.euro', { val: allTimeTotal })}
+              </Typography>
+            </Box>
+          </Stack>
 
           <AssetDataTable<CleaningRow>
             t={t}
@@ -220,6 +299,7 @@ function CleanerDashboard() {
             fields={fields}
             onDeleteRequest={handleDeleteRequest}
             sortable
+            fixedLayout
           />
         </CardContent>
       </Card>

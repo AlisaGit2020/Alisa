@@ -359,16 +359,18 @@ function AssetDataTable<T extends { id: number }>(props: {
                     )}
                   </TableCell>
                 ))}
-                {props.onNewRow && (
+                {(props.onEdit || props.onDelete || props.onDeleteRequest || props.onNewRow) && (
                   <TableCell align="right" sx={{ whiteSpace: "nowrap", width: isMobile ? MOBILE_ACTION_WIDTH : "auto", padding: isMobile ? MOBILE_ACTION_CELL_PADDING : undefined }}>
-                    <AssetDataTableAddButton
-                      onClick={props.onNewRow}
-                      t={props.t}
-                      visible={
-                        props.selectedIds?.length == 0 ||
-                        props.selectedIds === undefined
-                      }
-                    ></AssetDataTableAddButton>
+                    {props.onNewRow && (
+                      <AssetDataTableAddButton
+                        onClick={props.onNewRow}
+                        t={props.t}
+                        visible={
+                          props.selectedIds?.length == 0 ||
+                          props.selectedIds === undefined
+                        }
+                      ></AssetDataTableAddButton>
+                    )}
                   </TableCell>
                 )}
               </TableRow>
