@@ -39,6 +39,8 @@ const dashboard = {
   recalculate: "Laske tilastot uudelleen",
   configSaved: "Dashboard-asettelu tallennettu",
   configSaveError: "Dashboard-asettelun tallennus epäonnistui",
+  loanBalance: "Lainasaldo",
+  noLoanData: "Ei lainatietoja",
 };
 
 export default dashboard;
