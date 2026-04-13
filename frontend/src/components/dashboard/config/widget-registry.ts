@@ -6,6 +6,7 @@ import NetResultChart from "../widgets/NetResultChart";
 import DepositChart from "../widgets/DepositChart";
 import WithdrawChart from "../widgets/WithdrawChart";
 import AirbnbVisitsChart from "../widgets/AirbnbVisitsChart";
+import LoanBalanceChart from "../widgets/LoanBalanceChart";
 
 export type WidgetSize = "1/1" | "1/2" | "1/3" | "1/4";
 
@@ -77,6 +78,13 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     component: AirbnbVisitsChart,
     translationKey: "airbnbVisits",
     defaultSize: "1/3",
+    height: 300,
+  },
+  {
+    id: "loanBalance",
+    component: LoanBalanceChart,
+    translationKey: "loanBalance",
+    defaultSize: "1/2",
     height: 300,
   },
 ];
