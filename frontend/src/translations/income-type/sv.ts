@@ -3,6 +3,7 @@ const incomeTypes = {
     'rental': 'Hyresintäkt',
     'airbnb': 'Airbnb',
     'capital-income': 'Kapitalinkomst',
+    'capital-injection': 'Kapitaltillskott',
     'insurance-compensation': 'Försäkringsersättning',
     'cleaning-fee': 'Städavgift',
     'water-refund': 'Vattenavgiftsåterbetalning',

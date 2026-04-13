@@ -3,6 +3,7 @@ const incomeTypes = {
     'rental': 'Vuokratulo',
     'airbnb': 'Airbnb',
     'capital-income': 'Pääomatulo',
+    'capital-injection': 'Pääomasijoitus',
     'insurance-compensation': 'Vakuutuskorvaus',
     'cleaning-fee': 'Siivousmaksu',
     'water-refund': 'Vesimaksun palautus',

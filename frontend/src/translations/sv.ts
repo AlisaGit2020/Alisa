@@ -19,6 +19,7 @@ const sv = {
     rental: "Hyresintäkt",
     airbnb: "Airbnb",
     "capital-income": "Kapitalinkomst",
+    "capital-injection": "Kapitaltillskott",
     "insurance-compensation": "Försäkringsersättning",
   },
 

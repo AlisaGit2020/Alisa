@@ -163,6 +163,7 @@ export enum IncomeTypeKey {
   RENTAL = 'rental',
   AIRBNB = 'airbnb',
   CAPITAL_INCOME = 'capital-income',
+  CAPITAL_INJECTION = 'capital-injection',
   INSURANCE_COMPENSATION = 'insurance-compensation',
   CLEANING_FEE = 'cleaning-fee',
   WATER_REFUND = 'water-refund',

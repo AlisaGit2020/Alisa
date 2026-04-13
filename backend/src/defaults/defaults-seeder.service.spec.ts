@@ -49,7 +49,7 @@ describe('DefaultsSeeder', () => {
     expect(mockExpenseTypeRepo.save).toHaveBeenCalledTimes(22);
   });
 
-  it('seeds 6 global income types when table is empty', async () => {
+  it('seeds 7 global income types when table is empty', async () => {
     mockExpenseTypeRepo.count.mockResolvedValue(0);
     mockIncomeTypeRepo.count.mockResolvedValue(0);
     mockExpenseTypeRepo.save.mockResolvedValue({});
@@ -58,7 +58,7 @@ describe('DefaultsSeeder', () => {
     await seeder.onModuleInit();
 
     // Each type is saved individually
-    expect(mockIncomeTypeRepo.save).toHaveBeenCalledTimes(6);
+    expect(mockIncomeTypeRepo.save).toHaveBeenCalledTimes(7);
   });
 
   it('does not seed expense types if data already exists', async () => {
@@ -124,8 +124,9 @@ describe('DefaultsSeeder', () => {
       (call) => call[0].key,
     );
     const uniqueKeys = new Set(savedKeys);
-    expect(uniqueKeys.size).toBe(6);
+    expect(uniqueKeys.size).toBe(7);
     expect(savedKeys).toContain('airbnb');
     expect(savedKeys).toContain('rental');
+    expect(savedKeys).toContain('capital-injection');
   });
 });

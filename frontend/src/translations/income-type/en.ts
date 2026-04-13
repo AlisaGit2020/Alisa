@@ -3,6 +3,7 @@ const incomeTypes = {
     'rental': 'Rental income',
     'airbnb': 'Airbnb',
     'capital-income': 'Capital income',
+    'capital-injection': 'Capital injection',
     'insurance-compensation': 'Insurance compensation',
     'cleaning-fee': 'Cleaning fee',
     'water-refund': 'Water fee refund',
