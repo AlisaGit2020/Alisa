@@ -25,6 +25,8 @@ const cleaning = {
   lastName: 'Last name',
   cleanerRole: 'Cleaner',
   noCleanersAssigned: 'No cleaners assigned',
+  rowCount_one: '{{count}} cleaning',
+  rowCount_other: '{{count}} cleanings',
 };
 
 export default cleaning;

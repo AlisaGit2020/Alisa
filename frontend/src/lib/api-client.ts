@@ -81,11 +81,12 @@ class ApiClient {
 
   public static async post<T>(path: string, data: T, skipAuth = false): Promise<T> {
     const options = skipAuth ? { withCredentials: true } : await ApiClient.getOptions();
-    return axios.post(
+    const response = await axios.post(
       ApiClient.getApiUrl(path),
       data,
       options,
     );
+    return response.data;
   }
 
   public static async postSaveTask<T>(
@@ -101,11 +102,12 @@ class ApiClient {
   }
 
   public static async put<T>(path: string, id: number, data: T): Promise<T> {
-    return axios.put(
+    const response = await axios.put(
       ApiClient.getApiUrl(`${path}/${id}`),
       data,
       await ApiClient.getOptions(),
     );
+    return response.data;
   }
 
   public static async delete(path: string, id: number) {

@@ -27,6 +27,15 @@ const admin = {
     tierLimitReached: 'Kiinteistöraja saavutettu nykyisellä tasollasi',
     tierChangeTier: 'Vaihda taso',
     tierActions: 'Toiminnot',
+    userRoles: 'Roolit',
+    roleAdmin: 'Admin',
+    roleOwner: 'Omistaja',
+    roleCleaner: 'Siivooja',
+    addUser: 'Lisää käyttäjä',
+    addUserTitle: 'Lisää uusi käyttäjä',
+    editUser: 'Muokkaa käyttäjää',
+    deleteUser: 'Poista',
+    deleteUserConfirm: 'Haluatko varmasti poistaa tämän käyttäjän?',
 }
 
 export default admin

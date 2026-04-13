@@ -11,6 +11,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import SellIcon from '@mui/icons-material/Sell';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Property, PropertyStatus, PropertyExternalSource, propertyExternalSourceNames } from '@asset-types';
 import AssetDialog from '../../asset/dialog/AssetDialog';
 import AssetButton from '../../asset/form/AssetButton';
@@ -25,6 +26,7 @@ interface PropertyActionsMenuProps {
   onOpenAllocationRules: () => void;
   onOpenCharges?: () => void;
   onOpenManageCleaners?: () => void;
+  onViewCleanings?: () => void;
   onToggleAdvancedReports?: () => void;
   onPropertyUpdated?: (property: Property) => void;
 }
@@ -58,6 +60,7 @@ function PropertyActionsMenu({
   onOpenAllocationRules,
   onOpenCharges,
   onOpenManageCleaners,
+  onViewCleanings,
   onToggleAdvancedReports,
   onPropertyUpdated,
 }: PropertyActionsMenuProps) {
@@ -240,6 +243,12 @@ function PropertyActionsMenu({
               <PaymentsIcon fontSize="small" />
             </ListItemIcon>
             {t('chargeHistory')}
+          </MenuItem>
+        )}
+        {property.isAirbnb && onViewCleanings && (
+          <MenuItem onClick={() => { handleClose(); onViewCleanings(); }}>
+            <ListItemIcon><VisibilityIcon fontSize="small" /></ListItemIcon>
+            {t('cleaning:pageTitle')}
           </MenuItem>
         )}
         {property.isAirbnb && onOpenManageCleaners && (

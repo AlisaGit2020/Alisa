@@ -25,6 +25,8 @@ const cleaning = {
   lastName: 'Sukunimi',
   cleanerRole: 'Siivooja',
   noCleanersAssigned: 'Ei siivoojia liitetty',
+  rowCount_one: '{{count}} siivous',
+  rowCount_other: '{{count}} siivousta',
 };
 
 export default cleaning;

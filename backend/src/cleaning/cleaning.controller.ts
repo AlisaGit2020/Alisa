@@ -86,7 +86,7 @@ export class CleaningController {
   async assignCleaner(
     @User() user: JWTUser,
     @Param('propertyId', ParseIntPipe) propertyId: number,
-    @Body('userId', ParseIntPipe) userId: number,
+    @Body('userId') userId: number,
   ): Promise<PropertyCleaner> {
     return this.propertyCleanerService.assign(user, propertyId, userId);
   }

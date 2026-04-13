@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { User } from '@asset-backend/people/user/entities/user.entity';
@@ -76,6 +76,13 @@ export class UserService {
     await this.repository.save(user);
   }
 
+  async updateRoles(userId: number, roles: UserRole[]): Promise<void> {
+    const user = await this.findOne(userId);
+    if (!user) return;
+    user.roles = roles;
+    await this.repository.save(user);
+  }
+
   async hasOwnership(userId: number, propertyId: number): Promise<boolean> {
     const user = await this.findOne(userId, { relations: ['ownerships'] });
     if (!user) {
@@ -98,7 +105,12 @@ export class UserService {
       where: { email: dto.email },
     });
     if (existing) {
-      throw new BadRequestException('User with this email already exists');
+      // Add CLEANER role if not already present
+      if (!existing.roles.includes(UserRole.CLEANER)) {
+        existing.roles = [...existing.roles, UserRole.CLEANER];
+        await this.repository.save(existing);
+      }
+      return existing;
     }
     return this.repository.save({
       email: dto.email,

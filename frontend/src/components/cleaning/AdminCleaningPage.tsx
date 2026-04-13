@@ -7,6 +7,7 @@ import ApiClient from '@asset-lib/api-client';
 import AssetLoadingProgress from '../asset/AssetLoadingProgress';
 import AssetButton from '../asset/form/AssetButton';
 import AssetDataTable from '../asset/datatable/AssetDataTable';
+import AssetConfirmDialog from '../asset/dialog/AssetConfirmDialog';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -24,6 +25,8 @@ function AdminCleaningPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [cleaningToDelete, setCleaningToDelete] = useState<number | null>(null);
 
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1); // 1-12
@@ -88,12 +91,22 @@ function AdminCleaningPage() {
   }, [cleanings, property, t]);
 
   // Handle delete
-  const handleDelete = async (id: number) => {
+  const handleDeleteRequest = (id: number) => {
+    setCleaningToDelete(id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (cleaningToDelete === null) return;
+
     try {
-      await ApiClient.delete('cleaning', id);
+      await ApiClient.delete('cleaning', cleaningToDelete);
       setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error('Error deleting cleaning:', error);
+    } finally {
+      setDeleteConfirmOpen(false);
+      setCleaningToDelete(null);
     }
   };
 
@@ -187,9 +200,7 @@ function AdminCleaningPage() {
             { name: 'percentage', label: t('cleaning:percentage') },
             { name: 'amount', format: 'currency', sum: true, label: t('cleaning:amount') },
           ]}
-          selectedIds={[]}
-          onSelectChange={() => {}}
-          onDeleteRequest={handleDelete}
+          onDeleteRequest={handleDeleteRequest}
           sortable
         />
       </Box>
@@ -201,6 +212,19 @@ function AdminCleaningPage() {
           </Typography>
         </Box>
       )}
+
+      <AssetConfirmDialog
+        open={deleteConfirmOpen}
+        title={t('common:confirmDelete')}
+        contentText={t('common:confirmDeleteMessage')}
+        buttonTextCancel={t('common:cancel')}
+        buttonTextConfirm={t('common:delete')}
+        onConfirm={handleDeleteConfirm}
+        onClose={() => {
+          setDeleteConfirmOpen(false);
+          setCleaningToDelete(null);
+        }}
+      />
     </Paper>
   );
 }

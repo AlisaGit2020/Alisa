@@ -3,6 +3,7 @@ import { Box, Card, CardContent, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { AssetButton, AssetDatePicker, AssetNumberField, AssetSelectField } from '../asset';
 import AssetDataTable, { AssetDataTableField } from '../asset/datatable/AssetDataTable';
+import AssetConfirmDialog from '../asset/dialog/AssetConfirmDialog';
 import Title from '../../Title';
 import ApiClient from '@asset-lib/api-client';
 import { Cleaning, PropertyCleaner } from '@asset-types';
@@ -15,7 +16,7 @@ interface CleaningRow extends Cleaning {
 }
 
 function CleanerDashboard() {
-  const { t } = useTranslation(['cleaning']);
+  const { t } = useTranslation(['cleaning', 'common']);
   const { showToast } = useToast();
 
   const [properties, setProperties] = React.useState<PropertyCleaner[]>([]);
@@ -24,6 +25,8 @@ function CleanerDashboard() {
   const [date, setDate] = React.useState<Date | null>(new Date());
   const [percentage, setPercentage] = React.useState<number | ''>(100);
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
+  const [cleaningToDelete, setCleaningToDelete] = React.useState<number | null>(null);
 
   // Fetch assigned properties on mount
   React.useEffect(() => {
@@ -112,14 +115,24 @@ function CleanerDashboard() {
     { name: 'amount', format: 'currency', sum: true },
   ];
 
-  const handleDelete = async (id: number) => {
+  const handleDeleteRequest = (id: number) => {
+    setCleaningToDelete(id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (cleaningToDelete === null) return;
+
     try {
-      await ApiClient.delete('cleaning', id);
+      await ApiClient.delete('cleaning', cleaningToDelete);
       setRefreshTrigger(prev => prev + 1);
       showToast({ message: t('toast.deleteSuccess'), severity: 'success' });
     } catch (error) {
       console.error('Error deleting cleaning:', error);
       showToast({ message: 'Error deleting cleaning', severity: 'error' });
+    } finally {
+      setDeleteConfirmOpen(false);
+      setCleaningToDelete(null);
     }
   };
 
@@ -128,7 +141,7 @@ function CleanerDashboard() {
       <Title>{t('cleaning:pageTitle')}</Title>
 
       {/* Add Cleaning Form */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: 3, maxWidth: { xs: '100%', sm: 400 } }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
             {t('cleaning:addCleaning')}
@@ -205,11 +218,24 @@ function CleanerDashboard() {
             t={t}
             data={cleaningRows}
             fields={fields}
-            onDeleteRequest={handleDelete}
+            onDeleteRequest={handleDeleteRequest}
             sortable
           />
         </CardContent>
       </Card>
+
+      <AssetConfirmDialog
+        open={deleteConfirmOpen}
+        title={t('common:confirmDelete')}
+        contentText={t('common:confirmDeleteMessage')}
+        buttonTextCancel={t('common:cancel')}
+        buttonTextConfirm={t('common:delete')}
+        onConfirm={handleDeleteConfirm}
+        onClose={() => {
+          setDeleteConfirmOpen(false);
+          setCleaningToDelete(null);
+        }}
+      />
     </Box>
   );
 }

@@ -27,6 +27,15 @@ const admin = {
     tierLimitReached: 'Property limit reached for your current tier',
     tierChangeTier: 'Change Tier',
     tierActions: 'Actions',
+    userRoles: 'Roles',
+    roleAdmin: 'Admin',
+    roleOwner: 'Owner',
+    roleCleaner: 'Cleaner',
+    addUser: 'Add User',
+    addUserTitle: 'Add New User',
+    editUser: 'Edit User',
+    deleteUser: 'Delete',
+    deleteUserConfirm: 'Are you sure you want to delete this user?',
 }
 
 export default admin

@@ -25,6 +25,8 @@ const cleaning = {
   lastName: 'Efternamn',
   cleanerRole: 'Städare',
   noCleanersAssigned: 'Inga städare tilldelade',
+  rowCount_one: '{{count}} städning',
+  rowCount_other: '{{count}} städningar',
 };
 
 export default cleaning;
