@@ -740,6 +740,107 @@ export class PropertyStatisticsService {
     return combinedResult;
   }
 
+  /**
+   * Recalculates loan balance statistics for a property.
+   * Calculates running balance: purchaseLoan - cumulative LOAN_PRINCIPAL payments.
+   * @param propertyId The property ID to recalculate
+   */
+  async recalculateLoanBalance(propertyId: number): Promise<void> {
+    const decimals = 2;
+
+    // Delete existing loan_balance statistics for this property
+    await this.repository.delete({
+      propertyId,
+      key: StatisticKey.LOAN_BALANCE,
+    });
+
+    // Get property with loan info
+    const properties = await this.dataSource.query(
+      `SELECT id, "purchaseLoan", "purchaseDate"
+       FROM property
+       WHERE id = $1 AND "purchaseLoan" IS NOT NULL`,
+      [propertyId],
+    );
+
+    if (properties.length === 0) {
+      return; // No loan to track
+    }
+
+    const property = properties[0];
+    const purchaseLoan = parseFloat(property.purchaseLoan);
+    const purchaseDate = property.purchaseDate;
+
+    // Get monthly LOAN_PRINCIPAL payments grouped by year/month
+    const payments = await this.dataSource.query(
+      `SELECT
+       EXTRACT(YEAR FROM e."accountingDate")::INT as year,
+       EXTRACT(MONTH FROM e."accountingDate")::INT as month,
+       SUM(e."totalAmount")::TEXT as total
+     FROM expense e
+     JOIN expense_type et ON et.id = e."expenseTypeId"
+     WHERE e."propertyId" = $1
+       AND et.key = 'loan-principal'
+       AND e."accountingDate" >= $2
+     GROUP BY EXTRACT(YEAR FROM e."accountingDate"), EXTRACT(MONTH FROM e."accountingDate")
+     ORDER BY year, month`,
+      [propertyId, purchaseDate],
+    );
+
+    // Calculate running balance for each month
+    let runningBalance = purchaseLoan;
+    const balanceRecords: Array<{ year: number; month: number; balance: number }> = [];
+
+    for (const payment of payments) {
+      const paymentAmount = parseFloat(payment.total) || 0;
+      runningBalance = runningBalance - paymentAmount;
+      balanceRecords.push({
+        year: payment.year,
+        month: payment.month,
+        balance: runningBalance,
+      });
+    }
+
+    // Insert monthly records
+    for (const record of balanceRecords) {
+      await this.dataSource.query(
+        `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT ("propertyId", "year", "month", "key")
+         DO UPDATE SET "value" = EXCLUDED."value"`,
+        [propertyId, StatisticKey.LOAN_BALANCE, record.year, record.month, record.balance.toFixed(decimals)],
+      );
+    }
+
+    // Insert yearly records (end-of-year balance)
+    const yearlyBalances = new Map<number, number>();
+    for (const record of balanceRecords) {
+      yearlyBalances.set(record.year, record.balance); // Last month of year wins
+    }
+
+    for (const [year, balance] of yearlyBalances) {
+      await this.dataSource.query(
+        `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+         VALUES ($1, $2, $3, NULL, $4)
+         ON CONFLICT ("propertyId", "year", "month", "key")
+         DO UPDATE SET "value" = EXCLUDED."value"`,
+        [propertyId, StatisticKey.LOAN_BALANCE, year, balance.toFixed(decimals)],
+      );
+    }
+
+    // Insert all-time record (current balance)
+    const currentBalance = balanceRecords.length > 0
+      ? balanceRecords[balanceRecords.length - 1].balance
+      : purchaseLoan;
+
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       VALUES ($1, $2, NULL, NULL, $3)
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = EXCLUDED."value"`,
+      [propertyId, StatisticKey.LOAN_BALANCE, currentBalance.toFixed(decimals)],
+    );
+  }
+
   private async recalculateIncomeStatistics(
     propertyFilter: string,
     params: number[],
