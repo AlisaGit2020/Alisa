@@ -836,19 +836,30 @@ export class PropertyStatisticsService {
       );
     }
 
-    // Insert yearly records (end-of-year balance)
-    const yearlyBalances = new Map<number, number>();
+    // Insert yearly records for all years from purchase to now
+    const purchaseYear = new Date(purchaseDate).getFullYear();
+    const currentYear = new Date().getFullYear();
+
+    // Build map of end-of-year balances from payment records
+    const yearlyBalancesFromPayments = new Map<number, number>();
     for (const record of balanceRecords) {
-      yearlyBalances.set(record.year, record.balance); // Last month of year wins
+      yearlyBalancesFromPayments.set(record.year, record.balance); // Last month of year wins
     }
 
-    for (const [year, balance] of yearlyBalances) {
+    // Create yearly records for each year, carrying forward the balance
+    let yearEndBalance = purchaseLoan;
+    for (let year = purchaseYear; year <= currentYear; year++) {
+      // If we have payments in this year, use that balance; otherwise carry forward
+      if (yearlyBalancesFromPayments.has(year)) {
+        yearEndBalance = yearlyBalancesFromPayments.get(year)!;
+      }
+
       await this.dataSource.query(
         `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
          VALUES ($1, $2, $3, NULL, $4)
          ON CONFLICT ("propertyId", "year", "month", "key")
          DO UPDATE SET "value" = EXCLUDED."value"`,
-        [propertyId, StatisticKey.LOAN_BALANCE, year, balance.toFixed(decimals)],
+        [propertyId, StatisticKey.LOAN_BALANCE, year, yearEndBalance.toFixed(decimals)],
       );
     }
 
