@@ -825,48 +825,71 @@ export class PropertyStatisticsService {
       });
     }
 
-    // Insert monthly records
+    // Build map of monthly balances from payment records (key: "YYYY-MM")
+    const monthlyBalancesFromPayments = new Map<string, number>();
     for (const record of balanceRecords) {
-      await this.dataSource.query(
-        `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
-         VALUES ($1, $2, $3, $4, $5)
-         ON CONFLICT ("propertyId", "year", "month", "key")
-         DO UPDATE SET "value" = EXCLUDED."value"`,
-        [propertyId, StatisticKey.LOAN_BALANCE, record.year, record.month, record.balance.toFixed(decimals)],
-      );
+      const key = `${record.year}-${String(record.month).padStart(2, '0')}`;
+      monthlyBalancesFromPayments.set(key, record.balance);
     }
 
-    // Insert yearly records for all years from purchase to now
-    const purchaseYear = new Date(purchaseDate).getFullYear();
-    const currentYear = new Date().getFullYear();
+    // Insert monthly records for all months from purchase to now
+    const purchaseDateObj = new Date(purchaseDate);
+    const purchaseYear = purchaseDateObj.getFullYear();
+    const purchaseMonth = purchaseDateObj.getMonth() + 1; // 1-based
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
 
-    // Build map of end-of-year balances from payment records
-    const yearlyBalancesFromPayments = new Map<number, number>();
-    for (const record of balanceRecords) {
-      yearlyBalancesFromPayments.set(record.year, record.balance); // Last month of year wins
-    }
-
-    // Create yearly records for each year, carrying forward the balance
-    let yearEndBalance = purchaseLoan;
+    let monthlyBalance = purchaseLoan;
     for (let year = purchaseYear; year <= currentYear; year++) {
-      // If we have payments in this year, use that balance; otherwise carry forward
-      if (yearlyBalancesFromPayments.has(year)) {
-        yearEndBalance = yearlyBalancesFromPayments.get(year)!;
-      }
+      const startMonth = year === purchaseYear ? purchaseMonth : 1;
+      const endMonth = year === currentYear ? currentMonth : 12;
 
+      for (let month = startMonth; month <= endMonth; month++) {
+        const key = `${year}-${String(month).padStart(2, '0')}`;
+        // If we have a payment this month, use that balance; otherwise carry forward
+        if (monthlyBalancesFromPayments.has(key)) {
+          monthlyBalance = monthlyBalancesFromPayments.get(key)!;
+        }
+
+        await this.dataSource.query(
+          `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+           VALUES ($1, $2, $3, $4, $5)
+           ON CONFLICT ("propertyId", "year", "month", "key")
+           DO UPDATE SET "value" = EXCLUDED."value"`,
+          [propertyId, StatisticKey.LOAN_BALANCE, year, month, monthlyBalance.toFixed(decimals)],
+        );
+      }
+    }
+
+    // Insert yearly records (end-of-year balance = last month's balance for that year)
+    const yearlyBalances = new Map<number, number>();
+    monthlyBalance = purchaseLoan;
+    for (let year = purchaseYear; year <= currentYear; year++) {
+      const startMonth = year === purchaseYear ? purchaseMonth : 1;
+      const endMonth = year === currentYear ? currentMonth : 12;
+
+      for (let month = startMonth; month <= endMonth; month++) {
+        const key = `${year}-${String(month).padStart(2, '0')}`;
+        if (monthlyBalancesFromPayments.has(key)) {
+          monthlyBalance = monthlyBalancesFromPayments.get(key)!;
+        }
+      }
+      yearlyBalances.set(year, monthlyBalance);
+    }
+
+    for (const [year, balance] of yearlyBalances) {
       await this.dataSource.query(
         `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
          VALUES ($1, $2, $3, NULL, $4)
          ON CONFLICT ("propertyId", "year", "month", "key")
          DO UPDATE SET "value" = EXCLUDED."value"`,
-        [propertyId, StatisticKey.LOAN_BALANCE, year, yearEndBalance.toFixed(decimals)],
+        [propertyId, StatisticKey.LOAN_BALANCE, year, balance.toFixed(decimals)],
       );
     }
 
-    // Insert all-time record (current balance)
-    const currentBalance = balanceRecords.length > 0
-      ? balanceRecords[balanceRecords.length - 1].balance
-      : purchaseLoan;
+    // Insert all-time record (current balance = most recent monthly balance)
+    const currentBalance = monthlyBalance;
 
     await this.dataSource.query(
       `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
