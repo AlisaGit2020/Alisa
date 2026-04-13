@@ -710,10 +710,11 @@ describe('PropertyStatisticsService', () => {
       // - EXPENSE: all-time, yearly, monthly (3 queries)
       // - DEPOSIT: all-time, yearly, monthly (3 queries)
       // - WITHDRAW: all-time, yearly, monthly (3 queries)
-      // Total: 12 queries
+      // - LOAN_BALANCE: property query (1 query)
+      // Total: 13 queries
       expect(mockDataSource.query).toHaveBeenCalled();
       const calls = mockDataSource.query.mock.calls;
-      expect(calls.length).toBe(12);
+      expect(calls.length).toBe(13);
     });
 
     it('returns summary with counts and totals', async () => {

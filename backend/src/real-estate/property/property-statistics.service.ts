@@ -706,6 +706,9 @@ export class PropertyStatisticsService {
       true, // negative
     );
 
+    // Recalculate LOAN_BALANCE for properties with loans
+    await this.recalculateLoanBalanceStatistics(propertyId);
+
     // Return summary
     const summary = await this.getRecalculateSummary(propertyId);
     return summary;
@@ -738,6 +741,28 @@ export class PropertyStatisticsService {
     }
 
     return combinedResult;
+  }
+
+  /**
+   * Recalculates loan balance for all properties (or a specific property) with loans.
+   */
+  private async recalculateLoanBalanceStatistics(propertyId?: number): Promise<void> {
+    const propertyFilter = propertyId ? 'AND id = $1' : '';
+    const params = propertyId ? [propertyId] : [];
+
+    // Get all properties with loans
+    const properties = await this.dataSource.query(
+      `SELECT id FROM property WHERE "purchaseLoan" IS NOT NULL ${propertyFilter}`,
+      params,
+    );
+
+    if (!properties || properties.length === 0) {
+      return;
+    }
+
+    for (const property of properties) {
+      await this.recalculateLoanBalance(property.id);
+    }
   }
 
   /**
