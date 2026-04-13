@@ -151,6 +151,7 @@ const property = {
     perMonth: '/kk',
     netRent: 'Netto',
     grossYield: 'Bruttovuokratuotto',
+    cleaningBruttoPrice: 'Siivous bruttohinta',
 
     // Prospect add choice modal
     addProspectTitle: 'Lisää seurattava kohde',

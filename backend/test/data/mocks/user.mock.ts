@@ -1,4 +1,5 @@
 import { JWTUser } from '@asset-backend/auth/types';
+import { UserRole } from '@asset-backend/common/types';
 
 export const getJWTUser = (
   id: number,
@@ -6,7 +7,7 @@ export const getJWTUser = (
   lastName: string,
   email: string,
   ownershipInProperties: number[],
-  isAdmin: boolean = false,
+  roles: UserRole[] = [UserRole.OWNER],
 ): JWTUser => {
   return {
     id: id,
@@ -15,7 +16,7 @@ export const getJWTUser = (
     email: email,
     language: 'fi',
     ownershipInProperties: ownershipInProperties,
-    isAdmin: isAdmin,
+    roles: roles,
   };
 };
 

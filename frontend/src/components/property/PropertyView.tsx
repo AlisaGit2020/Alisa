@@ -20,6 +20,7 @@ import PropertyInfoSection from './sections/PropertyInfoSection';
 import PropertyInfoCard from './shared/PropertyInfoCard';
 import { calculateSummaryData } from './report/report-utils';
 import PropertyChargeDialog from './sections/PropertyChargeDialog';
+import ManageCleanersDialog from '../cleaning/ManageCleanersDialog';
 
 function PropertyView({ t }: WithTranslation) {
   const [property, setProperty] = useState<Property | null>(null);
@@ -27,6 +28,7 @@ function PropertyView({ t }: WithTranslation) {
   const [error, setError] = useState<string | null>(null);
   const [rulesModalOpen, setRulesModalOpen] = useState(false);
   const [chargesDialogOpen, setChargesDialogOpen] = useState(false);
+  const [cleanersDialogOpen, setCleanersDialogOpen] = useState(false);
   const [showAdvancedReports, setShowAdvancedReports] = useState(false);
   const [statistics, setStatistics] = useState<PropertyStatistics[]>([]);
   const { idParam } = useParams();
@@ -153,6 +155,8 @@ function PropertyView({ t }: WithTranslation) {
             onEdit={handleEdit}
             onOpenAllocationRules={() => setRulesModalOpen(true)}
             onOpenCharges={() => setChargesDialogOpen(true)}
+            onOpenManageCleaners={() => setCleanersDialogOpen(true)}
+            onViewCleanings={() => navigate(`/app/portfolio/property/${idParam}/cleanings`)}
             onToggleAdvancedReports={() => setShowAdvancedReports((prev) => !prev)}
             onPropertyUpdated={(updated) => setProperty(updated)}
           />
@@ -246,6 +250,15 @@ function PropertyView({ t }: WithTranslation) {
         propertyId={property.id}
         onClose={() => setChargesDialogOpen(false)}
       />
+
+      {/* Manage Cleaners Dialog */}
+      {property.isAirbnb && (
+        <ManageCleanersDialog
+          open={cleanersDialogOpen}
+          propertyId={property.id}
+          onClose={() => setCleanersDialogOpen(false)}
+        />
+      )}
     </Paper>
   );
 }

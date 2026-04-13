@@ -27,6 +27,15 @@ const admin = {
     tierLimitReached: 'Fastighetsgräns nådd på din nuvarande nivå',
     tierChangeTier: 'Byt nivå',
     tierActions: 'Åtgärder',
+    userRoles: 'Roller',
+    roleAdmin: 'Admin',
+    roleOwner: 'Ägare',
+    roleCleaner: 'Städare',
+    addUser: 'Lägg till användare',
+    addUserTitle: 'Lägg till ny användare',
+    editUser: 'Redigera användare',
+    deleteUser: 'Ta bort',
+    deleteUserConfirm: 'Vill du verkligen ta bort denna användare?',
 }
 
 export default admin

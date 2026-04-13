@@ -30,6 +30,7 @@ import settingsEn from '../src/translations/settings/en';
 import taxEn from '../src/translations/tax/en';
 import transactionEn from '../src/translations/transaction/en';
 import userEn from '../src/translations/user/en';
+import cleaningEn from '../src/translations/cleaning/en';
 
 // Import all namespace translations - Finnish
 import accountingFi from '../src/translations/accounting/fi';
@@ -54,6 +55,7 @@ import settingsFi from '../src/translations/settings/fi';
 import taxFi from '../src/translations/tax/fi';
 import transactionFi from '../src/translations/transaction/fi';
 import userFi from '../src/translations/user/fi';
+import cleaningFi from '../src/translations/cleaning/fi';
 
 // Import all namespace translations - Swedish
 import accountingSv from '../src/translations/accounting/sv';
@@ -78,6 +80,7 @@ import settingsSv from '../src/translations/settings/sv';
 import taxSv from '../src/translations/tax/sv';
 import transactionSv from '../src/translations/transaction/sv';
 import userSv from '../src/translations/user/sv';
+import cleaningSv from '../src/translations/cleaning/sv';
 
 // Combine all translations
 const en = {
@@ -85,6 +88,7 @@ const en = {
   accounting: accountingEn,
   admin: adminEn,
   allocation: allocationEn,
+  cleaning: cleaningEn,
   dashboard: dashboardEn,
   expense: expenseEn,
   'expense-type': expenseTypeEn,
@@ -111,6 +115,7 @@ const fi = {
   accounting: accountingFi,
   admin: adminFi,
   allocation: allocationFi,
+  cleaning: cleaningFi,
   dashboard: dashboardFi,
   expense: expenseFi,
   'expense-type': expenseTypeFi,
@@ -137,6 +142,7 @@ const sv = {
   accounting: accountingSv,
   admin: adminSv,
   allocation: allocationSv,
+  cleaning: cleaningSv,
   dashboard: dashboardSv,
   expense: expenseSv,
   'expense-type': expenseTypeSv,
@@ -308,7 +314,7 @@ describe('Translation Coverage', () => {
       // Check if key exists in any namespace
       // Keys can be used without namespace prefix and i18n will search all namespaces
       const namespaces = [
-        'accounting', 'admin', 'allocation', 'appBar', 'dashboard', 'expense', 'expense-type',
+        'accounting', 'admin', 'allocation', 'appBar', 'cleaning', 'dashboard', 'expense', 'expense-type',
         'finance', 'import-wizard', 'income-type', 'investment-calculator', 'landing', 'login',
         'menu', 'portfolio', 'property', 'reports', 'route', 'seo', 'settings', 'tax',
         'transaction', 'user'

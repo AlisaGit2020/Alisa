@@ -151,6 +151,7 @@ const property = {
     perMonth: '/mån',
     netRent: 'Netto',
     grossYield: 'Bruttoavkastning',
+    cleaningBruttoPrice: 'Städning bruttopris',
 
     // Prospect add choice modal
     addProspectTitle: 'Lägg till prospekt',

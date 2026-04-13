@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { User } from '@asset-backend/people/user/entities/user.entity';
 import { UserInputDto } from '@asset-backend/people/user/dtos/user-input.dto';
+import { UserRole } from '@asset-backend/common/types';
 
 @Injectable()
 export class UserService {
@@ -59,7 +60,27 @@ export class UserService {
    * Should only be called by admin-level operations.
    */
   async setAdminStatus(userId: number, isAdmin: boolean): Promise<void> {
-    await this.repository.update(userId, { isAdmin });
+    const user = await this.findOne(userId);
+    if (!user) return;
+
+    if (isAdmin) {
+      // Add ADMIN role if not already present
+      if (!user.roles.includes(UserRole.ADMIN)) {
+        user.roles = [...user.roles, UserRole.ADMIN];
+      }
+    } else {
+      // Remove ADMIN role
+      user.roles = user.roles.filter((role) => role !== UserRole.ADMIN);
+    }
+
+    await this.repository.save(user);
+  }
+
+  async updateRoles(userId: number, roles: UserRole[]): Promise<void> {
+    const user = await this.findOne(userId);
+    if (!user) return;
+    user.roles = roles;
+    await this.repository.save(user);
   }
 
   async hasOwnership(userId: number, propertyId: number): Promise<boolean> {
@@ -73,6 +94,50 @@ export class UserService {
     return user.ownerships.some(
       (ownership) => ownership.propertyId === propertyId,
     );
+  }
+
+  async createCleaner(dto: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  }): Promise<User> {
+    const existing = await this.repository.findOne({
+      where: { email: dto.email },
+    });
+    if (existing) {
+      // Add CLEANER role if not already present
+      if (!existing.roles.includes(UserRole.CLEANER)) {
+        existing.roles = [...existing.roles, UserRole.CLEANER];
+        await this.repository.save(existing);
+      }
+      return existing;
+    }
+    return this.repository.save({
+      email: dto.email,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      roles: [UserRole.CLEANER],
+    });
+  }
+
+  async findCleanersForAdmin(adminUserId: number): Promise<User[]> {
+    return this.repository
+      .createQueryBuilder('user')
+      .innerJoin(
+        'property_cleaner',
+        'pc',
+        'pc."userId" = user.id',
+      )
+      .innerJoin(
+        'ownership',
+        'o',
+        'o."propertyId" = pc."propertyId" AND o."userId" = :adminUserId',
+        {
+          adminUserId,
+        },
+      )
+      .where("'cleaner' = ANY(user.roles)")
+      .getMany();
   }
 
   private mapData(user: User, input: UserInputDto) {

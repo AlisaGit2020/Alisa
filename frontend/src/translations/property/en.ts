@@ -151,6 +151,7 @@ const property = {
     perMonth: '/mo',
     netRent: 'Net',
     grossYield: 'Gross Yield',
+    cleaningBruttoPrice: 'Cleaning gross price',
 
     // Prospect add choice modal
     addProspectTitle: 'Add Prospect Property',

@@ -11,6 +11,13 @@ import {
   TransactionType,
 } from './common';
 
+// User roles
+export enum UserRole {
+  ADMIN = 'admin',
+  OWNER = 'owner',
+  CLEANER = 'cleaner',
+}
+
 // Address
 export interface Address {
   id: number;
@@ -42,7 +49,7 @@ export interface User {
   tierId?: number;
   ownerships?: Ownership[];
   dashboardConfig?: DashboardConfig;
-  isAdmin: boolean;
+  roles: UserRole[];
 }
 
 // Ownership
@@ -81,6 +88,7 @@ export interface Property {
   debtShare?: number;
   monthlyRent?: number;
   isAirbnb?: boolean;
+  cleaningBruttoPrice?: number;
   distanceFromHome?: number;
 }
 
@@ -214,4 +222,23 @@ export interface CurrentCharges {
   waterPrepayment: number | null;
   totalCharge: number | null;
   otherChargeBased: number | null;
+}
+
+// Cleaning
+export interface Cleaning {
+  id: number;
+  date: string;
+  propertyId: number;
+  userId: number;
+  percentage: number;
+  user?: User;
+  property?: Property;
+}
+
+// PropertyCleaner
+export interface PropertyCleaner {
+  propertyId: number;
+  userId: number;
+  user?: User;
+  property?: Property;
 }

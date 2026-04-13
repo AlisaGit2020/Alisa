@@ -9,6 +9,7 @@ import {
 import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
 import type { DashboardConfig } from '@asset-backend/common/dashboard-config';
 import { Tier } from '@asset-backend/admin/entities/tier.entity';
+import { UserRole } from '@asset-backend/common/types';
 
 @Entity()
 export class User {
@@ -46,6 +47,6 @@ export class User {
   @Column({ type: 'jsonb', nullable: true })
   dashboardConfig?: DashboardConfig;
 
-  @Column({ default: false })
-  isAdmin: boolean;
+  @Column({ type: 'text', array: true, default: '{owner}' })
+  roles: UserRole[];
 }

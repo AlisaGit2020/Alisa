@@ -105,6 +105,11 @@ export class PropertyInputDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  cleaningBruttoPrice?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
   @Max(9999.9)
   distanceFromHome?: number;
 

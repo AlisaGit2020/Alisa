@@ -7,6 +7,8 @@ const route = {
   own: "My Properties",
   calculations: "Calculations",
   calculator: "Calculator",
+  cleaner: "Cleaner",
+  cleanings: "Cleanings",
   dashboard: "Overview",
   edit: "Edit",
   expense: "Expense",

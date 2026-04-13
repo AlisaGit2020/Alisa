@@ -227,3 +227,10 @@ export const chargeTypeToExpenseTypeKey = new Map<ChargeType, ExpenseTypeKey>([
   [ChargeType.WATER_PREPAYMENT, ExpenseTypeKey.WATER],
   [ChargeType.OTHER_CHARGE_BASED, ExpenseTypeKey.OTHER_CHARGE_BASED],
 ]);
+
+// User roles
+export enum UserRole {
+  ADMIN = 'admin',
+  OWNER = 'owner',
+  CLEANER = 'cleaner',
+}

@@ -5,6 +5,7 @@ import { renderWithProviders } from '@test-utils/test-wrapper';
 import AdminMenu from './AdminMenu';
 import ApiClient from '@asset-lib/api-client';
 import { createMockUser } from '@test-utils/test-data';
+import { UserRole } from '@asset-types';
 
 jest.mock('@asset-lib/api-client');
 
@@ -14,7 +15,7 @@ describe('AdminMenu', () => {
     firstName: 'Admin',
     lastName: 'User',
     email: 'admin@example.com',
-    isAdmin: true,
+    roles: [UserRole.ADMIN],
   });
 
   const mockNonAdminUser = createMockUser({
@@ -22,7 +23,7 @@ describe('AdminMenu', () => {
     firstName: 'Regular',
     lastName: 'User',
     email: 'user@example.com',
-    isAdmin: false,
+    roles: [],
   });
 
   beforeEach(() => {
@@ -61,8 +62,8 @@ describe('AdminMenu', () => {
       });
     });
 
-    it('does not render when isAdmin is undefined', async () => {
-      const userWithoutAdmin = { ...mockNonAdminUser, isAdmin: undefined };
+    it('does not render when roles is undefined', async () => {
+      const userWithoutAdmin = { ...mockNonAdminUser, roles: undefined };
       jest.spyOn(ApiClient, 'me').mockResolvedValue(userWithoutAdmin as unknown as ReturnType<typeof createMockUser>);
 
       const { container } = renderWithProviders(<AdminMenu />);
@@ -156,7 +157,7 @@ describe('AdminMenu Logic', () => {
   describe('Admin check flow', () => {
     it('calls ApiClient.me on mount', () => {
       const meSpy = jest.spyOn(ApiClient, 'me').mockResolvedValue(
-        createMockUser({ isAdmin: true })
+        createMockUser({ roles: [UserRole.ADMIN] })
       );
 
       renderWithProviders(<AdminMenu />);
@@ -165,18 +166,18 @@ describe('AdminMenu Logic', () => {
       expect(meSpy).toHaveBeenCalled();
     });
 
-    it('correctly identifies admin from user.isAdmin === true', async () => {
-      const checkAdmin = async (user: { isAdmin?: boolean }) => {
+    it('correctly identifies admin from user.roles.includes("admin")', async () => {
+      const checkAdmin = async (user: { roles?: string[] }) => {
         try {
-          return user.isAdmin === true;
+          return user.roles?.includes('admin') ?? false;
         } catch {
           return false;
         }
       };
 
-      expect(await checkAdmin({ isAdmin: true })).toBe(true);
-      expect(await checkAdmin({ isAdmin: false })).toBe(false);
-      expect(await checkAdmin({ isAdmin: undefined })).toBe(false);
+      expect(await checkAdmin({ roles: ['admin'] })).toBe(true);
+      expect(await checkAdmin({ roles: [] })).toBe(false);
+      expect(await checkAdmin({ roles: undefined })).toBe(false);
       expect(await checkAdmin({})).toBe(false);
     });
   });

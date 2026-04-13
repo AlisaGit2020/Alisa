@@ -4,7 +4,7 @@ import { TaxDeductionService } from './tax-deduction.service';
 import { TaxDeduction } from './entities/tax-deduction.entity';
 import { PropertyService } from './property.service';
 import { PropertyStatisticsService } from './property-statistics.service';
-import { TaxDeductionType } from '@asset-backend/common/types';
+import { TaxDeductionType, UserRole } from '@asset-backend/common/types';
 import { JWTUser } from '@asset-backend/auth/types';
 
 describe('TaxDeductionService', () => {
@@ -23,7 +23,7 @@ describe('TaxDeductionService', () => {
     lastName: 'User',
     language: 'en',
     ownershipInProperties: [],
-    isAdmin: false,
+    roles: [UserRole.OWNER],
   };
   const mockProperty = { id: 1, name: 'Test Property', distanceFromHome: 25.0, isAirbnb: true };
 

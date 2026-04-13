@@ -16,6 +16,7 @@ import {
   StatisticKey,
   TransactionStatus,
   TransactionType,
+  UserRole,
 } from '@asset-backend/common/types';
 import { Transaction } from '@asset-backend/accounting/transaction/entities/transaction.entity';
 import { Property } from '@asset-backend/real-estate/property/entities/property.entity';
@@ -1719,7 +1720,7 @@ describe('PropertyController (e2e)', () => {
         email,
         language: 'fi',
         ownershipInProperties: [],
-        isAdmin: false,
+        roles: [UserRole.OWNER],
       };
       await userService.add(jwtUser as unknown as UserInputDto);
       const users = await userService.search({ where: { email } });

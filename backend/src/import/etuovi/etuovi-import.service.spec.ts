@@ -11,6 +11,7 @@ import {
   PropertyExternalSource,
   PropertyStatus,
   PropertyType,
+  UserRole,
 } from '@asset-backend/common/types';
 import { EtuoviPropertyDataDto } from './dtos/etuovi-property-data.dto';
 import { PropertyService } from '@asset-backend/real-estate/property/property.service';
@@ -841,7 +842,7 @@ describe('EtuoviImportService', () => {
       email: 'test@example.com',
       language: 'fi',
       ownershipInProperties: [],
-      isAdmin: false,
+      roles: [UserRole.OWNER],
     };
 
     beforeEach(() => {

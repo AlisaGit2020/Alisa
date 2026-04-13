@@ -118,7 +118,7 @@ describe('AuthService', () => {
       expect(mockJwtService.sign).toHaveBeenCalledWith(
         expect.objectContaining({
           ownershipInProperties: [1, 2],
-          isAdmin: false,
+          roles: expect.any(Array),
         }),
       );
     });

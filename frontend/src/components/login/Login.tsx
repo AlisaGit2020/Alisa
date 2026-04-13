@@ -40,6 +40,11 @@ function Login({t}: WithTranslation) {
                     const returnUrl = sessionStorage.getItem('returnUrl')
                     const pendingCalc = sessionStorage.getItem('pendingInvestmentCalculation')
 
+                    // Determine default redirect based on user roles
+                    const userRoles = user.roles ?? [];
+                    const isCleanerOnly = userRoles.length === 1 && userRoles[0] === 'cleaner';
+                    const defaultPath = isCleanerOnly ? '/app/cleaner' : '/app/dashboard';
+
                     if (returnUrl && pendingCalc) {
                         try {
                             await ApiClient.post('real-estate/investment', JSON.parse(pendingCalc))
@@ -48,13 +53,13 @@ function Login({t}: WithTranslation) {
                             navigate(returnUrl + '?saved=true')
                         } catch (error) {
                             console.error('Error saving pending calculation:', error)
-                            navigate('/app/dashboard')
+                            navigate(defaultPath)
                         }
                     } else if (returnUrl) {
                         sessionStorage.removeItem('returnUrl')
                         navigate(returnUrl)
                     } else {
-                        navigate('/app/dashboard')
+                        navigate(defaultPath)
                     }
                 } else {
                     //Throw error
