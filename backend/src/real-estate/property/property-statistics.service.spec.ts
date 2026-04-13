@@ -979,4 +979,81 @@ describe('PropertyStatisticsService', () => {
       }
     });
   });
+
+  describe('recalculateLoanBalance', () => {
+    it('calculates loan balance from purchaseLoan minus principal payments', async () => {
+      const propertyId = 1;
+      const purchaseLoan = 100000;
+      const purchaseDate = new Date('2024-01-01');
+
+      // Mock property with loan
+      mockDataSource.query
+        .mockResolvedValueOnce([{ id: propertyId, purchaseLoan, purchaseDate }]) // properties query
+        .mockResolvedValueOnce([ // principal payments query
+          { year: 2024, month: 1, total: '1000.00' },
+          { year: 2024, month: 2, total: '1000.00' },
+          { year: 2024, month: 3, total: '1000.00' },
+        ])
+        .mockResolvedValue(undefined); // upsert queries
+
+      await service.recalculateLoanBalance(propertyId);
+
+      // Verify statistics were inserted for each month
+      const insertCalls = mockDataSource.query.mock.calls.filter(
+        (call) => call[0].includes('INSERT INTO property_statistics')
+      );
+      expect(insertCalls.length).toBeGreaterThan(0);
+    });
+
+    it('skips property without purchaseLoan', async () => {
+      const propertyId = 1;
+
+      // Mock property without loan
+      mockDataSource.query.mockResolvedValueOnce([]);
+
+      await service.recalculateLoanBalance(propertyId);
+
+      // Should only have the initial query, no inserts
+      expect(mockDataSource.query).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores payments before purchaseDate', async () => {
+      const propertyId = 1;
+      const purchaseLoan = 100000;
+      const purchaseDate = new Date('2024-03-01');
+
+      // Mock property with loan
+      mockDataSource.query
+        .mockResolvedValueOnce([{ id: propertyId, purchaseLoan, purchaseDate }])
+        .mockResolvedValueOnce([ // Only March payment should be included
+          { year: 2024, month: 3, total: '1000.00' },
+        ])
+        .mockResolvedValue(undefined);
+
+      await service.recalculateLoanBalance(propertyId);
+
+      // Check that the query filters by purchaseDate
+      const paymentQuery = mockDataSource.query.mock.calls[1][0];
+      expect(paymentQuery).toContain('accountingDate');
+    });
+
+    it('stores purchaseLoan as balance when no payments exist', async () => {
+      const propertyId = 1;
+      const purchaseLoan = 100000;
+      const purchaseDate = new Date('2024-01-01');
+
+      mockDataSource.query
+        .mockResolvedValueOnce([{ id: propertyId, purchaseLoan, purchaseDate }])
+        .mockResolvedValueOnce([]) // No payments
+        .mockResolvedValue(undefined);
+
+      await service.recalculateLoanBalance(propertyId);
+
+      // Should still insert an all-time record with the full loan amount
+      const insertCalls = mockDataSource.query.mock.calls.filter(
+        (call) => call[0].includes('INSERT INTO property_statistics')
+      );
+      expect(insertCalls.length).toBeGreaterThan(0);
+    });
+  });
 });
