@@ -4,9 +4,10 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { SelectChangeEvent } from "@mui/material/Select";
 import MonthlyBarChart, { MonthlyDataPoint } from "./MonthlyBarChart";
 import BalanceTrendChart from "./BalanceTrendChart";
+import LoanBalanceChart, { LoanBalanceDataPoint } from "./LoanBalanceChart";
 import TypeBreakdownCharts from "./TypeBreakdownCharts";
 import MonthlyTransactionTable from "./MonthlyTransactionTable";
-import { PropertyStatistics, Transaction } from "@asset-types";
+import { PropertyStatistics, Transaction, Property } from "@asset-types";
 import ApiClient from "@asset-lib/api-client";
 import { VITE_API_URL } from "../../../constants";
 import axios from "axios";
@@ -32,6 +33,8 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingTransactions, setLoadingTransactions] = useState(true);
+  const [property, setProperty] = useState<Property | null>(null);
+  const [loanStatistics, setLoanStatistics] = useState<PropertyStatistics[]>([]);
 
   // Track if an error toast was already shown to avoid multiple toasts when API is down
   const errorToastShownRef = useRef(false);
@@ -40,6 +43,25 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
   useEffect(() => {
     errorToastShownRef.current = false;
   }, [propertyId, selectedYear]);
+
+  // Fetch property details for loan info
+  useEffect(() => {
+    const fetchProperty = async () => {
+      try {
+        const url = `${VITE_API_URL}/real-estate/property/${propertyId}`;
+        const options = await ApiClient.getOptions();
+        const response = await axios.get<Property>(url, options);
+        setProperty(response.data);
+      } catch (error) {
+        console.error("Failed to fetch property:", error);
+        setProperty(null);
+      }
+    };
+
+    if (propertyId) {
+      fetchProperty();
+    }
+  }, [propertyId]);
 
   // Fetch available years
   useEffect(() => {
@@ -132,6 +154,32 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
     }
   }, [propertyId, selectedYear, showToast, t]);
 
+  // Fetch loan balance statistics
+  useEffect(() => {
+    const fetchLoanStatistics = async () => {
+      if (!property?.purchaseLoan) {
+        setLoanStatistics([]);
+        return;
+      }
+
+      try {
+        const url = `${VITE_API_URL}/real-estate/property/${propertyId}/statistics/search`;
+        const options = await ApiClient.getOptions();
+        const response = await axios.post<PropertyStatistics[]>(
+          url,
+          { key: "loan_balance", year: selectedYear, includeMonthly: true },
+          options
+        );
+        setLoanStatistics(response.data);
+      } catch (error) {
+        console.error("Failed to fetch loan statistics:", error);
+        setLoanStatistics([]);
+      }
+    };
+
+    fetchLoanStatistics();
+  }, [propertyId, selectedYear, property?.purchaseLoan]);
+
   const handleYearChange = useCallback((event: SelectChangeEvent<number>) => {
     setSelectedYear(event.target.value as number);
   }, []);
@@ -173,6 +221,26 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
     }));
   }, [monthlyData, selectedYear]);
 
+  // Transform loan statistics to chart data
+  const loanBalanceData: LoanBalanceDataPoint[] = useMemo(() => {
+    const dataPoints: LoanBalanceDataPoint[] = MONTH_LABELS.map((label, index) => ({
+      label,
+      month: index + 1,
+      balance: 0,
+    }));
+
+    loanStatistics.forEach((stat) => {
+      if (stat.month && stat.year === selectedYear && stat.key === "loan_balance") {
+        const monthIndex = stat.month - 1;
+        if (monthIndex >= 0 && monthIndex < 12) {
+          dataPoints[monthIndex].balance = parseFloat(stat.value) || 0;
+        }
+      }
+    });
+
+    return dataPoints.filter((dp) => dp.balance > 0);
+  }, [loanStatistics, selectedYear]);
+
   return (
     <Stack spacing={3}>
       {/* Year selector */}
@@ -198,6 +266,13 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
 
       {/* Balance Trend Chart */}
       <BalanceTrendChart data={monthlyData} loading={loadingStats} />
+
+      {/* Loan Balance Chart */}
+      <LoanBalanceChart
+        data={loanBalanceData}
+        originalLoan={property?.purchaseLoan ?? null}
+        loading={loadingStats}
+      />
 
       {/* Type Breakdown Charts */}
       <TypeBreakdownCharts
