@@ -342,9 +342,10 @@ describe('DashboardContext Logic', () => {
 
       const merged = mergeDashboardConfig(savedConfig);
 
-      // Should include all saved widgets plus airbnbVisits
-      expect(merged.widgets).toHaveLength(7);
+      // Should include all saved widgets plus airbnbVisits and loanBalance
+      expect(merged.widgets).toHaveLength(8);
       expect(merged.widgets.map((w) => w.id)).toContain('airbnbVisits');
+      expect(merged.widgets.map((w) => w.id)).toContain('loanBalance');
     });
 
     it('preserves user settings for existing widgets', () => {
