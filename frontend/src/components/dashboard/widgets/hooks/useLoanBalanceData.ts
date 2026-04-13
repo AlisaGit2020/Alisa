@@ -91,7 +91,14 @@ function aggregateLoanBalance(
       }
     });
 
-    return dataPoints;
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    return dataPoints.filter((dp) => {
+      if (dp.balance <= 0) return false;
+      if (year === currentYear && (dp.month ?? 0) > currentMonth) return false;
+      return true;
+    });
   } else {
     // Yearly view - aggregate by year
     const yearMap = new Map<number, LoanBalanceDataPoint>();

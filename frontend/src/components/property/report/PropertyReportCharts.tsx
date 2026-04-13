@@ -238,7 +238,14 @@ function PropertyReportCharts({ propertyId }: PropertyReportChartsProps) {
       }
     });
 
-    return dataPoints.filter((dp) => dp.balance > 0);
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    return dataPoints.filter((dp) => {
+      if (dp.balance <= 0) return false;
+      if (selectedYear === currentYear && dp.month > currentMonth) return false;
+      return true;
+    });
   }, [loanStatistics, selectedYear]);
 
   return (
