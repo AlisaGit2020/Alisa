@@ -216,6 +216,10 @@ const property = {
         selectProperty: 'Valitse kohde nähdäksesi raportit',
         backToProperty: 'Takaisin kohteeseen',
         fetchError: 'Raporttitietojen lataus epäonnistui',
+        loanBalance: 'Lainasaldo',
+        originalLoan: 'Alkuperäinen laina',
+        remainingBalance: 'Jäljellä',
+        noLoanData: 'Ei lainatietoja',
     },
 }
 

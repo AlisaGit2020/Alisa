@@ -706,6 +706,9 @@ export class PropertyStatisticsService {
       true, // negative
     );
 
+    // Recalculate LOAN_BALANCE for properties with loans
+    await this.recalculateLoanBalanceStatistics(propertyId);
+
     // Return summary
     const summary = await this.getRecalculateSummary(propertyId);
     return summary;
@@ -738,6 +741,163 @@ export class PropertyStatisticsService {
     }
 
     return combinedResult;
+  }
+
+  /**
+   * Recalculates loan balance for all properties (or a specific property) with loans.
+   */
+  private async recalculateLoanBalanceStatistics(propertyId?: number): Promise<void> {
+    const propertyFilter = propertyId ? 'AND id = $1' : '';
+    const params = propertyId ? [propertyId] : [];
+
+    // Get all properties with loans
+    const properties = await this.dataSource.query(
+      `SELECT id FROM property WHERE "purchaseLoan" IS NOT NULL ${propertyFilter}`,
+      params,
+    );
+
+    if (!properties || properties.length === 0) {
+      return;
+    }
+
+    for (const property of properties) {
+      await this.recalculateLoanBalance(property.id);
+    }
+  }
+
+  /**
+   * Recalculates loan balance statistics for a property.
+   * Calculates running balance: purchaseLoan - cumulative LOAN_PRINCIPAL payments.
+   * @param propertyId The property ID to recalculate
+   */
+  async recalculateLoanBalance(propertyId: number): Promise<void> {
+    const decimals = 2;
+
+    // Delete existing loan_balance statistics for this property
+    await this.repository.delete({
+      propertyId,
+      key: StatisticKey.LOAN_BALANCE,
+    });
+
+    // Get property with loan info
+    const properties = await this.dataSource.query(
+      `SELECT id, "purchaseLoan", "purchaseDate"
+       FROM property
+       WHERE id = $1 AND "purchaseLoan" IS NOT NULL`,
+      [propertyId],
+    );
+
+    if (properties.length === 0) {
+      return; // No loan to track
+    }
+
+    const property = properties[0];
+    const purchaseLoan = parseFloat(property.purchaseLoan);
+    const purchaseDate = property.purchaseDate;
+
+    // Get monthly LOAN_PRINCIPAL payments grouped by year/month
+    const payments = await this.dataSource.query(
+      `SELECT
+       EXTRACT(YEAR FROM e."accountingDate")::INT as year,
+       EXTRACT(MONTH FROM e."accountingDate")::INT as month,
+       SUM(e."totalAmount")::TEXT as total
+     FROM expense e
+     JOIN expense_type et ON et.id = e."expenseTypeId"
+     WHERE e."propertyId" = $1
+       AND et.key = 'loan-principal'
+       AND e."accountingDate" >= $2
+     GROUP BY EXTRACT(YEAR FROM e."accountingDate"), EXTRACT(MONTH FROM e."accountingDate")
+     ORDER BY year, month`,
+      [propertyId, purchaseDate],
+    );
+
+    // Calculate running balance for each month
+    let runningBalance = purchaseLoan;
+    const balanceRecords: Array<{ year: number; month: number; balance: number }> = [];
+
+    for (const payment of payments) {
+      const paymentAmount = parseFloat(payment.total) || 0;
+      runningBalance = runningBalance - paymentAmount;
+      balanceRecords.push({
+        year: payment.year,
+        month: payment.month,
+        balance: runningBalance,
+      });
+    }
+
+    // Build map of monthly balances from payment records (key: "YYYY-MM")
+    const monthlyBalancesFromPayments = new Map<string, number>();
+    for (const record of balanceRecords) {
+      const key = `${record.year}-${String(record.month).padStart(2, '0')}`;
+      monthlyBalancesFromPayments.set(key, record.balance);
+    }
+
+    // Insert monthly records for all months from purchase to now
+    const purchaseDateObj = new Date(purchaseDate);
+    const purchaseYear = purchaseDateObj.getFullYear();
+    const purchaseMonth = purchaseDateObj.getMonth() + 1; // 1-based
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    let monthlyBalance = purchaseLoan;
+    for (let year = purchaseYear; year <= currentYear; year++) {
+      const startMonth = year === purchaseYear ? purchaseMonth : 1;
+      const endMonth = year === currentYear ? currentMonth : 12;
+
+      for (let month = startMonth; month <= endMonth; month++) {
+        const key = `${year}-${String(month).padStart(2, '0')}`;
+        // If we have a payment this month, use that balance; otherwise carry forward
+        if (monthlyBalancesFromPayments.has(key)) {
+          monthlyBalance = monthlyBalancesFromPayments.get(key)!;
+        }
+
+        await this.dataSource.query(
+          `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+           VALUES ($1, $2, $3, $4, $5)
+           ON CONFLICT ("propertyId", "year", "month", "key")
+           DO UPDATE SET "value" = EXCLUDED."value"`,
+          [propertyId, StatisticKey.LOAN_BALANCE, year, month, monthlyBalance.toFixed(decimals)],
+        );
+      }
+    }
+
+    // Insert yearly records (end-of-year balance = last month's balance for that year)
+    const yearlyBalances = new Map<number, number>();
+    monthlyBalance = purchaseLoan;
+    for (let year = purchaseYear; year <= currentYear; year++) {
+      const startMonth = year === purchaseYear ? purchaseMonth : 1;
+      const endMonth = year === currentYear ? currentMonth : 12;
+
+      for (let month = startMonth; month <= endMonth; month++) {
+        const key = `${year}-${String(month).padStart(2, '0')}`;
+        if (monthlyBalancesFromPayments.has(key)) {
+          monthlyBalance = monthlyBalancesFromPayments.get(key)!;
+        }
+      }
+      yearlyBalances.set(year, monthlyBalance);
+    }
+
+    for (const [year, balance] of yearlyBalances) {
+      await this.dataSource.query(
+        `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+         VALUES ($1, $2, $3, NULL, $4)
+         ON CONFLICT ("propertyId", "year", "month", "key")
+         DO UPDATE SET "value" = EXCLUDED."value"`,
+        [propertyId, StatisticKey.LOAN_BALANCE, year, balance.toFixed(decimals)],
+      );
+    }
+
+    // Insert all-time record (current balance = most recent monthly balance)
+    const currentBalance = monthlyBalance;
+
+    await this.dataSource.query(
+      `INSERT INTO property_statistics ("propertyId", "key", "year", "month", "value")
+       VALUES ($1, $2, NULL, NULL, $3)
+       ON CONFLICT ("propertyId", "year", "month", "key")
+       DO UPDATE SET "value" = EXCLUDED."value"`,
+      [propertyId, StatisticKey.LOAN_BALANCE, currentBalance.toFixed(decimals)],
+    );
   }
 
   private async recalculateIncomeStatistics(

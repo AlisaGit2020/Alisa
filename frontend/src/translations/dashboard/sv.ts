@@ -39,6 +39,8 @@ const dashboard = {
   recalculate: "Beräkna statistik igen",
   configSaved: "Dashboard-layout sparad",
   configSaveError: "Kunde inte spara dashboard-layout",
+  loanBalance: "Lånesaldo",
+  noLoanData: "Inga låneuppgifter",
 };
 
 export default dashboard;

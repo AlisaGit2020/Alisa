@@ -39,6 +39,8 @@ const dashboard = {
   recalculate: "Recalculate statistics",
   configSaved: "Dashboard layout saved",
   configSaveError: "Failed to save dashboard layout",
+  loanBalance: "Loan Balance",
+  noLoanData: "No loan data",
 };
 
 export default dashboard;
