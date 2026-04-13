@@ -216,6 +216,10 @@ const property = {
         selectProperty: 'Välj en fastighet för att visa rapporter',
         backToProperty: 'Tillbaka till fastighet',
         fetchError: 'Kunde inte ladda rapportdata',
+        loanBalance: 'Lånesaldo',
+        originalLoan: 'Ursprungligt lån',
+        remainingBalance: 'Kvar',
+        noLoanData: 'Inga låneuppgifter',
     },
 }
 

@@ -216,6 +216,10 @@ const property = {
         selectProperty: 'Please select a property to view reports',
         backToProperty: 'Back to Property',
         fetchError: 'Failed to load report data',
+        loanBalance: 'Loan Balance',
+        originalLoan: 'Original Loan',
+        remainingBalance: 'Remaining',
+        noLoanData: 'No loan data',
     },
 }
 
