@@ -145,6 +145,7 @@ const en = {
     },
 
     close: "Close",
+    errorOccurred: "An error occurred. Please try again.",
     retry: "Retry",
     readMore: "Read more",
     showLess: "Show less",

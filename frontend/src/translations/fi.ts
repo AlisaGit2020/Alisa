@@ -145,6 +145,7 @@ const fi = {
     },
 
     close: "Sulje",
+    errorOccurred: "Tapahtui virhe. Yritä uudelleen.",
     retry: "Yrita uudelleen",
     readMore: "Lue lisää",
     showLess: "Näytä vähemmän",

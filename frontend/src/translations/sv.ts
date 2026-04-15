@@ -145,6 +145,7 @@ const sv = {
     },
 
     close: "Stäng",
+    errorOccurred: "Ett fel uppstod. Försök igen.",
     retry: "Forsok igen",
     readMore: "Läs mer",
     showLess: "Visa mindre",
