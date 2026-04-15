@@ -9,6 +9,8 @@ import { Tier } from './entities/tier.entity';
 import { TierInputDto } from './dtos/tier-input.dto';
 import { UserService } from '@asset-backend/people/user/user.service';
 import { User } from '@asset-backend/people/user/entities/user.entity';
+import { Ownership } from '@asset-backend/people/ownership/entities/ownership.entity';
+import { PropertyStatus } from '@asset-backend/common/types';
 
 @Injectable()
 export class TierService {
@@ -17,6 +19,8 @@ export class TierService {
     private repository: Repository<Tier>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Ownership)
+    private ownershipRepository: Repository<Ownership>,
     private userService: UserService,
   ) {}
 
@@ -86,9 +90,11 @@ export class TierService {
       relations: ['tier'],
     });
     if (!user || !user.tier) {
+      // User has no tier assigned, use default tier limits
       const defaultTier = await this.findDefault();
       if (!defaultTier) {
-        return true;
+        // No default tier configured - deny creation to be safe
+        return false;
       }
       return this.checkPropertyLimit(userId, defaultTier.maxProperties);
     }
@@ -102,15 +108,13 @@ export class TierService {
     if (maxProperties === 0) {
       return true;
     }
-    const users = await this.userService.search({
-      where: { id: userId },
-      relations: { ownerships: true },
-    });
-    const user = users[0];
-    if (!user) {
-      return false;
-    }
-    const propertyCount = user.ownerships?.length ?? 0;
+    // Count only non-prospect properties (prospects don't count toward the limit)
+    const propertyCount = await this.ownershipRepository
+      .createQueryBuilder('ownership')
+      .innerJoin('ownership.property', 'property')
+      .where('ownership.userId = :userId', { userId })
+      .andWhere('property.status != :status', { status: PropertyStatus.PROSPECT })
+      .getCount();
     return propertyCount < maxProperties;
   }
 

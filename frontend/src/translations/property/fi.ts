@@ -181,6 +181,7 @@ const property = {
     confirmSale: 'Vahvista myynti',
     congratulationsPurchase: 'Onneksi olkoon uudesta asunnostasi!',
     congratulationsSale: 'Onneksi olkoon kaupasta!',
+    tierLimitReached: 'Asuntojen enimmäismäärä saavutettu nykyiselle tasolle. Päivitä taso lisätäksesi lisää asuntoja.',
 
     // Airbnb settings
     airbnbSettingsSection: 'Airbnb-asetukset',

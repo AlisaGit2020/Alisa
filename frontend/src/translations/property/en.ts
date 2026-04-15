@@ -181,6 +181,7 @@ const property = {
     confirmSale: 'Confirm Sale',
     congratulationsPurchase: 'Congratulations on your new property!',
     congratulationsSale: 'Congratulations on the sale!',
+    tierLimitReached: 'Property limit reached for your current tier. Upgrade to add more properties.',
 
     // Airbnb settings
     airbnbSettingsSection: 'Airbnb Settings',

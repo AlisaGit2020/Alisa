@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { AxiosError } from 'axios';
 import { Box, IconButton, Menu, MenuItem, ListItemIcon, Stack, Alert } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
@@ -75,6 +76,8 @@ function PropertyActionsMenu({
   const [showPurchaseCongrats, setShowPurchaseCongrats] = useState(false);
   const [showSaleCongrats, setShowSaleCongrats] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const [saleError, setSaleError] = useState<string | null>(null);
 
   // Form data
   const [purchaseForm, setPurchaseForm] = useState<PurchaseFormData>({
@@ -139,6 +142,7 @@ function PropertyActionsMenu({
 
   const handlePurchaseSubmit = async () => {
     setLoading(true);
+    setPurchaseError(null);
     try {
       const updatedProperty = await ApiClient.put<Partial<Property>>('real-estate/property', property.id, {
         name: property.name,
@@ -152,6 +156,12 @@ function PropertyActionsMenu({
       setShowPurchaseCongrats(true);
       onPropertyUpdated?.(updatedProperty);
     } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 403) {
+        setPurchaseError(t('tierLimitReached'));
+      } else {
+        setPurchaseError(t('common:errorOccurred'));
+      }
       console.error('Failed to update property:', error);
     } finally {
       setLoading(false);
@@ -160,6 +170,7 @@ function PropertyActionsMenu({
 
   const handleSaleSubmit = async () => {
     setLoading(true);
+    setSaleError(null);
     try {
       const updatedProperty = await ApiClient.put<Partial<Property>>('real-estate/property', property.id, {
         name: property.name,
@@ -172,6 +183,7 @@ function PropertyActionsMenu({
       setShowSaleCongrats(true);
       onPropertyUpdated?.(updatedProperty);
     } catch (error) {
+      setSaleError(t('common:errorOccurred'));
       console.error('Failed to update property:', error);
     } finally {
       setLoading(false);
@@ -279,13 +291,13 @@ function PropertyActionsMenu({
       <AssetDialog
         open={purchaseDialogOpen}
         title={t('purchaseDialogTitle')}
-        onClose={() => setPurchaseDialogOpen(false)}
+        onClose={() => { setPurchaseDialogOpen(false); setPurchaseError(null); }}
         actions={
           <>
             <AssetButton
               label={t('common:cancel')}
               variant="text"
-              onClick={() => setPurchaseDialogOpen(false)}
+              onClick={() => { setPurchaseDialogOpen(false); setPurchaseError(null); }}
               disabled={loading}
             />
             <AssetButton
@@ -297,6 +309,9 @@ function PropertyActionsMenu({
         }
       >
         <Stack spacing={2} sx={{ pt: 1 }}>
+          {purchaseError && (
+            <Alert severity="error">{purchaseError}</Alert>
+          )}
           <AssetDatePicker
             label={t('purchaseDate')}
             value={purchaseForm.purchaseDate}
@@ -337,13 +352,13 @@ function PropertyActionsMenu({
       <AssetDialog
         open={saleDialogOpen}
         title={t('saleDialogTitle')}
-        onClose={() => setSaleDialogOpen(false)}
+        onClose={() => { setSaleDialogOpen(false); setSaleError(null); }}
         actions={
           <>
             <AssetButton
               label={t('common:cancel')}
               variant="text"
-              onClick={() => setSaleDialogOpen(false)}
+              onClick={() => { setSaleDialogOpen(false); setSaleError(null); }}
               disabled={loading}
             />
             <AssetButton
@@ -355,6 +370,9 @@ function PropertyActionsMenu({
         }
       >
         <Stack spacing={2} sx={{ pt: 1 }}>
+          {saleError && (
+            <Alert severity="error">{saleError}</Alert>
+          )}
           <AssetDatePicker
             label={t('saleDate')}
             value={saleForm.saleDate}
