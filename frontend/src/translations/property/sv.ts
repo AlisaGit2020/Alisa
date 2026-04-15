@@ -181,6 +181,7 @@ const property = {
     confirmSale: 'Bekräfta försäljning',
     congratulationsPurchase: 'Grattis till din nya fastighet!',
     congratulationsSale: 'Grattis till försäljningen!',
+    tierLimitReached: 'Fastighetsgränsen nådd för din nuvarande nivå. Uppgradera för att lägga till fler fastigheter.',
 
     // Airbnb settings
     airbnbSettingsSection: 'Airbnb-inställningar',

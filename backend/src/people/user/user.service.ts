@@ -149,5 +149,6 @@ export class UserService {
     if (input.photo !== undefined) user.photo = input.photo;
     if (input.dashboardConfig !== undefined)
       user.dashboardConfig = input.dashboardConfig;
+    if (input.tierId !== undefined) user.tierId = input.tierId;
   }
 }
