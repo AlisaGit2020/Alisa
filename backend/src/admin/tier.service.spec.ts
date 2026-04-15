@@ -13,11 +13,13 @@ describe('TierService', () => {
   let service: TierService;
   let mockRepository: MockRepository<Tier>;
   let mockUserRepository: MockRepository<User>;
+  let mockOwnershipRepository: MockRepository<Ownership>;
   let mockUserService: Partial<Record<keyof UserService, jest.Mock>>;
 
   beforeEach(async () => {
     mockRepository = createMockRepository<Tier>();
     mockUserRepository = createMockRepository<User>();
+    mockOwnershipRepository = createMockRepository<Ownership>();
     mockUserService = {
       search: jest.fn(),
       findOne: jest.fn(),
@@ -29,6 +31,10 @@ describe('TierService', () => {
         TierService,
         { provide: getRepositoryToken(Tier), useValue: mockRepository },
         { provide: getRepositoryToken(User), useValue: mockUserRepository },
+        {
+          provide: getRepositoryToken(Ownership),
+          useValue: mockOwnershipRepository,
+        },
         { provide: UserService, useValue: mockUserService },
       ],
     }).compile();
@@ -239,14 +245,26 @@ describe('TierService', () => {
   });
 
   describe('canCreateProperty', () => {
+    const mockQueryBuilder = {
+      innerJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getCount: jest.fn(),
+    };
+
+    beforeEach(() => {
+      mockOwnershipRepository.createQueryBuilder = jest
+        .fn()
+        .mockReturnValue(mockQueryBuilder);
+    });
+
     it('returns true when user is under property limit', async () => {
       const tier = createFreeTier({ maxProperties: 5 });
       const user = createUser({ id: 1, tierId: 1 });
       user.tier = tier;
-      user.ownerships = [{ propertyId: 1 } as Partial<Ownership> as Ownership];
 
       mockUserService.findOne.mockResolvedValue(user);
-      mockUserService.search.mockResolvedValue([user]);
+      mockQueryBuilder.getCount.mockResolvedValue(1);
 
       const result = await service.canCreateProperty(1);
 
@@ -257,10 +275,9 @@ describe('TierService', () => {
       const tier = createFreeTier({ maxProperties: 1 });
       const user = createUser({ id: 1, tierId: 1 });
       user.tier = tier;
-      user.ownerships = [{ propertyId: 1 } as Partial<Ownership> as Ownership];
 
       mockUserService.findOne.mockResolvedValue(user);
-      mockUserService.search.mockResolvedValue([user]);
+      mockQueryBuilder.getCount.mockResolvedValue(1);
 
       const result = await service.canCreateProperty(1);
 
@@ -271,9 +288,6 @@ describe('TierService', () => {
       const tier = createTier({ id: 4, maxProperties: 0 });
       const user = createUser({ id: 1, tierId: 4 });
       user.tier = tier;
-      user.ownerships = Array(100)
-        .fill(null)
-        .map((_, i) => ({ propertyId: i + 1 }) as Partial<Ownership> as Ownership);
 
       mockUserService.findOne.mockResolvedValue(user);
 
@@ -283,22 +297,21 @@ describe('TierService', () => {
     });
 
     it('uses default tier when user has no tier assigned', async () => {
-      const defaultTier = createFreeTier({ maxProperties: 1, isDefault: true });
+      const defaultTier = createFreeTier({ maxProperties: 2, isDefault: true });
       const user = createUser({ id: 1 });
       user.tier = undefined;
       user.tierId = undefined;
-      user.ownerships = [];
 
       mockUserService.findOne.mockResolvedValue(user);
       mockRepository.findOneBy.mockResolvedValue(defaultTier);
-      mockUserService.search.mockResolvedValue([user]);
+      mockQueryBuilder.getCount.mockResolvedValue(0);
 
       const result = await service.canCreateProperty(1);
 
       expect(result).toBe(true);
     });
 
-    it('returns true when no tier and no default tier exists', async () => {
+    it('returns false when no tier and no default tier exists', async () => {
       const user = createUser({ id: 1 });
       user.tier = undefined;
       user.tierId = undefined;
@@ -308,7 +321,7 @@ describe('TierService', () => {
 
       const result = await service.canCreateProperty(1);
 
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
   });
 });
