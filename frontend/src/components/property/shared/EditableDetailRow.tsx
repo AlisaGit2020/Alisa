@@ -1,6 +1,9 @@
 import { Box, Stack, Typography } from '@mui/material';
 import { KeyboardEvent, ReactNode, useLayoutEffect, useRef, useState } from 'react';
 import AssetTextField from '../../asset/form/AssetTextField';
+import AssetNumberField from '../../asset/form/AssetNumberField';
+import AssetMoneyField from '../../asset/form/AssetMoneyField';
+import AssetDatePicker from '../../asset/form/AssetDatePicker';
 import DetailRow from './DetailRow';
 
 export type EditableInputType = 'text' | 'number' | 'currency' | 'date' | 'multiline';
@@ -82,6 +85,103 @@ function EditableDetailRow(props: EditableDetailRowProps) {
     }
   };
 
+  const renderInput = () => {
+    switch (props.inputType) {
+      case 'number': {
+        const numericValue: number | '' = draft === '' ? '' : Number(draft);
+        return (
+          <AssetNumberField
+            label={props.label}
+            value={Number.isNaN(numericValue) ? '' : numericValue}
+            autoFocus={props.autoFocus !== false}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={() => {
+              if (escPressedRef.current) { escPressedRef.current = false; return; }
+              if (draft === '') {
+                if (lastCommittedRef.current === '') return;
+                const previous = lastCommittedRef.current;
+                lastCommittedRef.current = '';
+                void (async () => {
+                  try { await props.onSave(null); }
+                  catch { lastCommittedRef.current = previous; setDraft(previous); }
+                })();
+                return;
+              }
+              const parsed = Number(draft);
+              if (Number.isNaN(parsed)) return;
+              if (String(parsed) === lastCommittedRef.current) return;
+              const previous = lastCommittedRef.current;
+              lastCommittedRef.current = String(parsed);
+              void (async () => {
+                try { await props.onSave(parsed); }
+                catch { lastCommittedRef.current = previous; setDraft(previous); }
+              })();
+            }}
+          />
+        );
+      }
+      case 'currency': {
+        const moneyValue: number | '' = draft === '' ? '' : Number(draft);
+        return (
+          <AssetMoneyField
+            label={props.label}
+            value={Number.isNaN(moneyValue) ? '' : moneyValue}
+            autoFocus={props.autoFocus !== false}
+            onChange={(v) => setDraft(v === undefined ? '' : String(v))}
+            onBlur={() => {
+              if (escPressedRef.current) { escPressedRef.current = false; return; }
+              const next = draft === '' ? null : Number(draft);
+              if (next !== null && Number.isNaN(next)) return;
+              const nextStr = next === null ? '' : String(next);
+              if (nextStr === lastCommittedRef.current) return;
+              const previous = lastCommittedRef.current;
+              lastCommittedRef.current = nextStr;
+              void (async () => {
+                try { await props.onSave(next); }
+                catch { lastCommittedRef.current = previous; setDraft(previous); }
+              })();
+            }}
+          />
+        );
+      }
+      case 'date': {
+        const dateValue = props.value instanceof Date ? props.value : null;
+        return (
+          <AssetDatePicker
+            label={props.label}
+            value={dateValue}
+            autoFocus={props.autoFocus !== false}
+            onChange={(value) => {
+              const next = value ? value.toDate() : null;
+              const nextIso = next ? next.toISOString() : '';
+              if (nextIso === lastCommittedRef.current) return;
+              const previous = lastCommittedRef.current;
+              lastCommittedRef.current = nextIso;
+              void (async () => {
+                try { await props.onSave(next); }
+                catch { lastCommittedRef.current = previous; }
+              })();
+            }}
+          />
+        );
+      }
+      case 'multiline':
+      case 'text':
+      default:
+        return (
+          <AssetTextField
+            label={props.label}
+            value={draft}
+            multiline={props.inputType === 'multiline'}
+            rows={props.inputType === 'multiline' ? (props.rows ?? 4) : undefined}
+            autoFocus={props.autoFocus !== false}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={handleBlur}
+          />
+        );
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', py: 0.5 }} onKeyDown={handleKeyDown}>
       {props.icon && (
@@ -93,17 +193,7 @@ function EditableDetailRow(props: EditableDetailRowProps) {
         <Typography variant="caption" sx={{ color: 'text.secondary', minWidth: 120, fontSize: '0.75rem' }}>
           {props.label}
         </Typography>
-        <Box sx={{ flex: 1 }}>
-          <AssetTextField
-            label={props.label}
-            value={draft}
-            multiline={props.inputType === 'multiline'}
-            rows={props.inputType === 'multiline' ? (props.rows ?? 4) : undefined}
-            autoFocus={props.autoFocus !== false}
-            onChange={(e) => setDraft(e.target.value)}
-            onBlur={handleBlur}
-          />
-        </Box>
+        <Box sx={{ flex: 1 }}>{renderInput()}</Box>
       </Stack>
     </Box>
   );
