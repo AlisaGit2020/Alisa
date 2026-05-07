@@ -272,10 +272,11 @@ describe('ProspectCompareView', () => {
       const prospect = createMockProperty({ id: 1, name: 'Test Prospect' });
       setupMocks({ calculations: [], prospects: [prospect] });
 
-      // Mock the post call for saving calculation
-      const mockPost = jest.spyOn(ApiClient, 'post').mockResolvedValue({
-        data: createMockCalculation({ id: 100, name: 'New Calc', propertyId: 1 }),
-      });
+      const mockPost = jest
+        .spyOn(ApiClient, 'post')
+        .mockResolvedValue(
+          createMockCalculation({ id: 100, name: 'New Calc', propertyId: 1 }) as unknown as ReturnType<typeof ApiClient.post>
+        );
 
       renderWithProviders(<ProspectCompareView />);
 

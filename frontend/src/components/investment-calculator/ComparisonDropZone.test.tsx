@@ -6,10 +6,9 @@ import { SavedInvestmentCalculation } from './InvestmentCalculatorResults';
 import { PropertyStatus } from '@asset-types';
 import ApiClient from '@asset-lib/api-client';
 
-// Mock ApiClient
-jest.spyOn(ApiClient, 'post').mockResolvedValue({
-  data: {},
-} as unknown as ReturnType<typeof ApiClient.post>);
+jest
+  .spyOn(ApiClient, 'put')
+  .mockResolvedValue({} as unknown as ReturnType<typeof ApiClient.put>);
 
 // Import after mocking
 import ComparisonDropZone from './ComparisonDropZone';

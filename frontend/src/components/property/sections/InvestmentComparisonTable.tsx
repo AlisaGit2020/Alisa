@@ -14,6 +14,7 @@ import {
   Paper,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   SavedInvestmentCalculation,
   CalculationWithProperty,
@@ -28,6 +29,7 @@ interface InvestmentComparisonTableProps {
   onUpdate: (calculation: SavedInvestmentCalculation) => void;
   onDelete: (id: number) => void;
   showDeleteButton?: boolean;
+  removeMode?: 'confirm' | 'immediate';
 }
 
 // Input fields that are editable (cost fields come from property, not editable here)
@@ -103,10 +105,11 @@ function InvestmentComparisonTable({
   onUpdate,
   onDelete,
   showDeleteButton = true,
+  removeMode = 'confirm',
 }: InvestmentComparisonTableProps) {
   const { t } = useTranslation(['investment-calculator', 'property', 'common']);
   const { showToast } = useToast();
-  const [editingCell, setEditingCell] = useState<{ id: number; field: string } | null>(null);
+  const [editingCell, setEditingCell] = useState<{ id: number; field: keyof SavedInvestmentCalculation } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
@@ -125,45 +128,41 @@ function InvestmentComparisonTable({
     if (!editingCell) return;
 
     const calc = calculations.find((c) => c.id === editingCell.id);
-    if (!calc) return;
+    if (!calc) {
+      setEditingCell(null);
+      setEditValue('');
+      return;
+    }
 
     const updatedValue = parseFloat(editValue) || 0;
+    const previousValue = calc[editingCell.field] as unknown as number;
 
-    // Update locally first
+    setEditingCell(null);
+    setEditValue('');
+
+    if (updatedValue === previousValue) return;
+
     const localUpdate = {
       ...calc,
       [editingCell.field]: updatedValue,
     } as SavedInvestmentCalculation;
 
     try {
-      // Recalculate using the API
-      const response = await ApiClient.post<SavedInvestmentCalculation>(
-        'real-estate/investment/calculate',
-        { ...localUpdate }
+      const data = await ApiClient.put<SavedInvestmentCalculation>(
+        'real-estate/investment',
+        calc.id,
+        localUpdate
       );
-      // ApiClient.post returns axios response, extract data
-      const data = (response as unknown as { data: SavedInvestmentCalculation }).data;
-
-      // Merge with original id and name if API succeeds
-      if (data && typeof data === 'object' && Object.keys(data).length > 0) {
-        onUpdate({
-          ...data,
-          id: calc.id,
-          name: calc.name,
-        });
-      } else {
-        // API returned empty data, use local update
-        onUpdate(localUpdate);
-      }
+      onUpdate({
+        ...localUpdate,
+        ...data,
+        id: calc.id,
+        name: calc.name,
+      });
     } catch {
-      // Show error toast when API recalculation fails
       showToast({ message: t('common:toast.updateError'), severity: 'error' });
-      // Still update with local changes if API fails
       onUpdate(localUpdate);
     }
-
-    setEditingCell(null);
-    setEditValue('');
   }, [editingCell, editValue, calculations, onUpdate, showToast, t]);
 
   const handleKeyDown = useCallback(
@@ -178,9 +177,13 @@ function InvestmentComparisonTable({
   );
 
   const handleDeleteClick = useCallback((id: number) => {
+    if (removeMode === 'immediate') {
+      onDelete(id);
+      return;
+    }
     setDeleteTargetId(id);
     setDeleteDialogOpen(true);
-  }, []);
+  }, [removeMode, onDelete]);
 
   const handleDeleteConfirm = useCallback(() => {
     if (deleteTargetId !== null) {
@@ -222,6 +225,7 @@ function InvestmentComparisonTable({
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={handleSaveEdit}
           onKeyDown={handleKeyDown}
+          onFocus={(e) => e.target.select()}
           autoFocus
           sx={{ width: 120 }}
           slotProps={{
@@ -291,6 +295,12 @@ function InvestmentComparisonTable({
     );
   }
 
+  const isImmediateRemove = removeMode === 'immediate';
+  const removeIcon = isImmediateRemove ? <CloseIcon fontSize="small" /> : <DeleteIcon fontSize="small" />;
+  const removeLabel = isImmediateRemove
+    ? t('investment-calculator:removeFromComparison')
+    : t('common:delete');
+
   const stickyColumnStyle = {
     position: 'sticky' as const,
     left: 0,
@@ -326,9 +336,9 @@ function InvestmentComparisonTable({
                       <IconButton
                         size="small"
                         onClick={() => handleDeleteClick(calc.id)}
-                        aria-label={t('common:delete')}
+                        aria-label={removeLabel}
                       >
-                        <DeleteIcon fontSize="small" />
+                        {removeIcon}
                       </IconButton>
                     )}
                   </Box>

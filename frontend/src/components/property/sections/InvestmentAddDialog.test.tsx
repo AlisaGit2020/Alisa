@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 import { renderWithProviders, createMockProperty } from '@test-utils';
 import InvestmentAddDialog from './InvestmentAddDialog';
 import { PropertyStatus } from '@asset-types';
+import ApiClient from '@asset-lib/api-client';
 
 describe('InvestmentAddDialog', () => {
   const defaultProps = {
@@ -102,6 +103,39 @@ describe('InvestmentAddDialog', () => {
     // Note: rentPerMonth validation is tested indirectly via the AssetEditableNumber
     // component tests and the default value ensures it's always positive initially.
     // Testing inline editing in a Dialog is complex due to focus management.
+
+    it('passes the saved calculation (not undefined) to onSave', async () => {
+      const user = userEvent.setup();
+      const onSave = jest.fn();
+      const savedCalculation = {
+        id: 42,
+        name: 'My Calc',
+        deptFreePrice: 150000,
+        transferTaxPercent: 1.5,
+        rentPerMonth: 900,
+        propertyId: 1,
+      };
+
+      const apiPostSpy = jest
+        .spyOn(ApiClient, 'post')
+        .mockResolvedValue(savedCalculation as unknown as ReturnType<typeof ApiClient.post>);
+
+      renderWithProviders(
+        <InvestmentAddDialog {...defaultProps} onSave={onSave} />
+      );
+
+      const nameInput = screen.getByLabelText(/name/i);
+      await user.type(nameInput, 'My Calc');
+
+      const saveButton = screen.getByRole('button', { name: /save/i });
+      await user.click(saveButton);
+
+      await waitFor(() => {
+        expect(onSave).toHaveBeenCalledWith(savedCalculation);
+      });
+
+      apiPostSpy.mockRestore();
+    });
   });
 
   describe('cancel behavior', () => {

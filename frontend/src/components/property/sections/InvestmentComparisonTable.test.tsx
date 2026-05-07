@@ -7,10 +7,14 @@ import { SavedInvestmentCalculation } from '../../investment-calculator/Investme
 import { PropertyStatus } from '@asset-types';
 import ApiClient from '@asset-lib/api-client';
 
-// Mock ApiClient
-jest.spyOn(ApiClient, 'post').mockResolvedValue({
-  data: {},
-} as unknown as ReturnType<typeof ApiClient.post>);
+const apiPutSpy = jest
+  .spyOn(ApiClient, 'put')
+  .mockResolvedValue({} as unknown as ReturnType<typeof ApiClient.put>);
+
+beforeEach(() => {
+  apiPutSpy.mockClear();
+  apiPutSpy.mockResolvedValue({} as unknown as ReturnType<typeof ApiClient.put>);
+});
 
 const createMockCalculation = (
   overrides: Partial<SavedInvestmentCalculation> = {}
@@ -231,6 +235,104 @@ describe('InvestmentComparisonTable', () => {
           expect.objectContaining({
             id: 1,
             rentPerMonth: 900,
+          })
+        );
+      });
+    });
+
+    it('persists edits via PUT and passes recalculated output values into onUpdate', async () => {
+      const user = userEvent.setup();
+      const onUpdate = jest.fn();
+      const calculations = [createMockCalculation({ id: 1, rentPerMonth: 850 })];
+
+      apiPutSpy.mockResolvedValueOnce(
+        createMockCalculation({
+          id: 1,
+          rentPerMonth: 900,
+          rentalIncomePerYear: 10800,
+          rentalYieldPercent: 7.2,
+          cashFlowPerMonth: 230,
+        }) as unknown as ReturnType<typeof ApiClient.put>
+      );
+
+      renderWithProviders(
+        <InvestmentComparisonTable
+          calculations={calculations}
+          onUpdate={onUpdate}
+          onDelete={jest.fn()}
+        />
+      );
+
+      const rentText = screen.getByText('850 €');
+      await user.click(rentText);
+      const editableInput = await screen.findByDisplayValue('850');
+      await user.clear(editableInput);
+      await user.type(editableInput, '900');
+      await user.tab();
+
+      await waitFor(() => {
+        expect(apiPutSpy).toHaveBeenCalledWith(
+          'real-estate/investment',
+          1,
+          expect.objectContaining({ id: 1, rentPerMonth: 900 })
+        );
+      });
+
+      await waitFor(() => {
+        expect(onUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 1,
+            rentPerMonth: 900,
+            rentalIncomePerYear: 10800,
+            rentalYieldPercent: 7.2,
+            cashFlowPerMonth: 230,
+          })
+        );
+      });
+    });
+
+    it('preserves extra calculation fields (e.g. property) when merging API response', async () => {
+      const user = userEvent.setup();
+      const onUpdate = jest.fn();
+      const property = { id: 42, name: 'My House' };
+      const calculations = [
+        {
+          ...createMockCalculation({ id: 1, rentPerMonth: 850 }),
+          propertyId: 42,
+          property,
+        },
+      ];
+
+      apiPutSpy.mockResolvedValueOnce(
+        createMockCalculation({
+          id: 1,
+          rentPerMonth: 900,
+          rentalIncomePerYear: 10800,
+        }) as unknown as ReturnType<typeof ApiClient.put>
+      );
+
+      renderWithProviders(
+        <InvestmentComparisonTable
+          calculations={calculations as SavedInvestmentCalculation[]}
+          onUpdate={onUpdate}
+          onDelete={jest.fn()}
+        />
+      );
+
+      const rentText = screen.getByText('850 €');
+      await user.click(rentText);
+      const editableInput = await screen.findByDisplayValue('850');
+      await user.clear(editableInput);
+      await user.type(editableInput, '900');
+      await user.tab();
+
+      await waitFor(() => {
+        expect(onUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 1,
+            rentPerMonth: 900,
+            propertyId: 42,
+            property,
           })
         );
       });

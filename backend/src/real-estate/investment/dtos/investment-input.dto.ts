@@ -21,7 +21,7 @@ export class InvestmentInputDto {
   @IsNumber()
   @Min(0)
   @Max(100)
-  transferTaxPercent: number = 2; //default 2%
+  transferTaxPercent: number = 1.5;
 
   @IsNotEmpty()
   @IsNumber()

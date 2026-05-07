@@ -212,9 +212,7 @@ function ProspectCompareView({ standalone = false, refreshKey = 0 }: ProspectCom
 
     try {
       await ApiClient.delete('real-estate/investment', deleteTargetId);
-      // Remove from comparison if present
       setComparisonCalculations((prev) => prev.filter((c) => c.id !== deleteTargetId));
-      // Refresh list
       fetchCalculations();
       showToast({ message: t('common:deleted'), severity: 'success' });
     } catch (err) {

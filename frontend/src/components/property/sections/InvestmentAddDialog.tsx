@@ -11,7 +11,6 @@ import {
   Divider,
   Alert,
 } from '@mui/material';
-import { AxiosResponse } from 'axios';
 import { Property } from '@asset-types';
 import { SavedInvestmentCalculation } from '../../investment-calculator/InvestmentCalculatorResults';
 import { AssetButton, AssetTextField, AssetEditableNumber } from '../../asset';
@@ -44,7 +43,7 @@ interface FormErrors {
 const getDefaultFormData = (property: Property): FormData => ({
   name: '',
   deptFreePrice: property.purchasePrice ?? 100000,
-  transferTaxPercent: 2,
+  transferTaxPercent: 1.5,
   rentPerMonth: property.monthlyRent ?? 800,
   apartmentSize: property.size || 50,
   downPayment: 0,
@@ -126,9 +125,11 @@ function InvestmentAddDialog({
         waterCharge: 0,
       };
 
-      // ApiClient.post returns axios response (type mismatch in ApiClient)
-      const response = await ApiClient.post('real-estate/investment', submissionData) as unknown as AxiosResponse<SavedInvestmentCalculation>;
-      onSave(response.data);
+      const saved = await ApiClient.post<SavedInvestmentCalculation>(
+        'real-estate/investment',
+        submissionData as unknown as SavedInvestmentCalculation,
+      );
+      onSave(saved);
       onClose();
     } catch (error) {
       console.error('Failed to save calculation:', error);

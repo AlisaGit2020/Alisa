@@ -65,7 +65,7 @@ function InvestmentCalculatorForm({ t, id, initialValues, onCancel, onAfterSubmi
     id: initialValues?.id,
     deptFreePrice: initialValues?.deptFreePrice ?? 100000,
     deptShare: initialValues?.deptShare ?? 0,
-    transferTaxPercent: initialValues?.transferTaxPercent ?? 2,
+    transferTaxPercent: initialValues?.transferTaxPercent ?? 1.5,
     maintenanceFee: initialValues?.maintenanceFee ?? 200,
     chargeForFinancialCosts: initialValues?.chargeForFinancialCosts ?? 50,
     rentPerMonth: initialValues?.rentPerMonth ?? 800,

@@ -130,7 +130,7 @@ function ApartmentCalculationDialog({
     name: '',
     deptFreePrice: property?.purchasePrice ?? 100000,
     deptShare: 0,
-    transferTaxPercent: 2,
+    transferTaxPercent: 1.5,
     maintenanceFee: 200,
     chargeForFinancialCosts: 50,
     rentPerMonth: property?.monthlyRent ?? 800,
