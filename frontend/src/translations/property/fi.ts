@@ -74,6 +74,13 @@ const property = {
     deleteCalculationConfirm: 'Haluatko varmasti poistaa tämän laskelman?',
     inputFields: 'Syöttökentät',
 
+    // Edit section keys
+    editSection: 'Muokkaa osiota',
+    doneEditing: 'Valmis',
+    saveError: 'Tallennus epäonnistui',
+    street: 'Katu',
+    notSet: '—',
+
     // Property field sections
     monthlyCostsSection: 'Kuukausikulut',
     purchaseInfoSection: 'Ostotiedot',

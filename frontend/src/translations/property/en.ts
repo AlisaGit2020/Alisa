@@ -74,6 +74,13 @@ const property = {
     deleteCalculationConfirm: 'Are you sure you want to delete this calculation?',
     inputFields: 'Input Fields',
 
+    // Edit section keys
+    editSection: 'Edit section',
+    doneEditing: 'Done',
+    saveError: 'Failed to save changes',
+    street: 'Street',
+    notSet: '—',
+
     // Property field sections
     monthlyCostsSection: 'Monthly Costs',
     purchaseInfoSection: 'Purchase Info',

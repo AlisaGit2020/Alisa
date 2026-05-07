@@ -74,6 +74,13 @@ const property = {
     deleteCalculationConfirm: 'Är du säker på att du vill ta bort denna kalkyl?',
     inputFields: 'Inmatningsfält',
 
+    // Edit section keys
+    editSection: 'Redigera sektion',
+    doneEditing: 'Klar',
+    saveError: 'Sparandet misslyckades',
+    street: 'Gata',
+    notSet: '—',
+
     // Property field sections
     monthlyCostsSection: 'Månadskostnader',
     purchaseInfoSection: 'Köpinformation',
