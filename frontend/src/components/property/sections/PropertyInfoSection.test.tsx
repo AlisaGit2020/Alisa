@@ -341,4 +341,41 @@ describe('PropertyInfoSection edit mode', () => {
 
     expect(screen.getByText('Purchase Info')).toBeInTheDocument();
   });
+
+  it('switches active section when clicking a different pencil', async () => {
+    const user = userEvent.setup();
+    const property = createMockProperty({
+      id: 33, status: PropertyStatus.OWN,
+      purchaseLoan: 100000, purchaseDate: new Date('2020-01-01'),
+    });
+
+    const setActiveKey = jest.fn();
+
+    const { rerender } = renderWithProviders(
+      <PropertyInfoSection
+        property={property}
+        activeKey={null}
+        setActiveKey={setActiveKey}
+        onPropertyUpdated={jest.fn()}
+      />
+    );
+
+    const propertyInfoCard = screen.getByText('Property Information').closest('div')!;
+    const purchaseCard = screen.getByText('Purchase Info').closest('div')!;
+
+    await user.click(within(propertyInfoCard as HTMLElement).getByRole('button', { name: /edit section/i }));
+    expect(setActiveKey).toHaveBeenLastCalledWith('property-info');
+
+    rerender(
+      <PropertyInfoSection
+        property={property}
+        activeKey={'property-info'}
+        setActiveKey={setActiveKey}
+        onPropertyUpdated={jest.fn()}
+      />
+    );
+
+    await user.click(within(purchaseCard as HTMLElement).getByRole('button', { name: /edit section/i }));
+    expect(setActiveKey).toHaveBeenLastCalledWith('purchase');
+  });
 });
