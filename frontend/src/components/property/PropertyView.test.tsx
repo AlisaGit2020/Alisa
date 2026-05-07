@@ -138,7 +138,8 @@ describe('PropertyView', () => {
 
       // Verify location
       expect(screen.getByText('Mannerheimintie 1')).toBeInTheDocument();
-      expect(screen.getByText('00100 Helsinki')).toBeInTheDocument();
+      expect(screen.getByText('00100')).toBeInTheDocument();
+      expect(screen.getByText('Helsinki')).toBeInTheDocument();
 
       // Verify description
       expect(screen.getByText('A beautiful apartment in the city center.')).toBeInTheDocument();
@@ -211,7 +212,7 @@ describe('PropertyView', () => {
       expect(screen.getByText(/Ownership 100%/)).toBeInTheDocument();
     });
 
-    it('hides location section when no address or city', async () => {
+    it('shows location section with empty placeholders when no address', async () => {
       const propertyNoLocation = createMockProperty({
         ...mockProperty,
         address: undefined,
@@ -224,7 +225,9 @@ describe('PropertyView', () => {
         expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
 
-      expect(screen.queryByText('Location')).not.toBeInTheDocument();
+      expect(screen.getByText('Location')).toBeInTheDocument();
+      // At least one '—' placeholder for empty fields
+      expect(screen.getAllByText('—').length).toBeGreaterThan(0);
     });
 
     it('hides description section when no description', async () => {
