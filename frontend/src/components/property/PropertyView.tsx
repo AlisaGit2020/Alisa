@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Stack, Typography } from '@mui/material';
+import { Box, Grid, IconButton, Paper, Stack, Tooltip, Typography } from '@mui/material';
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { WithTranslation, withTranslation } from 'react-i18next';
@@ -9,6 +9,8 @@ import AssetLoadingProgress from '../asset/AssetLoadingProgress';
 import AssetButton from '../asset/form/AssetButton';
 import { getPhotoUrl } from '@asset-lib/functions';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
 import PropertyReportSection from './report/PropertyReportSection';
 import { AllocationRulesModal } from '../allocation';
 import { getReturnPathForStatus } from './property-form-utils';
@@ -18,6 +20,9 @@ import PropertyActionsMenu from './sections/PropertyActionsMenu';
 import PropertyKpiSection from './sections/PropertyKpiSection';
 import PropertyInfoSection from './sections/PropertyInfoSection';
 import PropertyInfoCard from './shared/PropertyInfoCard';
+import EditableDetailRow from './shared/EditableDetailRow';
+import { useEditableSection } from './shared/useEditableSection';
+import { usePropertyFieldSave } from './shared/usePropertyFieldSave';
 import { calculateSummaryData } from './report/report-utils';
 import PropertyChargeDialog from './sections/PropertyChargeDialog';
 import ManageCleanersDialog from '../cleaning/ManageCleanersDialog';
@@ -33,6 +38,14 @@ function PropertyView({ t }: WithTranslation) {
   const [statistics, setStatistics] = useState<PropertyStatistics[]>([]);
   const { idParam } = useParams();
   const navigate = useNavigate();
+
+  // Edit state - must be before early returns
+  const [activeEditKey, setActiveEditKey] = useState<string | null>(null);
+  const description = useEditableSection(activeEditKey, setActiveEditKey, 'description');
+
+  // Safe fallback for hooks (satisfies rules of hooks)
+  const safeProperty: Property = property ?? ({ id: 0, name: '', size: 0 } as Property);
+  const saveDescription = usePropertyFieldSave(safeProperty, (updated) => setProperty(updated));
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -172,26 +185,42 @@ function PropertyView({ t }: WithTranslation) {
       <Box sx={{ px: 2, py: 1.5 }}>
         <PropertyInfoSection
           property={property}
-          activeKey={null}
-          setActiveKey={() => {}}
-          onPropertyUpdated={() => {}}
+          activeKey={activeEditKey}
+          setActiveKey={setActiveEditKey}
+          onPropertyUpdated={setProperty}
         />
       </Box>
 
-      {/* Description Card */}
-      {property.description && (
-        <Box sx={{ px: 2, py: 1.5 }}>
-          <Grid container>
-            <Grid size={{ xs: 12 }}>
-              <PropertyInfoCard title={t('description')}>
-                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                  {property.description}
-                </Typography>
-              </PropertyInfoCard>
-            </Grid>
+      {/* Description Card — always rendered so users can add a description */}
+      <Box sx={{ px: 2, py: 1.5 }}>
+        <Grid container>
+          <Grid size={{ xs: 12 }}>
+            <PropertyInfoCard
+              title={t('description')}
+              action={
+                <Tooltip title={description.editing ? t('doneEditing') : t('editSection')}>
+                  <IconButton
+                    size="small"
+                    onClick={description.toggle}
+                    aria-label={description.editing ? t('doneEditing') : t('editSection')}
+                  >
+                    {description.editing ? <CheckIcon fontSize="small" /> : <EditIcon fontSize="small" />}
+                  </IconButton>
+                </Tooltip>
+              }
+            >
+              <EditableDetailRow
+                label={t('description')}
+                value={property.description ?? ''}
+                editing={description.editing}
+                inputType="multiline"
+                rows={4}
+                onSave={(v) => saveDescription({ description: (v as string) ?? '' })}
+              />
+            </PropertyInfoCard>
           </Grid>
-        </Box>
-      )}
+        </Grid>
+      </Box>
 
       {/* Statistics - only for OWN */}
       {property.status === PropertyStatus.OWN && (

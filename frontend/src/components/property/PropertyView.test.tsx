@@ -43,6 +43,11 @@ jest.mock('react-i18next', () => ({
         purchasePrice: 'Purchase Price',
         purchaseDate: 'Purchase Date',
         purchaseLoan: 'Purchase Loan',
+        editSection: 'Edit section',
+        doneEditing: 'Done',
+        saveError: 'Failed to save changes',
+        street: 'Street',
+        notSet: '—',
         // Property types
         'propertyTypes.apartment': 'Apartment',
         'propertyTypes.row-house': 'Row House',
@@ -230,7 +235,7 @@ describe('PropertyView', () => {
       expect(screen.getAllByText('—').length).toBeGreaterThan(0);
     });
 
-    it('hides description section when no description', async () => {
+    it('shows description section with edit button when no description', async () => {
       const propertyNoDesc = createMockProperty({
         ...mockProperty,
         description: undefined,
@@ -243,9 +248,12 @@ describe('PropertyView', () => {
         expect(screen.getByText('Helsinki Apartment')).toBeInTheDocument();
       });
 
-      // Description header should not be shown
+      // Description section should now always be shown (to allow inline editing)
       const descHeaders = screen.queryAllByText('Description');
-      expect(descHeaders).toHaveLength(0);
+      expect(descHeaders.length).toBeGreaterThan(0);
+      // Should have an edit button for the description section
+      const editButtons = screen.getAllByRole('button', { name: /edit section/i });
+      expect(editButtons.length).toBeGreaterThan(0);
     });
   });
 
@@ -440,6 +448,51 @@ describe('PropertyView', () => {
       // Check for the actual link to etuovi.com
       const externalLink = document.querySelector('a[href*="etuovi.com/kohde/12345"]');
       expect(externalLink).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Inline editing', () => {
+    it('saves description inline from the Description card', async () => {
+      const user = userEvent.setup();
+
+      const property = createMockProperty({
+        id: 1,
+        name: 'X',
+        size: 50,
+        description: 'old description',
+      });
+
+      const getSpy = jest.spyOn(ApiClient, 'get').mockResolvedValue(property);
+      const putSpy = jest.spyOn(ApiClient, 'put').mockResolvedValueOnce({
+        ...property,
+        description: 'new description',
+      });
+
+      renderPropertyView('1', 'own');
+
+      await waitFor(() => expect(screen.getByText('old description')).toBeInTheDocument());
+
+      // Click the edit section button (pencil icon) - find all buttons with that name and click the one for description
+      const editButtons = screen.getAllByRole('button', { name: /edit section/i });
+      // The description edit button should be the last one (after the info section buttons)
+      const descriptionEditButton = editButtons[editButtons.length - 1];
+      await user.click(descriptionEditButton);
+
+      const textarea = screen.getByLabelText('Description');
+      await user.clear(textarea);
+      await user.type(textarea, 'new description');
+      await user.tab();
+
+      await waitFor(() => {
+        expect(putSpy).toHaveBeenCalledWith(
+          'real-estate/property',
+          1,
+          expect.objectContaining({ description: 'new description' })
+        );
+      });
+
+      getSpy.mockRestore();
+      putSpy.mockRestore();
     });
   });
 });
