@@ -12,21 +12,50 @@ import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
 import { Property, PropertyStatus, CurrentCharges } from '@asset-types';
 import { formatCurrency, formatDate } from '@asset-lib/format-utils';
 import ApiClient from '@asset-lib/api-client';
 import PropertyInfoCard from '../shared/PropertyInfoCard';
 import DetailRow from '../shared/DetailRow';
+import EditableDetailRow from '../shared/EditableDetailRow';
+import { useEditableSection } from '../shared/useEditableSection';
+import { usePropertyFieldSave } from '../shared/usePropertyFieldSave';
 import PropertyChargeDialog from './PropertyChargeDialog';
 
 interface PropertyInfoSectionProps {
   property: Property;
+  activeKey: string | null;
+  setActiveKey: (key: string | null) => void;
+  onPropertyUpdated: (updated: Property) => void;
 }
 
-function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
+function PropertyInfoSection({
+  property,
+  activeKey,
+  setActiveKey,
+  onPropertyUpdated,
+}: PropertyInfoSectionProps) {
   const { t } = useTranslation('property');
   const [currentCharges, setCurrentCharges] = useState<CurrentCharges | null>(null);
   const [chargeDialogOpen, setChargeDialogOpen] = useState(false);
+
+  const saveField = usePropertyFieldSave(property, onPropertyUpdated);
+
+  const propertyInfo = useEditableSection(activeKey, setActiveKey, 'property-info');
+  const location = useEditableSection(activeKey, setActiveKey, 'location');
+
+  const renderPencil = (section: { editing: boolean; toggle: () => void }) => (
+    <Tooltip title={section.editing ? t('doneEditing') : t('editSection')}>
+      <IconButton
+        size="small"
+        onClick={section.toggle}
+        aria-label={section.editing ? t('doneEditing') : t('editSection')}
+      >
+        {section.editing ? <CheckIcon fontSize="small" /> : <EditIcon fontSize="small" />}
+      </IconButton>
+    </Tooltip>
+  );
 
   useEffect(() => {
     const fetchCharges = async () => {
@@ -51,7 +80,6 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
     }).then(setCurrentCharges);
   };
 
-  const hasAddress = property.address?.street || property.address?.city;
   const hasCosts =
     currentCharges !== null &&
     (currentCharges.maintenanceFee !== null ||
@@ -81,20 +109,29 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
     <Grid container spacing={2}>
       {/* Property Info Card */}
       <Grid size={{ xs: 12, md: 6 }}>
-        <PropertyInfoCard title={t('propertyInfo')}>
-          <DetailRow
+        <PropertyInfoCard title={t('propertyInfo')} action={renderPencil(propertyInfo)}>
+          <EditableDetailRow
             icon={<SquareFootIcon fontSize="small" />}
             label={t('size')}
-            value={`${property.size} m²`}
+            value={property.size}
+            editing={propertyInfo.editing}
+            inputType="number"
+            min={1}
+            max={1000}
+            onSave={(v) => saveField({ size: v as number })}
+            format={(v) => `${v} m²`}
           />
-          {property.buildYear && (
-            <DetailRow
-              icon={<CalendarTodayIcon fontSize="small" />}
-              label={t('buildYear')}
-              value={property.buildYear}
-            />
-          )}
-          {pricePerSqm && (
+          <EditableDetailRow
+            icon={<CalendarTodayIcon fontSize="small" />}
+            label={t('buildYear')}
+            value={property.buildYear ?? null}
+            editing={propertyInfo.editing}
+            inputType="number"
+            min={1800}
+            max={2100}
+            onSave={(v) => saveField({ buildYear: v as number })}
+          />
+          {pricePerSqm !== null && !propertyInfo.editing && (
             <DetailRow
               icon={<CalculateIcon fontSize="small" />}
               label={t('pricePerSqm')}
@@ -105,33 +142,42 @@ function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
       </Grid>
 
       {/* Location Card */}
-      {hasAddress && (
-        <Grid size={{ xs: 12, md: 6 }}>
-          <PropertyInfoCard title={t('locationInfo')}>
-            {property.address?.street && (
-              <DetailRow
-                icon={<LocationOnIcon fontSize="small" />}
-                label={t('address')}
-                value={property.address.street}
-              />
-            )}
-            {property.address?.city && (
-              <DetailRow
-                icon={<LocationCityIcon fontSize="small" />}
-                label={t('city')}
-                value={`${property.address.postalCode ? property.address.postalCode + ' ' : ''}${property.address.city}`}
-              />
-            )}
-            {property.address?.district && (
-              <DetailRow
-                icon={<MapIcon fontSize="small" />}
-                label={t('district')}
-                value={property.address.district}
-              />
-            )}
-          </PropertyInfoCard>
-        </Grid>
-      )}
+      <Grid size={{ xs: 12, md: 6 }}>
+        <PropertyInfoCard title={t('locationInfo')} action={renderPencil(location)}>
+          <EditableDetailRow
+            icon={<LocationOnIcon fontSize="small" />}
+            label={t('street')}
+            value={property.address?.street ?? null}
+            editing={location.editing}
+            inputType="text"
+            onSave={(v) => saveField({ address: { street: (v as string) ?? '' } as never })}
+          />
+          <EditableDetailRow
+            icon={<LocationCityIcon fontSize="small" />}
+            label={t('postalCode')}
+            value={property.address?.postalCode ?? null}
+            editing={location.editing}
+            inputType="text"
+            onSave={(v) => saveField({ address: { postalCode: (v as string) ?? '' } as never })}
+          />
+          <EditableDetailRow
+            icon={<LocationCityIcon fontSize="small" />}
+            label={t('city')}
+            value={property.address?.city ?? null}
+            editing={location.editing}
+            inputType="text"
+            onSave={(v) => saveField({ address: { city: (v as string) ?? '' } as never })}
+          />
+          <EditableDetailRow
+            icon={<MapIcon fontSize="small" />}
+            label={t('district')}
+            value={property.address?.district ?? null}
+            editing={location.editing}
+            inputType="text"
+            onSave={(v) => saveField({ address: { district: (v as string) ?? '' } as never })}
+          />
+        </PropertyInfoCard>
+      </Grid>
 
       {/* Monthly Costs Card - always show so users can add charges */}
       <Grid size={{ xs: 12, md: 6 }}>

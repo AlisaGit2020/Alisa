@@ -170,7 +170,12 @@ function PropertyView({ t }: WithTranslation) {
 
       {/* Info Cards Grid */}
       <Box sx={{ px: 2, py: 1.5 }}>
-        <PropertyInfoSection property={property} />
+        <PropertyInfoSection
+          property={property}
+          activeKey={null}
+          setActiveKey={() => {}}
+          onPropertyUpdated={() => {}}
+        />
       </Box>
 
       {/* Description Card */}

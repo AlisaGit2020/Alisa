@@ -1,7 +1,9 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders, createMockProperty } from '@test-utils';
 import { PropertyStatus } from '@asset-types';
+import ApiClient from '@asset-lib/api-client';
 import PropertyInfoSection from './PropertyInfoSection';
 
 describe('PropertyInfoSection', () => {
@@ -12,7 +14,14 @@ describe('PropertyInfoSection', () => {
       purchasePrice: 180000,
     });
 
-    renderWithProviders(<PropertyInfoSection property={property} />);
+    renderWithProviders(
+      <PropertyInfoSection
+        property={property}
+        activeKey={null}
+        setActiveKey={() => {}}
+        onPropertyUpdated={() => {}}
+      />
+    );
 
     expect(screen.getByText('45 m²')).toBeInTheDocument();
     expect(screen.getByText('2018')).toBeInTheDocument();
@@ -28,7 +37,14 @@ describe('PropertyInfoSection', () => {
       },
     });
 
-    renderWithProviders(<PropertyInfoSection property={property} />);
+    renderWithProviders(
+      <PropertyInfoSection
+        property={property}
+        activeKey={null}
+        setActiveKey={() => {}}
+        onPropertyUpdated={() => {}}
+      />
+    );
 
     expect(screen.getByText('Test Street 1')).toBeInTheDocument();
     expect(screen.getByText(/Helsinki/)).toBeInTheDocument();
@@ -37,7 +53,14 @@ describe('PropertyInfoSection', () => {
   it('renders monthly costs card with empty state when no charges data', () => {
     const property = createMockProperty();
 
-    renderWithProviders(<PropertyInfoSection property={property} />);
+    renderWithProviders(
+      <PropertyInfoSection
+        property={property}
+        activeKey={null}
+        setActiveKey={() => {}}
+        onPropertyUpdated={() => {}}
+      />
+    );
 
     // Monthly costs section should always appear with manage button
     expect(screen.getByText('Monthly Costs')).toBeInTheDocument();
@@ -52,7 +75,14 @@ describe('PropertyInfoSection', () => {
       purchaseLoan: 150000,
     });
 
-    renderWithProviders(<PropertyInfoSection property={property} />);
+    renderWithProviders(
+      <PropertyInfoSection
+        property={property}
+        activeKey={null}
+        setActiveKey={() => {}}
+        onPropertyUpdated={() => {}}
+      />
+    );
 
     expect(screen.getByText(/150.*000/)).toBeInTheDocument();
   });
@@ -62,10 +92,18 @@ describe('PropertyInfoSection', () => {
       address: undefined,
     });
 
-    renderWithProviders(<PropertyInfoSection property={property} />);
+    renderWithProviders(
+      <PropertyInfoSection
+        property={property}
+        activeKey={null}
+        setActiveKey={() => {}}
+        onPropertyUpdated={() => {}}
+      />
+    );
 
-    // Location section title should not be present
-    expect(screen.queryByText(/location/i)).not.toBeInTheDocument();
+    // Location section is now always rendered with empty placeholders
+    expect(screen.getByText('Location')).toBeInTheDocument();
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0);
   });
 
   // District display tests (TDD - implementation does not exist yet)
@@ -81,7 +119,14 @@ describe('PropertyInfoSection', () => {
         },
       });
 
-      renderWithProviders(<PropertyInfoSection property={property} />);
+      renderWithProviders(
+        <PropertyInfoSection
+          property={property}
+          activeKey={null}
+          setActiveKey={() => {}}
+          onPropertyUpdated={() => {}}
+        />
+      );
 
       // Should show the district value
       expect(screen.getByText('Kallio')).toBeInTheDocument();
@@ -98,7 +143,14 @@ describe('PropertyInfoSection', () => {
         },
       });
 
-      renderWithProviders(<PropertyInfoSection property={property} />);
+      renderWithProviders(
+        <PropertyInfoSection
+          property={property}
+          activeKey={null}
+          setActiveKey={() => {}}
+          onPropertyUpdated={() => {}}
+        />
+      );
 
       // Should show the district label (from translations)
       expect(screen.getByText(/district/i)).toBeInTheDocument();
@@ -115,11 +167,21 @@ describe('PropertyInfoSection', () => {
         },
       });
 
-      renderWithProviders(<PropertyInfoSection property={property} />);
+      renderWithProviders(
+        <PropertyInfoSection
+          property={property}
+          activeKey={null}
+          setActiveKey={() => {}}
+          onPropertyUpdated={() => {}}
+        />
+      );
 
-      // Should not show district text (since it's not set)
-      // The word "district" should not appear as a label
-      expect(screen.queryByText(/district/i)).not.toBeInTheDocument();
+      // District row is now always shown (for inline editing)
+      // When not set, it should show "—" placeholder
+      expect(screen.getByText(/district/i)).toBeInTheDocument();
+      // Find the district row and verify it has the empty placeholder
+      const districtRow = screen.getByText(/district/i).closest('div');
+      expect(districtRow).toHaveTextContent('—');
     });
 
     it('renders district alongside city and street', () => {
@@ -133,7 +195,14 @@ describe('PropertyInfoSection', () => {
         },
       });
 
-      renderWithProviders(<PropertyInfoSection property={property} />);
+      renderWithProviders(
+        <PropertyInfoSection
+          property={property}
+          activeKey={null}
+          setActiveKey={() => {}}
+          onPropertyUpdated={() => {}}
+        />
+      );
 
       // All location details should be present
       expect(screen.getByText('Töölönkatu 10')).toBeInTheDocument();
@@ -152,10 +221,77 @@ describe('PropertyInfoSection', () => {
         },
       });
 
-      renderWithProviders(<PropertyInfoSection property={property} />);
+      renderWithProviders(
+        <PropertyInfoSection
+          property={property}
+          activeKey={null}
+          setActiveKey={() => {}}
+          onPropertyUpdated={() => {}}
+        />
+      );
 
       // Finnish special characters should render correctly
       expect(screen.getByText('Sörnäinen')).toBeInTheDocument();
     });
+  });
+});
+
+describe('PropertyInfoSection edit mode', () => {
+  let putSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    putSpy = jest.spyOn(ApiClient, 'put');
+  });
+
+  afterEach(() => {
+    putSpy.mockRestore();
+  });
+
+  it('toggles Property Info into edit mode and saves size on blur', async () => {
+    const user = userEvent.setup();
+    const property = createMockProperty({ id: 11, size: 45, buildYear: 2010, name: 'X' });
+    const onUpdated = jest.fn();
+    const setActiveKey = jest.fn();
+
+    putSpy.mockResolvedValueOnce({ ...property, size: 60 });
+
+    const { rerender } = renderWithProviders(
+      <PropertyInfoSection
+        property={property}
+        activeKey={null}
+        setActiveKey={setActiveKey}
+        onPropertyUpdated={onUpdated}
+      />
+    );
+
+    // Click pencil for property-info card
+    const propertyInfoCard = screen.getByText('Property Information').closest('div')!;
+    const pencil = within(propertyInfoCard as HTMLElement).getByRole('button', { name: /edit section/i });
+    await user.click(pencil);
+
+    // setActiveKey should have been called with 'property-info'
+    expect(setActiveKey).toHaveBeenCalledWith('property-info');
+
+    // Re-render with the section in edit mode
+    rerender(
+      <PropertyInfoSection
+        property={property}
+        activeKey={'property-info'}
+        setActiveKey={setActiveKey}
+        onPropertyUpdated={onUpdated}
+      />
+    );
+
+    const sizeInput = screen.getByLabelText('Size');
+    await user.clear(sizeInput);
+    await user.type(sizeInput, '60');
+    await user.tab();
+
+    expect(putSpy).toHaveBeenCalledWith(
+      'real-estate/property',
+      11,
+      expect.objectContaining({ size: 60, name: 'X' })
+    );
+    expect(onUpdated).toHaveBeenCalled();
   });
 });
