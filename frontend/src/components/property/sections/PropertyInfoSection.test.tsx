@@ -294,4 +294,51 @@ describe('PropertyInfoSection edit mode', () => {
     );
     expect(onUpdated).toHaveBeenCalled();
   });
+
+  it('saves purchase loan inline with currency input', async () => {
+    const user = userEvent.setup();
+    const property = createMockProperty({
+      id: 22, name: 'Y', size: 50,
+      status: PropertyStatus.OWN, purchaseLoan: 100000,
+    });
+    putSpy.mockResolvedValueOnce({ ...property, purchaseLoan: 120000 });
+
+    renderWithProviders(
+      <PropertyInfoSection
+        property={property}
+        activeKey={'purchase'}
+        setActiveKey={() => {}}
+        onPropertyUpdated={jest.fn()}
+      />
+    );
+
+    const input = screen.getByLabelText('Purchase Loan');
+    await user.clear(input);
+    await user.type(input, '120000');
+    await user.tab();
+
+    expect(putSpy).toHaveBeenCalledWith(
+      'real-estate/property',
+      22,
+      expect.objectContaining({ purchaseLoan: 120000 })
+    );
+  });
+
+  it('renders Purchase card for OWN status even when no purchase data set', () => {
+    const property = createMockProperty({
+      id: 23, status: PropertyStatus.OWN,
+      purchaseDate: undefined, purchaseLoan: undefined,
+    });
+
+    renderWithProviders(
+      <PropertyInfoSection
+        property={property}
+        activeKey={null}
+        setActiveKey={() => {}}
+        onPropertyUpdated={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText('Purchase Info')).toBeInTheDocument();
+  });
 });

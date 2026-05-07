@@ -44,6 +44,8 @@ function PropertyInfoSection({
 
   const propertyInfo = useEditableSection(activeKey, setActiveKey, 'property-info');
   const location = useEditableSection(activeKey, setActiveKey, 'location');
+  const purchase = useEditableSection(activeKey, setActiveKey, 'purchase');
+  const sale = useEditableSection(activeKey, setActiveKey, 'sale');
 
   const renderPencil = (section: { editing: boolean; toggle: () => void }) => (
     <Tooltip title={section.editing ? t('doneEditing') : t('editSection')}>
@@ -86,13 +88,6 @@ function PropertyInfoSection({
       currentCharges.waterPrepayment !== null ||
       currentCharges.financialCharge !== null ||
       currentCharges.otherChargeBased !== null);
-  const hasPurchaseDetails =
-    (property.status === PropertyStatus.OWN || property.status === PropertyStatus.SOLD) &&
-    (property.purchaseDate !== undefined || property.purchaseLoan !== undefined);
-  const hasSaleDetails =
-    property.status === PropertyStatus.SOLD &&
-    property.saleDate !== undefined &&
-    property.saleDate !== null;
 
   const totalMonthlyCosts =
     (currentCharges?.maintenanceFee ?? 0) +
@@ -244,35 +239,43 @@ function PropertyInfoSection({
       </Grid>
 
       {/* Purchase Details Card */}
-      {hasPurchaseDetails && (
+      {(property.status === PropertyStatus.OWN || property.status === PropertyStatus.SOLD) && (
         <Grid size={{ xs: 12, md: 6 }}>
-          <PropertyInfoCard title={t('purchaseInfoSection')}>
-            {property.purchaseDate !== undefined && property.purchaseDate !== null && (
-              <DetailRow
-                icon={<CalendarTodayIcon fontSize="small" />}
-                label={t('purchaseDate')}
-                value={formatDate(property.purchaseDate)}
-              />
-            )}
-            {property.purchaseLoan !== undefined && property.purchaseLoan !== null && (
-              <DetailRow
-                icon={<AccountBalanceIcon fontSize="small" />}
-                label={t('purchaseLoan')}
-                value={formatCurrency(property.purchaseLoan)}
-              />
-            )}
+          <PropertyInfoCard title={t('purchaseInfoSection')} action={renderPencil(purchase)}>
+            <EditableDetailRow
+              icon={<CalendarTodayIcon fontSize="small" />}
+              label={t('purchaseDate')}
+              value={property.purchaseDate ?? null}
+              editing={purchase.editing}
+              inputType="date"
+              onSave={(v) => saveField({ purchaseDate: (v as Date) ?? undefined })}
+              format={(v) => formatDate(v as Date)}
+            />
+            <EditableDetailRow
+              icon={<AccountBalanceIcon fontSize="small" />}
+              label={t('purchaseLoan')}
+              value={property.purchaseLoan ?? null}
+              editing={purchase.editing}
+              inputType="currency"
+              onSave={(v) => saveField({ purchaseLoan: (v as number) ?? undefined })}
+              format={(v) => formatCurrency(v as number)}
+            />
           </PropertyInfoCard>
         </Grid>
       )}
 
       {/* Sale Details Card - only for SOLD */}
-      {hasSaleDetails && (
+      {property.status === PropertyStatus.SOLD && (
         <Grid size={{ xs: 12, md: 6 }}>
-          <PropertyInfoCard title={t('saleInfoSection')}>
-            <DetailRow
+          <PropertyInfoCard title={t('saleInfoSection')} action={renderPencil(sale)}>
+            <EditableDetailRow
               icon={<CalendarTodayIcon fontSize="small" />}
               label={t('saleDate')}
-              value={formatDate(property.saleDate!)}
+              value={property.saleDate ?? null}
+              editing={sale.editing}
+              inputType="date"
+              onSave={(v) => saveField({ saleDate: (v as Date) ?? undefined })}
+              format={(v) => formatDate(v as Date)}
             />
           </PropertyInfoCard>
         </Grid>
