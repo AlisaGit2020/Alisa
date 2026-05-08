@@ -215,6 +215,7 @@ function PropertyView({ t }: WithTranslation) {
                 editing={description.editing}
                 inputType="multiline"
                 rows={4}
+                autoFocus
                 onSave={(v) => saveDescription({ description: (v as string) ?? '' })}
               />
             </PropertyInfoCard>

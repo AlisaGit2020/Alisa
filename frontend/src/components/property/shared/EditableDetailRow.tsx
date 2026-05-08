@@ -109,7 +109,7 @@ function EditableDetailRow(props: EditableDetailRowProps) {
           <AssetNumberField
             label={props.label}
             value={Number.isNaN(numericValue) ? '' : numericValue}
-            autoFocus={props.autoFocus !== false}
+            autoFocus={props.autoFocus === true}
             onChange={(e) => setDraft(e.target.value)}
             onBlur={() => {
               if (escPressedRef.current) { escPressedRef.current = false; return; }
@@ -146,7 +146,7 @@ function EditableDetailRow(props: EditableDetailRowProps) {
           <AssetMoneyField
             label={props.label}
             value={Number.isNaN(moneyValue) ? '' : moneyValue}
-            autoFocus={props.autoFocus !== false}
+            autoFocus={props.autoFocus === true}
             onChange={(v) => setDraft(v === undefined ? '' : String(v))}
             onBlur={() => {
               if (escPressedRef.current) { escPressedRef.current = false; return; }
@@ -170,7 +170,7 @@ function EditableDetailRow(props: EditableDetailRowProps) {
           <AssetDatePicker
             label={props.label}
             value={dateValue}
-            autoFocus={props.autoFocus !== false}
+            autoFocus={props.autoFocus === true}
             onChange={(value) => {
               const next = value ? value.toDate() : null;
               const nextIso = next ? next.toISOString() : '';
@@ -194,7 +194,7 @@ function EditableDetailRow(props: EditableDetailRowProps) {
             value={draft}
             multiline={props.inputType === 'multiline'}
             rows={props.inputType === 'multiline' ? (props.rows ?? 4) : undefined}
-            autoFocus={props.autoFocus !== false}
+            autoFocus={props.autoFocus === true}
             onChange={(e) => setDraft(e.target.value)}
             onBlur={handleBlur}
           />

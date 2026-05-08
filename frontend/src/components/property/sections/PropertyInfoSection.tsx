@@ -114,6 +114,7 @@ function PropertyInfoSection({
             min={1}
             max={1000}
             required
+            autoFocus
             onSave={(v) => saveField({ size: v as number })}
             format={(v) => `${v} m²`}
           />
@@ -146,6 +147,7 @@ function PropertyInfoSection({
             value={property.address?.street ?? null}
             editing={location.editing}
             inputType="text"
+            autoFocus
             onSave={(v) => saveField({ address: { street: (v as string) ?? '' } as never })}
           />
           <EditableDetailRow
@@ -249,6 +251,7 @@ function PropertyInfoSection({
               value={property.purchaseDate ?? null}
               editing={purchase.editing}
               inputType="date"
+              autoFocus
               onSave={(v) => saveField({ purchaseDate: (v as Date) ?? undefined })}
               format={(v) => formatDate(v as Date)}
             />
@@ -275,6 +278,7 @@ function PropertyInfoSection({
               value={property.saleDate ?? null}
               editing={sale.editing}
               inputType="date"
+              autoFocus
               onSave={(v) => saveField({ saleDate: (v as Date) ?? undefined })}
               format={(v) => formatDate(v as Date)}
             />
