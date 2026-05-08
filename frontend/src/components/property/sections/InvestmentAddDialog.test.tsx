@@ -310,4 +310,93 @@ describe('InvestmentAddDialog', () => {
       expect(screen.getByText('800 €/mo')).toBeInTheDocument();
     });
   });
+
+  describe('current charges integration', () => {
+    it('fetches current charges from property_charge and submits them with the calculation', async () => {
+      const user = userEvent.setup();
+      const onSave = jest.fn();
+
+      const requestSpy = jest
+        .spyOn(ApiClient, 'request')
+        .mockResolvedValue({
+          maintenanceFee: 150,
+          financialCharge: 80,
+          waterPrepayment: 25,
+          totalCharge: 295,
+          otherChargeBased: 40,
+        } as unknown as ReturnType<typeof ApiClient.request>);
+
+      const postSpy = jest
+        .spyOn(ApiClient, 'post')
+        .mockResolvedValue({ id: 7 } as unknown as ReturnType<typeof ApiClient.post>);
+
+      renderWithProviders(
+        <InvestmentAddDialog {...defaultProps} onSave={onSave} />
+      );
+
+      await waitFor(() => {
+        expect(requestSpy).toHaveBeenCalledWith({
+          method: 'GET',
+          url: `/real-estate/property/${defaultProps.property.id}/charges/current`,
+        });
+      });
+
+      await user.type(screen.getByLabelText(/name/i), 'My Calc');
+      await user.click(screen.getByRole('button', { name: /save/i }));
+
+      await waitFor(() => {
+        expect(postSpy).toHaveBeenCalled();
+      });
+
+      const submitted = postSpy.mock.calls[0][1] as Record<string, number>;
+      // otherChargeBased (40) is bundled into maintenanceFee (150) -> 190 so it
+      // counts toward both maintenance costs AND yield reduction.
+      expect(submitted.maintenanceFee).toBe(190);
+      expect(submitted.chargeForFinancialCosts).toBe(80);
+      // Water flows through as waterCharge: counts toward maintenance costs but
+      // not yield (calculator's yield formula only subtracts maintenanceFee).
+      expect(submitted.waterCharge).toBe(25);
+
+      requestSpy.mockRestore();
+      postSpy.mockRestore();
+    });
+
+    it('falls back to zero when property has no current charges', async () => {
+      const user = userEvent.setup();
+      const onSave = jest.fn();
+
+      const requestSpy = jest
+        .spyOn(ApiClient, 'request')
+        .mockResolvedValue({
+          maintenanceFee: null,
+          financialCharge: null,
+          waterPrepayment: null,
+          totalCharge: 0,
+          otherChargeBased: null,
+        } as unknown as ReturnType<typeof ApiClient.request>);
+
+      const postSpy = jest
+        .spyOn(ApiClient, 'post')
+        .mockResolvedValue({ id: 8 } as unknown as ReturnType<typeof ApiClient.post>);
+
+      renderWithProviders(
+        <InvestmentAddDialog {...defaultProps} onSave={onSave} />
+      );
+
+      await user.type(screen.getByLabelText(/name/i), 'Empty Charges');
+      await user.click(screen.getByRole('button', { name: /save/i }));
+
+      await waitFor(() => {
+        expect(postSpy).toHaveBeenCalled();
+      });
+
+      const submitted = postSpy.mock.calls[0][1] as Record<string, number>;
+      expect(submitted.maintenanceFee).toBe(0);
+      expect(submitted.chargeForFinancialCosts).toBe(0);
+      expect(submitted.waterCharge).toBe(0);
+
+      requestSpy.mockRestore();
+      postSpy.mockRestore();
+    });
+  });
 });

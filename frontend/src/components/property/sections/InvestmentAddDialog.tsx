@@ -11,7 +11,7 @@ import {
   Divider,
   Alert,
 } from '@mui/material';
-import { Property } from '@asset-types';
+import { Property, CurrentCharges } from '@asset-types';
 import { SavedInvestmentCalculation } from '../../investment-calculator/InvestmentCalculatorResults';
 import { AssetButton, AssetTextField, AssetEditableNumber } from '../../asset';
 import ApiClient from '@asset-lib/api-client';
@@ -62,6 +62,7 @@ function InvestmentAddDialog({
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentCharges, setCurrentCharges] = useState<CurrentCharges | null>(null);
   // Ref for name input to handle autofocus
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -77,6 +78,30 @@ function InvestmentAddDialog({
       }, 100);
     }
   }, [open, property]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    let cancelled = false;
+    ApiClient.request<CurrentCharges>({
+      method: 'GET',
+      url: `/real-estate/property/${property.id}/charges/current`,
+    })
+      .then((charges) => {
+        if (!cancelled) {
+          setCurrentCharges(charges);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCurrentCharges(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, property.id]);
 
   const handleChange = useCallback((field: keyof FormData, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -114,15 +139,18 @@ function InvestmentAddDialog({
     setSubmitError(null);
 
     try {
-      // Include property cost fields in the submission
+      // otherChargeBased bundles into maintenanceFee so it reduces yield (the DTO
+      // has no dedicated field). waterCharge stays separate so it counts toward
+      // total maintenance costs but NOT yield — tenant reimburses water.
       const submissionData = {
         ...formData,
         propertyId: property.id,
-        // Cost fields - charges are now managed separately via PropertyCharge API
         deptShare: property.debtShare ?? 0,
-        maintenanceFee: 0,
-        chargeForFinancialCosts: 0,
-        waterCharge: 0,
+        maintenanceFee:
+          (currentCharges?.maintenanceFee ?? 0) +
+          (currentCharges?.otherChargeBased ?? 0),
+        chargeForFinancialCosts: currentCharges?.financialCharge ?? 0,
+        waterCharge: currentCharges?.waterPrepayment ?? 0,
       };
 
       const saved = await ApiClient.post<SavedInvestmentCalculation>(
@@ -137,7 +165,7 @@ function InvestmentAddDialog({
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, property, validate, onSave, onClose, t]);
+  }, [formData, property, currentCharges, validate, onSave, onClose, t]);
 
   return (
     <Dialog
