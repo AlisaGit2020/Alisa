@@ -89,10 +89,8 @@ function EditableDetailRow(props: EditableDetailRowProps) {
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' && props.inputType !== 'multiline') {
       e.preventDefault();
-      // Defer to the input's own onBlur, which dispatches to the correct
-      // type-specific save logic (text uses commit(draft); number/currency
-      // parse before saving). Calling commit() here would always save the
-      // raw string, even for numeric types.
+      // Blur, don't commit(draft) — number/currency need their type-specific
+      // onBlur to parse before saving.
       (e.target as HTMLInputElement).blur();
     } else if (e.key === 'Escape') {
       escPressedRef.current = true;

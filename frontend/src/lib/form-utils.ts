@@ -1,3 +1,5 @@
+import { AxiosError } from 'axios';
+
 /**
  * Creates error props for form fields from a field errors object.
  * @param fieldErrors - Object mapping field names to error messages
@@ -12,4 +14,16 @@ export function getFieldErrorProps<T extends object>(
     error: !!fieldErrors[field],
     helperText: fieldErrors[field],
   };
+}
+
+/**
+ * Extracts the validation message(s) from a NestJS-style 4xx response payload
+ * (`{ message: string | string[] }`). Returns null for non-axios errors or
+ * responses without a message. Multiple messages are joined with `. `.
+ */
+export function extractValidationMessage(err: unknown): string | null {
+  const axiosErr = err as AxiosError<{ message?: string | string[] }>;
+  const data = axiosErr.response?.data;
+  if (!data?.message) return null;
+  return Array.isArray(data.message) ? data.message.join('. ') : data.message;
 }
