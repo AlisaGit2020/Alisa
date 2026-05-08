@@ -2,8 +2,8 @@ import { renderHook, act } from '@testing-library/react';
 import { ReactNode } from 'react';
 import ApiClient from '@asset-lib/api-client';
 import { AssetToastProvider } from '../../asset';
-import { createMockProperty } from '@test-utils/test-data';
-import { usePropertyFieldSave } from './usePropertyFieldSave';
+import { createMockProperty, createAxiosError } from '@test-utils/test-data';
+import { usePropertyFieldSave, extractValidationMessage } from './usePropertyFieldSave';
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <AssetToastProvider>{children}</AssetToastProvider>
@@ -90,5 +90,25 @@ describe('usePropertyFieldSave', () => {
     ).rejects.toThrow('boom');
 
     expect(onUpdated).not.toHaveBeenCalled();
+  });
+});
+
+describe('extractValidationMessage', () => {
+  it('returns the message string from a single-message backend response', () => {
+    const err = createAxiosError(400, ['size must not be greater than 1000']);
+    expect(extractValidationMessage(err)).toBe('size must not be greater than 1000');
+  });
+
+  it('joins multiple messages with a period', () => {
+    const err = createAxiosError(400, ['a is required', 'a must be a number']);
+    expect(extractValidationMessage(err)).toBe('a is required. a must be a number');
+  });
+
+  it('returns null for non-axios errors', () => {
+    expect(extractValidationMessage(new Error('boom'))).toBeNull();
+  });
+
+  it('returns null when there is no response payload', () => {
+    expect(extractValidationMessage({})).toBeNull();
   });
 });

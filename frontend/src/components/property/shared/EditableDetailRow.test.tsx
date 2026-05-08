@@ -280,3 +280,93 @@ describe('EditableDetailRow (date edit mode)', () => {
     expect(screen.getByRole('button', { name: /Choose date/ })).toBeInTheDocument();
   });
 });
+
+describe('EditableDetailRow (required field)', () => {
+  it('reverts cleared text field instead of saving null when required', async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn().mockResolvedValue(undefined);
+
+    renderWithProviders(
+      <EditableDetailRow
+        label="Name"
+        value="Alpha"
+        editing
+        inputType="text"
+        required
+        onSave={onSave}
+      />
+    );
+
+    const input = screen.getByLabelText('Name');
+    await user.clear(input);
+    await user.tab();
+
+    expect(onSave).not.toHaveBeenCalled();
+    expect(input).toHaveValue('Alpha');
+  });
+
+  it('reverts cleared number field instead of saving null when required', async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn().mockResolvedValue(undefined);
+
+    renderWithProviders(
+      <EditableDetailRow
+        label="Size"
+        value={45}
+        editing
+        inputType="number"
+        required
+        onSave={onSave}
+      />
+    );
+
+    const input = screen.getByLabelText('Size');
+    await user.clear(input);
+    await user.tab();
+
+    expect(onSave).not.toHaveBeenCalled();
+    expect(input).toHaveValue(45);
+  });
+});
+
+describe('EditableDetailRow (regressions)', () => {
+  it('saves parsed number (not raw string) when pressing Enter on a number field', async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn().mockResolvedValue(undefined);
+
+    renderWithProviders(
+      <EditableDetailRow
+        label="Size"
+        value={45}
+        editing
+        inputType="number"
+        onSave={onSave}
+      />
+    );
+
+    const input = screen.getByLabelText('Size');
+    await user.clear(input);
+    await user.type(input, '60{Enter}');
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledWith(60);
+  });
+
+  it('renders the date picker prefilled when value is an ISO string', () => {
+    renderWithProviders(
+      <EditableDetailRow
+        label="Purchase date"
+        value={'2020-06-15T00:00:00.000Z'}
+        editing
+        inputType="date"
+        onSave={jest.fn()}
+      />
+    );
+
+    // MUI X DatePicker renders Month/Day/Year as spinbutton segments. When the
+    // picker is prefilled with 2020-06-15, the year segment shows "2020";
+    // with no value it would show the placeholder ("YYYY").
+    const yearSegment = screen.getByRole('spinbutton', { name: /year/i });
+    expect(yearSegment.textContent).toContain('2020');
+  });
+});

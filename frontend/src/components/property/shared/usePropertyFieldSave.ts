@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AxiosError } from 'axios';
 import ApiClient from '@asset-lib/api-client';
 import { propertyContext } from '@asset-lib/asset-contexts';
 import { Property } from '@asset-types';
@@ -8,6 +9,13 @@ import { useToast } from '../../asset';
 export type PropertyFieldPatch = Partial<Property>;
 
 export type SaveField = (patch: PropertyFieldPatch) => Promise<void>;
+
+export function extractValidationMessage(err: unknown): string | null {
+  const axiosErr = err as AxiosError<{ message?: string | string[] }>;
+  const data = axiosErr.response?.data;
+  if (!data?.message) return null;
+  return Array.isArray(data.message) ? data.message.join('. ') : data.message;
+}
 
 export function usePropertyFieldSave(
   property: Property,
@@ -34,7 +42,8 @@ export function usePropertyFieldSave(
         );
         onPropertyUpdated(updated);
       } catch (err) {
-        showToast({ message: t('saveError'), severity: 'error' });
+        const message = extractValidationMessage(err) ?? t('saveError');
+        showToast({ message, severity: 'error' });
         throw err;
       }
     },

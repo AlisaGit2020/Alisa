@@ -113,6 +113,7 @@ function PropertyInfoSection({
             inputType="number"
             min={1}
             max={1000}
+            required
             onSave={(v) => saveField({ size: v as number })}
             format={(v) => `${v} m²`}
           />

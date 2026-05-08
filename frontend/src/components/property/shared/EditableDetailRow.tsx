@@ -22,10 +22,18 @@ export interface EditableDetailRowProps {
   rows?: number;
   maxRows?: number;
   autoFocus?: boolean;
+  required?: boolean;
 }
 
 function isEmpty(value: EditableDetailRowProps['value']): boolean {
   return value === null || value === undefined || value === '';
+}
+
+function coerceDate(value: EditableDetailRowProps['value']): Date | null {
+  if (value instanceof Date) return value;
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = new Date(value as string | number);
+  return isNaN(parsed.getTime()) ? null : parsed;
 }
 
 function EditableDetailRow(props: EditableDetailRowProps) {
@@ -54,6 +62,11 @@ function EditableDetailRow(props: EditableDetailRowProps) {
     if (raw === lastCommittedRef.current) {
       return;
     }
+    if (raw === '' && props.required) {
+      // Required field cleared — revert silently rather than save null.
+      setDraft(lastCommittedRef.current);
+      return;
+    }
     const previous = lastCommittedRef.current;
     lastCommittedRef.current = raw;
     try {
@@ -76,7 +89,10 @@ function EditableDetailRow(props: EditableDetailRowProps) {
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' && props.inputType !== 'multiline') {
       e.preventDefault();
-      void commit(draft);
+      // Defer to the input's own onBlur, which dispatches to the correct
+      // type-specific save logic (text uses commit(draft); number/currency
+      // parse before saving). Calling commit() here would always save the
+      // raw string, even for numeric types.
       (e.target as HTMLInputElement).blur();
     } else if (e.key === 'Escape') {
       escPressedRef.current = true;
@@ -99,6 +115,10 @@ function EditableDetailRow(props: EditableDetailRowProps) {
               if (escPressedRef.current) { escPressedRef.current = false; return; }
               if (draft === '') {
                 if (lastCommittedRef.current === '') return;
+                if (props.required) {
+                  setDraft(lastCommittedRef.current);
+                  return;
+                }
                 const previous = lastCommittedRef.current;
                 lastCommittedRef.current = '';
                 void (async () => {
@@ -145,7 +165,7 @@ function EditableDetailRow(props: EditableDetailRowProps) {
         );
       }
       case 'date': {
-        const dateValue = props.value instanceof Date ? props.value : null;
+        const dateValue = coerceDate(props.value);
         return (
           <AssetDatePicker
             label={props.label}
