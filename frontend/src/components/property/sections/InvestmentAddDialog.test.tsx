@@ -353,9 +353,8 @@ describe('InvestmentAddDialog', () => {
       // counts toward both maintenance costs AND yield reduction.
       expect(submitted.maintenanceFee).toBe(190);
       expect(submitted.chargeForFinancialCosts).toBe(80);
-      // Water flows through as waterCharge: counts toward maintenance costs but
-      // not yield (calculator's yield formula only subtracts maintenanceFee).
-      expect(submitted.waterCharge).toBe(25);
+      // Water is excluded entirely: tenant reimburses it.
+      expect(submitted.waterCharge).toBe(0);
 
       requestSpy.mockRestore();
       postSpy.mockRestore();

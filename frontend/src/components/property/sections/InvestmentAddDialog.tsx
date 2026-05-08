@@ -139,9 +139,9 @@ function InvestmentAddDialog({
     setSubmitError(null);
 
     try {
-      // otherChargeBased bundles into maintenanceFee so it reduces yield (the DTO
-      // has no dedicated field). waterCharge stays separate so it counts toward
-      // total maintenance costs but NOT yield — tenant reimburses water.
+      // otherChargeBased bundles into maintenanceFee (no dedicated DTO field).
+      // Water is excluded entirely: tenant reimburses it and rent excludes it,
+      // so it shouldn't reduce yield, cash flow, profit, or maintenance costs.
       const submissionData = {
         ...formData,
         propertyId: property.id,
@@ -150,7 +150,7 @@ function InvestmentAddDialog({
           (currentCharges?.maintenanceFee ?? 0) +
           (currentCharges?.otherChargeBased ?? 0),
         chargeForFinancialCosts: currentCharges?.financialCharge ?? 0,
-        waterCharge: currentCharges?.waterPrepayment ?? 0,
+        waterCharge: 0,
       };
 
       const saved = await ApiClient.post<SavedInvestmentCalculation>(
